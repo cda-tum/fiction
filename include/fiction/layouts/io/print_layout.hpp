@@ -16,11 +16,11 @@
 
 #pragma once
 
+#include "fiction/layouts/cell_grid.hpp"
 #include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
-#include "fiction/traits.hpp"
 
 #include <fmt/color.h>
 #include <fmt/format.h>
@@ -67,9 +67,6 @@ template <typename Geometry>
 void print_gate_level_layout(std::ostream& os, const fiction::layouts::gate_layout<Geometry>& layout,
                              const bool io_color = true, const bool clk_color = false)
 {
-    /** @brief Gate-level layout using the requested coordinate geometry. */
-    using Lyt = fiction::layouts::gate_layout<Geometry>;
-
     // empty layout
     if (layout.is_empty())
     {
@@ -77,13 +74,13 @@ void print_gate_level_layout(std::ostream& os, const fiction::layouts::gate_layo
         return;
     }
 
-    if constexpr ((std::derived_from<Lyt, fiction::layouts::hexagonal_layout> &&
-                   !std::derived_from<Lyt, fiction::layouts::shifted_cartesian_layout>))
+    if constexpr (std::derived_from<Geometry, fiction::layouts::hexagonal_layout> &&
+                  !std::derived_from<Geometry, fiction::layouts::shifted_cartesian_layout>)
     {
         os << "[e] hexagonal layout printing is not supported\n";
         return;
     }
-    else if constexpr (std::derived_from<Lyt, fiction::layouts::shifted_cartesian_layout>)
+    else if constexpr (std::derived_from<Geometry, fiction::layouts::shifted_cartesian_layout>)
     {
         os << "[e] shifted cartesian layout printing is not supported\n";
         return;
@@ -268,9 +265,9 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
 {
     using cell_type = typename Lyt::cell_type;
 
-    constexpr bool has_clocking = requires(const Lyt& l, const cell<Lyt>& c) { l.get_clock_number(c); };
+    constexpr bool has_clocking = requires(const Lyt& l, const layout_base::coordinate& c) { l.get_clock_number(c); };
     constexpr bool has_synchronization_elements =
-        requires(const Lyt& l, const cell<Lyt>& c) { l.is_synchronization_element(c); };
+        requires(const Lyt& l, const layout_base::coordinate& c) { l.is_synchronization_element(c); };
 
     // empty layout
     if (layout.num_cells() == 0ul)
@@ -296,7 +293,7 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
     {
         for (uint32_t x_pos = 0; x_pos < layout.width(); ++x_pos)
         {
-            const cell<Lyt> c{x_pos, y_pos};
+            const layout_base::coordinate c{x_pos, y_pos};
 
             fmt::text_style color{};
 
@@ -359,15 +356,14 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
  * @param os The output stream to write into.
  */
 template <typename Lyt>
+    requires std::derived_from<Lyt, layout_base>
 void print_layout(const Lyt& lyt, std::ostream& os = std::cout)
 {
-    static_assert(std::derived_from<Lyt, fiction::layouts::layout_base>, "Lyt is not a coordinate layout");
-
     if constexpr (requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; })
     {
         print_gate_level_layout(os, lyt);
     }
-    else if constexpr (is_cell_grid_v<Lyt>)
+    else if constexpr (requires { requires std::derived_from<Lyt, cell_grid<typename Lyt::cell_type>>; })
     {
         print_cell_level_layout(os, lyt);
     }

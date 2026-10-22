@@ -1,9 +1,9 @@
 # Synthesis I/O
 
-## Truth Tables
+Read truth tables for use as logic specifications.
 
-**Header:** `fiction/synthesis/io/tt_reader.hpp`
+```{toctree}
+:maxdepth: 1
 
-```{doxygenclass} fiction::synthesis::io::tt_reader
-:members:
+truth_tables
 ```

@@ -16,8 +16,8 @@
 
 #if (FICTION_Z3_SOLVER)
 
-#include <fiction/layouts/cartesian_layout.hpp>  // Cartesian grid layouts
-#include <fiction/layouts/clocking_scheme.hpp>   // clocking schemes
+#include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/clocking_scheme.hpp>  // clocking schemes
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/io/layout_drawers.hpp>               // DOT drawers and writer for layouts
 #include <fiction/networks/io/dot_drawers.hpp>                 // DOT drawers and writer for logic networks
@@ -225,9 +225,6 @@ try
     /***************** Scalable layout generation *****************/
     /**************************************************************/
 
-    // defining the type of gate-level layout to use (also already pre-defined in fiction/types.hpp as cart_gate_clk_lyt
-    using fcn_gate_level_layout = gate_layout<cartesian_layout>;
-
     std::cout << "[i] orthogonal physical design\n";
 
     // set up parameters for orthogonal physical design
@@ -236,13 +233,13 @@ try
     orthogonal_physical_design_stats ortho_stats{};
 
     // perform layout generation with a scalable algorithm
-    auto ortho_gate_lyt = orthogonal<fcn_gate_level_layout>(top_ntk, ortho_params, &ortho_stats);
+    auto ortho_gate_lyt = orthogonal<cartesian_layout>(top_ntk, ortho_params, &ortho_stats);
 
     // print layout properties
     print_gate_layout_properties(ortho_gate_lyt);
     // draw the layout
-    write_dot_layout<fcn_gate_level_layout, gate_layout_cartesian_drawer<fcn_gate_level_layout>>(
-        ortho_gate_lyt, designs + "ortho_lyt.dot");
+    write_dot_layout<cartesian_layout, gate_layout_cartesian_drawer<cartesian_gate_layout>>(ortho_gate_lyt,
+                                                                                            designs + "ortho_lyt.dot");
 
     // apply the QCA ONE gate library to retrieve a QCA layout
     auto ortho_cell_layout = apply_gate_library<qca_one_library>(ortho_gate_lyt);
@@ -274,7 +271,7 @@ try
         exact_physical_design_stats exact_stats{};
 
         // perform layout generation with an SMT-based exact algorithm
-        auto exact_gate_lyt = exact<fcn_gate_level_layout>(top_ntk, exact_params, &exact_stats);
+        auto exact_gate_lyt = exact<cartesian_layout>(top_ntk, exact_params, &exact_stats);
 
         // if attempt was successful
         if (exact_gate_lyt.has_value())
@@ -282,7 +279,7 @@ try
             // print layout properties
             print_gate_layout_properties(*exact_gate_lyt);
             // draw the layout
-            write_dot_layout<fcn_gate_level_layout, gate_layout_cartesian_drawer<fcn_gate_level_layout>>(
+            write_dot_layout<cartesian_layout, gate_layout_cartesian_drawer<cartesian_gate_layout>>(
                 *exact_gate_lyt, designs + "exact_lyt.dot");
 
             // apply the QCA ONE gate library to retrieve a QCA layout

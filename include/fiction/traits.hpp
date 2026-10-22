@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief The compile-time trait system that classifies networks, layouts, and technologies.
+ * @brief Compile-time network extensions to the mockturtle trait system.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Benjamin Hien (hibenj)
@@ -18,138 +18,14 @@
 
 #pragma once
 
-#include "fiction/technology/fcn/cell_ports.hpp"
-
 #include <mockturtle/traits.hpp>
 
 #include <cstdint>
-#include <string>
 #include <type_traits>
 #include <utility>
 
 namespace fiction
 {
-
-namespace layouts
-{
-template <typename CellType>
-class cell_grid;
-}  // namespace layouts
-
-/**
- * This file includes fiction's trait system that is modeled after mockturtle/traits.hpp. It allows to check at compile
- * time for the appropriateness of passed types to any function.
- */
-
-/**
- * Cell-level layouts
- */
-
-template <typename Lyt>
-using cell = typename Lyt::cell;
-
-#pragma region is_cell_grid
-template <class Lyt, class = void>
-struct is_cell_grid : std::false_type
-{};
-
-template <class Lyt>
-struct is_cell_grid<Lyt, std::enable_if_t<std::is_base_of_v<layouts::cell_grid<typename Lyt::cell_type>, Lyt>>>
-        : std::true_type
-{};
-
-/**
- * Whether `Lyt` is a cell grid layout, i.e., a QCA, molQCA, or iNML layout that derives from `layouts::cell_grid`.
- */
-template <class Lyt>
-inline constexpr bool is_cell_grid_v = is_cell_grid<Lyt>::value;
-#pragma endregion
-
-#pragma region has_set_layout_name
-template <class Ntk, class = void>
-struct has_set_layout_name : std::false_type
-{};
-
-template <class Ntk>
-struct has_set_layout_name<Ntk, std::void_t<decltype(std::declval<Ntk>().set_layout_name(std::string()))>>
-        : std::true_type
-{};
-
-template <class Ntk>
-inline constexpr bool has_set_layout_name_v = has_set_layout_name<Ntk>::value;
-#pragma endregion
-
-#pragma region has_get_layout_name
-template <class Ntk, class = void>
-struct has_get_layout_name : std::false_type
-{};
-
-template <class Ntk>
-struct has_get_layout_name<Ntk, std::void_t<decltype(std::declval<Ntk>().get_layout_name())>> : std::true_type
-{};
-
-template <class Ntk>
-inline constexpr bool has_get_layout_name_v = has_get_layout_name<Ntk>::value;
-#pragma endregion
-
-/**
- * SiDB simulation domain
- */
-#pragma region has_dimensions
-
-template <typename T, typename = void>
-struct has_dimensions : std::false_type
-{};
-
-template <typename T>
-struct has_dimensions<T, std::void_t<decltype(std::declval<T>().dimensions)>> : std::true_type
-{};
-
-template <typename T>
-constexpr bool has_dimensions_v = has_dimensions<T>::value;
-
-#pragma endregion
-
-/**
- * Obstruction layout
- */
-
-/**
- * Gate libraries
- */
-
-#pragma region has_get_functional_implementations
-template <class Lib, class = void>
-struct has_get_functional_implementations : std::false_type
-{};
-
-template <class Lib>
-struct has_get_functional_implementations<
-    Lib, std::enable_if_t<std::is_same_v<decltype(std::declval<Lib>().get_functional_implementations()),
-                                         typename Lib::gate_functions>>> : std::true_type
-{};
-
-template <class Lib>
-inline constexpr bool has_get_functional_implementations_v = has_get_functional_implementations<Lib>::value;
-#pragma endregion
-
-#pragma region has_get_gate_ports
-template <class Lib, class = void>
-struct has_get_gate_ports : std::false_type
-{};
-
-template <class Lib>
-struct has_get_gate_ports<
-    Lib, std::enable_if_t<std::is_same_v<decltype(std::declval<Lib>().get_gate_ports()),
-                                         typename Lib::template gate_ports<fiction::fcn::port_position>> ||
-                          std::is_same_v<decltype(std::declval<Lib>().get_gate_ports()),
-                                         typename Lib::template gate_ports<fiction::fcn::port_direction>>>>
-        : std::true_type
-{};
-
-template <class Lib>
-inline constexpr bool has_get_gate_ports_v = has_get_gate_ports<Lib>::value;
-#pragma endregion
 
 /**
  * mockturtle extensions
@@ -503,6 +379,48 @@ struct has_is_virtual_pi<
 
 template <class Ntk>
 inline constexpr bool has_is_virtual_pi_v = has_is_virtual_pi<Ntk>::value;
+#pragma endregion
+
+#pragma region has_foreach_pi_unranked
+/**
+ * @brief Whether `Ntk` offers `foreach_pi_unranked`, which visits the primary inputs in creation order regardless of
+ * their rank, as `networks::views::mutable_rank_view` does.
+ */
+template <class Ntk, class = void>
+struct has_foreach_pi_unranked : std::false_type
+{};
+
+template <class Ntk>
+struct has_foreach_pi_unranked<Ntk, std::void_t<decltype(std::declval<Ntk>().foreach_pi_unranked(
+                                        std::declval<void (*)(mockturtle::node<Ntk>)>()))>> : std::true_type
+{};
+
+/**
+ * @brief Whether `Ntk` offers `foreach_pi_unranked`.
+ */
+template <class Ntk>
+inline constexpr bool has_foreach_pi_unranked_v = has_foreach_pi_unranked<Ntk>::value;
+#pragma endregion
+
+#pragma region has_has_level
+/**
+ * @brief Whether `Ntk` offers `has_level`, which tells whether a level is stored for a node, as
+ * `networks::views::static_depth_view` does for nodes that are reachable from an output.
+ */
+template <class Ntk, class = void>
+struct has_has_level : std::false_type
+{};
+
+template <class Ntk>
+struct has_has_level<Ntk, std::void_t<decltype(std::declval<Ntk>().has_level(std::declval<mockturtle::node<Ntk>>()))>>
+        : std::true_type
+{};
+
+/**
+ * @brief Whether `Ntk` offers `has_level`.
+ */
+template <class Ntk>
+inline constexpr bool has_has_level_v = has_has_level<Ntk>::value;
 #pragma endregion
 
 #pragma region has_is_real_pi

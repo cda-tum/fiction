@@ -25,8 +25,7 @@ using grid = fiction::layouts::cartesian_layout;
 grid lyt{{4, 4}};
 fiction::layouts::obstructions blocked;
 blocked.obstruct_coordinate({1, 1});
-using path = fiction::physical_design::layout_coordinate_path;
-auto paths = fiction::physical_design::path_finding::yen_k_shortest_paths<path>(
+auto paths = fiction::physical_design::path_finding::yen_k_shortest_paths(
     lyt, {{0, 0}, {3, 3}}, 3, {}, blocked);
 ```
 

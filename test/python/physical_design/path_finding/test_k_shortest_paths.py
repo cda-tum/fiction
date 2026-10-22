@@ -70,3 +70,23 @@ def test_clocked_yen_paths(make_lyt: Callable[[], GateLayout]) -> None:
 
     assert [(0, 0), (0, 1), (1, 1)] in paths
     assert [(0, 0), (1, 0), (1, 1)] in paths
+
+
+@pytest.mark.parametrize(
+    "make_lyt",
+    [
+        pytest.param(lambda: cartesian_layout((2, 2)), id="cartesian_layout"),
+        pytest.param(lambda: cartesian_gate_layout((2, 2), "2DDWave", "Layout"), id="cartesian_gate_layout"),
+    ],
+)
+@pytest.mark.parametrize(("source", "target"), [((2, 0), (0, 0)), ((0, 0), (-1, 0))])
+def test_yen_endpoint_bounds(
+    make_lyt: Callable[[], cartesian_layout | cartesian_gate_layout],
+    source: tuple[int, int],
+    target: tuple[int, int],
+) -> None:
+    """Check endpoint bounds independently of the other valid endpoint."""
+    lyt = make_lyt()
+    with pytest.raises(ValueError):  # ruff: ignore[pytest-raises-too-broad] - Only the exception type is specified.
+        yen_k_shortest_paths(lyt, source, target, 1)
+    assert yen_k_shortest_paths(lyt, source, target, 0) == []

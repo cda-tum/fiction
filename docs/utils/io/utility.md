@@ -1,9 +1,11 @@
-# Utility
+(utility)=
 
-Utility code for I/O.
+# I/O
 
-**Header:** `fiction/utils/io/csv_writer.hpp`
+Write tabular results as comma-separated values.
 
-```{doxygenclass} fiction::utils::io::csv_writer
+```{toctree}
+:maxdepth: 1
 
+csv_writer
 ```

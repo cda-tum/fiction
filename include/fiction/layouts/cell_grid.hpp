@@ -42,10 +42,9 @@ namespace fiction::layouts
  * @tparam CellType Enumeration of the cell types of one technology.
  */
 template <typename CellType>
+    requires std::is_enum_v<CellType>
 class cell_grid : public cartesian_layout
 {
-    static_assert(std::is_enum_v<CellType>, "CellType must be an enumeration");
-
   public:
     /**
      * Cell position.

@@ -75,7 +75,7 @@ inline void write_defect_influence_domain(const defects::defect_influence_domain
  * @param defect_infdom The domain to write.
  * @param filename The file to write to.
  * @param params Tags used for influential and non-influential defect positions.
- * @throws std::ofstream::failure if the file cannot be opened.
+ * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
  */
 inline void write_defect_influence_domain(const defects::defect_influence_domain&     defect_infdom,
                                           const std::string_view&                     filename,

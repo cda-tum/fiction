@@ -101,12 +101,10 @@ enum class heuristic_engine : uint8_t
  * @return The name of the simulation engine.
  */
 template <typename EngineType>
+    requires(std::is_same_v<EngineType, engine> || std::is_same_v<EngineType, exact_engine> ||
+             std::is_same_v<EngineType, heuristic_engine>)
 [[nodiscard]] std::string_view engine_name(const EngineType& eng) noexcept
 {
-    static_assert(std::is_same_v<EngineType, engine> || std::is_same_v<EngineType, exact_engine> ||
-                      std::is_same_v<EngineType, heuristic_engine>,
-                  "EngineType must be a SiDB simulation engine type");
-
     // generic SiDB simulation engines
     if constexpr (std::is_same_v<EngineType, engine>)
     {

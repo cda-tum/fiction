@@ -732,7 +732,12 @@ class hexagonal_layout : public layout_base
         return c.x >= 0 && static_cast<uint32_t>(c.x) < width() && c.y >= 0 && static_cast<uint32_t>(c.y) < height() &&
                c.z >= 0 && static_cast<uint32_t>(c.z) < layers();
     }
-    /** @param c Coordinate. @return Whether the geometry contains the coordinate. */
+    /**
+     * @brief Tests whether the geometry contains a coordinate.
+     *
+     * @param c Coordinate.
+     * @return Whether the geometry contains the coordinate.
+     */
     [[nodiscard]] bool is_within_bounds(const coordinate& c) const noexcept
     {
         return contains_coordinate(c);

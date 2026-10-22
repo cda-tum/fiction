@@ -372,14 +372,17 @@ struct operational_domain_value_range
     sweep_parameter dimension;
     /**
      * The minimum value of the dimension sweep.
+     * Defaults to 1.0.
      */
     double min{1.0};
     /**
      * The maximum value of the dimension sweep.
+     * Defaults to 10.0.
      */
     double max{10.0};
     /**
      * The step size of the dimension sweep.
+     * Defaults to 0.1.
      */
     double step{0.1};
 };

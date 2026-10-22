@@ -66,10 +66,9 @@ using sparse_distance_map =
  * @return Fully initialized `distance_map` for `lyt`.
  */
 template <typename Lyt, typename Dist>
+    requires std::derived_from<Lyt, layouts::layout_base>
 [[nodiscard]] distance_map<Dist> initialize_distance_map(const Lyt& lyt, const distance_functor<Dist>& dist_fn)
 {
-    static_assert(std::derived_from<Lyt, fiction::layouts::layout_base>, "Lyt is not a coordinate layout");
-
     // initialize distance map
     /** Number of coordinates across all layers. */
     const auto         coordinate_count = lyt.area() * lyt.layers();
@@ -79,7 +78,7 @@ template <typename Lyt, typename Dist>
     lyt.foreach_coordinate(
         [&lyt, &dist_fn, &dist_map](const auto& c1, const unsigned src)
         {
-            lyt.foreach_coordinate([&lyt, &dist_fn, &dist_map, &c1, src](const auto& c2, const unsigned tgt)
+            lyt.foreach_coordinate([&dist_fn, &dist_map, &c1, src](const auto& c2, const unsigned tgt)
                                    { dist_map[src][tgt] = dist_fn(c1, c2); });
         });
 
@@ -100,11 +99,10 @@ template <typename Lyt, typename Dist>
  * @return Fully initialized `sparse_distance_map` for `lyt`.
  */
 template <typename Lyt, typename Dist>
+    requires std::derived_from<Lyt, layouts::layout_base>
 [[nodiscard]] sparse_distance_map<Dist> initialize_sparse_distance_map(const Lyt&                    lyt,
                                                                        const distance_functor<Dist>& dist_fn)
 {
-    static_assert(std::derived_from<Lyt, fiction::layouts::layout_base>, "Lyt is not a coordinate layout");
-
     // initialize distance map
     sparse_distance_map<Dist> dist_map{};
     /** Number of coordinates across all layers. */
@@ -115,7 +113,7 @@ template <typename Lyt, typename Dist>
     lyt.foreach_coordinate(
         [&lyt, &dist_fn, &dist_map](const auto& c1)
         {
-            lyt.foreach_coordinate([&lyt, &dist_fn, &dist_map, &c1](const auto& c2)
+            lyt.foreach_coordinate([&dist_fn, &dist_map, &c1](const auto& c2)
                                    { dist_map[{c1, c2}] = dist_fn(c1, c2); });
         });
 

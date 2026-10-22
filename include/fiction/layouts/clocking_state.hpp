@@ -225,7 +225,11 @@ class state
         return 0;
     }
 
-    /** @brief Counts zones with a nonzero Hold-phase extension. @return Synchronization element count. */
+    /**
+     * @brief Counts zones with a nonzero Hold-phase extension.
+     *
+     * @return Synchronization element count.
+     */
     [[nodiscard]] uint32_t num_se() const noexcept
     {
         return static_cast<uint32_t>(synchronization.size());

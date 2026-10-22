@@ -101,6 +101,7 @@ inline constexpr const char* PROPERTY_LENGTH      = "length";
 
 }  // namespace qcc
 
+/** @brief Writes an iNML layout in QCC format. */
 class write_qcc_layout_impl
 {
   public:
@@ -120,6 +121,7 @@ class write_qcc_layout_impl
             ps{std::move(p)}
     {}
 
+    /** @brief Writes the iNML layout to the output stream in QCC format. */
     void run()
     {
         if (!has_border_io_pins())
@@ -370,6 +372,7 @@ class write_qcc_layout_impl
  * @param lyt The layout to be written.
  * @param os The output stream to write into.
  * @param ps Parameters.
+ * @throws std::invalid_argument If the layout has no designated I/O pins or the pins are not routed to its borders.
  */
 inline void write_qcc_layout(const inml::layout& lyt, std::ostream& os, write_qcc_layout_params ps = {})
 {
@@ -387,6 +390,8 @@ inline void write_qcc_layout(const inml::layout& lyt, std::ostream& os, write_qc
  * @param lyt The layout to be written.
  * @param filename The file name to create and write into. Should preferably use the `.qcc` extension.
  * @param ps Parameters.
+ * @throws std::invalid_argument If the layout has no designated I/O pins or the pins are not routed to its borders.
+ * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
  */
 inline void write_qcc_layout(const inml::layout& lyt, const std::string_view& filename, write_qcc_layout_params ps = {})
 {

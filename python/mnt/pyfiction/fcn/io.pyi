@@ -36,17 +36,20 @@ def write_qll_layout(
     (https://ieeexplore.ieee.org/document/8935211), a physical simulator
     for the molQCA (mQCA) technology platform.
 
-    This overload uses an output stream to write into.
+    This overload uses a file name to create and write into.
 
     Args:
-        lyt: The layout to be written.
-        os: The output stream to write into.
+        layout: The layout to be written.
+        filename: The file name to create and write into. Should
+                  preferably use the `.qll` extension.
         on_progress: Receives completed serialization work.
 
     Template Args:
         Lyt: `qca::layout`, `mol_qca::layout`, or `inml::layout`.
 
     Raises:
-        std::invalid_argument: if an iNML layout has no I/O pins or they
-                               are not routed to the layout's borders.
+        ValueError: if an iNML layout has no I/O pins or they are not
+                    routed to the layout's borders.
+        RuntimeError: If creating, writing, closing, or replacing the
+                      output file fails.
     """

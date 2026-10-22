@@ -97,17 +97,19 @@ the C++ part. If you want to work with the Python bindings, you need a Python 3.
 On Ubuntu, the build dependencies can be installed via:
 
 ```text
-sudo apt-get install build-essential cmake python3 python3-dev
+sudo apt-get install build-essential cmake ninja-build python3 python3-dev
 ```
+
+(building-tests)=
 
 ### Building the tests
 
 Configure and build with CMake:
 
 ```console
-$ cmake -S . -B build
-$ cmake --build build --parallel
-$ ctest --test-dir build
+$ cmake -S . --preset tests-slim
+$ cmake --build --preset tests-slim --parallel
+$ ctest --preset tests-slim --output-on-failure
 ```
 
 Several options can be toggled during the build. For a more interactive interface, please refer to `ccmake` for a
@@ -125,9 +127,9 @@ yourself. List them with:
 $ cmake --list-presets
 ```
 
-Noteworthy presets include `dev` (a quick Debug build with only the tests enabled), `dev-full` (the same,
-but with Z3 and ALGLIB also enabled), `dev-asan` (`dev` with sanitizers), `tests-slim`/`tests-full`
-(test-only builds, without/with all optional components, for the fastest edit-compile-test loop), `pyfiction`
+Noteworthy presets include `dev` and `tests-slim` (Debug builds with only the tests enabled),
+`dev-full` and `tests-full` (tests and experiments with Z3 and ALGLIB enabled), `dev-asan`
+(`dev` with sanitizers), `pyfiction`
 (mirrors the `pyproject.toml` configuration for iterating on the Python bindings directly with CMake), and
 `release` (an optimized, IPO-enabled build). The `ci-*` and `coverage` presets provide the shared baseline
 configuration used by the corresponding GitHub Actions workflows; each job layers a few compiler- and
@@ -147,7 +149,7 @@ part of the CMake build; it comes with the Python package, see {ref}`CLI (pip) <
 
 ## C++ Library
 
-If you want to use _fiction_ as a dependency in your project to utilize its header-only library for your own tool.
+Use _fiction_ as a header-only dependency in your C++ project.
 
 Add _fiction_ as a sub-directory to your CMake project and link against `libfiction` (assuming your project is
 called _fanfiction_):
@@ -315,6 +317,8 @@ of `pip install`), make sure the Python interpreter CMake picks up has `nanobind
 `uv`-managed virtual environment already does, so pass
 `-DPython_EXECUTABLE=<path_to_repo>/.venv/bin/python3` (or the equivalent `.venv\Scripts\python.exe` on
 Windows) if CMake would otherwise pick up a different interpreter.
+
+Use `-DCMAKE_BUILD_TYPE=Release` with this preset on MSVC to match the packaged `nanobind-backend` ABI.
 :::
 
 :::{note}
@@ -387,39 +391,31 @@ To enable it, before building _fiction_, pass `-DFICTION_ALGLIB=ON` to the `cmak
 ### Building experiments
 
 The `experiments` folder provides a playground for quickly scripting some ideas by plugging algorithms together.
-A `fictionlib_demo.cpp` demonstrates the usage. Any `*.cpp` file that is placed in on of its sub-folders is
+`experiments/libfiction_demo.cpp` demonstrates the usage. Any `*.cpp` file in this folder or its subfolders is
 automatically linked against `libfiction` and compiled as a stand-alone binary. Simply add a `main` function and
 include the desired header files to get started:
 
 ```c++
-#include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/technology/qca/layout.hpp>
-#include <fiction/technology/qca/qca_one_library.hpp>
-#include <fiction/technology/qca/io/write_qca_layout.hpp>
-#include <fiction/...>
 
-int main(int argc, char* argv[])
+int main()
 {
-  // your code goes here
+    fiction::qca::layout layout{};
+    layout.assign_cell_type({0, 0}, fiction::qca::cell_type::NORMAL);
+    return layout.num_cells() == 1 ? 0 : 1;
 }
 ```
 
 Each file can be built individually via CMake:
 
 ```console
-$ cmake -S . -B build -DFICTION_EXPERIMENTS=ON
-$ cmake --build build --parallel
+$ cmake -S . --preset tests-slim -DFICTION_EXPERIMENTS=ON
+$ cmake --build --preset tests-slim --target libfiction_demo
 ```
 
 ### Building tests
 
-Unit tests can be built with CMake via a respective flag on the command line and executed via `ctest`:
-
-```console
-$ cmake -S . -B build -DFICTION_TEST=ON
-$ cmake --build build --parallel
-$ ctest
-```
+See {ref}`building-tests` for the configure, build, and test commands.
 
 ### Building code benchmarks
 
@@ -429,8 +425,9 @@ the performance of our code during development. Any `*.cpp` file that is placed 
 linked against _fiction_ and compiled as a stand-alone binary using the following commands:
 
 ```console
-$ cmake -S . -B build -DFICTION_BENCHMARK=ON
-$ cmake --build build --parallel
+$ cmake -S . --preset tests-slim -DFICTION_BENCHMARK=ON
+$ cmake --build --preset tests-slim --parallel
+$ ctest --preset tests-slim --output-on-failure
 ```
 
 ### Noteworthy CMake options

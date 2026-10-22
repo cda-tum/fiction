@@ -676,8 +676,7 @@ template <typename WiringReductionLyt>
 
     static const physical_design::path_finding::a_star_params params{false};
 
-    return physical_design::path_finding::a_star<layout_coordinate_path>(lyt, {start, end}, dist(), cost(), params,
-                                                                         lyt.search_obstructions);
+    return physical_design::path_finding::a_star(lyt, {start, end}, dist(), cost(), params, lyt.search_obstructions);
 }
 /**
  * Update the to-delete list based on a possible path in a wiring_reduction_layout.

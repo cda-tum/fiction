@@ -49,13 +49,17 @@ void register_calculate_energy_and_state_type(nb::module_& m)
           &fiction::sidb::simulation::analysis::calculate_energy_and_state_type_with_kinks_accepted,
           nb::call_guard<nb::gil_scoped_release>(), nb::arg("energy_distribution"),
           nb::arg("valid_charge_distributions"), nb::arg("output_bdl_pairs"), nb::arg("spec"), nb::arg("input_index"),
-          DOC(fiction_sidb_simulation_analysis_calculate_energy_and_state_type_with_kinks_accepted));
+          parameter_doc(DOC(fiction_sidb_simulation_analysis_calculate_energy_and_state_type_with_kinks_accepted),
+                        {{"energy_dist", "energy_distribution"}})
+              .c_str());
     m.def("calculate_energy_and_state_type_with_kinks_rejected",
           &fiction::sidb::simulation::analysis::calculate_energy_and_state_type_with_kinks_rejected,
           nb::call_guard<nb::gil_scoped_release>(), nb::arg("lyt"), nb::arg("energy_distribution"),
           nb::arg("valid_charge_distributions"), nb::arg("spec"), nb::arg("input_index"), nb::arg("input_bdl_wires"),
           nb::arg("output_bdl_wires"),
-          DOC(fiction_sidb_simulation_analysis_calculate_energy_and_state_type_with_kinks_rejected));
+          parameter_doc(DOC(fiction_sidb_simulation_analysis_calculate_energy_and_state_type_with_kinks_rejected),
+                        {{"energy_dist", "energy_distribution"}})
+              .c_str());
 }
 
 }  // namespace pyfiction

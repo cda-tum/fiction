@@ -1,19 +1,10 @@
-# Simulated Annealing
+# Optimization
 
-**Header:** `fiction/utils/optimization/simulated_annealing.hpp`
+Optimization utilities search for solutions with simulated annealing.
+Temperature schedules control how the search explores candidate solutions.
 
-```{doxygenfunction} fiction::utils::optimization::linear_temperature_schedule
+```{toctree}
+:maxdepth: 1
 
-```
-
-```{doxygenfunction} fiction::utils::optimization::geometric_temperature_schedule
-
-```
-
-```{doxygenfunction} fiction::utils::optimization::simulated_annealing
-
-```
-
-```{doxygenfunction} fiction::utils::optimization::multi_simulated_annealing
-
+simulated_annealing
 ```

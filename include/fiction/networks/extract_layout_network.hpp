@@ -44,11 +44,8 @@ template <typename Geometry>
 [[nodiscard]] mockturtle::names_view<mockturtle::klut_network>
 extract_layout_network(const fiction::layouts::gate_layout<Geometry>& lyt)
 {
-    /** @brief Gate-level layout using the requested coordinate geometry. */
-    using Lyt = fiction::layouts::gate_layout<Geometry>;
-
     /** @brief Stable identity of an object in the source layout. */
-    using object_id = typename Lyt::object_id;
+    using object_id = typename fiction::layouts::gate_layout<Geometry>::object_id;
     /** @brief Signal in the extracted network. */
     using signal = mockturtle::klut_network::signal;
     /** @brief Traversal position in an object's ordered input ports. */

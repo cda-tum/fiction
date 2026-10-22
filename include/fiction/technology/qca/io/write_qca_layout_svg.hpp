@@ -304,6 +304,7 @@ inline constexpr const char* SIMPLE_CELL = "<g\n"
 
 }  // namespace svg
 
+/** @brief Draws a QCA layout as SVG. */
 class write_qca_layout_svg_impl
 {
   public:
@@ -319,6 +320,7 @@ class write_qca_layout_svg_impl
             ps{std::move(p)}
     {}
 
+    /** @brief Writes an SVG drawing of the QCA layout to the output stream. */
     void run()
     {
         if (lyt.get_tile_size_x() == 1 && lyt.get_tile_size_y() == 1)
@@ -613,12 +615,11 @@ inline void write_qca_layout_svg(const qca::layout& lyt, std::ostream& os, const
  * The utilized color scheme is based on the standard scheme used in QCADesigner
  * (https://waluslab.ece.ubc.ca/qcadesigner/).
  *
- * May throw an `unsupported_cell_type_exception` if it encounters unsupported cell types in the layout. May throw an
- * `std::ofstream::failure` if it cannot open the file.
- *
  * @param lyt The layout to be written.
  * @param filename The file name to create and write into. Should preferably use the `.svg` extension.
  * @param ps Parameters.
+ * @throws fcn::io::unsupported_cell_type_exception If the layout contains an unsupported cell type.
+ * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
  */
 inline void write_qca_layout_svg(const qca::layout& lyt, const std::string_view& filename,
                                  const write_qca_layout_svg_params& ps = {})

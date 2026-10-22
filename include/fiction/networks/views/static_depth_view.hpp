@@ -22,11 +22,14 @@
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/cost_functions.hpp>
 
+#include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
+#include <limits>
+#include <stdexcept>
 #include <utility>
-
-#include <parallel_hashmap/phmap.h>
+#include <vector>
 
 namespace fiction::networks::views
 {
@@ -47,17 +50,10 @@ struct depth_view_params
 };
 
 /**
- * Provides `depth` and `level` methods for networks, similar to `mockturtle::static_depth_view`.
- * Unlike the `mockturtle` implementation, this version uses flat hashmaps to store `level` data
- * instead of `mockturtle::node_map`. Additionally, the `add_event` functionality has been removed.
- * As a result, if the underlying network changes, either `on_add` has to be called when adding a node to the network
- * and keep the current depth information or the `update_levels` method must be called to refresh the
- * `static_depth_view` information. These modifications address performance issues encountered with
- * `mockturtle::static_depth_view`.
- *
- * This view computes the level of each node and the overall depth of the network. The `level` and
- * `depth` methods adhere to the network interface. Levels are calculated during construction and
- * can be updated later by invoking the `update_levels` method.
+ * Provides node levels and network depth, stored in vectors indexed by node index.
+ * Call `on_add` after adding a node, or `update_levels` after changing the network, to refresh the stored levels.
+ * Critical-path membership is computed on its first query after an update.
+ * Networks that already supply the depth interface retain their own storage and update behavior.
  *
  * @tparam Ntk The network type.
  * @tparam NodeCostFn Optional cost function applied to nodes. Default is `mockturtle::unit_cost<Ntk>`.
@@ -67,6 +63,13 @@ struct depth_view_params
 template <typename Ntk, typename NodeCostFn = mockturtle::unit_cost<Ntk>,
           bool has_depth_interface =
               mockturtle::has_depth_v<Ntk> && mockturtle::has_level_v<Ntk> && mockturtle::has_update_levels_v<Ntk>>
+    requires(has_depth_interface ||
+             (mockturtle::is_network_type_v<Ntk> && mockturtle::has_size_v<Ntk> && mockturtle::has_get_node_v<Ntk> &&
+              mockturtle::has_is_complemented_v<Ntk> && mockturtle::has_visited_v<Ntk> &&
+              mockturtle::has_set_visited_v<Ntk> && mockturtle::has_foreach_po_v<Ntk> &&
+              mockturtle::has_foreach_fanin_v<Ntk> && mockturtle::has_node_to_index_v<Ntk> &&
+              mockturtle::has_foreach_ci_v<Ntk> && mockturtle::has_is_constant_v<Ntk> && mockturtle::has_is_ci_v<Ntk> &&
+              mockturtle::has_is_pi_v<Ntk>))
 class static_depth_view
 {};
 
@@ -81,7 +84,27 @@ template <typename Ntk, typename NodeCostFn>
 class static_depth_view<Ntk, NodeCostFn, true> : public Ntk
 {
   public:
+    /** @brief Wraps a network that already supplies depth information. */
     explicit static_depth_view(Ntk const& ntk, [[maybe_unused]] depth_view_params const& params = {}) : Ntk(ntk) {}
+
+    /**
+     * @brief Checks whether a level is stored for a node.
+     *
+     * @param n Node to check.
+     * @return The wrapped network's answer if it offers `has_level`, otherwise `true`, since a network with a depth
+     * interface keeps levels for every node.
+     */
+    [[nodiscard]] bool has_level([[maybe_unused]] typename Ntk::node const& n) const
+    {
+        if constexpr (has_has_level_v<Ntk>)
+        {
+            return Ntk::has_level(n);
+        }
+        else
+        {
+            return true;
+        }
+    }
 };
 
 /**
@@ -95,9 +118,12 @@ template <typename Ntk, typename NodeCostFn>
 class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
 {
   public:
+    /** @brief Underlying network storage type. */
     using storage = typename Ntk::storage;
-    using node    = typename Ntk::node;
-    using signal  = typename Ntk::signal;
+    /** @brief Network node type. */
+    using node = typename Ntk::node;
+    /** @brief Network signal type. */
+    using signal = typename Ntk::signal;
 
     /**
      * Default constructor for `fiction::static_depth_view`.
@@ -111,18 +137,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
             Ntk(),
             ps(params),
             cost_fn(node_cost_fn)
-    {
-        static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-        static_assert(mockturtle::has_size_v<Ntk>, "Ntk does not implement the size method");
-        static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node method");
-        static_assert(mockturtle::has_is_complemented_v<Ntk>, "Ntk does not implement the is_complemented method");
-        static_assert(mockturtle::has_visited_v<Ntk>, "Ntk does not implement the visited method");
-        static_assert(mockturtle::has_set_visited_v<Ntk>, "Ntk does not implement the set_visited method");
-        static_assert(mockturtle::has_foreach_po_v<Ntk>, "Ntk does not implement the foreach_po method");
-        static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin method");
-
-        levels.rehash(this->size());
-    }
+    {}
 
     /**
      * Constructs an `fiction::static_depth_view` from an existing network.
@@ -140,16 +155,6 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
             ps(params),
             cost_fn(node_cost_fn)
     {
-        static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-        static_assert(mockturtle::has_size_v<Ntk>, "Ntk does not implement the size method");
-        static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node method");
-        static_assert(mockturtle::has_is_complemented_v<Ntk>, "Ntk does not implement the is_complemented method");
-        static_assert(mockturtle::has_visited_v<Ntk>, "Ntk does not implement the visited method");
-        static_assert(mockturtle::has_set_visited_v<Ntk>, "Ntk does not implement the set_visited method");
-        static_assert(mockturtle::has_foreach_po_v<Ntk>, "Ntk does not implement the foreach_po method");
-        static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin method");
-
-        levels.rehash(this->size());
         update_levels();
     }
 
@@ -164,6 +169,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
             ps(other.ps),
             levels(other.levels),
             crit_path(other.crit_path),
+            crit_path_valid(other.crit_path_valid),
             ntk_depth(other.ntk_depth),
             cost_fn(other.cost_fn)
     {}
@@ -183,22 +189,15 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
             return *this;
         }
 
-        // update the base class
-        this->_storage = other._storage;
-        this->_events  = other._events;
-
-        // update the virtual storage
-        if constexpr (has_is_virtual_pi_v<Ntk>)
-        {
-            this->v_storage = other.v_storage;
-        }
+        Ntk::operator=(other);
 
         // copy
-        ps        = other.ps;
-        levels    = other.levels;
-        crit_path = other.crit_path;
-        ntk_depth = other.ntk_depth;
-        cost_fn   = other.cost_fn;
+        ps              = other.ps;
+        levels          = other.levels;
+        crit_path       = other.crit_path;
+        crit_path_valid = other.crit_path_valid;
+        ntk_depth       = other.ntk_depth;
+        cost_fn         = other.cost_fn;
 
         // Return the current object
         return *this;
@@ -215,6 +214,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
             ps(other.ps),  // trivially copyable
             levels(std::move(other.levels)),
             crit_path(std::move(other.crit_path)),
+            crit_path_valid(other.crit_path_valid),
             ntk_depth(other.ntk_depth),
             cost_fn(std::move(other.cost_fn))
     {}
@@ -234,22 +234,15 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
             return *this;
         }
 
-        // move the base class
-        this->_storage = std::move(other._storage);
-        this->_events  = std::move(other._events);
+        // move the members before the base, since moving the base leaves `other` in an unspecified state
+        ps              = other.ps;  // trivially copyable
+        levels          = std::move(other.levels);
+        crit_path       = std::move(other.crit_path);
+        crit_path_valid = other.crit_path_valid;
+        ntk_depth       = other.ntk_depth;
+        cost_fn         = std::move(other.cost_fn);
 
-        // move the virtual storage
-        if constexpr (has_is_virtual_pi_v<Ntk>)
-        {
-            this->v_storage = std::move(other.v_storage);
-        }
-
-        // move
-        ps        = other.ps;  // trivially copyable
-        levels    = std::move(other.levels);
-        crit_path = std::move(other.crit_path);
-        ntk_depth = other.ntk_depth;
-        cost_fn   = std::move(other.cost_fn);
+        Ntk::operator=(std::move(other));
 
         // Return the current object
         return *this;
@@ -273,15 +266,51 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
      */
     uint32_t level(node const& n) const
     {
-        return levels.at(n);
+        const auto l = levels.at(static_cast<std::size_t>(this->node_to_index(n)));
+
+        if (l == NO_LEVEL)
+        {
+            throw std::out_of_range("static_depth_view: the node has no level");
+        }
+
+        return l;
     }
 
     /**
-     * @return If a node is on the critical path.
+     * @brief Checks whether a level is stored for a node.
+     *
+     * Every combinational input has one. A gate has none if no output reaches it (a dangling gate) or if it was added
+     * after the last call to `update_levels` without `on_add` being called for it.
+     *
+     * @param n Node to check.
+     * @return `true` iff a level is stored for `n`.
+     */
+    [[nodiscard]] bool has_level(node const& n) const
+    {
+        const auto i = static_cast<std::size_t>(this->node_to_index(n));
+
+        return i < levels.size() && levels[i] != NO_LEVEL;
+    }
+
+    /**
+     * @brief Checks whether a node is on the critical path.
+     *
+     * The first query after an update computes the critical path, so concurrent queries on one view are not safe until
+     * a query has returned.
+     *
+     * @param n Node to check.
+     * @return `true` iff `n` is on the critical path.
      */
     bool is_on_critical_path(node const& n) const
     {
-        return crit_path.contains(n);
+        if (!crit_path_valid)
+        {
+            compute_critical_path();
+        }
+
+        const auto i = static_cast<std::size_t>(this->node_to_index(n));
+
+        return i < crit_path.size() && crit_path[i];
     }
 
     /**
@@ -289,7 +318,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
      */
     void set_level(node const& n, uint32_t level)
     {
-        levels[n] = level;
+        level_slot(n) = level;
     }
 
     /**
@@ -301,70 +330,78 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
     }
 
     /**
-     * Update the levels and the critical path of the network.
+     * Update the levels of the network and invalidate the critical path.
      */
     void update_levels()
     {
-        levels.clear();
-        levels.rehash(this->size());
-        crit_path.clear();
-        crit_path.rehash(this->size());
+        levels.assign(this->size(), NO_LEVEL);
+        crit_path_valid = false;
 
-        this->incr_trav_id();
         compute_levels();
     }
 
-    /*
+    /**
      * Add a node to the `static_depth_view` and update its level and the depth.
      *
      * @param n Node added to the `static_depth_view`.
      */
     void on_add(node const& n)
     {
-        levels.rehash(this->size());
-
         uint32_t level{0};
         this->foreach_fanin(n,
                             [&](auto const& f)
                             {
-                                auto clevel = levels[f];
+                                auto clevel =
+                                    has_level(this->get_node(f)) ? levels[this->node_to_index(this->get_node(f))] : 0u;
                                 if (ps.count_complements && this->is_complemented(f))
                                 {
                                     ++clevel;
                                 }
                                 level = std::max(level, clevel);
                             });
-        if (this->is_pi(n))
-        {
-            levels[n] = level;
-        }
-        else
-        {
-            levels[n] = level + cost_fn(*this, n);
-        }
-        ntk_depth = std::max(ntk_depth, level + cost_fn(*this, n));
+        level_slot(n) = this->is_pi(n) ? level : level + cost_fn(*this, n);
+        ntk_depth     = std::max(ntk_depth, level + cost_fn(*this, n));
     }
 
   private:
+    /**
+     * @brief Marks a node without a level.
+     */
+    static constexpr uint32_t NO_LEVEL = std::numeric_limits<uint32_t>::max();
+    /**
+     * @brief Level slot of a node; grows the storage for a node added after the last update.
+     */
+    uint32_t& level_slot(node const& n)
+    {
+        const auto i = static_cast<std::size_t>(this->node_to_index(n));
+
+        if (i >= levels.size())
+        {
+            levels.resize(i + 1, NO_LEVEL);
+        }
+
+        return levels[i];
+    }
     /**
      * Compute the level of a nodes.
      */
     uint32_t compute_levels(node const& n)
     {
-        if (this->visited(n) == this->trav_id())
+        auto& slot = levels[this->node_to_index(n)];
+
+        if (slot != NO_LEVEL)
         {
-            return levels[n];
+            return slot;
         }
-        this->set_visited(n, this->trav_id());
 
         if (this->is_constant(n))
         {
-            return levels[n] = 0;
+            return slot = 0;
         }
         if (this->is_ci(n))
         {
             assert(!ps.pi_cost || cost_fn(*this, n) >= 1);
-            return levels[n] = ps.pi_cost ? cost_fn(*this, n) - 1 : 0;
+            return slot = ps.pi_cost ? cost_fn(*this, n) - 1 : 0;
         }
 
         uint32_t level{0};
@@ -379,7 +416,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
                                 level = std::max(level, clevel);
                             });
 
-        return levels[n] = level + cost_fn(*this, n);
+        return levels[this->node_to_index(n)] = level + cost_fn(*this, n);
     }
 
     /**
@@ -413,11 +450,23 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
                 });
         }
 
+        // an input that drives nothing is not reached from any output but is still part of the interface and sits on
+        // level 0 by definition; give it a level so that rank views and drawers can place it
+        this->foreach_ci([&](auto const& n) { compute_levels(n); });
+    }
+
+    /**
+     * @brief Compute the nodes on the critical path from the stored levels.
+     */
+    void compute_critical_path() const
+    {
+        crit_path.assign(levels.size(), false);
+
         this->foreach_po(
             [&](auto const& f)
             {
                 const auto n = this->get_node(f);
-                if (levels[n] == ntk_depth)
+                if (levels[this->node_to_index(n)] == ntk_depth)
                 {
                     set_critical_path(n);
                 }
@@ -429,23 +478,25 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
                 [&](auto const& f)
                 {
                     const auto n = this->get_node(f);
-                    if (levels[n] == ntk_depth)
+                    if (levels[this->node_to_index(n)] == ntk_depth)
                     {
                         set_critical_path(n);
                     }
                 });
         }
+
+        crit_path_valid = true;
     }
 
     /**
      * Set nodes on the critical path.
      */
-    void set_critical_path(node const& n)
+    void set_critical_path(node const& n) const
     {
-        crit_path[n] = true;
+        crit_path[this->node_to_index(n)] = true;
         if (!this->is_constant(n) && !(ps.pi_cost && this->is_pi(n)))
         {
-            const auto lvl = levels[n];
+            const auto lvl = levels[this->node_to_index(n)];
             this->foreach_fanin(n,
                                 [&](auto const& f)
                                 {
@@ -455,7 +506,8 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
                                     {
                                         ++offset;
                                     }
-                                    if (levels[cn] + offset == lvl && !crit_path[cn])
+                                    if (levels[this->node_to_index(cn)] + offset == lvl &&
+                                        !crit_path[this->node_to_index(cn)])
                                     {
                                         set_critical_path(cn);
                                     }
@@ -468,13 +520,18 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
      */
     depth_view_params ps;
     /**
-     * Flat hashmap assigning levels to nodes.
+     * Level per node index; `NO_LEVEL` for a node without one.
      */
-    phmap::flat_hash_map<node, uint32_t> levels;
+    std::vector<uint32_t> levels;
     /**
-     * Flat hashmap assigning nodes on the critical path.
+     * @brief Per node index, whether the node is on the critical path; computed on the first query after an update,
+     * because most users never ask for it.
      */
-    phmap::flat_hash_map<node, uint32_t> crit_path;
+    mutable std::vector<bool> crit_path;
+    /**
+     * Whether `crit_path` matches the levels.
+     */
+    mutable bool crit_path_valid{false};
     /**
      * The depth of the network.
      */
