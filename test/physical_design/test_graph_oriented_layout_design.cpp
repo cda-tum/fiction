@@ -749,7 +749,7 @@ TEMPLATE_TEST_CASE("Named specification conversion for graph_oriented_layout_des
 
 TEST_CASE("GOLD repeats completed sequential searches", "[graph-oriented-layout-design]")
 {
-    /** @brief Exercise both the reported fixed-spacing case and seeded PI placement. */
+    /** @brief Exercise fixed-spacing and seeded PI placement. */
     const auto randomize_spacing = GENERATE(false, true);
     /** @brief Captures geometry, functions, terminal kinds, and ordered connections without object identities. */
     const auto snapshot = [](const cartesian_gate_layout& layout)
@@ -794,7 +794,7 @@ TEST_CASE("GOLD repeats completed sequential searches", "[graph-oriented-layout-
         params.randomize_tiles_to_skip_between_pis = randomize_spacing;
         params.tiles_to_skip_between_pis           = randomize_spacing ? 1 : 0;
         /** @brief Reference result for this input and seed. */
-        const auto reference = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params);
+        const auto reference = graph_oriented_layout_design(ntk, params);
         REQUIRE(reference.has_value());
         check_eq(ntk, required_value(reference));
 
@@ -802,7 +802,7 @@ TEST_CASE("GOLD repeats completed sequential searches", "[graph-oriented-layout-
         params.tiles_to_skip_between_pis           = 3;
         params.randomize_tiles_to_skip_between_pis = true;
         /** @brief Intervening invocation with different randomization parameters. */
-        const auto intervening = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params);
+        const auto intervening = graph_oriented_layout_design(ntk, params);
         REQUIRE(intervening.has_value());
         check_eq(ntk, required_value(intervening));
 
@@ -810,7 +810,7 @@ TEST_CASE("GOLD repeats completed sequential searches", "[graph-oriented-layout-
         params.tiles_to_skip_between_pis           = randomize_spacing ? 1 : 0;
         params.randomize_tiles_to_skip_between_pis = randomize_spacing;
         /** @brief Repeating the original invocation must reproduce its complete physical result. */
-        const auto repeated = graph_oriented_layout_design<cartesian_gate_layout>(ntk, params);
+        const auto repeated = graph_oriented_layout_design(ntk, params);
         REQUIRE(repeated.has_value());
         check_eq(ntk, required_value(repeated));
         CHECK(snapshot(required_value(reference)) == snapshot(required_value(repeated)));

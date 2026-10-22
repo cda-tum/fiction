@@ -286,7 +286,7 @@ TEST_CASE("A* minimizes nonuniform path costs", "[A*]")
             return source == layout_base::coordinate{2, 0} ? 4 : 1;
         }};
     /** @brief The minimum-cost route has three edges. */
-    const auto path = a_star<layout_coordinate_path>(layout, {.source = {0, 0}, .target = {2, 1}}, estimate, cost);
+    const auto path = a_star(layout, {.source = {0, 0}, .target = {2, 1}}, estimate, cost);
     REQUIRE(path.size() == 4);
     CHECK(cost(path[0], path[1]) + cost(path[1], path[2]) + cost(path[2], path[3]) == 5);
 }
