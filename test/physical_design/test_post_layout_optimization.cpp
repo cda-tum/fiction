@@ -31,6 +31,8 @@
 #include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/physical_design/post_layout_optimization.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
+#include <fiction/synthesis/network_conversion.hpp>
+#include <fiction/types.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -48,7 +50,7 @@ using namespace fiction::physical_design;
 template <typename Lyt, typename Ntk>
 static void check_layout_equiv(const Ntk& ntk)
 {
-    auto layout = orthogonal<Lyt>(ntk, {});
+    auto layout = orthogonal<Lyt>(fiction::synthesis::convert_network<tec_nt>(ntk), {});
 
     post_layout_optimization_stats stats{};
     post_layout_optimization(layout, {}, &stats);
