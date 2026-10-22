@@ -784,6 +784,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     Custom geometry controls its assignment failure guarantee.
   - Depth and rank view assignment now preserves wrapped network names and metadata.
   - Breadth-first topological views now visit gates with repeated fanins.
+  - Breadth-first topological views now cache node indices for constant expected lookup time.
   - Depth views now refresh critical paths after explicit updates and count complemented output edges.
   - Rank traversal now keeps callback indices and early termination across levels.
   - `networks::views::mutable_rank_view::update_ranks` resets `width()`.

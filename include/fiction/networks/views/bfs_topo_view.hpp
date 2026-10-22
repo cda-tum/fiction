@@ -22,12 +22,10 @@
 #include <mockturtle/views/fanout_view.hpp>
 #include <mockturtle/views/immutable_view.hpp>
 
-#include <algorithm>
-#include <cassert>
 #include <cstdint>
-#include <iterator>
 #include <queue>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace fiction::networks::views
@@ -137,7 +135,8 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
      */
     uint32_t node_to_index(const node& n) const
     {
-        return static_cast<uint32_t>(std::ranges::distance(topo_order.cbegin(), std::ranges::find(topo_order, n)));
+        const auto index = topo_index.find(n);
+        return index == topo_index.cend() ? size() : index->second;
     }
 
     /**
@@ -211,6 +210,7 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
     {
         fanout_ntk.incr_trav_id();
         topo_order.clear();
+        topo_index.clear();
         topo_order.reserve(fanout_ntk.size());
 
         std::queue<node>                   q{};
@@ -268,6 +268,12 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
                                           }
                                       });
         }
+
+        topo_index.reserve(topo_order.size());
+        for (uint32_t index = 0; index < size(); ++index)
+        {
+            topo_index.emplace(topo_order[index], index);
+        }
     }
 
   private:
@@ -275,6 +281,12 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
      * Stores nodes in topological order from constants and PIs to reachable gates.
      */
     std::vector<node> topo_order;
+
+    /**
+     * @brief Topological index per visited node.
+     * Value-owned storage avoids the network pointer retained by `mockturtle::node_map` across copies and moves.
+     */
+    std::unordered_map<node, uint32_t> topo_index;
 
     /**
      * Fanout-augmented view of the original network for efficient traversal.
