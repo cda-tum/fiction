@@ -1012,6 +1012,9 @@ Args:
 Returns:
     `true` iff `n` has an AND, OR, or MAJ fanin node.
 
+Raises:
+    ValueError: If `n` does not identify a live object in `lyt`.
+
 )doc";
 
 static const char *mkd_doc_fiction_inml_topolinano_library_has_fanout_fanout =
@@ -1023,6 +1026,9 @@ Args:
 
 Returns:
     `true` iff `n` has a fanout node as fanout.
+
+Raises:
+    ValueError: If `n` does not identify a live object in `lyt`.
 
 )doc";
 
@@ -10272,7 +10278,7 @@ static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_
 R"doc(Places a node with two inputs in the layout and routes it.
 
 Args:
-    position: The tile representing the position for placement.
+    destination: Identity of the placed gate to route.
     layout: The layout in which to place the node.
     node2pos: A dictionary mapping nodes from the network to signals
               in the layout.
@@ -10284,7 +10290,7 @@ static const char *mkd_doc_fiction_physical_design_detail_graph_oriented_layout_
 R"doc(Places a node with a single input in the layout and routes it.
 
 Args:
-    position: The tile representing the position for placement.
+    destination: Identity of the placed gate to route.
     layout: The layout in which to place the node.
     node2pos: A dictionary mapping nodes from the network to signals
               in the layout.
