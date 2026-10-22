@@ -19,6 +19,7 @@
 
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/static_depth_view.hpp>
+#include <fiction/types.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/klut.hpp>
@@ -28,7 +29,6 @@
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/cost_functions.hpp>
 #include <mockturtle/views/depth_view.hpp>
-#include <mockturtle/views/names_view.hpp>
 
 #include <cstdint>
 #include <memory>
@@ -68,8 +68,8 @@ static_assert(requires(const static_depth_view<mockturtle::aig_network>& ntk) { 
 
 TEST_CASE("Depth view assignment preserves network names", "[static-depth-view]")
 {
-    static_depth_view<mockturtle::names_view<technology_network>> source{};
-    const auto                                                    input = source.create_pi();
+    static_depth_view<named_technology_network> source{};
+    const auto                                  input = source.create_pi();
     source.create_po(input);
     source.set_network_name("source");
     source.set_name(input, "input");

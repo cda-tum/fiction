@@ -672,8 +672,8 @@ TEST_CASE("GOLD preserves declared PI order and noncommutative input ports", "[g
 TEST_CASE("GOLD represents constant outputs explicitly and keeps empty networks empty",
           "[graph-oriented-layout-design]")
 {
-    const mockturtle::names_view<technology_network> empty{};
-    graph_oriented_layout_design_params              params{};
+    const named_technology_network      empty{};
+    graph_oriented_layout_design_params params{};
     params.return_first          = true;
     params.enable_multithreading = false;
     params.timeout               = 10000;

@@ -25,10 +25,10 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/networks/name_utils.hpp>
-#include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/placement_utils.hpp>
 #include <fiction/types.hpp>
 
+#include <mockturtle/networks/aig.hpp>
 #include <mockturtle/utils/node_map.hpp>
 
 #include <cstdint>
@@ -41,7 +41,7 @@ using namespace fiction::layouts;
 using namespace fiction::networks;
 
 /** @brief Named network missing node traversal required for signal-name transfer. */
-struct incomplete_named_network : mockturtle::names_view<mockturtle::aig_network>
+struct incomplete_named_network : named_aig_network
 {
     /**
      * @brief Disables node traversal.
@@ -52,7 +52,7 @@ struct incomplete_named_network : mockturtle::names_view<mockturtle::aig_network
 };
 
 /** @brief Named network without constant lookup. */
-struct named_without_constant : mockturtle::names_view<mockturtle::aig_network>
+struct named_without_constant : named_aig_network
 {
     /** @brief Creates an empty named network. */
     named_without_constant() = default;
@@ -90,7 +90,7 @@ struct layout_without_input_name_query : cartesian_gate_layout
 };
 
 /** @brief Named input source without input traversal. */
-struct input_source_without_traversal : mockturtle::names_view<mockturtle::aig_network>
+struct input_source_without_traversal : named_aig_network
 {
     /** @brief Disables input traversal. @tparam Fn Input callback type. */
     template <typename Fn>
@@ -168,21 +168,21 @@ concept branching_names_transferable =
 
 static_assert(branching_names_transferable<cartesian_gate_layout>);
 static_assert(branching_names_transferable<mockturtle::aig_network>);
-static_assert(!branching_names_transferable<mockturtle::names_view<mockturtle::aig_network>>);
+static_assert(!branching_names_transferable<named_aig_network>);
 
-static_assert(!all_names_transferable<incomplete_named_network, mockturtle::names_view<mockturtle::aig_network>>);
+static_assert(!all_names_transferable<incomplete_named_network, named_aig_network>);
 static_assert(signal_names_transferable<mockturtle::aig_network, mockturtle::aig_network>);
 static_assert(signal_names_transferable<incomplete_named_network, mockturtle::aig_network>);
-static_assert(!signal_names_transferable<incomplete_named_network, mockturtle::names_view<mockturtle::aig_network>>);
+static_assert(!signal_names_transferable<incomplete_named_network, named_aig_network>);
 
-static_assert(signal_names_transferable<named_without_constant, mockturtle::names_view<mockturtle::aig_network>>);
+static_assert(signal_names_transferable<named_without_constant, named_aig_network>);
 
 TEST_CASE("Signal names transfer without constant lookup", "[name-utils]")
 {
     named_without_constant source{};
     const auto             input = source.create_pi("input");
     source.create_po(input);
-    mockturtle::names_view<mockturtle::aig_network>                               destination{};
+    named_aig_network                                                             destination{};
     const auto                                                                    target = destination.create_pi();
     mockturtle::node_map<mockturtle::aig_network::signal, named_without_constant> mapping{source};
     mapping[source.get_node(input)] = target;
@@ -192,8 +192,8 @@ TEST_CASE("Signal names transfer without constant lookup", "[name-utils]")
 
 TEST_CASE("Unnamed network name transfers clear names and remain optional", "[name-utils]")
 {
-    mockturtle::aig_network                         unnamed{};
-    mockturtle::names_view<mockturtle::aig_network> named{};
+    mockturtle::aig_network unnamed{};
+    named_aig_network       named{};
     named.set_network_name("old");
     restore_network_name(unnamed, named);
     CHECK(named.get_network_name().empty());

@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Checked layout conversions for Python bindings.
+ * @brief Coordinate conversion and tuple-accepting type casters for Python bindings.
  * @author Marcel Walter (marcelwa)
  * @author Benjamin Hien (hibenj)
  */

@@ -580,7 +580,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - **Breaking:** Removed preset pointer aliases, `truth_table_t`, `logic_network_t`, `*_name`,
     `get_ntk_type_name`, and `ntk_type_name`. Use `std::shared_ptr<T>` for shared ownership.
-
   - **Breaking:** Removed `utils/stl/execution_utils.hpp` and its `FICTION_EXECUTION_POLICY_*` macros.
 - Data structures:
 
