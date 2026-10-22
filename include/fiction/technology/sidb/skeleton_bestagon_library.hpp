@@ -134,7 +134,7 @@ class skeleton_bestagon_library : public fcn::gate_library<sidb::layout, 60, 46>
     {
         if (!layouts::is_row_arrangement(lyt.get_arrangement()))
         {
-            throw std::invalid_argument("GateLyt must be a pointy-top hexagonal layout");
+            throw std::invalid_argument("A pointy-top hexagonal layout is required");
         }
 
         if (!lyt.find_object(t))
