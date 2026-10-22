@@ -84,17 +84,19 @@ TEST_CASE("Gate-design timeouts cover every search mode", "[design-sidb-gates]")
 {
     const auto lyt = blueprints::two_input_one_output_skeleton_west_west();
 
+    design_gates_params params{};
+
     SECTION("Zero expires immediately")
     {
-        const design_gates_params params{.operational_params = {.timeout = 0}};
+        params = design_gates_params{.operational_params = {.timeout = 0}};
     }
     SECTION("One positive budget covers setup and every candidate")
     {
-        const design_gates_params params{.operational_params     = {.timeout = 20},
-                                         .canvas                 = {site_at_row(27, 12), site_at_row(28, 13)},
-                                         .number_of_canvas_sidbs = 1,
-                                         .on_progress            = [](auto, auto, auto)
-                                         { std::this_thread::sleep_for(std::chrono::milliseconds{25}); }};
+        params = design_gates_params{.operational_params     = {.timeout = 20},
+                                     .canvas                 = {site_at_row(27, 12), site_at_row(28, 13)},
+                                     .number_of_canvas_sidbs = 1,
+                                     .on_progress            = [](auto, auto, auto)
+                                     { std::this_thread::sleep_for(std::chrono::milliseconds{25}); }};
     }
 
     for (const auto mode :
@@ -103,8 +105,8 @@ TEST_CASE("Gate-design timeouts cover every search mode", "[design-sidb-gates]")
           design_gates_params::design_gates_mode::RANDOM, design_gates_params::design_gates_mode::PRUNING_ONLY})
     {
         CAPTURE(mode);
-        const design_gates_params params{.design_mode = mode};
-        const auto                start = std::chrono::steady_clock::now();
+        params.design_mode = mode;
+        const auto start   = std::chrono::steady_clock::now();
         CHECK_THROWS_AS(design_gates(lyt, std::vector{create_and_tt()}, params), utils::timeout_error);
         CHECK(std::chrono::steady_clock::now() - start < std::chrono::seconds{10});
     }
