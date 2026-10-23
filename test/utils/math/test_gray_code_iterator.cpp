@@ -56,11 +56,11 @@ TEST_CASE("Gray-code indexing follows the current position", "[gray-code-iterato
 TEST_CASE("Gray-code arithmetic covers 64-bit positions", "[gray-code-iterator]")
 {
     /** A valid one-step distance that crosses the signed representation boundary. */
-    constexpr uint64_t boundary{uint64_t{1} << 63};
+    constexpr uint64_t boundary{uint64_t{1} << 63u};
     STATIC_REQUIRE(gray_code_iterator{boundary} - gray_code_iterator{boundary - 1} == 1);
     STATIC_REQUIRE(gray_code_iterator{boundary - 1} - gray_code_iterator{boundary} == -1);
     /** Offset wider than int used by C++20 iterator advancement. */
-    constexpr int64_t offset{int64_t{1} << 32};
+    constexpr int64_t offset{0x1'0000'0000};
     /** Iterator used for forward and backward arithmetic. */
     gray_code_iterator it{3};
     std::ranges::advance(it, offset);
