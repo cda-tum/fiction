@@ -32,10 +32,10 @@
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
-#include <fiction/types.hpp>
 #include <fiction/utils/execution_timeout.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
@@ -1224,10 +1224,10 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
 TEST_CASE("Domain algorithms share one budget across parameter points", "[operational-domain][application-timeout]")
 {
-    const auto                lyt = blueprints::siqad_or_gate();
-    const std::vector<tt>     spec{create_or_tt()};
-    operational_domain_params params{};
-    operational_domain_stats  stats{};
+    const auto                                    lyt = blueprints::siqad_or_gate();
+    const std::vector<kitty::dynamic_truth_table> spec{create_or_tt()};
+    operational_domain_params                     params{};
+    operational_domain_stats                      stats{};
     stats.num_evaluated_parameter_combinations                                                      = 42;
     stats.num_total_parameter_points                                                                = 43;
     params.operational_params.timeout                                                               = 0;
@@ -2157,8 +2157,9 @@ TEST_CASE("Operational domain rejects QuickSim with charged defects", "[operatio
     operational_domain_params params{};
     params.operational_params.sim_engine = engine::QUICKSIM;
     params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6, .step = 0.1}};
-    CHECK_THROWS_AS(operational_domain_grid_search(lyt, std::vector<tt>{create_and_tt()}, params),
-                    std::invalid_argument);
+    CHECK_THROWS_AS(
+        operational_domain_grid_search(lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, params),
+        std::invalid_argument);
 }
 
 TEST_CASE("Operational-domain sweeps reject non-finite and oversized ranges", "[operational-domain]")
@@ -2173,22 +2174,25 @@ TEST_CASE("Operational-domain sweeps reject non-finite and oversized ranges", "[
                                                          {.dimension = sweep_parameter::EPSILON_R, .step = value}})
         {
             params.sweep_dimensions = {range};
-            CHECK_THROWS_AS(operational_domain_grid_search(lyt, std::vector<tt>{create_and_tt()}, params),
-                            std::invalid_argument);
+            CHECK_THROWS_AS(
+                operational_domain_grid_search(lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, params),
+                std::invalid_argument);
         }
     }
     params.sweep_dimensions = {
         {.dimension = sweep_parameter::EPSILON_R, .min = 1, .max = 2, .step = std::numeric_limits<double>::min()}};
-    CHECK_THROWS_AS(operational_domain_grid_search(lyt, std::vector<tt>{create_and_tt()}, params),
-                    std::invalid_argument);
+    CHECK_THROWS_AS(
+        operational_domain_grid_search(lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, params),
+        std::invalid_argument);
 }
 
 TEST_CASE("Operational-domain flood fill requires two dimensions", "[operational-domain]")
 {
     operational_domain_params params{};
     params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.0, .max = 5.1, .step = 0.1}};
-    CHECK_THROWS_AS(operational_domain_flood_fill(layout{}, std::vector<tt>{create_id_tt()}, 0, params),
-                    std::invalid_argument);
+    CHECK_THROWS_AS(
+        operational_domain_flood_fill(layout{}, std::vector<kitty::dynamic_truth_table>{create_id_tt()}, 0, params),
+        std::invalid_argument);
 }
 
 TEST_CASE("Operational-domain sweeps preserve distinct parameter identities", "[operational-domain]")

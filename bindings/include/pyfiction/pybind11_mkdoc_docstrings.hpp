@@ -43,7 +43,7 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_fcn_area =
-R"doc(Computes real-world area requirements in nm² of a given cell-level
+R"doc(Computes real-world area requirements in nmÂ² of a given cell-level
 layout. For this purpose, each cell position in the layout is assigned
 a vertical and horizontal size. Additionally, a spacing between cell
 positions in horizontal and vertical direction is taken into account.
@@ -60,12 +60,12 @@ Template Args:
           default.
 
 Returns:
-    Area requirements in nm².
+    Area requirements in nmÂ².
 
 )doc";
 
 static const char *mkd_doc_fiction_fcn_area_2 =
-R"doc(Computes real-world area requirements in nm² of the bounding box of a
+R"doc(Computes real-world area requirements in nmÂ² of the bounding box of a
 given cell-level layout. For this purpose, each cell position in the
 layout is assigned a vertical and horizontal size. Additionally, a
 spacing between cell positions in horizontal and vertical direction is
@@ -81,12 +81,12 @@ Template Args:
          `inml::layout`.
 
 Returns:
-    Area requirements in nm².
+    Area requirements in nmÂ².
 
 )doc";
 
 static const char *mkd_doc_fiction_fcn_area_3 =
-R"doc(Computes real-world area requirements in nm² of the bounding box of a
+R"doc(Computes real-world area requirements in nmÂ² of the bounding box of a
 given SiDB layout. The bounding box covers the layout's SiDBs and
 defects; every column and every single-SiDB row inside it is assigned
 a horizontal and vertical size, and a spacing between neighboring
@@ -98,7 +98,7 @@ Args:
     pst: Area statistics.
 
 Returns:
-    Area requirements in nm².
+    Area requirements in nmÂ².
 
 )doc";
 
@@ -126,7 +126,7 @@ R"doc(Statistics class to store area-related information including width,
 height, and area of a layout. Additionally, it provides a method to
 print a formatted report of these statistics to an output stream.)doc";
 
-static const char *mkd_doc_fiction_fcn_area_stats_area = R"doc(Layout area in nm².)doc";
+static const char *mkd_doc_fiction_fcn_area_stats_area = R"doc(Layout area in nmÂ².)doc";
 
 static const char *mkd_doc_fiction_fcn_area_stats_height = R"doc(Layout height in nm.)doc";
 
@@ -301,7 +301,7 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_fcn_gate_library_rotate_180 =
-R"doc(Rotates the given `gate` by 180° at compile time.
+R"doc(Rotates the given `gate` by 180Â° at compile time.
 
 Args:
     g: `gate` to rotate.
@@ -312,7 +312,7 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_fcn_gate_library_rotate_270 =
-R"doc(Rotates the given `gate` by 270° clockwise at compile time.
+R"doc(Rotates the given `gate` by 270Â° clockwise at compile time.
 
 Args:
     g: `gate` to rotate.
@@ -323,7 +323,7 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_fcn_gate_library_rotate_90 =
-R"doc(Rotates the given `gate` by 90° clockwise at compile time.
+R"doc(Rotates the given `gate` by 90Â° clockwise at compile time.
 
 Args:
     g: `gate` to rotate.
@@ -677,8 +677,6 @@ static const char *mkd_doc_fiction_fcn_unsupported_gate_type_exception_coord = R
 static const char *mkd_doc_fiction_fcn_unsupported_gate_type_exception_unsupported_gate_type_exception = R"doc(Records the coordinate of an unsupported gate.)doc";
 
 static const char *mkd_doc_fiction_fcn_unsupported_gate_type_exception_where = R"doc(Returns the coordinate of the unsupported gate.)doc";
-
-static const char *mkd_doc_fiction_get_ntk_type_name = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_create_dot = R"doc()doc";
 
@@ -2189,11 +2187,11 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_get_scheme =
-R"doc(Returns a clocking scheme by name. The lookup ignores case and accepts
-a trailing `3` or `4` that selects the phase count of a scheme that
-supports it. Without a suffix, a scheme has its default phase count: 3
-for BANCS and 4 for all others. `2DDWAVEHEX` requires a hexagonal
-arrangement and falls back to `2DDWAVE` without one.
+R"doc(Returns a catalog clocking scheme by name. The lookup ignores case and
+accepts a trailing `3` or `4` that selects the phase count of a scheme
+that supports it. Without a suffix, a scheme has its default phase
+count: 3 for BANCS and 4 for all others. `2DDWAVEHEX` requires a
+hexagonal arrangement and falls back to `2DDWAVE` without one.
 
 Args:
     scheme_name: Name of the desired clocking scheme.
@@ -2262,7 +2260,7 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_row =
-R"doc(Returns a 90° rotated linear 1D clocking based on the one originally
+R"doc(Returns a 90Â° rotated linear 1D clocking based on the one originally
 introduced in \"A device architecture for computing with quantum
 dots\" by C. S. Lent and P. D. Tougaw in the Proceedings of the IEEE
 1997.
@@ -2355,8 +2353,9 @@ unchanged while using the view, or copy it with
 `std::string{scheme.name()}`.
 
 Returns:
-    The canonical name, e.g., `"2DDWAVE"`, without a phase-count
-    suffix.
+    The name supplied at construction, or `"OPEN"` for a default-
+    constructed scheme. Catalog factories use canonical names, e.g.,
+    `"2DDWAVE"`, without a phase-count suffix.
 
 )doc";
 
@@ -2438,8 +2437,8 @@ static const char *mkd_doc_fiction_layouts_clocking_scheme_scheme_2 =
 R"doc(Standard constructor.
 
 Args:
-    n: The clocking scheme's name. The name is the key under which
-       `get_scheme` finds the scheme.
+    n: The clocking scheme's stored name. Construction does not
+       register the scheme with `get_scheme`.
     cutout: Rows of clock numbers. Row `y`, column `x` holds the clock
             number of every tile :math:`(x + i \cdot w, y + j \cdot
             h)` for all integers :math:`i, j`, where :math:`w` and
@@ -3600,8 +3599,17 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_layout_incoming_data_flow =
-R"doc(Returns coordinates of declared sources; optionally filters physical
-clocking and adjacency.
+R"doc(Returns adjacent declared-source coordinates in input-index order.
+
+Args:
+    t: Destination-object coordinate.
+
+Template Args:
+    RespectClocking: Require incoming clocking in addition to
+                     adjacency; enabled by default.
+
+Returns:
+    Source coordinates of the selected connections.
 
 )doc";
 
@@ -5280,7 +5288,7 @@ static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_draw
 static const char *mkd_doc_fiction_layouts_io_print_cell_level_layout =
 R"doc(Writes a simplified 2D representation of a cell grid layout, i.e., a
 QCA, molQCA, or iNML layout, to an output stream. Regular cells of
-type `NORMAL` print as `▢`, positions below a crossing as `x`, and
+type `NORMAL` print as `â–¢`, positions below a crossing as `x`, and
 every other cell as the symbol of its type. Clock-zone colors apply to
 layouts with tile-based clocking and synchronization-element colors to
 layouts with synchronization elements.
@@ -10496,7 +10504,7 @@ output.
 
 The positioning of multi-output nodes will follow this structure:
 
-F→=→...→O ↓ =→=→...→O
+Fâ†’=â†’...â†’O â†“ =â†’=â†’...â†’O
 
 Args:
     layout: Current gate-level layout.
@@ -11199,7 +11207,7 @@ static const char *mkd_doc_fiction_physical_design_determine_clocking_stats_time
 static const char *mkd_doc_fiction_physical_design_exact =
 R"doc(An exact placement & routing approach using SMT solving as originally
 proposed in \"An Exact Method for Design Exploration of Quantum-dot
-Cellular Automata\" by M. Walter, R. Wille, D. Große, F. Sill Torres,
+Cellular Automata\" by M. Walter, R. Wille, D. GroÃŸe, F. Sill Torres,
 and R. Drechsler in DATE 2018. A more extensive description can be
 found in \"Design Automation for Field-coupled Nanotechnologies\" by
 M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by
@@ -11710,7 +11718,7 @@ static const char *mkd_doc_fiction_physical_design_hexagonalization =
 R"doc(Transforms a 2DDWave-clocked Cartesian layout into a hexagonal even
 row clocked layout suitable for SiDBs by remapping all gates and wires
 as originally proposed in \"Scalable Physical Design for Silicon
-Dangling Bond Logic: How a 45° Turn Prevents the Reinvention of the
+Dangling Bond Logic: How a 45Â° Turn Prevents the Reinvention of the
 Wheel\" by S. Hofmann, M. Walter, and R. Wille in IEEE NANO 2023
 (https://ieeexplore.ieee.org/document/10231278).
 
@@ -11876,7 +11884,7 @@ static const char *mkd_doc_fiction_physical_design_orthogonal =
 R"doc(A scalable placement & routing approach based on orthogonal graph
 drawing as originally proposed in \"Scalable Design for Field-coupled
 Nanocomputing Circuits\" by M. Walter, R. Wille, F. Sill Torres, D.
-Große, and R. Drechsler in ASP-DAC 2019. A more extensive description
+GroÃŸe, and R. Drechsler in ASP-DAC 2019. A more extensive description
 can be found in \"Design Automation for Field-coupled
 Nanotechnologies\" by M. Walter, R. Wille, F. Sill Torres, and R.
 Drechsler published by Springer Nature in 2022.
@@ -13395,7 +13403,7 @@ static const char *mkd_doc_fiction_qca_cell_mode_CROSSOVER = R"doc(Cell of a mul
 
 static const char *mkd_doc_fiction_qca_cell_mode_NORMAL = R"doc(Regular cell.)doc";
 
-static const char *mkd_doc_fiction_qca_cell_mode_ROTATED = R"doc(Cell rotated by 45°.)doc";
+static const char *mkd_doc_fiction_qca_cell_mode_ROTATED = R"doc(Cell rotated by 45Â°.)doc";
 
 static const char *mkd_doc_fiction_qca_cell_mode_VERTICAL = R"doc(Via cell that connects the ground and the crossing layer.)doc";
 
@@ -13746,7 +13754,7 @@ Returns:
 static const char *mkd_doc_fiction_qca_qca_one_library =
 R"doc(A concrete FCN gate library based on QCA ONE proposed in \"A
 Methodology for Standard Cell Design for QCA\" by Dayane Alfenas Reis,
-Caio Araújo T. Campos, Thiago Rodrigues B. S. Soares, Omar Paranaiba
+Caio AraÃºjo T. Campos, Thiago Rodrigues B. S. Soares, Omar Paranaiba
 V. Neto, and Frank Sill Torres in IEEE International Symposium on
 Circuits and Systems, 2016. QCA ONE was originally proposed for the
 USE clocking scheme. The version used here is an extension to the
@@ -15285,18 +15293,18 @@ Raises:
 static const char *mkd_doc_fiction_sidb_lattice =
 R"doc(A hydrogen-passivated silicon surface lattice: a Bravais lattice given
 by two lattice vectors plus a two-site basis. Site `(x, y, z)` lies at
-`x * a1 + y * a2 + basis[z]`. The vectors are stored in ångström, as
+`x * a1 + y * a2 + basis[z]`. The vectors are stored in Ã¥ngstrÃ¶m, as
 SiQAD stores them; positions are reported in nanometers. The two
 reconstructions SiQAD defines are available as `si_100_2x1()` and
 `si_111_1x1()`; any other reconstruction with a two-site basis can be
 described by setting the vectors directly.)doc";
 
-static const char *mkd_doc_fiction_sidb_lattice_a1 = R"doc(First lattice vector (unit: Å). Defaults to `(0, 0)`.)doc";
+static const char *mkd_doc_fiction_sidb_lattice_a1 = R"doc(First lattice vector (unit: Ã…). Defaults to `(0, 0)`.)doc";
 
-static const char *mkd_doc_fiction_sidb_lattice_a2 = R"doc(Second lattice vector (unit: Å). Defaults to `(0, 0)`.)doc";
+static const char *mkd_doc_fiction_sidb_lattice_a2 = R"doc(Second lattice vector (unit: Ã…). Defaults to `(0, 0)`.)doc";
 
 static const char *mkd_doc_fiction_sidb_lattice_basis =
-R"doc(The two basis sites of the unit cell (unit: Å). The first one is the
+R"doc(The two basis sites of the unit cell (unit: Ã…). The first one is the
 origin. Both sites default to `(0, 0)`.)doc";
 
 static const char *mkd_doc_fiction_sidb_lattice_name =
@@ -15344,8 +15352,8 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_lattice_si_100_2x1 =
-R"doc(The H-Si(100)-2x1 surface: dimer rows 7.68 Å apart, dimer atoms 3.84 Å
-apart along the row and 2.25 Å apart across it.
+R"doc(The H-Si(100)-2x1 surface: dimer rows 7.68 Ã… apart, dimer atoms 3.84 Ã…
+apart along the row and 2.25 Ã… apart across it.
 
 Returns:
     The H-Si(100)-2x1 lattice.
@@ -15353,8 +15361,8 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_lattice_si_111_1x1 =
-R"doc(The H-Si(111)-1x1 surface: a hexagonal arrangement with 3.84 Å between
-neighboring sites, described by a rectangular 6.65 Å × 3.84 Å cell
+R"doc(The H-Si(111)-1x1 surface: a hexagonal arrangement with 3.84 Ã… between
+neighboring sites, described by a rectangular 6.65 Ã… Ã— 3.84 Ã… cell
 with a centered second site.
 
 Returns:
@@ -15735,6 +15743,22 @@ Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_layout_layout_3 =
+R"doc(Copies a layout with independent storage.
+
+Args:
+    other: Layout to copy.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_layout_4 =
+R"doc(Moves a layout and transfers its storage.
+
+Args:
+    other: Layout to move.
+
+)doc";
+
 static const char *mkd_doc_fiction_sidb_layout_layout_name = R"doc(Layout name.)doc";
 
 static const char *mkd_doc_fiction_sidb_layout_move_defect =
@@ -15749,10 +15773,13 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_layout_num_charged_defects =
-R"doc(Number of charged defects.
+R"doc(Number of defects classified as charged by
+`model::is_charged_defect_type`. Includes `DB`, `SI_VACANCY`, and
+`ARSENIC` even at zero charge; these defects also contribute to
+`num_neutral_defects`.
 
 Returns:
-    Number of defects with non-zero charge.
+    Number of defects with non-zero charge or a charged defect type.
 
 )doc";
 
@@ -15820,6 +15847,28 @@ R"doc(Number of positively charged defects.
 
 Returns:
     Number of defects with positive charge.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_operator_assign =
+R"doc(Copies a layout. Allocation failure leaves this layout unchanged.
+
+Args:
+    other: Layout to copy.
+
+Returns:
+    This layout.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_operator_assign_2 =
+R"doc(Moves a layout and transfers its storage.
+
+Args:
+    other: Layout to move.
+
+Returns:
+    This layout.
 
 )doc";
 
@@ -15971,7 +16020,7 @@ Args:
 static const char *mkd_doc_fiction_sidb_model_defect_type =
 R"doc(Specifies the types of fabrication defects that can occur on the
 H-Si(100) 2x1 surface according to \"Atomic defect classification of
-the H–Si(100) surface through multi-mode scanning probe microscopy\"
+the Hâ€“Si(100) surface through multi-mode scanning probe microscopy\"
 by Jeremiah Croshaw, Thomas Dienel, Taleana Huff, and Robert Wolkow in
 Journal of Nanotechnology in 2020.)doc";
 
@@ -16149,9 +16198,9 @@ R"doc(`k` is the Coulomb constant `K_E` divided by `epsilon_r` (unit:
 
 static const char *mkd_doc_fiction_sidb_model_simulation_parameters_lambda_tf = R"doc(`lambda_tf` is the Thomas-Fermi screening distance (unit: nm).)doc";
 
-static const char *mkd_doc_fiction_sidb_model_simulation_parameters_mu_minus = R"doc(`mu_minus` (µ-) is the energy transition level (0/-) (unit: eV).)doc";
+static const char *mkd_doc_fiction_sidb_model_simulation_parameters_mu_minus = R"doc(`mu_minus` (Âµ-) is the energy transition level (0/-) (unit: eV).)doc";
 
-static const char *mkd_doc_fiction_sidb_model_simulation_parameters_mu_plus = R"doc(`mu_plus` (µ+) is the energy transition level (+/0) (unit: eV).)doc";
+static const char *mkd_doc_fiction_sidb_model_simulation_parameters_mu_plus = R"doc(`mu_plus` (Âµ+) is the energy transition level (+/0) (unit: eV).)doc";
 
 static const char *mkd_doc_fiction_sidb_model_simulation_parameters_simulation_parameters =
 R"doc(Default constructor.
@@ -16160,7 +16209,7 @@ Args:
     base_number: simulation can be conducted with 2 and 3 charge
                  states. 2 = (Negative, Neutral), 3 = (Negative,
                  Neutral, Positive).
-    mu: (µ-) is the energy transition level (0/-) in eV.
+    mu: (Âµ-) is the energy transition level (0/-) in eV.
     relative_permittivity: it describes the electric field reduction
                            due to polarization.
     screening_distance: also known as "Thomas-Fermi screening" and it
@@ -16601,7 +16650,7 @@ applicable if engine == QUICKSIM).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_params_max_temperature =
 R"doc(Maximum simulation temperature beyond which no simulation will be
-conducted (~ 126 °C by default) (unit: K).)doc";
+conducted (~ 126 Â°C by default) (unit: K).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_params_on_progress =
 R"doc(Callback that receives the number of simulated input patterns (gate-
@@ -17096,8 +17145,9 @@ Returns:
 Raises:
     ValueError: if a sweep range has non-finite or reversed bounds, a
                 non-positive or non-finite step, more points than the
-                storage range permits, or the engine is not
-                QuickExact, EXGS, or QuickSim.
+                storage range permits, colliding
+                `logic::parameter_point` identities, or the engine is
+                not QuickExact, EXGS, or QuickSim.
 
 )doc";
 
@@ -17160,7 +17210,7 @@ static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_for
 R"doc(Computes the time-to-solution (TTS) of *QuickSim* from an exact result
 and a series of heuristic results: the accuracy is the share of
 heuristic runs that found the ground state, and TTS is the mean
-heuristic runtime scaled to reach the given confidence level, `t ·
+heuristic runtime scaled to reach the given confidence level, `t Â·
 log(1 - c) / log(1 - acc)`. An empty sample yields zero accuracy, zero
 mean heuristic runtime, and infinite time-to-solution.
 
@@ -21212,7 +21262,7 @@ static const char *mkd_doc_fiction_sidb_simulation_io_detail_location_and_ground
 
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer =
 R"doc(Writes a `result` as a SiQAD simulation result file: engine info,
-physical parameters, the SiDB positions in ångström, and every charge
+physical parameters, the SiDB positions in Ã¥ngstrÃ¶m, and every charge
 distribution sorted by energy.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer_os = R"doc(Output stream.)doc";
@@ -21241,7 +21291,7 @@ static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writ
 
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer_write_engine_info = R"doc(Writes the engine name, version, and runtime.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer_write_physical_locations = R"doc(Writes the SiDB positions in ångström.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer_write_physical_locations = R"doc(Writes the SiDB positions in Ã¥ngstrÃ¶m.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer_write_simulation_parameters = R"doc(Writes the physical and additional simulation parameters.)doc";
 
@@ -22031,17 +22081,17 @@ one operational point within them. Thereby, this algorithm works for
 disconnected operational domains. The critical temperature is computed
 for each operational point.
 
-It performs `samples` uniformly-distributed random samples within the
-parameter range. For each thusly discovered operational island, it
-performs another number of samples equal to the distance to an edge of
-each operational area. Finally, it performs up to 8 samples for each
-contour point (however, the actual number is usually lower). For each
-sample, the algorithm performs one operational check on the layout,
-where each operational check consists of up to :math:`2^n` exact
-ground state simulations, where :math:`n` is the number of inputs of
-the layout. Each exact ground state simulation has exponential
-complexity in of itself. Therefore, the algorithm is only feasible for
-small layouts with few inputs.
+It performs up to `samples` uniformly-distributed random samples,
+stopping when every grid point has been collected. For each discovered
+operational island, it performs another number of samples equal to the
+distance to an edge of each operational area. Finally, it performs up
+to 8 samples for each contour point (however, the actual number is
+usually lower). For each sample, the algorithm performs one
+operational check on the layout, where each operational check consists
+of up to :math:`2^n` exact ground state simulations, where :math:`n`
+is the number of inputs of the layout. Each exact ground state
+simulation has exponential complexity in of itself. Therefore, the
+algorithm is only feasible for small layouts with few inputs.
 
 Args:
     lyt: Layout to compute the operational domain for.
@@ -22092,16 +22142,16 @@ the initial random sampling found at least one operational point
 within them. Thereby, this algorithm works for disconnected
 operational domains.
 
-It performs `samples` uniformly-distributed random samples within the
-parameter range. From there, it performs another number of samples
-equal to the number of points within the operational domain plus the
-first non-operational point in each direction. For each sample, the
-algorithm performs one operational check on the layout, where each
-operational check consists of up to :math:`2^n` exact ground state
-simulations, where :math:`n` is the number of inputs of the layout.
-Each exact ground state simulation has exponential complexity in of
-itself. Therefore, the algorithm is only feasible for small layouts
-with few inputs.
+It performs up to `samples` uniformly-distributed random samples,
+stopping when every grid point has been collected. From there, it
+performs another number of samples equal to the number of points
+within the operational domain plus the first non-operational point in
+each direction. For each sample, the algorithm performs one
+operational check on the layout, where each operational check consists
+of up to :math:`2^n` exact ground state simulations, where :math:`n`
+is the number of inputs of the layout. Each exact ground state
+simulation has exponential complexity in of itself. Therefore, the
+algorithm is only feasible for small layouts with few inputs.
 
 Args:
     lyt: Layout to compute the operational domain for.
@@ -22205,14 +22255,14 @@ which the layout is logically operational, along with the critical
 temperature for each specific parameter point.
 
 This algorithm uses random sampling to find a part of the operational
-domain that might not be complete. It performs a total of `samples`
-uniformly-distributed random samples within the parameter range. For
-each sample, the algorithm performs one operational check on the
-layout, where each operational check consists of up to :math:`2^n`
-exact ground state simulations, where :math:`n` is the number of
-inputs of the layout. Each exact ground state simulation has
-exponential complexity in of itself. Therefore, the algorithm is only
-feasible for small layouts with few inputs.
+domain that might not be complete. It performs up to `samples`
+uniformly-distributed random samples, stopping when every grid point
+has been collected. For each sample, the algorithm performs one
+operational check on the layout, where each operational check consists
+of up to :math:`2^n` exact ground state simulations, where :math:`n`
+is the number of inputs of the layout. Each exact ground state
+simulation has exponential complexity in of itself. Therefore, the
+algorithm is only feasible for small layouts with few inputs.
 
 Args:
     lyt: Layout to compute the operational domain for.
@@ -22745,15 +22795,10 @@ Template Args:
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_canvas_lyt = R"doc(This layout consists of the canvas dots of the layout.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_contour_tracing =
-R"doc(Performs contour tracing to determine the operational domain. The
-algorithm first performs a random sampling of up to the specified
-number of samples. It stops random sampling once it finds a single
-operational point, from which it moves straight outwards until it
-encounters the counter of the operational domain. From this point, it
-traces the contour until it reaches the initial contour point again.
-The operational domain will finally only contain up to `samples`
-random non-operational points as well as the contour of the found
-operational domain plus a one pixel wide border around it.
+R"doc(Samples up to the specified number of random points, then traces the
+boundary of each sampled operational island. The domain contains the
+sampled points, operational boundaries, and their non-operational
+neighbors.
 
 Args:
     samples: Maximum number of random samples to be taken before
@@ -22779,26 +22824,6 @@ Args:
 Returns:
     An operational step point at the edge of the operational domain
     `starting_point` is located in.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_find_operational_step_point_via_random_sampling =
-R"doc(Performs random sampling to find any operational parameter
-combination. This function is useful if a single starting point is
-required within the domain to expand from. This function returns the
-step in all dimensions of the first operational point found. If no
-operational parameter combination can be found within the given number
-of samples, the function returns `std::nullopt`.
-
-This function adds any sampled points to the `op_domain` member
-variables.
-
-Args:
-    samples: Maximum number of samples to take. Works as a timeout.
-
-Returns:
-    The first operational step point, if any could be found,
-    `std::nullopt` otherwise.
 
 )doc";
 
@@ -22839,8 +22864,9 @@ Raises:
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_generate_random_step_points =
 R"doc(Generates unique random `step_points` in the stored parameter range.
-The number of generated points is at most equal to `samples`. Each
-call owns its random number generator.
+The number of generated points is at most equal to `samples`. Sampling
+stops when every grid point has been collected. Each call owns its
+random generator.
 
 Args:
     samples: Maximum number of random `step_point`s to generate.
@@ -22936,8 +22962,9 @@ static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_doma
 R"doc(Builds the indices and values of each validated sweep dimension.
 
 Raises:
-    ValueError: if a sweep range is invalid or exceeds the storage
-                range.
+    ValueError: if a sweep range is invalid, the grid point count
+                exceeds the storage range, or coordinates occupy the
+                same `parameter_point` identity cell.
 
 )doc";
 
@@ -23053,6 +23080,8 @@ Returns:
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_num_dimensions = R"doc(The number of dimensions.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_num_evaluated_parameter_combinations = R"doc(Number of evaluated parameter combinations.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_num_parameter_points = R"doc(Number of parameter combinations in the validated sweep grid.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_num_simulator_invocations = R"doc(Number of simulator invocations.)doc";
 
@@ -23203,8 +23232,8 @@ R"doc(Traces the boundary surface of the operational domain in three or more
 dimensions.
 
 This serves the same purpose as the two-dimensional Moore contour
-trace — sample only the boundary of an operational region and infer
-its interior — but collects the boundary instead of walking it. A
+trace â€” sample only the boundary of an operational region and infer
+its interior â€” but collects the boundary instead of walking it. A
 closed curve can be walked because its neighbors admit a cyclic order;
 a closed surface cannot, so the boundary is gathered by a parallel
 breadth-first search over operational points with a non-operational
@@ -23660,17 +23689,17 @@ operational "islands" if the initial random sampling found at least
 one operational point within them. Thereby, this algorithm works for
 disconnected operational domains.
 
-It performs `samples` uniformly-distributed random samples within the
-parameter range. For each thusly discovered operational island, it
-performs another number of samples equal to the distance to an edge of
-each operational area. Finally, it performs up to 8 samples for each
-contour point (however, the actual number is usually lower). For each
-sample, the algorithm performs one operational check on the layout,
-where each operational check consists of up to :math:`2^n` exact
-ground state simulations, where :math:`n` is the number of inputs of
-the layout. Each exact ground state simulation has exponential
-complexity in of itself. Therefore, the algorithm is only feasible for
-small layouts with few inputs.
+It performs up to `samples` uniformly-distributed random samples,
+stopping when every grid point has been collected. For each discovered
+operational island, it performs another number of samples equal to the
+distance to an edge of each operational area. Finally, it performs up
+to 8 samples for each contour point (however, the actual number is
+usually lower). For each sample, the algorithm performs one
+operational check on the layout, where each operational check consists
+of up to :math:`2^n` exact ground state simulations, where :math:`n`
+is the number of inputs of the layout. Each exact ground state
+simulation has exponential complexity in of itself. Therefore, the
+algorithm is only feasible for small layouts with few inputs.
 
 Args:
     lyt: Layout to compute the operational domain for.
@@ -23713,16 +23742,16 @@ the initial random sampling found at least one operational point
 within them. Thereby, this algorithm works for disconnected
 operational domains.
 
-It performs `samples` uniformly-distributed random samples within the
-parameter range. From there, it performs another number of samples
-equal to the number of points within the operational domain plus the
-first non-operational point in each direction. For each sample, the
-algorithm performs one operational check on the layout, where each
-operational check consists of up to :math:`2^n` exact ground state
-simulations, where :math:`n` is the number of inputs of the layout.
-Each exact ground state simulation has exponential complexity in of
-itself. Therefore, the algorithm is only feasible for small layouts
-with few inputs.
+It performs up to `samples` uniformly-distributed random samples,
+stopping when every grid point has been collected. From there, it
+performs another number of samples equal to the number of points
+within the operational domain plus the first non-operational point in
+each direction. For each sample, the algorithm performs one
+operational check on the layout, where each operational check consists
+of up to :math:`2^n` exact ground state simulations, where :math:`n`
+is the number of inputs of the layout. Each exact ground state
+simulation has exponential complexity in of itself. Therefore, the
+algorithm is only feasible for small layouts with few inputs.
 
 This flavor of operational domain computation was proposed in
 \"Reducing the Complexity of Operational Domain Computation in Silicon
@@ -23864,14 +23893,14 @@ the layout are assumed to be in the same order as the inputs of the
 truth table.
 
 This algorithm uses random sampling to find a part of the operational
-domain that might not be complete. It performs a total of `samples`
-uniformly-distributed random samples within the parameter range. For
-each sample, the algorithm performs one operational check on the
-layout, where each operational check consists of up to :math:`2^n`
-exact ground state simulations, where :math:`n` is the number of
-inputs of the layout. Each exact ground state simulation has
-exponential complexity in of itself. Therefore, the algorithm is only
-feasible for small layouts with few inputs.
+domain that might not be complete. It performs up to `samples`
+uniformly-distributed random samples, stopping when every grid point
+has been collected. For each sample, the algorithm performs one
+operational check on the layout, where each operational check consists
+of up to :math:`2^n` exact ground state simulations, where :math:`n`
+is the number of inputs of the layout. Each exact ground state
+simulation has exponential complexity in of itself. Therefore, the
+algorithm is only feasible for small layouts with few inputs.
 
 Args:
     lyt: Layout to compute the operational domain for.
@@ -23951,7 +23980,10 @@ static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_stat
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_value_range =
 R"doc(A range of values for a dimension sweep. The range is defined by a
-minimum value, a maximum value and a step size.)doc";
+minimum value, a maximum value and a step size. Generated coordinates
+must occupy distinct `parameter_point` identity cells, whose width is
+`utils::math::ERROR_MARGIN`. Domain algorithms throw `ValueError` if
+coordinates collide.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_value_range_dimension = R"doc(The sweep parameter of the dimension.)doc";
 
@@ -24145,12 +24177,12 @@ Returns:
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_defect_defect_potentials =
 R"doc(Chargeless potential every defect exerts on every defect, row-major
-D×D (unit: V).)doc";
+DÃ—D (unit: V).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_defect_induced_potentials = R"doc(Potential of the charged defects per SiDB (unit: V).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_defect_sidb_potentials =
-R"doc(Chargeless potential every SiDB exerts on every defect, row-major D×N
+R"doc(Chargeless potential every SiDB exerts on every defect, row-major DÃ—N
 (unit: V).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_defects =
@@ -24161,7 +24193,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_distances = R"doc(Distances between SiDBs, row-major N×N (unit: nm).)doc";
+static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_distances = R"doc(Distances between SiDBs, row-major NÃ—N (unit: nm).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_effective_charge_transition_thresholds =
 R"doc(The charge transition thresholds of an SiDB, indexed by
@@ -24182,7 +24214,7 @@ static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_energy =
 R"doc(The electrostatic potential energy of a charge distribution given its
 local internal potentials, i.e., the energy of the SiDB charges in the
 potential of the other SiDBs, the defects, and the external sources,
-plus the energy of the defect charges. O(N + D·N) for D charged
+plus the energy of the defect charges. O(N + DÂ·N) for D charged
 defects.
 
 Args:
@@ -24201,7 +24233,7 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_energy_2 =
-R"doc(The electrostatic potential energy of a charge distribution. O(N²).
+R"doc(The electrostatic potential energy of a charge distribution. O(NÂ²).
 
 Args:
     cd: Charge distribution over this landscape's SiDBs.
@@ -24216,7 +24248,7 @@ Raises:
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_evaluate =
 R"doc(Evaluates a charge distribution: returns a copy with its energy set.
-O(N²).
+O(NÂ²).
 
 Args:
     cd: Charge distribution over this landscape's SiDBs.
@@ -24274,7 +24306,7 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_is_physically_valid_2 =
-R"doc(Whether a charge distribution is physically valid. O(N²).
+R"doc(Whether a charge distribution is physically valid. O(NÂ²).
 
 Args:
     cd: Charge distribution over this landscape's SiDBs.
@@ -24330,7 +24362,7 @@ static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_local_ext
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_local_internal_potentials =
 R"doc(The local internal potentials of a charge distribution: at every SiDB,
 the potential of the charged SiDBs plus the potential of the charged
-defects. O(N²).
+defects. O(NÂ²).
 
 Args:
     cd: Charge distribution over this landscape's SiDBs.
@@ -24359,7 +24391,7 @@ Raises:
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_local_potentials =
 R"doc(The local potentials of a charge distribution: internal plus external
-potential per SiDB. O(N²).
+potential per SiDB. O(NÂ²).
 
 Args:
     cd: Charge distribution over this landscape's SiDBs.
@@ -24425,7 +24457,7 @@ Raises:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_potentials = R"doc(Chargeless potentials between SiDBs, row-major N×N (unit: V).)doc";
+static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_potentials = R"doc(Chargeless potentials between SiDBs, row-major NÃ—N (unit: V).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_simulation_parameters_data = R"doc(Physical parameters.)doc";
 
@@ -27534,7 +27566,7 @@ but SAT are using the graph-coloring library by Brian Crites.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_graph_coloring_engine_DSATUR =
 R"doc(Saturation degree algorithm proposed in \"New Methods to Color the
-Vertices of a Graph\" by Daniel Brélaz in Communications of the ACM,
+Vertices of a Graph\" by Daniel BrÃ©laz in Communications of the ACM,
 1979. This algorithm is a heuristic but is exact for bipartite graphs.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_graph_coloring_engine_LMXRLF =
@@ -28958,7 +28990,7 @@ phases to ensure proper computation.
 
 For more information on the concept of throughput and delay see
 \"Synchronization of Clocked Field-Coupled Circuits\" by F. Sill
-Torres, M. Walter, R. Wille, D. Große, and R. Drechsler in IEEE NANO
+Torres, M. Walter, R. Wille, D. GroÃŸe, and R. Drechsler in IEEE NANO
 2018; or \"Design Automation for Field-coupled Nanotechnologies\" by
 M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by
 Springer Nature in 2022.
@@ -29310,7 +29342,7 @@ Logic networks have throughput denominator one.
 
 This approach was first proposed in \"Verification for Field-coupled
 Nanocomputing Circuits\" by M. Walter, R. Wille, F. Sill Torres, D.
-Große, and R. Drechsler in DAC 2020.
+GroÃŸe, and R. Drechsler in DAC 2020.
 
 Args:
     spec: The specification.
