@@ -27,14 +27,15 @@
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/domain.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
-#include <fiction/types.hpp>
 #include <fiction/utils/execution_timeout.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
@@ -62,6 +63,13 @@ using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::logic;
 using namespace fiction::synthesis;
 using namespace fiction::utils::math;
+
+/** @brief Tests whether mapped values can form a simulation domain. @tparam Mapped Value types. */
+template <typename... Mapped>
+concept domain_values = requires { typename domain<int, Mapped...>; };
+
+static_assert(domain_values<double>);
+static_assert(!domain_values<>);
 
 /**
  * @brief Checks domain dimensions, sweep bounds, and the requested operational status.
@@ -1216,11 +1224,12 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
 TEST_CASE("Domain algorithms share one budget across parameter points", "[operational-domain][application-timeout]")
 {
-    const auto                lyt = blueprints::siqad_or_gate();
-    const std::vector<tt>     spec{create_or_tt()};
-    operational_domain_params params{};
-    operational_domain_stats  stats{};
+    const auto                                    lyt = blueprints::siqad_or_gate();
+    const std::vector<kitty::dynamic_truth_table> spec{create_or_tt()};
+    operational_domain_params                     params{};
+    operational_domain_stats                      stats{};
     stats.num_evaluated_parameter_combinations                                                      = 42;
+    stats.num_total_parameter_points                                                                = 43;
     params.operational_params.timeout                                                               = 0;
     params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
 
@@ -1240,6 +1249,45 @@ TEST_CASE("Domain algorithms share one budget across parameter points", "[operat
     { std::this_thread::sleep_until(params.operational_params.deadline); };
     CHECK_THROWS_AS(operational_domain_grid_search(lyt, spec, params, &stats), utils::timeout_error);
     CHECK(stats.num_evaluated_parameter_combinations == 42);
+    CHECK(stats.num_total_parameter_points == 43);
+}
+
+TEST_CASE("Random sampling finishes when the whole grid is sampled", "[operational-domain]")
+{
+    /** @brief Layout whose parameter combinations are evaluated. */
+    const layout lyt{blueprints::siqad_and_gate()};
+    /** @brief Parameters of the sweep under test. */
+    operational_domain_params params{};
+    params.number_of_threads             = 1;
+    params.operational_params.sim_params = simulation_parameters{2, -0.32};
+    params.operational_params.timeout    = 2000;
+    params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6, .step = 0.1},
+                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.0, .step = 0.1}};
+    /** @brief Statistics of the parameter sweep. */
+    operational_domain_stats stats{};
+    /** @brief Domain returned by the sampling algorithm. */
+    const auto domain = operational_domain_random_sampling(lyt, std::vector{create_and_tt()},
+                                                           std::numeric_limits<std::size_t>::max(), params, &stats);
+    CHECK(domain.size() == 1);
+    CHECK(stats.num_total_parameter_points == 1);
+    CHECK(stats.num_evaluated_parameter_combinations == 1);
+    CHECK(stats.num_operational_parameter_combinations == 1);
+}
+
+TEST_CASE("Operational-domain sweeps reject overflowing grid products", "[operational-domain]")
+{
+    /** @brief Layout whose parameter combinations are evaluated. */
+    const layout lyt{blueprints::siqad_and_gate()};
+    /** @brief Parameters of the sweep under test. */
+    operational_domain_params params{};
+    params.sweep_dimensions.assign(std::numeric_limits<std::size_t>::digits,
+                                   {.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.7, .step = 0.1});
+    /** @brief Statistics of the parameter sweep. */
+    operational_domain_stats stats{};
+    stats.num_total_parameter_points = 42;
+    CHECK_THROWS_AS(operational_domain_random_sampling(lyt, std::vector{create_and_tt()}, 0, params, &stats),
+                    std::invalid_argument);
+    CHECK(stats.num_total_parameter_points == 42);
 }
 
 TEST_CASE("Three-dimensional operational domain sketch", "[operational-domain]")
@@ -2109,8 +2157,9 @@ TEST_CASE("Operational domain rejects QuickSim with charged defects", "[operatio
     operational_domain_params params{};
     params.operational_params.sim_engine = engine::QUICKSIM;
     params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6, .step = 0.1}};
-    CHECK_THROWS_AS(operational_domain_grid_search(lyt, std::vector<tt>{create_and_tt()}, params),
-                    std::invalid_argument);
+    CHECK_THROWS_AS(
+        operational_domain_grid_search(lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, params),
+        std::invalid_argument);
 }
 
 TEST_CASE("Operational-domain sweeps reject non-finite and oversized ranges", "[operational-domain]")
@@ -2125,22 +2174,125 @@ TEST_CASE("Operational-domain sweeps reject non-finite and oversized ranges", "[
                                                          {.dimension = sweep_parameter::EPSILON_R, .step = value}})
         {
             params.sweep_dimensions = {range};
-            CHECK_THROWS_AS(operational_domain_grid_search(lyt, std::vector<tt>{create_and_tt()}, params),
-                            std::invalid_argument);
+            CHECK_THROWS_AS(
+                operational_domain_grid_search(lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, params),
+                std::invalid_argument);
         }
     }
     params.sweep_dimensions = {
         {.dimension = sweep_parameter::EPSILON_R, .min = 1, .max = 2, .step = std::numeric_limits<double>::min()}};
-    CHECK_THROWS_AS(operational_domain_grid_search(lyt, std::vector<tt>{create_and_tt()}, params),
-                    std::invalid_argument);
+    CHECK_THROWS_AS(
+        operational_domain_grid_search(lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, params),
+        std::invalid_argument);
 }
 
 TEST_CASE("Operational-domain flood fill requires two dimensions", "[operational-domain]")
 {
     operational_domain_params params{};
     params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.0, .max = 5.1, .step = 0.1}};
-    CHECK_THROWS_AS(operational_domain_flood_fill(layout{}, std::vector<tt>{create_id_tt()}, 0, params),
-                    std::invalid_argument);
+    CHECK_THROWS_AS(
+        operational_domain_flood_fill(layout{}, std::vector<kitty::dynamic_truth_table>{create_id_tt()}, 0, params),
+        std::invalid_argument);
+}
+
+TEST_CASE("Operational-domain sweeps preserve distinct parameter identities", "[operational-domain]")
+{
+    /** @brief Layout whose parameter combinations are evaluated. */
+    const layout lyt{blueprints::siqad_and_gate()};
+    /** @brief AND specification for the layout. */
+    const std::vector spec{create_and_tt()};
+    /** @brief Parameters of the sweep under test. */
+    operational_domain_params params{};
+    params.number_of_threads             = 1;
+    params.operational_params.sim_params = simulation_parameters{2, -0.32};
+    params.sweep_dimensions              = {
+        {.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6000002, .step = 0.0000001},
+        {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.0, .step = 0.1}};
+
+    SECTION("reject colliding coordinates before sampling")
+    {
+        CHECK_THROWS_AS(operational_domain_grid_search(lyt, spec, params), std::invalid_argument);
+        CHECK_THROWS_AS(operational_domain_random_sampling(lyt, spec, 0, params), std::invalid_argument);
+        CHECK_THROWS_AS(operational_domain_flood_fill(lyt, spec, 0, params), std::invalid_argument);
+        CHECK_THROWS_AS(operational_domain_contour_tracing(lyt, spec, 0, params), std::invalid_argument);
+        CHECK_THROWS_AS(critical_temperature_domain_grid_search(lyt, spec, params), std::invalid_argument);
+        CHECK_THROWS_AS(critical_temperature_domain_random_sampling(lyt, spec, 0, params), std::invalid_argument);
+        CHECK_THROWS_AS(critical_temperature_domain_flood_fill(lyt, spec, 0, params), std::invalid_argument);
+        CHECK_THROWS_AS(critical_temperature_domain_contour_tracing(lyt, spec, 0, params), std::invalid_argument);
+    }
+    SECTION("reject fine ranges before allocating the grid")
+    {
+        params.sweep_dimensions.front().max  = 5.7;
+        params.sweep_dimensions.front().step = 1e-18;
+        CHECK_THROWS_AS(operational_domain_grid_search(lyt, spec, params), std::invalid_argument);
+    }
+    SECTION("accept singleton sweeps with fine steps")
+    {
+        params.sweep_dimensions.front().max = 5.6;
+        CHECK(operational_domain_grid_search(lyt, spec, params).size() == 1);
+    }
+    SECTION("accept singleton sweeps after trimming the final step")
+    {
+        params.sweep_dimensions.front().max  = 5.64;
+        params.sweep_dimensions.front().step = 0.07;
+        CHECK(operational_domain_grid_search(lyt, spec, params).size() == 1);
+    }
+    SECTION("reject collisions after distinct coordinates")
+    {
+        params.sweep_dimensions.front() = {.dimension = sweep_parameter::EPSILON_R,
+                                           .min       = 5.6000004,
+                                           .max       = 5.6000022,
+                                           .step      = 0.0000006};
+        CHECK_THROWS_AS(operational_domain_grid_search(lyt, spec, params), std::invalid_argument);
+    }
+    SECTION("accept fine steps across distinct identity cells")
+    {
+        params.sweep_dimensions.front() = {.dimension = sweep_parameter::EPSILON_R,
+                                           .min       = 5.6000004,
+                                           .max       = 5.600001,
+                                           .step      = 0.0000006};
+        /** @brief Statistics of the parameter sweep. */
+        operational_domain_stats stats{};
+        CHECK(operational_domain_grid_search(lyt, spec, params, &stats).size() == 2);
+        CHECK(stats.num_total_parameter_points == 2);
+        CHECK(stats.num_evaluated_parameter_combinations == 2);
+    }
+}
+
+TEST_CASE("Contour tracing finishes isolated operational points", "[operational-domain]")
+{
+    /** @brief Layout whose parameter combinations are evaluated. */
+    const layout lyt{blueprints::siqad_and_gate()};
+    /** @brief AND specification for the layout. */
+    const std::vector spec{create_and_tt()};
+    /** @brief Parameters of the sweep under test. */
+    operational_domain_params params{};
+    params.number_of_threads             = 1;
+    params.operational_params.sim_params = simulation_parameters{2, -0.32};
+    params.operational_params.timeout    = 2000;
+    params.sweep_dimensions = {{.dimension = sweep_parameter::MU_MINUS, .min = -1.32, .max = 0.68, .step = 1.0},
+                               {.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6, .step = 0.1}};
+    /** @brief Statistics of the exhaustive reference grid. */
+    operational_domain_stats reference_stats{};
+    REQUIRE(operational_domain_grid_search(lyt, spec, params, &reference_stats).size() == 3);
+    REQUIRE(reference_stats.num_operational_parameter_combinations == 1);
+
+    /** @brief Statistics of the parameter sweep. */
+    operational_domain_stats stats{};
+    SECTION("operational domain")
+    {
+        /** @brief Domain returned by the sampling algorithm. */
+        const auto domain = operational_domain_contour_tracing(lyt, spec, 1024, params, &stats);
+        CHECK(domain.contains(parameter_point{{-0.32, 5.6}}).has_value());
+    }
+    SECTION("critical temperature domain")
+    {
+        /** @brief Domain returned by the sampling algorithm. */
+        const auto domain = critical_temperature_domain_contour_tracing(lyt, spec, 1024, params, &stats);
+        CHECK(domain.contains(parameter_point{{-0.32, 5.6}}).has_value());
+    }
+    CHECK(stats.num_operational_parameter_combinations == 1);
+    CHECK(stats.num_evaluated_parameter_combinations == 3);
 }
 
 TEST_CASE("Flood fill propagates a worker's storage failure", "[operational-domain]")

@@ -16,10 +16,10 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/graph_oriented_layout_design.hpp>
+#include <fiction/types.hpp>
 
 #include <cstdint>
 #include <functional>
@@ -106,7 +106,8 @@ void register_graph_oriented_layout_design(nb::module_& m)
 
     m.def(
         "graph_oriented_layout_design",
-        [](py_tec_network& network, const decltype(graph_oriented_layout_design_options{}.timeout) timeout,
+        [](fiction::networks::named_technology_network&                                     network,
+           const decltype(graph_oriented_layout_design_options{}.timeout)                   timeout,
            const decltype(graph_oriented_layout_design_options{}.num_vertex_expansions)     num_vertex_expansions,
            const decltype(graph_oriented_layout_design_options{}.verbose)                   verbose,
            const decltype(graph_oriented_layout_design_options{}.mode)                      mode,
@@ -140,8 +141,8 @@ void register_graph_oriented_layout_design(nb::module_& m)
             params.on_progress                         = on_progress;
             params.on_worker_progress                  = on_worker_progress;
             const nb::gil_scoped_release release{};
-            return fiction::physical_design::graph_oriented_layout_design<fiction::layouts::cartesian_gate_layout>(
-                network, std::move(params), statistics, custom_cost_objective);
+            return fiction::physical_design::graph_oriented_layout_design(network, std::move(params), statistics,
+                                                                          custom_cost_objective);
         },
         nb::arg("network"), nb::kw_only(), nb::arg("timeout") = graph_oriented_layout_design_options{}.timeout,
         nb::arg("num_vertex_expansions")     = graph_oriented_layout_design_options{}.num_vertex_expansions,

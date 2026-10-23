@@ -33,8 +33,9 @@
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
-#include <fiction/types.hpp>
 #include <fiction/utils/execution_timeout.hpp>
+
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <chrono>
 #include <cmath>
@@ -129,7 +130,8 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
         params.iteration_steps               = 80;
         params.alpha                         = 0.7;
 
-        const auto ct_qe = critical_temperature_gate_based(lyt, std::vector{tt{}}, params, &critical_stats);
+        const auto ct_qe =
+            critical_temperature_gate_based(lyt, std::vector{kitty::dynamic_truth_table{}}, params, &critical_stats);
 
         CHECK(critical_stats.num_valid_lyt == 0);
         CHECK(ct_qe == 0.0);
@@ -138,7 +140,8 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
         params.operational_params.sim_engine = engine::CLUSTERCOMPLETE;
 
-        const auto ct_cc = critical_temperature_gate_based(lyt, std::vector{tt{}}, params, &critical_stats);
+        const auto ct_cc =
+            critical_temperature_gate_based(lyt, std::vector{kitty::dynamic_truth_table{}}, params, &critical_stats);
 
         CHECK(critical_stats.num_valid_lyt == 0);
         CHECK(ct_cc == 0.0);
@@ -736,8 +739,8 @@ TEST_CASE("Pre-generated input pattern layouts match the layout-based overload",
 
             critical_temperature_stats expected_stats{};
 
-            const auto expected_ct =
-                critical_temperature_gate_based(lat, std::vector<tt>{create_and_tt()}, params, &expected_stats);
+            const auto expected_ct = critical_temperature_gate_based(
+                lat, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, params, &expected_stats);
 
             const auto input_wires = detect_bdl_wires(
                 lat, params.operational_params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::INPUT);
@@ -752,7 +755,8 @@ TEST_CASE("Pre-generated input pattern layouts match the layout-based overload",
 
             critical_temperature_stats stats{};
 
-            const auto ct = critical_temperature_gate_based(input_pattern_layouts, std::vector<tt>{create_and_tt()},
+            const auto ct = critical_temperature_gate_based(input_pattern_layouts,
+                                                            std::vector<kitty::dynamic_truth_table>{create_and_tt()},
                                                             params, output_pairs, input_wires, output_wires, &stats);
 
             // the two overloads run the same computation, so the results must be bit-identical
@@ -782,7 +786,8 @@ TEST_CASE("Pre-generated input pattern layouts reject mismatched BDL data", "[cr
 
     SECTION("empty specification")
     {
-        CHECK_THROWS_AS(critical_temperature_gate_based(input_pattern_layouts, std::vector<tt>{}, params, output_pairs,
+        CHECK_THROWS_AS(critical_temperature_gate_based(input_pattern_layouts,
+                                                        std::vector<kitty::dynamic_truth_table>{}, params, output_pairs,
                                                         input_wires, output_wires),
                         std::invalid_argument);
     }
@@ -790,8 +795,9 @@ TEST_CASE("Pre-generated input pattern layouts reject mismatched BDL data", "[cr
     {
         const std::vector<layout> too_few{input_pattern_layouts.front()};
 
-        CHECK_THROWS_AS(critical_temperature_gate_based(too_few, std::vector<tt>{create_and_tt()}, params, output_pairs,
-                                                        input_wires, output_wires),
+        CHECK_THROWS_AS(critical_temperature_gate_based(too_few,
+                                                        std::vector<kitty::dynamic_truth_table>{create_and_tt()},
+                                                        params, output_pairs, input_wires, output_wires),
                         std::invalid_argument);
     }
     SECTION("more output BDL pairs than truth tables")
@@ -799,8 +805,9 @@ TEST_CASE("Pre-generated input pattern layouts reject mismatched BDL data", "[cr
         auto too_many = output_pairs;
         too_many.push_back(output_pairs.front());
 
-        CHECK_THROWS_AS(critical_temperature_gate_based(input_pattern_layouts, std::vector<tt>{create_and_tt()}, params,
-                                                        too_many, input_wires, output_wires),
+        CHECK_THROWS_AS(critical_temperature_gate_based(input_pattern_layouts,
+                                                        std::vector<kitty::dynamic_truth_table>{create_and_tt()},
+                                                        params, too_many, input_wires, output_wires),
                         std::invalid_argument);
     }
 }
@@ -1019,7 +1026,8 @@ TEST_CASE("Critical temperature reports progress", "[critical-temperature]")
 
         critical_temperature_stats stats{};
 
-        const auto ct = critical_temperature_gate_based(lat, std::vector<tt>{create_and_tt()}, params, &stats);
+        const auto ct = critical_temperature_gate_based(lat, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
+                                                        params, &stats);
 
         CHECK(ct > 0.0);
 
@@ -1043,5 +1051,26 @@ TEST_CASE("Critical temperature reports progress", "[critical-temperature]")
 
         // the physical simulation engine reports through the callback
         CHECK(rec.is_consistent("charge configurations"));
+    }
+}
+
+TEST_CASE("Gate-based critical temperature rejects invalid specifications", "[critical-temperature][invalid-spec]")
+{
+    /** @brief AND layout checked by both temperature entry points. */
+    const auto lyt = blueprints::siqad_and_gate();
+    /** @brief Input BDL wires of the AND layout. */
+    const auto input_wires = detect_bdl_wires(lyt, {}, bdl_wire_selection::INPUT);
+    /** @brief Output BDL wires of the AND layout. */
+    const auto output_wires = detect_bdl_wires(lyt, {}, bdl_wire_selection::OUTPUT);
+    /** @brief Input-pattern layouts supplied to the temperature check. */
+    const auto layouts = generate_bdl_input_pattern_layouts(lyt, {}, input_wires);
+    /** @brief Empty or mixed-variable specification. */
+    for (const auto& spec : {std::vector<kitty::dynamic_truth_table>{},
+                             std::vector<kitty::dynamic_truth_table>{create_and_tt(), create_id_tt()}})
+    {
+        CHECK_THROWS_AS(critical_temperature_gate_based(lyt, spec), std::invalid_argument);
+        CHECK_THROWS_AS(critical_temperature_gate_based(layouts, spec, {}, std::vector<bdl_pair>(spec.size()),
+                                                        input_wires, output_wires),
+                        std::invalid_argument);
     }
 }

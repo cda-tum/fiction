@@ -28,9 +28,21 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
+#include <fiction/technology/qca/layout.hpp>
 
 using namespace fiction;
 using namespace fiction::layouts;
+
+/**
+ * @brief Checks whether a layout has occupied bounds.
+ * @tparam Lyt Layout type to test.
+ */
+template <typename Lyt>
+concept bounded_layout = requires { typename bounding_box<Lyt>; };
+
+static_assert(bounded_layout<cartesian_gate_layout>);
+static_assert(bounded_layout<qca::layout>);
+static_assert(!bounded_layout<cartesian_layout>);
 
 TEMPLATE_TEST_CASE("Occupied bounds include outside objects and clear after removal", "[bounding-box]",
                    cartesian_layout, shifted_cartesian_layout, hexagonal_layout)

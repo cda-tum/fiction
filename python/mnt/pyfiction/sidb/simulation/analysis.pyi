@@ -97,8 +97,11 @@ def calculate_energy_and_state_type_with_kinks_rejected(
         level within `utils::math::ERROR_MARGIN`.
 
     Raises:
-        IndexError: if logic validation encounters an invalid lattice
-                    basis index.
+        ValueError: if logic validation encounters an empty specification
+                    or mixed variable counts.
+        IndexError: if logic validation encounters an input pattern
+                    outside the specification or an invalid lattice basis
+                    index.
     """
 
 def can_positive_charges_occur(
@@ -170,6 +173,7 @@ def critical_temperature_gate_based(
     Determine the critical temperature of an SiDB gate implementing the truth tables.
     The keyword options select physical values, operational analysis, confidence, and temperature bounds.
     Raises ValueError for confidence outside (0, 1) or a temperature outside the centikelvin iteration range.
+    Raises ValueError for an empty specification or truth tables with different variable counts.
     The overload with input and output wires bypasses automatic wire detection.
 
     Args:
@@ -221,6 +225,9 @@ def critical_temperature_gate_based(
     Determine the critical temperature of an SiDB gate implementing the truth tables.
     The keyword options select physical values, operational analysis, confidence, and temperature bounds.
     Raises ValueError for confidence outside (0, 1) or a temperature outside the centikelvin iteration range.
+    Raises ValueError for an empty specification or truth tables with different variable counts.
+    Raises ValueError if the input-layout count differs from the number of input combinations
+    or the output BDL pair count differs from the number of truth tables.
     The overload with input and output wires bypasses automatic wire detection.
 
     Args:

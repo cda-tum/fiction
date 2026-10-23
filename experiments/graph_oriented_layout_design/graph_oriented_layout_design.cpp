@@ -33,6 +33,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
+#include <memory>
 #include <sstream>
 #include <string>
 
@@ -48,10 +49,10 @@ Ntk read_ntk(const std::string& name)
 {
     fmt::print("[i] processing {}\n", name);
 
-    std::ostringstream      os{};
-    network_reader<tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
-    const auto              nets    = reader.get_networks();
-    const auto              network = *nets.front();
+    std::ostringstream                                        os{};
+    network_reader<std::shared_ptr<named_technology_network>> reader{fiction_experiments::benchmark_path(name), os};
+    const auto                                                nets    = reader.get_networks();
+    const auto                                                network = *nets.front();
 
     return network;
 }
@@ -87,10 +88,10 @@ try
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        auto network = read_ntk<tec_nt>(benchmark);
+        auto network = read_ntk<named_technology_network>(benchmark);
 
-        auto gate_layout = graph_oriented_layout_design<cartesian_gate_layout>(
-            network, graph_oriented_layout_design_params, &graph_oriented_layout_design_stats);
+        auto gate_layout = graph_oriented_layout_design(network, graph_oriented_layout_design_params,
+                                                        &graph_oriented_layout_design_stats);
 
         if (gate_layout.has_value())
         {

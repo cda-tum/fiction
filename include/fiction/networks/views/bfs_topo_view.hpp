@@ -70,6 +70,12 @@ namespace fiction::networks::views
  * @tparam sorted Whether the network already provides a topological order.
  */
 template <class Ntk, bool sorted = mockturtle::is_topologically_sorted_v<Ntk>>
+    requires(sorted || (mockturtle::is_network_type_v<Ntk> && mockturtle::has_size_v<Ntk> &&
+                        mockturtle::has_get_constant_v<Ntk> && mockturtle::has_foreach_pi_v<Ntk> &&
+                        mockturtle::has_foreach_fanin_v<Ntk> && mockturtle::has_incr_trav_id_v<Ntk> &&
+                        mockturtle::has_set_visited_v<Ntk> && mockturtle::has_trav_id_v<Ntk> &&
+                        mockturtle::has_visited_v<Ntk> && mockturtle::has_foreach_ci_v<Ntk> &&
+                        mockturtle::has_foreach_node_v<Ntk> && mockturtle::has_get_node_v<Ntk>))
 class bfs_topo_view
 {};
 
@@ -98,16 +104,6 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
      */
     explicit bfs_topo_view(const Ntk& ntk) : mockturtle::immutable_view<Ntk>(ntk), fanout_ntk(ntk)
     {
-        static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-        static_assert(mockturtle::has_size_v<Ntk>, "Ntk does not implement the size method");
-        static_assert(mockturtle::has_get_constant_v<Ntk>, "Ntk does not implement the get_constant method");
-        static_assert(mockturtle::has_foreach_pi_v<Ntk>, "Ntk does not implement the foreach_pi method");
-        static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin method");
-        static_assert(mockturtle::has_incr_trav_id_v<Ntk>, "Ntk does not implement the incr_trav_id method");
-        static_assert(mockturtle::has_set_visited_v<Ntk>, "Ntk does not implement the set_visited method");
-        static_assert(mockturtle::has_trav_id_v<Ntk>, "Ntk does not implement the trav_id method");
-        static_assert(mockturtle::has_visited_v<Ntk>, "Ntk does not implement the visited method");
-
         update_bfs_topo();
     }
 

@@ -15,18 +15,199 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/utils/optimization/simulated_annealing.hpp>
 
-#include <fmt/format.h>
-
 #include <algorithm>
-#include <iostream>
+#include <atomic>
+#include <cmath>
+#include <concepts>
+#include <cstdint>
+#include <limits>
+#include <memory>
 #include <random>
+#include <stdexcept>
+#include <utility>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::utils::optimization;
+
+/** @brief State whose cost and neighbor are member functions. */
+struct member_annealing_state
+{
+    /** @brief Signed state value. */
+    int value{};
+    /** @brief Returns the state cost. @return Signed cost. */
+    [[nodiscard]] double cost() const
+    {
+        return static_cast<double>(value);
+    }
+    /** @brief Produces a lower-cost neighbor. @return Neighbor state. */
+    [[nodiscard]] member_annealing_state next() const
+    {
+        return {value - 1};
+    }
+};
+
+/** @brief Signed floating-point cost callable on a named lvalue. */
+struct lvalue_annealing_cost
+{
+    /** @brief Returns the state's signed cost. @param state State to evaluate. @return State value. */
+    double operator()(const int& state) &
+    {
+        return static_cast<double>(state);
+    }
+};
+
+/** @brief Cost with a distinct declared result type and actual state-evaluation overload. */
+struct overloaded_annealing_cost
+{
+    /** @brief Selects the declared double cost type in unevaluated calls. @return Declared cost value. */
+    double operator()(int&&) const;
+    /** @brief Evaluates the actual state. @param state State value. @return Cost value. */
+    float operator()(const int& state) const
+    {
+        return static_cast<float>(state) + 0.25f;
+    }
+};
+
+/** @brief Cost whose mutable-state overload violates the signed-cost contract. @tparam Result Actual cost type. */
+template <typename Result>
+struct invalid_annealing_cost
+{
+    /** @brief Declares a signed cost for state rvalues. @return Declared cost. */
+    double operator()(int&&) const;
+    /** @brief Declares a signed cost for const states. @return Declared cost. */
+    double operator()(const int&) const;
+    /** @brief Declares the unsupported actual cost. @return Actual cost. */
+    Result operator()(int&) const;
+};
+
+/** @brief Schedule whose named-lvalue result is a reference accepted by std::clamp. */
+struct reference_annealing_schedule
+{
+    /** @brief Next temperature retained for reference-returning calls. */
+    double temperature{1.0};
+    /** @brief Returns the declared temperature value. @param value Current temperature. @return Next temperature. */
+    double operator()([[maybe_unused]] double&& value) const
+    {
+        return temperature;
+    }
+    /** @brief Returns the actual temperature reference. @param value Current temperature. @return Next temperature. */
+    const double& operator()([[maybe_unused]] double& value) const
+    {
+        return temperature;
+    }
+};
+
+/** @brief Cost callable only as an rvalue, unlike the algorithm's named callable parameters. */
+struct rvalue_annealing_cost
+{
+    /** @brief Returns a signed cost. @param state State to evaluate. @return State value. */
+    double operator()(const int& state) &&
+    {
+        return static_cast<double>(state);
+    }
+};
+
+/** @brief Generated state without a default constructor. */
+struct nondefault_annealing_state
+{
+    /** @brief Requires an explicit initial state value. @param value Initial value. */
+    explicit nondefault_annealing_state([[maybe_unused]] int value) {}
+};
+
+/**
+ * @brief Checks the single-state annealing callable contract.
+ * @tparam State State type to optimize.
+ * @tparam Cost Cost callable type.
+ * @tparam Schedule Temperature schedule type.
+ * @tparam Next Next-state callable type.
+ */
+template <typename Cost, typename Schedule, typename Next, typename State = int>
+concept annealable = requires(const State& state, Cost&& cost, Schedule&& schedule, Next&& next) {
+    simulated_annealing(state, 2.0, 1.0, 1, std::forward<Cost>(cost), std::forward<Schedule>(schedule),
+                        std::forward<Next>(next));
+};
+
+/**
+ * @brief Checks the generated-state annealing callable contract.
+ * @tparam Generator State generator type.
+ * @tparam Cost Cost callable type.
+ * @tparam Schedule Temperature schedule type.
+ * @tparam Next Next-state callable type.
+ */
+template <typename Generator, typename Cost, typename Schedule, typename Next>
+concept multi_annealable = requires(Generator&& generator, Cost&& cost, Schedule&& schedule, Next&& next) {
+    multi_simulated_annealing(2.0, 1.0, 1, 1, std::forward<Generator>(generator), std::forward<Cost>(cost),
+                              std::forward<Schedule>(schedule), std::forward<Next>(next));
+};
+
+TEST_CASE("Annealing accepts signed floating-point costs and actual callable forms", "[sim-anneal]")
+{
+    const auto cost      = [](const auto&) { return 0.0; };
+    const auto schedule  = [](double) { return 1.0; };
+    const auto next      = [](const auto& state) { return state; };
+    const auto generator = [] { return 0; };
+    CHECK((annealable<decltype(cost), decltype(schedule), decltype(next)>));
+    CHECK((annealable<decltype(cost), reference_annealing_schedule, decltype(next)>));
+    CHECK((annealable<lvalue_annealing_cost&, decltype(schedule), decltype(next)>));
+    CHECK_FALSE((annealable<rvalue_annealing_cost, decltype(schedule), decltype(next)>));
+    CHECK_FALSE((annealable<invalid_annealing_cost<void>, decltype(schedule), decltype(next)>));
+    CHECK_FALSE((annealable<invalid_annealing_cost<unsigned>, decltype(schedule), decltype(next)>));
+    CHECK_FALSE((annealable<decltype(cost), decltype(schedule),
+                            decltype([](const auto&) { return std::make_unique<int>(0); }), std::unique_ptr<int>>));
+    CHECK_FALSE((annealable<int, decltype(schedule), decltype(next)>));
+    CHECK_FALSE((annealable<decltype([](int) { return 0u; }), decltype(schedule), decltype(next)>));
+    CHECK_FALSE((annealable<decltype(cost), decltype([](double) { return 1.0f; }), decltype(next)>));
+    CHECK_FALSE((annealable<decltype(cost), decltype(schedule), decltype([](int) { return 0.0; })>));
+    CHECK((multi_annealable<decltype(generator), decltype(cost), decltype(schedule), decltype(next)>));
+    CHECK((multi_annealable<decltype(generator), lvalue_annealing_cost&, decltype(schedule), decltype(next)>));
+    CHECK_FALSE((multi_annealable<decltype(generator), rvalue_annealing_cost, decltype(schedule), decltype(next)>));
+    CHECK_FALSE(
+        (multi_annealable<decltype(generator), decltype([](int) { return 0u; }), decltype(schedule), decltype(next)>));
+    CHECK_FALSE(
+        (multi_annealable<decltype(generator), decltype(cost), decltype([](double) { return 1.0f; }), decltype(next)>));
+    CHECK_FALSE(
+        (multi_annealable<decltype(generator), decltype(cost), decltype(schedule), decltype([](int) { return 0.0; })>));
+    CHECK_FALSE((multi_annealable<int, decltype(cost), decltype(schedule), decltype(next)>));
+    CHECK_FALSE((multi_annealable<decltype([] { return nondefault_annealing_state{0}; }), decltype(cost),
+                                  decltype(schedule), decltype(next)>));
+
+    /** Cost callable passed as a named lvalue. */
+    lvalue_annealing_cost lvalue_cost{};
+    const auto result = simulated_annealing(0, 2.0, 1.0, 1, lvalue_cost, schedule, [](int state) { return state - 1; });
+    CHECK(result.first == -1);
+    CHECK(result.second == -1.0);
+    /** Reference-returning schedules use the same clamp operation as value-returning schedules. */
+    const auto reference_result = simulated_annealing(0, 2.0, 1.0, 1, lvalue_cost, reference_annealing_schedule{},
+                                                      [](int state) { return state - 1; });
+    CHECK(reference_result == result);
+}
+
+TEST_CASE("Annealing preserves the declared cost type with overloaded costs", "[sim-anneal]")
+{
+    /** Temperature schedule that completes one temperature step. */
+    const auto schedule = [](double) { return 1.0; };
+    /** Neighbor with a lower cost than the initial state. */
+    const auto next = [](int state) { return state - 1; };
+    /** Initial state for each independent worker. */
+    const auto generator = [] { return 0; };
+    /** Single-state result retains the declared double result while evaluating the lvalue state. */
+    const auto single = simulated_annealing(0, 2.0, 1.0, 1, overloaded_annealing_cost{}, schedule, next);
+    /** Multi-state result retains the same declared cost type. */
+    const auto multi =
+        multi_simulated_annealing(2.0, 1.0, 1, 2, generator, overloaded_annealing_cost{}, schedule, next);
+    CHECK((std::same_as<typename decltype(single)::second_type, double>));
+    CHECK((std::same_as<typename decltype(multi)::second_type, double>));
+    CHECK(single.first == -1);
+    CHECK(single.second == -0.75);
+    CHECK(multi.first == -1);
+    CHECK(multi.second == -0.75);
+}
 
 /**
  * The 1D Schwefel function is a non-convex function with many local minima. It is used to test optimization algorithms.
@@ -37,7 +218,7 @@ using namespace fiction::utils::optimization;
  */
 double schwefel_function_1d(const double& x) noexcept
 {
-    return 418.9829 - x * std::sin(std::sqrt(std::abs(x)));
+    return 418.9829 - (x * std::sin(std::sqrt(std::abs(x))));
 }
 /**
  * This function implements a randomized initial state generator for the 1D Schwefel function. It returns a random value
@@ -45,9 +226,11 @@ double schwefel_function_1d(const double& x) noexcept
  */
 double schwefel_1d_init_state_generator() noexcept
 {
-    static std::mt19937_64 generator(std::random_device{}());
+    /** @brief Initial-state random engine local to this worker. */
+    static thread_local std::mt19937_64 generator{std::random_device{}()};
 
-    static std::uniform_real_distribution<double> distribution(-500.0, 500.0);
+    /** @brief Initial-state draw distribution local to this worker. */
+    static thread_local std::uniform_real_distribution<double> distribution{-500.0, 500.0};
 
     return distribution(generator);
 }
@@ -60,7 +243,8 @@ double schwefel_1d_init_state_generator() noexcept
  */
 double random_next_schwefel(const double& x) noexcept
 {
-    static std::mt19937_64 generator{std::random_device{}()};
+    /** @brief Neighbor-state random engine local to this worker. */
+    static thread_local std::mt19937_64 generator{std::random_device{}()};
 
     std::uniform_real_distribution<double> distribution{x - 100, x + 100};
 
@@ -84,8 +268,8 @@ TEST_CASE("1D Schwefel function", "[sim-anneal]")
  */
 double drop_wave_function_2d(const std::pair<double, double>& x) noexcept
 {
-    return -((1.0 + std::cos(12.0 * std::sqrt(x.first * x.first + x.second * x.second))) /
-             (0.5 * (x.first * x.first + x.second * x.second) + 2.0));
+    return -((1.0 + std::cos(12.0 * std::sqrt((x.first * x.first) + (x.second * x.second)))) /
+             (0.5 * ((x.first * x.first) + (x.second * x.second)) + 2.0));
 }
 /**
  * This function implements a randomized initial state generator for the 2D Drop-Wave function. It returns a random pair
@@ -93,9 +277,11 @@ double drop_wave_function_2d(const std::pair<double, double>& x) noexcept
  */
 std::pair<double, double> drop_wave_2d_init_state_generator() noexcept
 {
-    static std::mt19937_64 generator(std::random_device{}());
+    /** @brief Initial-state random engine local to this worker. */
+    static thread_local std::mt19937_64 generator{std::random_device{}()};
 
-    static std::uniform_real_distribution<double> distribution(-5.12, 5.12);
+    /** @brief Initial-state draw distribution local to this worker. */
+    static thread_local std::uniform_real_distribution<double> distribution{-5.12, 5.12};
 
     return {distribution(generator), distribution(generator)};
 }
@@ -108,7 +294,8 @@ std::pair<double, double> drop_wave_2d_init_state_generator() noexcept
  */
 std::pair<double, double> random_next_drop_wave(const std::pair<double, double>& x) noexcept
 {
-    static std::mt19937_64 generator{std::random_device{}()};
+    /** @brief Neighbor-state random engine local to this worker. */
+    static thread_local std::mt19937_64 generator{std::random_device{}()};
 
     std::uniform_real_distribution<double> distribution_x{x.first - 1, x.first + 1};
     std::uniform_real_distribution<double> distribution_y{x.second - 1, x.second + 1};
@@ -151,13 +338,6 @@ TEST_CASE("Simulated Annealing for optimizing the 1D Schwefel function", "[sim-a
 
         CHECK_THAT(schwefel_function_1d(single_result), Catch::Matchers::WithinAbs(single_cost, 0.00001));
         CHECK_THAT(schwefel_function_1d(multi_result), Catch::Matchers::WithinAbs(multi_cost, 0.00001));
-
-        std::cout << fmt::format("Linear single_result: {}; Schwefel(x) = {}", single_result,
-                                 schwefel_function_1d(single_result))
-                  << std::endl;
-        std::cout << fmt::format("Linear multi_result: {}; Schwefel(x) = {}", multi_result,
-                                 schwefel_function_1d(multi_result))
-                  << std::endl;
     }
     SECTION("Geometric temperature schedule")
     {
@@ -174,14 +354,6 @@ TEST_CASE("Simulated Annealing for optimizing the 1D Schwefel function", "[sim-a
 
         CHECK_THAT(schwefel_function_1d(single_result), Catch::Matchers::WithinAbs(single_cost, 0.00001));
         CHECK_THAT(schwefel_function_1d(multi_result), Catch::Matchers::WithinAbs(multi_cost, 0.00001));
-
-        std::cout << fmt::format("Geometric single_result: {}; Schwefel(x) = {}", single_result,
-                                 schwefel_function_1d(single_result))
-                  << std::endl;
-
-        std::cout << fmt::format("Geometric multi_result: {}; Schwefel(x) = {}", multi_result,
-                                 schwefel_function_1d(multi_result))
-                  << std::endl;
     }
 }
 TEST_CASE("Simulated Annealing for optimizing the 2D Drop-Wave function", "[sim-anneal]")
@@ -209,14 +381,6 @@ TEST_CASE("Simulated Annealing for optimizing the 2D Drop-Wave function", "[sim-
 
         CHECK_THAT(drop_wave_function_2d(single_result), Catch::Matchers::WithinAbs(single_cost, 0.00001));
         CHECK_THAT(drop_wave_function_2d(multi_result), Catch::Matchers::WithinAbs(multi_cost, 0.00001));
-
-        std::cout << fmt::format("Linear single_result: ({}, {}); Drop-Wave(x) = {}", single_result.first,
-                                 single_result.second, drop_wave_function_2d(single_result))
-                  << std::endl;
-
-        std::cout << fmt::format("Linear multi_result: ({}, {}); Drop-Wave(x) = {}", multi_result.first,
-                                 multi_result.second, drop_wave_function_2d(multi_result))
-                  << std::endl;
     }
     SECTION("Geometric temperature schedule")
     {
@@ -233,13 +397,155 @@ TEST_CASE("Simulated Annealing for optimizing the 2D Drop-Wave function", "[sim-
 
         CHECK_THAT(drop_wave_function_2d(single_result), Catch::Matchers::WithinAbs(single_cost, 0.00001));
         CHECK_THAT(drop_wave_function_2d(multi_result), Catch::Matchers::WithinAbs(multi_cost, 0.00001));
-
-        std::cout << fmt::format("Geometric single_result: ({}, {}); Drop-Wave(x) = {}", single_result.first,
-                                 single_result.second, drop_wave_function_2d(single_result))
-                  << std::endl;
-
-        std::cout << fmt::format("Geometric multi_result: ({}, {}); Drop-Wave(x) = {}", multi_result.first,
-                                 multi_result.second, drop_wave_function_2d(multi_result))
-                  << std::endl;
     }
+}
+
+TEST_CASE("Annealing rejects non-finite temperature bounds", "[sim-anneal]")
+{
+    /** @brief Returns a signed state cost. */
+    const auto cost = [](const int state) { return state; };
+    /** @brief Preserves the state. */
+    const auto next = [](const int state) { return state; };
+    /** @brief Starts workers at zero. */
+    const auto initial = [] { return 0; };
+    for (const auto invalid : {std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::infinity(),
+                               -std::numeric_limits<double>::infinity()})
+    {
+        CHECK_THROWS_AS(simulated_annealing(0, invalid, 1.0, 0, cost, geometric_temperature_schedule, next),
+                        std::invalid_argument);
+        CHECK_THROWS_AS(simulated_annealing(0, 2.0, invalid, 0, cost, geometric_temperature_schedule, next),
+                        std::invalid_argument);
+        CHECK_THROWS_AS(
+            multi_simulated_annealing(invalid, 1.0, 0, 1, initial, cost, geometric_temperature_schedule, next),
+            std::invalid_argument);
+        CHECK_THROWS_AS(
+            multi_simulated_annealing(2.0, invalid, 0, 1, initial, cost, geometric_temperature_schedule, next),
+            std::invalid_argument);
+    }
+}
+
+TEST_CASE("Multi-state annealing rejects zero instances", "[sim-anneal]")
+{
+    CHECK_THROWS_AS(multi_simulated_annealing(2.0, 1.0, 1, 0, schwefel_1d_init_state_generator, schwefel_function_1d,
+                                              linear_temperature_schedule, random_next_schwefel),
+                    std::invalid_argument);
+}
+
+TEST_CASE("Concurrent annealing preserves a known minimum", "[sim-anneal]")
+{
+    /** @brief Starts each worker at the known minimum. */
+    const auto initial = [] { return 0; };
+    /** @brief Assigns the two states their signed floating-point costs. */
+    const auto cost = [](const int state) { return static_cast<double>(state); };
+    /** @brief Completes one finite-temperature annealing step. */
+    const auto schedule = [](double) { return 1.0; };
+    /** @brief Alternates between the minimum and a worse state, exercising acceptance randomness. */
+    const auto next = [](const int state) { return 1 - state; };
+    /** @brief Best state and cost from eight concurrent workers. */
+    const auto result = multi_simulated_annealing(2.0, 1.0, 256, 8, initial, cost, schedule, next);
+    CHECK(result.first == 0);
+    CHECK(result.second == 0.0);
+}
+
+TEST_CASE("Annealing compares extreme signed costs without overflow", "[sim-anneal]")
+{
+    /** @brief Keeps the state's signed integer cost. */
+    const auto cost = [](int state) { return state; };
+    /** @brief Completes one temperature step. */
+    const auto schedule = [](double) { return 1.0; };
+    /** @brief Records whether the maximally worse neighbor became the current state. */
+    bool accepted_worse{};
+    /** @brief Proposes the largest signed cost. */
+    const auto next = [&accepted_worse](int state)
+    {
+        accepted_worse = accepted_worse || state == std::numeric_limits<int>::max();
+        return std::numeric_limits<int>::max();
+    };
+    /** @brief Best state after two proposals with an extreme cost difference. */
+    const auto result = simulated_annealing(std::numeric_limits<int>::min(), 2.0, 1.0, 2, cost, schedule, next);
+    CHECK_FALSE(accepted_worse);
+    CHECK(result.first == std::numeric_limits<int>::min());
+    CHECK(result.second == std::numeric_limits<int>::min());
+}
+
+TEST_CASE("Annealing propagates callable failures after joining workers", "[sim-anneal]")
+{
+    /** @brief Returns a signed state cost. */
+    const auto cost = [](int state) { return static_cast<double>(state); };
+    /** @brief Completes one temperature step. */
+    const auto schedule = [](double) { return 1.0; };
+    /** @brief Retains the current state. */
+    const auto next = [](int state) { return state; };
+    /** @brief Reports a cost-evaluation failure. */
+    const auto failing_cost = [](int) -> double { throw std::runtime_error("cost failed"); };
+    CHECK_THROWS_AS(simulated_annealing(0, 2.0, 1.0, 1, failing_cost, schedule, next), std::runtime_error);
+
+    /** @brief Counts workers that started before the exception reaches the caller. */
+    std::atomic<unsigned> completed{};
+    /** @brief Records each started worker. */
+    const auto generator = [&completed]
+    {
+        ++completed;
+        return 0;
+    };
+    CHECK_THROWS_AS(multi_simulated_annealing(2.0, 1.0, 1, 4, generator, failing_cost, schedule, next),
+                    std::runtime_error);
+    CHECK(completed == 4);
+    /** @brief Reports an initial-state failure from a worker. */
+    const auto failing_generator = []() -> int { throw std::runtime_error("generator failed"); };
+    CHECK_THROWS_AS(multi_simulated_annealing(2.0, 1.0, 1, 4, failing_generator, cost, schedule, next),
+                    std::runtime_error);
+}
+
+TEST_CASE("Annealing invokes member-function callables", "[sim-anneal]")
+{
+    /** @brief Completes one temperature step. */
+    const auto schedule = [](double) { return 1.0; };
+    /** @brief Optimizes the state through its member functions. */
+    const auto result = simulated_annealing(member_annealing_state{}, 2.0, 1.0, 1, &member_annealing_state::cost,
+                                            schedule, &member_annealing_state::next);
+    CHECK(result.first.value == -1);
+    CHECK(result.second == -1.0);
+}
+
+TEST_CASE("Annealing preserves small differences between large signed costs", "[sim-anneal]")
+{
+    /** @brief Keeps signed 64-bit costs. */
+    const auto cost = [](int64_t state) { return state; };
+    /** @brief Finishes the temperature step. */
+    const auto schedule = [](double) { return 0.0; };
+    /** @brief Reaches the lower-cost state only if the worse proposal was accepted. */
+    const auto next = [](int64_t state)
+    {
+        return state == std::numeric_limits<int64_t>::max() ? std::numeric_limits<int64_t>::min() :
+                                                              std::numeric_limits<int64_t>::max();
+    };
+    /** @brief Best state when a one-unit increase is rejected at low temperature. */
+    const auto result =
+        simulated_annealing(std::numeric_limits<int64_t>::max() - 1, 0.01, 0.0, 2, cost, schedule, next);
+    CHECK(result.first == std::numeric_limits<int64_t>::max() - 1);
+}
+
+TEST_CASE("Annealing results own their state values", "[sim-anneal]")
+{
+    /** @brief Caller-owned initial state. */
+    const std::vector<int> initial(64, 7);
+    /** @brief Gives every state the same signed cost. */
+    const auto cost = [](const auto&) { return 0.0; };
+    /** @brief Preserves the temperature. */
+    const auto schedule = [](double temperature) { return temperature; };
+    /** @brief Preserves state values. */
+    const auto next = [](const auto& state) { return state; };
+    /** @brief Creates an independent initial state for a worker. */
+    const auto generator = [&initial] { return std::vector<int>{initial}; };
+    /** @brief Owns the result after single-state storage leaves scope. */
+    auto single = simulated_annealing(initial, 1.0, 1.0, 0, cost, schedule, next);
+    /** @brief Owns the result after all worker storage leaves scope. */
+    auto multi = multi_simulated_annealing(1.0, 1.0, 0, 2, generator, cost, schedule, next);
+    CHECK(single.first == initial);
+    CHECK(multi.first == initial);
+    single.first.front() = 8;
+    multi.first.back()   = 9;
+    CHECK(initial.front() == 7);
+    CHECK(initial.back() == 7);
 }

@@ -38,7 +38,6 @@
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/on_the_fly_gate_library.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
-#include <fiction/types.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
@@ -59,6 +58,38 @@ using namespace fiction::sidb::io;
 using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation::logic;
 using namespace fiction::synthesis;
+
+/** @brief Checks static library application without instantiating its body. @tparam Lyt Gate layout type. */
+template <typename Lyt>
+concept bestagon_mappable = requires(const Lyt& lyt) { apply_gate_library<bestagon_library>(lyt); };
+
+/** @brief Checks static library application on a defective surface. @tparam Lyt Gate layout type. */
+template <typename Lyt>
+concept defective_bestagon_mappable = requires(const Lyt& lyt, const sidb::layout& surface) {
+    apply_gate_library_to_defective_surface<bestagon_library>(lyt, surface);
+};
+
+/** @brief Checks parameterized library application. @tparam Lyt Gate layout type. */
+template <typename Lyt>
+concept on_the_fly_mappable = requires(const Lyt& lyt, const on_the_fly_gate_library_params& params) {
+    apply_parameterized_gate_library<on_the_fly_gate_library>(lyt, params);
+};
+
+/** @brief Checks parameterized library application on a defective surface. @tparam Lyt Gate layout type. */
+template <typename Lyt>
+concept defective_on_the_fly_mappable =
+    requires(const Lyt& lyt, const on_the_fly_gate_library_params& params, const sidb::layout& surface) {
+        apply_parameterized_gate_library_to_defective_surface<on_the_fly_gate_library>(lyt, params, surface);
+    };
+
+static_assert(bestagon_mappable<hexagonal_gate_layout>);
+static_assert(!bestagon_mappable<cartesian_gate_layout>);
+static_assert(defective_bestagon_mappable<hexagonal_gate_layout>);
+static_assert(!defective_bestagon_mappable<cartesian_gate_layout>);
+static_assert(on_the_fly_mappable<hexagonal_gate_layout>);
+static_assert(!on_the_fly_mappable<cartesian_gate_layout>);
+static_assert(defective_on_the_fly_mappable<hexagonal_gate_layout>);
+static_assert(!defective_on_the_fly_mappable<cartesian_gate_layout>);
 
 namespace
 {
@@ -127,7 +158,8 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
                 bestagon_and,
                 fmt::format("{}/resources/on_the_fly_gate_library/single_tile_layout/AND_gate.sqd", TEST_PATH));
 
-            CHECK(is_operational(bestagon_and, std::vector<tt>{create_and_tt()}, design_gate_params.operational_params)
+            CHECK(is_operational(bestagon_and, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
+                                 design_gate_params.operational_params)
                       .first == operational_status::OPERATIONAL);
 
             CHECK(bestagon_and.num_dots() == 19);
@@ -147,7 +179,8 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
                 CHECK(bestagon_and_with_defects.get_defect(site_at_row(30, 20)).type == defect_type::DB);
                 CHECK(bestagon_and_with_defects.get_defect(site_at_row(45, 55)).type == defect_type::DB);
 
-                CHECK(is_operational(bestagon_and_with_defects, std::vector<tt>{create_and_tt()},
+                CHECK(is_operational(bestagon_and_with_defects,
+                                     std::vector<kitty::dynamic_truth_table>{create_and_tt()},
                                      design_gate_params.operational_params)
                           .first == operational_status::OPERATIONAL);
 

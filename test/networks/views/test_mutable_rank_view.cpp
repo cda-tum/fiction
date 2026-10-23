@@ -20,6 +20,7 @@
 
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>
+#include <fiction/networks/views/static_depth_view.hpp>
 #include <fiction/networks/virtual_pi_network.hpp>
 #include <fiction/synthesis/network_balancing.hpp>
 #include <fiction/traits.hpp>
@@ -36,7 +37,9 @@
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/networks/xmg.hpp>
 #include <mockturtle/traits.hpp>
+#include <mockturtle/views/depth_view.hpp>
 
+#include <cstdint>
 #include <functional>
 #include <optional>
 #include <stdexcept>
@@ -47,6 +50,48 @@ using namespace fiction::networks;
 using namespace fiction::networks::views;
 using namespace fiction::synthesis;
 using namespace fiction::verification;
+
+/**
+ * @brief Checks whether a network can form a mutable rank view.
+ * @tparam Ntk Network type to test.
+ */
+template <typename Ntk>
+concept rank_viewable = requires { typename mutable_rank_view<Ntk>; };
+
+/** @brief Network that cannot supply the inherited depth view's visited state. */
+struct network_without_visited : mockturtle::aig_network
+{
+    /** @brief Disables visited-state lookup. @param n Node to inspect. */
+    [[nodiscard]] uint32_t visited(const node& n) const = delete;
+};
+
+/** @brief Checks the rank view's inherited depth interface. @tparam Ntk Network to test. */
+template <typename Ntk>
+concept rank_base_viewable = requires { typename static_depth_view<Ntk>; };
+
+/** @brief Depth-enabled network without indexed storage access. */
+struct ranked_without_node_index : mockturtle::depth_view<mockturtle::aig_network>
+{
+    /** @brief Disables node indexing. @param n Node to inspect. */
+    [[nodiscard]] uint32_t node_to_index(const node& n) const = delete;
+};
+
+/** @brief Depth-enabled network without a storage size. */
+struct ranked_without_size : mockturtle::depth_view<mockturtle::aig_network>
+{
+    /** @brief Disables storage sizing. */
+    [[nodiscard]] uint32_t size() const = delete;
+};
+
+static_assert(rank_base_viewable<ranked_without_node_index>);
+static_assert(rank_base_viewable<ranked_without_size>);
+static_assert(!rank_viewable<ranked_without_node_index>);
+static_assert(!rank_viewable<ranked_without_size>);
+static_assert(!rank_base_viewable<network_without_visited>);
+static_assert(!rank_viewable<network_without_visited>);
+static_assert(rank_viewable<technology_network>);
+static_assert(!rank_viewable<int>);
+static_assert(requires(const mutable_rank_view<technology_network>& ntk) { mutable_rank_view{ntk}; });
 
 namespace
 {
@@ -342,9 +387,6 @@ TEMPLATE_TEST_CASE("Check equivalence checking", "[mutable-rank-view]", mockturt
     ntk.create_po(f1_t);
     ntk.create_po(f2_t);
     ntk.create_po(f3_t);
-
-    network_balancing_params ps;
-    ps.unify_outputs = true;
 
     const auto ntk_r = mutable_rank_view(ntk);
 

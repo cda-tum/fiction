@@ -50,7 +50,8 @@ using namespace fiction::physical_design;
 template <typename Lyt, typename Ntk>
 static void check_layout_equiv(const Ntk& ntk)
 {
-    auto layout = orthogonal<Lyt>(fiction::synthesis::convert_network<tec_nt>(ntk), {});
+    auto layout = orthogonal<typename Lyt::coordinate_layout>(
+        fiction::synthesis::convert_network<named_technology_network>(ntk), {});
 
     post_layout_optimization_stats stats{};
     post_layout_optimization(layout, {}, &stats);
@@ -195,7 +196,7 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
     {
         for (int64_t max_gate_relocations = 0; max_gate_relocations < 10; max_gate_relocations++)
         {
-            auto layout = orthogonal<cartesian_gate_layout>(blueprints::mux21_network<technology_network>(), {});
+            auto layout = orthogonal<cartesian_layout>(blueprints::mux21_network<technology_network>(), {});
 
             post_layout_optimization_stats  stats{};
             post_layout_optimization_params params{};
@@ -208,7 +209,7 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
 
     SECTION("Optimize POs only")
     {
-        auto layout = orthogonal<cartesian_gate_layout>(blueprints::mux21_network<technology_network>(), {});
+        auto layout = orthogonal<cartesian_layout>(blueprints::mux21_network<technology_network>(), {});
 
         post_layout_optimization_stats  stats{};
         post_layout_optimization_params params{};
@@ -220,7 +221,7 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
 
     SECTION("Timeout")
     {
-        auto layout = orthogonal<cartesian_gate_layout>(blueprints::mux21_network<technology_network>(), {});
+        auto layout = orthogonal<cartesian_layout>(blueprints::mux21_network<technology_network>(), {});
 
         post_layout_optimization_stats  stats{};
         post_layout_optimization_params params{};
@@ -232,7 +233,7 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
 
     SECTION("Timeout exceeded")
     {
-        auto layout = orthogonal<cartesian_gate_layout>(blueprints::mux21_network<technology_network>(), {});
+        auto layout = orthogonal<cartesian_layout>(blueprints::mux21_network<technology_network>(), {});
 
         post_layout_optimization_stats  stats{};
         post_layout_optimization_params params{};
@@ -328,7 +329,7 @@ TEST_CASE("Optimization accepts interior terminals", "[post-layout-optimization]
 TEST_CASE("Post-layout optimization reports progress", "[post-layout-optimization]")
 {
     const auto ntk    = blueprints::mux21_network<technology_network>();
-    auto       layout = orthogonal<cartesian_gate_layout>(ntk);
+    auto       layout = orthogonal<cartesian_layout>(ntk);
 
     progress_recorder               rec{};
     post_layout_optimization_params params{};

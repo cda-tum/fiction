@@ -23,6 +23,7 @@
 #include "fiction/types.hpp"
 
 #include <fmt/format.h>
+#include <fmt/ranges.h>
 #include <lorina/genlib.hpp>
 #include <mockturtle/algorithms/emap.hpp>
 #include <mockturtle/io/genlib_reader.hpp>
@@ -35,6 +36,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 namespace fiction::synthesis
@@ -314,14 +316,14 @@ class technology_mapping_impl
     {}
 
     /** @brief Returns the source network mapped to the supplied technology library. */
-    [[nodiscard]] tec_nt run() const
+    [[nodiscard]] fiction::networks::named_technology_network run() const
     {
         // Validate that the library contains required gates for the base network type
         validate_required_gates();
 
         const auto gate_library = set_up_gates();
 
-        tec_nt mapped_ntk{};
+        fiction::networks::named_technology_network mapped_ntk{};
 
         if (params.maj3 || params.dot || params.and3 || params.xor_and || params.or_and || params.onehot ||
             params.gamble || params.mux || params.and_xor)
@@ -375,7 +377,7 @@ class technology_mapping_impl
         // Check for AIG network (requires AND and INV)
         if constexpr (std::is_same_v<typename Ntk::base_type, mockturtle::aig_network>)
         {
-            network_type = aig_name;
+            network_type = "AIG";
             if (!params.inv)
             {
                 missing_gates.emplace_back("INV");
@@ -388,7 +390,7 @@ class technology_mapping_impl
         // Check for XAG network (requires AND, XOR, and INV)
         else if constexpr (std::is_same_v<typename Ntk::base_type, mockturtle::xag_network>)
         {
-            network_type = xag_name;
+            network_type = "XAG";
             if (!params.inv)
             {
                 missing_gates.emplace_back("INV");
@@ -405,7 +407,7 @@ class technology_mapping_impl
         // Check for MIG network (requires MAJ and INV)
         else if constexpr (std::is_same_v<typename Ntk::base_type, mockturtle::mig_network>)
         {
-            network_type = mig_name;
+            network_type = "MIG";
             if (!params.inv)
             {
                 missing_gates.emplace_back("INV");
@@ -581,7 +583,8 @@ class technology_mapping_impl
      * @return Mapped network.
      */
     template <unsigned NumInp>
-    [[nodiscard]] tec_nt perform_mapping(const std::vector<mockturtle::gate>& gates) const
+    [[nodiscard]] fiction::networks::named_technology_network
+    perform_mapping(const std::vector<mockturtle::gate>& gates) const
     {
         mockturtle::tech_library<NumInp> lib{gates};
 
@@ -605,17 +608,17 @@ class technology_mapping_impl
             });
         if (stats.mapper_stats.mapping_error)
         {
-            return tec_nt{};
+            return fiction::networks::named_technology_network{};
         }
 
         const auto mapped_ntk = mockturtle::emap(ntk, lib, params.mapper_params, &stats.mapper_stats);
 
-        tec_nt converted_ntk{};
+        fiction::networks::named_technology_network converted_ntk{};
 
         if (!stats.mapper_stats.mapping_error)
         {
             // convert network
-            converted_ntk = convert_network<tec_nt>(mapped_ntk);
+            converted_ntk = convert_network<fiction::networks::named_technology_network>(mapped_ntk);
             networks::restore_names(ntk, converted_ntk);
         }
 
@@ -639,11 +642,11 @@ class technology_mapping_impl
  *         network type (e.g., AIG requires INV and AND; XAG requires INV, AND, and XOR; MIG requires INV and MAJ).
  */
 template <typename Ntk>
-[[nodiscard]] tec_nt technology_mapping(const Ntk& ntk, const technology_mapping_params& params = {},
-                                        technology_mapping_stats* pst = nullptr)
+    requires mockturtle::is_network_type_v<Ntk>
+[[nodiscard]] fiction::networks::named_technology_network
+technology_mapping(const Ntk& ntk, const technology_mapping_params& params = {},
+                   technology_mapping_stats* pst = nullptr)
 {
-    static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-
     technology_mapping_stats        st{};
     detail::technology_mapping_impl p{ntk, params, st};
 

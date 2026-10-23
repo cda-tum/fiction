@@ -19,6 +19,7 @@
 
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/static_depth_view.hpp>
+#include <fiction/types.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/klut.hpp>
@@ -28,8 +29,8 @@
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/cost_functions.hpp>
 #include <mockturtle/views/depth_view.hpp>
-#include <mockturtle/views/names_view.hpp>
 
+#include <cstdint>
 #include <memory>
 #include <utility>
 
@@ -37,10 +38,38 @@ using namespace fiction;
 using namespace fiction::networks;
 using namespace fiction::networks::views;
 
+/**
+ * @brief Checks whether a network can form a depth view.
+ * @tparam Ntk Network type to test.
+ */
+template <typename Ntk>
+concept depth_viewable = requires { typename static_depth_view<Ntk>; };
+
+/** @brief Network without indexed node storage access. */
+struct depth_without_node_index : mockturtle::aig_network
+{
+    /** @brief Disables node indexing. @param n Node to inspect. */
+    [[nodiscard]] uint32_t node_to_index(const node& n) const = delete;
+};
+
+/** @brief Network without combinational-input traversal. */
+struct depth_without_ci_traversal : mockturtle::aig_network
+{
+    /** @brief Disables input traversal. @tparam Fn Callback type. */
+    template <typename Fn>
+    void foreach_ci(Fn&&) const = delete;
+};
+
+static_assert(!depth_viewable<depth_without_node_index>);
+static_assert(!depth_viewable<depth_without_ci_traversal>);
+static_assert(depth_viewable<mockturtle::aig_network>);
+static_assert(!depth_viewable<int>);
+static_assert(requires(const static_depth_view<mockturtle::aig_network>& ntk) { static_depth_view{ntk}; });
+
 TEST_CASE("Depth view assignment preserves network names", "[static-depth-view]")
 {
-    static_depth_view<mockturtle::names_view<technology_network>> source{};
-    const auto                                                    input = source.create_pi();
+    static_depth_view<named_technology_network> source{};
+    const auto                                  input = source.create_pi();
     source.create_po(input);
     source.set_network_name("source");
     source.set_name(input, "input");

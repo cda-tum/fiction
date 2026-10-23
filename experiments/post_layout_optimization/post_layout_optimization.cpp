@@ -18,6 +18,7 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/layouts/bounding_box.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/io/network_reader.hpp>                        // read networks from files
 #include <fiction/physical_design/orthogonal.hpp>                        // scalable heuristic for physical design
@@ -33,11 +34,13 @@
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
+#include <memory>
 #include <sstream>
 #include <string>
 
 using namespace fiction;
 using namespace fiction::layouts;
+using namespace fiction::networks;
 using namespace fiction::networks::io;
 using namespace fiction::physical_design;
 using namespace fiction::verification;
@@ -49,7 +52,7 @@ Ntk read_ntk(const std::string& name)
 
     std::ostringstream os{};
 
-    network_reader<tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
+    network_reader<std::shared_ptr<named_technology_network>> reader{fiction_experiments::benchmark_path(name), os};
 
     const auto nets = reader.get_networks();
 
@@ -91,10 +94,10 @@ try
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        const auto benchmark_network = read_ntk<tec_nt>(benchmark);
+        const auto benchmark_network = read_ntk<named_technology_network>(benchmark);
 
         // perform layout generation with an OGD-based heuristic algorithm
-        auto       gate_layout = orthogonal<cartesian_gate_layout>(benchmark_network, {}, &orthogonal_stats);
+        auto       gate_layout = orthogonal<cartesian_layout>(benchmark_network, {}, &orthogonal_stats);
         const auto layout_copy = gate_layout.clone();
 
         //  compute critical path and throughput

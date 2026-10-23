@@ -21,16 +21,40 @@
 
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/physical_design/color_routing.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
 #include <fiction/utils/graph/graph_coloring.hpp>
 
+#include <stdexcept>
 #include <vector>
 
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::physical_design;
 using namespace fiction::utils::graph;
+
+TEST_CASE("Color routing validates endpoints before changing the layout", "[color-routing]")
+{
+    /** @brief Layout whose existing connection must survive failed routing. */
+    cartesian_gate_layout layout{{2, 2}, clocking::twoddwave()};
+    /** @brief Existing input and buffer. */
+    const auto input = layout.create_pi("input", {0, 0});
+    /** @brief Existing connected buffer. */
+    const auto output = layout.create_buf(input, {1, 1});
+    /** @brief Objective with an out-of-extent source. */
+    const std::vector<routing_objective> objectives{{{2, 0}, {1, 1}, 0}};
+    /** @brief Path limit for each contract check. */
+    color_routing_params params{};
+    CHECK_THROWS_AS(color_routing(layout, objectives, params), std::invalid_argument);
+    params.path_limit = 1;
+    CHECK_THROWS_AS(color_routing(layout, objectives, params), std::invalid_argument);
+    params.path_limit = 0;
+    CHECK_FALSE(color_routing(layout, objectives, params));
+    CHECK(layout.source({output, 0}) == input);
+    CHECK(layout.num_wires() == 1);
+    CHECK(layout.get_tile(output) == layout_base::coordinate{1, 1});
+}
 
 template <typename Spec, typename Impl>
 void check_color_routing(const Spec& spec, Impl& impl, const std::vector<routing_objective>& objectives,

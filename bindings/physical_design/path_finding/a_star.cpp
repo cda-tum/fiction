@@ -26,7 +26,6 @@
 #include <fiction/physical_design/path_finding/a_star.hpp>
 #include <fiction/physical_design/path_finding/cost.hpp>
 #include <fiction/physical_design/path_finding/distance.hpp>
-#include <fiction/physical_design/routing_utils.hpp>
 
 #include <optional>
 #include <vector>
@@ -74,7 +73,7 @@ void register_a_star_impl(nb::module_& m)
             params.crossings            = crossings;
 
             return static_cast<std::vector<fiction::layouts::layout_base::coordinate>>(
-                fiction::physical_design::path_finding::a_star<fiction::physical_design::layout_coordinate_path, Lyt>(
+                fiction::physical_design::path_finding::a_star<Lyt>(
                     lyt, {source, target}, fiction::physical_design::path_finding::manhattan_distance_functor(),
                     fiction::physical_design::path_finding::unit_cost_functor<>(), params, obstructions));
         },

@@ -19,6 +19,7 @@
 
 #include "../utils/blueprints/network_blueprints.hpp"
 
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/determine_clocking.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
@@ -28,26 +29,24 @@
 #include <bill/sat/interface/common.hpp>
 #include <mockturtle/networks/aig.hpp>
 
-#include <concepts>
-
 using namespace fiction;
+using namespace fiction::networks;
 using namespace fiction::layouts;
 using namespace fiction::physical_design;
 
-template <typename Lyt>
-void remove_clocking(Lyt& lyt)
+/**
+ * @brief Assigns clock zero to every tile in the declared frame.
+ * @param lyt Layout whose clock numbers are cleared.
+ */
+void remove_clocking(cartesian_gate_layout& lyt)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
-
     lyt.foreach_tile([&lyt](const auto& t) { lyt.assign_clock_number(t, 0); });
 }
 
 TEST_CASE("Benchmark SAT-based clocking determination", "[benchmark]")
 {
-    auto lyt = orthogonal<cartesian_gate_layout>(
-        fiction::synthesis::convert_network<tec_nt>(blueprints::nary_operation_network<mockturtle::aig_network>()));
+    auto lyt = orthogonal<cartesian_layout>(fiction::synthesis::convert_network<named_technology_network>(
+        blueprints::nary_operation_network<mockturtle::aig_network>()));
     remove_clocking(lyt);
 
     auto params = determine_clocking_params{};

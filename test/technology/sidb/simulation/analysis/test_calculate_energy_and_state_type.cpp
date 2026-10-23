@@ -34,7 +34,8 @@
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
-#include <fiction/types.hpp>
+
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <algorithm>
 #include <cstddef>
@@ -71,7 +72,8 @@ TEST_CASE("Single SiDB", "[calculate-energy-and-state-type]")
     const auto energy_distribution = calculate_energy_distribution(simulated_charge_distributions);
 
     const auto energy_state_with_state_info = calculate_energy_and_state_type_with_kinks_accepted(
-        energy_distribution, simulated_charge_distributions, output_bdls, std::vector<tt>{create_and_tt()}, 1);
+        energy_distribution, simulated_charge_distributions, output_bdls,
+        std::vector<kitty::dynamic_truth_table>{create_and_tt()}, 1);
 
     REQUIRE(energy_state_with_state_info.size() == 5);
 
@@ -164,7 +166,7 @@ TEST_CASE("Kinks-rejected labels count each matching charge distribution once", 
     kinked.assign_charge_state(internal_pair->lower, accepted.get_charge_state(internal_pair->upper));
     kinked.assign_charge_state(internal_pair->upper, accepted.get_charge_state(internal_pair->lower));
 
-    const std::vector<tt> spec{create_and_tt()};
+    const std::vector<kitty::dynamic_truth_table> spec{create_and_tt()};
     CHECK(calculate_energy_and_state_type_with_kinks_accepted(calculate_energy_distribution({kinked}), {kinked},
                                                               output_pairs, spec, 1)
               .front()
