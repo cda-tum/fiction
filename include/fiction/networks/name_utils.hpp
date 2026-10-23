@@ -305,12 +305,13 @@ void restore_signal_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, const mocktu
 template <typename NtkDest, uint16_t fanout_size = 2>
     requires detail::network_or_layout<NtkDest> &&
              (!detail::named_destination<NtkDest> ||
-              requires(NtkDest& dest, const tec_nt& src, const tec_nt::signal& signal) {
+              requires(NtkDest& dest, const fiction::networks::named_technology_network& src,
+                       const fiction::networks::named_technology_network::signal& signal) {
                   dest.set_name(layouts::layout_object_id{}, src.get_name(signal));
               })
-void restore_signal_names(
-    const tec_nt& ntk_src, NtkDest& ntk_dest,
-    const mockturtle::node_map<physical_design::branching_signal_container<fanout_size>, tec_nt>& old2new)
+void restore_signal_names(const fiction::networks::named_technology_network& ntk_src, NtkDest& ntk_dest,
+                          const mockturtle::node_map<physical_design::branching_signal_container<fanout_size>,
+                                                     fiction::networks::named_technology_network>& old2new)
 {
     if constexpr (detail::named_destination<NtkDest>)
     {

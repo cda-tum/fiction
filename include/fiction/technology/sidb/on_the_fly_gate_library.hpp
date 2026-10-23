@@ -31,7 +31,6 @@
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/technology/sidb/skeleton_bestagon_library.hpp"
-#include "fiction/types.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <phmap.h>
@@ -329,10 +328,11 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
                         const auto skeleton_with_defects =
                             add_defect_to_skeleton(defect_surface.value(), skeleton,
                                                    params.influence_radius_charged_defects, center_cell, absolute_cell);
-                        return design_gate(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                        return design_gate(skeleton_with_defects, std::vector<kitty::dynamic_truth_table>{f}, params, p,
+                                           t);
                     }
 
-                    return design_gate(skeleton, std::vector<tt>{f}, params, p, t);
+                    return design_gate(skeleton, std::vector<kitty::dynamic_truth_table>{f}, params, p, t);
                 }
                 return EMPTY_GATE;
             }
@@ -347,10 +347,10 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
                         add_defect_to_skeleton(defect_surface.value(), skeleton,
                                                params.influence_radius_charged_defects, center_cell, absolute_cell);
 
-                    return design_gate(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                    return design_gate(skeleton_with_defects, std::vector<kitty::dynamic_truth_table>{f}, params, p, t);
                 }
 
-                return design_gate(skeleton, std::vector<tt>{f}, params, p, t);
+                return design_gate(skeleton, std::vector<kitty::dynamic_truth_table>{f}, params, p, t);
             }
 
             const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
@@ -361,10 +361,10 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
                     add_defect_to_skeleton(defect_surface.value(), skeleton, params.influence_radius_charged_defects,
                                            center_cell, absolute_cell);
 
-                return design_gate(skeleton_with_defects, std::vector<tt>{f}, params, p, t);
+                return design_gate(skeleton_with_defects, std::vector<kitty::dynamic_truth_table>{f}, params, p, t);
             }
 
-            return design_gate(skeleton, std::vector<tt>{f}, params, p, t);
+            return design_gate(skeleton, std::vector<kitty::dynamic_truth_table>{f}, params, p, t);
         }
 
         catch (const std::out_of_range&)
