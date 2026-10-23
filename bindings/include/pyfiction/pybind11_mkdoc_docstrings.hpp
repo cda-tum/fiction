@@ -17145,8 +17145,9 @@ Returns:
 Raises:
     ValueError: if a sweep range has non-finite or reversed bounds, a
                 non-positive or non-finite step, more points than the
-                storage range permits, or the engine is not
-                QuickExact, EXGS, or QuickSim.
+                storage range permits, colliding
+                `logic::parameter_point` identities, or the engine is
+                not QuickExact, EXGS, or QuickSim.
 
 )doc";
 
@@ -22080,17 +22081,17 @@ one operational point within them. Thereby, this algorithm works for
 disconnected operational domains. The critical temperature is computed
 for each operational point.
 
-It performs `samples` uniformly-distributed random samples within the
-parameter range. For each thusly discovered operational island, it
-performs another number of samples equal to the distance to an edge of
-each operational area. Finally, it performs up to 8 samples for each
-contour point (however, the actual number is usually lower). For each
-sample, the algorithm performs one operational check on the layout,
-where each operational check consists of up to :math:`2^n` exact
-ground state simulations, where :math:`n` is the number of inputs of
-the layout. Each exact ground state simulation has exponential
-complexity in of itself. Therefore, the algorithm is only feasible for
-small layouts with few inputs.
+It performs up to `samples` uniformly-distributed random samples,
+stopping when every grid point has been collected. For each discovered
+operational island, it performs another number of samples equal to the
+distance to an edge of each operational area. Finally, it performs up
+to 8 samples for each contour point (however, the actual number is
+usually lower). For each sample, the algorithm performs one
+operational check on the layout, where each operational check consists
+of up to :math:`2^n` exact ground state simulations, where :math:`n`
+is the number of inputs of the layout. Each exact ground state
+simulation has exponential complexity in of itself. Therefore, the
+algorithm is only feasible for small layouts with few inputs.
 
 Args:
     lyt: Layout to compute the operational domain for.
@@ -22141,16 +22142,16 @@ the initial random sampling found at least one operational point
 within them. Thereby, this algorithm works for disconnected
 operational domains.
 
-It performs `samples` uniformly-distributed random samples within the
-parameter range. From there, it performs another number of samples
-equal to the number of points within the operational domain plus the
-first non-operational point in each direction. For each sample, the
-algorithm performs one operational check on the layout, where each
-operational check consists of up to :math:`2^n` exact ground state
-simulations, where :math:`n` is the number of inputs of the layout.
-Each exact ground state simulation has exponential complexity in of
-itself. Therefore, the algorithm is only feasible for small layouts
-with few inputs.
+It performs up to `samples` uniformly-distributed random samples,
+stopping when every grid point has been collected. From there, it
+performs another number of samples equal to the number of points
+within the operational domain plus the first non-operational point in
+each direction. For each sample, the algorithm performs one
+operational check on the layout, where each operational check consists
+of up to :math:`2^n` exact ground state simulations, where :math:`n`
+is the number of inputs of the layout. Each exact ground state
+simulation has exponential complexity in of itself. Therefore, the
+algorithm is only feasible for small layouts with few inputs.
 
 Args:
     lyt: Layout to compute the operational domain for.
@@ -22254,14 +22255,14 @@ which the layout is logically operational, along with the critical
 temperature for each specific parameter point.
 
 This algorithm uses random sampling to find a part of the operational
-domain that might not be complete. It performs a total of `samples`
-uniformly-distributed random samples within the parameter range. For
-each sample, the algorithm performs one operational check on the
-layout, where each operational check consists of up to :math:`2^n`
-exact ground state simulations, where :math:`n` is the number of
-inputs of the layout. Each exact ground state simulation has
-exponential complexity in of itself. Therefore, the algorithm is only
-feasible for small layouts with few inputs.
+domain that might not be complete. It performs up to `samples`
+uniformly-distributed random samples, stopping when every grid point
+has been collected. For each sample, the algorithm performs one
+operational check on the layout, where each operational check consists
+of up to :math:`2^n` exact ground state simulations, where :math:`n`
+is the number of inputs of the layout. Each exact ground state
+simulation has exponential complexity in of itself. Therefore, the
+algorithm is only feasible for small layouts with few inputs.
 
 Args:
     lyt: Layout to compute the operational domain for.
@@ -22794,15 +22795,10 @@ Template Args:
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_canvas_lyt = R"doc(This layout consists of the canvas dots of the layout.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_contour_tracing =
-R"doc(Performs contour tracing to determine the operational domain. The
-algorithm first performs a random sampling of up to the specified
-number of samples. It stops random sampling once it finds a single
-operational point, from which it moves straight outwards until it
-encounters the counter of the operational domain. From this point, it
-traces the contour until it reaches the initial contour point again.
-The operational domain will finally only contain up to `samples`
-random non-operational points as well as the contour of the found
-operational domain plus a one pixel wide border around it.
+R"doc(Samples up to the specified number of random points, then traces the
+boundary of each sampled operational island. The domain contains the
+sampled points, operational boundaries, and their non-operational
+neighbors.
 
 Args:
     samples: Maximum number of random samples to be taken before
@@ -22828,26 +22824,6 @@ Args:
 Returns:
     An operational step point at the edge of the operational domain
     `starting_point` is located in.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_find_operational_step_point_via_random_sampling =
-R"doc(Performs random sampling to find any operational parameter
-combination. This function is useful if a single starting point is
-required within the domain to expand from. This function returns the
-step in all dimensions of the first operational point found. If no
-operational parameter combination can be found within the given number
-of samples, the function returns `std::nullopt`.
-
-This function adds any sampled points to the `op_domain` member
-variables.
-
-Args:
-    samples: Maximum number of samples to take. Works as a timeout.
-
-Returns:
-    The first operational step point, if any could be found,
-    `std::nullopt` otherwise.
 
 )doc";
 
@@ -22888,8 +22864,9 @@ Raises:
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_generate_random_step_points =
 R"doc(Generates unique random `step_points` in the stored parameter range.
-The number of generated points is at most equal to `samples`. Each
-call owns its random number generator.
+The number of generated points is at most equal to `samples`. Sampling
+stops when every grid point has been collected. Each call owns its
+random generator.
 
 Args:
     samples: Maximum number of random `step_point`s to generate.
@@ -22985,8 +22962,9 @@ static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_doma
 R"doc(Builds the indices and values of each validated sweep dimension.
 
 Raises:
-    ValueError: if a sweep range is invalid or exceeds the storage
-                range.
+    ValueError: if a sweep range is invalid, the grid point count
+                exceeds the storage range, or coordinates occupy the
+                same `parameter_point` identity cell.
 
 )doc";
 
@@ -23102,6 +23080,8 @@ Returns:
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_num_dimensions = R"doc(The number of dimensions.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_num_evaluated_parameter_combinations = R"doc(Number of evaluated parameter combinations.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_num_parameter_points = R"doc(Number of parameter combinations in the validated sweep grid.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_num_simulator_invocations = R"doc(Number of simulator invocations.)doc";
 
@@ -23709,17 +23689,17 @@ operational "islands" if the initial random sampling found at least
 one operational point within them. Thereby, this algorithm works for
 disconnected operational domains.
 
-It performs `samples` uniformly-distributed random samples within the
-parameter range. For each thusly discovered operational island, it
-performs another number of samples equal to the distance to an edge of
-each operational area. Finally, it performs up to 8 samples for each
-contour point (however, the actual number is usually lower). For each
-sample, the algorithm performs one operational check on the layout,
-where each operational check consists of up to :math:`2^n` exact
-ground state simulations, where :math:`n` is the number of inputs of
-the layout. Each exact ground state simulation has exponential
-complexity in of itself. Therefore, the algorithm is only feasible for
-small layouts with few inputs.
+It performs up to `samples` uniformly-distributed random samples,
+stopping when every grid point has been collected. For each discovered
+operational island, it performs another number of samples equal to the
+distance to an edge of each operational area. Finally, it performs up
+to 8 samples for each contour point (however, the actual number is
+usually lower). For each sample, the algorithm performs one
+operational check on the layout, where each operational check consists
+of up to :math:`2^n` exact ground state simulations, where :math:`n`
+is the number of inputs of the layout. Each exact ground state
+simulation has exponential complexity in of itself. Therefore, the
+algorithm is only feasible for small layouts with few inputs.
 
 Args:
     lyt: Layout to compute the operational domain for.
@@ -23762,16 +23742,16 @@ the initial random sampling found at least one operational point
 within them. Thereby, this algorithm works for disconnected
 operational domains.
 
-It performs `samples` uniformly-distributed random samples within the
-parameter range. From there, it performs another number of samples
-equal to the number of points within the operational domain plus the
-first non-operational point in each direction. For each sample, the
-algorithm performs one operational check on the layout, where each
-operational check consists of up to :math:`2^n` exact ground state
-simulations, where :math:`n` is the number of inputs of the layout.
-Each exact ground state simulation has exponential complexity in of
-itself. Therefore, the algorithm is only feasible for small layouts
-with few inputs.
+It performs up to `samples` uniformly-distributed random samples,
+stopping when every grid point has been collected. From there, it
+performs another number of samples equal to the number of points
+within the operational domain plus the first non-operational point in
+each direction. For each sample, the algorithm performs one
+operational check on the layout, where each operational check consists
+of up to :math:`2^n` exact ground state simulations, where :math:`n`
+is the number of inputs of the layout. Each exact ground state
+simulation has exponential complexity in of itself. Therefore, the
+algorithm is only feasible for small layouts with few inputs.
 
 This flavor of operational domain computation was proposed in
 \"Reducing the Complexity of Operational Domain Computation in Silicon
@@ -23913,14 +23893,14 @@ the layout are assumed to be in the same order as the inputs of the
 truth table.
 
 This algorithm uses random sampling to find a part of the operational
-domain that might not be complete. It performs a total of `samples`
-uniformly-distributed random samples within the parameter range. For
-each sample, the algorithm performs one operational check on the
-layout, where each operational check consists of up to :math:`2^n`
-exact ground state simulations, where :math:`n` is the number of
-inputs of the layout. Each exact ground state simulation has
-exponential complexity in of itself. Therefore, the algorithm is only
-feasible for small layouts with few inputs.
+domain that might not be complete. It performs up to `samples`
+uniformly-distributed random samples, stopping when every grid point
+has been collected. For each sample, the algorithm performs one
+operational check on the layout, where each operational check consists
+of up to :math:`2^n` exact ground state simulations, where :math:`n`
+is the number of inputs of the layout. Each exact ground state
+simulation has exponential complexity in of itself. Therefore, the
+algorithm is only feasible for small layouts with few inputs.
 
 Args:
     lyt: Layout to compute the operational domain for.
@@ -24000,7 +23980,10 @@ static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_stat
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_value_range =
 R"doc(A range of values for a dimension sweep. The range is defined by a
-minimum value, a maximum value and a step size.)doc";
+minimum value, a maximum value and a step size. Generated coordinates
+must occupy distinct `parameter_point` identity cells, whose width is
+`utils::math::ERROR_MARGIN`. Domain algorithms throw `ValueError` if
+coordinates collide.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_value_range_dimension = R"doc(The sweep parameter of the dimension.)doc";
 

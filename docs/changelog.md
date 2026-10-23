@@ -146,6 +146,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - SiDB domain sampling now stops once every grid point has been collected.
   - **Breaking:** Physical design accepts only named technology networks (`networks::named_technology_network`). Convert other network types
     with `convert_network<networks::named_technology_network>` before placement; names survive conversion and extraction.
   - `verification::virtual_miter` is no longer `noexcept`, since the rank view it builds can throw.
@@ -668,6 +669,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - SiDB contour tracing now terminates for isolated operational points.
+  - SiDB parameter sweeps now reject colliding coordinates before allocating dimension indices,
+    and reject overflowing point counts.
+  - SiDB sweep indices now use the full platform index width on Windows.
   - A* now restores frontier ordering after a cheaper route reaches a queued coordinate.
   - Simulated annealing now rejects non-finite temperature bounds with `std::invalid_argument`.
   - Defect-aware circuit design now propagates unsupported gate-orientation errors.
