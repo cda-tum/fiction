@@ -43,6 +43,7 @@
 
 using namespace fiction;
 using namespace fiction::layouts;
+using namespace fiction::networks;
 using namespace fiction::physical_design;
 using namespace fiction::utils::graph;
 using namespace fiction::verification;
@@ -167,7 +168,7 @@ void smt_sat_complete()
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        const auto network = read_ntk<tec_nt>(benchmark);
+        const auto network = read_ntk<named_technology_network>(benchmark);
 
         for (const auto& clock : clocking_schemes)
         {
@@ -228,7 +229,7 @@ void ortho_sat_complete()
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        const auto network = read_ntk<tec_nt>(benchmark);
+        const auto network = read_ntk<named_technology_network>(benchmark);
 
         // perform layout generation with an OGD-based algorithm
         auto gate_layout = orthogonal<cartesian_layout>(network, {}, &ortho_stats);
@@ -273,7 +274,7 @@ void ortho_mcs()
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        const auto network = read_ntk<tec_nt>(benchmark);
+        const auto network = read_ntk<named_technology_network>(benchmark);
 
         // perform layout generation with an OGD-based algorithm
         auto gate_layout = orthogonal<cartesian_layout>(network, {}, &ortho_stats);

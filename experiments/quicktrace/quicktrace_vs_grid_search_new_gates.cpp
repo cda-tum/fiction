@@ -23,10 +23,10 @@
 #include "fiction/technology/sidb/simulation/defects/defect_clearance.hpp"
 #include "fiction/technology/sidb/simulation/defects/defect_influence.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
-#include "fiction/types.hpp"
 #include "fiction_experiments.hpp"
 
 #include <fmt/format.h>
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <array>
 #include <cstdio>
@@ -56,16 +56,16 @@ try
     static const std::string folder        = fmt::format("{}bestagon_gates_type_tags/", EXPERIMENTS_PATH);
     static const std::string output_folder = fmt::format("{}quicktrace/plots/", EXPERIMENTS_PATH);
 
-    static const std::array<std::pair<std::string, std::vector<tt>>, 9> gates = {
-        std::make_pair("and", std::vector<tt>{create_and_tt()}),
-        std::make_pair("xor", std::vector<tt>{create_xor_tt()}),
-        std::make_pair("or", std::vector<tt>{create_or_tt()}),
-        std::make_pair("xnor", std::vector<tt>{create_xnor_tt()}),
-        std::make_pair("fo2", std::vector<tt>{create_fan_out_tt()}),
-        std::make_pair("nor", std::vector<tt>{create_nor_tt()}),
-        std::make_pair("nand", std::vector<tt>{create_nand_tt()}),
-        std::make_pair("inv", std::vector<tt>{create_not_tt()}),
-        std::make_pair("wire", std::vector<tt>{create_id_tt()})};
+    static const std::array<std::pair<std::string, std::vector<kitty::dynamic_truth_table>>, 9> gates = {
+        std::make_pair("and", std::vector<kitty::dynamic_truth_table>{create_and_tt()}),
+        std::make_pair("xor", std::vector<kitty::dynamic_truth_table>{create_xor_tt()}),
+        std::make_pair("or", std::vector<kitty::dynamic_truth_table>{create_or_tt()}),
+        std::make_pair("xnor", std::vector<kitty::dynamic_truth_table>{create_xnor_tt()}),
+        std::make_pair("fo2", std::vector<kitty::dynamic_truth_table>{create_fan_out_tt()}),
+        std::make_pair("nor", std::vector<kitty::dynamic_truth_table>{create_nor_tt()}),
+        std::make_pair("nand", std::vector<kitty::dynamic_truth_table>{create_nand_tt()}),
+        std::make_pair("inv", std::vector<kitty::dynamic_truth_table>{create_not_tt()}),
+        std::make_pair("wire", std::vector<kitty::dynamic_truth_table>{create_id_tt()})};
 
     auto lyt = read_sqd_layout(
         fmt::format("{}/gate_skeletons/skeleton_bestagons_with_tags/skeleton_hex_inputsdbp_2i1o.sqd", folder));

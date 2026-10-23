@@ -14,9 +14,8 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "pyfiction/types.hpp"
-
 #include <fiction/layouts/gate_layout.hpp>
+#include <fiction/types.hpp>
 #include <fiction/verification/count_gate_types.hpp>
 
 #include <sstream>
@@ -113,10 +112,10 @@ Returns:
         .def_ro("num_and_xor", &stats::num_and_xor)
         .def_ro("num_other", &stats::num_other);
 
-    detail::register_count_gate_types<py_tec_network>(m);
-    detail::register_count_gate_types<py_aig_network>(m);
-    detail::register_count_gate_types<py_xag_network>(m);
-    detail::register_count_gate_types<py_mig_network>(m);
+    detail::register_count_gate_types<fiction::networks::named_technology_network>(m);
+    detail::register_count_gate_types<fiction::networks::named_aig_network>(m);
+    detail::register_count_gate_types<fiction::networks::named_xag_network>(m);
+    detail::register_count_gate_types<fiction::networks::named_mig_network>(m);
     detail::register_count_gate_types<fiction::layouts::cartesian_gate_layout>(m);
     detail::register_count_gate_types<fiction::layouts::shifted_cartesian_gate_layout>(m);
     detail::register_count_gate_types<fiction::layouts::hexagonal_gate_layout>(m);
