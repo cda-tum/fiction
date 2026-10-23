@@ -25,9 +25,9 @@
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
-#include <fiction/types.hpp>
 
 #include <fmt/format.h>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <array>
@@ -72,18 +72,18 @@ try
             "t_pruning [s]"             // double
     };
 
-    const auto truth_tables_and_names =
-        std::array<std::pair<std::vector<tt>, std::string>, 11>{{{std::vector<tt>{create_and3_tt()}, "and3"},
-                                                                 {std::vector<tt>{create_xor_and_tt()}, "xor_and"},
-                                                                 {std::vector<tt>{create_or_and_tt()}, "or_and"},
-                                                                 {std::vector<tt>{create_onehot_tt()}, "onehot"},
-                                                                 {std::vector<tt>{create_maj_tt()}, "maj"},
-                                                                 {std::vector<tt>{create_gamble_tt()}, "gamble"},
-                                                                 {std::vector<tt>{create_dot_tt()}, "dot"},
-                                                                 {std::vector<tt>{create_ite_tt()}, "ite"},
-                                                                 {std::vector<tt>{create_and_xor_tt()}, "and_xor"},
-                                                                 {std::vector<tt>{create_xor3_tt()}, "xor3"},
-                                                                 {std::vector<tt>{create_ite_tt()}, "21_mux"}}};
+    const auto truth_tables_and_names = std::array<std::pair<std::vector<kitty::dynamic_truth_table>, std::string>, 11>{
+        {{std::vector<kitty::dynamic_truth_table>{create_and3_tt()}, "and3"},
+         {std::vector<kitty::dynamic_truth_table>{create_xor_and_tt()}, "xor_and"},
+         {std::vector<kitty::dynamic_truth_table>{create_or_and_tt()}, "or_and"},
+         {std::vector<kitty::dynamic_truth_table>{create_onehot_tt()}, "onehot"},
+         {std::vector<kitty::dynamic_truth_table>{create_maj_tt()}, "maj"},
+         {std::vector<kitty::dynamic_truth_table>{create_gamble_tt()}, "gamble"},
+         {std::vector<kitty::dynamic_truth_table>{create_dot_tt()}, "dot"},
+         {std::vector<kitty::dynamic_truth_table>{create_ite_tt()}, "ite"},
+         {std::vector<kitty::dynamic_truth_table>{create_and_xor_tt()}, "and_xor"},
+         {std::vector<kitty::dynamic_truth_table>{create_xor3_tt()}, "xor3"},
+         {std::vector<kitty::dynamic_truth_table>{create_ite_tt()}, "21_mux"}}};
 
     static const std::string folder = fmt::format("{}/gate_skeletons/skeleton_3_input/", EXPERIMENTS_PATH);
 

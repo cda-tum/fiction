@@ -47,6 +47,7 @@ template <typename Ntk, bool DrawIndexes = false, bool DrawHexTT = false>
 class technology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
 {
   public:
+    /** @brief Returns the DOT label for a network node. */
     [[nodiscard]] std::string node_label(const Ntk& ntk, const mockturtle::node<Ntk>& n) const override
     {
         if constexpr (DrawIndexes)
@@ -60,6 +61,7 @@ class technology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
         return node_label_callback(ntk, n);
     }
 
+    /** @brief Returns the DOT fill color for a network node. */
     [[nodiscard]] std::string node_fillcolor(const Ntk& ntk, const mockturtle::node<Ntk>& n) const override
     {
         if (ntk.is_pi(n))
@@ -347,6 +349,7 @@ template <typename Ntk, bool DrawIndexes = false>
 class color_view_drawer : public mockturtle::default_dot_drawer<Ntk>
 {
   public:
+    /** @brief Returns the DOT label for a network node. */
     [[nodiscard]] std::string node_label(const Ntk& ntk, const mockturtle::node<Ntk>& n) const override
     {
         if constexpr (DrawIndexes)
@@ -359,6 +362,7 @@ class color_view_drawer : public mockturtle::default_dot_drawer<Ntk>
         }
     }
 
+    /** @brief Returns the DOT fill color for a network node. */
     [[nodiscard]] std::string node_fillcolor(const Ntk& ntk, const mockturtle::node<Ntk>& n) const override
     {
         const auto c = ntk.edge_color(n);
@@ -369,6 +373,7 @@ class color_view_drawer : public mockturtle::default_dot_drawer<Ntk>
     }
 
   protected:
+    /** @brief DOT color names indexed by network color. */
     static constexpr const std::array<const char*, 8> COLORS{{"ghostwhite", "deepskyblue1", "darkseagreen2", "crimson",
                                                               "goldenrod1", "darkorchid2", "chocolate1", "gray28"}};
 };
@@ -395,6 +400,7 @@ class edge_color_view_drawer : public color_view_drawer<Ntk, DrawIndexes>
         return base_drawer::node_fillcolor(ntk, n);
     }
 
+    /** @brief Returns the DOT edge style for a colored signal. */
     [[nodiscard]] std::string signal_style(Ntk const& ntk, mockturtle::signal<Ntk> const& f) const override
     {
         const auto c = ntk.edge_color(mockturtle::edge<Ntk>{ntk.get_node(f), last_accessed});
@@ -434,7 +440,7 @@ void write_dot_network(const Ntk& ntk, std::ostream& os, const Drawer& drawer = 
  * @param ntk Network to write.
  * @param filename Path of the file to write.
  * @param drawer Drawer that decides the node labels, colors, and styles.
- * @throws std::ofstream::failure if the file cannot be opened.
+ * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
  */
 template <typename Ntk, typename Drawer = technology_dot_drawer<Ntk, true>>
 void write_dot_network(const Ntk& ntk, const std::string_view& filename, const Drawer& drawer = {})

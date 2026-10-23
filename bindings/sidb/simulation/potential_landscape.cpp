@@ -104,7 +104,12 @@ Args:
         .def("num_sidbs", &potential_landscape::num_sidbs, DOC(fiction_sidb_simulation_potential_landscape_num_sidbs))
         .def(
             "sites", [](const potential_landscape& land) { return *land.sites(); },
-            nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_sidb_simulation_potential_landscape_sites))
+            nb::call_guard<nb::gil_scoped_release>(),
+            R"doc(Returns a copy of the SiDB sites in raster order.
+
+Returns:
+    A Python list of lattice sites. Changing the list does not change the landscape.
+)doc")
         .def("defects", &potential_landscape::defects, DOC(fiction_sidb_simulation_potential_landscape_defects))
         .def("nm_distance", &potential_landscape::nm_distance, nb::arg("i"), nb::arg("j"),
              DOC(fiction_sidb_simulation_potential_landscape_nm_distance))

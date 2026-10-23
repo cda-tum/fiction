@@ -28,7 +28,8 @@
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/verify_logic_match.hpp>
-#include <fiction/types.hpp>
+
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <stdexcept>
 #include <vector>
@@ -62,8 +63,9 @@ TEST_CASE("Bestagon FO2 gate", "[verify-logic-match]")
 
         REQUIRE(!gs.empty());
 
-        CHECK(verify_logic_match(*bii, gs.front(), is_operational_params{}, std::vector<tt>{create_fan_out_tt()}, 0,
-                                 input_wires, output_wires) == operational_status::OPERATIONAL);
+        CHECK(verify_logic_match(*bii, gs.front(), is_operational_params{},
+                                 std::vector<kitty::dynamic_truth_table>{create_fan_out_tt()}, 0, input_wires,
+                                 output_wires) == operational_status::OPERATIONAL);
     }
 
     SECTION("Input one")
@@ -78,13 +80,15 @@ TEST_CASE("Bestagon FO2 gate", "[verify-logic-match]")
 
         SECTION("Correct index")
         {
-            CHECK(verify_logic_match(*bii, gs.front(), is_operational_params{}, std::vector<tt>{create_fan_out_tt()}, 1,
-                                     input_wires, output_wires) == operational_status::OPERATIONAL);
+            CHECK(verify_logic_match(*bii, gs.front(), is_operational_params{},
+                                     std::vector<kitty::dynamic_truth_table>{create_fan_out_tt()}, 1, input_wires,
+                                     output_wires) == operational_status::OPERATIONAL);
         }
         SECTION("Wrong input index")
         {
-            CHECK(verify_logic_match(*bii, gs.front(), is_operational_params{}, std::vector<tt>{create_fan_out_tt()}, 0,
-                                     input_wires, output_wires) == operational_status::NON_OPERATIONAL);
+            CHECK(verify_logic_match(*bii, gs.front(), is_operational_params{},
+                                     std::vector<kitty::dynamic_truth_table>{create_fan_out_tt()}, 0, input_wires,
+                                     output_wires) == operational_status::NON_OPERATIONAL);
         }
     }
 }
@@ -113,8 +117,9 @@ TEST_CASE("AND gate mirrored on the x-axis on the H-Si 111 surface", "[verify-lo
 
         REQUIRE(!gs.empty());
 
-        CHECK(verify_logic_match(*bii, gs.front(), is_operational_params{}, std::vector<tt>{create_and_tt()}, 2,
-                                 input_wires, output_wires) == operational_status::OPERATIONAL);
+        CHECK(verify_logic_match(*bii, gs.front(), is_operational_params{},
+                                 std::vector<kitty::dynamic_truth_table>{create_and_tt()}, 2, input_wires,
+                                 output_wires) == operational_status::OPERATIONAL);
     }
 
     SECTION("Left input zero and right input one")
@@ -132,12 +137,14 @@ TEST_CASE("AND gate mirrored on the x-axis on the H-Si 111 surface", "[verify-lo
 
         SECTION("Correct index")
         {
-            CHECK(verify_logic_match(*bii, gs.front(), op_params, std::vector<tt>{create_and_tt()}, 1, input_wires,
+            CHECK(verify_logic_match(*bii, gs.front(), op_params,
+                                     std::vector<kitty::dynamic_truth_table>{create_and_tt()}, 1, input_wires,
                                      output_wires) == operational_status::OPERATIONAL);
         }
         SECTION("Wrong input index")
         {
-            CHECK(verify_logic_match(*bii, gs.front(), op_params, std::vector<tt>{create_and_tt()}, 2, input_wires,
+            CHECK(verify_logic_match(*bii, gs.front(), op_params,
+                                     std::vector<kitty::dynamic_truth_table>{create_and_tt()}, 2, input_wires,
                                      output_wires) == operational_status::NON_OPERATIONAL);
         }
     }

@@ -1,4 +1,6 @@
-# SiDB Layout
+(sidb-layout)=
+
+# Layout
 
 An SiDB layout places SiDBs and surface defects on the lattice sites of one hydrogen-passivated silicon surface. The
 surface is a Bravais lattice with a two-site basis: two lattice vectors `a1` and `a2` plus the two basis sites
@@ -137,7 +139,7 @@ distribution per physically valid state beside a single copy of the simulated la
 
 ::::
 
-## Gate-library Coordinates
+## Gate-Library Coordinates
 
 SiDB gate libraries describe their gates on a grid whose rows are single SiDB rows. `apply_gate_library` maps these
 grid coordinates onto lattice sites with the following function.

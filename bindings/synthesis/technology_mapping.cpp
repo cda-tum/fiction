@@ -17,9 +17,9 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/synthesis/technology_mapping.hpp>
+#include <fiction/types.hpp>
 
 #include <mockturtle/algorithms/emap.hpp>
 
@@ -269,10 +269,10 @@ void register_technology_mapping(nb::module_& m)
         nb::sig("def all_supported_standard_functions() -> TechnologyMappingOptions"),
         "Return boolean mapping keywords for all supported standard functions.");
 
-    detail::register_technology_mapping_impl<py_tec_network>(m);
-    detail::register_technology_mapping_impl<py_aig_network>(m);
-    detail::register_technology_mapping_impl<py_xag_network>(m);
-    detail::register_technology_mapping_impl<py_mig_network>(m);
+    detail::register_technology_mapping_impl<fiction::networks::named_technology_network>(m);
+    detail::register_technology_mapping_impl<fiction::networks::named_aig_network>(m);
+    detail::register_technology_mapping_impl<fiction::networks::named_xag_network>(m);
+    detail::register_technology_mapping_impl<fiction::networks::named_mig_network>(m);
 }
 
 }  // namespace pyfiction

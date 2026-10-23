@@ -34,11 +34,13 @@
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
+#include <memory>
 #include <sstream>
 #include <string>
 
 using namespace fiction;
 using namespace fiction::layouts;
+using namespace fiction::networks;
 using namespace fiction::networks::io;
 using namespace fiction::physical_design;
 using namespace fiction::verification;
@@ -50,7 +52,7 @@ Ntk read_ntk(const std::string& name)
 
     std::ostringstream os{};
 
-    network_reader<tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
+    network_reader<std::shared_ptr<named_technology_network>> reader{fiction_experiments::benchmark_path(name), os};
 
     const auto nets = reader.get_networks();
 
@@ -61,8 +63,6 @@ Ntk read_ntk(const std::string& name)
 int main()
 try
 {
-    using gate_lyt = gate_layout<cartesian_layout>;
-
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
                             uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, double, double, float, std::string>
         optimization_exp{"optimization",
@@ -94,10 +94,10 @@ try
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        const auto benchmark_network = read_ntk<tec_nt>(benchmark);
+        const auto benchmark_network = read_ntk<named_technology_network>(benchmark);
 
         // perform layout generation with an OGD-based heuristic algorithm
-        auto       gate_layout = orthogonal<gate_lyt>(benchmark_network, {}, &orthogonal_stats);
+        auto       gate_layout = orthogonal<cartesian_layout>(benchmark_network, {}, &orthogonal_stats);
         const auto layout_copy = gate_layout.clone();
 
         //  compute critical path and throughput
@@ -117,7 +117,8 @@ try
         post_layout_optimization(gate_layout, post_layout_optimization_params, &post_layout_optimization_stats);
 
         // check equivalence
-        const auto eq_stats = equivalence_checking<gate_lyt, gate_lyt>(layout_copy, gate_layout);
+        const auto eq_stats =
+            equivalence_checking<cartesian_gate_layout, cartesian_gate_layout>(layout_copy, gate_layout);
 
         std::string eq_result{"NO"};
         if (eq_stats == eq_type::STRONG)

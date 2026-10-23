@@ -32,5 +32,5 @@ build:
       - asdf global uv latest
     build:
       html:
-        - PYTHONMALLOC=malloc uvx nox --non-interactive -s docs
+        - PYTHONMALLOC=malloc UV_LINK_MODE=copy uvx nox --non-interactive -s docs
         - mkdir -p $READTHEDOCS_OUTPUT/html && cp -R docs/_build/html/. $READTHEDOCS_OUTPUT/html

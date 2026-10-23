@@ -17,12 +17,15 @@ import pytest
 from mnt.pyfiction.layouts import (
     arrangement,
     cartesian_gate_layout,
+    cartesian_layout,
     coordinate,
     extent,
     hexagonal_gate_layout,
+    hexagonal_layout,
     layout_input_port,
     layout_object_id,
     shifted_cartesian_gate_layout,
+    shifted_cartesian_layout,
 )
 from mnt.pyfiction.synthesis import dynamic_truth_table
 from mnt.pyfiction.verification import critical_path_length_and_throughput, gate_level_drvs
@@ -99,29 +102,45 @@ def test_unknown_clocking_scheme_rejects_construction(make_layout: Callable[[], 
 
 
 @pytest.mark.parametrize(
-    "make_layout",
+    ("make_layout", "geometry"),
     [
         pytest.param(
             lambda: cartesian_gate_layout(extent=(3, 3, 1), clocking_scheme="2DDWave", layout_name="Layout"),
+            cartesian_layout,
             id="cartesian_gate_layout",
         ),
         pytest.param(
             lambda: shifted_cartesian_gate_layout(
                 arrangement.ODD_COLUMN, extent=(3, 3, 1), clocking_scheme="2DDWave", layout_name="Layout"
             ),
+            shifted_cartesian_layout,
             id="shifted_cartesian_gate_layout",
         ),
         pytest.param(
             lambda: hexagonal_gate_layout(
                 arrangement.EVEN_ROW, extent=(3, 3, 1), clocking_scheme="2DDWave", layout_name="Layout"
             ),
+            hexagonal_layout,
             id="hexagonal_gate_layout",
         ),
     ],
 )
-def test_gate_layout_inheritance(make_layout: Callable[[], GateLayout]) -> None:
-    """Expose clocked geometry through the placed layout."""
+def test_gate_layout_inheritance(
+    make_layout: Callable[[], GateLayout],
+    geometry: type[cartesian_layout | shifted_cartesian_layout | hexagonal_layout],
+) -> None:
+    """Preserve geometry, tuple placement, and the concrete class when cloning."""
     layout = make_layout()
+    assert isinstance(layout, geometry)
+    source = layout.create_pi("a", (0, 0))
+    assert layout.get_tile(source) == coordinate(0, 0)
+    clone = layout.clone()
+    assert type(clone) is type(layout)
+    assert clone.get_extent() == layout.get_extent()
+    if isinstance(layout, (shifted_cartesian_gate_layout, hexagonal_gate_layout)):
+        assert isinstance(clone, (shifted_cartesian_gate_layout, hexagonal_gate_layout))
+        assert clone.get_arrangement() == layout.get_arrangement()
+
     assert layout.incoming_clocked_zones((0, 0)) == []
     assert layout.outgoing_clocked_zones((2, 2)) == []
 

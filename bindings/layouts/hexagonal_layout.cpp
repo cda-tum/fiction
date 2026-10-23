@@ -19,6 +19,7 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/io/print_layout.hpp>
 
 #include <cstdint>
@@ -61,9 +62,14 @@ void register_hexagonal_layout(nb::module_& m, const char* name)
     // Keep the GIL for constant-time geometry access and mutation; releasing it costs more than these operations.
     nb::class_<Lyt>(m, name, HEXAGONAL_LAYOUT_DOC)
         .def(nb::init<fiction::layouts::arrangement>(), nb::arg("arrangement"),
-             extent_doc(DOC(fiction_layouts_hexagonal_layout_hexagonal_layout)).c_str())
+             parameter_doc(DOC(fiction_layouts_hexagonal_layout_hexagonal_layout),
+                           {{"size", "extent"}, {"a", "arrangement"}})
+                 .c_str())
         .def(nb::init<fiction::layouts::arrangement, const typename Lyt::extent&>(), nb::arg("arrangement"),
-             nb::arg("extent"), extent_doc(DOC(fiction_layouts_hexagonal_layout_hexagonal_layout)).c_str())
+             nb::arg("extent"),
+             parameter_doc(DOC(fiction_layouts_hexagonal_layout_hexagonal_layout),
+                           {{"size", "extent"}, {"a", "arrangement"}})
+                 .c_str())
         .def(
             "get_arrangement", [](const Lyt& lyt) { return lyt.get_arrangement(); },
             DOC(fiction_layouts_hexagonal_layout_get_arrangement))
@@ -79,7 +85,7 @@ void register_hexagonal_layout(nb::module_& m, const char* name)
         .def("contains_coordinate", &Lyt::contains_coordinate, nb::arg("c"), "Tests the half-open geometry bounds.")
         .def("area", &Lyt::area, DOC(fiction_layouts_hexagonal_layout_area))
         .def("resize", &Lyt::resize, nb::arg("extent"),
-             extent_doc(DOC(fiction_layouts_hexagonal_layout_resize)).c_str())
+             parameter_doc(DOC(fiction_layouts_hexagonal_layout_resize), {{"size", "extent"}}).c_str())
 
         .def("north", &Lyt::north, nb::arg("c"), DOC(fiction_layouts_hexagonal_layout_north))
         .def("north_east", &Lyt::north_east, nb::arg("c"), DOC(fiction_layouts_hexagonal_layout_north_east))
@@ -145,7 +151,8 @@ void register_hexagonal_layout(nb::module_& m, const char* name)
 
         .def(
             "coordinates",
-            [](const Lyt& lyt, const std::optional<py_coordinate> start, const std::optional<py_coordinate> stop)
+            [](const Lyt& lyt, const std::optional<fiction::layouts::layout_base::coordinate> start,
+               const std::optional<fiction::layouts::layout_base::coordinate> stop)
             {
                 std::vector<fiction::layouts::layout_base::coordinate> coords{};
                 if (!start && !stop)
@@ -161,7 +168,8 @@ void register_hexagonal_layout(nb::module_& m, const char* name)
             nb::call_guard<nb::gil_scoped_release>())
         .def(
             "ground_coordinates",
-            [](const Lyt& lyt, const std::optional<py_coordinate> start, const std::optional<py_coordinate> stop)
+            [](const Lyt& lyt, const std::optional<fiction::layouts::layout_base::coordinate> start,
+               const std::optional<fiction::layouts::layout_base::coordinate> stop)
             {
                 std::vector<fiction::layouts::layout_base::coordinate> coords{};
                 if (!start && !stop)
@@ -207,7 +215,7 @@ void register_hexagonal_layout(nb::module_& m, const char* name)
  */
 void register_hexagonal_layout(nb::module_& m)
 {
-    detail::register_hexagonal_layout<py_hexagonal_layout>(m, "hexagonal_layout");
+    detail::register_hexagonal_layout<fiction::layouts::hexagonal_layout>(m, "hexagonal_layout");
 }
 
 }  // namespace pyfiction

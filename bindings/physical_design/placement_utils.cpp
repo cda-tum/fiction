@@ -15,11 +15,11 @@
  */
 
 #include "fiction/layouts/layout_base.hpp"
-#include "pyfiction/types.hpp"
+#include "pyfiction/types.hpp"  // NOLINT(misc-include-cleaner): preserves coordinate and extent tuple signatures.
 
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/placement_utils.hpp>
-
-#include <mockturtle/traits.hpp>
+#include <fiction/types.hpp>
 
 #include <optional>
 
@@ -37,36 +37,44 @@ namespace pyfiction
 namespace detail
 {
 
-/** @brief Bind placement at a known coordinate. @tparam Lyt Gate layout. @tparam Ntk Network. @param m Python module.
+/** @brief Bind placement at a known coordinate. @tparam Lyt Gate layout. @param m Python module.
  */
-template <typename Lyt, typename Ntk>
+template <typename Lyt>
 void register_place(nb::module_& m)
 {
     // Keep the GIL: each overload places one gate with at most three inputs.
     m.def(
         "place",
-        [](Lyt& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk, const mockturtle::node<Ntk>& n)
-        { return fiction::physical_design::place(lyt, t, ntk, n); }, nb::arg("lyt"), nb::arg("t"), nb::arg("ntk"),
-        nb::arg("n"), "Places a primary input at the given coordinate and returns its output port.");
+        [](Lyt& lyt, const fiction::layouts::layout_base::coordinate& t,
+           const fiction::networks::named_technology_network&       ntk,
+           const fiction::networks::named_technology_network::node& n)
+        { return fiction::physical_design::place(lyt, t, ntk, n); },
+        nb::arg("lyt"), nb::arg("t"), nb::arg("ntk"), nb::arg("n"),
+        "Places a primary input at the given coordinate and returns its output port.");
 
     m.def(
         "place",
-        [](Lyt& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
-           const typename Lyt::object_id& a) { return fiction::physical_design::place(lyt, t, ntk, n, a); },
+        [](Lyt& lyt, const fiction::layouts::layout_base::coordinate& t,
+           const fiction::networks::named_technology_network&       ntk,
+           const fiction::networks::named_technology_network::node& n, const typename Lyt::object_id& a)
+        { return fiction::physical_design::place(lyt, t, ntk, n, a); },
         nb::arg("lyt"), nb::arg("t"), nb::arg("ntk"), nb::arg("n"), nb::arg("a"));
 
     m.def(
         "place",
-        [](Lyt& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
-           const typename Lyt::object_id& a, const typename Lyt::object_id& b,
-           const std::optional<bool>& c = std::nullopt)
+        [](Lyt& lyt, const fiction::layouts::layout_base::coordinate& t,
+           const fiction::networks::named_technology_network&       ntk,
+           const fiction::networks::named_technology_network::node& n, const typename Lyt::object_id& a,
+           const typename Lyt::object_id& b, const std::optional<bool>& c = std::nullopt)
         { return fiction::physical_design::place(lyt, t, ntk, n, a, b, c); },
         nb::arg("lyt"), nb::arg("t"), nb::arg("ntk"), nb::arg("n"), nb::arg("a"), nb::arg("b"), nb::arg("c"));
 
     m.def(
         "place",
-        [](Lyt& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
-           const typename Lyt::object_id& a, const typename Lyt::object_id& b, const typename Lyt::object_id& c)
+        [](Lyt& lyt, const fiction::layouts::layout_base::coordinate& t,
+           const fiction::networks::named_technology_network&       ntk,
+           const fiction::networks::named_technology_network::node& n, const typename Lyt::object_id& a,
+           const typename Lyt::object_id& b, const typename Lyt::object_id& c)
         { return fiction::physical_design::place(lyt, t, ntk, n, a, b, c); },
         nb::arg("lyt"), nb::arg("t"), nb::arg("ntk"), nb::arg("n"), nb::arg("a"), nb::arg("b"), nb::arg("c"));
 }
@@ -78,9 +86,9 @@ void register_placement_utils(nb::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::register_place<py_cartesian_gate_layout, py_tec_network>(m);
-    detail::register_place<py_shifted_cartesian_gate_layout, py_tec_network>(m);
-    detail::register_place<py_hexagonal_gate_layout, py_tec_network>(m);
+    detail::register_place<fiction::layouts::cartesian_gate_layout>(m);
+    detail::register_place<fiction::layouts::shifted_cartesian_gate_layout>(m);
+    detail::register_place<fiction::layouts::hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction

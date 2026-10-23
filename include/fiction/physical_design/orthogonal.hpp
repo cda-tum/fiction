@@ -24,10 +24,10 @@
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/networks/network_utils.hpp"
-#include "fiction/networks/technology_network.hpp"
 #include "fiction/networks/views/edge_color_view.hpp"
 #include "fiction/physical_design/placement_utils.hpp"
 #include "fiction/synthesis/fanout_substitution.hpp"
+#include "fiction/types.hpp"
 #include "fiction/utils/progress.hpp"
 
 #include <fmt/format.h>
@@ -37,12 +37,10 @@
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 #include <mockturtle/views/fanout_view.hpp>
-#include <mockturtle/views/names_view.hpp>
 #include <mockturtle/views/topo_view.hpp>
 
 #include <algorithm>
 #include <cassert>
-#include <concepts>
 #include <cstdint>
 #include <iostream>
 #include <optional>
@@ -73,11 +71,16 @@ struct orthogonal_physical_design_params
     utils::progress_callback on_progress{};
 };
 
+/** @brief Statistics for orthogonal physical design. */
 struct orthogonal_physical_design_stats
 {
+    /** @brief Total algorithm runtime. */
     mockturtle::stopwatch<>::duration time_total{0};
 
-    uint64_t x_size{0ull}, y_size{0ull};
+    /** @brief Layout extent along the x axis. */
+    uint64_t x_size{0ull};
+    /** @brief Layout extent along the y axis. */
+    uint64_t y_size{0ull};
     /** @brief Number of logic gates, excluding primary inputs and outputs. */
     uint64_t num_gates{0ull};
     /** @brief Number of physical wires, excluding primary inputs and outputs. */
@@ -85,6 +88,7 @@ struct orthogonal_physical_design_stats
     /** @brief Number of crossing-layer wires above occupied ground-layer tiles. */
     uint64_t num_crossings{0ull};
 
+    /** @brief Writes the collected statistics to the output stream. */
     void report(std::ostream& out = std::cout) const
     {
         out << fmt::format("[i] total time      = {:.2f} secs\n", mockturtle::to_seconds(time_total));
@@ -98,29 +102,42 @@ struct orthogonal_physical_design_stats
 namespace detail
 {
 
-template <typename Ntk>
+/** @brief Owns the colored traversal and its directional colors. */
 struct coloring_container
 {
-    explicit coloring_container(const Ntk& ntk) :
+    /** @brief Colors the named technology-network traversal. */
+    explicit coloring_container(
+        const mockturtle::topo_view<mockturtle::fanout_view<fiction::networks::named_technology_network>>& ntk) :
             color_ntk{ntk},
             color_east{color_ntk.new_color()},
             color_south{color_ntk.new_color()}
     {}
 
-    networks::views::out_of_place_edge_color_view<Ntk> color_ntk;
+    /** @brief Named traversal with separate node and edge colors. */
+    networks::views::out_of_place_edge_color_view<
+        mockturtle::topo_view<mockturtle::fanout_view<fiction::networks::named_technology_network>>>
+        color_ntk;
 
-    uint32_t color_null = 0ul, color_east, color_south;
+    /** @brief Identifier for uncolored edges. */
+    uint32_t color_null = 0ul;
+    /** @brief Identifier for eastward edges. */
+    uint32_t color_east;
+    /** @brief Identifier for southward edges. */
+    uint32_t color_south;
 
+    /** @brief Returns the other direction color. */
     [[nodiscard]] uint32_t opposite_color(const uint32_t c) const noexcept
     {
         return c == color_east ? color_south : color_east;
     }
 };
 
-template <typename Ntk>
-void recursively_paint_edges(const coloring_container<Ntk>&                                              ctn,
-                             const mockturtle::edge<networks::views::out_of_place_edge_color_view<Ntk>>& e,
-                             const uint32_t                                                              c) noexcept
+/** @brief Paints adjacent edges with alternating direction colors. */
+inline void recursively_paint_edges(
+    const coloring_container&                                                                          ctn,
+    const mockturtle::edge<networks::views::out_of_place_edge_color_view<
+        mockturtle::topo_view<mockturtle::fanout_view<fiction::networks::named_technology_network>>>>& e,
+    const uint32_t                                                                                     c) noexcept
 {
     // exit condition: edge is already painted
     if (ctn.color_ntk.edge_color(e) != ctn.color_null)
@@ -152,13 +169,17 @@ void recursively_paint_edges(const coloring_container<Ntk>&                     
                                     });
 }
 
-template <typename Ntk>
-coloring_container<Ntk> east_south_edge_coloring(const Ntk& ntk) noexcept
+/**
+ * @brief Colors the named traversal for orthogonal placement.
+ * @param ntk Topologically ordered named technology network to read.
+ * @return Traversal with its own node and edge color storage.
+ */
+inline coloring_container east_south_edge_coloring(
+    const mockturtle::topo_view<mockturtle::fanout_view<fiction::networks::named_technology_network>>& ntk) noexcept
 {
-    coloring_container<Ntk> ctn{ntk};
-    mockturtle::topo_view   rtv{ntk};
+    coloring_container ctn{ntk};
 
-    rtv.foreach_gate_reverse(
+    ntk.foreach_gate_reverse(
         [&](const auto& n)
         {
             const auto finc = networks::fanin_edges(ctn.color_ntk, n);
@@ -176,21 +197,23 @@ coloring_container<Ntk> east_south_edge_coloring(const Ntk& ntk) noexcept
             if (std::ranges::all_of(finc.fanin_edges,
                                     [&ctn](const auto& fe) { return ctn.color_ntk.edge_color(fe) == ctn.color_east; }))
             {
-                ctn.color_ntk.paint(mockturtle::node<Ntk>{n}, ctn.color_east);
+                ctn.color_ntk.paint(fiction::networks::named_technology_network::node{n}, ctn.color_east);
             }
             // else, if all incoming edges are colored south, paint the node south as well
             else if (std::ranges::all_of(finc.fanin_edges, [&ctn](const auto& fe)
                                          { return ctn.color_ntk.edge_color(fe) == ctn.color_south; }))
             {
-                ctn.color_ntk.paint(mockturtle::node<Ntk>{n}, ctn.color_south);
+                ctn.color_ntk.paint(fiction::networks::named_technology_network::node{n}, ctn.color_south);
             }
         });
 
     return ctn;
 }
 
-template <typename Ntk>
-bool is_east_south_colored(const Ntk& ntk) noexcept
+/** @brief Checks that fanouts use distinct direction colors. */
+inline bool is_east_south_colored(
+    const networks::views::out_of_place_edge_color_view<
+        mockturtle::topo_view<mockturtle::fanout_view<fiction::networks::named_technology_network>>>& ntk) noexcept
 {
     bool is_properly_colored = true;
     ntk.foreach_node(
@@ -223,9 +246,9 @@ bool is_east_south_colored(const Ntk& ntk) noexcept
     return is_properly_colored;
 }
 
-template <typename Ntk>
-uint32_t is_eastern_po_orientation_available(const coloring_container<Ntk>& ctn,
-                                             const mockturtle::node<Ntk>&   n) noexcept
+/** @brief Checks whether the eastern side can host a primary output. */
+inline bool is_eastern_po_orientation_available(const coloring_container&                                ctn,
+                                                const fiction::networks::named_technology_network::node& n) noexcept
 {
     bool eastern_side_available = true;
 
@@ -244,9 +267,9 @@ uint32_t is_eastern_po_orientation_available(const coloring_container<Ntk>& ctn,
     return eastern_side_available;
 }
 
-template <typename Lyt, typename Ntk>
-fiction::layouts::layout_base::extent determine_layout_size(const coloring_container<Ntk>& ctn,
-                                                            const uint32_t                 num_multi_output_nodes)
+/** @brief Computes the extent required by colored gates and primary outputs. */
+inline fiction::layouts::layout_base::extent determine_layout_size(const coloring_container& ctn,
+                                                                   const uint32_t            num_multi_output_nodes)
 {
     uint64_t x = 0ull, y = ctn.color_ntk.num_pis() == 0 ? 0 : ctn.color_ntk.num_pis() - 1;
     ctn.color_ntk.foreach_node(
@@ -339,11 +362,17 @@ typename Lyt::object_id wire_south(Lyt& lyt, const fiction::layouts::layout_base
     return a;
 }
 
-template <typename Lyt, typename Ntk>
-typename Lyt::object_id
-connect_and_place(Lyt& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk,
-                  const mockturtle::node<Ntk>& n, fiction::layouts::layout_base::coordinate pre1_t,
-                  fiction::layouts::layout_base::coordinate pre2_t, const std::optional<bool>& c = std::nullopt)
+/**
+ * @brief Routes ordered inputs to a placed two-input gate.
+ * @tparam Lyt Output layout type.
+ */
+template <typename Lyt>
+typename Lyt::object_id connect_and_place(Lyt& lyt, const fiction::layouts::layout_base::coordinate& t,
+                                          const fiction::networks::named_technology_network&       ntk,
+                                          const fiction::networks::named_technology_network::node& n,
+                                          fiction::layouts::layout_base::coordinate                pre1_t,
+                                          fiction::layouts::layout_base::coordinate                pre2_t,
+                                          const std::optional<bool>&                               c = std::nullopt)
 {
     const bool reversed = pre2_t < pre1_t;
     if (reversed)
@@ -355,10 +384,15 @@ connect_and_place(Lyt& lyt, const fiction::layouts::layout_base::coordinate& t, 
     return reversed ? place(lyt, t, ntk, n, west, north, c) : place(lyt, t, ntk, n, north, west, c);
 }
 
-template <typename Lyt, typename Ntk>
-typename Lyt::object_id connect_and_place(Lyt& lyt, const fiction::layouts::layout_base::coordinate& t, const Ntk& ntk,
-                                          const mockturtle::node<Ntk>&                     n,
-                                          const fiction::layouts::layout_base::coordinate& pre_t)
+/**
+ * @brief Routes one input to a placed unary gate.
+ * @tparam Lyt Output layout type.
+ */
+template <typename Lyt>
+typename Lyt::object_id connect_and_place(Lyt& lyt, const fiction::layouts::layout_base::coordinate& t,
+                                          const fiction::networks::named_technology_network&       ntk,
+                                          const fiction::networks::named_technology_network::node& n,
+                                          const fiction::layouts::layout_base::coordinate&         pre_t)
 {
     if (lyt.is_westwards_of(t, pre_t))
     {
@@ -386,18 +420,18 @@ typename Lyt::object_id connect_and_place(Lyt& lyt, const fiction::layouts::layo
  * =→=→...→O
  *
  * @tparam Lyt Desired gate-level layout type.
- * @tparam Ntk Network type that acts as specification.
  * @param layout Current gate-level layout.
  * @param ctn Contains the colored network.
  * @param po_counter Counter for POs.
  * @param node2pos Mapping from network nodes to layout signals, i.e., a pointer to their position in the layout. The
  * map is used to fetch location of the fanins. The `mockturtle::node_map` is not updated by this function.
  */
-template <typename Ntk, typename Lyt>
-void place_outputs(Lyt& layout, const coloring_container<Ntk>& ctn, uint32_t po_counter,
-                   const mockturtle::node_map<typename Lyt::object_id, decltype(ctn.color_ntk)>& node2pos)
+template <typename Lyt>
+void place_outputs(
+    Lyt& layout, const coloring_container& ctn, uint32_t po_counter,
+    const mockturtle::node_map<typename Lyt::object_id, fiction::networks::named_technology_network>& node2pos)
 {
-    std::vector<mockturtle::node<Ntk>> output_nodes{};
+    std::vector<fiction::networks::named_technology_network::node> output_nodes{};
 
     ctn.color_ntk.foreach_po(
         [&po_counter, &output_nodes, &node2pos, &ctn, &layout](const auto& po)
@@ -464,10 +498,7 @@ void place_outputs(Lyt& layout, const coloring_container<Ntk>& ctn, uint32_t po_
 /**
  * Implementation of the orthogonal physical design algorithm.
  *
- * The specification network is converted to a `technology_network` before anything else happens, so this class is
- * templated on the layout type only. Carrying the caller's network type through the whole implementation would
- * duplicate every member for each network type the caller happens to use, without a single line of the body depending
- * on it. The conversion lives in the `orthogonal` entry point below.
+ * The named technology network has normalized fanout. This class specializes only the output layout type.
  *
  * @tparam Lyt Gate-level layout type.
  */
@@ -482,8 +513,8 @@ class orthogonal_impl
      * @param p The parameters for the orthogonal physical design algorithm.
      * @param st The statistics object to record execution details.
      */
-    orthogonal_impl(const mockturtle::names_view<networks::technology_network>& src,
-                    orthogonal_physical_design_params p, orthogonal_physical_design_stats& st) :
+    orthogonal_impl(const fiction::networks::named_technology_network& src, orthogonal_physical_design_params p,
+                    orthogonal_physical_design_stats& st) :
             ntk{mockturtle::fanout_view{src}},
             ps{std::move(p)},
             pst{st}
@@ -500,7 +531,9 @@ class orthogonal_impl
         // compute a coloring
         const auto ctn = east_south_edge_coloring(ntk);
 
-        mockturtle::node_map<typename Lyt::object_id, decltype(ctn.color_ntk)> node2pos{ctn.color_ntk};
+        // Use source node IDs and include nodes outside the topological traversal when sizing the map.
+        mockturtle::node_map<typename Lyt::object_id, fiction::networks::named_technology_network> node2pos{
+            static_cast<const fiction::networks::named_technology_network&>(ctn.color_ntk)};
 
         // find multi-output nodes
         std::vector<mockturtle::node<decltype(ntk)>> output_nodes{};
@@ -521,10 +554,11 @@ class orthogonal_impl
 
         // instantiate the layout
         auto layout = layouts::make_gate_level_layout<Lyt>(ps.layout_arrangement,
-                                                           determine_layout_size<Lyt>(ctn, num_multi_output_nodes),
+                                                           determine_layout_size(ctn, num_multi_output_nodes),
                                                            layouts::clocking::twoddwave(ps.number_of_clock_phases));
 
-        mockturtle::node_map<typename Lyt::object_id, decltype(ctn.color_ntk)> pi2node{ctn.color_ntk};
+        mockturtle::node_map<typename Lyt::object_id, fiction::networks::named_technology_network> pi2node{
+            static_cast<const fiction::networks::named_technology_network&>(ctn.color_ntk)};
 
         // first x-pos to use for gates is 1 because PIs take up the 0th column
         fiction::layouts::layout_base::coordinate latest_pos{1, 0};
@@ -679,7 +713,8 @@ class orthogonal_impl
         layout.set_input_order(input_order);
 
         // restore possibly set signal names
-        networks::restore_names(ctn.color_ntk, layout, node2pos);
+        networks::restore_names(static_cast<const fiction::networks::named_technology_network&>(ctn.color_ntk), layout,
+                                node2pos);
 
         // statistical information
         pst.x_size        = layout.width();
@@ -692,7 +727,7 @@ class orthogonal_impl
     }
 
   private:
-    mockturtle::topo_view<mockturtle::fanout_view<mockturtle::names_view<networks::technology_network>>> ntk;
+    mockturtle::topo_view<mockturtle::fanout_view<fiction::networks::named_technology_network>> ntk;
 
     orthogonal_physical_design_params ps;
     orthogonal_physical_design_stats& pst;
@@ -728,27 +763,20 @@ class orthogonal_impl
  *
  * May throw a high_degree_fanin_exception if `ntk` contains any node with a fan-in larger than 2.
  *
- * @tparam Lyt Desired gate-level layout type.
- * @tparam Ntk Network type that acts as specification.
- * @param ntk The network that is to place and route.
+ * @tparam Geometry Coordinate geometry of the returned gate-level layout.
+ * @param ntk Named technology network to place and route.
  * @param ps Parameters.
  * @param pst Statistics.
- * @return A gate-level layout of type `Lyt` that implements `ntk` as an FCN circuit.
- * @throws std::invalid_argument If `Lyt` is a shifted Cartesian or hexagonal layout and `ps.layout_arrangement` is
- * empty.
+ * @return A gate-level layout of type `gate_layout<Geometry>` that implements `ntk` as an FCN circuit.
+ * @throws std::invalid_argument If `gate_layout<Geometry>` is a shifted Cartesian or hexagonal layout and
+ * `ps.layout_arrangement` is empty.
  */
-template <typename Lyt, typename Ntk>
-Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
-               orthogonal_physical_design_stats* pst = nullptr)
+template <typename Geometry>
+layouts::gate_layout<Geometry> orthogonal(const fiction::networks::named_technology_network& ntk,
+                                          orthogonal_physical_design_params                  ps  = {},
+                                          orthogonal_physical_design_stats*                  pst = nullptr)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
-    static_assert(mockturtle::is_network_type_v<Ntk>,
-                  "Ntk is not a network type");  // Ntk is being converted to a networks::technology_network anyway,
-                                                 // therefore, this is the only relevant check here
-
-    layouts::require_arrangement<Lyt>(ps.layout_arrangement);
+    layouts::require_arrangement<layouts::gate_layout<Geometry>>(ps.layout_arrangement);
 
     // check for input degree
     if (networks::has_high_degree_fanin_nodes(ntk, 2))
@@ -756,9 +784,9 @@ Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
         throw networks::high_degree_fanin_exception();
     }
 
-    orthogonal_physical_design_stats st{};
-    detail::orthogonal_impl<Lyt>     p{
-        synthesis::fanout_substitution<mockturtle::names_view<networks::technology_network>>(ntk), ps, st};
+    orthogonal_physical_design_stats                        st{};
+    detail::orthogonal_impl<layouts::gate_layout<Geometry>> p{
+        synthesis::fanout_substitution<fiction::networks::named_technology_network>(ntk), std::move(ps), st};
 
     auto result = p.run();
 

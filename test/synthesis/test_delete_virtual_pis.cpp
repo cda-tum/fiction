@@ -23,6 +23,7 @@
 #include <fiction/networks/views/static_depth_view.hpp>
 #include <fiction/networks/virtual_pi_network.hpp>
 #include <fiction/synthesis/delete_virtual_pis.hpp>
+#include <fiction/types.hpp>
 
 #include <mockturtle/algorithms/equivalence_checking.hpp>
 #include <mockturtle/algorithms/miter.hpp>
@@ -30,16 +31,36 @@
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/networks/xmg.hpp>
-#include <mockturtle/views/names_view.hpp>
 
 using namespace fiction;
 using namespace fiction::networks;
 using namespace fiction::networks::views;
 using namespace fiction::synthesis;
 
+TEST_CASE("Delete virtual PIs from a ranked AIG", "[delete-virtual-pis]")
+{
+    virtual_pi_network<mockturtle::aig_network> source{};
+    const auto                                  real = source.create_pi();
+    const auto                                  copy = source.create_virtual_pi(real);
+    source.create_po(source.create_and(real, copy));
+
+    const mutable_rank_view ranked{source};
+    auto                    result = delete_virtual_pis(ranked);
+    result.update_ranks();
+
+    CHECK(result.num_pis() == 1);
+    CHECK(result.num_virtual_pis() == 0);
+    mockturtle::aig_network expected{};
+    expected.create_po(expected.create_pi());
+    const auto miter = mockturtle::miter<mockturtle::aig_network>(expected, result);
+    REQUIRE(miter.has_value());
+    // NOLINTNEXTLINE(bugprone-unchecked-optional-access): REQUIRE guards the value.
+    CHECK(mockturtle::equivalence_checking(*miter).value_or(false));
+}
+
 TEST_CASE("Check name conservation", "[delete-virtual-pis]")
 {
-    virtual_pi_network<mockturtle::names_view<technology_network>> vpi{};
+    virtual_pi_network<named_technology_network> vpi{};
 
     const auto a  = vpi.create_pi();
     const auto b  = vpi.create_pi();
@@ -247,5 +268,41 @@ TEMPLATE_TEST_CASE("Remove PIs and check equivalence", "[delete-virtual-pis]", m
                 }
             }
         }
+    }
+}
+
+TEST_CASE("Primary outputs driven by virtual PIs are mapped to the real PI", "[delete-virtual-pis]")
+{
+    virtual_pi_network<technology_network> vpi{};
+
+    const auto a   = vpi.create_pi();
+    const auto b   = vpi.create_pi();
+    const auto a_v = vpi.create_virtual_pi(a);
+    const auto f1  = vpi.create_and(a, b);
+    vpi.create_po(f1);
+    vpi.create_po(a_v);
+
+    const auto non_vpi = delete_virtual_pis(vpi);
+
+    CHECK(non_vpi.num_pis() == 2);
+    CHECK(non_vpi.num_pos() == 2);
+    CHECK(non_vpi.size() == vpi.size() - vpi.num_virtual_pis());
+
+    technology_network tec{};
+
+    const auto x1 = tec.create_pi();
+    const auto x2 = tec.create_pi();
+    tec.create_po(tec.create_and(x1, x2));
+    tec.create_po(x1);
+
+    const auto maybe_miter = mockturtle::miter<technology_network>(tec, non_vpi);
+    REQUIRE(maybe_miter.has_value());
+
+    if (maybe_miter.has_value())  // the optional-access check does not model REQUIRE
+    {
+        mockturtle::equivalence_checking_stats st{};
+        const auto                             cec = mockturtle::equivalence_checking(*maybe_miter, {}, &st);
+        REQUIRE(cec.has_value());
+        CHECK(cec.value_or(false));
     }
 }

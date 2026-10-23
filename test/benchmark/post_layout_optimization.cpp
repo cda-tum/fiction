@@ -24,19 +24,21 @@
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/physical_design/post_layout_optimization.hpp>
+#include <fiction/synthesis/network_conversion.hpp>
+#include <fiction/types.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 
 using namespace fiction;
+using namespace fiction::networks;
 using namespace fiction::layouts;
 using namespace fiction::physical_design;
 
 TEST_CASE("Benchmark Post-Layout Optimization", "[benchmark]")
 {
-    using gate_layout = fiction::layouts::gate_layout<cartesian_layout>;
-
-    const auto ntk    = blueprints::parity_network<mockturtle::aig_network>();
-    const auto layout = orthogonal<gate_layout>(ntk);
+    const auto ntk = blueprints::parity_network<mockturtle::aig_network>();
+    const auto layout =
+        orthogonal<cartesian_layout>(fiction::synthesis::convert_network<named_technology_network>(ntk));
 
     post_layout_optimization_params full_optimization_params{};
 

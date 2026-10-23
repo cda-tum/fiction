@@ -47,7 +47,8 @@ void register_read_sqd_layout(nb::module_& m)
 
     m.def("read_sqd_layout",
           nb::overload_cast<const std::string_view&, const std::string_view&>(&fiction::sidb::io::read_sqd_layout),
-          nb::arg("filename"), nb::arg("layout_name") = "", DOC(fiction_sidb_io_read_sqd_layout_2),
+          nb::arg("filename"), nb::arg("layout_name") = "",
+          parameter_doc(DOC(fiction_sidb_io_read_sqd_layout_2), {{"name", "layout_name"}}).c_str(),
           nb::call_guard<nb::gil_scoped_release>());
 }
 

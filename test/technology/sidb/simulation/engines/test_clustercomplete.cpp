@@ -38,7 +38,6 @@
 #include <fiction/technology/sidb/simulation/engines/clustercomplete.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
-#include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
 #include <kitty/constructors.hpp>
@@ -1445,7 +1444,7 @@ TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 un
 
 TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete]")
 {
-    hex_gate_clk_lyt gate_lyt{arrangement::EVEN_ROW, {3, 3}};
+    hexagonal_gate_layout gate_lyt{arrangement::EVEN_ROW, {3, 3}};
     /** @brief NAND function with two declared input slots. */
     kitty::dynamic_truth_table nand_function{2};
     kitty::create_from_hex_string(nand_function, "7");

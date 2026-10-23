@@ -14,10 +14,8 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
-
 #include <fiction/networks/io/dot_drawers.hpp>
+#include <fiction/types.hpp>
 
 #include <string>
 
@@ -58,7 +56,17 @@ void register_write_dot_network(nb::module_& m)
                     ntk, filename);
             }
         },
-        nb::arg("network"), nb::arg("filename"), nb::arg("indexes") = true, DOC(fiction_networks_io_write_dot_network),
+        nb::arg("network"), nb::arg("filename"), nb::arg("indexes") = true,
+        R"doc(Write a logic network to a DOT file with gate-type colors.
+
+Args:
+    network: Logic network to write.
+    filename: Path of the output file.
+    indexes: Include node indices in labels. Defaults to True.
+
+Raises:
+    RuntimeError: The output file cannot be written.
+)doc",
         nb::call_guard<nb::gil_scoped_release>());
 }
 
@@ -70,10 +78,10 @@ void register_write_dot_network(nb::module_& m)
  */
 void register_dot_drawers(nb::module_& m)
 {
-    detail::register_write_dot_network<py_tec_network>(m);
-    detail::register_write_dot_network<py_aig_network>(m);
-    detail::register_write_dot_network<py_xag_network>(m);
-    detail::register_write_dot_network<py_mig_network>(m);
+    detail::register_write_dot_network<fiction::networks::named_technology_network>(m);
+    detail::register_write_dot_network<fiction::networks::named_aig_network>(m);
+    detail::register_write_dot_network<fiction::networks::named_xag_network>(m);
+    detail::register_write_dot_network<fiction::networks::named_mig_network>(m);
 }
 
 }  // namespace pyfiction

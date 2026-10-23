@@ -383,7 +383,7 @@ inline void write_sqd_layout(const layout& lyt, std::ostream& os, utils::progres
  * @param lyt Layout to write.
  * @param filename File to write into.
  * @param on_progress Receives completed dot and defect records.
- * @throws std::ofstream::failure if the file cannot be opened.
+ * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
  */
 inline void write_sqd_layout(const layout& lyt, const std::string_view& filename,
                              utils::progress_callback on_progress = {})

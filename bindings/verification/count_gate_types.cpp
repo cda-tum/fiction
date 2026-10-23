@@ -14,9 +14,8 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
-
+#include <fiction/layouts/gate_layout.hpp>
+#include <fiction/types.hpp>
 #include <fiction/verification/count_gate_types.hpp>
 
 #include <sstream>
@@ -48,7 +47,17 @@ void register_count_gate_types(nb::module_& m)
             fiction::verification::count_gate_types(ntk_or_lyt, &stats);
             return stats;
         },
-        nb::arg("ntk_or_lyt"), nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_verification_count_gate_types));
+        nb::arg("ntk_or_lyt"), nb::call_guard<nb::gil_scoped_release>(),
+        R"doc(Return gate-type counts for a logic network or gate-level layout.
+Primary terminals and network constants do not enter the counts. Placed wires
+count as fanouts when they drive multiple inputs, or as buffers otherwise.
+
+Args:
+    ntk_or_lyt: Network or gate-level layout to inspect.
+
+Returns:
+    A count_gate_types_stats object containing the counts.
+)doc");
 }
 
 }  // namespace detail
@@ -71,7 +80,14 @@ void register_count_gate_types(nb::module_& m)
                 st.report(os, detailed);
                 return os.str();
             },
-            nb::arg("detailed") = false, DOC(fiction_verification_count_gate_types_stats_report))
+            nb::arg("detailed") = false, R"doc(Return the gate-count report as a string.
+
+Args:
+    detailed: List every gate type when True; otherwise combine less-common types under other. Defaults to False.
+
+Returns:
+    The formatted report.
+)doc")
         .def_ro("num_fanout", &stats::num_fanout)
         .def_ro("num_buf", &stats::num_buf)
         .def_ro("num_inv", &stats::num_inv)
@@ -96,13 +112,13 @@ void register_count_gate_types(nb::module_& m)
         .def_ro("num_and_xor", &stats::num_and_xor)
         .def_ro("num_other", &stats::num_other);
 
-    detail::register_count_gate_types<py_tec_network>(m);
-    detail::register_count_gate_types<py_aig_network>(m);
-    detail::register_count_gate_types<py_xag_network>(m);
-    detail::register_count_gate_types<py_mig_network>(m);
-    detail::register_count_gate_types<py_cartesian_gate_layout>(m);
-    detail::register_count_gate_types<py_shifted_cartesian_gate_layout>(m);
-    detail::register_count_gate_types<py_hexagonal_gate_layout>(m);
+    detail::register_count_gate_types<fiction::networks::named_technology_network>(m);
+    detail::register_count_gate_types<fiction::networks::named_aig_network>(m);
+    detail::register_count_gate_types<fiction::networks::named_xag_network>(m);
+    detail::register_count_gate_types<fiction::networks::named_mig_network>(m);
+    detail::register_count_gate_types<fiction::layouts::cartesian_gate_layout>(m);
+    detail::register_count_gate_types<fiction::layouts::shifted_cartesian_gate_layout>(m);
+    detail::register_count_gate_types<fiction::layouts::hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction

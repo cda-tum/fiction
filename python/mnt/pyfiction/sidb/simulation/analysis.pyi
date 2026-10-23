@@ -48,7 +48,7 @@ def calculate_energy_and_state_type_with_kinks_accepted(
     pairs are inspected.
 
     Args:
-        energy_dist: The energy distribution of the charge distributions.
+        energy_distribution: The energy distribution of the charge distributions.
         valid_charge_distributions: The physically valid charge
                                     distributions.
         output_bdl_pairs: The output BDL pairs of the layout.
@@ -77,7 +77,7 @@ def calculate_energy_and_state_type_with_kinks_rejected(
 
     Args:
         lyt: The layout the charge distributions belong to.
-        energy_dist: The energy distribution of the charge distributions.
+        energy_distribution: The energy distribution of the charge distributions.
         valid_charge_distributions: The physically valid charge
                                     distributions.
         spec: The Boolean function(s) to implement.
@@ -90,11 +90,8 @@ def calculate_energy_and_state_type_with_kinks_rejected(
         The energies with their state types.
 
     Raises:
-        std::invalid_argument: if logic validation encounters an empty
-                               specification or mixed variable counts.
-        std::out_of_range: if logic validation encounters an input pattern
-                           outside the specification or an invalid lattice
-                           basis index.
+        IndexError: if logic validation encounters an invalid lattice
+                    basis index.
     """
 
 def can_positive_charges_occur(
@@ -306,8 +303,8 @@ class energy_distribution:
             state_index: The index of the state to be retrieved.
 
         Returns:
-            Energy state. If the index is out of range, `std::nullopt` is
-            returned instead.
+            Energy state, or `std::nullopt` (`None` in Python) if the index is
+            out of range.
         """
 
     def degeneracy(self, energy: float) -> int | None:
@@ -319,8 +316,8 @@ class energy_distribution:
             energy: The energy value whose degeneracy is requested.
 
         Returns:
-            The degeneracy of the given energy. If the energy value is not
-            found, `std::nullopt` is returned instead.
+            The degeneracy of the given energy, or `std::nullopt` (`None` in
+            Python) if the energy is not found.
         """
 
     def add_energy_state(self, state: energy_state) -> None:
@@ -355,7 +352,7 @@ class energy_distribution:
             The maximum energy value in the energy distribution.
 
         Raises:
-            std::invalid_argument: If the energy distribution is empty.
+            ValueError: If the energy distribution is empty.
         """
 
     def min_energy(self) -> float:
@@ -366,7 +363,7 @@ class energy_distribution:
             The minimum energy value in the energy distribution.
 
         Raises:
-            std::invalid_argument: If the energy distribution is empty.
+            ValueError: If the energy distribution is empty.
         """
 
 def calculate_energy_distribution(
@@ -386,21 +383,13 @@ def calculate_energy_distribution(
 
 def minimum_energy(charge_distributions: Sequence[mnt.pyfiction.sidb.charge_distribution]) -> float:
     """
-    Computes the minimum energy of a range of charge distributions. If the
-    range is empty, infinity is returned to indicate no valid energy value
-    exists.
+    Computes the minimum energy of a sequence of charge distributions.
 
     Args:
-        first: Begin of the range to examine.
-        last: End of the range to examine.
-
-    Template Args:
-        InputIt: Must meet the requirements of `LegacyInputIterator`.
+        charge_distributions: Charge distributions to examine.
 
     Returns:
-        Value of the minimum energy found in the input range (unit: eV),
-        or `std::numeric_limits<double>::infinity()` if the range is
-        empty.
+        Minimum energy in eV, or positive infinity if the sequence is empty.
     """
 
 def occupation_probability_gate_based(
@@ -412,7 +401,7 @@ def occupation_probability_gate_based(
     according the truth table) at a given temperature.
 
     Args:
-        est: This contains the energies of all possible charge
+        energy_and_state_type: This contains the energies of all possible charge
              distributions together with the information if the charge
              distribution (state) is transparent or erroneous.
         temperature: System temperature to assume (unit: K).
@@ -460,7 +449,7 @@ class population_stability_information:
     def critical_dot(self) -> mnt.pyfiction.sidb.lattice_site:
         """
         SiDB with the minimum potential difference to any charge transition
-        threshold.
+        threshold. Defaults to `(0, 0, 0)`.
         """
 
     @critical_dot.setter
@@ -469,7 +458,7 @@ class population_stability_information:
     def transition_potentials(self) -> dict[transition_type, tuple[mnt.pyfiction.sidb.lattice_site, float]]:
         """
         For each transition type, the SiDB closest to it and the required
-        potential difference (unit: V).
+        potential difference (unit: V). Empty by default.
         """
 
     @transition_potentials.setter
@@ -485,14 +474,17 @@ class population_stability_information:
         infinity. An absent transition also has infinite distance; its entry
         in `transition_potentials` has infinite potential. Distances use the
         potential magnitude of one elementary charge with all other charge
-        states fixed.
+        states fixed. Empty by default.
         """
 
     @distance_corresponding_to_potential.setter
     def distance_corresponding_to_potential(self, arg: Mapping[transition_type, float], /) -> None: ...
     @property
     def system_energy(self) -> float:
-        """Electrostatic potential energy of the charge distribution (unit: eV)."""
+        """
+        Electrostatic potential energy of the charge distribution (unit: eV).
+        Defaults to 0.0.
+        """
 
     @system_energy.setter
     def system_energy(self, arg: float, /) -> None: ...

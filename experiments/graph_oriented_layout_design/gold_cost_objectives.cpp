@@ -18,7 +18,6 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/layouts/bounding_box.hpp>
-#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/io/network_reader.hpp>
 #include <fiction/networks/technology_network.hpp>
@@ -33,6 +32,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -50,10 +50,10 @@ Ntk read_ntk(const std::string& name)
 {
     fmt::print("[i] processing {}\n", name);
 
-    std::ostringstream      os{};
-    network_reader<tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
-    const auto              nets    = reader.get_networks();
-    const auto              network = *nets.front();
+    std::ostringstream                                        os{};
+    network_reader<std::shared_ptr<named_technology_network>> reader{fiction_experiments::benchmark_path(name), os};
+    const auto                                                nets    = reader.get_networks();
+    const auto                                                network = *nets.front();
 
     return network;
 }
@@ -62,8 +62,6 @@ Ntk read_ntk(const std::string& name)
 int main()
 try
 {
-    using gate_lyt = gate_layout<cartesian_layout>;
-
     experiments::experiment<std::string, std::string, uint64_t, uint64_t, uint64_t, uint64_t, double, std::string>
         gold_cost_objectives_exp{"graph_oriented_layout_design_exp",
                                  "benchmark",
@@ -96,15 +94,16 @@ try
             const auto& [cost, cost_name]            = cost_pair;
             graph_oriented_layout_design_params.cost = cost;
 
-            auto network = read_ntk<tec_nt>(benchmark);
+            auto network = read_ntk<named_technology_network>(benchmark);
 
-            auto gate_layout = graph_oriented_layout_design<gate_lyt, tec_nt>(
-                network, graph_oriented_layout_design_params, &graph_oriented_layout_design_stats);
+            auto gate_layout = graph_oriented_layout_design(network, graph_oriented_layout_design_params,
+                                                            &graph_oriented_layout_design_stats);
 
             if (gate_layout.has_value())
             {
                 // check equivalence
-                const auto eq_stats = equivalence_checking<technology_network, gate_lyt>(network, *gate_layout);
+                const auto eq_stats =
+                    equivalence_checking<technology_network, cartesian_gate_layout>(network, *gate_layout);
 
                 std::string eq_result = "NO";
                 if (eq_stats == eq_type::STRONG)
