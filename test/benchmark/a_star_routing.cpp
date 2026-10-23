@@ -82,7 +82,10 @@ TEST_CASE("Benchmark A* routing callers", "[benchmark]")
     /** @brief GOLD result checked outside the timed region. */
     const auto gold_layout = graph_oriented_layout_design(network, gold_params);
     REQUIRE(gold_layout.has_value());
-    REQUIRE(equivalence_checking(network, *gold_layout) != eq_type::NO);
+    if (gold_layout.has_value())
+    {
+        REQUIRE(equivalence_checking(network, *gold_layout) != eq_type::NO);
+    }
     BENCHMARK("graph_oriented_layout_design: parity, seed 1340")
     {
         return graph_oriented_layout_design(network, gold_params);
@@ -93,9 +96,9 @@ TEST_CASE("Benchmark A* open grid", "[benchmark]")
 {
     /** @brief Large frontier workload independent of gate placement. */
     const cartesian_layout layout{{256, 256}};
-    REQUIRE(a_star(layout, {{0, 0}, {255, 255}}).size() == 511);
+    REQUIRE(a_star(layout, {.source = {0, 0}, .target = {255, 255}}).size() == 511);
     BENCHMARK("a_star: open 256 by 256 grid")
     {
-        return a_star(layout, {{0, 0}, {255, 255}});
+        return a_star(layout, {.source = {0, 0}, .target = {255, 255}});
     };
 }

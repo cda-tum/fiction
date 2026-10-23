@@ -99,7 +99,7 @@ TEST_CASE("A* retains least costs after multiple route improvements", "[A*]")
     /** @brief Admissible heuristic for the weighted search. */
     const distance_functor<uint32_t> zero{[](const auto&, const auto&) { return uint32_t{0}; }};
     /** @brief Minimum-cost route through the zero-cost edge. */
-    const auto path = a_star(layout, {{0, 0}, {2, 1}}, zero, cost);
+    const auto path = a_star(layout, {.source = {0, 0}, .target = {2, 1}}, zero, cost);
     REQUIRE_FALSE(path.empty());
     /** @brief Accumulated route cost. */
     uint32_t total_cost{};
