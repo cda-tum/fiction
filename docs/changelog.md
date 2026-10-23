@@ -788,6 +788,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Edge-color views now support clearing only node colors and clearing both node and edge colors.
   - Gate-level layout moves now propagate geometry failures and preserve owned state.
     Custom geometry controls its assignment failure guarantee.
+  - SiDB layout copy assignment now preserves the destination when allocation fails.
   - Depth and rank view assignment now preserves wrapped network names and metadata.
   - `networks::views::mutable_rank_view::update_ranks` resets `width()`.
   - Clocking-state moves now avoid synchronization-map allocations on Windows.
@@ -832,6 +833,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - `gate_layout::incoming_data_flow` now documents required adjacency and optional clocking.
   - Python keyword-only APIs document option meanings and units, including exact search bounds.
+  - SiDB layout documentation now distinguishes charged defect types from non-zero defect charges.
   - Corrected planarization complexity bounds to include weighted-cone traversals.
   - Corrected the reference for Yen's loopless path algorithm.
   - Python critical-temperature domain docstrings state the fixed confidence default.

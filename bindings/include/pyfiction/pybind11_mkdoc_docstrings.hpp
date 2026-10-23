@@ -15742,6 +15742,22 @@ Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_layout_layout_3 =
+R"doc(Copies a layout with independent storage.
+
+Args:
+    other: Layout to copy.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_layout_4 =
+R"doc(Moves a layout and transfers its storage.
+
+Args:
+    other: Layout to move.
+
+)doc";
+
 static const char *mkd_doc_fiction_sidb_layout_layout_name = R"doc(Layout name.)doc";
 
 static const char *mkd_doc_fiction_sidb_layout_move_defect =
@@ -15756,10 +15772,13 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_layout_num_charged_defects =
-R"doc(Number of charged defects.
+R"doc(Number of defects classified as charged by
+`model::is_charged_defect_type`. Includes `DB`, `SI_VACANCY`, and
+`ARSENIC` even at zero charge; these defects also contribute to
+`num_neutral_defects`.
 
 Returns:
-    Number of defects with non-zero charge.
+    Number of defects with non-zero charge or a charged defect type.
 
 )doc";
 
@@ -15827,6 +15846,28 @@ R"doc(Number of positively charged defects.
 
 Returns:
     Number of defects with positive charge.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_operator_assign =
+R"doc(Copies a layout. Allocation failure leaves this layout unchanged.
+
+Args:
+    other: Layout to copy.
+
+Returns:
+    This layout.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_operator_assign_2 =
+R"doc(Moves a layout and transfers its storage.
+
+Args:
+    other: Layout to move.
+
+Returns:
+    This layout.
 
 )doc";
 
