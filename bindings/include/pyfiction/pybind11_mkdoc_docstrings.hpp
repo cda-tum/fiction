@@ -43,7 +43,7 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_fcn_area =
-R"doc(Computes real-world area requirements in nmÂ² of a given cell-level
+R"doc(Computes real-world area requirements in nm² of a given cell-level
 layout. For this purpose, each cell position in the layout is assigned
 a vertical and horizontal size. Additionally, a spacing between cell
 positions in horizontal and vertical direction is taken into account.
@@ -60,12 +60,12 @@ Template Args:
           default.
 
 Returns:
-    Area requirements in nmÂ².
+    Area requirements in nm².
 
 )doc";
 
 static const char *mkd_doc_fiction_fcn_area_2 =
-R"doc(Computes real-world area requirements in nmÂ² of the bounding box of a
+R"doc(Computes real-world area requirements in nm² of the bounding box of a
 given cell-level layout. For this purpose, each cell position in the
 layout is assigned a vertical and horizontal size. Additionally, a
 spacing between cell positions in horizontal and vertical direction is
@@ -81,12 +81,12 @@ Template Args:
          `inml::layout`.
 
 Returns:
-    Area requirements in nmÂ².
+    Area requirements in nm².
 
 )doc";
 
 static const char *mkd_doc_fiction_fcn_area_3 =
-R"doc(Computes real-world area requirements in nmÂ² of the bounding box of a
+R"doc(Computes real-world area requirements in nm² of the bounding box of a
 given SiDB layout. The bounding box covers the layout's SiDBs and
 defects; every column and every single-SiDB row inside it is assigned
 a horizontal and vertical size, and a spacing between neighboring
@@ -98,7 +98,7 @@ Args:
     pst: Area statistics.
 
 Returns:
-    Area requirements in nmÂ².
+    Area requirements in nm².
 
 )doc";
 
@@ -126,7 +126,7 @@ R"doc(Statistics class to store area-related information including width,
 height, and area of a layout. Additionally, it provides a method to
 print a formatted report of these statistics to an output stream.)doc";
 
-static const char *mkd_doc_fiction_fcn_area_stats_area = R"doc(Layout area in nmÂ².)doc";
+static const char *mkd_doc_fiction_fcn_area_stats_area = R"doc(Layout area in nm².)doc";
 
 static const char *mkd_doc_fiction_fcn_area_stats_height = R"doc(Layout height in nm.)doc";
 
@@ -301,7 +301,7 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_fcn_gate_library_rotate_180 =
-R"doc(Rotates the given `gate` by 180Â° at compile time.
+R"doc(Rotates the given `gate` by 180° at compile time.
 
 Args:
     g: `gate` to rotate.
@@ -312,7 +312,7 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_fcn_gate_library_rotate_270 =
-R"doc(Rotates the given `gate` by 270Â° clockwise at compile time.
+R"doc(Rotates the given `gate` by 270° clockwise at compile time.
 
 Args:
     g: `gate` to rotate.
@@ -323,7 +323,7 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_fcn_gate_library_rotate_90 =
-R"doc(Rotates the given `gate` by 90Â° clockwise at compile time.
+R"doc(Rotates the given `gate` by 90° clockwise at compile time.
 
 Args:
     g: `gate` to rotate.
@@ -2260,7 +2260,7 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_row =
-R"doc(Returns a 90Â° rotated linear 1D clocking based on the one originally
+R"doc(Returns a 90° rotated linear 1D clocking based on the one originally
 introduced in \"A device architecture for computing with quantum
 dots\" by C. S. Lent and P. D. Tougaw in the Proceedings of the IEEE
 1997.
@@ -5288,7 +5288,7 @@ static const char *mkd_doc_fiction_layouts_io_gate_layout_shifted_cartesian_draw
 static const char *mkd_doc_fiction_layouts_io_print_cell_level_layout =
 R"doc(Writes a simplified 2D representation of a cell grid layout, i.e., a
 QCA, molQCA, or iNML layout, to an output stream. Regular cells of
-type `NORMAL` print as `â–¢`, positions below a crossing as `x`, and
+type `NORMAL` print as `▢`, positions below a crossing as `x`, and
 every other cell as the symbol of its type. Clock-zone colors apply to
 layouts with tile-based clocking and synchronization-element colors to
 layouts with synchronization elements.
@@ -10504,7 +10504,7 @@ output.
 
 The positioning of multi-output nodes will follow this structure:
 
-Fâ†’=â†’...â†’O â†“ =â†’=â†’...â†’O
+F→=→...→O ↓ =→=→...→O
 
 Args:
     layout: Current gate-level layout.
@@ -11207,7 +11207,7 @@ static const char *mkd_doc_fiction_physical_design_determine_clocking_stats_time
 static const char *mkd_doc_fiction_physical_design_exact =
 R"doc(An exact placement & routing approach using SMT solving as originally
 proposed in \"An Exact Method for Design Exploration of Quantum-dot
-Cellular Automata\" by M. Walter, R. Wille, D. GroÃŸe, F. Sill Torres,
+Cellular Automata\" by M. Walter, R. Wille, D. Große, F. Sill Torres,
 and R. Drechsler in DATE 2018. A more extensive description can be
 found in \"Design Automation for Field-coupled Nanotechnologies\" by
 M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by
@@ -11718,7 +11718,7 @@ static const char *mkd_doc_fiction_physical_design_hexagonalization =
 R"doc(Transforms a 2DDWave-clocked Cartesian layout into a hexagonal even
 row clocked layout suitable for SiDBs by remapping all gates and wires
 as originally proposed in \"Scalable Physical Design for Silicon
-Dangling Bond Logic: How a 45Â° Turn Prevents the Reinvention of the
+Dangling Bond Logic: How a 45° Turn Prevents the Reinvention of the
 Wheel\" by S. Hofmann, M. Walter, and R. Wille in IEEE NANO 2023
 (https://ieeexplore.ieee.org/document/10231278).
 
@@ -11884,7 +11884,7 @@ static const char *mkd_doc_fiction_physical_design_orthogonal =
 R"doc(A scalable placement & routing approach based on orthogonal graph
 drawing as originally proposed in \"Scalable Design for Field-coupled
 Nanocomputing Circuits\" by M. Walter, R. Wille, F. Sill Torres, D.
-GroÃŸe, and R. Drechsler in ASP-DAC 2019. A more extensive description
+Große, and R. Drechsler in ASP-DAC 2019. A more extensive description
 can be found in \"Design Automation for Field-coupled
 Nanotechnologies\" by M. Walter, R. Wille, F. Sill Torres, and R.
 Drechsler published by Springer Nature in 2022.
@@ -13403,7 +13403,7 @@ static const char *mkd_doc_fiction_qca_cell_mode_CROSSOVER = R"doc(Cell of a mul
 
 static const char *mkd_doc_fiction_qca_cell_mode_NORMAL = R"doc(Regular cell.)doc";
 
-static const char *mkd_doc_fiction_qca_cell_mode_ROTATED = R"doc(Cell rotated by 45Â°.)doc";
+static const char *mkd_doc_fiction_qca_cell_mode_ROTATED = R"doc(Cell rotated by 45°.)doc";
 
 static const char *mkd_doc_fiction_qca_cell_mode_VERTICAL = R"doc(Via cell that connects the ground and the crossing layer.)doc";
 
@@ -13754,7 +13754,7 @@ Returns:
 static const char *mkd_doc_fiction_qca_qca_one_library =
 R"doc(A concrete FCN gate library based on QCA ONE proposed in \"A
 Methodology for Standard Cell Design for QCA\" by Dayane Alfenas Reis,
-Caio AraÃºjo T. Campos, Thiago Rodrigues B. S. Soares, Omar Paranaiba
+Caio Araújo T. Campos, Thiago Rodrigues B. S. Soares, Omar Paranaiba
 V. Neto, and Frank Sill Torres in IEEE International Symposium on
 Circuits and Systems, 2016. QCA ONE was originally proposed for the
 USE clocking scheme. The version used here is an extension to the
@@ -15293,18 +15293,18 @@ Raises:
 static const char *mkd_doc_fiction_sidb_lattice =
 R"doc(A hydrogen-passivated silicon surface lattice: a Bravais lattice given
 by two lattice vectors plus a two-site basis. Site `(x, y, z)` lies at
-`x * a1 + y * a2 + basis[z]`. The vectors are stored in Ã¥ngstrÃ¶m, as
+`x * a1 + y * a2 + basis[z]`. The vectors are stored in ångström, as
 SiQAD stores them; positions are reported in nanometers. The two
 reconstructions SiQAD defines are available as `si_100_2x1()` and
 `si_111_1x1()`; any other reconstruction with a two-site basis can be
 described by setting the vectors directly.)doc";
 
-static const char *mkd_doc_fiction_sidb_lattice_a1 = R"doc(First lattice vector (unit: Ã…). Defaults to `(0, 0)`.)doc";
+static const char *mkd_doc_fiction_sidb_lattice_a1 = R"doc(First lattice vector (unit: Å). Defaults to `(0, 0)`.)doc";
 
-static const char *mkd_doc_fiction_sidb_lattice_a2 = R"doc(Second lattice vector (unit: Ã…). Defaults to `(0, 0)`.)doc";
+static const char *mkd_doc_fiction_sidb_lattice_a2 = R"doc(Second lattice vector (unit: Å). Defaults to `(0, 0)`.)doc";
 
 static const char *mkd_doc_fiction_sidb_lattice_basis =
-R"doc(The two basis sites of the unit cell (unit: Ã…). The first one is the
+R"doc(The two basis sites of the unit cell (unit: Å). The first one is the
 origin. Both sites default to `(0, 0)`.)doc";
 
 static const char *mkd_doc_fiction_sidb_lattice_name =
@@ -15352,8 +15352,8 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_lattice_si_100_2x1 =
-R"doc(The H-Si(100)-2x1 surface: dimer rows 7.68 Ã… apart, dimer atoms 3.84 Ã…
-apart along the row and 2.25 Ã… apart across it.
+R"doc(The H-Si(100)-2x1 surface: dimer rows 7.68 Å apart, dimer atoms 3.84 Å
+apart along the row and 2.25 Å apart across it.
 
 Returns:
     The H-Si(100)-2x1 lattice.
@@ -15361,8 +15361,8 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_lattice_si_111_1x1 =
-R"doc(The H-Si(111)-1x1 surface: a hexagonal arrangement with 3.84 Ã… between
-neighboring sites, described by a rectangular 6.65 Ã… Ã— 3.84 Ã… cell
+R"doc(The H-Si(111)-1x1 surface: a hexagonal arrangement with 3.84 Å between
+neighboring sites, described by a rectangular 6.65 Å × 3.84 Å cell
 with a centered second site.
 
 Returns:
@@ -16020,7 +16020,7 @@ Args:
 static const char *mkd_doc_fiction_sidb_model_defect_type =
 R"doc(Specifies the types of fabrication defects that can occur on the
 H-Si(100) 2x1 surface according to \"Atomic defect classification of
-the Hâ€“Si(100) surface through multi-mode scanning probe microscopy\"
+the H–Si(100) surface through multi-mode scanning probe microscopy\"
 by Jeremiah Croshaw, Thomas Dienel, Taleana Huff, and Robert Wolkow in
 Journal of Nanotechnology in 2020.)doc";
 
@@ -16198,9 +16198,9 @@ R"doc(`k` is the Coulomb constant `K_E` divided by `epsilon_r` (unit:
 
 static const char *mkd_doc_fiction_sidb_model_simulation_parameters_lambda_tf = R"doc(`lambda_tf` is the Thomas-Fermi screening distance (unit: nm).)doc";
 
-static const char *mkd_doc_fiction_sidb_model_simulation_parameters_mu_minus = R"doc(`mu_minus` (Âµ-) is the energy transition level (0/-) (unit: eV).)doc";
+static const char *mkd_doc_fiction_sidb_model_simulation_parameters_mu_minus = R"doc(`mu_minus` (µ-) is the energy transition level (0/-) (unit: eV).)doc";
 
-static const char *mkd_doc_fiction_sidb_model_simulation_parameters_mu_plus = R"doc(`mu_plus` (Âµ+) is the energy transition level (+/0) (unit: eV).)doc";
+static const char *mkd_doc_fiction_sidb_model_simulation_parameters_mu_plus = R"doc(`mu_plus` (µ+) is the energy transition level (+/0) (unit: eV).)doc";
 
 static const char *mkd_doc_fiction_sidb_model_simulation_parameters_simulation_parameters =
 R"doc(Default constructor.
@@ -16209,7 +16209,7 @@ Args:
     base_number: simulation can be conducted with 2 and 3 charge
                  states. 2 = (Negative, Neutral), 3 = (Negative,
                  Neutral, Positive).
-    mu: (Âµ-) is the energy transition level (0/-) in eV.
+    mu: (µ-) is the energy transition level (0/-) in eV.
     relative_permittivity: it describes the electric field reduction
                            due to polarization.
     screening_distance: also known as "Thomas-Fermi screening" and it
@@ -16650,7 +16650,7 @@ applicable if engine == QUICKSIM).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_params_max_temperature =
 R"doc(Maximum simulation temperature beyond which no simulation will be
-conducted (~ 126 Â°C by default) (unit: K).)doc";
+conducted (~ 126 °C by default) (unit: K).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_params_on_progress =
 R"doc(Callback that receives the number of simulated input patterns (gate-
@@ -17210,7 +17210,7 @@ static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_for
 R"doc(Computes the time-to-solution (TTS) of *QuickSim* from an exact result
 and a series of heuristic results: the accuracy is the share of
 heuristic runs that found the ground state, and TTS is the mean
-heuristic runtime scaled to reach the given confidence level, `t Â·
+heuristic runtime scaled to reach the given confidence level, `t ·
 log(1 - c) / log(1 - acc)`. An empty sample yields zero accuracy, zero
 mean heuristic runtime, and infinite time-to-solution.
 
@@ -21262,7 +21262,7 @@ static const char *mkd_doc_fiction_sidb_simulation_io_detail_location_and_ground
 
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer =
 R"doc(Writes a `result` as a SiQAD simulation result file: engine info,
-physical parameters, the SiDB positions in Ã¥ngstrÃ¶m, and every charge
+physical parameters, the SiDB positions in ångström, and every charge
 distribution sorted by energy.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer_os = R"doc(Output stream.)doc";
@@ -21291,7 +21291,7 @@ static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writ
 
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer_write_engine_info = R"doc(Writes the engine name, version, and runtime.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer_write_physical_locations = R"doc(Writes the SiDB positions in Ã¥ngstrÃ¶m.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer_write_physical_locations = R"doc(Writes the SiDB positions in ångström.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer_write_simulation_parameters = R"doc(Writes the physical and additional simulation parameters.)doc";
 
@@ -23232,8 +23232,8 @@ R"doc(Traces the boundary surface of the operational domain in three or more
 dimensions.
 
 This serves the same purpose as the two-dimensional Moore contour
-trace â€” sample only the boundary of an operational region and infer
-its interior â€” but collects the boundary instead of walking it. A
+trace — sample only the boundary of an operational region and infer
+its interior — but collects the boundary instead of walking it. A
 closed curve can be walked because its neighbors admit a cyclic order;
 a closed surface cannot, so the boundary is gathered by a parallel
 breadth-first search over operational points with a non-operational
@@ -24177,12 +24177,12 @@ Returns:
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_defect_defect_potentials =
 R"doc(Chargeless potential every defect exerts on every defect, row-major
-DÃ—D (unit: V).)doc";
+D×D (unit: V).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_defect_induced_potentials = R"doc(Potential of the charged defects per SiDB (unit: V).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_defect_sidb_potentials =
-R"doc(Chargeless potential every SiDB exerts on every defect, row-major DÃ—N
+R"doc(Chargeless potential every SiDB exerts on every defect, row-major D×N
 (unit: V).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_defects =
@@ -24193,7 +24193,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_distances = R"doc(Distances between SiDBs, row-major NÃ—N (unit: nm).)doc";
+static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_distances = R"doc(Distances between SiDBs, row-major N×N (unit: nm).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_effective_charge_transition_thresholds =
 R"doc(The charge transition thresholds of an SiDB, indexed by
@@ -24214,7 +24214,7 @@ static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_energy =
 R"doc(The electrostatic potential energy of a charge distribution given its
 local internal potentials, i.e., the energy of the SiDB charges in the
 potential of the other SiDBs, the defects, and the external sources,
-plus the energy of the defect charges. O(N + DÂ·N) for D charged
+plus the energy of the defect charges. O(N + D·N) for D charged
 defects.
 
 Args:
@@ -24233,7 +24233,7 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_energy_2 =
-R"doc(The electrostatic potential energy of a charge distribution. O(NÂ²).
+R"doc(The electrostatic potential energy of a charge distribution. O(N²).
 
 Args:
     cd: Charge distribution over this landscape's SiDBs.
@@ -24248,7 +24248,7 @@ Raises:
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_evaluate =
 R"doc(Evaluates a charge distribution: returns a copy with its energy set.
-O(NÂ²).
+O(N²).
 
 Args:
     cd: Charge distribution over this landscape's SiDBs.
@@ -24306,7 +24306,7 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_is_physically_valid_2 =
-R"doc(Whether a charge distribution is physically valid. O(NÂ²).
+R"doc(Whether a charge distribution is physically valid. O(N²).
 
 Args:
     cd: Charge distribution over this landscape's SiDBs.
@@ -24362,7 +24362,7 @@ static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_local_ext
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_local_internal_potentials =
 R"doc(The local internal potentials of a charge distribution: at every SiDB,
 the potential of the charged SiDBs plus the potential of the charged
-defects. O(NÂ²).
+defects. O(N²).
 
 Args:
     cd: Charge distribution over this landscape's SiDBs.
@@ -24391,7 +24391,7 @@ Raises:
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_local_potentials =
 R"doc(The local potentials of a charge distribution: internal plus external
-potential per SiDB. O(NÂ²).
+potential per SiDB. O(N²).
 
 Args:
     cd: Charge distribution over this landscape's SiDBs.
@@ -24457,7 +24457,7 @@ Raises:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_potentials = R"doc(Chargeless potentials between SiDBs, row-major NÃ—N (unit: V).)doc";
+static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_potentials = R"doc(Chargeless potentials between SiDBs, row-major N×N (unit: V).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_simulation_parameters_data = R"doc(Physical parameters.)doc";
 
@@ -27566,7 +27566,7 @@ but SAT are using the graph-coloring library by Brian Crites.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_graph_coloring_engine_DSATUR =
 R"doc(Saturation degree algorithm proposed in \"New Methods to Color the
-Vertices of a Graph\" by Daniel BrÃ©laz in Communications of the ACM,
+Vertices of a Graph\" by Daniel Brélaz in Communications of the ACM,
 1979. This algorithm is a heuristic but is exact for bipartite graphs.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_graph_coloring_engine_LMXRLF =
@@ -28990,7 +28990,7 @@ phases to ensure proper computation.
 
 For more information on the concept of throughput and delay see
 \"Synchronization of Clocked Field-Coupled Circuits\" by F. Sill
-Torres, M. Walter, R. Wille, D. GroÃŸe, and R. Drechsler in IEEE NANO
+Torres, M. Walter, R. Wille, D. Große, and R. Drechsler in IEEE NANO
 2018; or \"Design Automation for Field-coupled Nanotechnologies\" by
 M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by
 Springer Nature in 2022.
@@ -29342,7 +29342,7 @@ Logic networks have throughput denominator one.
 
 This approach was first proposed in \"Verification for Field-coupled
 Nanocomputing Circuits\" by M. Walter, R. Wille, F. Sill Torres, D.
-GroÃŸe, and R. Drechsler in DAC 2020.
+Große, and R. Drechsler in DAC 2020.
 
 Args:
     spec: The specification.

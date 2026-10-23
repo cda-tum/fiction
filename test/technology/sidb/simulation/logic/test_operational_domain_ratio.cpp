@@ -307,7 +307,7 @@ TEST_CASE("Operational-domain ratios reject colliding sweep coordinates", "[comp
     params.op_domain_params.sweep_dimensions              = {
         {.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6000002, .step = 0.0000001},
         {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.0, .step = 0.1}};
-    CHECK_THROWS_AS(
-        operational_domain_ratio(lyt, std::vector<tt>{create_and_tt()}, parameter_point{{5.6, 5.0}}, params),
-        std::invalid_argument);
+    CHECK_THROWS_AS(operational_domain_ratio(lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
+                                             parameter_point{{5.6, 5.0}}, params),
+                    std::invalid_argument);
 }
