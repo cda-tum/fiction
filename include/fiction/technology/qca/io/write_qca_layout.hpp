@@ -25,7 +25,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <cstddef>
 #include <cstdint>
 #include <ostream>
 #include <stdexcept>
@@ -236,7 +235,7 @@ class write_qca_layout_impl
                     cells.push_back(c);
                 }
             });
-        std::sort(cells.begin(), cells.end());
+        std::ranges::sort(cells);
 
         write_header();
 
@@ -286,7 +285,7 @@ class write_qca_layout_impl
             os << qcad::PSZ_DESCRIPTION << ((z == 0) ? "Ground Layer" : ("Crossing Layer " + std::to_string(z)))
                << '\n';
 
-            while (cell != cells.cend() && cell->z == static_cast<decltype(cell->z)>(z))
+            while (cell != cells.cend() && std::cmp_equal(cell->z, z))
             {
                 write_cell(*cell++, ps.create_inter_layer_via_cells);
                 progress.advance();
@@ -532,8 +531,8 @@ class write_qca_layout_impl
         os << qcad::OPEN_QCAD_DESIGN_OBJECT;
 
         // calculate cell position
-        const qcad::cell_pos pos{.x = static_cast<double>(c.x) * qcad::CELL_DISTANCE + qcad::X_Y_OFFSET,
-                                 .y = static_cast<double>(c.y) * qcad::CELL_DISTANCE + qcad::X_Y_OFFSET};
+        const qcad::cell_pos pos{.x = (static_cast<double>(c.x) * qcad::CELL_DISTANCE) + qcad::X_Y_OFFSET,
+                                 .y = (static_cast<double>(c.y) * qcad::CELL_DISTANCE) + qcad::X_Y_OFFSET};
 
         // write cell position
         os << qcad::X_POS << std::to_string(pos.x) << '\n';

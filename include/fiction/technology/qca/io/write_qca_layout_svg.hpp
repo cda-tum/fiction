@@ -456,7 +456,7 @@ class write_qca_layout_svg_impl
                     cells.push_back(c);
                 }
             });
-        std::sort(cells.begin(), cells.end());
+        std::ranges::sort(cells);
         utils::progress_reporter progress{ps.on_progress, "rendering cells", cells.size()};
         for (const auto& c : cells)
         {
