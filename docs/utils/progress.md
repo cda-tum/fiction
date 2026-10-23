@@ -18,7 +18,7 @@ turns the reporting off.
 fiction::physical_design::orthogonal_physical_design_params params{};
 params.on_progress = [](const std::string_view task, const std::size_t done, const std::size_t total)
 { std::cout << task << ": " << done << '/' << total << '\n'; };
-const auto specification = fiction::synthesis::convert_network<fiction::tec_nt>(source);
+const auto specification = fiction::synthesis::convert_network<fiction::networks::named_technology_network>(source);
 const auto layout = fiction::physical_design::orthogonal<fiction::layouts::cartesian_layout>(specification, params);
 ```
 
