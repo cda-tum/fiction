@@ -25,13 +25,11 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/networks/name_utils.hpp>
-#include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/placement_utils.hpp>
 #include <fiction/types.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/utils/node_map.hpp>
-#include <mockturtle/views/names_view.hpp>
 
 #include <cstdint>
 #include <stdexcept>
@@ -43,7 +41,7 @@ using namespace fiction::layouts;
 using namespace fiction::networks;
 
 /** @brief Named network missing node traversal required for signal-name transfer. */
-struct incomplete_named_network : mockturtle::names_view<mockturtle::aig_network>
+struct incomplete_named_network : named_aig_network
 {
     /**
      * @brief Disables node traversal.
@@ -54,7 +52,7 @@ struct incomplete_named_network : mockturtle::names_view<mockturtle::aig_network
 };
 
 /** @brief Named network without constant lookup. */
-struct named_without_constant : mockturtle::names_view<mockturtle::aig_network>
+struct named_without_constant : named_aig_network
 {
     /** @brief Creates an empty named network. */
     named_without_constant() = default;
@@ -92,7 +90,7 @@ struct layout_without_input_name_query : cartesian_gate_layout
 };
 
 /** @brief Named input source without input traversal. */
-struct input_source_without_traversal : mockturtle::names_view<mockturtle::aig_network>
+struct input_source_without_traversal : named_aig_network
 {
     /** @brief Disables input traversal. @tparam Fn Input callback type. */
     template <typename Fn>
@@ -104,7 +102,7 @@ struct input_source_without_traversal : mockturtle::names_view<mockturtle::aig_n
  * @tparam Src Source network or layout type.
  * @tparam Dest Destination network or layout type.
  */
-template <typename Src, typename Dest = tec_nt>
+template <typename Src, typename Dest = named_technology_network>
 concept source_input_names_transferable = requires(const Src& src, Dest& dest) { restore_input_names(src, dest); };
 
 static_assert(!source_input_names_transferable<layout_without_input_name_query>);
@@ -133,7 +131,8 @@ struct dual_interface_without_input_names : layout_without_input_names
 
 /** @brief Checks input-name restoration. @tparam Dest Destination network or layout type. */
 template <typename Dest>
-concept input_names_transferable = requires(const tec_nt& src, Dest& dest) { restore_input_names(src, dest); };
+concept input_names_transferable =
+    requires(const named_technology_network& src, Dest& dest) { restore_input_names(src, dest); };
 
 static_assert(input_names_transferable<cartesian_gate_layout>);
 static_assert(input_names_transferable<mockturtle::aig_network>);
@@ -149,7 +148,8 @@ struct layout_without_output_names : cartesian_gate_layout
 
 /** @brief Checks output-name restoration. @tparam Dest Destination network or layout type. */
 template <typename Dest>
-concept output_names_transferable = requires(const tec_nt& src, Dest& dest) { restore_output_names(src, dest); };
+concept output_names_transferable =
+    requires(const named_technology_network& src, Dest& dest) { restore_output_names(src, dest); };
 
 static_assert(output_names_transferable<cartesian_gate_layout>);
 static_assert(output_names_transferable<mockturtle::aig_network>);
@@ -161,28 +161,28 @@ static_assert(!output_names_transferable<layout_without_output_names>);
  */
 template <typename Dest>
 concept branching_names_transferable =
-    requires(const tec_nt& src, Dest& dest,
-             const mockturtle::node_map<physical_design::branching_signal_container<>, tec_nt>& map) {
+    requires(const named_technology_network& src, Dest& dest,
+             const mockturtle::node_map<physical_design::branching_signal_container<>, named_technology_network>& map) {
         restore_signal_names(src, dest, map);
     };
 
 static_assert(branching_names_transferable<cartesian_gate_layout>);
 static_assert(branching_names_transferable<mockturtle::aig_network>);
-static_assert(!branching_names_transferable<mockturtle::names_view<mockturtle::aig_network>>);
+static_assert(!branching_names_transferable<named_aig_network>);
 
-static_assert(!all_names_transferable<incomplete_named_network, mockturtle::names_view<mockturtle::aig_network>>);
+static_assert(!all_names_transferable<incomplete_named_network, named_aig_network>);
 static_assert(signal_names_transferable<mockturtle::aig_network, mockturtle::aig_network>);
 static_assert(signal_names_transferable<incomplete_named_network, mockturtle::aig_network>);
-static_assert(!signal_names_transferable<incomplete_named_network, mockturtle::names_view<mockturtle::aig_network>>);
+static_assert(!signal_names_transferable<incomplete_named_network, named_aig_network>);
 
-static_assert(signal_names_transferable<named_without_constant, mockturtle::names_view<mockturtle::aig_network>>);
+static_assert(signal_names_transferable<named_without_constant, named_aig_network>);
 
 TEST_CASE("Signal names transfer without constant lookup", "[name-utils]")
 {
     named_without_constant source{};
     const auto             input = source.create_pi("input");
     source.create_po(input);
-    mockturtle::names_view<mockturtle::aig_network>                               destination{};
+    named_aig_network                                                             destination{};
     const auto                                                                    target = destination.create_pi();
     mockturtle::node_map<mockturtle::aig_network::signal, named_without_constant> mapping{source};
     mapping[source.get_node(input)] = target;
@@ -192,8 +192,8 @@ TEST_CASE("Signal names transfer without constant lookup", "[name-utils]")
 
 TEST_CASE("Unnamed network name transfers clear names and remain optional", "[name-utils]")
 {
-    mockturtle::aig_network                         unnamed{};
-    mockturtle::names_view<mockturtle::aig_network> named{};
+    mockturtle::aig_network unnamed{};
+    named_aig_network       named{};
     named.set_network_name("old");
     restore_network_name(unnamed, named);
     CHECK(named.get_network_name().empty());
@@ -207,8 +207,8 @@ TEST_CASE("Unnamed network name transfers clear names and remain optional", "[na
 TEMPLATE_TEST_CASE("Name transfer respects interface order and string-view bounds", "[name-utils]", cartesian_layout,
                    shifted_cartesian_layout, hexagonal_layout)
 {
-    mockturtle::names_view<technology_network> ntk{};
-    const auto                                 input = ntk.create_pi("a");
+    named_technology_network ntk{};
+    const auto               input = ntk.create_pi("a");
     ntk.create_po(input, "f");
     set_name(ntk, std::string_view{"prefix suffix", 6});
 
@@ -220,7 +220,7 @@ TEMPLATE_TEST_CASE("Name transfer respects interface order and string-view bound
     CHECK(lyt.get_input_name(0) == "a");
     CHECK(lyt.get_output_name(0) == "f");
 
-    mockturtle::names_view<technology_network> copied{};
+    named_technology_network copied{};
     copied.create_po(copied.create_pi());
     restore_names(lyt, copied);
     CHECK(copied.get_network_name() == "prefix");
@@ -232,7 +232,7 @@ TEMPLATE_TEST_CASE("Signal names transfer from a logic network to placed objects
                    shifted_cartesian_layout, hexagonal_layout)
 {
     /** Named logic source with an internal signal and a declared output. */
-    mockturtle::names_view<technology_network> ntk{};
+    named_technology_network ntk{};
     /** Named primary input signal. */
     const auto input = ntk.create_pi("input");
     /** Named internal signal. */
@@ -268,7 +268,7 @@ TEMPLATE_TEST_CASE("Signal name restoration covers output drivers and mapped unu
                    cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
     /** Logic source with a named output driver and unused inputs. */
-    mockturtle::names_view<technology_network> ntk{};
+    named_technology_network ntk{};
     /** Connected primary input. */
     const auto input = ntk.create_pi("input");
     /** Unused input with a target mapping. */
@@ -311,7 +311,7 @@ TEMPLATE_TEST_CASE("Signal name restoration covers output drivers and mapped unu
 TEST_CASE("Signal name restoration retains used complemented names", "[name-utils]")
 {
     /** Source with a separately named complemented signal. */
-    mockturtle::names_view<mockturtle::aig_network> source{};
+    named_aig_network source{};
     /** Source input whose complement carries a name. */
     const auto input = source.create_pi();
     /** Named complemented source signal. */
@@ -326,7 +326,7 @@ TEST_CASE("Signal name restoration retains used complemented names", "[name-util
         source.create_po(inverted);
     }
     /** Target network receiving the mapped signal name. */
-    mockturtle::names_view<mockturtle::aig_network> target{};
+    named_aig_network target{};
     /** Mapped target signal. */
     const auto mapped = target.create_pi();
     /** Source-node mapping to target signals. */

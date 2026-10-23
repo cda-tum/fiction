@@ -73,6 +73,43 @@ TEST_CASE("A* preserves priority after improving a queued coordinate", "[A*]")
     CHECK(total_cost == 34);
 }
 
+TEST_CASE("A* retains least costs after multiple route improvements", "[A*]")
+{
+    /** @brief Weighted geometry with a zero-cost edge and two routes improved before reaching the target. */
+    const cartesian_layout layout{{3, 2}};
+    /** @brief Eastbound costs for each row. */
+    const std::array<uint32_t, 4> east{20, 1, 0, 100};
+    /** @brief Southbound costs for each column. */
+    const std::array<uint32_t, 3> south{1, 1000, 50};
+    /** @brief Directed edge costs, including a cheap northbound step from the lower middle tile. */
+    const cost_functor<uint32_t> cost{
+        [&](const auto& source, const auto& target)
+        {
+            if (target.x > source.x)
+            {
+                return east.at((2 * static_cast<std::size_t>(source.y)) + static_cast<std::size_t>(source.x));
+            }
+            if (target.y > source.y)
+            {
+                return south.at(static_cast<std::size_t>(source.x));
+            }
+            return source == layout_base::coordinate{1, 1} && target == layout_base::coordinate{1, 0} ? uint32_t{1} :
+                                                                                                        uint32_t{1000};
+        }};
+    /** @brief Admissible heuristic for the weighted search. */
+    const distance_functor<uint32_t> zero{[](const auto&, const auto&) { return uint32_t{0}; }};
+    /** @brief Minimum-cost route through the zero-cost edge. */
+    const auto path = a_star(layout, {.source = {0, 0}, .target = {2, 1}}, zero, cost);
+    REQUIRE_FALSE(path.empty());
+    /** @brief Accumulated route cost. */
+    uint32_t total_cost{};
+    for (std::size_t i = 1; i < path.size(); ++i)
+    {
+        total_cost += cost(path[i - 1], path[i]);
+    }
+    CHECK(total_cost == 53);
+}
+
 TEST_CASE("A* on 2x2 layouts", "[A*]")
 {
     using lyt = cartesian_layout;

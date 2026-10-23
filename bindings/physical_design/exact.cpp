@@ -20,10 +20,11 @@
 #if (FICTION_Z3_SOLVER)
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
+#include "pyfiction/types.hpp"  // NOLINT(misc-include-cleaner): preserves coordinate and extent tuple signatures.
 
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/exact.hpp>
+#include <fiction/types.hpp>
 
 #include <sstream>
 #include <type_traits>
@@ -65,7 +66,7 @@ void register_exact(nb::module_& m, const char* signature)
 {
     /** @brief Compute exact physical design for the selected layout representation. */
     const auto design =
-        [](const py_tec_network& network, const nb::handle layout_type,
+        [](const fiction::networks::named_technology_network& network, const nb::handle layout_type,
            fiction::physical_design::exact_physical_design_stats*                   statistics,
            const decltype(exact_physical_design_options{}.scheme)&                  scheme,
            const decltype(exact_physical_design_options{}.layout_arrangement)       layout_arrangement,
@@ -261,7 +262,8 @@ void register_exact(nb::module_& m)
     // Keep the GIL while rejecting an unsupported Python layout type.
     m.def(
         "exact",
-        [](const py_tec_network&, const nb::handle, fiction::physical_design::exact_physical_design_stats*,
+        [](const fiction::networks::named_technology_network&, const nb::handle,
+           fiction::physical_design::exact_physical_design_stats*,
            const decltype(exact_physical_design_options{}.scheme)&,
            const decltype(exact_physical_design_options{}.layout_arrangement),
            const decltype(exact_physical_design_options{}.upper_bound_area),

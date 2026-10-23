@@ -22,7 +22,7 @@ a 3-graph. The output layout is 2DDWave-clocked and has a large area overhead.
 :members:
 ```
 
-```{doxygenfunction} fiction::physical_design::orthogonal(const tec_nt& ntk, orthogonal_physical_design_params ps = {}, orthogonal_physical_design_stats* pst = nullptr)
+```{doxygenfunction} fiction::physical_design::orthogonal(const fiction::networks::named_technology_network& ntk, orthogonal_physical_design_params ps = {}, orthogonal_physical_design_stats* pst = nullptr)
 
 ```
 

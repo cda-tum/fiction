@@ -472,7 +472,7 @@ class priority_queue
 /**
  * Maps logic-network nodes to typed layout output ports.
  */
-using node_dict_type = mockturtle::node_map<layouts::layout_object_id, tec_nt>;
+using node_dict_type = mockturtle::node_map<layouts::layout_object_id, fiction::networks::named_technology_network>;
 /**
  * This enum class indicates the allowed positions for PIs.
  */
@@ -514,11 +514,11 @@ struct search_space_graph
     /**
      * The network associated with this search space graph.
      */
-    tec_nt network;
+    fiction::networks::named_technology_network network;
     /**
      * Topological list of nodes to be placed in the layout.
      */
-    std::vector<mockturtle::node<tec_nt>> nodes_to_place;
+    std::vector<mockturtle::node<fiction::networks::named_technology_network>> nodes_to_place;
     /**
      * Enum indicating if primary inputs (PIs) can be placed at the top or left.
      */
@@ -551,21 +551,23 @@ struct search_space_graph
  * @tparam Randomize Shuffle traversal choices when true.
  */
 template <bool CiToCo = false, bool Randomize = false>
-class topo_view : public mockturtle::immutable_view<mockturtle::fanout_view<tec_nt>>
+class topo_view
+        : public mockturtle::immutable_view<mockturtle::fanout_view<fiction::networks::named_technology_network>>
 {
   public:
     /**
      * Node type of the underlying network.
      */
-    using node = tec_nt::node;
+    using node = fiction::networks::named_technology_network::node;
     /**
      * Signal type of the underlying network.
      */
-    using signal = tec_nt::signal;
+    using signal = fiction::networks::named_technology_network::signal;
 
     /** @brief Builds the selected traversal with a reproducible shuffle seed. */
-    explicit topo_view(const mockturtle::fanout_view<tec_nt>& ntk, const uint32_t seed_val = 42) :
-            mockturtle::immutable_view<mockturtle::fanout_view<tec_nt>>(ntk),
+    explicit topo_view(const mockturtle::fanout_view<fiction::networks::named_technology_network>& ntk,
+                       const uint32_t                                                              seed_val = 42) :
+            mockturtle::immutable_view<mockturtle::fanout_view<fiction::networks::named_technology_network>>(ntk),
             rng(seed_val)
     {
         update_topo();
@@ -653,9 +655,10 @@ class topo_view : public mockturtle::immutable_view<mockturtle::fanout_view<tec_
         if constexpr (CiToCo)
         {
             std::vector<node> starts{};
-            starts.reserve(mockturtle::immutable_view<mockturtle::fanout_view<tec_nt>>::num_cis());
-            mockturtle::immutable_view<mockturtle::fanout_view<tec_nt>>::foreach_ci([&starts](const auto& n)
-                                                                                    { starts.push_back(n); });
+            starts.reserve(mockturtle::immutable_view<
+                           mockturtle::fanout_view<fiction::networks::named_technology_network>>::num_cis());
+            mockturtle::immutable_view<mockturtle::fanout_view<fiction::networks::named_technology_network>>::
+                foreach_ci([&starts](const auto& n) { starts.push_back(n); });
             if constexpr (Randomize)
             {
                 std::shuffle(starts.begin(), starts.end(), rng);
@@ -668,9 +671,10 @@ class topo_view : public mockturtle::immutable_view<mockturtle::fanout_view<tec_
         else
         {
             std::vector<signal> starts{};
-            starts.reserve(mockturtle::immutable_view<mockturtle::fanout_view<tec_nt>>::num_cos());
-            mockturtle::immutable_view<mockturtle::fanout_view<tec_nt>>::foreach_co([&starts](const auto& f)
-                                                                                    { starts.push_back(f); });
+            starts.reserve(mockturtle::immutable_view<
+                           mockturtle::fanout_view<fiction::networks::named_technology_network>>::num_cos());
+            mockturtle::immutable_view<mockturtle::fanout_view<fiction::networks::named_technology_network>>::
+                foreach_co([&starts](const auto& f) { starts.push_back(f); });
             if constexpr (Randomize)
             {
                 std::shuffle(starts.begin(), starts.end(), rng);
@@ -679,8 +683,8 @@ class topo_view : public mockturtle::immutable_view<mockturtle::fanout_view<tec_
             {
                 create_topo_rec(this->get_node(f));
             }
-            mockturtle::immutable_view<mockturtle::fanout_view<tec_nt>>::foreach_pi([this](const auto pi)
-                                                                                    { create_topo_rec(pi); });
+            mockturtle::immutable_view<mockturtle::fanout_view<fiction::networks::named_technology_network>>::
+                foreach_pi([this](const auto pi) { create_topo_rec(pi); });
         }
     }
 
@@ -820,7 +824,7 @@ struct placement_info
     /**
      * Original placed primary-input identities, independent of routed output ports.
      */
-    mockturtle::node_map<layouts::layout_object_id, tec_nt> pi2node;
+    mockturtle::node_map<layouts::layout_object_id, fiction::networks::named_technology_network> pi2node;
     /** @brief Whether space for constant outputs has been reserved in this rebuilt candidate. */
     bool constant_output_margin{};
 };
@@ -841,8 +845,8 @@ class graph_oriented_layout_design_impl
      * @param st The statistics object to record execution details.
      * @param custom Custom layout cost function transferred into owned storage.
      */
-    graph_oriented_layout_design_impl(const tec_nt& src, graph_oriented_layout_design_params&& p,
-                                      graph_oriented_layout_design_stats&                            st,
+    graph_oriented_layout_design_impl(const fiction::networks::named_technology_network& src,
+                                      graph_oriented_layout_design_params&& p, graph_oriented_layout_design_stats& st,
                                       std::function<uint64_t(const layouts::cartesian_gate_layout&)> custom) :
             ntk{src},
             ps{std::move(p)},
@@ -1074,7 +1078,7 @@ class graph_oriented_layout_design_impl
     /**
      * The network to be placed and routed.
      */
-    tec_nt ntk;
+    fiction::networks::named_technology_network ntk;
     /** @brief Number of constant outputs; every search graph preserves this source interface. */
     uint32_t constant_output_count{};
     /**
@@ -1457,9 +1461,9 @@ class graph_oriented_layout_design_impl
      * @param fc A vector of nodes that precede the PO nodes.
      * @return A vector of tiles representing the possible positions for POs.
      */
-    [[nodiscard]] coord_vec_type get_possible_positions_pos(const layouts::cartesian_gate_layout&    layout,
-                                                            const placement_info&                    place_info,
-                                                            const networks::fanin_container<tec_nt>& fc) const
+    [[nodiscard]] coord_vec_type
+    get_possible_positions_pos(const layouts::cartesian_gate_layout& layout, const placement_info& place_info,
+                               const networks::fanin_container<fiction::networks::named_technology_network>& fc) const
     {
         coord_vec_type possible_positions{};
 
@@ -1506,9 +1510,9 @@ class graph_oriented_layout_design_impl
      * @param fc A vector of nodes that precede the single fanin node.
      * @return A vector of tiles representing the possible positions for a single fan-in node.
      */
-    [[nodiscard]] coord_vec_type get_possible_positions_single_fanin(layouts::cartesian_gate_layout& layout,
-                                                                     const placement_info&           place_info,
-                                                                     const networks::fanin_container<tec_nt>& fc) const
+    [[nodiscard]] coord_vec_type get_possible_positions_single_fanin(
+        layouts::cartesian_gate_layout& layout, const placement_info& place_info,
+        const networks::fanin_container<fiction::networks::named_technology_network>& fc) const
     {
         coord_vec_type possible_positions{};
         possible_positions.reserve(ps.num_vertex_expansions);
@@ -1573,9 +1577,9 @@ class graph_oriented_layout_design_impl
      * @param fc A vector of nodes that precede the double fanin node.
      * @return A vector of tiles representing the possible positions for a double fan-in node.
      */
-    [[nodiscard]] coord_vec_type get_possible_positions_double_fanin(layouts::cartesian_gate_layout& layout,
-                                                                     const placement_info&           place_info,
-                                                                     const networks::fanin_container<tec_nt>& fc) const
+    [[nodiscard]] coord_vec_type get_possible_positions_double_fanin(
+        layouts::cartesian_gate_layout& layout, const placement_info& place_info,
+        const networks::fanin_container<fiction::networks::named_technology_network>& fc) const
     {
         coord_vec_type possible_positions{};
         possible_positions.reserve(ps.num_vertex_expansions);
@@ -1814,7 +1818,8 @@ class graph_oriented_layout_design_impl
      * @param fc A vector of nodes that precede the single fanin node.
      */
     void route_single_input_node(const layouts::layout_object_id destination, layouts::cartesian_gate_layout& layout,
-                                 node_dict_type& node2pos, const networks::fanin_container<tec_nt>& fc) const
+                                 node_dict_type&                                                               node2pos,
+                                 const networks::fanin_container<fiction::networks::named_technology_network>& fc) const
     {
         const auto& pre   = fc.fanin_nodes[0];
         const auto  pre_t = layout.get_tile(node2pos[pre]);
@@ -1842,7 +1847,8 @@ class graph_oriented_layout_design_impl
      * @param fc A vector of nodes that precede the double fanin node.
      */
     void route_double_input_node(const layouts::layout_object_id destination, layouts::cartesian_gate_layout& layout,
-                                 node_dict_type& node2pos, const networks::fanin_container<tec_nt>& fc) const
+                                 node_dict_type&                                                               node2pos,
+                                 const networks::fanin_container<fiction::networks::named_technology_network>& fc) const
     {
         const auto& pre1 = fc.fanin_nodes[0];
         const auto& pre2 = fc.fanin_nodes[1];
@@ -2447,8 +2453,10 @@ class graph_oriented_layout_design_impl
     void initialize_networks_and_nodes_to_place()
     {
         // helper function to prepare nodes to place
-        const auto prepare_nodes_to_place = []<bool CiToCo, bool Randomize>(const topo_view<CiToCo, Randomize>& network,
-                                                                            std::vector<tec_nt::node>& nodes_to_place)
+        const auto prepare_nodes_to_place =
+            []<bool CiToCo, bool Randomize>(
+                const topo_view<CiToCo, Randomize>&                             network,
+                std::vector<fiction::networks::named_technology_network::node>& nodes_to_place)
         {
             nodes_to_place.reserve(network.size());
             network.foreach_node(
@@ -2478,10 +2486,14 @@ class graph_oriented_layout_design_impl
 
         // helper function to assign networks and nodes
         const auto assign_networks_and_nodes =
-            [&](uint64_t base_index, const tec_nt& breadth_co_to_ci, const tec_nt& breadth_ci_to_co,
-                const tec_nt& depth_co_to_ci, const tec_nt& depth_ci_to_co,
-                const std::vector<tec_nt::node>& breadth_co_nodes, const std::vector<tec_nt::node>& breadth_ci_nodes,
-                const std::vector<tec_nt::node>& depth_co_nodes, const std::vector<tec_nt::node>& depth_ci_nodes)
+            [&](uint64_t base_index, const fiction::networks::named_technology_network& breadth_co_to_ci,
+                const fiction::networks::named_technology_network&                    breadth_ci_to_co,
+                const fiction::networks::named_technology_network&                    depth_co_to_ci,
+                const fiction::networks::named_technology_network&                    depth_ci_to_co,
+                const std::vector<fiction::networks::named_technology_network::node>& breadth_co_nodes,
+                const std::vector<fiction::networks::named_technology_network::node>& breadth_ci_nodes,
+                const std::vector<fiction::networks::named_technology_network::node>& depth_co_nodes,
+                const std::vector<fiction::networks::named_technology_network::node>& depth_ci_nodes)
         {
             for (uint64_t i = 0; i < num_possible_pi_locations; ++i)
             {
@@ -2499,12 +2511,13 @@ class graph_oriented_layout_design_impl
 
         synthesis::fanout_substitution_params params{};
         params.strategy = synthesis::fanout_substitution_params::substitution_strategy::BREADTH;
-        const mockturtle::fanout_view network_substituted_breadth{synthesis::fanout_substitution<tec_nt>(ntk, params)};
+        const mockturtle::fanout_view network_substituted_breadth{
+            synthesis::fanout_substitution<fiction::networks::named_technology_network>(ntk, params)};
 
         const topo_view_co_to_ci network_breadth_co_to_ci{network_substituted_breadth, seed};
 
         // prepare initial nodes to place
-        std::vector<tec_nt::node> nodes_to_place_breadth_co_to_ci{};
+        std::vector<fiction::networks::named_technology_network::node> nodes_to_place_breadth_co_to_ci{};
         prepare_nodes_to_place(network_breadth_co_to_ci, nodes_to_place_breadth_co_to_ci);
 
         // set initial cost
@@ -2520,16 +2533,16 @@ class graph_oriented_layout_design_impl
         {
             params.strategy = synthesis::fanout_substitution_params::substitution_strategy::DEPTH;
             const mockturtle::fanout_view network_substituted_depth{
-                synthesis::fanout_substitution<tec_nt>(ntk, params)};
+                synthesis::fanout_substitution<fiction::networks::named_technology_network>(ntk, params)};
 
             const topo_view_ci_to_co network_breadth_ci_to_co{network_substituted_breadth, seed};
             const topo_view_co_to_ci network_depth_co_to_ci{network_substituted_depth, seed};
             const topo_view_ci_to_co network_depth_ci_to_co{network_substituted_depth, seed};
 
             // prepare nodes to place for additional networks
-            std::vector<tec_nt::node> nodes_to_place_breadth_ci_to_co{};
-            std::vector<tec_nt::node> nodes_to_place_depth_co_to_ci{};
-            std::vector<tec_nt::node> nodes_to_place_depth_ci_to_co{};
+            std::vector<fiction::networks::named_technology_network::node> nodes_to_place_breadth_ci_to_co{};
+            std::vector<fiction::networks::named_technology_network::node> nodes_to_place_depth_co_to_ci{};
+            std::vector<fiction::networks::named_technology_network::node> nodes_to_place_depth_ci_to_co{};
 
             prepare_nodes_to_place(network_breadth_ci_to_co, nodes_to_place_breadth_ci_to_co);
             prepare_nodes_to_place(network_depth_co_to_ci, nodes_to_place_depth_co_to_ci);
@@ -2566,14 +2579,14 @@ class graph_oriented_layout_design_impl
                     params.strategy = synthesis::fanout_substitution_params::substitution_strategy::RANDOM;
                     params.seed     = seed;
                     const mockturtle::fanout_view network_substituted_random{
-                        synthesis::fanout_substitution<tec_nt>(ntk, params)};
+                        synthesis::fanout_substitution<fiction::networks::named_technology_network>(ntk, params)};
 
                     const topo_view_co_to_ci_random network_co_to_ci_random{network_substituted_random, seed};
                     const topo_view_ci_to_co_random network_ci_to_co_random{network_substituted_random, seed};
 
                     // prepare nodes to place for additional networks
-                    std::vector<tec_nt::node> nodes_to_place_co_to_ci_random{};
-                    std::vector<tec_nt::node> nodes_to_place_ci_to_co_random{};
+                    std::vector<fiction::networks::named_technology_network::node> nodes_to_place_co_to_ci_random{};
+                    std::vector<fiction::networks::named_technology_network::node> nodes_to_place_ci_to_co_random{};
 
                     prepare_nodes_to_place(network_co_to_ci_random, nodes_to_place_co_to_ci_random);
                     prepare_nodes_to_place(network_ci_to_co_random, nodes_to_place_ci_to_co_random);
@@ -2698,7 +2711,8 @@ class graph_oriented_layout_design_impl
  * `ps.tiles_to_skip_between_pis` does not lie in \f$[0, 2^{20}]\f$.
  */
 inline std::optional<layouts::cartesian_gate_layout> graph_oriented_layout_design(
-    const tec_nt& ntk, graph_oriented_layout_design_params ps = {}, graph_oriented_layout_design_stats* pst = nullptr,
+    const fiction::networks::named_technology_network& ntk, graph_oriented_layout_design_params ps = {},
+    graph_oriented_layout_design_stats*                            pst                   = nullptr,
     std::function<uint64_t(const layouts::cartesian_gate_layout&)> custom_cost_objective = nullptr)
 {
     // check for input degree
@@ -2720,8 +2734,9 @@ inline std::optional<layouts::cartesian_gate_layout> graph_oriented_layout_desig
 
     graph_oriented_layout_design_stats st{};
     /** @brief GOLD invocation state with owned options and an optional custom cost callback. */
-    detail::graph_oriented_layout_design_impl p{synthesis::convert_network<tec_nt>(ntk), std::move(ps), st,
-                                                std::move(custom_cost_objective)};
+    detail::graph_oriented_layout_design_impl p{
+        synthesis::convert_network<fiction::networks::named_technology_network>(ntk), std::move(ps), st,
+        std::move(custom_cost_objective)};
 
     /** @brief Optional layout returned by the GOLD search. */
     auto result = p.run();

@@ -678,8 +678,6 @@ static const char *mkd_doc_fiction_fcn_unsupported_gate_type_exception_unsupport
 
 static const char *mkd_doc_fiction_fcn_unsupported_gate_type_exception_where = R"doc(Returns the coordinate of the unsupported gate.)doc";
 
-static const char *mkd_doc_fiction_get_ntk_type_name = R"doc()doc";
-
 static const char *mkd_doc_fiction_has_create_dot = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_foreach_pi_unranked =
