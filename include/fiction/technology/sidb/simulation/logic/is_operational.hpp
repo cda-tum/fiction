@@ -52,6 +52,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <limits>
 #include <optional>
 #include <ranges>
@@ -877,13 +878,7 @@ class is_operational_impl
     {
         if (parameters.sim_engine == engine::QUICKSIM &&
             (input_pattern_layouts != nullptr ?
-                 std::ranges::any_of(*input_pattern_layouts,
-                                     /**
-                                      * @brief Checks a supplied layout for charged defects.
-                                      * @param lyt Layout to check.
-                                      * @return Whether the layout holds charged defects.
-                                      */
-                                     [](const auto& lyt) { return lyt.num_charged_defects() > 0; }) :
+                 std::ranges::any_of(*input_pattern_layouts, &layout::num_charged_defects) :
                  sidb_layout.num_charged_defects() > 0))
         {
             throw std::invalid_argument("QuickSim does not support charged defects");
@@ -1122,15 +1117,7 @@ inline void check_specification(const std::vector<kitty::dynamic_truth_table>& s
     {
         throw std::invalid_argument("spec is empty");
     }
-    if (std::ranges::adjacent_find(spec,
-                                   /**
-                                    * @brief Compares the variable counts of adjacent truth tables.
-                                    * @param a First truth table.
-                                    * @param b Second truth table.
-                                    * @return Whether the variable counts differ.
-                                    */
-                                   [](const auto& a, const auto& b)
-                                   { return a.num_vars() != b.num_vars(); }) != spec.cend())
+    if (std::ranges::adjacent_find(spec, std::not_equal_to{}, &kitty::dynamic_truth_table::num_vars) != spec.cend())
     {
         throw std::invalid_argument("truth tables must have the same number of variables");
     }
