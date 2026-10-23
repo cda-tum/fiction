@@ -2187,11 +2187,11 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_get_scheme =
-R"doc(Returns a clocking scheme by name. The lookup ignores case and accepts
-a trailing `3` or `4` that selects the phase count of a scheme that
-supports it. Without a suffix, a scheme has its default phase count: 3
-for BANCS and 4 for all others. `2DDWAVEHEX` requires a hexagonal
-arrangement and falls back to `2DDWAVE` without one.
+R"doc(Returns a catalog clocking scheme by name. The lookup ignores case and
+accepts a trailing `3` or `4` that selects the phase count of a scheme
+that supports it. Without a suffix, a scheme has its default phase
+count: 3 for BANCS and 4 for all others. `2DDWAVEHEX` requires a
+hexagonal arrangement and falls back to `2DDWAVE` without one.
 
 Args:
     scheme_name: Name of the desired clocking scheme.
@@ -2353,8 +2353,9 @@ unchanged while using the view, or copy it with
 `std::string{scheme.name()}`.
 
 Returns:
-    The canonical name, e.g., `"2DDWAVE"`, without a phase-count
-    suffix.
+    The name supplied at construction, or `"OPEN"` for a default-
+    constructed scheme. Catalog factories use canonical names, e.g.,
+    `"2DDWAVE"`, without a phase-count suffix.
 
 )doc";
 
@@ -2436,8 +2437,8 @@ static const char *mkd_doc_fiction_layouts_clocking_scheme_scheme_2 =
 R"doc(Standard constructor.
 
 Args:
-    n: The clocking scheme's name. The name is the key under which
-       `get_scheme` finds the scheme.
+    n: The clocking scheme's stored name. Construction does not
+       register the scheme with `get_scheme`.
     cutout: Rows of clock numbers. Row `y`, column `x` holds the clock
             number of every tile :math:`(x + i \cdot w, y + j \cdot
             h)` for all integers :math:`i, j`, where :math:`w` and
