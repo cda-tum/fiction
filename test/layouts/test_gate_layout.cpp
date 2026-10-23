@@ -22,6 +22,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include "utils/allocation_failure.hpp"
@@ -58,6 +59,9 @@ using namespace fiction::layouts;
 
 using Catch::Matchers::RangeEquals;
 using Catch::Matchers::UnorderedRangeEquals;
+
+/** @brief Coordinate geometries covered by gate-layout fixture tests. */
+using gate_geometries = std::tuple<cartesian_layout, shifted_cartesian_layout, hexagonal_layout>;
 
 /** @brief Checks whether a geometry can back a gate layout. @tparam Geometry Coordinate geometry. */
 template <typename Geometry>
@@ -109,8 +113,8 @@ TEST_CASE("Canonical gate layouts expose their geometry", "[gate-layout]")
     }
 }
 
-TEMPLATE_TEST_CASE_METHOD(gate_layout_fixture, "Elementary truth tables retain logical input order", "[gate-layout]",
-                          cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
+TEMPLATE_LIST_TEST_CASE_METHOD(gate_layout_fixture, "Elementary truth tables retain logical input order",
+                               "[gate-layout]", gate_geometries)
 {
     auto&      lyt = this->lyt;
     const auto a   = this->a;
@@ -146,8 +150,8 @@ TEMPLATE_TEST_CASE_METHOD(gate_layout_fixture, "Elementary truth tables retain l
     }
 }
 
-TEMPLATE_TEST_CASE_METHOD(gate_layout_fixture, "Gate iteration excludes identity functions and terminals",
-                          "[gate-layout]", cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
+TEMPLATE_LIST_TEST_CASE_METHOD(gate_layout_fixture, "Gate iteration excludes identity functions and terminals",
+                               "[gate-layout]", gate_geometries)
 {
     auto&      lyt  = this->lyt;
     const auto wire = lyt.create_buf(this->a, {0, 2});
@@ -182,8 +186,8 @@ TEMPLATE_TEST_CASE("Connections expose declared ports despite physical violation
     CHECK_FALSE(lyt.find_object({0, 0}).has_value());
 }
 
-TEMPLATE_TEST_CASE_METHOD(gate_layout_fixture, "Object identity survives placement and stale IDs reject reuse",
-                          "[gate-layout]", cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
+TEMPLATE_LIST_TEST_CASE_METHOD(gate_layout_fixture, "Object identity survives placement and stale IDs reject reuse",
+                               "[gate-layout]", gate_geometries)
 {
     auto&      lyt  = this->lyt;
     const auto a    = this->a;
@@ -308,8 +312,8 @@ TEMPLATE_TEST_CASE("Deletion disconnects self loops and duplicate destination in
     CHECK(lyt.size() == 1);
 }
 
-TEMPLATE_TEST_CASE_METHOD(gate_layout_fixture, "Copies isolate geometry, terminals, and connectivity", "[gate-layout]",
-                          cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
+TEMPLATE_LIST_TEST_CASE_METHOD(gate_layout_fixture, "Copies isolate geometry, terminals, and connectivity",
+                               "[gate-layout]", gate_geometries)
 {
     auto&      original = this->lyt;
     const auto a        = this->a;
@@ -793,9 +797,9 @@ TEMPLATE_TEST_CASE("Five-input objects keep ordered ports", "[gate-layout]", car
     CHECK(lyt.template outgoing_data_flow<true>({2, 1}).empty());
 }
 
-TEMPLATE_TEST_CASE_METHOD(gate_layout_fixture,
-                          "Large-arity objects preserve disconnected ports through copying, moving, and removal",
-                          "[gate-layout]", cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
+TEMPLATE_LIST_TEST_CASE_METHOD(gate_layout_fixture,
+                               "Large-arity objects preserve disconnected ports through copying, moving, and removal",
+                               "[gate-layout]", gate_geometries)
 {
     auto&                      original = this->lyt;
     const auto                 a        = this->a;
@@ -939,7 +943,7 @@ TEMPLATE_TEST_CASE("Object iteration preserves sparse membership through reuse a
                 CHECK(index == count++);
                 visited.push_back(id);
             });
-        std::sort(visited.begin(), visited.end());
+        std::ranges::sort(visited);
         CHECK_THAT(visited, RangeEquals(expected));
         CHECK(count == layout.size());
         count = 0;
@@ -1283,7 +1287,7 @@ TEST_CASE("Failed creation preserves object iteration across storage growth", "[
         }
         std::vector<layout_object_id> visited{};
         lyt.foreach_object([&](const auto id) { visited.push_back(id); });
-        std::sort(visited.begin(), visited.end());
+        std::ranges::sort(visited);
         CHECK_THAT(visited, RangeEquals(expected));
         CHECK(lyt.size() == expected.size());
         if (created)
@@ -1297,7 +1301,7 @@ TEST_CASE("Failed creation preserves object iteration across storage growth", "[
         expected.insert(recovered);
         visited.clear();
         lyt.foreach_object([&](const auto id) { visited.push_back(id); });
-        std::sort(visited.begin(), visited.end());
+        std::ranges::sort(visited);
         CHECK_THAT(visited, RangeEquals(expected));
     }
 }
