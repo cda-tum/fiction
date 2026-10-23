@@ -24,7 +24,7 @@ network specifications under constraints. This approach finds exact results but 
 :members:
 ```
 
-```{doxygenfunction} fiction::physical_design::exact(const tec_nt& ntk, const exact_physical_design_params& ps = {}, exact_physical_design_stats *pst = nullptr)
+```{doxygenfunction} fiction::physical_design::exact(const fiction::networks::named_technology_network& ntk, const exact_physical_design_params& ps = {}, exact_physical_design_stats *pst = nullptr)
 
 ```
 
