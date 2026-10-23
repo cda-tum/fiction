@@ -926,3 +926,112 @@ TEST_CASE("Both is_operational entry points apply the same canvas rule", "[is-op
         }
     }
 }
+
+TEST_CASE("Operational checks reject invalid specifications", "[is-operational][invalid-spec]")
+{
+    /** @brief AND layout checked by the operational APIs. */
+    const auto lyt = blueprints::siqad_and_gate();
+    /** @brief Input BDL wires of the AND layout. */
+    const auto input_wires = detect_bdl_wires(lyt, {}, bdl_wire_selection::INPUT);
+    /** @brief Output BDL wires of the AND layout. */
+    const auto output_wires = detect_bdl_wires(lyt, {}, bdl_wire_selection::OUTPUT);
+    /** @brief Layouts with the Boolean input patterns applied. */
+    const auto layouts = generate_bdl_input_pattern_layouts(lyt, {}, input_wires);
+
+    /** @brief Empty or mixed-variable specification rejected by each public entry point. */
+    for (const auto& spec : {std::vector<kitty::dynamic_truth_table>{},
+                             std::vector<kitty::dynamic_truth_table>{create_and_tt(), create_id_tt()}})
+    {
+        CHECK_THROWS_AS(is_operational(lyt, spec), std::invalid_argument);
+        CHECK_THROWS_AS(is_operational(lyt, spec, {}, input_wires, output_wires), std::invalid_argument);
+        CHECK_THROWS_AS(is_operational(layouts, spec, {}, input_wires, output_wires), std::invalid_argument);
+        CHECK_THROWS_AS(operational_input_patterns(lyt, spec), std::invalid_argument);
+        CHECK_THROWS_AS(operational_input_patterns(lyt, spec, {}, input_wires, output_wires), std::invalid_argument);
+        CHECK_THROWS_AS(kink_induced_non_operational_input_patterns(lyt, spec), std::invalid_argument);
+        CHECK_THROWS_AS(kink_induced_non_operational_input_patterns(lyt, spec, {}, input_wires, output_wires),
+                        std::invalid_argument);
+        CHECK_THROWS_AS(is_kink_induced_non_operational(lyt, spec), std::invalid_argument);
+        CHECK_THROWS_AS(is_kink_induced_non_operational(lyt, spec, {}, input_wires, output_wires),
+                        std::invalid_argument);
+    }
+}
+
+TEST_CASE("Operational checks reject charged defects with QuickSim", "[is-operational][quicksim-defects]")
+{
+    /** @brief AND layout checked by the operational APIs. */
+    auto lyt = blueprints::siqad_and_gate();
+    lyt.assign_defect({100, 100, 0}, defect{defect_type::DB, -1});
+    /** @brief Input BDL wires of the AND layout. */
+    const auto input_wires = detect_bdl_wires(lyt, {}, bdl_wire_selection::INPUT);
+    /** @brief Output BDL wires of the AND layout. */
+    const auto output_wires = detect_bdl_wires(lyt, {}, bdl_wire_selection::OUTPUT);
+    /** @brief Layouts with the Boolean input patterns applied. */
+    auto layouts = generate_bdl_input_pattern_layouts(lyt, {}, input_wires);
+    /** @brief AND truth-table specification. */
+    const std::vector<kitty::dynamic_truth_table> spec{create_and_tt()};
+    /** @brief Physical and simulation settings for the operational check. */
+    const is_operational_params params{.sim_params = simulation_parameters{2, -0.28}, .sim_engine = engine::QUICKSIM};
+
+    CHECK_THROWS_AS(is_operational(lyt, spec, params), std::invalid_argument);
+    CHECK_THROWS_AS(is_operational(lyt, spec, params, input_wires, output_wires), std::invalid_argument);
+    CHECK_THROWS_AS(is_operational(layouts, spec, params, input_wires, output_wires), std::invalid_argument);
+    CHECK_THROWS_AS(operational_input_patterns(lyt, spec, params), std::invalid_argument);
+    CHECK_THROWS_AS(operational_input_patterns(lyt, spec, params, input_wires, output_wires), std::invalid_argument);
+    CHECK_THROWS_AS(kink_induced_non_operational_input_patterns(lyt, spec, params), std::invalid_argument);
+    CHECK_THROWS_AS(is_kink_induced_non_operational(lyt, spec, params), std::invalid_argument);
+
+    SECTION("A charged defect occurs only in a later supplied layout")
+    {
+        /** @brief Input-pattern layout with its charged defect removed. */
+        for (auto& pattern : layouts)
+        {
+            pattern.assign_defect({100, 100, 0}, defect{defect_type::NONE});
+        }
+        layouts.back().assign_defect({100, 100, 0}, defect{defect_type::DB, -1});
+        CHECK_THROWS_AS(is_operational(layouts, spec, params, input_wires, output_wires), std::invalid_argument);
+    }
+}
+
+TEST_CASE("An empty simulation result cannot establish an operational pattern", "[is-operational][empty-result]")
+{
+    /** @brief AND layout checked by the operational APIs. */
+    const auto lyt = blueprints::siqad_and_gate();
+    /** @brief Input BDL wires of the AND layout. */
+    const auto input_wires = detect_bdl_wires(lyt, {}, bdl_wire_selection::INPUT);
+    /** @brief Output BDL wires of the AND layout. */
+    const auto output_wires = detect_bdl_wires(lyt, {}, bdl_wire_selection::OUTPUT);
+    /** @brief Layouts with the Boolean input patterns applied. */
+    auto layouts = generate_bdl_input_pattern_layouts(lyt, {}, input_wires);
+    layouts[1]   = layout{};
+    /** @brief AND truth-table specification. */
+    const std::vector<kitty::dynamic_truth_table> spec{create_and_tt()};
+    /** @brief Physical and simulation settings for the operational check. */
+    const is_operational_params params{.sim_params = simulation_parameters{2, -0.28}, .sim_engine = engine::QUICKSIM};
+    /** @brief Operational-pattern collector for the supplied layouts. */
+    sidb::simulation::logic::detail::is_operational_impl implementation{layouts,     spec,         params,
+                                                                        input_wires, output_wires, layout{}};
+
+    CHECK_FALSE(sidb::simulation::logic::detail::operational_patterns_of(implementation, 4).contains(1));
+    CHECK(is_operational(layouts, spec, params, input_wires, output_wires).first ==
+          operational_status::NON_OPERATIONAL);
+}
+
+TEST_CASE("Operational QuickSim simulations reject base three", "[is-operational][quicksim-base]")
+{
+    /** @brief AND layout checked by the operational APIs. */
+    const auto lyt = blueprints::siqad_and_gate();
+    /** @brief Input BDL wires of the AND layout. */
+    const auto input_wires = detect_bdl_wires(lyt, {}, bdl_wire_selection::INPUT);
+    /** @brief Output BDL wires of the AND layout. */
+    const auto output_wires = detect_bdl_wires(lyt, {}, bdl_wire_selection::OUTPUT);
+    /** @brief Layouts with the Boolean input patterns applied. */
+    const auto layouts = generate_bdl_input_pattern_layouts(lyt, {}, input_wires);
+    /** @brief AND truth-table specification. */
+    const std::vector<kitty::dynamic_truth_table> spec{create_and_tt()};
+    /** @brief Physical and simulation settings for the operational check. */
+    const is_operational_params params{.sim_params = simulation_parameters{3, -0.28}, .sim_engine = engine::QUICKSIM};
+
+    CHECK_THROWS_AS(is_operational(lyt, spec, params), std::invalid_argument);
+    CHECK_THROWS_AS(operational_input_patterns(lyt, spec, params), std::invalid_argument);
+    CHECK_THROWS_AS(is_operational(layouts, spec, params, input_wires, output_wires), std::invalid_argument);
+}
