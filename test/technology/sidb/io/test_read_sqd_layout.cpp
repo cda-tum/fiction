@@ -26,6 +26,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <ios>
 #include <random>
 #include <sstream>
 #include <string>
