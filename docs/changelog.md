@@ -146,8 +146,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
-  - **Breaking:** Physical design accepts only named technology networks (`tec_nt`). Convert other network types
-    with `convert_network<tec_nt>` before placement; names survive conversion and extraction.
+  - **Breaking:** Physical design accepts only named technology networks (`networks::named_technology_network`). Convert other network types
+    with `convert_network<networks::named_technology_network>` before placement; names survive conversion and extraction.
   - `verification::virtual_miter` is no longer `noexcept`, since the rank view it builds can throw.
   - `synthesis::node_duplication_planarization` skips unused cone-weight traversals when ranking duplication choices.
   - `utils::graph::mincross` with optimization runs about 10x faster and returns the same rank order.
@@ -247,6 +247,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - **Breaking:** Network presets replace `*_nt` with `networks::named_aig_network`,
+    `named_xag_network`, `named_mig_network`, and `named_technology_network`.
+    `kitty::dynamic_truth_table` replaces `fiction::tt`; Python names stay unchanged.
   - **Breaking:** Routing algorithms and path containers now use `layout_coordinate_path` directly. Remove path template
     arguments from C++ calls and container declarations.
   - `technology_network` and `virtual_pi_network` answer `is_pi`, `is_ci`, and `is_virtual_pi` and iterate gates and
@@ -323,6 +326,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Experiments:
 
+  - Experiments use canonical network types and `kitty::dynamic_truth_table` without changing their computations.
   - Clock-number assignment helpers now take concrete Cartesian gate layouts.
     Experiment parameters, inputs, and output columns are unchanged.
   - Physical-design experiments convert mapped networks before placement with unchanged computations.
@@ -574,6 +578,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **Breaking:** `reserve_input_nodes` is gone. Place each primary input with `place` or `create_pi` when its coordinate is known.
 - Code quality:
 
+  - **Breaking:** Removed preset pointer aliases, `truth_table_t`, `logic_network_t`, `*_name`,
+    `get_ntk_type_name`, and `ntk_type_name`. Use `std::shared_ptr<T>` for shared ownership.
   - **Breaking:** Removed `utils/stl/execution_utils.hpp` and its `FICTION_EXECUTION_POLICY_*` macros.
 - Data structures:
 

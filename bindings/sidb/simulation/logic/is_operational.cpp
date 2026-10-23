@@ -17,11 +17,12 @@
 
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/operational_parameters.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
+
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <optional>
 #include <vector>
@@ -60,7 +61,8 @@ inline void register_is_operational_functions(nb::module_& m)
 
     m.def(
         "is_operational",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const decltype(is_operational_options{}.timeout) timeout,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+           const decltype(is_operational_options{}.timeout)              timeout,
            const decltype(is_operational_options{}.sim_params.base)      base,
            const decltype(is_operational_options{}.sim_params.mu_minus)  mu_minus,
            const decltype(is_operational_options{}.sim_params.epsilon_r) epsilon_r,
@@ -124,7 +126,7 @@ Args:
 )doc");
     m.def(
         "is_operational",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const wires& in, const wires& out,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const wires& in, const wires& out,
            const decltype(is_operational_options{}.timeout)                                    timeout,
            const decltype(is_operational_options{}.sim_params.base)                            base,
            const decltype(is_operational_options{}.sim_params.mu_minus)                        mu_minus,
@@ -188,8 +190,8 @@ Args:
 )doc");
     m.def(
         "is_operational",
-        [](const std::vector<layout>& input_pattern_layouts, const std::vector<py_tt>& spec, const wires& in,
-           const wires& out, const decltype(is_operational_options{}.timeout) timeout,
+        [](const std::vector<layout>& input_pattern_layouts, const std::vector<kitty::dynamic_truth_table>& spec,
+           const wires& in, const wires& out, const decltype(is_operational_options{}.timeout) timeout,
            const decltype(is_operational_options{}.sim_params.base)                            base,
            const decltype(is_operational_options{}.sim_params.mu_minus)                        mu_minus,
            const decltype(is_operational_options{}.sim_params.epsilon_r)                       epsilon_r,
@@ -253,7 +255,8 @@ Args:
 )doc");
     m.def(
         "operational_input_patterns",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const decltype(is_operational_options{}.timeout) timeout,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+           const decltype(is_operational_options{}.timeout)              timeout,
            const decltype(is_operational_options{}.sim_params.base)      base,
            const decltype(is_operational_options{}.sim_params.mu_minus)  mu_minus,
            const decltype(is_operational_options{}.sim_params.epsilon_r) epsilon_r,
@@ -316,7 +319,7 @@ Args:
 )doc");
     m.def(
         "operational_input_patterns",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const wires& in, const wires& out,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const wires& in, const wires& out,
            const decltype(is_operational_options{}.timeout)                                    timeout,
            const decltype(is_operational_options{}.sim_params.base)                            base,
            const decltype(is_operational_options{}.sim_params.mu_minus)                        mu_minus,
@@ -379,7 +382,8 @@ Args:
 )doc");
     m.def(
         "kink_induced_non_operational_input_patterns",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const decltype(is_operational_options{}.timeout) timeout,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+           const decltype(is_operational_options{}.timeout)              timeout,
            const decltype(is_operational_options{}.sim_params.base)      base,
            const decltype(is_operational_options{}.sim_params.mu_minus)  mu_minus,
            const decltype(is_operational_options{}.sim_params.epsilon_r) epsilon_r,
@@ -442,7 +446,7 @@ Args:
 )doc");
     m.def(
         "kink_induced_non_operational_input_patterns",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const wires& in, const wires& out,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const wires& in, const wires& out,
            const decltype(is_operational_options{}.timeout)                                    timeout,
            const decltype(is_operational_options{}.sim_params.base)                            base,
            const decltype(is_operational_options{}.sim_params.mu_minus)                        mu_minus,
@@ -506,7 +510,8 @@ Args:
 )doc");
     m.def(
         "is_kink_induced_non_operational",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const decltype(is_operational_options{}.timeout) timeout,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+           const decltype(is_operational_options{}.timeout)              timeout,
            const decltype(is_operational_options{}.sim_params.base)      base,
            const decltype(is_operational_options{}.sim_params.mu_minus)  mu_minus,
            const decltype(is_operational_options{}.sim_params.epsilon_r) epsilon_r,
@@ -569,7 +574,7 @@ Args:
 )doc");
     m.def(
         "is_kink_induced_non_operational",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const wires& in, const wires& out,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const wires& in, const wires& out,
            const decltype(is_operational_options{}.timeout)                                    timeout,
            const decltype(is_operational_options{}.sim_params.base)                            base,
            const decltype(is_operational_options{}.sim_params.mu_minus)                        mu_minus,
