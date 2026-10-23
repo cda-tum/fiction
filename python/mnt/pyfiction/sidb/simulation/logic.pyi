@@ -1138,8 +1138,8 @@ class operational_domain_value_range:
     A range of values for a dimension sweep. The range is defined by a
     minimum value, a maximum value and a step size. Generated coordinates
     must occupy distinct `parameter_point` identity cells, whose width is
-    `utils::math::ERROR_MARGIN`. Domain algorithms throw
-    `std::invalid_argument` if coordinates collide.
+    `utils::math::ERROR_MARGIN`. Domain algorithms throw `ValueError` if
+    coordinates collide.
     """
 
     @overload
