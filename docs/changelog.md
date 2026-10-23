@@ -146,6 +146,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Combination generation avoids one allocation and copy per result.
   - **Breaking:** Physical design accepts only named technology networks (`networks::named_technology_network`). Convert other network types
     with `convert_network<networks::named_technology_network>` before placement; names survive conversion and extraction.
   - `verification::virtual_miter` is no longer `noexcept`, since the rank view it builds can throw.
@@ -247,6 +248,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - **Breaking:** Gray-code iterators now satisfy C++20 random access and return values; replace `auto&` bindings
+    with `auto`. Use C++20 ranges for constant-time advancement and distance; legacy traversal is forward-only
+    and linear.
   - **Breaking:** Network presets replace `*_nt` with `networks::named_aig_network`,
     `named_xag_network`, `named_mig_network`, and `named_technology_network`.
     `kitty::dynamic_truth_table` replaces `fiction::tt`; Python names stay unchanged.
@@ -785,6 +789,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - Gray-code iterators now index from their current position, compare positions, support copy assignment,
+    and preserve 64-bit offsets and distances across the signed boundary.
   - Edge-color views now support clearing only node colors and clearing both node and edge colors.
   - Gate-level layout moves now propagate geometry failures and preserve owned state.
     Custom geometry controls its assignment failure guarantee.
