@@ -10,6 +10,7 @@
 #include "fiction/algorithms/iter/aspect_ratio_iterator.hpp"
 #include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/networks/technology_network.hpp"
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/sidb_surface_analysis.hpp"
 #include "fiction/traits.hpp"
@@ -26,6 +27,7 @@
 #include <mockturtle/utils/stopwatch.hpp>
 #include <mockturtle/views/depth_view.hpp>
 #include <mockturtle/views/fanout_view.hpp>
+#include <mockturtle/views/names_view.hpp>
 #include <mockturtle/views/topo_view.hpp>
 #if (PROGRESS_BARS)
 #include <mockturtle/utils/progress_bar.hpp>
@@ -48,6 +50,7 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 namespace fiction
@@ -174,9 +177,16 @@ template <typename Lyt>
 class exact_impl
 {
   public:
-    exact_impl(mockturtle::names_view<technology_network>& src, const exact_physical_design_params& p,
+    /**
+     * @brief Prepares exact placement and routing for a named technology network.
+     * @param src Network whose primary output signals are substituted.
+     * @param p Physical design parameters.
+     * @param st Statistics to update during physical design.
+     * @param sbl Excluded gate orientations by tile.
+     */
+    exact_impl(mockturtle::names_view<technology_network>& src, exact_physical_design_params p,
                exact_physical_design_stats& st, const surface_black_list<Lyt, port_direction>& sbl = {}) :
-            ps{p},
+            ps{std::move(p)},
             pst{st},
             scheme{*get_clocking_scheme<Lyt>(ps.scheme)},  // NOLINT(bugprone-unchecked-optional-access)
             black_list{sbl}
@@ -265,14 +275,16 @@ class exact_impl
          *
          * @param ctxp The context that is used in all solvers.
          * @param lyt The empty gate-level layout that is going to contain the created layout.
+         * @param ntk Topologically ordered network to place and route.
          * @param ps The parameters to respect in the SMT instance generation process.
+         * @param sbl Excluded gate orientations by tile.
          */
-        smt_handler(ctx_ptr ctxp, Lyt& lyt, const topology_ntk_t& ntk, const exact_physical_design_params& ps,
+        smt_handler(ctx_ptr ctxp, Lyt& lyt, const topology_ntk_t& ntk, exact_physical_design_params ps,
                     const surface_black_list<Lyt, port_direction>& sbl) noexcept :
                 ctx{std::move(ctxp)},
                 layout{lyt},
                 network{ntk},
-                params{ps},
+                params{std::move(ps)},
                 black_list{sbl},
                 node2pos{ntk},
                 depth_ntk{ntk},
@@ -688,7 +700,7 @@ class exact_impl
          * @param fn Unary function to apply to all added tiles. Must receive a tile as parameter.
          */
         template <typename Fn>
-        void apply_to_added_tiles(Fn&& fn)
+        void apply_to_added_tiles(const Fn& fn)
         {
             std::for_each(check_point->added_tiles.cbegin(), check_point->added_tiles.cend(), fn);
         }
@@ -699,7 +711,7 @@ class exact_impl
          * @param fn Unary function to apply to all updated tiles. Must receive a tile as parameter.
          */
         template <typename Fn>
-        void apply_to_updated_tiles(Fn&& fn)
+        void apply_to_updated_tiles(const Fn& fn)
         {
             std::for_each(check_point->updated_tiles.cbegin(), check_point->updated_tiles.cend(), fn);
         }
@@ -710,7 +722,7 @@ class exact_impl
          * @param fn Unary function to apply to all added and updated tiles. Must receive a tile as parameter.
          */
         template <typename Fn>
-        void apply_to_added_and_updated_tiles(Fn&& fn)
+        void apply_to_added_and_updated_tiles(const Fn& fn)
         {
             apply_to_added_tiles(fn);
             apply_to_updated_tiles(fn);
@@ -847,9 +859,9 @@ class exact_impl
         [[nodiscard]] z3::expr mk_eq(const z3::expr_vector& v) const
         {
             z3::expr_vector eq{*ctx};
-            for (int i = 1; static_cast<decltype(v.size())>(i) < v.size(); ++i)
+            for (unsigned i = 1; i < v.size(); ++i)
             {
-                eq.push_back(v[i - 1] == v[i]);
+                eq.push_back(v[i - 1u] == v[i]);
             }
 
             return z3::mk_and(eq);
