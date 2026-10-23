@@ -1268,8 +1268,8 @@ is_operational(const layout& lyt, const std::vector<kitty::dynamic_truth_table>&
  * @param output_bdl_wire The output BDL wires of `lyt`.
  * @param canvas_lyt The canvas; defaults to the logic dots of `lyt`.
  * @return The operational status and the number of simulator invocations.
- * @throws std::invalid_argument if filtering with rejected kinks encounters a canvas site absent from the layout.
- * @throws std::invalid_argument if `spec` is empty, truth-table variable counts differ, QuickSim encounters charged
+ * @throws std::invalid_argument if filtering with rejected kinks encounters a canvas site absent from the layout,
+ * `spec` is empty, truth-table variable counts differ, QuickSim encounters charged
  * defects, or a QuickSim simulation requests base 3.
  */
 [[nodiscard]] inline std::pair<operational_status, std::size_t>
@@ -1296,8 +1296,8 @@ is_operational(const layout& lyt, const std::vector<kitty::dynamic_truth_table>&
  * @param output_bdl_wire The output BDL wires.
  * @param canvas_lyt The canvas; defaults to the logic dots of the first layout.
  * @return The operational status and the number of simulator invocations.
- * @throws std::invalid_argument if filtering with rejected kinks encounters a canvas site absent from the layout.
- * @throws std::invalid_argument if `spec` is empty, truth-table variable counts differ, the layout count does not
+ * @throws std::invalid_argument if filtering with rejected kinks encounters a canvas site absent from the layout,
+ * `spec` is empty, truth-table variable counts differ, the layout count does not
  * match the number of patterns, QuickSim encounters charged defects, or a QuickSim simulation requests base 3.
  */
 [[nodiscard]] inline std::pair<operational_status, std::size_t>
@@ -1466,8 +1466,8 @@ kink_induced_non_operational_input_patterns(const layout& lyt, const std::vector
  * @param output_bdl_wire The output BDL wires of `lyt`.
  * @param canvas_lyt The canvas; defaults to none.
  * @return `true` if the layout is non-operational because of kinks.
- * @throws std::invalid_argument if filtering encounters a canvas site absent from the layout.
- * @throws std::invalid_argument if `spec` is empty, truth-table variable counts differ, QuickSim encounters charged
+ * @throws std::invalid_argument if filtering encounters a canvas site absent from the layout,
+ * `spec` is empty, truth-table variable counts differ, QuickSim encounters charged
  * defects, or a QuickSim simulation requests base 3.
  */
 [[nodiscard]] inline bool is_kink_induced_non_operational(const layout&                                  lyt,
