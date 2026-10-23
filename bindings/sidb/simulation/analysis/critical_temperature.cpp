@@ -133,6 +133,7 @@ inline void register_critical_temperature_functions(nb::module_& m)
         R"doc(Determine the critical temperature of an SiDB gate implementing the truth tables.
 The keyword options select physical values, operational analysis, confidence, and temperature bounds.
 Raises ValueError for confidence outside (0, 1) or a temperature outside the centikelvin iteration range.
+Raises ValueError for an empty specification or truth tables with different variable counts.
 The overload with input and output wires bypasses automatic wire detection.
 
 Args:
@@ -225,6 +226,7 @@ Args:
         R"doc(Determine the critical temperature of an SiDB gate implementing the truth tables.
 The keyword options select physical values, operational analysis, confidence, and temperature bounds.
 Raises ValueError for confidence outside (0, 1) or a temperature outside the centikelvin iteration range.
+Raises ValueError for an empty specification or truth tables with different variable counts.
 The overload with input and output wires bypasses automatic wire detection.
 
 Args:

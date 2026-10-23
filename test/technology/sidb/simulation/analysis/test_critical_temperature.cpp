@@ -1053,3 +1053,24 @@ TEST_CASE("Critical temperature reports progress", "[critical-temperature]")
         CHECK(rec.is_consistent("charge configurations"));
     }
 }
+
+TEST_CASE("Gate-based critical temperature rejects invalid specifications", "[critical-temperature][invalid-spec]")
+{
+    /** @brief AND layout checked by both temperature entry points. */
+    const auto lyt = blueprints::siqad_and_gate();
+    /** @brief Input BDL wires of the AND layout. */
+    const auto input_wires = detect_bdl_wires(lyt, {}, bdl_wire_selection::INPUT);
+    /** @brief Output BDL wires of the AND layout. */
+    const auto output_wires = detect_bdl_wires(lyt, {}, bdl_wire_selection::OUTPUT);
+    /** @brief Input-pattern layouts supplied to the temperature check. */
+    const auto layouts = generate_bdl_input_pattern_layouts(lyt, {}, input_wires);
+    /** @brief Empty or mixed-variable specification. */
+    for (const auto& spec : {std::vector<kitty::dynamic_truth_table>{},
+                             std::vector<kitty::dynamic_truth_table>{create_and_tt(), create_id_tt()}})
+    {
+        CHECK_THROWS_AS(critical_temperature_gate_based(lyt, spec), std::invalid_argument);
+        CHECK_THROWS_AS(critical_temperature_gate_based(layouts, spec, {}, std::vector<bdl_pair>(spec.size()),
+                                                        input_wires, output_wires),
+                        std::invalid_argument);
+    }
+}
