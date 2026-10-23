@@ -16,9 +16,9 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/traits.hpp>
+#include <fiction/types.hpp>
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/views/depth_view.hpp>
@@ -125,8 +125,8 @@ void register_network(nb::module_& m, const char* network_name, const char* doc)
             },
             // Keep the GIL for AIG/XAG/MIG fanins: releasing it adds overhead for at most three inputs.
             nb::arg("n"),
-            std::conditional_t<std::is_same_v<Ntk, py_tec_network>, nb::call_guard<nb::gil_scoped_release>,
-                               nb::call_guard<>>{})
+            std::conditional_t<std::is_same_v<Ntk, fiction::networks::named_technology_network>,
+                               nb::call_guard<nb::gil_scoped_release>, nb::call_guard<>>{})
 
         .def("is_constant", &Ntk::is_constant, nb::arg("n"))
         .def("is_pi", &Ntk::is_pi, nb::arg("n"))
@@ -215,7 +215,7 @@ void register_network(nb::module_& m, const char* network_name, const char* doc)
             "is_xnor", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_xnor(n); }, nb::arg("n"),
             DOC(fiction_networks_technology_network_is_xnor));
     }
-    if constexpr (std::is_same_v<Ntk, py_tec_network>)
+    if constexpr (std::is_same_v<Ntk, fiction::networks::named_technology_network>)
     {
         cls.def(
                "po_index", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.po_index(n); }, nb::arg("n"))
@@ -231,13 +231,14 @@ void register_network(nb::module_& m, const char* network_name, const char* doc)
  */
 void register_logic_networks(nb::module_& m)
 {
-    detail::register_network<py_tec_network>(m, "technology_network", DOC(fiction_networks_technology_network));
-    detail::register_network<py_aig_network>(m, "aig_network",
-                                             "An AND-inverter graph (AIG) with node and output names.");
-    detail::register_network<py_xag_network>(m, "xag_network",
-                                             "An XOR-AND-inverter graph (XAG) with node and output names.");
-    detail::register_network<py_mig_network>(m, "mig_network",
-                                             "A majority-inverter graph (MIG) with node and output names.");
+    detail::register_network<fiction::networks::named_technology_network>(m, "technology_network",
+                                                                          DOC(fiction_networks_technology_network));
+    detail::register_network<fiction::networks::named_aig_network>(
+        m, "aig_network", "An AND-inverter graph (AIG) with node and output names.");
+    detail::register_network<fiction::networks::named_xag_network>(
+        m, "xag_network", "An XOR-AND-inverter graph (XAG) with node and output names.");
+    detail::register_network<fiction::networks::named_mig_network>(
+        m, "mig_network", "A majority-inverter graph (MIG) with node and output names.");
 }
 
 }  // namespace pyfiction

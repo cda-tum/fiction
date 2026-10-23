@@ -39,7 +39,8 @@ using namespace fiction::verification;
 TEST_CASE("Benchmark A* routing callers", "[benchmark]")
 {
     /** @brief Technology network shared by the routing workloads. */
-    const auto network = synthesis::convert_network<tec_nt>(blueprints::parity_network<mockturtle::aig_network>());
+    const auto network = synthesis::convert_network<networks::named_technology_network>(
+        blueprints::parity_network<mockturtle::aig_network>());
     /** @brief Routed input cloned inside each optimization measurement. */
     const auto layout = orthogonal<cartesian_layout>(network);
 

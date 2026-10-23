@@ -64,11 +64,13 @@ using namespace fiction::layouts;
 using namespace fiction::networks;
 using namespace fiction::physical_design;
 using namespace fiction::qca;
+using namespace fiction::synthesis;
 
-static_assert(std::same_as<decltype(&graph_oriented_layout_design),
-                           std::optional<cartesian_gate_layout> (*)(
-                               const tec_nt&, graph_oriented_layout_design_params, graph_oriented_layout_design_stats*,
-                               std::function<uint64_t(const cartesian_gate_layout&)>)>);
+static_assert(
+    std::same_as<decltype(&graph_oriented_layout_design),
+                 std::optional<cartesian_gate_layout> (*)(
+                     const named_technology_network&, graph_oriented_layout_design_params,
+                     graph_oriented_layout_design_stats*, std::function<uint64_t(const cartesian_gate_layout&)>)>);
 
 /**
  * @brief Accesses an optional after a Catch2 assertion established that it contains a value.
@@ -95,7 +97,8 @@ void check_graph_oriented_layout_design_equiv(const Ntk& ntk)
     params.timeout      = 100000;
     params.return_first = true;
 
-    const auto layout = graph_oriented_layout_design(fiction::synthesis::convert_network<tec_nt>(ntk), params, &stats);
+    const auto layout = graph_oriented_layout_design(fiction::synthesis::convert_network<named_technology_network>(ntk),
+                                                     params, &stats);
     REQUIRE(layout.has_value());
 
     check_eq(ntk, required_value(layout));
@@ -139,14 +142,14 @@ TEST_CASE("Gate library application", "[graph-oriented-layout-design]")
         params.timeout      = 100000;
         params.return_first = true;
 
-        const auto layout =
-            graph_oriented_layout_design(fiction::synthesis::convert_network<tec_nt>(ntk), params, &stats);
+        const auto layout = graph_oriented_layout_design(
+            fiction::synthesis::convert_network<named_technology_network>(ntk), params, &stats);
         REQUIRE(layout.has_value());
 
         CHECK_NOTHROW(apply_gate_library<qca_one_library>(required_value(layout)));
     };
 
-    check(blueprints::maj1_network<mockturtle::names_view<mockturtle::aig_network>>());
+    check(blueprints::maj1_network<named_aig_network>());
 }
 
 TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
@@ -504,7 +507,8 @@ TEST_CASE("Name conservation after graph-oriented layout design", "[graph-orient
     params.timeout      = 100000;
     params.return_first = true;
 
-    const auto layout = graph_oriented_layout_design(fiction::synthesis::convert_network<tec_nt>(maj), params, &stats);
+    const auto layout = graph_oriented_layout_design(fiction::synthesis::convert_network<named_technology_network>(maj),
+                                                     params, &stats);
 
     REQUIRE(layout.has_value());
 
@@ -644,10 +648,10 @@ TEST_CASE("Graph-oriented layout design reports progress", "[graph-oriented-layo
 
 TEST_CASE("GOLD preserves declared PI order and noncommutative input ports", "[graph-oriented-layout-design]")
 {
-    mockturtle::names_view<technology_network> ntk{};
-    const auto                                 unused = ntk.create_pi("unused");
-    const auto                                 a      = ntk.create_pi("a");
-    const auto                                 b      = ntk.create_pi("b");
+    named_technology_network ntk{};
+    const auto               unused = ntk.create_pi("unused");
+    const auto               a      = ntk.create_pi("a");
+    const auto               b      = ntk.create_pi("b");
     ntk.create_po(ntk.create_lt(b, a), "less");
     ntk.set_network_name("ordered");
     static_cast<void>(unused);
@@ -674,8 +678,8 @@ TEST_CASE("GOLD preserves declared PI order and noncommutative input ports", "[g
 TEST_CASE("GOLD represents constant outputs explicitly and keeps empty networks empty",
           "[graph-oriented-layout-design]")
 {
-    const mockturtle::names_view<technology_network> empty{};
-    graph_oriented_layout_design_params              params{};
+    const named_technology_network      empty{};
+    graph_oriented_layout_design_params params{};
     params.return_first          = true;
     params.enable_multithreading = false;
     params.timeout               = 10000;
@@ -683,7 +687,7 @@ TEST_CASE("GOLD represents constant outputs explicitly and keeps empty networks 
     REQUIRE(empty_result.has_value());
     CHECK(required_value(empty_result).is_empty());
     CHECK(required_value(empty_result).area() == 0);
-    mockturtle::names_view<technology_network> ntk{};
+    named_technology_network ntk{};
     ntk.create_po(ntk.get_constant(false), "zero");
     ntk.create_po(ntk.get_constant(true), "one");
     const auto result = graph_oriented_layout_design(ntk, params);
@@ -698,8 +702,8 @@ TEST_CASE("GOLD represents constant outputs explicitly and keeps empty networks 
 
 TEST_CASE("GOLD preserves mixed constant and logic output order", "[graph-oriented-layout-design]")
 {
-    mockturtle::names_view<technology_network> ntk{};
-    const auto                                 input = ntk.create_pi("input");
+    named_technology_network ntk{};
+    const auto               input = ntk.create_pi("input");
     ntk.create_po(input, "input_copy");
     ntk.create_po(ntk.get_constant(true), "one");
     ntk.create_po(ntk.get_constant(false), "zero");
@@ -725,7 +729,7 @@ TEMPLATE_TEST_CASE("Named specification conversion for graph_oriented_layout_des
     const auto a = source.create_pi("left");
     const auto b = source.create_pi("right");
     source.create_po(source.create_and(a, b), "result");
-    const auto ntk = fiction::synthesis::convert_network<tec_nt>(source);
+    const auto ntk = fiction::synthesis::convert_network<named_technology_network>(source);
     CHECK(ntk.get_network_name() == "named_spec");
     CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(0))) == "left");
     CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(1))) == "right");

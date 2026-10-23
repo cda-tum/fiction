@@ -229,8 +229,9 @@ class exact_impl
      * @param clocking_scheme Validated clocking scheme for the target layout.
      * @param sbl Gate orientations forbidden at each tile.
      */
-    exact_impl(tec_nt& src, exact_physical_design_params p, exact_physical_design_stats& st,
-               layouts::clocking::scheme clocking_scheme, const surface_black_list<fcn::port_direction>& sbl = {}) :
+    exact_impl(fiction::networks::named_technology_network& src, exact_physical_design_params p,
+               exact_physical_design_stats& st, layouts::clocking::scheme clocking_scheme,
+               const surface_black_list<fcn::port_direction>& sbl = {}) :
             ps{std::move(p)},
             pst{st},
             progress{ps.on_progress, "aspect ratios"},
@@ -277,7 +278,7 @@ class exact_impl
      * Network type for internal handling. Converting the input network to this type ensures the availability of all
      * necessary member functions.
      */
-    using topology_ntk_t = mockturtle::topo_view<mockturtle::fanout_view<tec_nt>>;
+    using topology_ntk_t = mockturtle::topo_view<mockturtle::fanout_view<fiction::networks::named_technology_network>>;
     /**
      * Specification network.
      */
@@ -349,7 +350,7 @@ class exact_impl
                 network{ntk},
                 params{std::move(ps)},
                 black_list{sbl},
-                node2pos{static_cast<const tec_nt&>(ntk)},
+                node2pos{static_cast<const fiction::networks::named_technology_network&>(ntk)},
                 depth_ntk{ntk},
                 inv_levels{networks::inverse_levels(ntk)}
         {}
@@ -589,7 +590,9 @@ class exact_impl
          * Maps nodes to tile positions when creating the layout from the SMT model.
          * Layout fanout is bounded by max_fanin_size; add a separate bound if layouts permit more branches.
          */
-        mockturtle::node_map<branching_signal_container<Lyt::max_fanin_size>, tec_nt> node2pos;
+        mockturtle::node_map<branching_signal_container<Lyt::max_fanin_size>,
+                             fiction::networks::named_technology_network>
+            node2pos;
         /**
          * Mapping of levels to nodes used for symmetry breaking.
          */
@@ -2838,7 +2841,8 @@ class exact_impl
             // from now on, a clocking scheme is assigned and no distinction between regular and irregular clocking
             // must be made
 
-            mockturtle::node_map<typename Lyt::object_id, tec_nt> pis{static_cast<const tec_nt&>(network)};
+            mockturtle::node_map<typename Lyt::object_id, fiction::networks::named_technology_network> pis{
+                static_cast<const fiction::networks::named_technology_network&>(network)};
 
             // network is topologically sorted, therefore, foreach_node ensures conflict-free traversal
             network.foreach_node(
@@ -2935,7 +2939,8 @@ class exact_impl
             layout.set_input_order(input_order);
 
             // restore possibly set signal names
-            networks::restore_names(static_cast<const tec_nt&>(network), layout, node2pos);
+            networks::restore_names(static_cast<const fiction::networks::named_technology_network&>(network), layout,
+                                    node2pos);
         }
     };
 
@@ -2999,7 +3004,7 @@ class exact_impl
         Lyt layout = make_layout();
 
         // Network views mutate traversal marks and event subscriptions, so each worker needs its own storage.
-        tec_nt worker_ntk{*ntk};
+        fiction::networks::named_technology_network worker_ntk{*ntk};
         static_cast<networks::technology_network&>(worker_ntk) = ntk->clone();
         const topology_ntk_t worker_topology{mockturtle::fanout_view{worker_ntk}};
         smt_handler          handler{ctx, layout, worker_topology, ps, black_list};
@@ -3304,8 +3309,9 @@ class exact_impl
  * `ps.layout_arrangement` is empty.
  */
 template <typename Geometry>
-std::optional<layouts::gate_layout<Geometry>> exact(const tec_nt& ntk, const exact_physical_design_params& ps = {},
-                                                    exact_physical_design_stats* pst = nullptr)
+std::optional<layouts::gate_layout<Geometry>> exact(const fiction::networks::named_technology_network& ntk,
+                                                    const exact_physical_design_params&                ps  = {},
+                                                    exact_physical_design_stats*                       pst = nullptr)
 {
     layouts::require_arrangement<layouts::gate_layout<Geometry>>(ps.layout_arrangement);
 
@@ -3330,8 +3336,9 @@ std::optional<layouts::gate_layout<Geometry>> exact(const tec_nt& ntk, const exa
         throw networks::high_degree_fanin_exception();
     }
 
-    tec_nt intermediate_ntk{synthesis::fanout_substitution<tec_nt>(
-        ntk, {synthesis::fanout_substitution_params::substitution_strategy::BREADTH, max_out_degree, 1ul})};
+    fiction::networks::named_technology_network intermediate_ntk{
+        synthesis::fanout_substitution<fiction::networks::named_technology_network>(
+            ntk, {synthesis::fanout_substitution_params::substitution_strategy::BREADTH, max_out_degree, 1ul})};
 
     exact_physical_design_stats st{};
 
@@ -3364,8 +3371,9 @@ std::optional<layouts::gate_layout<Geometry>> exact(const tec_nt& ntk, const exa
  */
 template <typename Geometry>
 std::optional<layouts::gate_layout<Geometry>>
-exact_with_blacklist(const tec_nt& ntk, const surface_black_list<fcn::port_direction>& black_list,
-                     exact_physical_design_params ps = {}, exact_physical_design_stats* pst = nullptr)
+exact_with_blacklist(const fiction::networks::named_technology_network& ntk,
+                     const surface_black_list<fcn::port_direction>& black_list, exact_physical_design_params ps = {},
+                     exact_physical_design_stats* pst = nullptr)
 {
     layouts::require_arrangement<layouts::gate_layout<Geometry>>(ps.layout_arrangement);
 
@@ -3390,8 +3398,9 @@ exact_with_blacklist(const tec_nt& ntk, const surface_black_list<fcn::port_direc
         throw networks::high_degree_fanin_exception();
     }
 
-    tec_nt intermediate_ntk{synthesis::fanout_substitution<tec_nt>(
-        ntk, {synthesis::fanout_substitution_params::substitution_strategy::BREADTH, max_out_degree, 1ul})};
+    fiction::networks::named_technology_network intermediate_ntk{
+        synthesis::fanout_substitution<fiction::networks::named_technology_network>(
+            ntk, {synthesis::fanout_substitution_params::substitution_strategy::BREADTH, max_out_degree, 1ul})};
 
     exact_physical_design_stats st{};
 
