@@ -19,12 +19,13 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/operational_parameters.hpp"
 #include "pyfiction/simulation_parameters.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/analysis/critical_temperature.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
+
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <sstream>
 #include <vector>
@@ -64,7 +65,8 @@ inline void register_critical_temperature_functions(nb::module_& m)
 
     m.def(
         "critical_temperature_gate_based",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const decltype(operational_options{}.timeout) timeout,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+           const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
            const decltype(operational_options{}.sim_params.epsilon_r) epsilon_r,
@@ -154,7 +156,7 @@ Args:
 )doc");
     m.def(
         "critical_temperature_gate_based",
-        [](const std::vector<layout>& input_pattern_layouts, const std::vector<py_tt>& spec,
+        [](const std::vector<layout>& input_pattern_layouts, const std::vector<kitty::dynamic_truth_table>& spec,
            const std::vector<bdl_pair>& output_bdl_pairs, const std::vector<bdl_wire>& input_bdl_wires,
            const std::vector<bdl_wire>& output_bdl_wires, const decltype(operational_options{}.timeout) timeout,
            const decltype(operational_options{}.sim_params.base)                            base,

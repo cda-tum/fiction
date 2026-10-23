@@ -60,6 +60,7 @@ using namespace fiction::layouts;
 using namespace fiction::layouts::io;
 using namespace fiction::networks;
 using namespace fiction::physical_design;
+using namespace fiction::synthesis;
 
 /**
  * @brief Compares serialized placement, functions, ports, and interfaces.
@@ -125,8 +126,8 @@ void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt)
 template <typename Lyt, typename Ntk>
 void check_parsing_equiv(const Ntk& ntk)
 {
-    const auto layout =
-        orthogonal<typename Lyt::coordinate_layout>(fiction::synthesis::convert_network<tec_nt>(ntk), {});
+    const auto layout = orthogonal<typename Lyt::coordinate_layout>(
+        fiction::synthesis::convert_network<named_technology_network>(ntk), {});
 
     std::stringstream layout_stream{};
     write_fgl_layout(layout, layout_stream);

@@ -38,7 +38,7 @@ using namespace fiction::physical_design;
 
 TEST_CASE("Placement reduces a constant input without changing variable order", "[placement-utils]")
 {
-    tec_nt                     ntk{};
+    named_technology_network   ntk{};
     const auto                 a = ntk.create_pi();
     const auto                 b = ntk.create_pi();
     kitty::dynamic_truth_table function{3};
@@ -62,7 +62,7 @@ TEST_CASE("Placement maps retain named-view node IDs", "[placement-utils]")
     /** @brief Gate constructor selected before each independent network fixture. */
     const auto create_comparison = GENERATE(&technology_network::create_lt, &technology_network::create_le,
                                             &technology_network::create_gt, &technology_network::create_ge);
-    tec_nt     ntk{};
+    named_technology_network ntk{};
     ntk.set_network_name("named_spec");
     const auto a = ntk.create_pi("left");
     const auto b = ntk.create_pi("right");
@@ -71,12 +71,12 @@ TEST_CASE("Placement maps retain named-view node IDs", "[placement-utils]")
     const auto gate = (ntk.*create_comparison)(a, b);
     ntk.create_po(gate, "result");
     const mockturtle::topo_view view{mockturtle::fanout_view{ntk}};
-    const auto&                 named = static_cast<const tec_nt&>(view);
+    const auto&                 named = static_cast<const named_technology_network&>(view);
 
-    gate_layout<cartesian_layout>                  lyt{{3, 3}};
-    const auto                                     left  = lyt.create_pi("left", {0, 0});
-    const auto                                     right = lyt.create_pi("right", {1, 0});
-    mockturtle::node_map<layout_object_id, tec_nt> node2pos{named};
+    gate_layout<cartesian_layout>                                    lyt{{3, 3}};
+    const auto                                                       left  = lyt.create_pi("left", {0, 0});
+    const auto                                                       right = lyt.create_pi("right", {1, 0});
+    mockturtle::node_map<layout_object_id, named_technology_network> node2pos{named};
     node2pos[a]       = left;
     node2pos[b]       = right;
     const auto placed = place(lyt, {1, 1}, named, named.get_node(gate), node2pos);
@@ -84,7 +84,7 @@ TEST_CASE("Placement maps retain named-view node IDs", "[placement-utils]")
     CHECK(lyt.source({placed, 1}) == right);
     CHECK(lyt.object_function(placed) == named.node_function(named.get_node(gate)));
 
-    mockturtle::node_map<branching_signal_container<>, tec_nt> branches{named};
+    mockturtle::node_map<branching_signal_container<>, named_technology_network> branches{named};
     branches[a].update_branch(named.get_node(gate), left);
     branches[b].update_branch(named.get_node(gate), right);
     const auto branching = place(lyt, {2, 1}, named, named.get_node(gate), branches);
@@ -102,7 +102,7 @@ TEST_CASE("Placement maps retain named-view node IDs", "[placement-utils]")
 
 TEST_CASE("Placement reduces an explicit third constant", "[placement-utils]")
 {
-    tec_nt                     ntk{};
+    named_technology_network   ntk{};
     const auto                 a = ntk.create_pi();
     const auto                 b = ntk.create_pi();
     const auto                 c = ntk.create_pi();
@@ -124,7 +124,7 @@ TEST_CASE("Placement reduces an explicit third constant", "[placement-utils]")
 TEST_CASE("Mapped placement preserves three ordered inputs", "[placement-utils]")
 {
     /** @brief Named specification with a three-input function. */
-    tec_nt ntk{};
+    named_technology_network ntk{};
     /** @brief Source signals in the function's variable order. */
     const auto a = ntk.create_pi("a");
     /** @brief Second source signal. */
@@ -146,7 +146,7 @@ TEST_CASE("Mapped placement preserves three ordered inputs", "[placement-utils]"
     /** @brief Third layout input port. */
     const auto right = lyt.create_pi("c", {2, 0});
     /** @brief Existing source-to-layout input mapping. */
-    mockturtle::node_map<layout_object_id, tec_nt> node2pos{ntk};
+    mockturtle::node_map<layout_object_id, named_technology_network> node2pos{ntk};
     node2pos[a] = left;
     node2pos[b] = middle;
     node2pos[c] = right;
@@ -163,7 +163,7 @@ TEST_CASE("Mapped placement preserves three ordered inputs", "[placement-utils]"
 TEST_CASE("Two-input placement validates constant reduction", "[placement-utils]")
 {
     /** @brief Source specification for invalid reductions. */
-    tec_nt ntk{};
+    named_technology_network ntk{};
     /** @brief First source input. */
     const auto a = ntk.create_pi();
     /** @brief Second source input. */

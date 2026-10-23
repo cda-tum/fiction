@@ -173,11 +173,10 @@ struct on_the_fly_circuit_design_on_defective_surface_stats
  * @throws fcn::unsupported_gate_orientation_exception If a gate orientation has no implementation.
  * @throws unsuccessful_pr_error If placement and routing cannot satisfy the blacklist.
  */
-[[nodiscard]] inline layout
-on_the_fly_circuit_design_on_defective_surface(const tec_nt& ntk, const layouts::hexagonal_gate_layout& lattice_tiling,
-                                               const layout& defective_surface,
-                                               const on_the_fly_circuit_design_on_defective_surface_params& params = {},
-                                               on_the_fly_circuit_design_on_defective_surface_stats* stats = nullptr)
+[[nodiscard]] inline layout on_the_fly_circuit_design_on_defective_surface(
+    const fiction::networks::named_technology_network& ntk, const layouts::hexagonal_gate_layout& lattice_tiling,
+    const layout& defective_surface, const on_the_fly_circuit_design_on_defective_surface_params& params = {},
+    on_the_fly_circuit_design_on_defective_surface_stats* stats = nullptr)
 {
     auto  library_params = params.sidb_on_the_fly_gate_library_parameters;
     auto& deadline       = library_params.design_gate_params.operational_params.deadline;
