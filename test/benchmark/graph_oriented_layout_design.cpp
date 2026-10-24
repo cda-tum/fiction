@@ -27,6 +27,7 @@
 #include <mockturtle/networks/aig.hpp>
 
 using namespace fiction;
+using namespace fiction::networks;
 using namespace fiction::layouts;
 using namespace fiction::physical_design;
 
@@ -39,7 +40,7 @@ TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
         const graph_oriented_layout_design_params params{
             .mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY};
 
-        return graph_oriented_layout_design(fiction::synthesis::convert_network<tec_nt>(ntk), params);
+        return graph_oriented_layout_design(fiction::synthesis::convert_network<named_technology_network>(ntk), params);
     };
 
     BENCHMARK("graph_oriented_layout_design: high-effort")
@@ -47,7 +48,7 @@ TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
         const graph_oriented_layout_design_params params{
             .mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT};
 
-        return graph_oriented_layout_design(fiction::synthesis::convert_network<tec_nt>(ntk), params);
+        return graph_oriented_layout_design(fiction::synthesis::convert_network<named_technology_network>(ntk), params);
     };
 
     BENCHMARK("graph_oriented_layout_design: highest-effort")
@@ -55,7 +56,7 @@ TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
         const graph_oriented_layout_design_params params{
             .mode = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT};
 
-        return graph_oriented_layout_design(fiction::synthesis::convert_network<tec_nt>(ntk), params);
+        return graph_oriented_layout_design(fiction::synthesis::convert_network<named_technology_network>(ntk), params);
     };
 
     BENCHMARK("graph_oriented_layout_design: maximum-effort")
@@ -64,7 +65,7 @@ TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
             .mode = graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT,
             .seed = 12345};
 
-        return graph_oriented_layout_design(fiction::synthesis::convert_network<tec_nt>(ntk), params);
+        return graph_oriented_layout_design(fiction::synthesis::convert_network<named_technology_network>(ntk), params);
     };
 
     ntk = blueprints::parity_network<mockturtle::aig_network>();
@@ -74,7 +75,7 @@ TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
             .mode         = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT,
             .return_first = true,
             .seed         = 12345};
-        return graph_oriented_layout_design(fiction::synthesis::convert_network<tec_nt>(ntk), params);
+        return graph_oriented_layout_design(fiction::synthesis::convert_network<named_technology_network>(ntk), params);
     };
 
     BENCHMARK("graph_oriented_layout_design: multi-threading")
@@ -84,7 +85,7 @@ TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
             .return_first          = true,
             .enable_multithreading = true,
             .seed                  = 12345};
-        return graph_oriented_layout_design(fiction::synthesis::convert_network<tec_nt>(ntk), params);
+        return graph_oriented_layout_design(fiction::synthesis::convert_network<named_technology_network>(ntk), params);
     };
 }
 

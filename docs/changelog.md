@@ -67,6 +67,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
 
+  - Documented GOLD's fixed-seed repeatability limits and geometric `AREA` priority on one-tile axes.
   - Added an FCN bibliography, BibTeX download, and OpenGraph metadata.
   - Added `nox -s docs` for local previews, link checks, and Read the Docs builds.
   - Added synchronized C++/Python tabs and code copy buttons.
@@ -146,8 +147,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
-  - **Breaking:** Physical design accepts only named technology networks (`tec_nt`). Convert other network types
-    with `convert_network<tec_nt>` before placement; names survive conversion and extraction.
+  - SiDB domain sampling now stops once every grid point has been collected.
+  - **Breaking:** Physical design accepts only named technology networks (`networks::named_technology_network`). Convert other network types
+    with `convert_network<networks::named_technology_network>` before placement; names survive conversion and extraction.
   - `verification::virtual_miter` is no longer `noexcept`, since the rank view it builds can throw.
   - `synthesis::node_duplication_planarization` skips unused cone-weight traversals when ranking duplication choices.
   - `utils::graph::mincross` with optimization runs about 10x faster and returns the same rank order.
@@ -166,6 +168,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Layout extraction and critical-path analysis reduce per-object allocations with flat traversal maps.
   - Gate-layout iteration skips removed objects through a compact live-object bitmap.
   - GOLD reuses built-in objective costs while ranking candidates and accepting solutions.
+  - GOLD reduces placement-sequence copies, repeated frontier-cost lookups, and buffer allocations.
   - **Breaking:** A*, path enumeration, and Yen's algorithm route around the gates and wires of every gate-level
     layout and take temporary constraints as a separate `obstructions` argument, leaving the caller's data unchanged.
     `&a_star_distance<Lyt>` no longer converts to a `distance_functor`; use `a_star_distance_functor`.
@@ -251,6 +254,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - **Breaking:** Network presets replace `*_nt` with `networks::named_aig_network`,
+    `named_xag_network`, `named_mig_network`, and `named_technology_network`.
+    `kitty::dynamic_truth_table` replaces `fiction::tt`; Python names stay unchanged.
   - **Breaking:** Routing algorithms and path containers now use `layout_coordinate_path` directly. Remove path template
     arguments from C++ calls and container declarations.
   - `technology_network` and `virtual_pi_network` answer `is_pi`, `is_ci`, and `is_virtual_pi` and iterate gates and
@@ -316,6 +322,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Documentation:
   - Documented all three gate-layout geometries and MSVC Release builds for Python.
   - Python layout docstrings use `extent` for the extent argument.
+  - Clarified that custom clocking scheme names do not register schemes for catalog lookup.
   - Corrected the coordinate page's `last_coordinate()` accessor reference.
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
   - Standardized paper links in the docs and README to DOI URLs and corrected the `ortho`, `equiv`, and Yen references.
@@ -328,6 +335,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Experiments:
 
   - Parameter configurations now use designated initializers with unchanged inputs and computations.
+  - Experiments use canonical network types and `kitty::dynamic_truth_table` without changing their computations.
   - Clock-number assignment helpers now take concrete Cartesian gate layouts.
     Experiment parameters, inputs, and output columns are unchanged.
   - Physical-design experiments convert mapped networks before placement with unchanged computations.
@@ -579,6 +587,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **Breaking:** `reserve_input_nodes` is gone. Place each primary input with `place` or `create_pi` when its coordinate is known.
 - Code quality:
 
+  - **Breaking:** Removed preset pointer aliases, `truth_table_t`, `logic_network_t`, `*_name`,
+    `get_ntk_type_name`, and `ntk_type_name`. Use `std::shared_ptr<T>` for shared ownership.
   - **Breaking:** Removed `utils/stl/execution_utils.hpp` and its `FICTION_EXECUTION_POLICY_*` macros.
 - Data structures:
 
@@ -666,6 +676,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Kinks-rejected energy labels now count each matching charge distribution once, preserving degenerate-state
+    occupation probabilities. Both energy-labeling variants document ascending energy order.
+  - Operational checks now reject invalid specifications and unsupported QuickSim inputs across entry points.
+    Empty simulation results no longer count as operational input patterns.
+  - `verify_logic_match` now rejects input patterns outside the specification.
+  - Gate-based critical-temperature checks now reject empty or mixed-variable specifications with
+    `std::invalid_argument` (`ValueError` in Python).
+  - SiDB contour tracing now terminates for isolated operational points.
+  - SiDB parameter sweeps now reject colliding coordinates before allocating dimension indices,
+    and reject overflowing point counts.
+  - SiDB sweep indices now use the full platform index width on Windows.
   - A* now restores frontier ordering after a cheaper route reaches a queued coordinate.
   - Simulated annealing now rejects non-finite temperature bounds with `std::invalid_argument`.
   - Defect-aware circuit design now propagates unsupported gate-orientation errors.
@@ -743,6 +764,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Build system:
 
+  - PCH cache hashes now retain comments so GCC builds accept documentation-only header edits.
   - Release benchmark builds now skip stripping when no strip tool is available.
   - Rebuild Python bindings when uncommitted C++ binding sources change.
   - Keep tinyxml2 static across build reconfiguration so Python imports find all libraries.
@@ -787,6 +809,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Edge-color views now support clearing only node colors and clearing both node and edge colors.
   - Gate-level layout moves now propagate geometry failures and preserve owned state.
     Custom geometry controls its assignment failure guarantee.
+  - SiDB layout copy assignment now preserves the destination when allocation fails.
   - Depth and rank view assignment now preserves wrapped network names and metadata.
   - `networks::views::mutable_rank_view::update_ranks` resets `width()`.
   - Clocking-state moves now avoid synchronization-map allocations on Windows.
@@ -829,7 +852,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
 
+  - Hexagonal layout documentation now names the eastern border and `is_adjacent_of` correctly.
+  - `gate_layout::incoming_data_flow` now documents required adjacency and optional clocking.
   - Python keyword-only APIs document option meanings and units, including exact search bounds.
+  - SiDB layout documentation now distinguishes charged defect types from non-zero defect charges.
   - Corrected planarization complexity bounds to include weighted-cone traversals.
   - Corrected the reference for Yen's loopless path algorithm.
   - Python critical-temperature domain docstrings state the fixed confidence default.

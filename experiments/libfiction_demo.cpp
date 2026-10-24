@@ -41,7 +41,6 @@
 #include <mockturtle/io/verilog_reader.hpp>                    // call-backs to read Verilog files into networks
 #include <mockturtle/networks/aig.hpp>                         // AND-inverter graphs
 #include <mockturtle/views/depth_view.hpp>                     // to determine network levels
-#include <mockturtle/views/names_view.hpp>                     // to assign names to network signals
 
 #include <algorithm>
 #include <cstdint>
@@ -56,6 +55,7 @@ using namespace fiction;
 using namespace fiction::fcn;
 using namespace fiction::layouts;
 using namespace fiction::layouts::io;
+using namespace fiction::networks;
 using namespace fiction::networks::io;
 using namespace fiction::physical_design;
 using namespace fiction::qca;
@@ -141,11 +141,8 @@ try
         return EXIT_FAILURE;
     }
 
-    // defining the type of logic network to use (also already pre-defined in fiction/types.hpp as aig_nt
-    using logic_network = mockturtle::names_view<mockturtle::aig_network>;
-
     // instantiate an empty network
-    logic_network ntk{};
+    named_aig_network ntk{};
 
     // parse input file into ntk
     if (lorina::read_verilog(file_path.string(), mockturtle::verilog_reader(ntk)) != lorina::return_code::success)
@@ -179,7 +176,7 @@ try
     std::cout << "[i] cut rewriting\n";
 
     // instantiate a complete AIG NPN database for node re-synthesis
-    mockturtle::xag_npn_resynthesis<logic_network,                              // the input network type
+    mockturtle::xag_npn_resynthesis<named_aig_network,                          // the input network type
                                     mockturtle::aig_network,                    // the database network type
                                     mockturtle::xag_npn_db_kind::aig_complete>  // the kind of database to use
         const resynthesis_function{};
@@ -210,7 +207,7 @@ try
                                                    .threshold = 1};
 
     // substitute high-degree output nodes by fanout nodes (converts network into a topology_network)
-    auto top_ntk = fanout_substitution<tec_nt>(ntk, fanout_params);
+    auto top_ntk = fanout_substitution<named_technology_network>(ntk, fanout_params);
 
     // print network properties again
     print_network_properties(top_ntk);

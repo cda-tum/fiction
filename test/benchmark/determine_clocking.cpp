@@ -30,6 +30,7 @@
 #include <mockturtle/networks/aig.hpp>
 
 using namespace fiction;
+using namespace fiction::networks;
 using namespace fiction::layouts;
 using namespace fiction::physical_design;
 
@@ -44,8 +45,8 @@ void remove_clocking(cartesian_gate_layout& lyt)
 
 TEST_CASE("Benchmark SAT-based clocking determination", "[benchmark]")
 {
-    auto lyt = orthogonal<cartesian_layout>(
-        fiction::synthesis::convert_network<tec_nt>(blueprints::nary_operation_network<mockturtle::aig_network>()));
+    auto lyt = orthogonal<cartesian_layout>(fiction::synthesis::convert_network<named_technology_network>(
+        blueprints::nary_operation_network<mockturtle::aig_network>()));
     remove_clocking(lyt);
 
     BENCHMARK("determine_clocking: ghack")

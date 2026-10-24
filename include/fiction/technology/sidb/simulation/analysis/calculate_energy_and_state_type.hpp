@@ -30,7 +30,6 @@
 #include <kitty/bit_operations.hpp>
 #include <kitty/dynamic_truth_table.hpp>
 
-#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
@@ -62,16 +61,17 @@ enum class state_type : uint8_t
 using energy_and_state_type = std::vector<std::pair<double, state_type>>;
 
 /**
- * Labels every energy level of an energy distribution by whether the physically valid charge distributions at that
- * level encode the expected output for the given input pattern (`ACCEPTED`) or not (`REJECTED`). Kinks in the
- * wires are tolerated: only the output BDL pairs are inspected.
+ * @brief Labels each charge distribution matching an energy level by whether its output BDL pairs encode the expected
+ * output for the given input pattern (`ACCEPTED`) or not (`REJECTED`). Kinks in the wires are tolerated.
+ * Distributions at the same energy contribute separate entries to preserve their occupation probabilities.
  *
  * @param energy_dist The energy distribution of the charge distributions.
  * @param valid_charge_distributions The physically valid charge distributions.
  * @param output_bdl_pairs The output BDL pairs of the layout.
  * @param spec The Boolean function(s) to implement.
  * @param input_index The input pattern the charge distributions were simulated for.
- * @return The energies with their state types, ascending by energy.
+ * @return One energy and state type per matching charge distribution, ascending by energy. Empty if no distribution
+ * matches an energy level within `utils::math::ERROR_MARGIN`.
  */
 [[nodiscard]] inline energy_and_state_type calculate_energy_and_state_type_with_kinks_accepted(
     const energy_distribution& energy_dist, const std::vector<charge_distribution>& valid_charge_distributions,
@@ -109,14 +109,13 @@ using energy_and_state_type = std::vector<std::pair<double, state_type>>;
             }
         });
 
-    std::ranges::sort(est, [](const auto& a, const auto& b) { return a.first < b.first; });
-
     return est;
 }
 /**
- * Like `calculate_energy_and_state_type_with_kinks_accepted`, but a charge distribution with kinks in its wires is
- * `REJECTED` as well: every energy level is `ACCEPTED`, and additionally `REJECTED` if any of its charge
- * distributions fails the logic match with kinks rejected.
+ * @brief Labels each charge distribution matching an energy level as `ACCEPTED` if it passes
+ * `logic::verify_logic_match` with kinks rejected, or `REJECTED` otherwise. Each distribution contributes exactly one
+ * label per matching energy level. Distributions at the same energy contribute separate entries to preserve their
+ * occupation probabilities.
  *
  * @param lyt The layout the charge distributions belong to.
  * @param energy_dist The energy distribution of the charge distributions.
@@ -125,8 +124,11 @@ using energy_and_state_type = std::vector<std::pair<double, state_type>>;
  * @param input_index The input pattern the charge distributions were simulated for.
  * @param input_bdl_wires The input BDL wires of `lyt`.
  * @param output_bdl_wires The output BDL wires of `lyt`.
- * @return The energies with their state types.
- * @throws std::out_of_range if logic validation encounters an invalid lattice basis index.
+ * @return One energy and state type per matching charge distribution, ascending by energy. Empty if no distribution
+ * matches an energy level within `utils::math::ERROR_MARGIN`.
+ * @throws std::invalid_argument if logic validation encounters an empty specification or mixed variable counts.
+ * @throws std::out_of_range if logic validation encounters an input pattern outside the specification or an
+ * invalid lattice basis index.
  */
 [[nodiscard]] inline energy_and_state_type calculate_energy_and_state_type_with_kinks_rejected(
     const layout& lyt, const energy_distribution& energy_dist,
@@ -149,16 +151,11 @@ using energy_and_state_type = std::vector<std::pair<double, state_type>>;
                     continue;
                 }
 
-                est.emplace_back(energy, state_type::ACCEPTED);
-
                 const auto op_status =
                     logic::verify_logic_match(lyt, cd, params, spec, input_index, input_bdl_wires, output_bdl_wires);
 
-                if (op_status == logic::operational_status::NON_OPERATIONAL)
-                {
-                    est.emplace_back(energy, state_type::REJECTED);
-                    break;
-                }
+                est.emplace_back(energy, op_status == logic::operational_status::OPERATIONAL ? state_type::ACCEPTED :
+                                                                                               state_type::REJECTED);
             }
         });
 

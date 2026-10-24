@@ -22,9 +22,9 @@
 #include <fiction/technology/sidb/simulation/io/write_operational_domain.hpp>  // writer for operational domains
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>  // operational domain computation algorithms
-#include <fiction/types.hpp>  // pre-defined types suitable for the FCN domain
 
-#include <fmt/format.h>                    // output formatting
+#include <fmt/format.h>  // output formatting
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>  // stopwatch for time measurement
 
 #include <array>
@@ -93,17 +93,17 @@ try
 
     static const std::string folder = fmt::format("{}sidb_gate_libraries/bestagon_gates/", EXPERIMENTS_PATH);
 
-    static const std::array<std::pair<std::string, std::vector<tt>>, 10> gates = {
-        std::make_pair("and", std::vector<tt>{create_and_tt()}),
-        std::make_pair("nand", std::vector<tt>{create_nand_tt()}),
-        std::make_pair("nor", std::vector<tt>{create_nor_tt()}),
-        std::make_pair("xnor", std::vector<tt>{create_xnor_tt()}),
-        std::make_pair("xor", std::vector<tt>{create_xor_tt()}),
-        std::make_pair("or", std::vector<tt>{create_or_tt()}),
-        std::make_pair("wire", std::vector<tt>{create_id_tt()}),
-        std::make_pair("wire_diag", std::vector<tt>{create_id_tt()}),
-        std::make_pair("inv", std::vector<tt>{create_not_tt()}),
-        std::make_pair("inv_diag", std::vector<tt>{create_not_tt()})};
+    static const std::array<std::pair<std::string, std::vector<kitty::dynamic_truth_table>>, 10> gates = {
+        std::make_pair("and", std::vector<kitty::dynamic_truth_table>{create_and_tt()}),
+        std::make_pair("nand", std::vector<kitty::dynamic_truth_table>{create_nand_tt()}),
+        std::make_pair("nor", std::vector<kitty::dynamic_truth_table>{create_nor_tt()}),
+        std::make_pair("xnor", std::vector<kitty::dynamic_truth_table>{create_xnor_tt()}),
+        std::make_pair("xor", std::vector<kitty::dynamic_truth_table>{create_xor_tt()}),
+        std::make_pair("or", std::vector<kitty::dynamic_truth_table>{create_or_tt()}),
+        std::make_pair("wire", std::vector<kitty::dynamic_truth_table>{create_id_tt()}),
+        std::make_pair("wire_diag", std::vector<kitty::dynamic_truth_table>{create_id_tt()}),
+        std::make_pair("inv", std::vector<kitty::dynamic_truth_table>{create_not_tt()}),
+        std::make_pair("inv_diag", std::vector<kitty::dynamic_truth_table>{create_not_tt()})};
 
     // total number of samples
     static std::size_t total_samples_gs = 0;

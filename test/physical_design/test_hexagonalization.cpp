@@ -83,8 +83,8 @@ static void check_no_explicit_obstructions(const HexLyt& hex_layout)
 template <typename Lyt, typename Ntk>
 static void check_mapping_equiv(const Ntk& ntk)
 {
-    const auto layout =
-        orthogonal<typename Lyt::coordinate_layout>(fiction::synthesis::convert_network<tec_nt>(ntk), {});
+    const auto layout = orthogonal<typename Lyt::coordinate_layout>(
+        fiction::synthesis::convert_network<named_technology_network>(ntk), {});
 
     hexagonalization_stats  stats{};
     hexagonalization_params params{};

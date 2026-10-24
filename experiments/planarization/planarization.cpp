@@ -45,6 +45,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
+#include <memory>
 #include <span>
 #include <sstream>
 #include <string>
@@ -81,10 +82,10 @@ constexpr uint32_t SIMULATION_PATTERNS = 4096;
  * @param name Benchmark name relative to `benchmarks/`, without extension.
  * @return The network.
  */
-tec_nt read_network(const std::string& name)
+named_technology_network read_network(const std::string& name)
 {
-    std::ostringstream      os{};
-    network_reader<tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
+    std::ostringstream                                        os{};
+    network_reader<std::shared_ptr<named_technology_network>> reader{fiction_experiments::benchmark_path(name), os};
 
     return *reader.get_networks().front();
 }

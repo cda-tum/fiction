@@ -832,7 +832,12 @@ class gate_layout : public CoordinateLayout
     {
         foreach_sink(id, [&](const auto port, const auto index) { return visit(fn, port.object, index); });
     }
-    /** @brief Returns coordinates of declared sources; optionally filters physical clocking and adjacency. */
+    /**
+     * @brief Returns adjacent declared-source coordinates in input-index order.
+     * @tparam RespectClocking Require incoming clocking in addition to adjacency; enabled by default.
+     * @param t Destination-object coordinate.
+     * @return Source coordinates of the selected connections.
+     */
     template <bool RespectClocking = true>
     [[nodiscard]] std::vector<tile> incoming_data_flow(const tile& t) const
     {

@@ -32,11 +32,11 @@
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
-#include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
 #include <fmt/core.h>
 #include <fmt/format.h>
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <algorithm>
 #include <array>
@@ -98,17 +98,17 @@ try
     const std::size_t minimum_number_of_canvas_sidbs = 2;
     const std::size_t maximum_number_of_canvas_sidbs = 6;
 
-    static const std::array<std::pair<std::string, std::vector<tt>>, 10> gates = {
-        std::make_pair("and", std::vector<tt>{create_and_tt()}),
-        std::make_pair("nand", std::vector<tt>{create_nand_tt()}),
-        std::make_pair("nor", std::vector<tt>{create_nor_tt()}),
-        std::make_pair("xnor", std::vector<tt>{create_xnor_tt()}),
-        std::make_pair("xor", std::vector<tt>{create_xor_tt()}),
-        std::make_pair("or", std::vector<tt>{create_or_tt()}),
-        std::make_pair("wire", std::vector<tt>{create_id_tt()}),
-        std::make_pair("wire_diag", std::vector<tt>{create_id_tt()}),
-        std::make_pair("inv", std::vector<tt>{create_not_tt()}),
-        std::make_pair("inv_diag", std::vector<tt>{create_not_tt()})};
+    static const std::array<std::pair<std::string, std::vector<kitty::dynamic_truth_table>>, 10> gates = {
+        std::make_pair("and", std::vector<kitty::dynamic_truth_table>{create_and_tt()}),
+        std::make_pair("nand", std::vector<kitty::dynamic_truth_table>{create_nand_tt()}),
+        std::make_pair("nor", std::vector<kitty::dynamic_truth_table>{create_nor_tt()}),
+        std::make_pair("xnor", std::vector<kitty::dynamic_truth_table>{create_xnor_tt()}),
+        std::make_pair("xor", std::vector<kitty::dynamic_truth_table>{create_xor_tt()}),
+        std::make_pair("or", std::vector<kitty::dynamic_truth_table>{create_or_tt()}),
+        std::make_pair("wire", std::vector<kitty::dynamic_truth_table>{create_id_tt()}),
+        std::make_pair("wire_diag", std::vector<kitty::dynamic_truth_table>{create_id_tt()}),
+        std::make_pair("inv", std::vector<kitty::dynamic_truth_table>{create_not_tt()}),
+        std::make_pair("inv_diag", std::vector<kitty::dynamic_truth_table>{create_not_tt()})};
 
     const critical_temperature_params ct_params{.operational_params = op_params};
 

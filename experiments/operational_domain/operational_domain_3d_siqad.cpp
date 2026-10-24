@@ -21,9 +21,9 @@
 #include <fiction/technology/sidb/simulation/engine.hpp>                       // SiDB simulation engines
 #include <fiction/technology/sidb/simulation/io/write_operational_domain.hpp>  // writer for operational domains
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>  // operational domain computation algorithms
-#include <fiction/types.hpp>  // pre-defined types suitable for the FCN domain
 
-#include <fmt/format.h>                    // string formatting
+#include <fmt/format.h>  // string formatting
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>  // stopwatch for measuring time
 
 #include <array>
@@ -91,11 +91,12 @@ try
 
     static const std::string folder = fmt::format("{}sidb_gate_libraries/siqad_gates/", EXPERIMENTS_PATH);
 
-    static const std::array<std::pair<std::string, std::vector<tt>>, 5> gates = {
-        std::make_pair("and", std::vector<tt>{create_and_tt()}),
-        std::make_pair("nand", std::vector<tt>{create_nand_tt()}),
-        std::make_pair("xnor", std::vector<tt>{create_xnor_tt()}),
-        std::make_pair("xor", std::vector<tt>{create_xor_tt()}), std::make_pair("or", std::vector<tt>{create_or_tt()})};
+    static const std::array<std::pair<std::string, std::vector<kitty::dynamic_truth_table>>, 5> gates = {
+        std::make_pair("and", std::vector<kitty::dynamic_truth_table>{create_and_tt()}),
+        std::make_pair("nand", std::vector<kitty::dynamic_truth_table>{create_nand_tt()}),
+        std::make_pair("xnor", std::vector<kitty::dynamic_truth_table>{create_xnor_tt()}),
+        std::make_pair("xor", std::vector<kitty::dynamic_truth_table>{create_xor_tt()}),
+        std::make_pair("or", std::vector<kitty::dynamic_truth_table>{create_or_tt()})};
 
     // total number of samples
     static std::size_t total_samples_gs = 0;

@@ -43,6 +43,7 @@
 #include <thread>
 
 using namespace fiction;
+using namespace fiction::networks;
 using namespace fiction::layouts;
 using namespace fiction::sidb;
 using namespace fiction::sidb::generators;
@@ -118,9 +119,9 @@ TEST_CASE("Circuit design honors both circuit and gate timeouts", "[on-the-fly-c
 #if (FICTION_Z3_SOLVER)
 TEST_CASE("Defect-aware circuit design propagates gate errors", "[on-the-fly-circuit-design]")
 {
-    tec_nt     network{};
-    const auto first  = network.create_pi();
-    const auto second = network.create_pi();
+    named_technology_network network{};
+    const auto               first  = network.create_pi();
+    const auto               second = network.create_pi();
     network.create_po(network.create_and(first, second));
 
     const hexagonal_gate_layout tiling{arrangement::EVEN_ROW, {3, 3}, clocking::row()};

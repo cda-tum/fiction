@@ -678,8 +678,6 @@ static const char *mkd_doc_fiction_fcn_unsupported_gate_type_exception_unsupport
 
 static const char *mkd_doc_fiction_fcn_unsupported_gate_type_exception_where = R"doc(Returns the coordinate of the unsupported gate.)doc";
 
-static const char *mkd_doc_fiction_get_ntk_type_name = R"doc()doc";
-
 static const char *mkd_doc_fiction_has_create_dot = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_foreach_pi_unranked =
@@ -2189,11 +2187,11 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_get_scheme =
-R"doc(Returns a clocking scheme by name. The lookup ignores case and accepts
-a trailing `3` or `4` that selects the phase count of a scheme that
-supports it. Without a suffix, a scheme has its default phase count: 3
-for BANCS and 4 for all others. `2DDWAVEHEX` requires a hexagonal
-arrangement and falls back to `2DDWAVE` without one.
+R"doc(Returns a catalog clocking scheme by name. The lookup ignores case and
+accepts a trailing `3` or `4` that selects the phase count of a scheme
+that supports it. Without a suffix, a scheme has its default phase
+count: 3 for BANCS and 4 for all others. `2DDWAVEHEX` requires a
+hexagonal arrangement and falls back to `2DDWAVE` without one.
 
 Args:
     scheme_name: Name of the desired clocking scheme.
@@ -2355,8 +2353,9 @@ unchanged while using the view, or copy it with
 `std::string{scheme.name()}`.
 
 Returns:
-    The canonical name, e.g., `"2DDWAVE"`, without a phase-count
-    suffix.
+    The name supplied at construction, or `"OPEN"` for a default-
+    constructed scheme. Catalog factories use canonical names, e.g.,
+    `"2DDWAVE"`, without a phase-count suffix.
 
 )doc";
 
@@ -2438,8 +2437,8 @@ static const char *mkd_doc_fiction_layouts_clocking_scheme_scheme_2 =
 R"doc(Standard constructor.
 
 Args:
-    n: The clocking scheme's name. The name is the key under which
-       `get_scheme` finds the scheme.
+    n: The clocking scheme's stored name. Construction does not
+       register the scheme with `get_scheme`.
     cutout: Rows of clock numbers. Row `y`, column `x` holds the clock
             number of every tile :math:`(x + i \cdot w, y + j \cdot
             h)` for all integers :math:`i, j`, where :math:`w` and
@@ -3600,8 +3599,17 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_gate_layout_incoming_data_flow =
-R"doc(Returns coordinates of declared sources; optionally filters physical
-clocking and adjacency.
+R"doc(Returns adjacent declared-source coordinates in input-index order.
+
+Args:
+    t: Destination-object coordinate.
+
+Template Args:
+    RespectClocking: Require incoming clocking in addition to
+                     adjacency; enabled by default.
+
+Returns:
+    Source coordinates of the selected connections.
 
 )doc";
 
@@ -4119,7 +4127,7 @@ static const char *mkd_doc_fiction_layouts_hexagonal_layout_adjacent_coordinates
 R"doc(Returns a container that contains all coordinates that are adjacent to
 a given one. Thereby, cardinal and ordinal directions are being
 considered, i.e., the container will contain all coordinates `ac` for
-which `is_adjacent(c, ac)` returns `true`.
+which `is_adjacent_of(c, ac)` returns `true`.
 
 Coordinates that are outside of the layout bounds are not considered.
 Thereby, the size of the returned container is at most 6.
@@ -4341,7 +4349,8 @@ static const char *mkd_doc_fiction_layouts_hexagonal_layout_foreach_adjacent_coo
 R"doc(Applies a function to all coordinates adjacent to a given one in
 accordance with `adjacent_coordinates`. Thereby, cardinal and ordinal
 directions are being considered, i.e., the given function is applied
-to all coordinates ac for which `is_adjacent(c, ac)` returns `true`.
+to all coordinates ac for which `is_adjacent_of(c, ac)` returns
+`true`.
 
 Coordinates that are outside of the layout bounds are not considered.
 Thereby, at most 6 coordinates are touched.
@@ -4552,7 +4561,7 @@ Args:
     c: Coordinate to check for border location.
 
 Returns:
-    `true` iff `c` is located at the layout's northern border.
+    `true` iff `c` is located at the layout's eastern border.
 
 )doc";
 
@@ -8556,6 +8565,20 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_candidate_layout_area =
+R"doc(Estimates candidate area without the spare eastern and southern
+borders.
+
+Args:
+    width: Layout width in tiles.
+    height: Layout height in tiles.
+    position: Candidate position to include in the area.
+
+Returns:
+    Geometric area in tiles, including one-tile axes.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_check_and_optimize_po_positions =
 R"doc(Extends outputs one tile to the nearest border while preserving their
 logical inputs.
@@ -11606,7 +11629,8 @@ When set to `true`, the algorithm will utilize multiple threads to
 process different search space graphs in parallel, improving
 performance by distributing the workload across available CPU cores.
 If set to `false`, the algorithm will run sequentially on a single
-thread.
+thread. Parallel search results can depend on worker scheduling, even
+with a fixed seed.
 
 Only recommended for `HIGH_EFFORT` and `HIGHEST_EFFORT` modes and
 complex networks (> 100 nodes).
@@ -11659,7 +11683,9 @@ can be found fast.)doc";
 
 static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_params_seed =
 R"doc(Random seed for PI spacing, fanout substitution, and topological
-ordering. Generated randomly if not specified.)doc";
+ordering. Generated randomly if not specified. Within one build, a
+fixed seed reproduces sequential searches that finish before their
+timeout, provided custom cost functions are deterministic.)doc";
 
 static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_params_straight_inverters = R"doc(Enforce NOT gates to be routed non-bending only.)doc";
 
@@ -11678,7 +11704,10 @@ probability of finding a routable layout at the expense of a
 temporarily larger footprint, which post-layout optimization may later
 shrink. Must lie in :math:`[0, 2^{20}]`. Defaults to `0`.)doc";
 
-static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_params_timeout = R"doc(Timeout limit (in ms).)doc";
+static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_params_timeout =
+R"doc(Wall-clock timeout limit (in ms). Time-limited results depend on how
+many expansions finish. Without an explicit limit, `HIGH_EFFICIENCY`
+stops after 10 seconds once a solution exists.)doc";
 
 static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_params_verbose = R"doc(Verbosity.)doc";
 
@@ -15735,6 +15764,22 @@ Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_layout_layout_3 =
+R"doc(Copies a layout with independent storage.
+
+Args:
+    other: Layout to copy.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_layout_4 =
+R"doc(Moves a layout and transfers its storage.
+
+Args:
+    other: Layout to move.
+
+)doc";
+
 static const char *mkd_doc_fiction_sidb_layout_layout_name = R"doc(Layout name.)doc";
 
 static const char *mkd_doc_fiction_sidb_layout_move_defect =
@@ -15749,10 +15794,13 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_layout_num_charged_defects =
-R"doc(Number of charged defects.
+R"doc(Number of defects classified as charged by
+`model::is_charged_defect_type`. Includes `DB`, `SI_VACANCY`, and
+`ARSENIC` even at zero charge; these defects also contribute to
+`num_neutral_defects`.
 
 Returns:
-    Number of defects with non-zero charge.
+    Number of defects with non-zero charge or a charged defect type.
 
 )doc";
 
@@ -15820,6 +15868,28 @@ R"doc(Number of positively charged defects.
 
 Returns:
     Number of defects with positive charge.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_operator_assign =
+R"doc(Copies a layout. Allocation failure leaves this layout unchanged.
+
+Args:
+    other: Layout to copy.
+
+Returns:
+    This layout.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_operator_assign_2 =
+R"doc(Moves a layout and transfers its storage.
+
+Args:
+    other: Layout to move.
+
+Returns:
+    This layout.
 
 )doc";
 
@@ -16405,11 +16475,13 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_calculate_energy_and_state_type_with_kinks_accepted =
-R"doc(Labels every energy level of an energy distribution by whether the
-physically valid charge distributions at that level encode the
-expected output for the given input pattern (`ACCEPTED`) or not
-(`REJECTED`). Kinks in the wires are tolerated: only the output BDL
-pairs are inspected.
+R"doc(Labels each charge distribution matching an energy level by whether
+its output BDL pairs encode the expected output for the given input
+pattern (`ACCEPTED`) or not (`REJECTED`). Kinks in the wires are
+tolerated.
+
+Distributions at the same energy contribute separate entries to
+preserve their occupation probabilities.
 
 Args:
     energy_dist: The energy distribution of the charge distributions.
@@ -16421,15 +16493,18 @@ Args:
                  simulated for.
 
 Returns:
-    The energies with their state types, ascending by energy.
+    One energy and state type per matching charge distribution,
+    ascending by energy. Empty if no distribution matches an energy
+    level within `utils::math::ERROR_MARGIN`.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_calculate_energy_and_state_type_with_kinks_rejected =
-R"doc(Like `calculate_energy_and_state_type_with_kinks_accepted`, but a
-charge distribution with kinks in its wires is `REJECTED` as well:
-every energy level is `ACCEPTED`, and additionally `REJECTED` if any
-of its charge distributions fails the logic match with kinks rejected.
+R"doc(Labels each charge distribution matching an energy level as `ACCEPTED`
+if it passes `logic::verify_logic_match` with kinks rejected, or
+`REJECTED` otherwise. Each distribution contributes exactly one label
+per matching energy level. Distributions at the same energy contribute
+separate entries to preserve their occupation probabilities.
 
 Args:
     lyt: The layout the charge distributions belong to.
@@ -16443,11 +16518,16 @@ Args:
     output_bdl_wires: The output BDL wires of `lyt`.
 
 Returns:
-    The energies with their state types.
+    One energy and state type per matching charge distribution,
+    ascending by energy. Empty if no distribution matches an energy
+    level within `utils::math::ERROR_MARGIN`.
 
 Raises:
-    IndexError: if logic validation encounters an invalid lattice
-                basis index.
+    ValueError: if logic validation encounters an empty specification
+                or mixed variable counts.
+    IndexError: if logic validation encounters an input pattern
+                outside the specification or an invalid lattice basis
+                index.
 
 )doc";
 
@@ -16522,6 +16602,10 @@ Args:
 Returns:
     The critical temperature (unit: K).
 
+Raises:
+    ValueError: if `spec` is empty or truth-table variable counts
+                differ.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_gate_based_2 =
@@ -16556,10 +16640,11 @@ Returns:
     The critical temperature (unit: K).
 
 Raises:
-    ValueError: if `spec` is empty, if the number of input pattern
-                layouts does not match the number of input
-                combinations of `spec`, or if the number of output BDL
-                pairs does not match the number of truth tables.
+    ValueError: if `spec` is empty, truth-table variable counts
+                differ, the number of input pattern layouts does not
+                match the number of input combinations, or the number
+                of output BDL pairs does not match the number of truth
+                tables.
 
 )doc";
 
@@ -17096,8 +17181,9 @@ Returns:
 Raises:
     ValueError: if a sweep range has non-finite or reversed bounds, a
                 non-positive or non-finite step, more points than the
-                storage range permits, or the engine is not
-                QuickExact, EXGS, or QuickSim.
+                storage range permits, colliding
+                `logic::parameter_point` identities, or the engine is
+                not QuickExact, EXGS, or QuickSim.
 
 )doc";
 
@@ -21090,10 +21176,11 @@ K. Walus, and R. Wille in IEEE NANO 2023
 (https://ieeexplore.ieee.org/document/10231266). It grows candidate
 charge distributions from the SiDBs that have to be negative by
 repeatedly charging the neutral SiDB farthest from every negative one,
-keeping the physically valid intermediate states. Every worker thread
-owns one simulation state and shares the layout's potential landscape.
-Charged surface defects are not supported: a layout that holds any
-yields `std::nullopt`.
+keeping the physically valid intermediate states. The search uses
+negative and neutral charge states regardless of `ps.sim_params.base`.
+Every worker thread owns one simulation state and shares the layout's
+potential landscape. Charged surface defects are not supported: a
+layout that holds any yields `std::nullopt`.
 
 Args:
     lyt: Layout to simulate.
@@ -22031,17 +22118,17 @@ one operational point within them. Thereby, this algorithm works for
 disconnected operational domains. The critical temperature is computed
 for each operational point.
 
-It performs `samples` uniformly-distributed random samples within the
-parameter range. For each thusly discovered operational island, it
-performs another number of samples equal to the distance to an edge of
-each operational area. Finally, it performs up to 8 samples for each
-contour point (however, the actual number is usually lower). For each
-sample, the algorithm performs one operational check on the layout,
-where each operational check consists of up to :math:`2^n` exact
-ground state simulations, where :math:`n` is the number of inputs of
-the layout. Each exact ground state simulation has exponential
-complexity in of itself. Therefore, the algorithm is only feasible for
-small layouts with few inputs.
+It performs up to `samples` uniformly-distributed random samples,
+stopping when every grid point has been collected. For each discovered
+operational island, it performs another number of samples equal to the
+distance to an edge of each operational area. Finally, it performs up
+to 8 samples for each contour point (however, the actual number is
+usually lower). For each sample, the algorithm performs one
+operational check on the layout, where each operational check consists
+of up to :math:`2^n` exact ground state simulations, where :math:`n`
+is the number of inputs of the layout. Each exact ground state
+simulation has exponential complexity in of itself. Therefore, the
+algorithm is only feasible for small layouts with few inputs.
 
 Args:
     lyt: Layout to compute the operational domain for.
@@ -22092,16 +22179,16 @@ the initial random sampling found at least one operational point
 within them. Thereby, this algorithm works for disconnected
 operational domains.
 
-It performs `samples` uniformly-distributed random samples within the
-parameter range. From there, it performs another number of samples
-equal to the number of points within the operational domain plus the
-first non-operational point in each direction. For each sample, the
-algorithm performs one operational check on the layout, where each
-operational check consists of up to :math:`2^n` exact ground state
-simulations, where :math:`n` is the number of inputs of the layout.
-Each exact ground state simulation has exponential complexity in of
-itself. Therefore, the algorithm is only feasible for small layouts
-with few inputs.
+It performs up to `samples` uniformly-distributed random samples,
+stopping when every grid point has been collected. From there, it
+performs another number of samples equal to the number of points
+within the operational domain plus the first non-operational point in
+each direction. For each sample, the algorithm performs one
+operational check on the layout, where each operational check consists
+of up to :math:`2^n` exact ground state simulations, where :math:`n`
+is the number of inputs of the layout. Each exact ground state
+simulation has exponential complexity in of itself. Therefore, the
+algorithm is only feasible for small layouts with few inputs.
 
 Args:
     lyt: Layout to compute the operational domain for.
@@ -22205,14 +22292,14 @@ which the layout is logically operational, along with the critical
 temperature for each specific parameter point.
 
 This algorithm uses random sampling to find a part of the operational
-domain that might not be complete. It performs a total of `samples`
-uniformly-distributed random samples within the parameter range. For
-each sample, the algorithm performs one operational check on the
-layout, where each operational check consists of up to :math:`2^n`
-exact ground state simulations, where :math:`n` is the number of
-inputs of the layout. Each exact ground state simulation has
-exponential complexity in of itself. Therefore, the algorithm is only
-feasible for small layouts with few inputs.
+domain that might not be complete. It performs up to `samples`
+uniformly-distributed random samples, stopping when every grid point
+has been collected. For each sample, the algorithm performs one
+operational check on the layout, where each operational check consists
+of up to :math:`2^n` exact ground state simulations, where :math:`n`
+is the number of inputs of the layout. Each exact ground state
+simulation has exponential complexity in of itself. Therefore, the
+algorithm is only feasible for small layouts with few inputs.
 
 Args:
     lyt: Layout to compute the operational domain for.
@@ -22251,6 +22338,23 @@ R"doc(Sanity checks shared by every entry point.
 Args:
     lyt: The layout.
     spec: The specification.
+
+Raises:
+    ValueError: if `spec` is empty or truth-table variable counts
+                differ.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_check_specification =
+R"doc(Checks that a specification has truth tables with a common variable
+count.
+
+Args:
+    spec: The specification.
+
+Raises:
+    ValueError: if `spec` is empty or the truth tables have different
+                variable counts.
 
 )doc";
 
@@ -22414,6 +22518,15 @@ Args:
 
 Returns:
     `true` if a kink exists.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_check_simulation_engine_support =
+R"doc(Rejects layouts the selected simulation engine cannot simulate.
+
+Raises:
+    ValueError: if QuickSim is selected for a layout with charged
+                defects.
 
 )doc";
 
@@ -22745,15 +22858,10 @@ Template Args:
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_canvas_lyt = R"doc(This layout consists of the canvas dots of the layout.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_contour_tracing =
-R"doc(Performs contour tracing to determine the operational domain. The
-algorithm first performs a random sampling of up to the specified
-number of samples. It stops random sampling once it finds a single
-operational point, from which it moves straight outwards until it
-encounters the counter of the operational domain. From this point, it
-traces the contour until it reaches the initial contour point again.
-The operational domain will finally only contain up to `samples`
-random non-operational points as well as the contour of the found
-operational domain plus a one pixel wide border around it.
+R"doc(Samples up to the specified number of random points, then traces the
+boundary of each sampled operational island. The domain contains the
+sampled points, operational boundaries, and their non-operational
+neighbors.
 
 Args:
     samples: Maximum number of random samples to be taken before
@@ -22779,26 +22887,6 @@ Args:
 Returns:
     An operational step point at the edge of the operational domain
     `starting_point` is located in.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_find_operational_step_point_via_random_sampling =
-R"doc(Performs random sampling to find any operational parameter
-combination. This function is useful if a single starting point is
-required within the domain to expand from. This function returns the
-step in all dimensions of the first operational point found. If no
-operational parameter combination can be found within the given number
-of samples, the function returns `std::nullopt`.
-
-This function adds any sampled points to the `op_domain` member
-variables.
-
-Args:
-    samples: Maximum number of samples to take. Works as a timeout.
-
-Returns:
-    The first operational step point, if any could be found,
-    `std::nullopt` otherwise.
 
 )doc";
 
@@ -22839,8 +22927,9 @@ Raises:
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_generate_random_step_points =
 R"doc(Generates unique random `step_points` in the stored parameter range.
-The number of generated points is at most equal to `samples`. Each
-call owns its random number generator.
+The number of generated points is at most equal to `samples`. Sampling
+stops when every grid point has been collected. Each call owns its
+random generator.
 
 Args:
     samples: Maximum number of random `step_point`s to generate.
@@ -22936,8 +23025,9 @@ static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_doma
 R"doc(Builds the indices and values of each validated sweep dimension.
 
 Raises:
-    ValueError: if a sweep range is invalid or exceeds the storage
-                range.
+    ValueError: if a sweep range is invalid, the grid point count
+                exceeds the storage range, or coordinates occupy the
+                same `parameter_point` identity cell.
 
 )doc";
 
@@ -23053,6 +23143,8 @@ Returns:
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_num_dimensions = R"doc(The number of dimensions.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_num_evaluated_parameter_combinations = R"doc(Number of evaluated parameter combinations.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_num_parameter_points = R"doc(Number of parameter combinations in the validated sweep grid.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_num_simulator_invocations = R"doc(Number of simulator invocations.)doc";
 
@@ -23266,7 +23358,8 @@ R"doc(Reports each top-level parameter worker without exposing nested
 simulations.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_patterns_of =
-R"doc(The input patterns that are not operational for the given reasons.
+R"doc(Collects the input patterns whose simulation results satisfy the
+operational check.
 
 Args:
     p: The implementation object.
@@ -23413,6 +23506,11 @@ Args:
 Returns:
     `true` if the layout is non-operational because of kinks.
 
+Raises:
+    ValueError: if `spec` is empty, truth-table variable counts
+                differ, QuickSim encounters charged defects, or a
+                QuickSim simulation requests base 3.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_is_kink_induced_non_operational_2 =
@@ -23431,6 +23529,12 @@ Args:
 Returns:
     `true` if the layout is non-operational because of kinks.
 
+Raises:
+    ValueError: if filtering encounters a canvas site absent from the
+                layout, `spec` is empty, truth-table variable counts
+                differ, QuickSim encounters charged defects, or a
+                QuickSim simulation requests base 3.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_is_operational =
@@ -23440,7 +23544,9 @@ the ground states are simulated with the configured engine, and the
 charge states of the output BDL pairs are compared with the expected
 truth-table entries. If the layout carries logic dots, they form the
 canvas of the pruning filters that run before any simulation whenever
-the parameters ask for filtering and reject kinks.
+the parameters ask for filtering and reject kinks. Charged defects
+with QuickSim are rejected before topology and filtering checks; a
+QuickSim simulation requires base 2.
 
 Args:
     lyt: The layout to check.
@@ -23449,6 +23555,11 @@ Args:
 
 Returns:
     The operational status and the number of simulator invocations.
+
+Raises:
+    ValueError: if `spec` is empty, truth-table variable counts
+                differ, QuickSim encounters charged defects, or a
+                QuickSim simulation requests base 3.
 
 )doc";
 
@@ -23466,6 +23577,13 @@ Args:
 
 Returns:
     The operational status and the number of simulator invocations.
+
+Raises:
+    ValueError: if filtering with rejected kinks encounters a canvas
+                site absent from the layout, `spec` is empty, truth-
+                table variable counts differ, QuickSim encounters
+                charged defects, or a QuickSim simulation requests
+                base 3.
 
 )doc";
 
@@ -23487,8 +23605,12 @@ Returns:
     The operational status and the number of simulator invocations.
 
 Raises:
-    ValueError: if `spec` is empty or the number of layouts does not
-                match the number of patterns.
+    ValueError: if filtering with rejected kinks encounters a canvas
+                site absent from the layout, `spec` is empty, truth-
+                table variable counts differ, the layout count does
+                not match the number of patterns, QuickSim encounters
+                charged defects, or a QuickSim simulation requests
+                base 3.
 
 )doc";
 
@@ -23594,6 +23716,11 @@ Args:
 Returns:
     The kink-induced non-operational input patterns.
 
+Raises:
+    ValueError: if `spec` is empty, truth-table variable counts
+                differ, QuickSim encounters charged defects, or a
+                QuickSim simulation requests base 3.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_kink_induced_non_operational_input_patterns_2 =
@@ -23611,6 +23738,11 @@ Args:
 
 Returns:
     The kink-induced non-operational input patterns.
+
+Raises:
+    ValueError: if `spec` is empty, truth-table variable counts
+                differ, QuickSim encounters charged defects, or a
+                QuickSim simulation requests base 3.
 
 )doc";
 
@@ -23660,17 +23792,17 @@ operational "islands" if the initial random sampling found at least
 one operational point within them. Thereby, this algorithm works for
 disconnected operational domains.
 
-It performs `samples` uniformly-distributed random samples within the
-parameter range. For each thusly discovered operational island, it
-performs another number of samples equal to the distance to an edge of
-each operational area. Finally, it performs up to 8 samples for each
-contour point (however, the actual number is usually lower). For each
-sample, the algorithm performs one operational check on the layout,
-where each operational check consists of up to :math:`2^n` exact
-ground state simulations, where :math:`n` is the number of inputs of
-the layout. Each exact ground state simulation has exponential
-complexity in of itself. Therefore, the algorithm is only feasible for
-small layouts with few inputs.
+It performs up to `samples` uniformly-distributed random samples,
+stopping when every grid point has been collected. For each discovered
+operational island, it performs another number of samples equal to the
+distance to an edge of each operational area. Finally, it performs up
+to 8 samples for each contour point (however, the actual number is
+usually lower). For each sample, the algorithm performs one
+operational check on the layout, where each operational check consists
+of up to :math:`2^n` exact ground state simulations, where :math:`n`
+is the number of inputs of the layout. Each exact ground state
+simulation has exponential complexity in of itself. Therefore, the
+algorithm is only feasible for small layouts with few inputs.
 
 Args:
     lyt: Layout to compute the operational domain for.
@@ -23713,16 +23845,16 @@ the initial random sampling found at least one operational point
 within them. Thereby, this algorithm works for disconnected
 operational domains.
 
-It performs `samples` uniformly-distributed random samples within the
-parameter range. From there, it performs another number of samples
-equal to the number of points within the operational domain plus the
-first non-operational point in each direction. For each sample, the
-algorithm performs one operational check on the layout, where each
-operational check consists of up to :math:`2^n` exact ground state
-simulations, where :math:`n` is the number of inputs of the layout.
-Each exact ground state simulation has exponential complexity in of
-itself. Therefore, the algorithm is only feasible for small layouts
-with few inputs.
+It performs up to `samples` uniformly-distributed random samples,
+stopping when every grid point has been collected. From there, it
+performs another number of samples equal to the number of points
+within the operational domain plus the first non-operational point in
+each direction. For each sample, the algorithm performs one
+operational check on the layout, where each operational check consists
+of up to :math:`2^n` exact ground state simulations, where :math:`n`
+is the number of inputs of the layout. Each exact ground state
+simulation has exponential complexity in of itself. Therefore, the
+algorithm is only feasible for small layouts with few inputs.
 
 This flavor of operational domain computation was proposed in
 \"Reducing the Complexity of Operational Domain Computation in Silicon
@@ -23864,14 +23996,14 @@ the layout are assumed to be in the same order as the inputs of the
 truth table.
 
 This algorithm uses random sampling to find a part of the operational
-domain that might not be complete. It performs a total of `samples`
-uniformly-distributed random samples within the parameter range. For
-each sample, the algorithm performs one operational check on the
-layout, where each operational check consists of up to :math:`2^n`
-exact ground state simulations, where :math:`n` is the number of
-inputs of the layout. Each exact ground state simulation has
-exponential complexity in of itself. Therefore, the algorithm is only
-feasible for small layouts with few inputs.
+domain that might not be complete. It performs up to `samples`
+uniformly-distributed random samples, stopping when every grid point
+has been collected. For each sample, the algorithm performs one
+operational check on the layout, where each operational check consists
+of up to :math:`2^n` exact ground state simulations, where :math:`n`
+is the number of inputs of the layout. Each exact ground state
+simulation has exponential complexity in of itself. Therefore, the
+algorithm is only feasible for small layouts with few inputs.
 
 Args:
     lyt: Layout to compute the operational domain for.
@@ -23951,7 +24083,10 @@ static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_stat
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_value_range =
 R"doc(A range of values for a dimension sweep. The range is defined by a
-minimum value, a maximum value and a step size.)doc";
+minimum value, a maximum value and a step size. Generated coordinates
+must occupy distinct `parameter_point` identity cells, whose width is
+`utils::math::ERROR_MARGIN`. Domain algorithms throw `ValueError` if
+coordinates collide.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_value_range_dimension = R"doc(The sweep parameter of the dimension.)doc";
 
@@ -23972,6 +24107,11 @@ Args:
 Returns:
     The operational input patterns.
 
+Raises:
+    ValueError: if `spec` is empty, truth-table variable counts
+                differ, QuickSim encounters charged defects, or a
+                QuickSim simulation requests base 3.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_input_patterns_2 =
@@ -23988,6 +24128,11 @@ Args:
 
 Returns:
     The operational input patterns.
+
+Raises:
+    ValueError: if `spec` is empty, truth-table variable counts
+                differ, QuickSim encounters charged defects, or a
+                QuickSim simulation requests base 3.
 
 )doc";
 
@@ -24082,8 +24227,10 @@ Returns:
     The operational status.
 
 Raises:
-    IndexError: if validation encounters an invalid lattice basis
-                index.
+    ValueError: if `spec` is empty or truth-table variable counts
+                differ.
+    IndexError: if `input_pattern` exceeds the specification or a
+                lattice basis index is invalid.
 
 )doc";
 
