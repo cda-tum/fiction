@@ -4127,7 +4127,7 @@ static const char *mkd_doc_fiction_layouts_hexagonal_layout_adjacent_coordinates
 R"doc(Returns a container that contains all coordinates that are adjacent to
 a given one. Thereby, cardinal and ordinal directions are being
 considered, i.e., the container will contain all coordinates `ac` for
-which `is_adjacent(c, ac)` returns `true`.
+which `is_adjacent_of(c, ac)` returns `true`.
 
 Coordinates that are outside of the layout bounds are not considered.
 Thereby, the size of the returned container is at most 6.
@@ -4349,7 +4349,8 @@ static const char *mkd_doc_fiction_layouts_hexagonal_layout_foreach_adjacent_coo
 R"doc(Applies a function to all coordinates adjacent to a given one in
 accordance with `adjacent_coordinates`. Thereby, cardinal and ordinal
 directions are being considered, i.e., the given function is applied
-to all coordinates ac for which `is_adjacent(c, ac)` returns `true`.
+to all coordinates ac for which `is_adjacent_of(c, ac)` returns
+`true`.
 
 Coordinates that are outside of the layout bounds are not considered.
 Thereby, at most 6 coordinates are touched.
@@ -4560,7 +4561,7 @@ Args:
     c: Coordinate to check for border location.
 
 Returns:
-    `true` iff `c` is located at the layout's northern border.
+    `true` iff `c` is located at the layout's eastern border.
 
 )doc";
 
