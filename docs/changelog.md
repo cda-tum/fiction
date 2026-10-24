@@ -900,6 +900,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - QCC and QLL writers now propagate allocation failures while sorting terminal cells.
   - Gate-layout DOT output now preserves signed coordinate IDs and quoted terminal names.
   - FGL round trips now preserve whitespace-only layout and port names.
+  - `tt_reader` now handles empty input and rejects incomplete or malformed hexadecimal records.
   - FGL version 2 now preserves manual obstructions and XML whitespace in names. Readers reject unfinished or physically invalid layouts; writers reject illegal XML control characters before changing output.
   - FGL gate IDs now reject malformed, negative, and out-of-range integers with a parsing error.
   - QCA SVG output now includes synchronized cells in tiled layouts and wraps latch clock labels within the clock cycle.
