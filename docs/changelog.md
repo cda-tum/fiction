@@ -29,8 +29,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     progress through the `on_progress` parameter. Finite physical-validity sweeps report their total.
   - Parallel algorithms accept `on_worker_progress` for stable worker activity and completed counts.
     Gate mapping, network passes, design-rule checks, and layout writers report counted phases.
-  - Python: `operational_domain.to_numpy()` returns sampled coordinates and operational flags as NumPy arrays.
-    The method rejects mismatched dimensions and reports an installation hint when NumPy is missing.
 
 - CLI:
 
@@ -99,6 +97,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - `operational_domain.to_numpy()` returns sampled coordinates and operational flags as NumPy arrays.
+    The method rejects mismatched dimensions and reports an installation hint when NumPy is missing.
   - `mnt.pyfiction.synthesis.planarization` planarizes a balanced technology network and reports its virtual inputs
   - `mnt.pyfiction.synthesis.network_balancing` and `is_balanced` accept the `buffer_constant_outputs` keyword
   - The callback members of parameter classes accept `None`, which clears the callback.
