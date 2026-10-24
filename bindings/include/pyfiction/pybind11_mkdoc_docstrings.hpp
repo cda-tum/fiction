@@ -8565,6 +8565,20 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_candidate_layout_area =
+R"doc(Estimates candidate area without the spare eastern and southern
+borders.
+
+Args:
+    width: Layout width in tiles.
+    height: Layout height in tiles.
+    position: Candidate position to include in the area.
+
+Returns:
+    Geometric area in tiles, including one-tile axes.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_check_and_optimize_po_positions =
 R"doc(Extends outputs one tile to the nearest border while preserving their
 logical inputs.
@@ -11615,7 +11629,8 @@ When set to `true`, the algorithm will utilize multiple threads to
 process different search space graphs in parallel, improving
 performance by distributing the workload across available CPU cores.
 If set to `false`, the algorithm will run sequentially on a single
-thread.
+thread. Parallel search results can depend on worker scheduling, even
+with a fixed seed.
 
 Only recommended for `HIGH_EFFORT` and `HIGHEST_EFFORT` modes and
 complex networks (> 100 nodes).
@@ -11668,7 +11683,9 @@ can be found fast.)doc";
 
 static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_params_seed =
 R"doc(Random seed for PI spacing, fanout substitution, and topological
-ordering. Generated randomly if not specified.)doc";
+ordering. Generated randomly if not specified. Within one build, a
+fixed seed reproduces sequential searches that finish before their
+timeout, provided custom cost functions are deterministic.)doc";
 
 static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_params_straight_inverters = R"doc(Enforce NOT gates to be routed non-bending only.)doc";
 
@@ -11687,7 +11704,10 @@ probability of finding a routable layout at the expense of a
 temporarily larger footprint, which post-layout optimization may later
 shrink. Must lie in :math:`[0, 2^{20}]`. Defaults to `0`.)doc";
 
-static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_params_timeout = R"doc(Timeout limit (in ms).)doc";
+static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_params_timeout =
+R"doc(Wall-clock timeout limit (in ms). Time-limited results depend on how
+many expansions finish. Without an explicit limit, `HIGH_EFFICIENCY`
+stops after 10 seconds once a solution exists.)doc";
 
 static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_params_verbose = R"doc(Verbosity.)doc";
 

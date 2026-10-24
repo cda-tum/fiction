@@ -130,7 +130,8 @@ struct graph_oriented_layout_design_params
      */
     bool return_first = false;
     /**
-     * Timeout limit (in ms).
+     * Wall-clock timeout limit (in ms). Time-limited results depend on how many expansions finish.
+     * Without an explicit limit, `HIGH_EFFICIENCY` stops after 10 seconds once a solution exists.
      */
     uint64_t timeout = std::numeric_limits<uint64_t>::max();
     /**
@@ -177,6 +178,7 @@ struct graph_oriented_layout_design_params
      * When set to `true`, the algorithm will utilize multiple threads to process different search space graphs in
      * parallel, improving performance by distributing the workload across available CPU cores. If set to `false`, the
      * algorithm will run sequentially on a single thread.
+     * Parallel search results can depend on worker scheduling, even with a fixed seed.
      *
      * Only recommended for `HIGH_EFFORT` and `HIGHEST_EFFORT` modes and complex networks (> 100 nodes).
      *
@@ -195,6 +197,8 @@ struct graph_oriented_layout_design_params
     /**
      * Random seed for PI spacing, fanout substitution, and topological ordering.
      * Generated randomly if not specified.
+     * Within one build, a fixed seed reproduces sequential searches that finish before their timeout,
+     * provided custom cost functions are deterministic.
      */
     std::optional<uint32_t> seed = std::nullopt;
     /**
@@ -365,6 +369,20 @@ struct graph_oriented_layout_design_stats
 namespace detail
 {
 /**
+ * @brief Estimates candidate area without the spare eastern and southern borders.
+ * @param width Layout width in tiles.
+ * @param height Layout height in tiles.
+ * @param position Candidate position to include in the area.
+ * @return Geometric area in tiles, including one-tile axes.
+ */
+[[nodiscard]] constexpr double candidate_layout_area(const uint32_t width, const uint32_t height,
+                                                     const fiction::layouts::layout_base::coordinate& position) noexcept
+{
+    return std::max(static_cast<double>(width) - 1.0, static_cast<double>(position.x) + 1.0) *
+           std::max(static_cast<double>(height) - 1.0, static_cast<double>(position.y) + 1.0);
+}
+
+/**
  * Alias for a vector of tiles in a given layout.
  *
  */
@@ -421,9 +439,9 @@ class priority_queue
      * @param item The element to be added.
      * @param priority The priority of the element.
      */
-    void put(const coord_vec_type& item, double priority)
+    void put(coord_vec_type item, double priority)
     {
-        elements.emplace(priority, counter++, item);
+        elements.emplace(priority, counter++, std::move(item));
     }
     /**
      * Retrieves and removes the element with the highest priority from the queue.
@@ -2072,7 +2090,7 @@ class graph_oriented_layout_design_impl
                             const search_space_graph& ssg)
     {
         std::vector<std::pair<coord_vec_type, double>> next_positions;
-        next_positions.reserve(2 * ps.num_vertex_expansions);
+        next_positions.reserve(possible_positions.size());
         const auto node_count = static_cast<double>(ssg.nodes_to_place.size());
         /** Built-in objectives are invariant while candidate positions are ranked. */
         const double layout_cost = !possible_positions.empty() &&
@@ -2083,7 +2101,10 @@ class graph_oriented_layout_design_impl
 
         for (const auto& position : possible_positions)
         {
-            auto new_sequence = ssg.current_vertex;
+            /** @brief Candidate history with capacity for the next placement. */
+            coord_vec_type new_sequence{};
+            new_sequence.reserve(ssg.current_vertex.size() + 1);
+            new_sequence.insert(new_sequence.end(), ssg.current_vertex.cbegin(), ssg.current_vertex.cend());
             new_sequence.push_back(position);
 
             const auto remaining_nodes_to_place =
@@ -2091,11 +2112,9 @@ class graph_oriented_layout_design_impl
 
             if (ssg.cost == graph_oriented_layout_design_params::cost_objective::AREA)
             {
-                // current layout size
+                // Geometric candidate area excludes the spare eastern and southern borders, even on one-tile axes.
                 const double layout_size =
-                    ((std::max(static_cast<double>(layout.width()) - 2.0, static_cast<double>(position.x)) + 1.0) *
-                     (std::max(static_cast<double>(layout.height()) - 2.0, static_cast<double>(position.y)) + 1.0)) /
-                    (node_count * node_count);
+                    candidate_layout_area(layout.width(), layout.height(), position) / (node_count * node_count);
 
                 // position of last placed node
                 const double last_position =
@@ -2103,7 +2122,7 @@ class graph_oriented_layout_design_impl
                     (node_count * node_count);
 
                 const double priority = remaining_nodes_to_place + layout_size + last_position;
-                next_positions.emplace_back(new_sequence, priority);
+                next_positions.emplace_back(std::move(new_sequence), priority);
             }
             else
             {
@@ -2114,11 +2133,11 @@ class graph_oriented_layout_design_impl
 
                 const double priority = remaining_nodes_to_place + cost;
 
-                next_positions.emplace_back(new_sequence, priority);
+                next_positions.emplace_back(std::move(new_sequence), priority);
             }
         }
 
-        return {next_positions, std::nullopt};
+        return {std::move(next_positions), std::nullopt};
     }
     /**
      * Computes possible expansions and their priorities for the current vertex in the search space graph.
@@ -2136,16 +2155,12 @@ class graph_oriented_layout_design_impl
     {
         const auto min_layout_width = ssg.network.num_pis();
 
-        std::vector<std::pair<coord_vec_type, double>> next_positions;
-        next_positions.reserve(2 * ps.num_vertex_expansions);
-
         auto layout = initialize_layout(min_layout_width);
         report_graph(ssg, layout, 0, worker_progress);
 
         placement_info place_info{.node2pos = node_dict_type{ssg.network}, .pi2node = node_dict_type{ssg.network}};
 
         coord_vec_type possible_positions{};
-        possible_positions.reserve(2 * ps.num_vertex_expansions);
 
         if (ssg.current_vertex.empty())
         {
@@ -2389,24 +2404,26 @@ class graph_oriented_layout_design_impl
     {
         if (ssg.frontier_flag)
         {
-            const auto expansion = expand(ssg, worker_progress);
+            /** @brief Expansion result whose accepted states transfer to the frontier. */
+            auto expansion = expand(ssg, worker_progress);
             progress.advance();
             ++ssg.completed_expansions;
             worker_progress.update(static_cast<std::size_t>(&ssg - ssg_vec.data()), ssg.progress_description,
                                    ssg.completed_expansions);
             if (expansion.second)
             {
-                return expansion.second;
+                return std::move(expansion.second);
             }
 
             // Update costs and frontier
-            for (const auto& [next, cost] : expansion.first)
+            for (auto& [next, cost] : expansion.first)
             {
-                if (ssg.cost_so_far.find(next) == ssg.cost_so_far.cend() || cost < ssg.cost_so_far[next])
+                /** @brief One lookup retains the best known cost for this placement sequence. */
+                const auto [entry, inserted] = ssg.cost_so_far.try_emplace(next, cost);
+                if (inserted || cost < entry->second)
                 {
-                    ssg.cost_so_far[next] = cost;
-                    const double priority = cost;
-                    ssg.frontier.put(next, priority);
+                    entry->second = cost;
+                    ssg.frontier.put(std::move(next), cost);
                 }
             }
         }
