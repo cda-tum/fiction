@@ -757,6 +757,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Build system:
 
+  - PCH cache hashes now retain comments so GCC builds accept documentation-only header edits.
   - Release benchmark builds now skip stripping when no strip tool is available.
   - Rebuild Python bindings when uncommitted C++ binding sources change.
   - Keep tinyxml2 static across build reconfiguration so Python imports find all libraries.
