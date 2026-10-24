@@ -93,6 +93,8 @@ $ cd fiction
 
 CMake fetches the third-party libraries during configuration. Only `CMake` and a C++20 compiler are required for
 the C++ part. If you want to work with the Python bindings, you need a Python 3.10+ installation.
+The `dev` dependency group requires Python 3.11+ because patched `filelock` releases require it.
+The `build` and `test` groups support Python 3.10.
 
 On Ubuntu, the build dependencies can be installed via:
 

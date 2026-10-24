@@ -181,7 +181,7 @@ cmake.args = [
 
 [tool.uv]
 required-version = ">=0.13.4"
-constraint-dependencies = [ "certifi>=2026.10.19" ]
+constraint-dependencies = [ "certifi>=2026.10.19", "filelock>=4.2.1", "virtualenv>=21.14.13" ]
 cache-keys = [
     { file = "pyproject.toml" },
     { git = { commit = true, tags = true } },
@@ -194,6 +194,7 @@ cache-keys = [
 ]
 
 [tool.uv.dependency-groups]
+dev = { requires-python = ">=3.11" }
 docs = { requires-python = ">=3.12" }
 
 [tool.cibuildwheel]

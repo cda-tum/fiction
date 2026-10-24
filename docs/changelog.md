@@ -844,6 +844,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     Rebuild Docker images with the patched `uv`; update host trust stores separately.
   - Docs dependencies now require `certifi` 2026.10.19, which retains unaffected emSign roots
     removed by 2026.10.18 while rejecting the compromised chains.
+  - Development tools now require patched `filelock` and `virtualenv` releases and Python 3.11+.
+    Python 3.10 remains supported for the package, build, and test groups.
 
 - Documentation:
 
