@@ -155,7 +155,7 @@ repos:
 
   # Python linting using ruff
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.17.0
+    rev: v0.17.1
     hooks:
       - id: ruff-format
         priority: 6
@@ -223,7 +223,7 @@ repos:
 
   # Check the pyproject.toml file
   - repo: https://github.com/henryiii/validate-pyproject-schema-store
-    rev: 2026.10.12
+    rev: 2026.10.17
     hooks:
       - id: validate-pyproject
         priority: 0
