@@ -674,7 +674,7 @@ template <typename WiringReductionLyt>
     using dist = physical_design::path_finding::manhattan_distance_functor;
     using cost = physical_design::path_finding::unit_cost_functor<uint8_t>;
 
-    static const physical_design::path_finding::a_star_params params{false};
+    static const physical_design::path_finding::a_star_params params{.crossings = false};
 
     return physical_design::path_finding::a_star(lyt, {start, end}, dist(), cost(), params, lyt.search_obstructions);
 }

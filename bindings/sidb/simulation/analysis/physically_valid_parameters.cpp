@@ -25,6 +25,7 @@
 
 #include <cstdint>
 #include <optional>
+#include <utility>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner): converts progress callbacks
@@ -84,21 +85,15 @@ void register_physically_valid_parameters(nb::module_& m)
            const decltype(operational_domain_options{}.on_progress)&                            on_progress,
            const decltype(operational_domain_options{}.on_worker_progress)&                     on_worker_progress)
         {
-            operational_domain_options params{};
-            params.operational_params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            params.operational_params.timeout    = timeout;
-            params.operational_params.sim_engine = sim_engine;
-
-            if (sweep_dimensions)
-            {
-                params.sweep_dimensions = *sweep_dimensions;
-            }
-            if (number_of_threads)
-            {
-                params.number_of_threads = *number_of_threads;
-            }
-            params.on_progress        = on_progress;
-            params.on_worker_progress = on_worker_progress;
+            operational_domain_options       defaults{};
+            const operational_domain_options params{
+                .operational_params = {.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf),
+                                       .sim_engine = sim_engine,
+                                       .timeout    = timeout},
+                .sweep_dimensions   = sweep_dimensions.value_or(std::move(defaults.sweep_dimensions)),
+                .number_of_threads  = number_of_threads ? *number_of_threads : defaults.number_of_threads,
+                .on_progress        = on_progress,
+                .on_worker_progress = on_worker_progress};
             const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::analysis::physically_valid_parameters(lyt, cd, params);
         },

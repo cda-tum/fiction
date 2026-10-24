@@ -24,9 +24,8 @@ int main()
     {
         layout.assign_sidb({x, 0, 0});
     }
-    sidb::simulation::engines::quickexact_params params{};
-    params.sim_params.base = 2;
-    params.sim_params.mu_minus = -0.25;
+    const sidb::simulation::engines::quickexact_params params{
+        .sim_params = sidb::model::simulation_parameters{2, -0.25}};
     const auto result = sidb::simulation::engines::quickexact(layout, params);
     const auto states = result.groundstates();
     assert(!states.empty());

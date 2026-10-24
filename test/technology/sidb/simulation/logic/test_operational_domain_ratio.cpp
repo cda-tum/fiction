@@ -25,6 +25,8 @@
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
+#include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain_ratio.hpp>
 #include <fiction/utils/math/math_utils.hpp>
@@ -67,26 +69,16 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
     simulation_parameters sim_params{};
     sim_params.base = 2;
 
-    operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.sim_params = sim_params;
-    op_domain_params.sweep_dimensions              = {{.dimension = sweep_parameter::EPSILON_R},
-                                                      {.dimension = sweep_parameter::LAMBDA_TF}};
-
-    // set x-dimension
-    op_domain_params.sweep_dimensions[0].min  = 5.5;
-    op_domain_params.sweep_dimensions[0].max  = 5.5;
-    op_domain_params.sweep_dimensions[0].step = 0.1;
-
-    // set y-dimension
-    op_domain_params.sweep_dimensions[1].min  = 5.0;
-    op_domain_params.sweep_dimensions[1].max  = 5.0;
-    op_domain_params.sweep_dimensions[1].step = 0.1;
+    operational_domain_params op_domain_params{
+        .operational_params = {.sim_params = sim_params},
+        .sweep_dimensions   = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.5, .step = 0.1},
+                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.0, .step = 0.1}}};
 
     SECTION("Off-grid seeds map to the next grid point")
     {
         op_domain_params.sweep_dimensions[0].max = 5.6;
         op_domain_params.sweep_dimensions[1].max = 5.1;
-        const operational_domain_ratio_params params{op_domain_params};
+        const operational_domain_ratio_params params{.op_domain_params = op_domain_params};
         const auto off_grid = operational_domain_ratio(lat, std::vector<kitty::dynamic_truth_table>{create_id_tt()},
                                                        parameter_point{{5.55, 5.05}}, params);
         const auto on_grid  = operational_domain_ratio(lat, std::vector<kitty::dynamic_truth_table>{create_id_tt()},
@@ -103,7 +95,7 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
 
         op_domain_params.sweep_dimensions.push_back(z_dimension);
 
-        const operational_domain_ratio_params op_ratio_params{op_domain_params};
+        const operational_domain_ratio_params op_ratio_params{.op_domain_params = op_domain_params};
 
         const auto op_domain_ratio =
             operational_domain_ratio(lat, std::vector<kitty::dynamic_truth_table>{create_id_tt()},
@@ -125,7 +117,7 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
         op_domain_params.sweep_dimensions[1].max  = 4.25;
         op_domain_params.sweep_dimensions[1].step = 0.25;
 
-        const operational_domain_ratio_params op_ratio_params{op_domain_params};
+        const operational_domain_ratio_params op_ratio_params{.op_domain_params = op_domain_params};
 
         const auto op_domain_ratio =
             operational_domain_ratio(lat, std::vector<kitty::dynamic_truth_table>{create_id_tt()},
@@ -143,28 +135,19 @@ TEST_CASE("SiQAD NAND gate", "[compute-operational-ratio]")
     sim_params.base     = 2;
     sim_params.mu_minus = -0.28;
 
-    operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.sim_params = sim_params;
-    op_domain_params.operational_params.input_bdl_iterator_params.input_bdl_config =
-        bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED;
-    op_domain_params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R},
-                                         {.dimension = sweep_parameter::LAMBDA_TF}};
-    op_domain_params.operational_params.strategy_to_analyze_operational_status =
-        is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION;
-    op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
-    op_domain_params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
+    const operational_domain_params op_domain_params{
+        .operational_params = {.sim_params = sim_params,
+                               .input_bdl_iterator_params =
+                                   {.bdl_wire_params = {.threshold_bdl_interdistance = 1.5},
+                                    .input_bdl_config =
+                                        bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
+                               .op_condition = is_operational_params::operational_condition::REJECT_KINKS,
+                               .strategy_to_analyze_operational_status =
+                                   is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION},
+        .sweep_dimensions   = {{.dimension = sweep_parameter::EPSILON_R, .min = 2.0, .max = 10.0, .step = 0.1},
+                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 2.0, .max = 10.0, .step = 0.1}}};
 
-    // set x-dimension
-    op_domain_params.sweep_dimensions[0].min  = 2.0;
-    op_domain_params.sweep_dimensions[0].max  = 10.0;
-    op_domain_params.sweep_dimensions[0].step = 0.1;
-
-    // set y-dimension
-    op_domain_params.sweep_dimensions[1].min  = 2.0;
-    op_domain_params.sweep_dimensions[1].max  = 10.0;
-    op_domain_params.sweep_dimensions[1].step = 0.1;
-
-    operational_domain_ratio_params op_ratio_params{op_domain_params};
+    operational_domain_ratio_params op_ratio_params{.op_domain_params = op_domain_params};
 
     // pruning and simulation to determine the operational status of the layout
     const auto op_domain_ratio_pruning_and_simulation = operational_domain_ratio(
@@ -191,20 +174,10 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
     simulation_parameters sim_params{};
     sim_params.base = 2;
 
-    operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.sim_params = sim_params;
-    op_domain_params.sweep_dimensions              = {{.dimension = sweep_parameter::EPSILON_R},
-                                                      {.dimension = sweep_parameter::LAMBDA_TF}};
-
-    // set x-dimension
-    op_domain_params.sweep_dimensions[0].min  = 5.0;
-    op_domain_params.sweep_dimensions[0].max  = 6.0;
-    op_domain_params.sweep_dimensions[0].step = 0.1;
-
-    // set y-dimension
-    op_domain_params.sweep_dimensions[1].min  = 5.0;
-    op_domain_params.sweep_dimensions[1].max  = 6.0;
-    op_domain_params.sweep_dimensions[1].step = 0.1;
+    operational_domain_params op_domain_params{
+        .operational_params = {.sim_params = sim_params},
+        .sweep_dimensions   = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.0, .max = 6.0, .step = 0.1},
+                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 6.0, .step = 0.1}}};
 
     const auto z_dimension = operational_domain_value_range{.dimension = sweep_parameter::MU_MINUS,
                                                             .min       = -0.32,
@@ -215,7 +188,7 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
     {
         op_domain_params.sweep_dimensions.push_back(z_dimension);
 
-        const operational_domain_ratio_params op_ratio_params{op_domain_params};
+        const operational_domain_ratio_params op_ratio_params{.op_domain_params = op_domain_params};
 
         const auto op_domain_ratio =
             operational_domain_ratio(lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
@@ -230,7 +203,7 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
         op_domain_params.sweep_dimensions.push_back(z_dimension);
         op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
 
-        const operational_domain_ratio_params op_ratio_params{op_domain_params};
+        const operational_domain_ratio_params op_ratio_params{.op_domain_params = op_domain_params};
 
         const auto op_domain_ratio =
             operational_domain_ratio(lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
@@ -248,7 +221,7 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
         op_domain_params.operational_params.strategy_to_analyze_operational_status =
             is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
-        const operational_domain_ratio_params op_ratio_params{op_domain_params};
+        const operational_domain_ratio_params op_ratio_params{.op_domain_params = op_domain_params};
 
         const auto op_domain_ratio =
             operational_domain_ratio(lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
@@ -262,9 +235,9 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
 
 TEST_CASE("Operational-domain ratios reject invalid sweep steps", "[compute-operational-ratio]")
 {
-    operational_domain_ratio_params params{};
-    params.op_domain_params.sweep_dimensions = {
-        {.dimension = sweep_parameter::EPSILON_R, .min = 5.0, .max = 5.1, .step = 0.0}};
+    const operational_domain_ratio_params params{
+        .op_domain_params = {
+            .sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.0, .max = 5.1, .step = 0.0}}}};
     CHECK_THROWS_AS(operational_domain_ratio(layout{}, std::vector<kitty::dynamic_truth_table>{create_id_tt()},
                                              parameter_point{{5.0}}, params),
                     std::invalid_argument);
@@ -272,10 +245,10 @@ TEST_CASE("Operational-domain ratios reject invalid sweep steps", "[compute-oper
 
 TEST_CASE("Operational-domain ratios reject malformed seeds", "[compute-operational-ratio]")
 {
-    operational_domain_ratio_params params{};
-    params.op_domain_params.sweep_dimensions = {
-        {.dimension = sweep_parameter::EPSILON_R, .min = 5.0, .max = 6.0, .step = 1.0},
-        {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 6.0, .step = 1.0}};
+    operational_domain_ratio_params params{
+        .op_domain_params = {
+            .sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.0, .max = 6.0, .step = 1.0},
+                                 {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 6.0, .step = 1.0}}}};
     const auto nan = std::numeric_limits<double>::quiet_NaN();
     const auto inf = std::numeric_limits<double>::infinity();
     for (const auto& seed : std::vector<std::vector<double>>{{},

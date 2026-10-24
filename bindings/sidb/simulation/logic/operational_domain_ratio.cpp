@@ -24,6 +24,7 @@
 #include <kitty/dynamic_truth_table.hpp>
 
 #include <optional>
+#include <utility>
 #include <vector>
 
 #include <nanobind/nanobind.h>
@@ -87,21 +88,19 @@ void register_operational_domain_ratio(nb::module_& m)
            const decltype(operational_domain_ratio_options{}.op_domain_params.on_progress)&        on_progress,
            const decltype(operational_domain_ratio_options{}.op_domain_params.on_worker_progress)& on_worker_progress)
         {
-            operational_domain_ratio_options params{};
-            params.op_domain_params.operational_params =
-                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
-            if (sweep_dimensions)
-            {
-                params.op_domain_params.sweep_dimensions = *sweep_dimensions;
-            }
-            if (number_of_threads)
-            {
-                params.op_domain_params.number_of_threads = *number_of_threads;
-            }
-            params.op_domain_params.on_progress        = on_progress;
-            params.op_domain_params.on_worker_progress = on_worker_progress;
+            operational_domain_ratio_options       defaults{};
+            const operational_domain_ratio_options params{
+                .op_domain_params = {
+                    .operational_params = make_operational_parameters(
+                        timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine, threshold_bdl_interdistance,
+                        minimum_distance, maximum_distance, input_bdl_config, op_condition,
+                        strategy_to_analyze_operational_status),
+                    .sweep_dimensions =
+                        sweep_dimensions.value_or(std::move(defaults.op_domain_params.sweep_dimensions)),
+                    .number_of_threads =
+                        number_of_threads ? *number_of_threads : defaults.op_domain_params.number_of_threads,
+                    .on_progress        = on_progress,
+                    .on_worker_progress = on_worker_progress}};
             const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::operational_domain_ratio(lyt, spec, pp, params);
         },

@@ -65,9 +65,8 @@ void register_enumerate_all_paths_impl(nb::module_& m)
            const decltype(enumerate_all_paths_options{}.crossings) crossings,
            const std::optional<fiction::layouts::obstructions>&    supplied_obstructions)
         {
-            enumerate_all_paths_options params{};
-            const auto                  obstructions = supplied_obstructions.value_or(fiction::layouts::obstructions{});
-            params.crossings                         = crossings;
+            const enumerate_all_paths_options params{.crossings = crossings};
+            const auto obstructions = supplied_obstructions.value_or(fiction::layouts::obstructions{});
 
             const auto all_paths = fiction::physical_design::path_finding::enumerate_all_paths<Lyt>(
                 lyt, {source, target}, params, obstructions);

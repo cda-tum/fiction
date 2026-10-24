@@ -83,9 +83,9 @@ TEST_CASE("Predefined SiDB gates on defective surfaces honor the per-gate timeou
         sidb::layout surface{};
         surface.assign_defect(site_at_row(0, 0), defect{defect_type::DB, -1, 2, 5});
 
-        on_the_fly_gate_library_params params{};
-        params.design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
-        params.design_gate_params.operational_params.timeout    = 0;
+        on_the_fly_gate_library_params params{
+            .design_gate_params = {
+                .operational_params = {.sim_params = simulation_parameters{2, -0.32}, .timeout = 0}}};
         const auto enclosing_deadline = std::chrono::steady_clock::now() + std::chrono::seconds{2};
         params.design_gate_params.operational_params.deadline = enclosing_deadline;
 
@@ -117,9 +117,9 @@ TEST_CASE("Unsuccessful binary SiDB designs retain the tile, function, and ports
             const auto            gate   = gate_layout.create_gate({input1, input2}, function, {1, 1});
             gate_layout.create_po(gate, "output", {0, 2});
 
-            on_the_fly_gate_library_params params{};
-            params.design_gate_params.canvas                 = {site_at_row(24, 17), site_at_row(24, 17)};
-            params.design_gate_params.number_of_canvas_sidbs = 2;
+            const on_the_fly_gate_library_params params{
+                .design_gate_params = {.canvas                 = {site_at_row(24, 17), site_at_row(24, 17)},
+                                       .number_of_canvas_sidbs = 2}};
 
             std::optional<sidb::layout> surface{};
             if (with_defects)

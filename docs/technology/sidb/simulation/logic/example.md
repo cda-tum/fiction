@@ -31,10 +31,9 @@ int main()
     place(sidb::dot_tag::INPUT, {0, 2});
     place(sidb::dot_tag::NORMAL, {6, 8, 18});
     place(sidb::dot_tag::OUTPUT, {12, 14});
-    logic::operational_domain_params params{};
-    params.operational_params.sim_params.base = 2;
-    params.operational_params.timeout = 5'000;
-    params.sweep_dimensions = {{logic::sweep_parameter::EPSILON_R, 5.5, 5.6, 0.1}};
+    const logic::operational_domain_params params{
+        .operational_params = {.sim_params = sidb::model::simulation_parameters{2}, .timeout = 5'000},
+        .sweep_dimensions = {{logic::sweep_parameter::EPSILON_R, 5.5, 5.6, 0.1}}};
     const auto domain = logic::operational_domain_grid_search(wire, {fiction::synthesis::create_id_tt()}, params);
     assert(domain.size() == 2);
     sidb::simulation::io::write_operational_domain(domain, std::cout);

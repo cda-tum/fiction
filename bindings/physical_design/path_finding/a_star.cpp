@@ -68,9 +68,8 @@ void register_a_star_impl(nb::module_& m)
            const decltype(a_star_options{}.crossings)           crossings,
            const std::optional<fiction::layouts::obstructions>& supplied_obstructions)
         {
-            a_star_options params{};
-            const auto     obstructions = supplied_obstructions.value_or(fiction::layouts::obstructions{});
-            params.crossings            = crossings;
+            const a_star_options params{.crossings = crossings};
+            const auto           obstructions = supplied_obstructions.value_or(fiction::layouts::obstructions{});
 
             return static_cast<std::vector<fiction::layouts::layout_base::coordinate>>(
                 fiction::physical_design::path_finding::a_star<Lyt>(

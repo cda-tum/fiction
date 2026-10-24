@@ -37,6 +37,7 @@
 #include <fiction/types.hpp>                                 // pre-defined types suitable for the FCN domain
 #include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 
+#include <fmt/base.h>
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/common.hpp>                                   // parser return codes
 #include <lorina/genlib.hpp>                                   // Genlib file parsing
@@ -60,6 +61,8 @@
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include <experiments.hpp>
 
 using namespace fiction;
 using namespace fiction::fcn;
@@ -130,14 +133,13 @@ try
     const mockturtle::tech_library<2> gate_lib{gates};
 
     // parameters for SMT-based physical design
-    exact_physical_design_params exact_params{};
-    exact_params.scheme             = "Row";
-    exact_params.layout_arrangement = arrangement::EVEN_ROW;
-    exact_params.crossings          = true;
-    exact_params.border_io          = true;
-    exact_params.desynchronize      = true;
-    exact_params.timeout            = 3'600'000;  // 1h in ms
-    exact_physical_design_stats exact_stats{};
+    const exact_physical_design_params exact_params{.scheme             = "Row",
+                                                    .layout_arrangement = arrangement::EVEN_ROW,
+                                                    .crossings          = true,
+                                                    .border_io          = true,
+                                                    .desynchronize      = true,
+                                                    .timeout            = 3'600'000};  // 1h in ms
+    exact_physical_design_stats        exact_stats{};
 
     static constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::b1_r2 &
                                                    ~fiction_experiments::clpl & ~fiction_experiments::two_bit_add_maj &

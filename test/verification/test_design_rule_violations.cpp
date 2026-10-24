@@ -37,12 +37,11 @@ using namespace fiction::verification;
 template <typename Lyt>
 gate_level_drv_stats get_drvs(const Lyt& lyt)
 {
-    gate_level_drv_params ps{};
-    gate_level_drv_stats  st{};
+    gate_level_drv_stats st{};
 
     // suppress standard output
-    std::stringstream ss{};
-    ps.out = &ss;
+    std::stringstream           ss{};
+    const gate_level_drv_params ps{.out = &ss};
 
     gate_level_drvs(lyt, ps, &st);
 

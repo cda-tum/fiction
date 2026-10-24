@@ -98,10 +98,9 @@ TEST_CASE("Every strategy yields a planar, balanced, fanout-substituted network"
             {
                 for (const bool xor_gates : {false, true})
                 {
-                    planarization_params ps{};
-                    ps.duplication.strategy                 = strategy;
-                    ps.duplication.criterion                = criterion;
-                    ps.duplication.crossing_gates.xor_gates = xor_gates;
+                    const planarization_params ps{.duplication = {.strategy       = strategy,
+                                                                  .crossing_gates = {.xor_gates = xor_gates},
+                                                                  .criterion      = criterion}};
 
                     planarization_stats st{};
                     const auto          result = planarization(ranked, ps, &st);
@@ -122,8 +121,7 @@ TEST_CASE("The fanout degree is respected", "[planarization]")
 
     for (const uint32_t degree : {2u, 3u})
     {
-        planarization_params ps{};
-        ps.fanout_degree = degree;
+        const planarization_params ps{.fanout_degree = degree};
 
         const auto result = planarization(ranked, ps);
 
@@ -155,14 +153,14 @@ TEST_CASE("Progress is reported for every stage", "[planarization]")
 
     std::vector<std::string> tasks{};
 
-    planarization_params ps{};
-    ps.on_progress = [&tasks](const std::string_view task, const std::size_t, const std::size_t)
-    {
-        if (tasks.empty() || tasks.back() != task)
+    const planarization_params ps{
+        .on_progress = [&tasks](const std::string_view task, const std::size_t, const std::size_t)
         {
-            tasks.emplace_back(task);
-        }
-    };
+            if (tasks.empty() || tasks.back() != task)
+            {
+                tasks.emplace_back(task);
+            }
+        }};
 
     const auto result = planarization(ranked, ps);
 
@@ -177,16 +175,17 @@ TEST_CASE("Statistics report the runtime and progress reaches every stage", "[pl
 
     std::vector<std::string> tasks{};
 
-    planarization_params ps{};
-    ps.duplication.strategy                 = node_duplication_planarization_params::planarization_strategy::HYBRID;
-    ps.duplication.crossing_gates.xor_gates = true;
-    ps.duplication.on_progress = [&tasks](const std::string_view task, const std::size_t, const std::size_t)
-    {
-        if (tasks.empty() || tasks.back() != task)
-        {
-            tasks.emplace_back(task);
-        }
-    };
+    const planarization_params ps{
+        .duplication = {.strategy = node_duplication_planarization_params::planarization_strategy::HYBRID,
+                        .on_progress =
+                            [&tasks](const std::string_view task, const std::size_t, const std::size_t)
+                        {
+                            if (tasks.empty() || tasks.back() != task)
+                            {
+                                tasks.emplace_back(task);
+                            }
+                        },
+                        .crossing_gates = {.xor_gates = true}}};
 
     planarization_stats st{};
     const auto          result = planarization(ranked, ps, &st);
@@ -203,12 +202,12 @@ TEST_CASE("Kept crossings run through the crossing gates for both crossing gate 
 
     for (const bool xor_gates : {false, true})
     {
-        planarization_params ps{};
-        ps.duplication.strategy  = node_duplication_planarization_params::planarization_strategy::HYBRID;
-        ps.duplication.criterion = node_duplication_planarization_params::decision_criterion::WEIGHTED_CONE;
-        ps.duplication.crossing_gates.xor_gates = xor_gates;
         // a prohibitive duplication cost makes the hybrid strategy keep every crossing it may keep
-        ps.duplication.duplication_cost.node_weight = 1e6;
+        const planarization_params ps{
+            .duplication = {.strategy       = node_duplication_planarization_params::planarization_strategy::HYBRID,
+                            .crossing_gates = {.xor_gates = xor_gates},
+                            .criterion      = node_duplication_planarization_params::decision_criterion::WEIGHTED_CONE,
+                            .duplication_cost = {.node_weight = 1e6}}};
 
         planarization_stats st{};
         const auto          result = planarization(ranked, ps, &st);
@@ -226,16 +225,18 @@ TEST_CASE("The lookahead budget fallback and the crossing limit are honored", "[
 
     SECTION("a tiny lookahead budget falls back to the cone model")
     {
-        planarization_params ps{};
-        ps.duplication.lookahead_budget = 1;
+        const planarization_params ps{
+            .duplication = {.strategy         = node_duplication_planarization_params::planarization_strategy::HYBRID,
+                            .lookahead_budget = 1}};
 
         const auto result = planarization(ranked, ps);
         check_contract(ntk, result);
     }
     SECTION("a crossing limit of zero duplicates every level")
     {
-        planarization_params ps{};
-        ps.duplication.crossing_gates.max_crossings_per_level = 0;
+        const planarization_params ps{
+            .duplication = {.strategy       = node_duplication_planarization_params::planarization_strategy::HYBRID,
+                            .crossing_gates = {.max_crossings_per_level = 0}}};
 
         planarization_stats st{};
         const auto          result = planarization(ranked, ps, &st);
@@ -251,22 +252,23 @@ TEST_CASE("Invalid parameters are rejected before any stage runs", "[planarizati
 
     SECTION("fanout degree below two")
     {
-        planarization_params ps{};
-        ps.fanout_degree = 1;
+        const planarization_params ps{.fanout_degree = 1};
 
         CHECK_THROWS_AS(planarization(ranked, ps), std::invalid_argument);
     }
     SECTION("lookahead budget of zero")
     {
-        planarization_params ps{};
-        ps.duplication.lookahead_budget = 0;
+        const planarization_params ps{
+            .duplication = {.strategy         = node_duplication_planarization_params::planarization_strategy::HYBRID,
+                            .lookahead_budget = 0}};
 
         CHECK_THROWS_AS(planarization(ranked, ps), std::invalid_argument);
     }
     SECTION("negative cost weight")
     {
-        planarization_params ps{};
-        ps.duplication.duplication_cost.buffer_weight = -1.0;
+        const planarization_params ps{
+            .duplication = {.strategy         = node_duplication_planarization_params::planarization_strategy::HYBRID,
+                            .duplication_cost = {.buffer_weight = -1.0}}};
 
         CHECK_THROWS_AS(planarization(ranked, ps), std::invalid_argument);
     }

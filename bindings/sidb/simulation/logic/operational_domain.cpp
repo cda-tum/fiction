@@ -101,22 +101,16 @@ inline void register_operational_domain_functions(nb::module_& m)
            const decltype(operational_domain_options{}.on_worker_progress)&              on_worker_progress,
            operational_domain_stats*                                                     stats)
         {
-            operational_domain_options params{};
-            params.operational_params =
-                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
-
-            if (sweep_dimensions)
-            {
-                params.sweep_dimensions = *sweep_dimensions;
-            }
-            if (number_of_threads)
-            {
-                params.number_of_threads = *number_of_threads;
-            }
-            params.on_progress        = on_progress;
-            params.on_worker_progress = on_worker_progress;
+            operational_domain_options       defaults{};
+            const operational_domain_options params{
+                .operational_params =
+                    make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                                threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                                input_bdl_config, op_condition, strategy_to_analyze_operational_status),
+                .sweep_dimensions   = sweep_dimensions.value_or(std::move(defaults.sweep_dimensions)),
+                .number_of_threads  = number_of_threads ? *number_of_threads : defaults.number_of_threads,
+                .on_progress        = on_progress,
+                .on_worker_progress = on_worker_progress};
             const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::operational_domain_grid_search(lyt, spec, params, stats);
         },
@@ -194,22 +188,16 @@ Args:
            const decltype(operational_domain_options{}.on_worker_progress)&              on_worker_progress,
            operational_domain_stats*                                                     stats)
         {
-            operational_domain_options params{};
-            params.operational_params =
-                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
-
-            if (sweep_dimensions)
-            {
-                params.sweep_dimensions = *sweep_dimensions;
-            }
-            if (number_of_threads)
-            {
-                params.number_of_threads = *number_of_threads;
-            }
-            params.on_progress        = on_progress;
-            params.on_worker_progress = on_worker_progress;
+            operational_domain_options       defaults{};
+            const operational_domain_options params{
+                .operational_params =
+                    make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                                threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                                input_bdl_config, op_condition, strategy_to_analyze_operational_status),
+                .sweep_dimensions   = sweep_dimensions.value_or(std::move(defaults.sweep_dimensions)),
+                .number_of_threads  = number_of_threads ? *number_of_threads : defaults.number_of_threads,
+                .on_progress        = on_progress,
+                .on_worker_progress = on_worker_progress};
             const nb::gil_scoped_release release{};
 
             return fiction::sidb::simulation::logic::operational_domain_random_sampling(lyt, spec, samples, params,
@@ -288,22 +276,16 @@ Args:
            const decltype(operational_domain_options{}.on_worker_progress)&              on_worker_progress,
            operational_domain_stats*                                                     stats)
         {
-            operational_domain_options params{};
-            params.operational_params =
-                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
-
-            if (sweep_dimensions)
-            {
-                params.sweep_dimensions = *sweep_dimensions;
-            }
-            if (number_of_threads)
-            {
-                params.number_of_threads = *number_of_threads;
-            }
-            params.on_progress        = on_progress;
-            params.on_worker_progress = on_worker_progress;
+            operational_domain_options       defaults{};
+            const operational_domain_options params{
+                .operational_params =
+                    make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                                threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                                input_bdl_config, op_condition, strategy_to_analyze_operational_status),
+                .sweep_dimensions   = sweep_dimensions.value_or(std::move(defaults.sweep_dimensions)),
+                .number_of_threads  = number_of_threads ? *number_of_threads : defaults.number_of_threads,
+                .on_progress        = on_progress,
+                .on_worker_progress = on_worker_progress};
             const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::operational_domain_flood_fill(lyt, spec, samples, params, stats);
         },
@@ -380,22 +362,16 @@ Args:
            const decltype(operational_domain_options{}.on_worker_progress)&              on_worker_progress,
            operational_domain_stats*                                                     stats)
         {
-            operational_domain_options params{};
-            params.operational_params =
-                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
-
-            if (sweep_dimensions)
-            {
-                params.sweep_dimensions = *sweep_dimensions;
-            }
-            if (number_of_threads)
-            {
-                params.number_of_threads = *number_of_threads;
-            }
-            params.on_progress        = on_progress;
-            params.on_worker_progress = on_worker_progress;
+            operational_domain_options       defaults{};
+            const operational_domain_options params{
+                .operational_params =
+                    make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                                threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                                input_bdl_config, op_condition, strategy_to_analyze_operational_status),
+                .sweep_dimensions   = sweep_dimensions.value_or(std::move(defaults.sweep_dimensions)),
+                .number_of_threads  = number_of_threads ? *number_of_threads : defaults.number_of_threads,
+                .on_progress        = on_progress,
+                .on_worker_progress = on_worker_progress};
             const nb::gil_scoped_release release{};
 
             return fiction::sidb::simulation::logic::operational_domain_contour_tracing(lyt, spec, samples, params,
@@ -474,22 +450,16 @@ Args:
            const decltype(operational_domain_options{}.on_worker_progress)&              on_worker_progress,
            operational_domain_stats*                                                     stats)
         {
-            operational_domain_options params{};
-            params.operational_params =
-                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
-
-            if (sweep_dimensions)
-            {
-                params.sweep_dimensions = *sweep_dimensions;
-            }
-            if (number_of_threads)
-            {
-                params.number_of_threads = *number_of_threads;
-            }
-            params.on_progress        = on_progress;
-            params.on_worker_progress = on_worker_progress;
+            operational_domain_options       defaults{};
+            const operational_domain_options params{
+                .operational_params =
+                    make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                                threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                                input_bdl_config, op_condition, strategy_to_analyze_operational_status),
+                .sweep_dimensions   = sweep_dimensions.value_or(std::move(defaults.sweep_dimensions)),
+                .number_of_threads  = number_of_threads ? *number_of_threads : defaults.number_of_threads,
+                .on_progress        = on_progress,
+                .on_worker_progress = on_worker_progress};
             const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::critical_temperature_domain_grid_search(lyt, spec, params, stats);
         },
@@ -568,22 +538,16 @@ Args:
            const decltype(operational_domain_options{}.on_worker_progress)&              on_worker_progress,
            operational_domain_stats*                                                     stats)
         {
-            operational_domain_options params{};
-            params.operational_params =
-                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
-
-            if (sweep_dimensions)
-            {
-                params.sweep_dimensions = *sweep_dimensions;
-            }
-            if (number_of_threads)
-            {
-                params.number_of_threads = *number_of_threads;
-            }
-            params.on_progress        = on_progress;
-            params.on_worker_progress = on_worker_progress;
+            operational_domain_options       defaults{};
+            const operational_domain_options params{
+                .operational_params =
+                    make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                                threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                                input_bdl_config, op_condition, strategy_to_analyze_operational_status),
+                .sweep_dimensions   = sweep_dimensions.value_or(std::move(defaults.sweep_dimensions)),
+                .number_of_threads  = number_of_threads ? *number_of_threads : defaults.number_of_threads,
+                .on_progress        = on_progress,
+                .on_worker_progress = on_worker_progress};
             const nb::gil_scoped_release release{};
 
             return fiction::sidb::simulation::logic::critical_temperature_domain_random_sampling(lyt, spec, samples,
@@ -664,22 +628,16 @@ Args:
            const decltype(operational_domain_options{}.on_worker_progress)&              on_worker_progress,
            operational_domain_stats*                                                     stats)
         {
-            operational_domain_options params{};
-            params.operational_params =
-                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
-
-            if (sweep_dimensions)
-            {
-                params.sweep_dimensions = *sweep_dimensions;
-            }
-            if (number_of_threads)
-            {
-                params.number_of_threads = *number_of_threads;
-            }
-            params.on_progress        = on_progress;
-            params.on_worker_progress = on_worker_progress;
+            operational_domain_options       defaults{};
+            const operational_domain_options params{
+                .operational_params =
+                    make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                                threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                                input_bdl_config, op_condition, strategy_to_analyze_operational_status),
+                .sweep_dimensions   = sweep_dimensions.value_or(std::move(defaults.sweep_dimensions)),
+                .number_of_threads  = number_of_threads ? *number_of_threads : defaults.number_of_threads,
+                .on_progress        = on_progress,
+                .on_worker_progress = on_worker_progress};
             const nb::gil_scoped_release release{};
 
             return fiction::sidb::simulation::logic::critical_temperature_domain_flood_fill(lyt, spec, samples, params,
@@ -760,22 +718,16 @@ Args:
            const decltype(operational_domain_options{}.on_worker_progress)&              on_worker_progress,
            operational_domain_stats*                                                     stats)
         {
-            operational_domain_options params{};
-            params.operational_params =
-                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
-
-            if (sweep_dimensions)
-            {
-                params.sweep_dimensions = *sweep_dimensions;
-            }
-            if (number_of_threads)
-            {
-                params.number_of_threads = *number_of_threads;
-            }
-            params.on_progress        = on_progress;
-            params.on_worker_progress = on_worker_progress;
+            operational_domain_options       defaults{};
+            const operational_domain_options params{
+                .operational_params =
+                    make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                                threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                                input_bdl_config, op_condition, strategy_to_analyze_operational_status),
+                .sweep_dimensions   = sweep_dimensions.value_or(std::move(defaults.sweep_dimensions)),
+                .number_of_threads  = number_of_threads ? *number_of_threads : defaults.number_of_threads,
+                .on_progress        = on_progress,
+                .on_worker_progress = on_worker_progress};
             const nb::gil_scoped_release release{};
 
             return fiction::sidb::simulation::logic::critical_temperature_domain_contour_tracing(lyt, spec, samples,
