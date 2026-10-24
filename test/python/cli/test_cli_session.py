@@ -24,9 +24,10 @@ from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TimeElapsedColumn
 
 from mnt.fiction.cli.errors import CommandError
+from mnt.fiction.cli.output import ignore_progress, ignore_worker_progress
 from mnt.fiction.cli.parsing import tokenize
 from mnt.fiction.cli.registry import REGISTRY, STORE_FLAGS, Category
-from mnt.fiction.cli.session import Session, ignore_progress, ignore_worker_progress
+from mnt.fiction.cli.session import Session
 from mnt.fiction.cli.statistics import stats_to_dict
 from mnt.fiction.cli.stores import Store
 from mnt.pyfiction.networks import set_name
@@ -284,7 +285,7 @@ def test_progress_serializes_shared_task_reports(monkeypatch: pytest.MonkeyPatch
     """Concurrent reporters create one bar for a shared task name."""
     session = Session(console=Console(file=io.StringIO(), force_terminal=True))
     display = Progress(console=session.console, auto_refresh=False)
-    monkeypatch.setattr("mnt.fiction.cli.session.Progress", lambda *_args, **_kwargs: display)
+    monkeypatch.setattr("mnt.fiction.cli.output.Progress", lambda *_args, **_kwargs: display)
     add_task = display.add_task
 
     def delayed_add_task(description: str, *, total: float | None = 100, spinner: bool = False) -> TaskID:
@@ -315,7 +316,7 @@ def test_progress_restarts_with_an_unknown_total(monkeypatch: pytest.MonkeyPatch
     """A new pass clears the old total even if the old pass completed no items."""
     session = Session(console=Console(file=io.StringIO(), force_terminal=True))
     display = Progress(console=session.console, auto_refresh=False)
-    monkeypatch.setattr("mnt.fiction.cli.session.Progress", lambda *_args, **_kwargs: display)
+    monkeypatch.setattr("mnt.fiction.cli.output.Progress", lambda *_args, **_kwargs: display)
     with session.progress("simulation") as report:
         report("compositions", 0, 4)
         report("compositions", 0, 0)
@@ -357,7 +358,7 @@ def test_parallel_progress_has_one_aggregate_row(
     console = Console(file=io.StringIO(), width=100, height=height, force_terminal=True)
     session = Session(console=console)
     display = Progress(console=console, auto_refresh=False)
-    monkeypatch.setattr("mnt.fiction.cli.session.Progress", lambda *_args, **_kwargs: display)
+    monkeypatch.setattr("mnt.fiction.cli.output.Progress", lambda *_args, **_kwargs: display)
     total = 0 if command in {"exact", "gold", "clustercomplete"} else 256
     active, inactive = True, False
     with session.progress(command) as report:
@@ -390,7 +391,7 @@ def test_exact_retains_an_active_candidate(monkeypatch: pytest.MonkeyPatch) -> N
     """When the latest candidate finishes, the remaining active candidate supplies the dimensions."""
     session = Session(console=Console(file=io.StringIO(), force_terminal=True))
     display = Progress(console=session.console, auto_refresh=False)
-    monkeypatch.setattr("mnt.fiction.cli.session.Progress", lambda *_args, **_kwargs: display)
+    monkeypatch.setattr("mnt.fiction.cli.output.Progress", lambda *_args, **_kwargs: display)
     active, inactive = True, False
     with session.progress("exact") as report:
         session.report_worker_progress(0, 2, "worker 1: 4 \N{MULTIPLICATION SIGN} 6", 0, 0, active)
@@ -455,7 +456,7 @@ def test_gold_retains_best_accepted_solution(workers: int, monkeypatch: pytest.M
     """A completed graph and an older report cannot erase the best accepted solution."""
     session = Session(console=Console(file=io.StringIO(), force_terminal=True))
     display = Progress(console=session.console, auto_refresh=False)
-    monkeypatch.setattr("mnt.fiction.cli.session.Progress", lambda *_args, **_kwargs: display)
+    monkeypatch.setattr("mnt.fiction.cli.output.Progress", lambda *_args, **_kwargs: display)
     active, inactive = True, False
     with session.progress("gold") as aggregate:
         report = session.report_worker_progress
@@ -522,7 +523,7 @@ def test_spinner_refreshes_during_native_read(tmp_path: Path, monkeypatch: pytes
 
     session = Session(console=Console(file=io.StringIO(), force_terminal=True))
     display = Progress(RecordingSpinner(), TimeElapsedColumn(), console=session.console, transient=True)
-    monkeypatch.setattr("mnt.fiction.cli.session.Progress", lambda *_args, **_kwargs: display)
+    monkeypatch.setattr("mnt.fiction.cli.output.Progress", lambda *_args, **_kwargs: display)
     interval = sys.getswitchinterval()
     try:
         # Only the native call can release the GIL while the reading flag is set.
