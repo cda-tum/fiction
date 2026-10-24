@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
@@ -26,6 +26,7 @@
 #include <cassert>
 #include <concepts>
 #include <stdexcept>
+#include <utility>
 
 namespace fiction::physical_design::path_finding
 {
@@ -44,7 +45,11 @@ struct enumerate_all_paths_params
 namespace detail
 {
 
-template <typename Path, typename Lyt>
+/**
+ * @brief Implements loop-free path enumeration.
+ * @tparam Lyt Layout type.
+ */
+template <typename Lyt>
 class enumerate_all_paths_impl
 {
   public:
@@ -68,16 +73,17 @@ class enumerate_all_paths_impl
      *
      * @return A collection of all unique paths in `layout` from `objective.source` to `objective.target`.
      */
-    [[nodiscard]] path_collection<Path> run()
+    [[nodiscard]] path_collection run()
     {
         if (!layout.contains_coordinate(objective.source) || !layout.contains_coordinate(objective.target))
         {
             throw std::invalid_argument("Routing endpoints must lie within the layout extent");
         }
 
-        recursively_enumerate_all_paths(objective.source, objective.target, Path{});
+        recursively_enumerate_all_paths(objective.source, objective.target, layout_coordinate_path{});
 
-        return collection;
+        // The public search consumes this implementation's result.
+        return std::move(collection);
     }
 
   private:
@@ -102,7 +108,7 @@ class enumerate_all_paths_impl
     /**
      * Collection of all enumerated paths.
      */
-    path_collection<Path> collection{};
+    path_collection collection{};
     /**
      * Mark a coordinate as visited.
      *
@@ -141,7 +147,7 @@ class enumerate_all_paths_impl
      * @param p Current path to extend.
      */
     void recursively_enumerate_all_paths(const fiction::layouts::layout_base::coordinate& src,
-                                         const fiction::layouts::layout_base::coordinate& tgt, Path p)
+                                         const fiction::layouts::layout_base::coordinate& tgt, layout_coordinate_path p)
     {
         // mark source coordinate as visited and append it to the path
         mark_visited(src);
@@ -150,7 +156,7 @@ class enumerate_all_paths_impl
         // if source and target are identical, a path has been found
         if (src == tgt)
         {
-            collection.add(p);
+            collection.push_back(std::move(p));
         }
         else  // destination is not reached yet
         {
@@ -187,8 +193,7 @@ class enumerate_all_paths_impl
             }
         }
 
-        // after recursion, remove current coordinate from path and mark it as unvisited to allow it in other paths
-        p.pop_back();
+        // allow the current coordinate in other paths after recursion
         mark_unvisited(src);
     }
 };
@@ -198,7 +203,7 @@ class enumerate_all_paths_impl
 /**
  * Enumerates all possible paths in a layout that start at a given source coordinate and lead to given target
  * coordinate. This function automatically detects whether the given layout implements a clocking interface (see
- * `gate_level_layout`) and respects the underlying information flow imposed by `layout`'s clocking scheme. This
+ * `gate_layout`) and respects the underlying information flow imposed by `layout`'s clocking scheme. This
  * algorithm does neither generate duplicate nor looping paths, even in a cyclic clocking scheme. That is, along each
  * path, each coordinate can occur at maximum once.
  *
@@ -215,28 +220,25 @@ class enumerate_all_paths_impl
  * In certain cases it might be desirable to enumerate regular coordinate paths even if the layout implements a clocking
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
  * @code{.cpp}
- * using clk_lyt = gate_level_layout<cartesian_layout>;
- * using path = layout_coordinate_path;
- * clk_lyt layout = ...;
- * auto all_paths = enumerate_all_paths<path>(static_cast<cartesian_layout>(layout), {source, target});
+ * fiction::layouts::cartesian_gate_layout layout = ...;
+ * auto all_paths = enumerate_all_paths(static_cast<cartesian_layout>(layout), {source, target});
  * @endcode
  *
- * @tparam Path Type of the returned individual paths.
  * @tparam Lyt Type of the layout to perform path finding on.
  * @param layout The layout whose paths are to be enumerated.
  * @param objective Source-target coordinate pair.
  * @param params Parameters.
  * @param obstructions Additional coordinate and connection constraints; the search does not modify them.
  * @return A collection of all unique paths in `layout` from `objective.source` to `objective.target`.
+ * @throws std::invalid_argument If either endpoint lies outside the layout extent.
  */
-template <typename Path, typename Lyt>
-[[nodiscard]] path_collection<Path> enumerate_all_paths(const Lyt& layout, const routing_objective& objective,
-                                                        const enumerate_all_paths_params& params       = {},
-                                                        const layouts::obstructions&      obstructions = {})
+template <typename Lyt>
+    requires std::derived_from<Lyt, layouts::layout_base>
+[[nodiscard]] path_collection enumerate_all_paths(const Lyt& layout, const routing_objective& objective,
+                                                  const enumerate_all_paths_params& params       = {},
+                                                  const layouts::obstructions&      obstructions = {})
 {
-    static_assert(std::derived_from<Lyt, fiction::layouts::layout_base>, "Lyt is not a coordinate layout");
-
-    return detail::enumerate_all_paths_impl<Path, Lyt>{layout, objective, params, obstructions}.run();
+    return detail::enumerate_all_paths_impl<Lyt>{layout, objective, params, obstructions}.run();
 }
 
 }  // namespace fiction::physical_design::path_finding

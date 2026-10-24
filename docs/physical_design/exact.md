@@ -1,6 +1,6 @@
 (exact)=
 
-# SMT-based Exact Physical Design
+# SMT-Based Exact Physical Design
 
 Utilizes the SMT solver [Z3](https://github.com/Z3Prover/z3) to generate minimal FCN gate-level layouts from logic
 network specifications under constraints. This approach finds exact results but has a large runtime overhead.
@@ -13,6 +13,9 @@ network specifications under constraints. This approach finds exact results but 
 
 **Header:** `fiction/physical_design/exact.hpp`
 
+```{doxygenenum} fiction::physical_design::technology_constraints
+```
+
 ```{doxygenstruct} fiction::physical_design::exact_physical_design_params
 :members:
 ```
@@ -21,7 +24,7 @@ network specifications under constraints. This approach finds exact results but 
 :members:
 ```
 
-```{doxygenfunction} fiction::physical_design::exact(const Ntk& ntk, const exact_physical_design_params& ps = {}, exact_physical_design_stats *pst = nullptr)
+```{doxygenfunction} fiction::physical_design::exact(const fiction::networks::named_technology_network& ntk, const exact_physical_design_params& ps = {}, exact_physical_design_stats *pst = nullptr)
 
 ```
 
@@ -35,6 +38,13 @@ network specifications under constraints. This approach finds exact results but 
 :sync: python
 
 ```{eval-rst}
+.. autoclass:: mnt.pyfiction.physical_design.technology_constraints
+   :members:
+
+.. autoclass:: mnt.pyfiction.physical_design.exact_stats
+   :members:
+   :undoc-members:
+
 .. autofunction:: mnt.pyfiction.physical_design.exact
 ```
 

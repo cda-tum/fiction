@@ -361,6 +361,8 @@ class critical_temperature_domain : public sidb::simulation::domain<parameter_po
 
 /**
  * A range of values for a dimension sweep. The range is defined by a minimum value, a maximum value and a step size.
+ * Generated coordinates must occupy distinct `parameter_point` identity cells, whose width is
+ * `utils::math::ERROR_MARGIN`. Domain algorithms throw `std::invalid_argument` if coordinates collide.
  */
 struct operational_domain_value_range
 {
@@ -370,14 +372,17 @@ struct operational_domain_value_range
     sweep_parameter dimension;
     /**
      * The minimum value of the dimension sweep.
+     * Defaults to 1.0.
      */
     double min{1.0};
     /**
      * The maximum value of the dimension sweep.
+     * Defaults to 10.0.
      */
     double max{10.0};
     /**
      * The step size of the dimension sweep.
+     * Defaults to 0.1.
      */
     double step{0.1};
 };
@@ -859,12 +864,8 @@ class operational_domain_impl
         return op_domain;
     }
     /**
-     * Performs contour tracing to determine the operational domain. The algorithm first performs a random sampling of
-     * up to the specified number of samples. It stops random sampling once it finds a single operational point, from
-     * which it moves straight outwards until it encounters the counter of the operational domain. From this point, it
-     * traces the contour until it reaches the initial contour point again. The operational domain will finally only
-     * contain up to `samples` random non-operational points as well as the contour of the found operational domain plus
-     * a one pixel wide border around it.
+     * Samples up to the specified number of random points, then traces the boundary of each sampled operational
+     * island. The domain contains the sampled points, operational boundaries, and their non-operational neighbors.
      *
      * @param samples Maximum number of random samples to be taken before contour tracing.
      * @return The (partial) operational domain of the layout.
@@ -945,6 +946,8 @@ class operational_domain_impl
             auto current_neighborhood = moore_neighborhood_2d(current_contour_point);
 
             auto next_point = contour_starting_point;
+            /** @brief Counts consecutive non-operational neighbors. */
+            std::size_t non_operational_neighbors{0};
 
             if (!current_neighborhood.empty())
             {
@@ -963,10 +966,15 @@ class operational_domain_impl
                     current_contour_point = next_point;
 
                     contour.insert(current_contour_point);
+                    non_operational_neighbors = 0;
                 }
                 else
                 {
                     backtrack_point = next_point;
+                    if (++non_operational_neighbors == current_neighborhood.size())
+                    {
+                        break;
+                    }
                 }
 
                 current_neighborhood = moore_neighborhood_2d(current_contour_point);
@@ -1336,16 +1344,27 @@ class operational_domain_impl
                     const auto energy_dist =
                         sidb::simulation::analysis::calculate_energy_distribution(sim_results.charge_distributions);
 
-                    const auto degeneracy_of_layout_energy =
-                        energy_dist.degeneracy(potential_landscape{sidb_layout, sim_params}.energy(cd));
+                    const auto layout_energy = potential_landscape{sidb_layout, sim_params}.energy(cd);
 
-                    if (!degeneracy_of_layout_energy.has_value())
+                    // The excited-state number counts lower energy levels, not charge configurations.
+                    uint64_t excited_state_number{};
+                    bool     layout_energy_found{};
+                    energy_dist.for_each(
+                        [&](const double energy, const auto&)
+                        {
+                            if (std::abs(energy - layout_energy) < utils::math::ERROR_MARGIN)
+                            {
+                                layout_energy_found = true;
+                            }
+                            else if (energy < layout_energy)
+                            {
+                                ++excited_state_number;
+                            }
+                        });
+                    if (layout_energy_found)
                     {
-                        return;
+                        suitable_params_domain.add_value(param_point, std::make_tuple(excited_state_number));
                     }
-
-                    const auto excited_state_number = degeneracy_of_layout_energy.value();
-                    suitable_params_domain.add_value(param_point, std::make_tuple(excited_state_number));
                 }
             });
 
@@ -1374,7 +1393,8 @@ class operational_domain_impl
     /**
      * Builds the indices and values of each validated sweep dimension.
      *
-     * @throws std::invalid_argument if a sweep range is invalid or exceeds the storage range.
+     * @throws std::invalid_argument if a sweep range is invalid, the grid point count exceeds the storage range, or
+     * coordinates occupy the same `parameter_point` identity cell.
      */
     void initialize_sweep()
     {
@@ -1385,28 +1405,44 @@ class operational_domain_impl
         {
             op_domain.add_dimension(params.sweep_dimensions.at(d).dimension);
 
-            // generate the step points for the dimension
-            indices.push_back(std::vector<std::size_t>(num_sweep_steps(params.sweep_dimensions.at(d)) + 1));
-            std::iota(indices.at(d).begin(), indices.at(d).end(), 0ul);
+            /** @brief Number of points retained in this sweep dimension. */
+            auto num_points = num_sweep_steps(params.sweep_dimensions.at(d)) + 1;
 
-            // if the value of the parameter is greater than params.max after num_x_steps() steps, this value is
-            // ignored in the operational domain calculation
+            // Discard the final step when its coordinate exceeds the upper bound.
             if ((params.sweep_dimensions.at(d).min +
-                 (static_cast<double>(indices.at(d).size() - 1) * params.sweep_dimensions.at(d).step)) -
+                 (static_cast<double>(num_points - 1) * params.sweep_dimensions.at(d).step)) -
                     params.sweep_dimensions.at(d).max >
                 fiction::utils::math::ERROR_MARGIN)
             {
-                indices.at(d).pop_back();
+                --num_points;
             }
 
+            // Colliding grids can request excessive storage, so validate before allocating their index grid.
             values.emplace_back();
 
-            // generate the values for the dimension
-            for (const auto i : indices.at(d))
+            /** @brief Index of the coordinate generated for this dimension. */
+            for (std::size_t i = 0; i < num_points; ++i)
             {
-                values.at(d).push_back(params.sweep_dimensions.at(d).min +
-                                       (static_cast<double>(i) * params.sweep_dimensions.at(d).step));
+                /** @brief Coordinate generated for this sweep step. */
+                const auto value =
+                    params.sweep_dimensions.at(d).min + (static_cast<double>(i) * params.sweep_dimensions.at(d).step);
+                if (!values.at(d).empty() &&
+                    parameter_point::quantize(values.at(d).back()) == parameter_point::quantize(value))
+                {
+                    throw std::invalid_argument(
+                        "Sweep coordinates must occupy distinct parameter-point identity cells");
+                }
+                values.at(d).push_back(value);
             }
+
+            if (num_parameter_points > std::numeric_limits<std::size_t>::max() / values.at(d).size())
+            {
+                throw std::invalid_argument("Sweep grid point count exceeds the storage range");
+            }
+            num_parameter_points *= values.at(d).size();
+
+            indices.emplace_back(num_points);
+            std::iota(indices.at(d).begin(), indices.at(d).end(), std::size_t{0});
         }
     }
     /**
@@ -1433,6 +1469,8 @@ class operational_domain_impl
      * The number of dimensions.
      */
     const std::size_t num_dimensions;
+    /** @brief Number of parameter combinations in the validated sweep grid. */
+    std::size_t num_parameter_points{1};
     /**
      * Dimension steps.
      */
@@ -1633,12 +1671,13 @@ class operational_domain_impl
     operational_status is_step_point_operational(const step_point& sp)
     {
         utils::check_deadline(params.operational_params.deadline);
-        if (const auto op_value = op_domain.contains(to_parameter_point(sp)); op_value.has_value())
+        /** @brief Parameter values used for cache lookup and simulation. */
+        const auto param_point = to_parameter_point(sp);
+        /** @brief Cached classification of the parameter point. */
+        if (const auto op_value = op_domain.contains(param_point); op_value.has_value())
         {
             return std::get<0>(*op_value);
         }
-
-        const auto param_point = to_parameter_point(sp);
 
         const auto operational = [this, &param_point](const std::optional<double>& ct_value = std::nullopt)
         {
@@ -1723,14 +1762,13 @@ class operational_domain_impl
     operational_status is_step_point_suitable(const charge_distribution& cd, const step_point& sp)
     {
         utils::check_deadline(params.operational_params.deadline);
-        // if the point has already been sampled, return the stored operational status
-        if (const auto op_value = op_domain.contains(to_parameter_point(sp)); op_value.has_value())
+        /** @brief Parameter values used for cache lookup and simulation. */
+        const auto param_point = to_parameter_point(sp);
+        /** @brief Cached classification of the parameter point. */
+        if (const auto op_value = op_domain.contains(param_point); op_value.has_value())
         {
             return std::get<0>(*op_value);
         }
-
-        // fetch the parameter values of all sweep dimensions
-        const auto param_point = to_parameter_point(sp);
 
         const auto operational = [this, &param_point]()
         {
@@ -1782,7 +1820,7 @@ class operational_domain_impl
     }
     /**
      * Generates unique random `step_points` in the stored parameter range. The number of generated points is at most
-     * equal to `samples`. Each call owns its random number generator.
+     * equal to `samples`. Sampling stops when every grid point has been collected. Each call owns its random generator.
      *
      * @param samples Maximum number of random `step_point`s to generate.
      * @return A vector of unique random `step_point`s in the stored parameter range of size at most equal to `samples`.
@@ -1804,7 +1842,8 @@ class operational_domain_impl
         // container for the random samples
         phmap::btree_set<step_point> step_point_samples{};
 
-        for (std::size_t i = 0; i < samples; ++i)
+        /** @brief Index of the current random draw. */
+        for (std::size_t i = 0; i < samples && step_point_samples.size() < num_parameter_points; ++i)
         {
             utils::check_deadline(params.operational_params.deadline);
             std::vector<std::size_t> dimension_samples{};
@@ -1816,7 +1855,7 @@ class operational_domain_impl
                 dimension_samples.push_back(distributions.at(d)(generator));
             }
 
-            step_point_samples.insert(step_point{dimension_samples});
+            step_point_samples.insert(step_point{std::move(dimension_samples)});
         }
 
         return std::vector<step_point>(step_point_samples.cbegin(), step_point_samples.cend());
@@ -1885,34 +1924,6 @@ class operational_domain_impl
         {
             thread.get();
         }
-    }
-    /**
-     * Performs random sampling to find any operational parameter combination. This function is useful if a single
-     * starting point is required within the domain to expand from. This function returns the step in all dimensions
-     * of the first operational point found. If no operational parameter combination can be found within the given
-     * number of samples, the function returns `std::nullopt`.
-     *
-     * This function adds any sampled points to the `op_domain` member variables.
-     *
-     * @param samples Maximum number of samples to take. Works as a timeout.
-     * @return The first operational step point, if any could be found, `std::nullopt` otherwise.
-     */
-    [[maybe_unused]] [[nodiscard]] std::optional<step_point>
-    find_operational_step_point_via_random_sampling(const std::size_t samples)
-    {
-        for (const auto& sample_step_point : generate_random_step_points(samples))
-        {
-            // determine the operational status
-            const auto operational_value = is_step_point_operational(sample_step_point);
-
-            // if the parameter combination is operational, return its step values in all dimensions
-            if (operational_value == operational_status::OPERATIONAL)
-            {
-                return sample_step_point;
-            }
-        }
-
-        return std::nullopt;
     }
     /**
      * Finds a boundary starting point for the contour tracing algorithm. This function starts at the given starting
@@ -2318,9 +2329,7 @@ class operational_domain_impl
                 }
             });
 
-        stats.num_total_parameter_points =
-            std::accumulate(values.cbegin(), values.cend(), static_cast<std::size_t>(1),
-                            [](std::size_t product, const auto& val) { return product * val.size(); });
+        stats.num_total_parameter_points = num_parameter_points;
     }
 };
 
@@ -2375,10 +2384,11 @@ operational_domain_grid_search(const layout& lyt, const std::vector<kitty::dynam
  * inputs of the truth table.
  *
  * This algorithm uses random sampling to find a part of the operational domain that might not be complete. It performs
- * a total of `samples` uniformly-distributed random samples within the parameter range. For each sample, the algorithm
- * performs one operational check on the layout, where each operational check consists of up to \f$2^n\f$ exact
- * ground state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact ground state simulation
- * has exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
+ * up to `samples` uniformly-distributed random samples, stopping when every grid point has been collected. For each
+ * sample, the algorithm performs one operational check on the layout, where each operational check consists of up to
+ * \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact ground
+ * state simulation has exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts
+ * with few inputs.
  *
  * @param lyt Layout to compute the operational domain for.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
@@ -2421,12 +2431,12 @@ operational_domain_random_sampling(const layout& lyt, const std::vector<kitty::d
  * operational "islands" in their entirety if the initial random sampling found at least one operational point within
  * them. Thereby, this algorithm works for disconnected operational domains.
  *
- * It performs `samples` uniformly-distributed random samples within the parameter range. From there, it performs
- * another number of samples equal to the number of points within the operational domain plus the first non-operational
- * point in each direction. For each sample, the algorithm performs one operational check on the layout, where each
- * operational check consists of up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of
- * inputs of the layout. Each exact ground state simulation has exponential complexity in of itself. Therefore, the
- * algorithm is only feasible for small layouts with few inputs.
+ * It performs up to `samples` uniformly-distributed random samples, stopping when every grid point has been collected.
+ * From there, it performs another number of samples equal to the number of points within the operational domain plus
+ * the first non-operational point in each direction. For each sample, the algorithm performs one operational check on
+ * the layout, where each operational check consists of up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is
+ * the number of inputs of the layout. Each exact ground state simulation has exponential complexity in of itself.
+ * Therefore, the algorithm is only feasible for small layouts with few inputs.
  *
  * This flavor of operational domain computation was proposed in \"Reducing the Complexity of Operational Domain
  * Computation in Silicon Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K. Walus, and R. Wille in
@@ -2476,13 +2486,13 @@ operational_domain_flood_fill(const layout& lyt, const std::vector<kitty::dynami
  * random sampling found at least one operational point within them. Thereby, this algorithm works for disconnected
  * operational domains.
  *
- * It performs `samples` uniformly-distributed random samples within the parameter range. For each thusly discovered
- * operational island, it performs another number of samples equal to the distance to an edge of each operational
- * area. Finally, it performs up to 8 samples for each contour point (however, the actual number is usually lower).
- * For each sample, the algorithm performs one operational check on the layout, where each operational check consists of
- * up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact
- * ground state simulation has exponential complexity in of itself. Therefore, the algorithm is only feasible for small
- * layouts with few inputs.
+ * It performs up to `samples` uniformly-distributed random samples, stopping when every grid point has been collected.
+ * For each discovered operational island, it performs another number of samples equal to the distance to an edge of
+ * each operational area. Finally, it performs up to 8 samples for each contour point (however, the actual number is
+ * usually lower). For each sample, the algorithm performs one operational check on the layout, where each operational
+ * check consists of up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of inputs of the
+ * layout. Each exact ground state simulation has exponential complexity in of itself. Therefore, the algorithm is only
+ * feasible for small layouts with few inputs.
  *
  * @param lyt Layout to compute the operational domain for.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
@@ -2564,10 +2574,11 @@ critical_temperature_domain_grid_search(const layout& lyt, const std::vector<kit
  * temperature for each specific parameter point.
  *
  * This algorithm uses random sampling to find a part of the operational domain that might not be complete. It performs
- * a total of `samples` uniformly-distributed random samples within the parameter range. For each sample, the algorithm
- * performs one operational check on the layout, where each operational check consists of up to \f$2^n\f$ exact
- * ground state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact ground state simulation
- * has exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
+ * up to `samples` uniformly-distributed random samples, stopping when every grid point has been collected. For each
+ * sample, the algorithm performs one operational check on the layout, where each operational check consists of up to
+ * \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact ground
+ * state simulation has exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts
+ * with few inputs.
  *
  * @param lyt Layout to compute the operational domain for.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
@@ -2610,12 +2621,12 @@ critical_temperature_domain_random_sampling(const layout& lyt, const std::vector
  * operational "islands" in their entirety if the initial random sampling found at least one operational point within
  * them. Thereby, this algorithm works for disconnected operational domains.
  *
- * It performs `samples` uniformly-distributed random samples within the parameter range. From there, it performs
- * another number of samples equal to the number of points within the operational domain plus the first non-operational
- * point in each direction. For each sample, the algorithm performs one operational check on the layout, where each
- * operational check consists of up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of
- * inputs of the layout. Each exact ground state simulation has exponential complexity in of itself. Therefore, the
- * algorithm is only feasible for small layouts with few inputs.
+ * It performs up to `samples` uniformly-distributed random samples, stopping when every grid point has been collected.
+ * From there, it performs another number of samples equal to the number of points within the operational domain plus
+ * the first non-operational point in each direction. For each sample, the algorithm performs one operational check on
+ * the layout, where each operational check consists of up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is
+ * the number of inputs of the layout. Each exact ground state simulation has exponential complexity in of itself.
+ * Therefore, the algorithm is only feasible for small layouts with few inputs.
  *
  * @param lyt Layout to compute the operational domain for.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
@@ -2661,13 +2672,13 @@ critical_temperature_domain_flood_fill(const layout& lyt, const std::vector<kitt
  * random sampling found at least one operational point within them. Thereby, this algorithm works for disconnected
  * operational domains. The critical temperature is computed for each operational point.
  *
- * It performs `samples` uniformly-distributed random samples within the parameter range. For each thusly discovered
- * operational island, it performs another number of samples equal to the distance to an edge of each operational
- * area. Finally, it performs up to 8 samples for each contour point (however, the actual number is usually lower).
- * For each sample, the algorithm performs one operational check on the layout, where each operational check consists of
- * up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact
- * ground state simulation has exponential complexity in of itself. Therefore, the algorithm is only feasible for small
- * layouts with few inputs.
+ * It performs up to `samples` uniformly-distributed random samples, stopping when every grid point has been collected.
+ * For each discovered operational island, it performs another number of samples equal to the distance to an edge of
+ * each operational area. Finally, it performs up to 8 samples for each contour point (however, the actual number is
+ * usually lower). For each sample, the algorithm performs one operational check on the layout, where each operational
+ * check consists of up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of inputs of the
+ * layout. Each exact ground state simulation has exponential complexity in of itself. Therefore, the algorithm is only
+ * feasible for small layouts with few inputs.
  *
  * @param lyt Layout to compute the operational domain for.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.

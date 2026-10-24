@@ -48,7 +48,7 @@ void register_sidb_simulation_engine_name_impl(nb::module_& m)
     m.def(
         "sidb_simulation_engine_name",
         [](const EngineType& engine) -> std::string_view { return fiction::sidb::simulation::engine_name(engine); },
-        nb::arg("engine"), DOC(fiction_sidb_simulation_engine_name));
+        nb::arg("engine"), parameter_doc(DOC(fiction_sidb_simulation_engine_name), {{"eng", "engine"}}).c_str());
 }
 
 }  // namespace detail
@@ -59,6 +59,7 @@ void register_sidb_simulation_engine_name_impl(nb::module_& m)
  */
 void register_engine(nb::module_& m)
 {
+    // Keep the GIL for engine-name lookups; releasing it costs more than the lookup.
     nb::enum_<fiction::sidb::simulation::engine>(m, "sidb_simulation_engine", DOC(fiction_sidb_simulation_engine))
         .value("EXGS", fiction::sidb::simulation::engine::EXGS, DOC(fiction_sidb_simulation_engine_EXGS))
         .value("QUICKSIM", fiction::sidb::simulation::engine::QUICKSIM, DOC(fiction_sidb_simulation_engine_QUICKSIM))

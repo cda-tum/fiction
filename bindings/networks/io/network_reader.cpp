@@ -14,9 +14,8 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "pyfiction/types.hpp"
-
 #include <fiction/networks/io/network_reader.hpp>
+#include <fiction/types.hpp>
 
 #include <fmt/format.h>
 
@@ -52,6 +51,7 @@ void register_network_reader(nb::module_& m, const char* signature)
     /** @brief Read the selected registered network representation. */
     const auto read = [](const std::string& filename, const std::string& format, const nb::handle network_type) -> Ntk
     {
+        // Keep the GIL for Python type dispatch, then release it for native parsing.
         if (!network_type.is(nb::type<Ntk>()))
         {
             throw nb::next_overload();
@@ -68,7 +68,7 @@ void register_network_reader(nb::module_& m, const char* signature)
 
         throw std::runtime_error(fmt::format("could not parse '{}': {}", filename, diagnostics.str()));
     };
-    if constexpr (std::is_same_v<Ntk, py_tec_network>)
+    if constexpr (std::is_same_v<Ntk, fiction::networks::named_technology_network>)
     {
         m.def("read_network", read, nb::arg("filename"), nb::arg("format") = "", nb::kw_only(),
               nb::arg("network_type") = nb::type<Ntk>(), nb::sig(signature),
@@ -92,17 +92,17 @@ void register_network_reader(nb::module_& m, const char* signature)
  */
 void register_network_reader(nb::module_& m)
 {
-    detail::register_network_reader<py_tec_network>(
+    detail::register_network_reader<fiction::networks::named_technology_network>(
         m, "def read_network(filename: str, format: str = \"\", *, network_type: "
            "type[mnt.pyfiction.networks.technology_network] = mnt.pyfiction.networks.technology_network) -> "
            "mnt.pyfiction.networks.technology_network");
-    detail::register_network_reader<py_aig_network>(
+    detail::register_network_reader<fiction::networks::named_aig_network>(
         m, "def read_network(filename: str, format: str = \"\", *, network_type: "
            "type[mnt.pyfiction.networks.aig_network]) -> mnt.pyfiction.networks.aig_network");
-    detail::register_network_reader<py_xag_network>(
+    detail::register_network_reader<fiction::networks::named_xag_network>(
         m, "def read_network(filename: str, format: str = \"\", *, network_type: "
            "type[mnt.pyfiction.networks.xag_network]) -> mnt.pyfiction.networks.xag_network");
-    detail::register_network_reader<py_mig_network>(
+    detail::register_network_reader<fiction::networks::named_mig_network>(
         m, "def read_network(filename: str, format: str = \"\", *, network_type: "
            "type[mnt.pyfiction.networks.mig_network]) -> mnt.pyfiction.networks.mig_network");
     m.def(

@@ -18,9 +18,8 @@
 // Pre-compiled header for the fiction test suite
 // Included automatically in every test translation unit when FICTION_ENABLE_PCH is on
 //
-// Only headers that are stable, expensive, and pulled in by a large share of the 118 test
-// translation units belong here. `fiction/types.hpp` alone instantiates every preset layout type and
-// is included by 62 of them.
+// Only headers that are stable, expensive, and common to the test translation units belong here. `fiction/types.hpp`
+// supplies the shared network presets.
 //
 
 #pragma once
@@ -36,10 +35,10 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 // ============================================================================
-// fiction: type presets and traits (the two heaviest shared headers)
+// fiction: shared layout and trait definitions
 // ============================================================================
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>

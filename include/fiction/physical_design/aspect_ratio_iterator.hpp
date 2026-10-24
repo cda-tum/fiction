@@ -199,10 +199,13 @@ class aspect_ratio_iterator
 // make `aspect_ratio_iterator` compatible with STL iterator categories
 namespace std
 {
+/** @brief Standard iterator traits for the specialized iterator. */
 template <typename AspectRatio>
 struct iterator_traits<fiction::physical_design::aspect_ratio_iterator<AspectRatio>>
 {
+    /** @brief Iterator traversal category. */
     using iterator_category = std::forward_iterator_tag;
-    using value_type        = AspectRatio;
+    /** @brief Value produced by dereferencing the iterator. */
+    using value_type = AspectRatio;
 };
 }  // namespace std

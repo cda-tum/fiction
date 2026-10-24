@@ -344,10 +344,13 @@ def docs(session: nox.Session) -> None:
         "build",
         "--group",
         "docs",
+        "--group",
+        "test",
         "--no-build-isolation-package",
         "mnt-pyfiction",
         env=env,
     )
+    session.run("python", "-m", "pytest", "test/docs", "-o", "addopts=")
     with session.chdir("docs"):
         serve = args.builder == "html" and session.interactive
         command = ["sphinx-autobuild" if serve else "sphinx-build"]
@@ -359,6 +362,7 @@ def docs(session: nox.Session) -> None:
         session.run(
             *command,
             "-T",
+            "-W",
             "-b",
             args.builder,
             ".",

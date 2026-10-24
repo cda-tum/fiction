@@ -40,6 +40,7 @@ namespace pyfiction
  */
 inline nb::module_ def_submodule(nb::module_& parent, const char* name, const char* doc)
 {
+    // Keep the GIL: module construction, imports, and sys.modules access use Python objects.
     auto submodule = parent.def_submodule(name, doc);
 
     nb::module_::import_("sys").attr("modules")[submodule.attr("__name__")] = submodule;

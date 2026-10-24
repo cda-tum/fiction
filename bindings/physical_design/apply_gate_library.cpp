@@ -16,9 +16,8 @@
  */
 
 #include "fiction/layouts/layout_base.hpp"
-#include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/fcn/cell_ports.hpp>
 #include <fiction/technology/fcn/gate_library.hpp>
@@ -102,7 +101,24 @@ void register_apply_gate_library(nb::module_& m, const std::string& lib_name)
 {
     m.def(fmt::format("apply_{}_library", lib_name).c_str(), &checked_apply_gate_library<GateLibrary, GateLyt>,
           nb::arg("layout"), nb::arg("on_progress").none() = nb::none(), nb::call_guard<nb::gil_scoped_release>(),
-          DOC(fiction_physical_design_apply_gate_library));
+          R"doc(Apply the selected gate library to produce a cell-level layout.
+The cell grid spans the gate-level layout. QCA and iNML tile-based clock zones
+follow the gate-level clocking. Supported synchronization elements apply each
+gate tile's delay to its entire clock zone, including cells added later. molQCA
+cell types carry the clock phases defined by the gate library. Input and output
+cells retain their object names. The Bestagon library produces an SiDB layout
+on the H-Si(100)-2x1 lattice.
+
+Args:
+    layout: Gate-level layout to map.
+    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+
+Returns:
+    The QCA, molQCA, iNML, or SiDB layout produced by the selected library.
+
+Raises:
+    ValueError: The library cannot implement a gate type or orientation; the message names its tile.
+)doc");
 }
 
 }  // namespace detail
@@ -113,11 +129,14 @@ void register_apply_gate_library(nb::module_& m, const std::string& lib_name)
  */
 void register_apply_gate_library(nb::module_& m)
 {
-    detail::register_apply_gate_library<fiction::qca::qca_one_library, py_cartesian_gate_layout>(m, "qca_one");
-    detail::register_apply_gate_library<fiction::mol_qca::sim7_mol_library, py_cartesian_gate_layout>(m, "sim7_mol");
-    detail::register_apply_gate_library<fiction::inml::topolinano_library, py_shifted_cartesian_gate_layout>(
-        m, "topolinano");
-    detail::register_apply_gate_library<fiction::sidb::bestagon_library, py_hexagonal_gate_layout>(m, "bestagon");
+    detail::register_apply_gate_library<fiction::qca::qca_one_library, fiction::layouts::cartesian_gate_layout>(
+        m, "qca_one");
+    detail::register_apply_gate_library<fiction::mol_qca::sim7_mol_library, fiction::layouts::cartesian_gate_layout>(
+        m, "sim7_mol");
+    detail::register_apply_gate_library<fiction::inml::topolinano_library,
+                                        fiction::layouts::shifted_cartesian_gate_layout>(m, "topolinano");
+    detail::register_apply_gate_library<fiction::sidb::bestagon_library, fiction::layouts::hexagonal_gate_layout>(
+        m, "bestagon");
 }
 
 }  // namespace pyfiction

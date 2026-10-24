@@ -32,7 +32,7 @@ namespace fiction::sidb::simulation::analysis
 /**
  * Determines the physical parameters under which a given charge distribution of a layout is physically valid:
  * every parameter point of the sweep dimensions in `params` is checked, and for each one where the charge
- * distribution is valid, its excited-state number (the number of valid configurations with lower energy under
+ * distribution is valid, its excited-state number (the number of distinct valid energy levels below its energy under
  * those parameters) is recorded.
  *
  * @param lyt The layout.
@@ -41,7 +41,8 @@ namespace fiction::sidb::simulation::analysis
  * @return The parameter points where `cd` is physically valid, each with its excited-state number; empty if `cd`
  * does not cover the layout's SiDBs in raster order.
  * @throws std::invalid_argument if a sweep range has non-finite or reversed bounds, a non-positive
- * or non-finite step, more points than the storage range permits, or the engine is not QuickExact, EXGS, or QuickSim.
+ * or non-finite step, more points than the storage range permits, colliding `logic::parameter_point` identities, or the
+ * engine is not QuickExact, EXGS, or QuickSim.
  */
 [[nodiscard]] inline domain<logic::parameter_point, uint64_t>
 physically_valid_parameters(const layout& lyt, const charge_distribution& cd,

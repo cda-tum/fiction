@@ -16,13 +16,16 @@
 
 #include "fiction/layouts/layout_base.hpp"
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
+#include "pyfiction/types.hpp"  // NOLINT(misc-include-cleaner): preserves coordinate tuple input signatures.
 
+#include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/obstructions.hpp>
+#include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/physical_design/path_finding/a_star.hpp>
 #include <fiction/physical_design/path_finding/cost.hpp>
 #include <fiction/physical_design/path_finding/distance.hpp>
-#include <fiction/physical_design/routing_utils.hpp>
 
 #include <optional>
 #include <vector>
@@ -70,12 +73,13 @@ void register_a_star_impl(nb::module_& m)
             params.crossings            = crossings;
 
             return static_cast<std::vector<fiction::layouts::layout_base::coordinate>>(
-                fiction::physical_design::path_finding::a_star<fiction::physical_design::layout_coordinate_path, Lyt>(
+                fiction::physical_design::path_finding::a_star<Lyt>(
                     lyt, {source, target}, fiction::physical_design::path_finding::manhattan_distance_functor(),
                     fiction::physical_design::path_finding::unit_cost_functor<>(), params, obstructions));
         },
         nb::arg("layout"), nb::arg("source"), nb::arg("target"), nb::kw_only(),
         nb::arg("crossings") = a_star_options{}.crossings, nb::arg("obstructions") = nb::none(),
+        nb::call_guard<nb::gil_scoped_release>(),
         R"doc(Find a shortest loop-free path from source to target in the layout.
 The keyword options select obstructions and crossing constraints.
 Raises ValueError when source or target lies outside the layout extent.
@@ -87,7 +91,7 @@ Args:
 
     m.def("a_star_distance", &fiction::physical_design::path_finding::a_star_distance<Lyt>, nb::arg("layout"),
           nb::arg("source"), nb::arg("target"), nb::arg("obstructions") = fiction::layouts::obstructions{},
-          DOC(fiction_physical_design_path_finding_a_star_distance));
+          nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_physical_design_path_finding_a_star_distance));
 }
 
 }  // namespace detail
@@ -99,12 +103,12 @@ Args:
 void register_a_star(nb::module_& m)
 {
 
-    detail::register_a_star_impl<py_cartesian_gate_layout>(m);
-    detail::register_a_star_impl<py_cartesian_layout>(m);
-    detail::register_a_star_impl<py_shifted_cartesian_gate_layout>(m);
-    detail::register_a_star_impl<py_shifted_cartesian_layout>(m);
-    detail::register_a_star_impl<py_hexagonal_gate_layout>(m);
-    detail::register_a_star_impl<py_hexagonal_layout>(m);
+    detail::register_a_star_impl<fiction::layouts::cartesian_gate_layout>(m);
+    detail::register_a_star_impl<fiction::layouts::cartesian_layout>(m);
+    detail::register_a_star_impl<fiction::layouts::shifted_cartesian_gate_layout>(m);
+    detail::register_a_star_impl<fiction::layouts::shifted_cartesian_layout>(m);
+    detail::register_a_star_impl<fiction::layouts::hexagonal_gate_layout>(m);
+    detail::register_a_star_impl<fiction::layouts::hexagonal_layout>(m);
 }
 
 }  // namespace pyfiction

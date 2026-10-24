@@ -18,6 +18,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"  // NOLINT(misc-include-cleaner): defines the nanobind coordinate type casters
 
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/post_layout_optimization.hpp>
 
 #include <sstream>
@@ -49,6 +50,7 @@ using post_layout_optimization_options = fiction::physical_design::post_layout_o
 void register_post_layout_optimization(nb::module_& m)
 {
 
+    // Keep the GIL for statistics construction, field access, and bounded report formatting.
     nb::class_<fiction::physical_design::post_layout_optimization_stats>(
         m, "post_layout_optimization_stats", DOC(fiction_physical_design_post_layout_optimization_stats))
         .def(nb::init<>(), "Default constructor.")
@@ -84,7 +86,7 @@ void register_post_layout_optimization(nb::module_& m)
 
     m.def(
         "post_layout_optimization",
-        [](py_cartesian_gate_layout&                                               layout,
+        [](fiction::layouts::cartesian_gate_layout&                                layout,
            const decltype(post_layout_optimization_options{}.max_gate_relocations) max_gate_relocations,
            const decltype(post_layout_optimization_options{}.optimize_pos_only)    optimize_pos_only,
            const decltype(post_layout_optimization_options{}.planar_optimization)  planar_optimization,

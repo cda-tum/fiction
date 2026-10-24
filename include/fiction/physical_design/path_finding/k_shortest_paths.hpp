@@ -29,7 +29,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
-#include <stdexcept>
+#include <utility>
 
 namespace fiction::physical_design::path_finding
 {
@@ -48,7 +48,11 @@ struct yen_k_shortest_paths_params
 namespace detail
 {
 
-template <typename Path, typename Lyt>
+/**
+ * @brief Implements Yen's path enumeration.
+ * @tparam Lyt Layout type.
+ */
+template <typename Lyt>
 class yen_k_shortest_paths_impl
 {
   public:
@@ -70,9 +74,8 @@ class yen_k_shortest_paths_impl
             params{p}
     {
         // start by determining the shortest path between source and target
-        k_shortest_paths.push_back(a_star<Path>(layout, objective, manhattan_distance_functor(),
-                                                unit_cost_functor<uint8_t>(), params.astar_params,
-                                                search_obstructions));
+        k_shortest_paths.push_back(a_star(layout, objective, manhattan_distance_functor(), unit_cost_functor<uint8_t>(),
+                                          params.astar_params, search_obstructions));
     }
 
     /**
@@ -80,13 +83,8 @@ class yen_k_shortest_paths_impl
      *
      * @return A collection of up to k shortest paths in `layout` from `objective.source` to `objective.target`.
      */
-    [[nodiscard]] path_collection<Path> run()
+    [[nodiscard]] path_collection run()
     {
-        if (!layout.contains_coordinate(objective.source) || !layout.contains_coordinate(objective.target))
-        {
-            throw std::invalid_argument("Routing endpoints must lie within the layout extent");
-        }
-
         // if there was no path to begin with, abort
         if (k_shortest_paths.back().empty())
         {
@@ -104,8 +102,8 @@ class yen_k_shortest_paths_impl
                 // create a spur, which is the ith coordinate of the latest path
                 const auto spur = latest_path[i];
 
-                // the root path is the path from the source to the spur coordinate
-                Path root_path{latest_path.cbegin(), latest_path.cbegin() + i};
+                /** @brief Prefix before the current spur coordinate. */
+                layout_coordinate_path root_path{latest_path.cbegin(), latest_path.cbegin() + i};
 
                 // for all previous paths
                 for (const auto& p : k_shortest_paths)
@@ -121,7 +119,6 @@ class yen_k_shortest_paths_impl
                     }
                 }
 
-                // the root path excludes the spur coordinate
                 for (const auto& root : root_path)
                 {
                     search_obstructions.obstruct_coordinate(root);
@@ -129,8 +126,8 @@ class yen_k_shortest_paths_impl
 
                 // find an alternative path from the spur coordinate to the target and check that it is not empty
                 if (const auto spur_path =
-                        a_star<Path>(layout, {spur, objective.target}, manhattan_distance_functor(),
-                                     unit_cost_functor<uint8_t>(), params.astar_params, search_obstructions);
+                        a_star(layout, {spur, objective.target}, manhattan_distance_functor(),
+                               unit_cost_functor<uint8_t>(), params.astar_params, search_obstructions);
                     !spur_path.empty())
                 {
                     // the final path will be a concatenation of the root path and the spur path
@@ -141,7 +138,7 @@ class yen_k_shortest_paths_impl
                     final_path.insert(final_path.end(), std::make_move_iterator(spur_path.begin()),
                                       std::make_move_iterator(spur_path.end()));
 
-                    shortest_path_candidates.add(final_path);
+                    shortest_path_candidates.insert(std::move(final_path));
                 }
 
                 // clear obstructions again (prepare for the next potential path)
@@ -160,12 +157,14 @@ class yen_k_shortest_paths_impl
                                              { return path_cost(p1) < path_cost(p2); });
                 lowest_cost_path_it != shortest_path_candidates.cend())
             {
-                k_shortest_paths.add(*lowest_cost_path_it);
-                shortest_path_candidates.erase(lowest_cost_path_it);
+                /** @brief Candidate detached from the set for transfer to the result. */
+                auto selected = shortest_path_candidates.extract(lowest_cost_path_it);
+                k_shortest_paths.push_back(std::move(selected.value()));
             }
         }
 
-        return k_shortest_paths;
+        // The public search consumes this implementation's result.
+        return std::move(k_shortest_paths);
     }
 
   private:
@@ -192,11 +191,11 @@ class yen_k_shortest_paths_impl
     /**
      * The list of k shortest paths that is created during the algorithm.
      */
-    path_collection<Path> k_shortest_paths{};
+    path_collection k_shortest_paths{};
     /**
      * A set of potential shortest paths.
      */
-    path_set<Path> shortest_path_candidates{};
+    path_set shortest_path_candidates{};
     /**
      * Computes the cost of a path. This function can be adjusted to fetch paths of differing costs.
      *
@@ -205,7 +204,7 @@ class yen_k_shortest_paths_impl
      * @param p Path whose costs are to be calculated.
      * @return Costs of path p.
      */
-    static std::size_t path_cost(const Path& p)
+    static std::size_t path_cost(const layout_coordinate_path& p)
     {
         return p.size();
     }
@@ -228,8 +227,10 @@ class yen_k_shortest_paths_impl
  *
  * This implementation uses the A* algorithm with the Manhattan distance function internally.
  *
+ * If k is zero, this function returns an empty collection without checking endpoint bounds.
+ *
  * This function automatically detects whether the given layout implements a clocking interface (see
- * `gate_level_layout`) and respects the underlying information flow imposed by `layout`'s clocking scheme. This
+ * `gate_layout`) and respects the underlying information flow imposed by `layout`'s clocking scheme. This
  * algorithm does neither generate duplicate nor looping paths, even in a cyclic clocking scheme. That is, along each
  * path, each coordinate can occur at maximum once.
  *
@@ -246,16 +247,13 @@ class yen_k_shortest_paths_impl
  * In certain cases it might be desirable to enumerate regular coordinate paths even if the layout implements a clocking
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
  * @code{.cpp}
- * using clk_lyt = gate_level_layout<cartesian_layout>;
- * using path = layout_coordinate_path;
- * clk_lyt layout = ...;
- * auto k_paths = yen_k_shortest_paths<path>(static_cast<cartesian_layout>(layout), {source, target}, k);
+ * fiction::layouts::cartesian_gate_layout layout = ...;
+ * auto k_paths = yen_k_shortest_paths(static_cast<cartesian_layout>(layout), {source, target}, k);
  * @endcode
  *
- * The algorithm was originally described in \"An algorithm for finding shortest routes from all source nodes to a given
- * destination in general networks\" by Jin Y. Yen in Quarterly of Applied Mathematics, 1970.
+ * The algorithm is described in \"Finding the K Shortest Loopless Paths in a Network\" by Jin Y. Yen in
+ * Management Science, 1971.
  *
- * @tparam Path Type of the returned individual paths.
  * @tparam Lyt Type of the layout to perform path finding on.
  * @param layout The layout in which the \f$k\f$ shortest paths are to be found.
  * @param objective Source-target coordinate pair.
@@ -264,20 +262,20 @@ class yen_k_shortest_paths_impl
  * @param obstructions Additional constraints; caller and layout obstructions remain unchanged.
  * @return A collection of up to \f$k\f$ shortest loop-less paths in `layout` from `objective.source` to
  * `objective.target`.
+ * @throws std::invalid_argument If k is nonzero and either endpoint lies outside the layout extent.
  */
-template <typename Path, typename Lyt>
-[[nodiscard]] path_collection<Path>
-yen_k_shortest_paths(const Lyt& layout, const routing_objective& objective, const uint32_t k,
-                     const yen_k_shortest_paths_params& params = {}, const layouts::obstructions& obstructions = {})
+template <typename Lyt>
+    requires std::derived_from<Lyt, layouts::layout_base>
+[[nodiscard]] path_collection yen_k_shortest_paths(const Lyt& layout, const routing_objective& objective,
+                                                   const uint32_t k, const yen_k_shortest_paths_params& params = {},
+                                                   const layouts::obstructions& obstructions = {})
 {
-    static_assert(std::derived_from<Lyt, fiction::layouts::layout_base>, "Lyt is not a coordinate layout");
-
     if (k == 0)
     {
         return {};
     }
 
-    return detail::yen_k_shortest_paths_impl<Path, Lyt>{layout, objective, k, params, obstructions}.run();
+    return detail::yen_k_shortest_paths_impl<Lyt>{layout, objective, k, params, obstructions}.run();
 }
 
 }  // namespace fiction::physical_design::path_finding

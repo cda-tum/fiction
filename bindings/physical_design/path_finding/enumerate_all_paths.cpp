@@ -15,11 +15,14 @@
  */
 
 #include "fiction/layouts/layout_base.hpp"
-#include "pyfiction/types.hpp"
+#include "pyfiction/types.hpp"  // NOLINT(misc-include-cleaner): preserves coordinate tuple input signatures.
 
+#include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/obstructions.hpp>
+#include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/physical_design/path_finding/enumerate_all_paths.hpp>
-#include <fiction/physical_design/routing_utils.hpp>
 
 #include <optional>
 #include <vector>
@@ -66,8 +69,8 @@ void register_enumerate_all_paths_impl(nb::module_& m)
             const auto                  obstructions = supplied_obstructions.value_or(fiction::layouts::obstructions{});
             params.crossings                         = crossings;
 
-            const auto all_paths = fiction::physical_design::path_finding::enumerate_all_paths<
-                fiction::physical_design::layout_coordinate_path, Lyt>(lyt, {source, target}, params, obstructions);
+            const auto all_paths = fiction::physical_design::path_finding::enumerate_all_paths<Lyt>(
+                lyt, {source, target}, params, obstructions);
 
             std::vector<std::vector<fiction::layouts::layout_base::coordinate>> paths{};
             paths.reserve(all_paths.size());
@@ -81,8 +84,10 @@ void register_enumerate_all_paths_impl(nb::module_& m)
         },
         nb::arg("layout"), nb::arg("source"), nb::arg("target"), nb::kw_only(),
         nb::arg("crossings") = enumerate_all_paths_options{}.crossings, nb::arg("obstructions") = nb::none(),
+        nb::call_guard<nb::gil_scoped_release>(),
         R"doc(Enumerate all loop-free paths from source to target in the layout.
 The keyword options select obstructions and crossing constraints.
+Raises ValueError when source or target lies outside the layout extent.
 
 Args:
     crossings: Allow wires to cross on separate layers.
@@ -101,12 +106,12 @@ void register_enumerate_all_paths(nb::module_& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::register_enumerate_all_paths_impl<py_cartesian_gate_layout>(m);
-    detail::register_enumerate_all_paths_impl<py_cartesian_layout>(m);
-    detail::register_enumerate_all_paths_impl<py_shifted_cartesian_gate_layout>(m);
-    detail::register_enumerate_all_paths_impl<py_shifted_cartesian_layout>(m);
-    detail::register_enumerate_all_paths_impl<py_hexagonal_gate_layout>(m);
-    detail::register_enumerate_all_paths_impl<py_hexagonal_layout>(m);
+    detail::register_enumerate_all_paths_impl<fiction::layouts::cartesian_gate_layout>(m);
+    detail::register_enumerate_all_paths_impl<fiction::layouts::cartesian_layout>(m);
+    detail::register_enumerate_all_paths_impl<fiction::layouts::shifted_cartesian_gate_layout>(m);
+    detail::register_enumerate_all_paths_impl<fiction::layouts::shifted_cartesian_layout>(m);
+    detail::register_enumerate_all_paths_impl<fiction::layouts::hexagonal_gate_layout>(m);
+    detail::register_enumerate_all_paths_impl<fiction::layouts::hexagonal_layout>(m);
 }
 
 }  // namespace pyfiction

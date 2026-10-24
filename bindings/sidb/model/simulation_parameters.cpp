@@ -41,6 +41,7 @@ namespace pyfiction
  */
 void register_simulation_parameters(nb::module_& m)
 {
+    // Keep the GIL for scalar physical parameters; releasing it costs more than these operations.
     nb::class_<fiction::sidb::model::simulation_parameters>(m, "sidb_simulation_parameters",
                                                             DOC(fiction_sidb_model_simulation_parameters))
         .def(

@@ -19,9 +19,8 @@
 #pragma once
 
 #include "fiction/layouts/arrangement.hpp"
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
-#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
 #include "fiction/technology/inml/layout.hpp"
@@ -30,7 +29,6 @@
 #include <phmap.h>
 
 #include <algorithm>
-#include <concepts>
 #include <cstdint>
 #include <optional>
 #include <stdexcept>
@@ -53,7 +51,6 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
      * information from the stored grid into account to choose the correct gate representation for that tile. May it
      * be a gate or wires. Rotation and special marks like input and output, const cells etc. are computed additionally.
      *
-     * @tparam GateLyt Shifted Cartesian gate-level layout type.
      * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a ToPoliNano gate.
      * @return ToPoliNano gate representation of `t` including I/Os, rotation, etc.
@@ -61,18 +58,12 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
      * @throws fcn::unsupported_gate_type_exception If a terminal also acts as a fanout. Connect the terminal to a
      * separate fanout wire instead.
      */
-    template <typename GateLyt>
-    [[nodiscard]] static gate set_up_gate(const GateLyt& lyt, const fiction::layouts::layout_base::coordinate& t)
+    [[nodiscard]] static gate set_up_gate(const layouts::shifted_cartesian_gate_layout&    lyt,
+                                          const fiction::layouts::layout_base::coordinate& t)
     {
-        static_assert(
-            requires { requires std::same_as<typename GateLyt::object_id, fiction::layouts::layout_object_id>; },
-            "GateLyt must be a gate-level layout");
-        static_assert(std::derived_from<GateLyt, fiction::layouts::shifted_cartesian_layout>,
-                      "GateLyt must be a shifted Cartesian layout");
-
         if (layouts::is_row_arrangement(lyt.get_arrangement()))
         {
-            throw std::invalid_argument("GateLyt must be a column-shifted Cartesian layout");
+            throw std::invalid_argument("A column-shifted Cartesian layout is required");
         }
 
         // crossing magnets are handled only in the ground layer
@@ -339,34 +330,20 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
     /**
      * Checks whether the given node has an AND, OR, or MAJ fanin node.
      *
-     * @tparam Lyt Gate-level layout type.
      * @param lyt The layout to check.
      * @param n Node whose fanins are to be considered.
      * @return `true` iff `n` has an AND, OR, or MAJ fanin node.
+     * @throws std::invalid_argument If `n` does not identify a live object in `lyt`.
      */
-    template <typename Lyt>
-    [[nodiscard]] static bool has_and_or_maj_fanin(const Lyt& lyt, const typename Lyt::object_id n) noexcept
+    [[nodiscard]] static bool has_and_or_maj_fanin(const layouts::shifted_cartesian_gate_layout&           lyt,
+                                                   const layouts::shifted_cartesian_gate_layout::object_id n)
     {
         auto pre_and_or_maj = false;
 
         lyt.foreach_fanin(n,
                           [&lyt, &pre_and_or_maj](const auto& fi)
                           {
-                              const auto fin = fi;
-
-                              if (lyt.is_and(fin))
-                              {
-                                  pre_and_or_maj = true;
-                                  return false;  // exit function
-                              }
-
-                              if (lyt.is_or(fin))
-                              {
-                                  pre_and_or_maj = true;
-                                  return false;  // exit function
-                              }
-
-                              if (lyt.is_maj(fin))
+                              if (lyt.is_and(fi) || lyt.is_or(fi) || lyt.is_maj(fi))
                               {
                                   pre_and_or_maj = true;
                                   return false;  // exit function
@@ -380,13 +357,13 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
     /**
      * Checks whether the given node has an fanout node as fanout.
      *
-     * @tparam Lyt Gate-level layout type.
      * @param lyt The layout to check.
      * @param n Node whose fanouts are to be considered.
      * @return `true` iff `n` has a fanout node as fanout.
+     * @throws std::invalid_argument If `n` does not identify a live object in `lyt`.
      */
-    template <typename Lyt>
-    [[nodiscard]] static bool has_fanout_fanout(const Lyt& lyt, const typename Lyt::object_id n) noexcept
+    [[nodiscard]] static bool has_fanout_fanout(const layouts::shifted_cartesian_gate_layout&           lyt,
+                                                const layouts::shifted_cartesian_gate_layout::object_id n)
     {
         auto fanout_fanout = false;
 
@@ -407,14 +384,13 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
 
     /**
      * Routes the physical connector ports of an occupied tile.
-     * @tparam Lyt Gate-level layout type.
      * @param lyt Layout.
      * @param t Occupied tile.
      * @return Physical connector ports.
      */
-    template <typename Lyt>
     [[nodiscard]] static fcn::port_list<fcn::port_position>
-    determine_port_routing(const Lyt& lyt, const fiction::layouts::layout_base::coordinate& t)
+    determine_port_routing(const layouts::shifted_cartesian_gate_layout&    lyt,
+                           const fiction::layouts::layout_base::coordinate& t)
     {
         fcn::port_list<fcn::port_position> p{};
 

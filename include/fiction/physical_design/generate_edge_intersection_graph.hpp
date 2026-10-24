@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/physical_design/path_finding/enumerate_all_paths.hpp"
 #include "fiction/physical_design/path_finding/k_shortest_paths.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
@@ -25,10 +25,11 @@
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
-#include <concepts>
 #include <cstddef>
 #include <cstdint>
+#include <iterator>
 #include <optional>
+#include <utility>
 #include <vector>
 
 #include <combinations.h>
@@ -62,6 +63,7 @@ struct generate_edge_intersection_graph_params
     std::optional<uint32_t> path_limit = std::nullopt;
 };
 
+/** @brief Statistics for edge intersection graph generation. */
 struct generate_edge_intersection_graph_stats
 {
     /**
@@ -82,10 +84,10 @@ struct generate_edge_intersection_graph_stats
      * @brief Routing objective index for each vertex ID.
      */
     std::vector<std::size_t> objective_indices{};
-    /**
-     * Stores the size of the generated edge intersection graph.
-     */
-    std::size_t num_vertices, num_edges;
+    /** @brief Number of vertices in the intersection graph. */
+    std::size_t num_vertices;
+    /** @brief Number of edges in the intersection graph. */
+    std::size_t num_edges;
 };
 
 namespace detail
@@ -115,57 +117,67 @@ class generate_edge_intersection_graph_impl
             pst{st}
     {}
 
-    /** @brief Generate the graph. @return Candidate paths and their intersections. */
+    /**
+     * @brief Builds and transfers the completed intersection graph.
+     * @return Graph of candidate paths and their intersections.
+     */
     edge_intersection_graph run()
     {
         // measure runtime
         mockturtle::stopwatch stop{pst.time_total};
 
-        std::ranges::for_each(objectives,
-                              [this](const auto& obj)
-                              {
-                                  path_collection<clk_path> obj_paths{};
+        std::ranges::for_each(
+            objectives,
+            [this](const auto& obj)
+            {
+                /** @brief Candidate coordinate paths for the current routing objective. */
+                path_collection paths{};
 
-                                  if (!ps.path_limit.has_value())
-                                  {
-                                      // enumerate all paths for the current objective
-                                      obj_paths = physical_design::path_finding::enumerate_all_paths<clk_path>(
-                                          layout, {obj.source, obj.target}, {ps.crossings});
-                                  }
-                                  else
-                                  {
-                                      // enumerate k paths for the current objective
-                                      obj_paths = physical_design::path_finding::yen_k_shortest_paths<clk_path>(
-                                          layout, {obj.source, obj.target}, *ps.path_limit, {ps.crossings});
-                                  }
+                if (!ps.path_limit.has_value())
+                {
+                    // enumerate all paths for the current objective
+                    paths = physical_design::path_finding::enumerate_all_paths(layout, {obj.source, obj.target},
+                                                                               {ps.crossings});
+                }
+                else
+                {
+                    // enumerate k paths for the current objective
+                    paths = physical_design::path_finding::yen_k_shortest_paths(layout, {obj.source, obj.target},
+                                                                                *ps.path_limit, {ps.crossings});
+                }
 
-                                  // assign a unique label to each path and create a corresponding node in the graph
-                                  initiate_objective_nodes(obj_paths,
-                                                           static_cast<std::size_t>(&obj - objectives.data()));
+                /** @brief Candidate paths with storage for graph vertex labels. */
+                std::vector<clk_path> obj_paths{std::make_move_iterator(paths.begin()),
+                                                std::make_move_iterator(paths.end())};
 
-                                  // if there are no paths, the objective could not be fulfilled
-                                  if (obj_paths.empty())
-                                  {
-                                      pst.number_of_unroutable_objectives++;
-                                  }
-                                  else if (obj_paths.size() > 1)
-                                  {
-                                      // since all paths of the same objective have intersections by definition, create
-                                      // edges between all of them by iterating over all possible combinations of size 2
-                                      connect_clique(obj_paths);
-                                  }
-                                  // for each previously stored path, create an edge if there is an intersection
-                                  create_intersection_edges(obj_paths);
+                // assign a unique label to each path and create a corresponding node in the graph
+                initiate_objective_nodes(obj_paths, static_cast<std::size_t>(&obj - objectives.data()));
 
-                                  // add the collection to all paths gathered thus far
-                                  all_paths.insert(all_paths.end(), obj_paths.cbegin(), obj_paths.cend());
-                              });
+                // if there are no paths, the objective could not be fulfilled
+                if (obj_paths.empty())
+                {
+                    pst.number_of_unroutable_objectives++;
+                }
+                else if (obj_paths.size() > 1)
+                {
+                    // since all paths of the same objective have intersections by definition, create
+                    // edges between all of them by iterating over all possible combinations of size 2
+                    connect_clique(obj_paths);
+                }
+                // for each previously stored path, create an edge if there is an intersection
+                create_intersection_edges(obj_paths);
+
+                // add the collection to all paths gathered thus far
+                all_paths.insert(all_paths.end(), std::make_move_iterator(obj_paths.begin()),
+                                 std::make_move_iterator(obj_paths.end()));
+            });
 
         // store size of the generated graph
         pst.num_vertices = graph.size_vertices();
         pst.num_edges    = graph.size_edges();
 
-        return graph;
+        // The one-shot implementation transfers its completed graph.
+        return std::move(graph);
     }
 
   private:
@@ -200,12 +212,10 @@ class generate_edge_intersection_graph_impl
         /**
          * @brief Check whether this path shares an interior coordinate of the other path.
          *
-         * @tparam Path Type of other path.
          * @param other The other path.
          * @return `true` iff this path contains an interior coordinate of the other path.
          */
-        template <typename Path>
-        bool has_intersection_with(const Path& other) const noexcept
+        [[nodiscard]] bool has_intersection_with(const layout_coordinate_path& other) const noexcept
         {
             if (other.size() <= 2)
             {
@@ -218,13 +228,11 @@ class generate_edge_intersection_graph_impl
         /**
          * @brief Check for a shared segment, allowing single-tile intersections as crossings.
          *
-         * @tparam Path Type of other path.
          * @param other The other path.
          * @return `true` iff this path and the given one are overlapping, i.e., share at least one coordinate segment
          * of size 2.
          */
-        template <typename Path>
-        bool has_overlap_with(const Path& other) const noexcept
+        [[nodiscard]] bool has_overlap_with(const layout_coordinate_path& other) const noexcept
         {
             // Include endpoints when checking for a shared segment.
             return fiction::utils::stl::find_first_two_of(std::cbegin(other), std::cend(other), std::cbegin(*this),
@@ -235,12 +243,12 @@ class generate_edge_intersection_graph_impl
          */
         std::size_t label{};
 
-      protected:
-        using base = layout_coordinate_path;
-
-      public:
-        // make all inherited constructors available
-        using base::base;
+        /**
+         * @brief Takes ownership of a coordinate path.
+         * @param path Path to label.
+         */
+        explicit labeled_layout_coordinate_path(layout_coordinate_path path) : layout_coordinate_path{std::move(path)}
+        {}
     };
     /**
      * Alias for the path type.
@@ -249,19 +257,19 @@ class generate_edge_intersection_graph_impl
     /**
      * Stores labeled paths to find intersections with each new objective. The graph stores plain paths.
      */
-    path_collection<clk_path> all_paths{};
+    std::vector<clk_path> all_paths{};
     /**
      * Given a collection of paths belonging to the same objective, this function assigns them unique labels and
      * generates corresponding nodes in the edge intersection graph.
      *
-     * Since each path of the same objective objective belongs to a clique in the final graph, this function
+     * Since each path of the same objective belongs to a clique in the final graph, this function
      * additionally stores their node IDs in the statistics.
      *
      * @param objective_paths Collection of paths belonging to the same objective.
      * @param objective_index Index of the routing objective.
      * @throws std::bad_alloc If storage allocation fails.
      */
-    void initiate_objective_nodes(path_collection<clk_path>& objective_paths, const std::size_t objective_index)
+    void initiate_objective_nodes(std::vector<clk_path>& objective_paths, const std::size_t objective_index)
     {
         std::vector<std::size_t> clique{};
 
@@ -276,7 +284,7 @@ class generate_edge_intersection_graph_impl
 
         if (!clique.empty())
         {
-            pst.cliques.push_back(clique);
+            pst.cliques.push_back(std::move(clique));
         }
     }
     /**
@@ -286,7 +294,7 @@ class generate_edge_intersection_graph_impl
      * @param objective_paths Collection of paths belonging to the same objective.
      * @throws std::bad_alloc If storage allocation fails.
      */
-    void connect_clique(path_collection<clk_path>& objective_paths)
+    void connect_clique(std::vector<clk_path>& objective_paths)
     {
         combinations::for_each_combination(objective_paths.begin(), objective_paths.begin() + 2, objective_paths.end(),
                                            [this](const auto begin, [[maybe_unused]] const auto end)
@@ -304,7 +312,7 @@ class generate_edge_intersection_graph_impl
      * @param objective_paths Collection of paths belonging to the same objective.
      * @throws std::bad_alloc If storage allocation fails.
      */
-    void create_intersection_edges(path_collection<clk_path>& objective_paths)
+    void create_intersection_edges(std::vector<clk_path>& objective_paths)
     {
         std::ranges::for_each(objective_paths,
                               [this](const auto& obj_p)
@@ -331,29 +339,30 @@ class generate_edge_intersection_graph_impl
  * intersections of these paths. An intersection is understood as the non-disjunction of paths, i.e., they share at
  * least one coordinate. To generate the paths for the routing objectives, all possible paths from source to target in
  * the layout are enumerated while taking obstructions into consideration. The given layout must be clocked.
+ * An explicit zero path limit creates no candidate paths and counts each objective as unroutable without checking
+ * endpoint bounds.
  *
- * @tparam Lyt Type of the clocked layout.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param lyt The layout to generate the edge intersection graph for.
  * @param objectives Source coordinates and indexed destination inputs.
  * @param ps Parameters.
  * @param pst Statistics.
  * @return An edge intersection graph of paths satisfying the given routing objectives in `lyt`.
+ * @throws std::invalid_argument If an objective endpoint lies outside the layout extent when ps.path_limit is absent
+ * or nonzero.
  */
-template <typename Lyt>
-edge_intersection_graph generate_edge_intersection_graph(const Lyt&                              lyt,
+template <typename Geometry>
+edge_intersection_graph generate_edge_intersection_graph(const layouts::gate_layout<Geometry>&   lyt,
                                                          const std::vector<routing_objective>&   objectives,
                                                          generate_edge_intersection_graph_params ps  = {},
                                                          generate_edge_intersection_graph_stats* pst = nullptr)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a clocked layout");
-
     generate_edge_intersection_graph_stats st{};
 
-    detail::generate_edge_intersection_graph_impl<Lyt> p{lyt, objectives, ps, st};
+    detail::generate_edge_intersection_graph_impl<layouts::gate_layout<Geometry>> p{lyt, objectives, ps, st};
 
-    const auto result = p.run();
+    /** @brief Completed intersection graph retained while statistics are copied. */
+    auto result = p.run();
 
     if (pst)
     {

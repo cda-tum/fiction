@@ -29,6 +29,7 @@
 #include <map>
 #include <optional>
 #include <set>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -77,7 +78,7 @@ class energy_distribution
      * Returns the nth state (energy + degeneracy) in the energy distribution.
      *
      * @param state_index The index of the state to be retrieved.
-     * @return Energy state. If the index is out of range, `std::nullopt` is returned instead.
+     * @return Energy state, or `std::nullopt` (`None` in Python) if the index is out of range.
      */
     [[nodiscard]] std::optional<energy_state> get_nth_state(const uint64_t state_index) const noexcept
     {
@@ -95,21 +96,17 @@ class energy_distribution
     /**
      * Returns the degeneracy value (number of states) with the given energy value.
      *
-     * @param energy The energy value for which the excited state number is to be determined.
-     * @return The degeneracy of the given energy. If the energy value is not found, `std::nullopt` is
-     * returned instead.
+     * @param energy The energy value whose degeneracy is requested.
+     * @return The degeneracy of the given energy, or `std::nullopt` (`None` in Python) if the energy is not found.
      */
     [[nodiscard]] std::optional<uint64_t> degeneracy(const double energy) const noexcept
     {
-        uint64_t degeneracy = 0;
-
         for (const auto& [key, value] : distribution)
         {
             if (std::abs(key - energy) < fiction::utils::math::ERROR_MARGIN)
             {
-                return degeneracy;
+                return value;
             }
-            ++degeneracy;
         }
 
         return std::nullopt;
@@ -145,18 +142,28 @@ class energy_distribution
      * Returns the maximum energy value in the energy distribution.
      *
      * @return The maximum energy value in the energy distribution.
+     * @throws std::invalid_argument If the energy distribution is empty.
      */
-    [[nodiscard]] double max_energy() const noexcept
+    [[nodiscard]] double max_energy() const
     {
+        if (distribution.empty())
+        {
+            throw std::invalid_argument{"energy distribution is empty"};
+        }
         return distribution.crbegin()->first;
     }
     /**
      * Returns the minimum energy value in the energy distribution.
      *
      * @return The minimum energy value in the energy distribution.
+     * @throws std::invalid_argument If the energy distribution is empty.
      */
-    [[nodiscard]] double min_energy() const noexcept
+    [[nodiscard]] double min_energy() const
     {
+        if (distribution.empty())
+        {
+            throw std::invalid_argument{"energy distribution is empty"};
+        }
         return distribution.cbegin()->first;
     }
     /**

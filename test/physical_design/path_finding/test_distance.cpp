@@ -22,7 +22,7 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/physical_design/path_finding/a_star.hpp>
 #include <fiction/physical_design/path_finding/distance.hpp>
@@ -197,23 +197,26 @@ TEST_CASE("A* distance", "[distance]")
         }
         SECTION("clocking path distance")
         {
-            using clk_lyt = gate_level_layout<lyt>;
-
             SECTION("2DDWave")
             {
-                const clk_lyt layout{clk_lyt::extent{10, 5, 2}, clocking::twoddwave()};
+                const gate_layout<lyt> layout{gate_layout<lyt>::extent{10, 5, 2}, clocking::twoddwave()};
 
-                CHECK(a_star_distance<clk_lyt>(layout, {0, 0}, {0, 0}) == 0);
-                CHECK(a_star_distance<clk_lyt>(layout, {1, 1}, {1, 1}) == 0);
-                CHECK(a_star_distance<clk_lyt>(layout, {0, 0}, {0, 1}) == 1);
-                CHECK(a_star_distance<clk_lyt>(layout, {0, 0}, {1, 1}) == 2);
-                CHECK(a_star_distance<clk_lyt>(layout, {9, 1}, {6, 2}) == std::numeric_limits<uint64_t>::max());
-                CHECK(a_star_distance<clk_lyt>(layout, {6, 2}, {0, 4}) == std::numeric_limits<uint64_t>::max());
-                CHECK(a_star_distance<clk_lyt>(layout, {0, 4}, {9, 1}) == std::numeric_limits<uint64_t>::max());
+                CHECK(a_star_distance<gate_layout<lyt>>(layout, {0, 0}, {0, 0}) == 0);
+                CHECK(a_star_distance<gate_layout<lyt>>(layout, {1, 1}, {1, 1}) == 0);
+                CHECK(a_star_distance<gate_layout<lyt>>(layout, {0, 0}, {0, 1}) == 1);
+                CHECK(a_star_distance<gate_layout<lyt>>(layout, {0, 0}, {1, 1}) == 2);
+                CHECK(a_star_distance<gate_layout<lyt>>(layout, {9, 1}, {6, 2}) ==
+                      std::numeric_limits<uint64_t>::max());
+                CHECK(a_star_distance<gate_layout<lyt>>(layout, {6, 2}, {0, 4}) ==
+                      std::numeric_limits<uint64_t>::max());
+                CHECK(a_star_distance<gate_layout<lyt>>(layout, {0, 4}, {9, 1}) ==
+                      std::numeric_limits<uint64_t>::max());
 
                 // A* is not meant for routing to the z-layer
-                CHECK(a_star_distance<clk_lyt>(layout, {6, 2, 0}, {0, 4, 1}) == std::numeric_limits<uint64_t>::max());
-                CHECK(a_star_distance<clk_lyt>(layout, {0, 4, 1}, {9, 1, 1}) == std::numeric_limits<uint64_t>::max());
+                CHECK(a_star_distance<gate_layout<lyt>>(layout, {6, 2, 0}, {0, 4, 1}) ==
+                      std::numeric_limits<uint64_t>::max());
+                CHECK(a_star_distance<gate_layout<lyt>>(layout, {0, 4, 1}, {9, 1, 1}) ==
+                      std::numeric_limits<uint64_t>::max());
             }
         }
     }
@@ -245,13 +248,11 @@ TEST_CASE("A* distance functor", "[distance]")
         }
         SECTION("clocking path distance")
         {
-            using clk_lyt = gate_level_layout<lyt>;
-
             SECTION("2DDWave")
             {
-                const clk_lyt layout{clk_lyt::extent{10, 5, 2}, clocking::twoddwave()};
+                const gate_layout<lyt> layout{gate_layout<lyt>::extent{10, 5, 2}, clocking::twoddwave()};
 
-                const a_star_distance_functor<clk_lyt> distance{layout};
+                const a_star_distance_functor<gate_layout<lyt>> distance{layout};
 
                 CHECK(distance({0, 0}, {0, 0}) == 0);
                 CHECK(distance({1, 1}, {1, 1}) == 0);

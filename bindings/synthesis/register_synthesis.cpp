@@ -12,6 +12,7 @@
  * @file
  * @brief Entry point of the `mnt.pyfiction.synthesis` extension module.
  * @author Marcel Walter (marcelwa)
+ * @author Benjamin Hien (hibenj)
  */
 
 #include <nanobind/nanobind.h>
@@ -55,6 +56,11 @@ void register_technology_mapping(nb::module_& m);
  * @param m Python module.
  */
 void register_network_conversion(nb::module_& m);
+/**
+ * @brief Binds the planarization pipeline.
+ * @param m Python module.
+ */
+void register_planarization(nb::module_& m);
 
 }  // namespace pyfiction
 
@@ -74,6 +80,7 @@ NB_MODULE(synthesis, m)
     pyfiction::register_network_balancing(m);
     pyfiction::register_technology_mapping(m);
     pyfiction::register_network_conversion(m);
+    pyfiction::register_planarization(m);
 }
 
 #pragma GCC diagnostic pop

@@ -33,6 +33,7 @@ namespace pyfiction
  */
 void register_version_info(nb::module_& m)
 {
+    // Retain the GIL: module attributes create Python strings.
     m.attr("__version__")       = fiction::FICTION_VERSION;
     m.attr("__repo__")          = fiction::FICTION_REPO;
     m.attr("__compiled_date__") = fiction::COMPILED_DATE;

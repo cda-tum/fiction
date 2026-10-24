@@ -30,12 +30,13 @@
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/io/read_fgl_layout.hpp>
 #include <fiction/layouts/io/write_fgl_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
+#include <fiction/synthesis/network_conversion.hpp>
 #include <fiction/types.hpp>
 
 #include <kitty/constructors.hpp>
@@ -59,6 +60,7 @@ using namespace fiction::layouts;
 using namespace fiction::layouts::io;
 using namespace fiction::networks;
 using namespace fiction::physical_design;
+using namespace fiction::synthesis;
 
 /**
  * @brief Compares serialized placement, functions, ports, and interfaces.
@@ -124,12 +126,13 @@ void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt)
 template <typename Lyt, typename Ntk>
 void check_parsing_equiv(const Ntk& ntk)
 {
-    const auto layout = orthogonal<Lyt>(ntk, {});
+    const auto layout = orthogonal<typename Lyt::coordinate_layout>(
+        fiction::synthesis::convert_network<named_technology_network>(ntk), {});
 
     std::stringstream layout_stream{};
     write_fgl_layout(layout, layout_stream);
 
-    const auto read_layout = read_fgl_layout<Lyt>(layout_stream, layout.get_layout_name());
+    const auto read_layout = read_fgl_layout<typename Lyt::coordinate_layout>(layout_stream, layout.get_layout_name());
 
     compare_written_and_read_layout(layout, read_layout);
 
@@ -144,7 +147,7 @@ void check_parsing_equiv_layout(const Lyt& lyt)
 {
     std::stringstream layout_stream{};
     write_fgl_layout(lyt, layout_stream);
-    const auto read_layout = read_fgl_layout<Lyt>(layout_stream, lyt.get_layout_name());
+    const auto read_layout = read_fgl_layout<typename Lyt::coordinate_layout>(layout_stream, lyt.get_layout_name());
 
     compare_written_and_read_layout(lyt, read_layout);
 
@@ -181,50 +184,51 @@ void check_parsing_equiv_all()
 /** @brief Check layout round-trip fixtures for all topologies. */
 void check_parsing_equiv_layout_all()
 {
-    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::straight_wire_gate_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::three_wire_paths_gate_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::xor_maj_gate_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::single_input_tautology_gate_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::tautology_gate_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::and_or_gate_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::and_not_gate_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::or_not_gate_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::use_and_gate_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::res_maj_gate_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::res_tautology_gate_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::crossing_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::fanout_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::unbalanced_and_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::optimization_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_gate_clk_lyt>(
-        blueprints::optimization_layout_corner_case_outputs_1<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout<cart_gate_clk_lyt>(
-        blueprints::optimization_layout_corner_case_outputs_2<cart_gate_clk_lyt>());
+    check_parsing_equiv_layout<cartesian_gate_layout>(blueprints::straight_wire_gate_layout<cartesian_gate_layout>());
+    check_parsing_equiv_layout<cartesian_gate_layout>(
+        blueprints::three_wire_paths_gate_layout<cartesian_gate_layout>());
+    check_parsing_equiv_layout<cartesian_gate_layout>(blueprints::xor_maj_gate_layout<cartesian_gate_layout>());
+    check_parsing_equiv_layout<cartesian_gate_layout>(
+        blueprints::single_input_tautology_gate_layout<cartesian_gate_layout>());
+    check_parsing_equiv_layout<cartesian_gate_layout>(blueprints::tautology_gate_layout<cartesian_gate_layout>());
+    check_parsing_equiv_layout<cartesian_gate_layout>(blueprints::and_or_gate_layout<cartesian_gate_layout>());
+    check_parsing_equiv_layout<cartesian_gate_layout>(blueprints::and_not_gate_layout<cartesian_gate_layout>());
+    check_parsing_equiv_layout<cartesian_gate_layout>(blueprints::or_not_gate_layout<cartesian_gate_layout>());
+    check_parsing_equiv_layout<cartesian_gate_layout>(blueprints::use_and_gate_layout<cartesian_gate_layout>());
+    check_parsing_equiv_layout<cartesian_gate_layout>(blueprints::res_maj_gate_layout<cartesian_gate_layout>());
+    check_parsing_equiv_layout<cartesian_gate_layout>(blueprints::res_tautology_gate_layout<cartesian_gate_layout>());
+    check_parsing_equiv_layout<cartesian_gate_layout>(blueprints::crossing_layout<cartesian_gate_layout>());
+    check_parsing_equiv_layout<cartesian_gate_layout>(blueprints::fanout_layout<cartesian_gate_layout>());
+    check_parsing_equiv_layout<cartesian_gate_layout>(blueprints::unbalanced_and_layout<cartesian_gate_layout>());
+    check_parsing_equiv_layout<cartesian_gate_layout>(blueprints::optimization_layout<cartesian_gate_layout>());
+    check_parsing_equiv_layout<cartesian_gate_layout>(
+        blueprints::optimization_layout_corner_case_outputs_1<cartesian_gate_layout>());
+    check_parsing_equiv_layout<cartesian_gate_layout>(
+        blueprints::optimization_layout_corner_case_outputs_2<cartesian_gate_layout>());
 
     for (const auto a :
          {arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN})
     {
-        check_parsing_equiv_layout<shifted_cart_gate_clk_lyt>(
-            blueprints::and_or_gate_layout<shifted_cart_gate_clk_lyt>(a));
-        check_parsing_equiv_layout<hex_gate_clk_lyt>(blueprints::and_or_gate_layout<hex_gate_clk_lyt>(a));
+        check_parsing_equiv_layout<shifted_cartesian_gate_layout>(
+            blueprints::and_or_gate_layout<shifted_cartesian_gate_layout>(a));
+        check_parsing_equiv_layout<hexagonal_gate_layout>(blueprints::and_or_gate_layout<hexagonal_gate_layout>(a));
     }
 
-    check_parsing_equiv_layout<hex_gate_clk_lyt>(
-        blueprints::open_tautology_gate_layout<hex_gate_clk_lyt>(arrangement::EVEN_ROW));
-    check_parsing_equiv_layout<shifted_cart_gate_clk_lyt>(
-        blueprints::shifted_cart_and_or_inv_gate_layout<shifted_cart_gate_clk_lyt>(arrangement::ODD_COLUMN));
-    check_parsing_equiv_layout<shifted_cart_gate_clk_lyt>(
-        blueprints::row_clocked_and_xor_gate_layout<shifted_cart_gate_clk_lyt>(arrangement::EVEN_ROW));
+    check_parsing_equiv_layout<hexagonal_gate_layout>(
+        blueprints::open_tautology_gate_layout<hexagonal_gate_layout>(arrangement::EVEN_ROW));
+    check_parsing_equiv_layout<shifted_cartesian_gate_layout>(
+        blueprints::shifted_cart_and_or_inv_gate_layout<shifted_cartesian_gate_layout>(arrangement::ODD_COLUMN));
+    check_parsing_equiv_layout<shifted_cartesian_gate_layout>(
+        blueprints::row_clocked_and_xor_gate_layout<shifted_cartesian_gate_layout>(arrangement::EVEN_ROW));
 }
 
 TEST_CASE("Write empty gate-level layout", "[write-fgl-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
-    const gate_layout layout{{}, "empty"};
+    const cartesian_gate_layout layout{{}, "empty"};
 
     std::stringstream layout_stream{};
     write_fgl_layout(layout, layout_stream);
-    const auto read_layout = read_fgl_layout<gate_layout>(layout_stream, "empty");
+    const auto read_layout = read_fgl_layout<cartesian_layout>(layout_stream, "empty");
 
     compare_written_and_read_layout(layout, read_layout);
 }
@@ -232,7 +236,7 @@ TEST_CASE("Write empty gate-level layout", "[write-fgl-layout]")
 TEST_CASE("FGL preserves whitespace-only names", "[write-fgl-layout]")
 {
     /** Layout with whitespace-only metadata and ports. */
-    cart_gate_clk_lyt layout{{2, 1, 1}, clocking::twoddwave()};
+    cartesian_gate_layout layout{{2, 1, 1}, clocking::twoddwave()};
     layout.set_layout_name("  ");
     /** Primary input with a whitespace-only name. */
     const auto input = layout.create_pi("  ", {0, 0});
@@ -241,7 +245,7 @@ TEST_CASE("FGL preserves whitespace-only names", "[write-fgl-layout]")
     std::stringstream stream{};
     write_fgl_layout(layout, stream);
     /** Restored layout and port names. */
-    const auto restored = read_fgl_layout<cart_gate_clk_lyt>(stream);
+    const auto restored = read_fgl_layout<cartesian_layout>(stream);
     CHECK(restored.get_layout_name() == "  ");
     /** Restored terminals whose names must retain whitespace. */
     const auto restored_input  = restored.find_object({0, 0});
@@ -258,8 +262,8 @@ TEST_CASE("FGL preserves whitespace-only names", "[write-fgl-layout]")
 
 TEST_CASE("FGL preserves XML whitespace in layout and object names", "[write-fgl-layout]")
 {
-    cart_gate_clk_lyt layout{{3, 1, 1}, clocking::twoddwave()};
-    const std::string label{"first\r\nsecond\t<&>"};
+    cartesian_gate_layout layout{{3, 1, 1}, clocking::twoddwave()};
+    const std::string     label{"first\r\nsecond\t<&>"};
     layout.set_layout_name(label);
     const auto input = layout.create_pi(label, {0, 0});
     const auto wire  = layout.create_buf(input, {1, 0});
@@ -267,28 +271,26 @@ TEST_CASE("FGL preserves XML whitespace in layout and object names", "[write-fgl
     layout.create_po(wire, label, {2, 0});
     std::stringstream stream{};
     write_fgl_layout(layout, stream);
-    const auto restored = read_fgl_layout<cart_gate_clk_lyt>(stream);
+    const auto restored = read_fgl_layout<cartesian_layout>(stream);
     CHECK(restored.get_layout_name() == label);
     restored.foreach_object([&](const auto id) { CHECK(restored.get_name(id) == label); });
 }
 
 TEST_CASE("FGL preserves clock numbers on crossing layers", "[write-fgl-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
-
-    gate_layout original{{2, 2, 2}, clocking::open(), "crossing clocks"};
+    cartesian_gate_layout original{{2, 2, 2}, clocking::open(), "crossing clocks"};
     original.assign_clock_number({1, 1, 1}, 2);
 
     std::stringstream stream{};
     write_fgl_layout(original, stream);
-    const auto restored = read_fgl_layout<gate_layout>(stream);
+    const auto restored = read_fgl_layout<cartesian_layout>(stream);
 
     CHECK(restored.get_clock_number({1, 1, 0}) == 2);
     CHECK(restored.get_clock_number({1, 1, 1}) == 2);
 }
 
-TEMPLATE_TEST_CASE("FGL preserves clock phases and zone assignments", "[write-fgl-layout]", cart_gate_clk_lyt,
-                   shifted_cart_gate_clk_lyt, hex_gate_clk_lyt)
+TEMPLATE_TEST_CASE("FGL preserves clock phases and zone assignments", "[write-fgl-layout]", cartesian_gate_layout,
+                   shifted_cartesian_gate_layout, hexagonal_gate_layout)
 {
     const auto a =
         GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
@@ -321,7 +323,7 @@ TEMPLATE_TEST_CASE("FGL preserves clock phases and zone assignments", "[write-fg
         original.create_pi("a", {0, 0, 0});
         std::stringstream stream{};
         write_fgl_layout(original, stream);
-        const auto restored = read_fgl_layout<TestType>(stream);
+        const auto restored = read_fgl_layout<typename TestType::coordinate_layout>(stream);
         CHECK(restored.num_clocks() == original.num_clocks());
         CHECK(restored.get_clocking_scheme().name() == original.get_clocking_scheme().name());
         CHECK(restored.get_clocking_scheme().is_regular() == original.get_clocking_scheme().is_regular());
@@ -334,12 +336,12 @@ TEMPLATE_TEST_CASE("FGL preserves clock phases and zone assignments", "[write-fg
 
 TEST_CASE("Versioned FGL keeps interface order and dangling objects", "[write-fgl-layout]")
 {
-    cart_gate_clk_lyt layout{{3, 3, 1}, clocking::twoddwave()};
-    const auto        b     = layout.create_pi("b", {1, 0, 0});
-    const auto        a     = layout.create_pi("a", {0, 1, 0});
-    const auto        gate  = layout.create_lt(a, b, {1, 1, 0});
-    const auto        other = layout.create_po(a, "pass", {0, 2, 0});
-    const auto        po    = layout.create_po(gate, "f", {2, 1, 0});
+    cartesian_gate_layout layout{{3, 3, 1}, clocking::twoddwave()};
+    const auto            b     = layout.create_pi("b", {1, 0, 0});
+    const auto            a     = layout.create_pi("a", {0, 1, 0});
+    const auto            gate  = layout.create_lt(a, b, {1, 1, 0});
+    const auto            other = layout.create_po(a, "pass", {0, 2, 0});
+    const auto            po    = layout.create_po(gate, "f", {2, 1, 0});
     layout.set_output_order(std::array{po, other});
     layout.set_input_order(std::array{a, b});
     kitty::dynamic_truth_table constant{0};
@@ -348,7 +350,7 @@ TEST_CASE("Versioned FGL keeps interface order and dangling objects", "[write-fg
     std::stringstream stream{};
     write_fgl_layout(layout, stream);
     CHECK(stream.str().find("<fgl version=\"2\">") != std::string::npos);
-    const auto restored = read_fgl_layout<cart_gate_clk_lyt>(stream);
+    const auto restored = read_fgl_layout<cartesian_layout>(stream);
     CHECK(restored.width() == 3);
     CHECK(restored.height() == 3);
     CHECK(restored.layers() == 1);
@@ -375,7 +377,7 @@ TEST_CASE("Versioned FGL keeps interface order and dangling objects", "[write-fg
 }
 
 TEMPLATE_TEST_CASE("FGL preserves manual obstructions independently of occupancy", "[write-fgl-layout]",
-                   cart_gate_clk_lyt, shifted_cart_gate_clk_lyt, hex_gate_clk_lyt)
+                   cartesian_gate_layout, shifted_cartesian_gate_layout, hexagonal_gate_layout)
 {
     TestType layout = []
     {
@@ -400,7 +402,7 @@ TEMPLATE_TEST_CASE("FGL preserves manual obstructions independently of occupancy
 
     std::stringstream stream{};
     write_fgl_layout(layout, stream);
-    auto restored = read_fgl_layout<TestType>(stream);
+    auto restored = read_fgl_layout<typename TestType::coordinate_layout>(stream);
     CHECK(restored.is_obstructed_coordinate({1, 1}));
     CHECK(restored.is_obstructed_coordinate({-1, -2, -3}));
     CHECK(restored.is_obstructed_coordinate({7, 8, 9}));
@@ -426,13 +428,13 @@ TEMPLATE_TEST_CASE("FGL preserves manual obstructions independently of occupancy
 
 TEST_CASE("FGL keeps sparse metadata in a large two-layer extent", "[write-fgl-layout]")
 {
-    cart_gate_clk_lyt layout{{1000000000, 1000000000, 2}, clocking::twoddwave()};
+    cartesian_gate_layout layout{{1000000000, 1000000000, 2}, clocking::twoddwave()};
     layout.assign_clock_number({999999999, 999999999, 1}, 2);
     layout.assign_synchronization_element({999999999, 999999999, 1}, 7);
     std::stringstream stream{};
     write_fgl_layout(layout, stream);
     CHECK(stream.str().size() < 2000);
-    const auto restored = read_fgl_layout<cart_gate_clk_lyt>(stream);
+    const auto restored = read_fgl_layout<cartesian_layout>(stream);
     CHECK(restored.width() == 1000000000);
     CHECK(restored.height() == 1000000000);
     CHECK(restored.layers() == 2);
@@ -443,7 +445,7 @@ TEST_CASE("FGL keeps sparse metadata in a large two-layer extent", "[write-fgl-l
 
 TEST_CASE("FGL validates every object before changing the stream", "[write-fgl-layout]")
 {
-    cart_gate_clk_lyt layout{{4, 2, 1}, clocking::twoddwave()};
+    cartesian_gate_layout layout{{4, 2, 1}, clocking::twoddwave()};
     layout.create_pi("unused", {0, 0, 0});
     const auto        wire = layout.create_buf({1, 0, 0});
     std::stringstream stream{};
@@ -457,8 +459,8 @@ TEST_CASE("FGL validates every object before changing the stream", "[write-fgl-l
 
 TEST_CASE("FGL rejects invalid finished placement and metadata", "[write-fgl-layout]")
 {
-    cart_gate_clk_lyt layout{{3, 1, 1}, clocking::twoddwave()};
-    const auto        source = layout.create_pi("a", {0, 0, 0});
+    cartesian_gate_layout layout{{3, 1, 1}, clocking::twoddwave()};
+    const auto            source = layout.create_pi("a", {0, 0, 0});
     SECTION("Nonadjacent connection")
     {
         layout.create_po(source, "f", {2, 0, 0});
@@ -496,12 +498,12 @@ TEST_CASE("FGL rejects invalid finished placement and metadata", "[write-fgl-lay
 
 TEST_CASE("FGL rejects illegal XML controls before changing output", "[write-fgl-layout]")
 {
-    const auto        control = GENERATE(char{0}, char{1}, char{8}, char{11}, char{12}, char{14}, char{31});
-    cart_gate_clk_lyt layout{{3, 1, 1}, clocking::twoddwave()};
-    const auto        input  = layout.create_pi("a", {0, 0});
-    const auto        wire   = layout.create_buf(input, {1, 0});
-    const auto        output = layout.create_po(wire, "f", {2, 0});
-    const std::string label  = std::string{"first"} + control + "second";
+    const auto            control = GENERATE(char{0}, char{1}, char{8}, char{11}, char{12}, char{14}, char{31});
+    cartesian_gate_layout layout{{3, 1, 1}, clocking::twoddwave()};
+    const auto            input  = layout.create_pi("a", {0, 0});
+    const auto            wire   = layout.create_buf(input, {1, 0});
+    const auto            output = layout.create_po(wire, "f", {2, 0});
+    const std::string     label  = std::string{"first"} + control + "second";
     SECTION("Layout name")
     {
         layout.set_layout_name(label);
@@ -540,8 +542,6 @@ TEST_CASE("FGL rejects illegal XML controls before changing output", "[write-fgl
 
 TEST_CASE("Write and read layouts", "[write-fgl-layout]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
-
-    check_parsing_equiv_all<gate_layout>();
+    check_parsing_equiv_all<cartesian_gate_layout>();
     check_parsing_equiv_layout_all();
 }

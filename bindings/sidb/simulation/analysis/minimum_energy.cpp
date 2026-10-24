@@ -15,8 +15,6 @@
  * @author Jan Drewniok (Drewniok)
  */
 
-#include "pyfiction/documentation.hpp"
-
 #include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/simulation/analysis/minimum_energy.hpp>
 
@@ -46,7 +44,15 @@ void register_minimum_energy(nb::module_& m)
             return fiction::sidb::simulation::analysis::minimum_energy(charge_distributions.cbegin(),
                                                                        charge_distributions.cend());
         },
-        nb::arg("charge_distributions"), DOC(fiction_sidb_simulation_analysis_minimum_energy));
+        nb::call_guard<nb::gil_scoped_release>(), nb::arg("charge_distributions"),
+        R"doc(Computes the minimum energy of a sequence of charge distributions.
+
+Args:
+    charge_distributions: Charge distributions to examine.
+
+Returns:
+    Minimum energy in eV, or positive infinity if the sequence is empty.
+)doc");
 }
 
 }  // namespace pyfiction

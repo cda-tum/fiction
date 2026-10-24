@@ -16,8 +16,8 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/hexagonalization.hpp>
 
 #include <sstream>
@@ -68,6 +68,7 @@ void register_hexagonalization(nb::module_& m)
         .value("EXTEND_PLANAR", hexagonalization_options::io_pin_extension_mode::EXTEND_PLANAR,
                DOC(fiction_physical_design_hexagonalization_params_io_pin_extension_mode_EXTEND_PLANAR));
 
+    // Keep the GIL for statistics construction, field access, and bounded report formatting.
     nb::class_<fiction::physical_design::hexagonalization_stats>(m, "hexagonalization_stats",
                                                                  DOC(fiction_physical_design_hexagonalization_stats))
         .def(nb::init<>(), "Default constructor.")
@@ -95,7 +96,7 @@ void register_hexagonalization(nb::module_& m)
 
     m.def(
         "hexagonalization",
-        [](const py_cartesian_gate_layout&                                 layout,
+        [](const fiction::layouts::cartesian_gate_layout&                  layout,
            const decltype(hexagonalization_options{}.input_pin_extension)  input_pin_extension,
            const decltype(hexagonalization_options{}.output_pin_extension) output_pin_extension,
            const decltype(hexagonalization_options{}.on_progress)&         on_progress,
@@ -106,8 +107,7 @@ void register_hexagonalization(nb::module_& m)
             params.output_pin_extension = output_pin_extension;
             params.on_progress          = on_progress;
             const nb::gil_scoped_release release{};
-            return fiction::physical_design::hexagonalization<py_hexagonal_gate_layout, py_cartesian_gate_layout>(
-                layout, params, statistics);
+            return fiction::physical_design::hexagonalization(layout, params, statistics);
         },
         nb::arg("layout"), nb::kw_only(),
         nb::arg("input_pin_extension")  = hexagonalization_options{}.input_pin_extension,

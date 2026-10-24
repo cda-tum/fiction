@@ -110,6 +110,43 @@ class layout
     explicit layout(lattice lat, std::string name = "") : surface_lattice{std::move(lat)}, layout_name{std::move(name)}
     {}
     /**
+     * Copies a layout with independent storage.
+     *
+     * @param other Layout to copy.
+     */
+    layout(const layout& other) = default;
+    /**
+     * Moves a layout and transfers its storage.
+     *
+     * @param other Layout to move.
+     */
+    layout(layout&& other) noexcept = default;
+    /**
+     * Copies a layout. Allocation failure leaves this layout unchanged.
+     *
+     * @param other Layout to copy.
+     * @return This layout.
+     */
+    layout& operator=(const layout& other)
+    {
+        if (this != &other)
+        {
+            *this = layout{other};
+        }
+        return *this;
+    }
+    /**
+     * Moves a layout and transfers its storage.
+     *
+     * @param other Layout to move.
+     * @return This layout.
+     */
+    layout& operator=(layout&& other) noexcept = default;
+    /**
+     * Destroys the layout and releases its storage.
+     */
+    ~layout() = default;
+    /**
      * The lattice of the surface.
      *
      * @return The lattice.
@@ -271,7 +308,7 @@ class layout
      * The index of a site in `sidbs()`.
      *
      * @param s Site.
-     * @return Index of `s`, or `std::nullopt` if `s` holds no SiDB.
+     * @return Index of `s`, or `std::nullopt` (`None` in Python) if `s` holds no SiDB.
      */
     [[nodiscard]] std::optional<std::size_t> index_of(const lattice_site& s) const noexcept
     {
@@ -452,9 +489,10 @@ class layout
         return count_defects(model::is_negatively_charged_defect);
     }
     /**
-     * Number of charged defects.
+     * Number of defects classified as charged by `model::is_charged_defect_type`. Includes `DB`, `SI_VACANCY`, and
+     * `ARSENIC` even at zero charge; these defects also contribute to `num_neutral_defects`.
      *
-     * @return Number of defects with non-zero charge.
+     * @return Number of defects with non-zero charge or a charged defect type.
      */
     [[nodiscard]] uint64_t num_charged_defects() const noexcept
     {

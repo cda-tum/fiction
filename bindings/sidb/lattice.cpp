@@ -46,11 +46,15 @@ namespace pyfiction
  */
 void register_lattice(nb::module_& m)
 {
+    // Keep the GIL for scalar lattice arithmetic and properties; releasing it costs more than these operations.
     nb::class_<fiction::sidb::lattice_site>(m, "lattice_site", DOC(fiction_sidb_lattice_site))
         .def(nb::init<>(), DOC(fiction_sidb_lattice_site_lattice_site))
         .def(nb::init<int32_t, int32_t, int8_t>(), nb::arg("x"), nb::arg("y"), nb::arg("z"),
-             DOC(fiction_sidb_lattice_site_lattice_site_2))
-        .def(nb::init<int32_t, int32_t>(), nb::arg("x"), nb::arg("y"), DOC(fiction_sidb_lattice_site_lattice_site_3))
+             parameter_doc(DOC(fiction_sidb_lattice_site_lattice_site_2),
+                           {{"x_coord", "x"}, {"y_coord", "y"}, {"basis_site", "z"}})
+                 .c_str())
+        .def(nb::init<int32_t, int32_t>(), nb::arg("x"), nb::arg("y"),
+             parameter_doc(DOC(fiction_sidb_lattice_site_lattice_site_3), {{"x_coord", "x"}, {"y_coord", "y"}}).c_str())
         .def_rw("x", &fiction::sidb::lattice_site::x, DOC(fiction_sidb_lattice_site_x))
         .def_rw("y", &fiction::sidb::lattice_site::y, DOC(fiction_sidb_lattice_site_y))
         .def_prop_rw(
@@ -80,10 +84,11 @@ void register_lattice(nb::module_& m)
 
         ;
 
-    m.def("row_of", &fiction::sidb::row_of, nb::arg("site"), DOC(fiction_sidb_row_of));
+    m.def("row_of", &fiction::sidb::row_of, nb::arg("site"),
+          parameter_doc(DOC(fiction_sidb_row_of), {{"s", "site"}}).c_str());
     m.def("site_at_row", &fiction::sidb::site_at_row, nb::arg("x"), nb::arg("row"), DOC(fiction_sidb_site_at_row));
-    m.def("sites_in_area", &fiction::sidb::sites_in_area, nb::arg("first_corner"), nb::arg("second_corner"),
-          DOC(fiction_sidb_sites_in_area));
+    m.def("sites_in_area", &fiction::sidb::sites_in_area, nb::call_guard<nb::gil_scoped_release>(),
+          nb::arg("first_corner"), nb::arg("second_corner"), DOC(fiction_sidb_sites_in_area));
 
     nb::class_<fiction::sidb::lattice>(m, "lattice", DOC(fiction_sidb_lattice))
         .def(nb::init<>(), "Default constructor.")
@@ -97,7 +102,7 @@ void register_lattice(nb::module_& m)
         .def_rw("a2", &fiction::sidb::lattice::a2, DOC(fiction_sidb_lattice_a2))
         .def_rw("basis", &fiction::sidb::lattice::basis, DOC(fiction_sidb_lattice_basis))
         .def("nm_position", &fiction::sidb::lattice::nm_position, nb::arg("site"),
-             DOC(fiction_sidb_lattice_nm_position))
+             parameter_doc(DOC(fiction_sidb_lattice_nm_position), {{"s", "site"}}).c_str())
         .def("nm_distance", &fiction::sidb::lattice::nm_distance, nb::arg("source"), nb::arg("target"),
              DOC(fiction_sidb_lattice_nm_distance))
         // NOLINTBEGIN(misc-redundant-expression): nanobind operator bindings intentionally compare placeholder objects.

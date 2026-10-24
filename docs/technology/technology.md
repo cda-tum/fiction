@@ -2,6 +2,10 @@
 
 # Technologies
 
+Technology modules describe cells, gate libraries, and file formats for QCA,
+molecular QCA, iNML, and SiDB circuits. Shared FCN interfaces support gate-library
+mapping and area estimation.
+
 ```{toctree}
 :maxdepth: 1
 

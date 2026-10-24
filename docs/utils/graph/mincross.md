@@ -30,6 +30,10 @@ based on the median positions of their fanin and fanout connections.
 :members:
 ```
 
+```{doxygenfunction} fiction::utils::graph::count_crossings
+
+```
+
 ```{doxygenfunction} fiction::utils::graph::mincross(Ntk& ntk, const mincross_params& ps = {}, mincross_stats* pst = nullptr)
 
 ```

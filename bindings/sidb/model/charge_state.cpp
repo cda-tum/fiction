@@ -37,6 +37,7 @@ namespace pyfiction
  */
 void register_charge_state(nb::module_& m)
 {
+    // Keep the GIL for scalar charge conversions; formatting a charge configuration releases it.
     nb::enum_<fiction::sidb::model::charge_state>(m, "sidb_charge_state", DOC(fiction_sidb_model_charge_state))
         .value("NEGATIVE", fiction::sidb::model::charge_state::NEGATIVE, DOC(fiction_sidb_model_charge_state_NEGATIVE))
         .value("NEUTRAL", fiction::sidb::model::charge_state::NEUTRAL, DOC(fiction_sidb_model_charge_state_NEUTRAL))
@@ -53,8 +54,10 @@ void register_charge_state(nb::module_& m)
           DOC(fiction_sidb_model_charge_state_to_sign));
     m.def("sign_to_charge_state", &fiction::sidb::model::sign_to_charge_state, nb::arg("sg"),
           DOC(fiction_sidb_model_sign_to_charge_state));
-    m.def("charge_configuration_to_string", &fiction::sidb::model::charge_configuration_to_string, nb::arg("cc"),
-          DOC(fiction_sidb_model_charge_configuration_to_string));
+    m.def(
+        "charge_configuration_to_string", &fiction::sidb::model::charge_configuration_to_string,
+        nb::call_guard<nb::gil_scoped_release>(), nb::arg("cc"),
+        parameter_doc(DOC(fiction_sidb_model_charge_configuration_to_string), {{"charge_distribution", "cc"}}).c_str());
 }
 
 }  // namespace pyfiction

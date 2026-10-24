@@ -52,6 +52,7 @@ using detect_bdl_pairs_options = fiction::sidb::simulation::logic::detect_bdl_pa
  */
 void register_detect_bdl_pairs(nb::module_& m)
 {
+    // Keep the GIL for BDL pair properties and comparisons; native pair detection releases it.
     using fiction::sidb::lattice_site;
     using fiction::sidb::layout;
     using bdl_pair_t = fiction::sidb::simulation::logic::bdl_pair;
@@ -84,6 +85,7 @@ void register_detect_bdl_pairs(nb::module_& m)
             detect_bdl_pairs_options params{};
             params.minimum_distance = minimum_distance;
             params.maximum_distance = maximum_distance;
+            const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::detect_bdl_pairs(lyt, type, params);
         },
         nb::arg("lyt"), nb::arg("type") = std::nullopt, nb::kw_only(),

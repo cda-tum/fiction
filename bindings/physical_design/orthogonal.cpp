@@ -16,10 +16,11 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
+#include <fiction/types.hpp>
 
 #include <sstream>
 #include <type_traits>
@@ -60,12 +61,13 @@ void register_orthogonal(nb::module_& m, const char* signature)
 {
     /** @brief Compute orthogonal physical design for the selected layout representation. */
     const auto design =
-        [](const py_tec_network& network, const nb::handle layout_type,
+        [](const fiction::networks::named_technology_network& network, const nb::handle layout_type,
            fiction::physical_design::orthogonal_physical_design_stats*                 statistics,
            const decltype(orthogonal_physical_design_options{}.number_of_clock_phases) number_of_clock_phases,
            const decltype(orthogonal_physical_design_options{}.layout_arrangement)     layout_arrangement,
            const decltype(orthogonal_physical_design_options{}.on_progress)&           on_progress)
     {
+        // Python type comparison requires the GIL; release it only for native design below.
         if (!layout_type.is(nb::type<Lyt>()))
         {
             throw nb::next_overload();
@@ -75,9 +77,9 @@ void register_orthogonal(nb::module_& m, const char* signature)
         parameters.layout_arrangement     = layout_arrangement;
         parameters.on_progress            = on_progress;
         const nb::gil_scoped_release release{};
-        return fiction::physical_design::orthogonal<Lyt, py_tec_network>(network, parameters, statistics);
+        return fiction::physical_design::orthogonal<typename Lyt::coordinate_layout>(network, parameters, statistics);
     };
-    if constexpr (std::is_same_v<Lyt, py_cartesian_gate_layout>)
+    if constexpr (std::is_same_v<Lyt, fiction::layouts::cartesian_gate_layout>)
     {
         m.def("orthogonal", design, nb::arg("network"), nb::kw_only(), nb::arg("layout_type") = nb::type<Lyt>(),
               nb::arg("statistics")             = nullptr,
@@ -119,6 +121,7 @@ void register_orthogonal(nb::module_& m)
         .value("THREE", fiction::layouts::clocking::num_clks::THREE, DOC(fiction_layouts_clocking_num_clks_THREE))
         .value("FOUR", fiction::layouts::clocking::num_clks::FOUR, DOC(fiction_layouts_clocking_num_clks_FOUR));
 
+    // Keep the GIL for statistics construction, field access, and bounded report formatting.
     nb::class_<fiction::physical_design::orthogonal_physical_design_stats>(
         m, "orthogonal_stats", DOC(fiction_physical_design_orthogonal_physical_design_stats))
         .def(nb::init<>(), "Default constructor.")
@@ -144,21 +147,23 @@ void register_orthogonal(nb::module_& m)
         .def_ro("num_crossings", &fiction::physical_design::orthogonal_physical_design_stats::num_crossings,
                 DOC(fiction_physical_design_orthogonal_physical_design_stats_num_crossings));
 
-    detail::register_orthogonal<py_cartesian_gate_layout>(
+    detail::register_orthogonal<fiction::layouts::cartesian_gate_layout>(
         m, "def orthogonal(network: mnt.pyfiction.networks.technology_network, *, layout_type: "
            "type[mnt.pyfiction.layouts.cartesian_gate_layout] = mnt.pyfiction.layouts.cartesian_gate_layout, "
            "statistics: orthogonal_stats | None = None, number_of_clock_phases: num_clks = ..., layout_arrangement: "
            "mnt.pyfiction.layouts.arrangement | None = ..., on_progress: Callable[[str, int, int], None] | None = ...) "
            "-> mnt.pyfiction.layouts.cartesian_gate_layout");
-    detail::register_orthogonal<py_hexagonal_gate_layout>(
+    detail::register_orthogonal<fiction::layouts::hexagonal_gate_layout>(
         m,
         "def orthogonal(network: mnt.pyfiction.networks.technology_network, *, layout_type: "
         "type[mnt.pyfiction.layouts.hexagonal_gate_layout], statistics: orthogonal_stats | None = None, "
         "number_of_clock_phases: num_clks = ..., layout_arrangement: mnt.pyfiction.layouts.arrangement | None = ..., "
         "on_progress: Callable[[str, int, int], None] | None = ...) -> mnt.pyfiction.layouts.hexagonal_gate_layout");
+    // Keep the GIL while rejecting an unsupported Python layout type.
     m.def(
         "orthogonal",
-        [](const py_tec_network&, const nb::handle, fiction::physical_design::orthogonal_physical_design_stats*,
+        [](const fiction::networks::named_technology_network&, const nb::handle,
+           fiction::physical_design::orthogonal_physical_design_stats*,
            const decltype(orthogonal_physical_design_options{}.number_of_clock_phases),
            const decltype(orthogonal_physical_design_options{}.layout_arrangement),
            const decltype(orthogonal_physical_design_options{}.on_progress)&) -> nb::object

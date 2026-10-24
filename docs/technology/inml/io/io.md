@@ -1,36 +1,9 @@
 # iNML I/O
 
-## ToPoliNano
+Export iNML nanomagnet layouts for ToPoliNano.
 
-::::{tab-set}
-:sync-group: language
+```{toctree}
+:maxdepth: 1
 
-:::{tab-item} C++
-:sync: cpp
-
-**Header:** `fiction/technology/inml/io/write_qcc_layout.hpp`
-
-```{doxygenstruct} fiction::inml::io::write_qcc_layout_params
-:members:
+qcc
 ```
-
-```{doxygenfunction} fiction::inml::io::write_qcc_layout(const inml::layout& lyt, std::ostream& os, write_qcc_layout_params ps = {})
-
-```
-
-```{doxygenfunction} fiction::inml::io::write_qcc_layout(const inml::layout& lyt, const std::string_view& filename, write_qcc_layout_params ps = {})
-
-```
-
-:::
-
-:::{tab-item} Python
-:sync: python
-
-```{eval-rst}
-.. autofunction:: mnt.pyfiction.inml.io.write_qcc_layout
-```
-
-:::
-
-::::

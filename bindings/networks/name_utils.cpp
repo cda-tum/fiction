@@ -15,13 +15,14 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/name_utils.hpp>
 #include <fiction/technology/inml/layout.hpp>
 #include <fiction/technology/mol_qca/layout.hpp>
 #include <fiction/technology/qca/layout.hpp>
 #include <fiction/technology/sidb/layout.hpp>
+#include <fiction/types.hpp>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>        // NOLINT(misc-include-cleaner)
@@ -49,6 +50,7 @@ namespace detail
 template <typename NtkOrLyt>
 void register_name_utils(nb::module_& m)
 {
+    // Keep the GIL for these short name lookups and updates; a release adds overhead.
     m.def("get_name", &fiction::networks::get_name<NtkOrLyt>, nb::arg("ntk_or_lyt"), DOC(fiction_networks_get_name));
     m.def("set_name", &fiction::networks::set_name<NtkOrLyt>, nb::arg("ntk_or_lyt"), nb::arg("name"),
           DOC(fiction_networks_set_name));
@@ -64,17 +66,17 @@ void register_name_utils(nb::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::register_name_utils<py_cartesian_gate_layout>(m);
-    detail::register_name_utils<py_shifted_cartesian_gate_layout>(m);
-    detail::register_name_utils<py_hexagonal_gate_layout>(m);
+    detail::register_name_utils<fiction::layouts::cartesian_gate_layout>(m);
+    detail::register_name_utils<fiction::layouts::shifted_cartesian_gate_layout>(m);
+    detail::register_name_utils<fiction::layouts::hexagonal_gate_layout>(m);
     detail::register_name_utils<fiction::qca::layout>(m);
     detail::register_name_utils<fiction::mol_qca::layout>(m);
     detail::register_name_utils<fiction::inml::layout>(m);
     detail::register_name_utils<fiction::sidb::layout>(m);
-    detail::register_name_utils<py_tec_network>(m);
-    detail::register_name_utils<py_aig_network>(m);
-    detail::register_name_utils<py_xag_network>(m);
-    detail::register_name_utils<py_mig_network>(m);
+    detail::register_name_utils<fiction::networks::named_technology_network>(m);
+    detail::register_name_utils<fiction::networks::named_aig_network>(m);
+    detail::register_name_utils<fiction::networks::named_xag_network>(m);
+    detail::register_name_utils<fiction::networks::named_mig_network>(m);
 }
 
 }  // namespace pyfiction

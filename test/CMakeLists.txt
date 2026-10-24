@@ -46,7 +46,7 @@ list(FILTER FILENAMES EXCLUDE REGEX "^package/")
 # These tests include utils/allocation_failure.hpp and own global new/delete. A
 # second allocator replacement conflicts with their fault injection.
 set(ALLOCATION_FAILURE_TESTS
-    test_layout test_clocking_state test_gate_level_layout test_routing_utils
+    test_layout test_clocking_state test_gate_layout test_routing_utils
     test_determine_clocking test_cell_writer_allocation_failure)
 get_target_property(ALLOCATION_FAILURE_LIBRARIES libfiction
                     INTERFACE_LINK_LIBRARIES)

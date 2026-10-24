@@ -16,9 +16,9 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/traits.hpp>
+#include <fiction/types.hpp>
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/views/depth_view.hpp>
@@ -61,6 +61,7 @@ void register_network(nb::module_& m, const char* network_name, const char* doc)
 
     auto cls = nb::class_<Ntk>(m, network_name, doc);
 
+    // Keep the GIL for cached counts, local node queries, names, and mutations; releasing it adds overhead.
     cls.def(nb::init<>(), "Default constructor.")
 
         .def("size", &Ntk::size)
@@ -69,40 +70,49 @@ void register_network(nb::module_& m, const char* network_name, const char* doc)
         .def("num_pos", &Ntk::num_pos)
         .def(
             "depth", [](const Ntk& ntk) { return mockturtle::depth_view<Ntk>{ntk}.depth(); },
-            "Returns the number of gates on the longest input-to-output path.")
+            "Returns the number of gates on the longest input-to-output path.",
+            nb::call_guard<nb::gil_scoped_release>())
 
-        .def("nodes",
-             [](const Ntk& ntk)
-             {
-                 std::vector<mockturtle::node<Ntk>> nodes{};
-                 nodes.reserve(ntk.size());
-                 ntk.foreach_node([&nodes](const auto& n) { nodes.push_back(n); });
-                 return nodes;
-             })
-        .def("gates",
-             [](const Ntk& ntk)
-             {
-                 std::vector<mockturtle::node<Ntk>> gates{};
-                 gates.reserve(ntk.num_gates());
-                 ntk.foreach_gate([&gates](const auto& g) { gates.push_back(g); });
-                 return gates;
-             })
-        .def("pis",
-             [](const Ntk& ntk)
-             {
-                 std::vector<mockturtle::node<Ntk>> pis{};
-                 pis.reserve(ntk.num_pis());
-                 ntk.foreach_pi([&pis](const auto& pi) { pis.push_back(pi); });
-                 return pis;
-             })
-        .def("pos",
-             [](const Ntk& ntk)
-             {
-                 std::vector<mockturtle::node<Ntk>> pos{};
-                 pos.reserve(ntk.num_pos());
-                 ntk.foreach_po([&pos, &ntk](const auto& po) { pos.push_back(ntk.get_node(po)); });
-                 return pos;
-             })
+        .def(
+            "nodes",
+            [](const Ntk& ntk)
+            {
+                std::vector<mockturtle::node<Ntk>> nodes{};
+                nodes.reserve(ntk.size());
+                ntk.foreach_node([&nodes](const auto& n) { nodes.push_back(n); });
+                return nodes;
+            },
+            nb::call_guard<nb::gil_scoped_release>())
+        .def(
+            "gates",
+            [](const Ntk& ntk)
+            {
+                std::vector<mockturtle::node<Ntk>> gates{};
+                gates.reserve(ntk.num_gates());
+                ntk.foreach_gate([&gates](const auto& g) { gates.push_back(g); });
+                return gates;
+            },
+            nb::call_guard<nb::gil_scoped_release>())
+        .def(
+            "pis",
+            [](const Ntk& ntk)
+            {
+                std::vector<mockturtle::node<Ntk>> pis{};
+                pis.reserve(ntk.num_pis());
+                ntk.foreach_pi([&pis](const auto& pi) { pis.push_back(pi); });
+                return pis;
+            },
+            nb::call_guard<nb::gil_scoped_release>())
+        .def(
+            "pos",
+            [](const Ntk& ntk)
+            {
+                std::vector<mockturtle::node<Ntk>> pos{};
+                pos.reserve(ntk.num_pos());
+                ntk.foreach_po([&pos, &ntk](const auto& po) { pos.push_back(ntk.get_node(po)); });
+                return pos;
+            },
+            nb::call_guard<nb::gil_scoped_release>())
 
         .def(
             "fanins",
@@ -113,7 +123,10 @@ void register_network(nb::module_& m, const char* network_name, const char* doc)
                 ntk.foreach_fanin(n, [&fanins, &ntk](const auto& f) { fanins.push_back(ntk.get_node(f)); });
                 return fanins;
             },
-            nb::arg("n"))
+            // Keep the GIL for AIG/XAG/MIG fanins: releasing it adds overhead for at most three inputs.
+            nb::arg("n"),
+            std::conditional_t<std::is_same_v<Ntk, fiction::networks::named_technology_network>,
+                               nb::call_guard<nb::gil_scoped_release>, nb::call_guard<>>{})
 
         .def("is_constant", &Ntk::is_constant, nb::arg("n"))
         .def("is_pi", &Ntk::is_pi, nb::arg("n"))
@@ -202,7 +215,7 @@ void register_network(nb::module_& m, const char* network_name, const char* doc)
             "is_xnor", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_xnor(n); }, nb::arg("n"),
             DOC(fiction_networks_technology_network_is_xnor));
     }
-    if constexpr (std::is_same_v<Ntk, py_tec_network>)
+    if constexpr (std::is_same_v<Ntk, fiction::networks::named_technology_network>)
     {
         cls.def(
                "po_index", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.po_index(n); }, nb::arg("n"))
@@ -218,13 +231,14 @@ void register_network(nb::module_& m, const char* network_name, const char* doc)
  */
 void register_logic_networks(nb::module_& m)
 {
-    detail::register_network<py_tec_network>(m, "technology_network", DOC(fiction_networks_technology_network));
-    detail::register_network<py_aig_network>(m, "aig_network",
-                                             "An AND-inverter graph (AIG) with node and output names.");
-    detail::register_network<py_xag_network>(m, "xag_network",
-                                             "An XOR-AND-inverter graph (XAG) with node and output names.");
-    detail::register_network<py_mig_network>(m, "mig_network",
-                                             "A majority-inverter graph (MIG) with node and output names.");
+    detail::register_network<fiction::networks::named_technology_network>(m, "technology_network",
+                                                                          DOC(fiction_networks_technology_network));
+    detail::register_network<fiction::networks::named_aig_network>(
+        m, "aig_network", "An AND-inverter graph (AIG) with node and output names.");
+    detail::register_network<fiction::networks::named_xag_network>(
+        m, "xag_network", "An XOR-AND-inverter graph (XAG) with node and output names.");
+    detail::register_network<fiction::networks::named_mig_network>(
+        m, "mig_network", "A majority-inverter graph (MIG) with node and output names.");
 }
 
 }  // namespace pyfiction

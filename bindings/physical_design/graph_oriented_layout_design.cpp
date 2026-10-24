@@ -16,13 +16,15 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/graph_oriented_layout_design.hpp>
+#include <fiction/types.hpp>
 
 #include <cstdint>
 #include <functional>
 #include <sstream>
+#include <utility>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
@@ -76,6 +78,7 @@ void register_graph_oriented_layout_design(nb::module_& m)
         .value("CUSTOM", graph_oriented_layout_design_options::cost_objective::CUSTOM,
                DOC(fiction_physical_design_graph_oriented_layout_design_params_cost_objective_CUSTOM));
 
+    // Keep the GIL for statistics construction, field access, and bounded report formatting.
     nb::class_<fiction::physical_design::graph_oriented_layout_design_stats>(
         m, "graph_oriented_layout_design_stats", DOC(fiction_physical_design_graph_oriented_layout_design_stats))
         .def(nb::init<>(), "Default constructor.")
@@ -103,7 +106,8 @@ void register_graph_oriented_layout_design(nb::module_& m)
 
     m.def(
         "graph_oriented_layout_design",
-        [](py_tec_network& network, const decltype(graph_oriented_layout_design_options{}.timeout) timeout,
+        [](fiction::networks::named_technology_network&                                     network,
+           const decltype(graph_oriented_layout_design_options{}.timeout)                   timeout,
            const decltype(graph_oriented_layout_design_options{}.num_vertex_expansions)     num_vertex_expansions,
            const decltype(graph_oriented_layout_design_options{}.verbose)                   verbose,
            const decltype(graph_oriented_layout_design_options{}.mode)                      mode,
@@ -117,9 +121,9 @@ void register_graph_oriented_layout_design(nb::module_& m)
            const decltype(graph_oriented_layout_design_options{}
                               .randomize_tiles_to_skip_between_pis)            randomize_tiles_to_skip_between_pis,
            const decltype(graph_oriented_layout_design_options{}.on_progress)& on_progress,
-           const decltype(graph_oriented_layout_design_options{}.on_worker_progress)& on_worker_progress,
-           fiction::physical_design::graph_oriented_layout_design_stats*              statistics,
-           const std::function<uint64_t(const py_cartesian_gate_layout&)>&            custom_cost_objective)
+           const decltype(graph_oriented_layout_design_options{}.on_worker_progress)&     on_worker_progress,
+           fiction::physical_design::graph_oriented_layout_design_stats*                  statistics,
+           const std::function<uint64_t(const fiction::layouts::cartesian_gate_layout&)>& custom_cost_objective)
         {
             graph_oriented_layout_design_options params{};
             params.timeout                             = timeout;
@@ -137,8 +141,8 @@ void register_graph_oriented_layout_design(nb::module_& m)
             params.on_progress                         = on_progress;
             params.on_worker_progress                  = on_worker_progress;
             const nb::gil_scoped_release release{};
-            return fiction::physical_design::graph_oriented_layout_design<py_cartesian_gate_layout, py_tec_network>(
-                network, params, statistics, custom_cost_objective);
+            return fiction::physical_design::graph_oriented_layout_design(network, std::move(params), statistics,
+                                                                          custom_cost_objective);
         },
         nb::arg("network"), nb::kw_only(), nb::arg("timeout") = graph_oriented_layout_design_options{}.timeout,
         nb::arg("num_vertex_expansions")     = graph_oriented_layout_design_options{}.num_vertex_expansions,

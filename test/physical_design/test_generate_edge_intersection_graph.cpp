@@ -16,13 +16,14 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/physical_design/generate_edge_intersection_graph.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
 
+#include <algorithm>
+#include <stdexcept>
 #include <vector>
 
 using namespace fiction;
@@ -31,12 +32,11 @@ using namespace fiction::physical_design;
 
 TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt = gate_level_layout<cartesian_layout>;
     generate_edge_intersection_graph_stats st{};
 
     SECTION("2DDWave")
     {
-        const gate_lyt layout{{2, 2}, clocking::twoddwave()};
+        const cartesian_gate_layout layout{{2, 2}, clocking::twoddwave()};
 
         SECTION("Disjoint paths")
         {
@@ -86,7 +86,7 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
     }
     SECTION("USE")
     {
-        gate_lyt layout{{2, 2}, clocking::use()};
+        cartesian_gate_layout layout{{2, 2}, clocking::use()};
 
         SECTION("Disjoint paths")
         {
@@ -139,12 +139,11 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
 
 TEST_CASE("EPG on 3x3 layouts", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt = gate_level_layout<cartesian_layout>;
     generate_edge_intersection_graph_stats st{};
 
     SECTION("2DDWave")
     {
-        const gate_lyt layout{{3, 3}, clocking::twoddwave()};
+        const cartesian_gate_layout layout{{3, 3}, clocking::twoddwave()};
 
         SECTION("(0,1) to (2,1) and (1,0) to (1,2)")
         {
@@ -185,12 +184,11 @@ TEST_CASE("EPG on 3x3 layouts", "[generate-edge-intersection-graph]")
 
 TEST_CASE("EPG on 4x4 layouts", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt = gate_level_layout<cartesian_layout>;
     generate_edge_intersection_graph_stats st{};
 
     SECTION("2DDWave")
     {
-        const gate_lyt layout{{4, 4}, clocking::twoddwave()};
+        const cartesian_gate_layout layout{{4, 4}, clocking::twoddwave()};
 
         SECTION("(0,0) to (3,3) without obstruction")
         {
@@ -208,7 +206,7 @@ TEST_CASE("EPG on 4x4 layouts", "[generate-edge-intersection-graph]")
     }
     SECTION("USE")
     {
-        const gate_lyt layout{{4, 4}, clocking::use()};
+        const cartesian_gate_layout layout{{4, 4}, clocking::use()};
 
         SECTION("(0,0) to (3,3) without obstruction")
         {
@@ -228,12 +226,11 @@ TEST_CASE("EPG on 4x4 layouts", "[generate-edge-intersection-graph]")
 
 TEST_CASE("EPG on 4x4 layouts with obstruction", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt = gate_level_layout<cartesian_layout>;
     generate_edge_intersection_graph_stats st{};
 
     SECTION("2DDWave")
     {
-        gate_lyt layout{{4, 4}, clocking::twoddwave()};
+        cartesian_gate_layout layout{{4, 4}, clocking::twoddwave()};
 
         SECTION("(0,0) to (3,3) with obstruction")  // 19 valid paths
         {
@@ -254,7 +251,7 @@ TEST_CASE("EPG on 4x4 layouts with obstruction", "[generate-edge-intersection-gr
     }
     SECTION("USE")
     {
-        gate_lyt layout{{4, 4}, clocking::use()};
+        cartesian_gate_layout layout{{4, 4}, clocking::use()};
 
         SECTION("(0,0) to (3,3) with obstruction")  // 1 valid path
         {
@@ -277,8 +274,7 @@ TEST_CASE("EPG on 4x4 layouts with obstruction", "[generate-edge-intersection-gr
 
 TEST_CASE("Limited paths retain interior conflicts", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt = gate_level_layout<cartesian_layout>;
-    const gate_lyt                       layout{{3, 3, 2}, clocking::twoddwave()};
+    const cartesian_gate_layout          layout{{3, 3, 2}, clocking::twoddwave()};
     const std::vector<routing_objective> objectives{{{0, 1}, {2, 1}}, {{1, 0}, {1, 2}}};
     for (const auto limit : {1u, 2u})
     {
@@ -286,4 +282,66 @@ TEST_CASE("Limited paths retain interior conflicts", "[generate-edge-intersectio
         CHECK(graph.size_vertices() == 2);
         CHECK(graph.size_edges() == 1);
     }
+}
+
+TEST_CASE("Candidate labels retain their routing objective", "[generate-edge-intersection-graph]")
+{
+    /** @brief Clocked geometry for routing-objective label checks. */
+    const cartesian_gate_layout layout{{2, 2}, clocking::twoddwave()};
+    /** @brief Routing objectives with two routable pairs and one unroutable pair. */
+    const std::vector<routing_objective> objectives{{{0, 0}, {1, 1}}, {{1, 1}, {0, 0}}, {{0, 0}, {0, 1}}};
+    /** @brief Whether this run limits path enumeration. */
+    for (const auto limited : {false, true})
+    {
+        /** @brief Enumeration options for the current graph run. */
+        generate_edge_intersection_graph_params params{};
+        if (limited)
+        {
+            params.path_limit = 2;
+        }
+        /** @brief Graph statistics used to verify objective labels. */
+        generate_edge_intersection_graph_stats st{};
+        /** @brief Intersection graph for the current enumeration mode. */
+        const auto graph = generate_edge_intersection_graph(layout, objectives, params, &st);
+        CHECK(graph.size_vertices() == 3);
+        CHECK(st.number_of_unroutable_objectives == 1);
+        REQUIRE(st.cliques.size() == 2);
+        CHECK(st.cliques[0].size() == 2);
+        CHECK(st.cliques[1].size() == 1);
+        CHECK(std::count(st.objective_indices.begin(), st.objective_indices.end(), 0) == 2);
+        CHECK(std::count(st.objective_indices.begin(), st.objective_indices.end(), 2) == 1);
+        /** @brief Graph vertex IDs belonging to one routing objective. */
+        for (const auto& clique : st.cliques)
+        {
+            /** @brief Vertex ID whose objective association is checked. */
+            for (const auto id : clique)
+            {
+                /** @brief Routing objective associated with the current graph vertex. */
+                const auto& objective = objectives.at(st.objective_indices.at(id));
+                CHECK(graph.at_vertex(id).source() == objective.source);
+                CHECK(graph.at_vertex(id).target() == objective.target);
+            }
+        }
+    }
+}
+
+TEST_CASE("Intersection graph endpoint validation respects the path limit", "[generate-edge-intersection-graph]")
+{
+    /** @brief Clocked geometry for endpoint validation. */
+    const cartesian_gate_layout layout{{2, 2}, clocking::twoddwave()};
+    /** @brief Routing objective with an out-of-bounds target. */
+    const std::vector<routing_objective> objectives{{.source = {0, 0}, .target = {2, 0}}};
+    CHECK_THROWS_AS(generate_edge_intersection_graph(layout, objectives), std::invalid_argument);
+    CHECK_THROWS_AS(generate_edge_intersection_graph(layout, objectives, {.path_limit = 1}), std::invalid_argument);
+    /** @brief Statistics for the zero-limit graph. */
+    generate_edge_intersection_graph_stats st{};
+    /** @brief Empty graph returned without endpoint validation. */
+    const auto graph = generate_edge_intersection_graph(layout, objectives, {.path_limit = 0}, &st);
+    CHECK(graph.size_vertices() == 0);
+    CHECK(graph.size_edges() == 0);
+    CHECK(st.number_of_unroutable_objectives == 1);
+    CHECK(st.num_vertices == 0);
+    CHECK(st.num_edges == 0);
+    CHECK(st.cliques.empty());
+    CHECK(st.objective_indices.empty());
 }

@@ -19,12 +19,13 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/operational_parameters.hpp"
 #include "pyfiction/simulation_parameters.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/analysis/critical_temperature.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
+
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <sstream>
 #include <vector>
@@ -64,7 +65,8 @@ inline void register_critical_temperature_functions(nb::module_& m)
 
     m.def(
         "critical_temperature_gate_based",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const decltype(operational_options{}.timeout) timeout,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+           const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
            const decltype(operational_options{}.sim_params.epsilon_r) epsilon_r,
@@ -131,6 +133,7 @@ inline void register_critical_temperature_functions(nb::module_& m)
         R"doc(Determine the critical temperature of an SiDB gate implementing the truth tables.
 The keyword options select physical values, operational analysis, confidence, and temperature bounds.
 Raises ValueError for confidence outside (0, 1) or a temperature outside the centikelvin iteration range.
+Raises ValueError for an empty specification or truth tables with different variable counts.
 The overload with input and output wires bypasses automatic wire detection.
 
 Args:
@@ -154,7 +157,7 @@ Args:
 )doc");
     m.def(
         "critical_temperature_gate_based",
-        [](const std::vector<layout>& input_pattern_layouts, const std::vector<py_tt>& spec,
+        [](const std::vector<layout>& input_pattern_layouts, const std::vector<kitty::dynamic_truth_table>& spec,
            const std::vector<bdl_pair>& output_bdl_pairs, const std::vector<bdl_wire>& input_bdl_wires,
            const std::vector<bdl_wire>& output_bdl_wires, const decltype(operational_options{}.timeout) timeout,
            const decltype(operational_options{}.sim_params.base)                            base,
@@ -223,6 +226,9 @@ Args:
         R"doc(Determine the critical temperature of an SiDB gate implementing the truth tables.
 The keyword options select physical values, operational analysis, confidence, and temperature bounds.
 Raises ValueError for confidence outside (0, 1) or a temperature outside the centikelvin iteration range.
+Raises ValueError for an empty specification or truth tables with different variable counts.
+Raises ValueError if the input-layout count differs from the number of input combinations
+or the output BDL pair count differs from the number of truth tables.
 The overload with input and output wires bypasses automatic wire detection.
 
 Args:
@@ -308,6 +314,7 @@ Args:
  */
 void register_critical_temperature(nb::module_& m)
 {
+    // Keep the GIL for statistics properties; native temperature analyses release it.
     /**
      * Critical temperature statistics.
      */

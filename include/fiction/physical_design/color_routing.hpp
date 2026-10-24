@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/physical_design/generate_edge_intersection_graph.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
 #include "fiction/utils/graph/graph_coloring.hpp"
@@ -25,7 +25,6 @@
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
-#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <optional>
@@ -62,6 +61,7 @@ struct color_routing_params
     bool partial_sat = false;
 };
 
+/** @brief Statistics for graph-coloring-based routing. */
 struct color_routing_stats
 {
     /**
@@ -85,10 +85,12 @@ struct color_routing_stats
 namespace detail
 {
 
+/** @brief Routes objectives using an edge intersection graph coloring. */
 template <typename Lyt>
 class color_routing_impl
 {
   public:
+    /** @brief Stores the layout, routing objectives, parameters, and statistics. */
     color_routing_impl(Lyt& lyt, const std::vector<routing_objective>& obj, const color_routing_params& p,
                        color_routing_stats& st) :
             layout{lyt},
@@ -97,6 +99,7 @@ class color_routing_impl
             pst{st}
     {}
 
+    /** @brief Routes objectives, allowing incomplete routing when `conduct_partial_routing` is set. */
     bool run()
     {
         // measure runtime
@@ -218,25 +221,24 @@ class color_routing_impl
  *
  * This function will return `true` if all objectives could be satisfied or if the partial routing parameter was set. In
  * the case of `true` being returned, all determined paths have been routed in the given layout.
+ * When `ps.path_limit` is zero, no candidate paths are generated and endpoint bounds are not checked.
  *
- * @tparam Lyt The gate-level layout type to route.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param lyt A gate-level layout to route.
  * @param objectives The routing objectives as source coordinates and indexed destination inputs to fulfill.
  * @param ps Parameters.
  * @param pst Statistics.
- * @return `true` iff routing was successful, i.e., iff all objectives could be satisfied.
+ * @return `true` iff all objectives are satisfied or partial routing is enabled.
+ * @throws std::invalid_argument If an objective endpoint lies outside the layout extent when ps.path_limit is absent
+ * or nonzero.
  */
-template <typename Lyt>
-bool color_routing(Lyt& lyt, const std::vector<routing_objective>& objectives, color_routing_params ps = {},
-                   color_routing_stats* pst = nullptr)
+template <typename Geometry>
+bool color_routing(layouts::gate_layout<Geometry>& lyt, const std::vector<routing_objective>& objectives,
+                   color_routing_params ps = {}, color_routing_stats* pst = nullptr)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
-
     color_routing_stats st{};
 
-    detail::color_routing_impl<Lyt> p{lyt, objectives, ps, st};
+    detail::color_routing_impl<layouts::gate_layout<Geometry>> p{lyt, objectives, ps, st};
 
     const auto result = p.run();
 

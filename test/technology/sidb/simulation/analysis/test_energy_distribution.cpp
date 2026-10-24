@@ -27,6 +27,7 @@
 #include <fiction/technology/sidb/simulation/analysis/energy_distribution.hpp>
 #include <fiction/technology/sidb/simulation/potential_landscape.hpp>
 
+#include <stdexcept>
 #include <vector>
 
 using namespace fiction;
@@ -34,6 +35,26 @@ using namespace fiction::sidb;
 using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::analysis;
+
+TEST_CASE("Empty energy distributions reject extrema queries", "[energy-distribution]")
+{
+    const energy_distribution distribution{};
+
+    CHECK_THROWS_AS(distribution.min_energy(), std::invalid_argument);
+    CHECK_THROWS_AS(distribution.max_energy(), std::invalid_argument);
+}
+
+TEST_CASE("Energy degeneracy returns the stored state count", "[energy-distribution]")
+{
+    energy_distribution distribution{};
+    distribution.add_energy_state({-1.0, 7});
+    distribution.add_energy_state({0.0, 3});
+
+    CHECK(distribution.degeneracy(-1.0) == 7);
+    CHECK(distribution.degeneracy(-1.0 + 1e-7) == 7);
+    CHECK(distribution.degeneracy(0.0) == 3);
+    CHECK_FALSE(distribution.degeneracy(1.0).has_value());
+}
 
 TEST_CASE("Test calculate_energy_distribution function", "[energy-distribution]")
 {

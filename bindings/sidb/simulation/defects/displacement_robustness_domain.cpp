@@ -17,10 +17,11 @@
 
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/operational_parameters.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/defects/displacement_robustness_domain.hpp>
+
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <cmath>
 #include <optional>
@@ -53,6 +54,7 @@ using displacement_robustness_domain_options =
  */
 void register_displacement_robustness_domain(nb::module_& m)
 {
+    // Keep the GIL for domain and statistics properties; the native robustness analysis releases it.
     using fiction::sidb::layout;
     using fiction::sidb::simulation::defects::displacement_robustness_domain;
 
@@ -102,7 +104,7 @@ void register_displacement_robustness_domain(nb::module_& m)
 
     m.def(
         "determine_displacement_robustness_domain",
-        [](const layout& lyt, const std::vector<py_tt>& spec,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
            const decltype(displacement_robustness_domain_options{}.analysis_mode)           analysis_mode,
            const decltype(displacement_robustness_domain_options{}.displacement_variations) displacement_variations,
            const decltype(operational_options{}.timeout)                                    timeout,

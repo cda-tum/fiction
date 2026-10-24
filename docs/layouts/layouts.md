@@ -1,5 +1,8 @@
 # Layouts
 
+Layouts represent coordinates, geometry, clocking, and circuit placement.
+Use gate-level layouts for logic gates and wires, and cell grids to map tiles to cells.
+
 ```{toctree}
 :maxdepth: 1
 
@@ -9,56 +12,12 @@ cell_grid
 clocking_scheme
 clocking_state
 coordinates
-gate_level_layout
+gate_layout
 hexagonal_layout
 obstructions
 shifted_cartesian_layout
 io/io
+layout_utils
+traits
+types
 ```
-
-## Layout Utils
-
-::::{tab-set}
-:sync-group: language
-
-:::{tab-item} C++
-:sync: cpp
-
-**Header:** `fiction/layouts/layout_utils.hpp`
-
-```{doxygenfunction} fiction::layouts::num_adjacent_coordinates
-
-```
-
-```{doxygenfunction} fiction::layouts::relative_to_absolute_cell_position
-
-```
-
-```{doxygenfunction} fiction::layouts::port_direction_to_coordinate
-
-```
-
-```{doxygenfunction} fiction::layouts::normalize_layout_coordinates
-
-```
-
-```{doxygenfunction} fiction::layouts::random_coordinate
-
-```
-
-:::
-
-:::{tab-item} Python
-:sync: python
-
-```{eval-rst}
-.. autofunction:: mnt.pyfiction.layouts.num_adjacent_coordinates
-
-.. autofunction:: mnt.pyfiction.layouts.normalize_layout_coordinates
-
-.. autofunction:: mnt.pyfiction.layouts.random_coordinate
-```
-
-:::
-
-::::

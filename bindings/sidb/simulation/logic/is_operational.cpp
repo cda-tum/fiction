@@ -17,11 +17,12 @@
 
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/operational_parameters.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
+
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <optional>
 #include <vector>
@@ -60,7 +61,8 @@ inline void register_is_operational_functions(nb::module_& m)
 
     m.def(
         "is_operational",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const decltype(is_operational_options{}.timeout) timeout,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+           const decltype(is_operational_options{}.timeout)              timeout,
            const decltype(is_operational_options{}.sim_params.base)      base,
            const decltype(is_operational_options{}.sim_params.mu_minus)  mu_minus,
            const decltype(is_operational_options{}.sim_params.epsilon_r) epsilon_r,
@@ -85,6 +87,7 @@ inline void register_is_operational_functions(nb::module_& m)
                                             threshold_bdl_interdistance, minimum_distance, maximum_distance,
                                             input_bdl_config, op_condition, strategy_to_analyze_operational_status);
 
+            const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::is_operational(lyt, spec, params);
         },
         nb::arg("lyt"), nb::arg("spec"), nb::kw_only(), nb::arg("timeout") = is_operational_options{}.timeout,
@@ -120,10 +123,14 @@ Args:
     input_bdl_config: Input encoding: perturber absence or perturber distance.
     op_condition: Condition used to decide whether the layout is operational.
     strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+Raises:
+    ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+        a QuickSim simulation requests base 3.
 )doc");
     m.def(
         "is_operational",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const wires& in, const wires& out,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const wires& in, const wires& out,
            const decltype(is_operational_options{}.timeout)                                    timeout,
            const decltype(is_operational_options{}.sim_params.base)                            base,
            const decltype(is_operational_options{}.sim_params.mu_minus)                        mu_minus,
@@ -148,6 +155,7 @@ Args:
                 minimum_distance, maximum_distance, input_bdl_config, op_condition,
                 strategy_to_analyze_operational_status);
 
+            const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::is_operational(lyt, spec, params, in, out, canvas_lyt);
         },
         nb::arg("lyt"), nb::arg("spec"), nb::arg("input_bdl_wire"), nb::arg("output_bdl_wire"), nb::kw_only(),
@@ -183,11 +191,16 @@ Args:
     op_condition: Condition used to decide whether the layout is operational.
     canvas_lyt: Optional canvas layout for operational analysis.
     strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+Raises:
+    ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+        a QuickSim simulation requests base 3, or filtering with rejected kinks encounters a canvas site
+        absent from the layout.
 )doc");
     m.def(
         "is_operational",
-        [](const std::vector<layout>& input_pattern_layouts, const std::vector<py_tt>& spec, const wires& in,
-           const wires& out, const decltype(is_operational_options{}.timeout) timeout,
+        [](const std::vector<layout>& input_pattern_layouts, const std::vector<kitty::dynamic_truth_table>& spec,
+           const wires& in, const wires& out, const decltype(is_operational_options{}.timeout) timeout,
            const decltype(is_operational_options{}.sim_params.base)                            base,
            const decltype(is_operational_options{}.sim_params.mu_minus)                        mu_minus,
            const decltype(is_operational_options{}.sim_params.epsilon_r)                       epsilon_r,
@@ -211,6 +224,7 @@ Args:
                 minimum_distance, maximum_distance, input_bdl_config, op_condition,
                 strategy_to_analyze_operational_status);
 
+            const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::is_operational(input_pattern_layouts, spec, params, in, out,
                                                                     canvas_lyt);
         },
@@ -247,10 +261,16 @@ Args:
     op_condition: Condition used to decide whether the layout is operational.
     canvas_lyt: Optional canvas layout for operational analysis.
     strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+Raises:
+    ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, a
+        QuickSim simulation requests base 3, the layout count does not match the number of input patterns, or
+        filtering with rejected kinks encounters a canvas site absent from the layout.
 )doc");
     m.def(
         "operational_input_patterns",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const decltype(is_operational_options{}.timeout) timeout,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+           const decltype(is_operational_options{}.timeout)              timeout,
            const decltype(is_operational_options{}.sim_params.base)      base,
            const decltype(is_operational_options{}.sim_params.mu_minus)  mu_minus,
            const decltype(is_operational_options{}.sim_params.epsilon_r) epsilon_r,
@@ -275,6 +295,7 @@ Args:
                                             threshold_bdl_interdistance, minimum_distance, maximum_distance,
                                             input_bdl_config, op_condition, strategy_to_analyze_operational_status);
 
+            const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::operational_input_patterns(lyt, spec, params);
         },
         nb::arg("lyt"), nb::arg("spec"), nb::kw_only(), nb::arg("timeout") = is_operational_options{}.timeout,
@@ -309,10 +330,14 @@ Args:
     input_bdl_config: Input encoding: perturber absence or perturber distance.
     op_condition: Condition used to decide whether the layout is operational.
     strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+Raises:
+    ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+        a QuickSim simulation requests base 3.
 )doc");
     m.def(
         "operational_input_patterns",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const wires& in, const wires& out,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const wires& in, const wires& out,
            const decltype(is_operational_options{}.timeout)                                    timeout,
            const decltype(is_operational_options{}.sim_params.base)                            base,
            const decltype(is_operational_options{}.sim_params.mu_minus)                        mu_minus,
@@ -337,6 +362,7 @@ Args:
                 minimum_distance, maximum_distance, input_bdl_config, op_condition,
                 strategy_to_analyze_operational_status);
 
+            const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::operational_input_patterns(lyt, spec, params, in, out, canvas_lyt);
         },
         nb::arg("lyt"), nb::arg("spec"), nb::arg("input_bdl_wire"), nb::arg("output_bdl_wire"), nb::kw_only(),
@@ -371,10 +397,15 @@ Args:
     op_condition: Condition used to decide whether the layout is operational.
     canvas_lyt: Optional canvas layout for operational analysis.
     strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+Raises:
+    ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+        a QuickSim simulation requests base 3.
 )doc");
     m.def(
         "kink_induced_non_operational_input_patterns",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const decltype(is_operational_options{}.timeout) timeout,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+           const decltype(is_operational_options{}.timeout)              timeout,
            const decltype(is_operational_options{}.sim_params.base)      base,
            const decltype(is_operational_options{}.sim_params.mu_minus)  mu_minus,
            const decltype(is_operational_options{}.sim_params.epsilon_r) epsilon_r,
@@ -399,6 +430,7 @@ Args:
                                             threshold_bdl_interdistance, minimum_distance, maximum_distance,
                                             input_bdl_config, op_condition, strategy_to_analyze_operational_status);
 
+            const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::kink_induced_non_operational_input_patterns(lyt, spec, params);
         },
         nb::arg("lyt"), nb::arg("spec"), nb::kw_only(), nb::arg("timeout") = is_operational_options{}.timeout,
@@ -433,10 +465,14 @@ Args:
     input_bdl_config: Input encoding: perturber absence or perturber distance.
     op_condition: Condition used to decide whether the layout is operational.
     strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+Raises:
+    ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+        a QuickSim simulation requests base 3.
 )doc");
     m.def(
         "kink_induced_non_operational_input_patterns",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const wires& in, const wires& out,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const wires& in, const wires& out,
            const decltype(is_operational_options{}.timeout)                                    timeout,
            const decltype(is_operational_options{}.sim_params.base)                            base,
            const decltype(is_operational_options{}.sim_params.mu_minus)                        mu_minus,
@@ -461,6 +497,7 @@ Args:
                 minimum_distance, maximum_distance, input_bdl_config, op_condition,
                 strategy_to_analyze_operational_status);
 
+            const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::kink_induced_non_operational_input_patterns(lyt, spec, params, in,
                                                                                                  out, canvas_lyt);
         },
@@ -496,10 +533,15 @@ Args:
     op_condition: Condition used to decide whether the layout is operational.
     canvas_lyt: Optional canvas layout for operational analysis.
     strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+Raises:
+    ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+        a QuickSim simulation requests base 3.
 )doc");
     m.def(
         "is_kink_induced_non_operational",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const decltype(is_operational_options{}.timeout) timeout,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+           const decltype(is_operational_options{}.timeout)              timeout,
            const decltype(is_operational_options{}.sim_params.base)      base,
            const decltype(is_operational_options{}.sim_params.mu_minus)  mu_minus,
            const decltype(is_operational_options{}.sim_params.epsilon_r) epsilon_r,
@@ -524,6 +566,7 @@ Args:
                                             threshold_bdl_interdistance, minimum_distance, maximum_distance,
                                             input_bdl_config, op_condition, strategy_to_analyze_operational_status);
 
+            const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::is_kink_induced_non_operational(lyt, spec, params);
         },
         nb::arg("lyt"), nb::arg("spec"), nb::kw_only(), nb::arg("timeout") = is_operational_options{}.timeout,
@@ -558,10 +601,14 @@ Args:
     input_bdl_config: Input encoding: perturber absence or perturber distance.
     op_condition: Condition used to decide whether the layout is operational.
     strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+Raises:
+    ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+        a QuickSim simulation requests base 3.
 )doc");
     m.def(
         "is_kink_induced_non_operational",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const wires& in, const wires& out,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const wires& in, const wires& out,
            const decltype(is_operational_options{}.timeout)                                    timeout,
            const decltype(is_operational_options{}.sim_params.base)                            base,
            const decltype(is_operational_options{}.sim_params.mu_minus)                        mu_minus,
@@ -586,6 +633,7 @@ Args:
                 minimum_distance, maximum_distance, input_bdl_config, op_condition,
                 strategy_to_analyze_operational_status);
 
+            const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::is_kink_induced_non_operational(lyt, spec, params, in, out,
                                                                                      canvas_lyt);
         },
@@ -620,6 +668,10 @@ Args:
     op_condition: Condition used to decide whether the layout is operational.
     canvas_lyt: Optional canvas layout for operational analysis.
     strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+Raises:
+    ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+        a QuickSim simulation requests base 3, or filtering encounters a canvas site absent from the layout.
 )doc");
 }
 

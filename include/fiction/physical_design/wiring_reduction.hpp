@@ -20,7 +20,7 @@
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
 #include "fiction/physical_design/path_finding/a_star.hpp"
@@ -374,7 +374,7 @@ class wiring_reduction_layout : public layouts::cartesian_layout
  * @return wiring_reduction_layout suitable for finding excess wiring via A*.
  */
 inline wiring_reduction_layout
-create_wiring_reduction_layout(const fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
+create_wiring_reduction_layout(const fiction::layouts::gate_layout<fiction::layouts::cartesian_layout>& lyt,
                                const int32_t x_offset = 0, const int32_t y_offset = 0,
                                search_direction direction = search_direction::HORIZONTAL)
 {
@@ -676,8 +676,7 @@ template <typename WiringReductionLyt>
 
     static const physical_design::path_finding::a_star_params params{false};
 
-    return physical_design::path_finding::a_star<layout_coordinate_path>(lyt, {start, end}, dist(), cost(), params,
-                                                                         lyt.search_obstructions);
+    return physical_design::path_finding::a_star(lyt, {start, end}, dist(), cost(), params, lyt.search_obstructions);
 }
 /**
  * Update the to-delete list based on a possible path in a wiring_reduction_layout.
@@ -822,7 +821,7 @@ determine_new_coord(const WiringReductionLyt& wiring_reduction_lyt, const int32_
  * @throws std::invalid_argument If a cut selects a retained object or a cyclic wire chain.
  */
 template <typename WiringReductionLyt>
-inline void delete_wires(fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
+inline void delete_wires(fiction::layouts::gate_layout<fiction::layouts::cartesian_layout>& lyt,
                          const WiringReductionLyt& wiring_reduction_layout, const layout_coordinate_path& to_delete)
 {
     const auto offsets = calculate_offset_matrix(wiring_reduction_layout, to_delete);
@@ -908,7 +907,7 @@ class wiring_reduction_impl
 {
   public:
     /** @brief Initializes a wiring-cut search. @param lyt Layout. @param p Parameters. @param st Statistics. */
-    wiring_reduction_impl(fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
+    wiring_reduction_impl(fiction::layouts::gate_layout<fiction::layouts::cartesian_layout>& lyt,
                           wiring_reduction_params p, wiring_reduction_stats& st) :
             plyt{lyt},
             ps{std::move(p)},
@@ -1055,7 +1054,7 @@ class wiring_reduction_impl
     /**
      * The 2DDWave-clocked layout whose wiring is to be reduced.
      */
-    fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& plyt;
+    fiction::layouts::gate_layout<fiction::layouts::cartesian_layout>& plyt;
     /**
      * Wiring reduction parameters.
      */
@@ -1096,7 +1095,7 @@ class wiring_reduction_impl
  * @throws std::invalid_argument If clocking or occupied geometry is invalid.
  * @throws std::overflow_error If the extent leaves no room for signed routing coordinates.
  */
-inline void wiring_reduction(fiction::layouts::gate_level_layout<fiction::layouts::cartesian_layout>& lyt,
+inline void wiring_reduction(fiction::layouts::gate_layout<fiction::layouts::cartesian_layout>& lyt,
                              wiring_reduction_params ps = {}, wiring_reduction_stats* pst = nullptr)
 {
     if (!lyt.is_clocking_scheme(layouts::clocking::TWODDWAVE_NAME))

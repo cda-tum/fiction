@@ -24,9 +24,9 @@
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
-#include <fiction/types.hpp>
 
 #include <fmt/format.h>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <array>
@@ -73,22 +73,22 @@ try
                        "#Lp3/N [%]",                           // double
                        "t_pruning [s]"};                       // double
 
-    const auto truth_tables_and_names = std::array<std::pair<std::vector<tt>, std::string>, 15>{
-        {{std::vector<tt>{create_not_tt()}, "inv"},
-         {std::vector<tt>{create_id_tt()}, "wire"},
-         {std::vector<tt>{create_and_tt()}, "and"},
-         {std::vector<tt>{create_nand_tt()}, "nand"},
-         {std::vector<tt>{create_or_tt()}, "or"},
-         {std::vector<tt>{create_nor_tt()}, "nor"},
-         {std::vector<tt>{create_xor_tt()}, "xor"},
-         {std::vector<tt>{create_xnor_tt()}, "xnor"},
-         {std::vector<tt>{create_lt_tt()}, "lt"},
-         {std::vector<tt>{create_gt_tt()}, "gt"},
-         {std::vector<tt>{create_le_tt()}, "le"},
-         {std::vector<tt>{create_ge_tt()}, "ge"},
-         {std::vector<tt>{create_crossing_wire_tt()}, "cx"},
-         {std::vector<tt>{create_half_adder_tt()}, "ha"},
-         {std::vector<tt>{create_double_wire_tt()}, "hourglass"}}};
+    const auto truth_tables_and_names = std::array<std::pair<std::vector<kitty::dynamic_truth_table>, std::string>, 15>{
+        {{std::vector<kitty::dynamic_truth_table>{create_not_tt()}, "inv"},
+         {std::vector<kitty::dynamic_truth_table>{create_id_tt()}, "wire"},
+         {std::vector<kitty::dynamic_truth_table>{create_and_tt()}, "and"},
+         {std::vector<kitty::dynamic_truth_table>{create_nand_tt()}, "nand"},
+         {std::vector<kitty::dynamic_truth_table>{create_or_tt()}, "or"},
+         {std::vector<kitty::dynamic_truth_table>{create_nor_tt()}, "nor"},
+         {std::vector<kitty::dynamic_truth_table>{create_xor_tt()}, "xor"},
+         {std::vector<kitty::dynamic_truth_table>{create_xnor_tt()}, "xnor"},
+         {std::vector<kitty::dynamic_truth_table>{create_lt_tt()}, "lt"},
+         {std::vector<kitty::dynamic_truth_table>{create_gt_tt()}, "gt"},
+         {std::vector<kitty::dynamic_truth_table>{create_le_tt()}, "le"},
+         {std::vector<kitty::dynamic_truth_table>{create_ge_tt()}, "ge"},
+         {std::vector<kitty::dynamic_truth_table>{create_crossing_wire_tt()}, "cx"},
+         {std::vector<kitty::dynamic_truth_table>{create_half_adder_tt()}, "ha"},
+         {std::vector<kitty::dynamic_truth_table>{create_double_wire_tt()}, "hourglass"}}};
 
     static const std::string folder = fmt::format("{}/gate_skeletons/skeleton_bestagons_with_tags", EXPERIMENTS_PATH);
 

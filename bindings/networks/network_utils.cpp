@@ -15,10 +15,10 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/networks/network_utils.hpp>
 #include <fiction/synthesis/network_conversion.hpp>
+#include <fiction/types.hpp>
 
 #include <mockturtle/generators/random_network.hpp>
 
@@ -59,6 +59,7 @@ void register_random_network(nb::module_& m, const char* signature)
     const auto generate =
         [](const uint32_t inputs, const uint32_t gates, const uint64_t seed, const nb::handle network_type)
     {
+        // Keep the GIL for Python type dispatch, then release it for native generation.
         if (!network_type.is(nb::type<Ntk>()))
         {
             throw nb::next_overload();
@@ -73,15 +74,15 @@ void register_random_network(nb::module_& m, const char* signature)
                                                                       .num_gates = gates};
         auto                                                   generator = [&params]()
         {
-            if constexpr (std::is_same_v<Ntk, py_aig_network>)
+            if constexpr (std::is_same_v<Ntk, fiction::networks::named_aig_network>)
             {
                 return mockturtle::random_aig_generator(params);
             }
-            else if constexpr (std::is_same_v<Ntk, py_xag_network>)
+            else if constexpr (std::is_same_v<Ntk, fiction::networks::named_xag_network>)
             {
                 return mockturtle::random_xag_generator(params);
             }
-            else if constexpr (std::is_same_v<Ntk, py_mig_network>)
+            else if constexpr (std::is_same_v<Ntk, fiction::networks::named_mig_network>)
             {
                 return mockturtle::random_mig_generator(params);
             }
@@ -94,7 +95,7 @@ void register_random_network(nb::module_& m, const char* signature)
         network.set_network_name(std::to_string(seed));
         return network;
     };
-    if constexpr (std::is_same_v<Ntk, py_tec_network>)
+    if constexpr (std::is_same_v<Ntk, fiction::networks::named_technology_network>)
     {
         m.def("random_network", generate, nb::arg("inputs"), nb::arg("gates"), nb::arg("seed"), nb::kw_only(),
               nb::arg("network_type") = nb::type<Ntk>(), nb::sig(signature),
@@ -123,21 +124,24 @@ void register_network_utils(nb::module_& m)
         PyExc_ValueError);  // NOLINT(misc-include-cleaner): included through nanobind.h
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 
-    m.def("has_high_degree_fanin_nodes", &fiction::networks::has_high_degree_fanin_nodes<py_tec_network>,
-          nb::arg("ntk"), nb::arg("threshold") = 2, DOC(fiction_networks_has_high_degree_fanin_nodes));
-    detail::register_random_network<py_tec_network>(
+    m.def("has_high_degree_fanin_nodes",
+          &fiction::networks::has_high_degree_fanin_nodes<fiction::networks::named_technology_network>, nb::arg("ntk"),
+          nb::arg("threshold") = 2, DOC(fiction_networks_has_high_degree_fanin_nodes),
+          nb::call_guard<nb::gil_scoped_release>());
+    detail::register_random_network<fiction::networks::named_technology_network>(
         m, "def random_network(inputs: int, gates: int, seed: int, *, network_type: "
            "type[mnt.pyfiction.networks.technology_network] = mnt.pyfiction.networks.technology_network) -> "
            "mnt.pyfiction.networks.technology_network");
-    detail::register_random_network<py_aig_network>(
+    detail::register_random_network<fiction::networks::named_aig_network>(
         m, "def random_network(inputs: int, gates: int, seed: int, *, network_type: "
            "type[mnt.pyfiction.networks.aig_network]) -> mnt.pyfiction.networks.aig_network");
-    detail::register_random_network<py_xag_network>(
+    detail::register_random_network<fiction::networks::named_xag_network>(
         m, "def random_network(inputs: int, gates: int, seed: int, *, network_type: "
            "type[mnt.pyfiction.networks.xag_network]) -> mnt.pyfiction.networks.xag_network");
-    detail::register_random_network<py_mig_network>(
+    detail::register_random_network<fiction::networks::named_mig_network>(
         m, "def random_network(inputs: int, gates: int, seed: int, *, network_type: "
            "type[mnt.pyfiction.networks.mig_network]) -> mnt.pyfiction.networks.mig_network");
+    // Keep the GIL for the Python type-error fallback.
     m.def(
         "random_network", [](const uint32_t, const uint32_t, const uint64_t, const nb::handle) -> nb::object
         { throw nb::type_error("network_type must be a registered network class"); }, nb::arg("inputs"),

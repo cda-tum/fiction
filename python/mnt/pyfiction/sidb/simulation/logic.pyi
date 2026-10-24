@@ -8,7 +8,7 @@
 
 """Operational analysis of SiDB logic."""
 
-import datetime
+import datetime as dt
 import enum
 from collections.abc import Callable, Iterator, Sequence
 from typing import Annotated, overload
@@ -408,25 +408,25 @@ class bdl_wire:
 
     @property
     def pairs(self) -> list[bdl_pair]:
-        """The BDL pairs of the wire."""
+        """The BDL pairs of the wire. Empty by default."""
 
     @pairs.setter
     def pairs(self, arg: Sequence[bdl_pair], /) -> None: ...
     @property
     def direction(self) -> bdl_wire.port_direction:
-        """Port direction of the wire."""
+        """Port direction of the wire. Defaults to `NONE`."""
 
     @direction.setter
     def direction(self, arg: bdl_wire.port_direction, /) -> None: ...
     @property
     def first_bdl_pair(self) -> bdl_pair | None:
-        """First BDL pair of the wire."""
+        """First BDL pair of the wire. Unset by default (`None` in Python)."""
 
     @first_bdl_pair.setter
     def first_bdl_pair(self, arg: bdl_pair | None, /) -> None: ...
     @property
     def last_bdl_pair(self) -> bdl_pair | None:
-        """Last BDL pair of the wire."""
+        """Last BDL pair of the wire. Unset by default (`None` in Python)."""
 
     @last_bdl_pair.setter
     def last_bdl_pair(self, arg: bdl_pair | None, /) -> None: ...
@@ -456,8 +456,8 @@ class bdl_wire:
             t: The SiDB type to look for.
 
         Returns:
-            The first BDL pair of type `t`, or `std::nullopt` if the wire has
-            none.
+            The first BDL pair of type `t`, or `std::nullopt` (`None` in
+            Python) if the wire has none.
         """
 
     def __eq__(self, arg: bdl_wire, /) -> bool:
@@ -608,6 +608,10 @@ def is_operational(
         input_bdl_config: Input encoding: perturber absence or perturber distance.
         op_condition: Condition used to decide whether the layout is operational.
         strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+    Raises:
+        ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+            a QuickSim simulation requests base 3.
     """
 
 @overload
@@ -629,7 +633,32 @@ def is_operational(
     op_condition: operational_condition = ...,
     strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
     canvas_lyt: mnt.pyfiction.sidb.sidb_layout | None = None,
-) -> tuple[operational_status, int]: ...
+) -> tuple[operational_status, int]:
+    """
+    Determine whether the SiDB layout implements the supplied truth tables for every input pattern.
+    The keyword options select physical values, simulation, BDL encoding, and operational analysis.
+    Overloads accept supplied wires or one layout per input pattern.
+
+    Args:
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        sim_engine: SiDB simulation engine used for operational analysis.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        op_condition: Condition used to decide whether the layout is operational.
+        canvas_lyt: Optional canvas layout for operational analysis.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+    Raises:
+        ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+            a QuickSim simulation requests base 3, or filtering with rejected kinks encounters a canvas site
+            absent from the layout.
+    """
+
 @overload
 def is_operational(
     input_pattern_layouts: Sequence[mnt.pyfiction.sidb.sidb_layout],
@@ -668,6 +697,11 @@ def is_operational(
         op_condition: Condition used to decide whether the layout is operational.
         canvas_lyt: Optional canvas layout for operational analysis.
         strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+    Raises:
+        ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, a
+            QuickSim simulation requests base 3, the layout count does not match the number of input patterns, or
+            filtering with rejected kinks encounters a canvas site absent from the layout.
     """
 
 @overload
@@ -705,6 +739,10 @@ def operational_input_patterns(
         input_bdl_config: Input encoding: perturber absence or perturber distance.
         op_condition: Condition used to decide whether the layout is operational.
         strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+    Raises:
+        ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+            a QuickSim simulation requests base 3.
     """
 
 @overload
@@ -744,6 +782,10 @@ def operational_input_patterns(
         op_condition: Condition used to decide whether the layout is operational.
         canvas_lyt: Optional canvas layout for operational analysis.
         strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+    Raises:
+        ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+            a QuickSim simulation requests base 3.
     """
 
 @overload
@@ -781,6 +823,10 @@ def kink_induced_non_operational_input_patterns(
         input_bdl_config: Input encoding: perturber absence or perturber distance.
         op_condition: Condition used to decide whether the layout is operational.
         strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+    Raises:
+        ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+            a QuickSim simulation requests base 3.
     """
 
 @overload
@@ -820,6 +866,10 @@ def kink_induced_non_operational_input_patterns(
         op_condition: Condition used to decide whether the layout is operational.
         canvas_lyt: Optional canvas layout for operational analysis.
         strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+    Raises:
+        ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+            a QuickSim simulation requests base 3.
     """
 
 @overload
@@ -857,6 +907,10 @@ def is_kink_induced_non_operational(
         input_bdl_config: Input encoding: perturber absence or perturber distance.
         op_condition: Condition used to decide whether the layout is operational.
         strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+    Raises:
+        ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+            a QuickSim simulation requests base 3.
     """
 
 @overload
@@ -896,6 +950,10 @@ def is_kink_induced_non_operational(
         op_condition: Condition used to decide whether the layout is operational.
         canvas_lyt: Optional canvas layout for operational analysis.
         strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+    Raises:
+        ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+            a QuickSim simulation requests base 3, or filtering encounters a canvas site absent from the layout.
     """
 
 class parameter_point:
@@ -1001,7 +1059,7 @@ class critical_temperature_domain:
             The dimension at the specified index.
 
         Raises:
-            std::out_of_range: if the index is out of range.
+            IndexError: if the index is out of range.
         """
 
     def get_number_of_dimensions(self) -> int:
@@ -1103,7 +1161,7 @@ class operational_domain:
             The dimension at the specified index.
 
         Raises:
-            std::out_of_range: if the index is out of range.
+            IndexError: if the index is out of range.
         """
 
     def get_number_of_dimensions(self) -> int:
@@ -1150,7 +1208,10 @@ class operational_domain:
 class operational_domain_value_range:
     """
     A range of values for a dimension sweep. The range is defined by a
-    minimum value, a maximum value and a step size.
+    minimum value, a maximum value and a step size. Generated coordinates
+    must occupy distinct `parameter_point` identity cells, whose width is
+    `utils::math::ERROR_MARGIN`. Domain algorithms throw `ValueError` if
+    coordinates collide.
     """
 
     @overload
@@ -1165,19 +1226,19 @@ class operational_domain_value_range:
     def dimension(self, arg: sweep_parameter, /) -> None: ...
     @property
     def min(self) -> float:
-        """The minimum value of the dimension sweep."""
+        """The minimum value of the dimension sweep. Defaults to 1.0."""
 
     @min.setter
     def min(self, arg: float, /) -> None: ...
     @property
     def max(self) -> float:
-        """The maximum value of the dimension sweep."""
+        """The maximum value of the dimension sweep. Defaults to 10.0."""
 
     @max.setter
     def max(self, arg: float, /) -> None: ...
     @property
     def step(self) -> float:
-        """The step size of the dimension sweep."""
+        """The step size of the dimension sweep. Defaults to 0.1."""
 
     @step.setter
     def step(self, arg: float, /) -> None: ...
@@ -1192,7 +1253,7 @@ class operational_domain_stats:
         """Default constructor."""
 
     @property
-    def time_total(self) -> datetime.timedelta:
+    def time_total(self) -> dt.timedelta:
         """The total runtime of the operational domain computation."""
 
     @property

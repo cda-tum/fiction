@@ -1,6 +1,6 @@
 FROM ubuntu:26.04
 
-COPY --from=ghcr.io/astral-sh/uv:0.12.15 /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.13.4 /uv /usr/local/bin/uv
 
 # Optional argument to run the build in parallel with the specified NUMBER_OF_JOBS
 ARG NUMBER_OF_JOBS=4

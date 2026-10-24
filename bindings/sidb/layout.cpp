@@ -48,6 +48,7 @@ namespace pyfiction
  */
 void register_layout(nb::module_& m)
 {
+    // Keep the GIL for scalar queries, binary searches, and views converted through the Python API.
     using fiction::sidb::layout;
 
     nb::enum_<fiction::sidb::dot_tag>(m, "sidb_dot_tag", DOC(fiction_sidb_dot_tag))
@@ -60,67 +61,86 @@ void register_layout(nb::module_& m)
     nb::class_<layout>(m, "sidb_layout", DOC(fiction_sidb_layout))
         .def(nb::init<>(), DOC(fiction_sidb_layout_layout))
         .def(nb::init<const fiction::sidb::lattice&, std::string>(), nb::arg("lattice"), nb::arg("name") = "",
-             DOC(fiction_sidb_layout_layout_2))
+             parameter_doc(DOC(fiction_sidb_layout_layout_2), {{"lat", "lattice"}}).c_str())
         .def("get_lattice", &layout::get_lattice, DOC(fiction_sidb_layout_get_lattice))
-        .def("set_lattice", &layout::set_lattice, nb::arg("lattice"), DOC(fiction_sidb_layout_set_lattice))
+        .def("set_lattice", &layout::set_lattice, nb::arg("lattice"),
+             parameter_doc(DOC(fiction_sidb_layout_set_lattice), {{"lat", "lattice"}}).c_str())
         .def("get_layout_name", &layout::get_layout_name, DOC(fiction_sidb_layout_get_layout_name))
         .def("set_layout_name", &layout::set_layout_name, nb::arg("name"), DOC(fiction_sidb_layout_set_layout_name))
 
+        // Keep the GIL for individual site updates; a release adds overhead to these common mutations.
         .def("assign_sidb", &layout::assign_sidb, nb::arg("site"), nb::arg("dot_tag") = fiction::sidb::dot_tag::NORMAL,
-             DOC(fiction_sidb_layout_assign_sidb))
-        .def("get_dot_tag", &layout::get_dot_tag, nb::arg("site"), DOC(fiction_sidb_layout_get_dot_tag))
-        .def("is_empty_site", &layout::is_empty_site, nb::arg("site"), DOC(fiction_sidb_layout_is_empty_site))
+             parameter_doc(DOC(fiction_sidb_layout_assign_sidb), {{"s", "site"}, {"tag", "dot_tag"}}).c_str())
+        .def("get_dot_tag", &layout::get_dot_tag, nb::arg("site"),
+             parameter_doc(DOC(fiction_sidb_layout_get_dot_tag), {{"s", "site"}}).c_str())
+        .def("is_empty_site", &layout::is_empty_site, nb::arg("site"),
+             parameter_doc(DOC(fiction_sidb_layout_is_empty_site), {{"s", "site"}}).c_str())
         .def("is_empty", &layout::is_empty, DOC(fiction_sidb_layout_is_empty))
         .def("num_dots", &layout::num_dots, DOC(fiction_sidb_layout_num_dots))
-        .def("num_dots_with_tag", &layout::num_dots_with_tag, nb::arg("dot_tag"),
-             DOC(fiction_sidb_layout_num_dots_with_tag))
-        .def("dots_with_tag", &layout::dots_with_tag, nb::arg("dot_tag"), DOC(fiction_sidb_layout_dots_with_tag))
+        .def("num_dots_with_tag", &layout::num_dots_with_tag, nb::call_guard<nb::gil_scoped_release>(),
+             nb::arg("dot_tag"),
+             parameter_doc(DOC(fiction_sidb_layout_num_dots_with_tag), {{"tag", "dot_tag"}}).c_str())
+        .def("dots_with_tag", &layout::dots_with_tag, nb::call_guard<nb::gil_scoped_release>(), nb::arg("dot_tag"),
+             parameter_doc(DOC(fiction_sidb_layout_dots_with_tag), {{"tag", "dot_tag"}}).c_str())
         .def("sidbs", &layout::sidbs, DOC(fiction_sidb_layout_sidbs))
-        .def("index_of", &layout::index_of, nb::arg("site"), DOC(fiction_sidb_layout_index_of))
-        .def("num_pis", &layout::num_pis, DOC(fiction_sidb_layout_num_pis))
-        .def("num_pos", &layout::num_pos, DOC(fiction_sidb_layout_num_pos))
-        .def("is_pi", &layout::is_pi, nb::arg("site"), DOC(fiction_sidb_layout_is_pi))
-        .def("is_po", &layout::is_po, nb::arg("site"), DOC(fiction_sidb_layout_is_po))
+        .def("index_of", &layout::index_of, nb::arg("site"),
+             parameter_doc(DOC(fiction_sidb_layout_index_of), {{"s", "site"}}).c_str())
+        .def("num_pis", &layout::num_pis, nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_sidb_layout_num_pis))
+        .def("num_pos", &layout::num_pos, nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_sidb_layout_num_pos))
+        .def("is_pi", &layout::is_pi, nb::arg("site"),
+             parameter_doc(DOC(fiction_sidb_layout_is_pi), {{"s", "site"}}).c_str())
+        .def("is_po", &layout::is_po, nb::arg("site"),
+             parameter_doc(DOC(fiction_sidb_layout_is_po), {{"s", "site"}}).c_str())
         .def(
             "pis", [](const layout& lyt) { return lyt.dots_with_tag(fiction::sidb::dot_tag::INPUT); },
-            "Returns the sites of all input SiDBs.")
+            nb::call_guard<nb::gil_scoped_release>(), "Returns the sites of all input SiDBs.")
         .def(
             "pos", [](const layout& lyt) { return lyt.dots_with_tag(fiction::sidb::dot_tag::OUTPUT); },
-            "Returns the sites of all output SiDBs.")
+            nb::call_guard<nb::gil_scoped_release>(), "Returns the sites of all output SiDBs.")
 
+        // Keep individual defect updates under the GIL, as with individual dot updates.
         .def("assign_defect", &layout::assign_defect, nb::arg("site"), nb::arg("defect"),
-             DOC(fiction_sidb_layout_assign_defect))
+             parameter_doc(DOC(fiction_sidb_layout_assign_defect), {{"s", "site"}, {"d", "defect"}}).c_str())
         .def("move_defect", &layout::move_defect, nb::arg("source"), nb::arg("target"),
              DOC(fiction_sidb_layout_move_defect))
-        .def("get_defect", &layout::get_defect, nb::arg("site"), DOC(fiction_sidb_layout_get_defect))
+        .def("get_defect", &layout::get_defect, nb::arg("site"),
+             parameter_doc(DOC(fiction_sidb_layout_get_defect), {{"s", "site"}}).c_str())
         .def("num_defects", &layout::num_defects, DOC(fiction_sidb_layout_num_defects))
         .def("num_positively_charged_defects", &layout::num_positively_charged_defects,
-             DOC(fiction_sidb_layout_num_positively_charged_defects))
+             nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_sidb_layout_num_positively_charged_defects))
         .def("num_negatively_charged_defects", &layout::num_negatively_charged_defects,
-             DOC(fiction_sidb_layout_num_negatively_charged_defects))
-        .def("num_charged_defects", &layout::num_charged_defects, DOC(fiction_sidb_layout_num_charged_defects))
-        .def("num_neutral_defects", &layout::num_neutral_defects, DOC(fiction_sidb_layout_num_neutral_defects))
+             nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_sidb_layout_num_negatively_charged_defects))
+        .def("num_charged_defects", &layout::num_charged_defects, nb::call_guard<nb::gil_scoped_release>(),
+             DOC(fiction_sidb_layout_num_charged_defects))
+        .def("num_neutral_defects", &layout::num_neutral_defects, nb::call_guard<nb::gil_scoped_release>(),
+             DOC(fiction_sidb_layout_num_neutral_defects))
         .def("defects", &layout::defects, DOC(fiction_sidb_layout_defects))
-        .def("affected_sidbs", &layout::affected_sidbs, nb::arg("site"),
+        .def("affected_sidbs", &layout::affected_sidbs, nb::call_guard<nb::gil_scoped_release>(), nb::arg("site"),
              nb::arg("charged_defect_spacing_overwrite") = std::nullopt,
-             nb::arg("neutral_defect_spacing_overwrite") = std::nullopt, DOC(fiction_sidb_layout_affected_sidbs))
-        .def("all_affected_sidbs", &layout::all_affected_sidbs,
+             nb::arg("neutral_defect_spacing_overwrite") = std::nullopt,
+             parameter_doc(DOC(fiction_sidb_layout_affected_sidbs), {{"s", "site"}}).c_str())
+        .def("all_affected_sidbs", &layout::all_affected_sidbs, nb::call_guard<nb::gil_scoped_release>(),
              nb::arg("charged_defect_spacing_overwrite") = std::nullopt,
              nb::arg("neutral_defect_spacing_overwrite") = std::nullopt, DOC(fiction_sidb_layout_all_affected_sidbs))
 
-        .def("bounding_box", &layout::bounding_box, DOC(fiction_sidb_layout_bounding_box))
+        .def("bounding_box", &layout::bounding_box, nb::call_guard<nb::gil_scoped_release>(),
+             DOC(fiction_sidb_layout_bounding_box))
         // NOLINTBEGIN(misc-redundant-expression): nanobind operator bindings intentionally compare placeholder objects.
-        .def(nb::self == nb::self, DOC(fiction_sidb_layout_operator_eq))
-        .def(nb::self != nb::self)
+        .def(nb::self == nb::self, nb::call_guard<nb::gil_scoped_release>(), DOC(fiction_sidb_layout_operator_eq))
+        .def(nb::self != nb::self, nb::call_guard<nb::gil_scoped_release>())
         // NOLINTEND(misc-redundant-expression)
-        .def("__hash__", [](const layout& lyt) { return std::hash<layout>{}(lyt); })
-        .def("__repr__",
-             [](const layout& lyt)
-             {
-                 std::stringstream stream{};
-                 fiction::sidb::io::print_sidb_layout(stream, lyt, false);
-                 return stream.str();
-             })
+        .def(
+            "__hash__", [](const layout& lyt) { return std::hash<layout>{}(lyt); },
+            nb::call_guard<nb::gil_scoped_release>())
+        .def(
+            "__repr__",
+            [](const layout& lyt)
+            {
+                std::stringstream stream{};
+                fiction::sidb::io::print_sidb_layout(stream, lyt, false);
+                return stream.str();
+            },
+            nb::call_guard<nb::gil_scoped_release>())
 
         ;
 }

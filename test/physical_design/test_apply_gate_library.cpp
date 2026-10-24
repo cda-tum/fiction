@@ -23,9 +23,8 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
-#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
@@ -39,7 +38,6 @@
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/on_the_fly_gate_library.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
-#include <fiction/types.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
@@ -60,6 +58,38 @@ using namespace fiction::sidb::io;
 using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation::logic;
 using namespace fiction::synthesis;
+
+/** @brief Checks static library application without instantiating its body. @tparam Lyt Gate layout type. */
+template <typename Lyt>
+concept bestagon_mappable = requires(const Lyt& lyt) { apply_gate_library<bestagon_library>(lyt); };
+
+/** @brief Checks static library application on a defective surface. @tparam Lyt Gate layout type. */
+template <typename Lyt>
+concept defective_bestagon_mappable = requires(const Lyt& lyt, const sidb::layout& surface) {
+    apply_gate_library_to_defective_surface<bestagon_library>(lyt, surface);
+};
+
+/** @brief Checks parameterized library application. @tparam Lyt Gate layout type. */
+template <typename Lyt>
+concept on_the_fly_mappable = requires(const Lyt& lyt, const on_the_fly_gate_library_params& params) {
+    apply_parameterized_gate_library<on_the_fly_gate_library>(lyt, params);
+};
+
+/** @brief Checks parameterized library application on a defective surface. @tparam Lyt Gate layout type. */
+template <typename Lyt>
+concept defective_on_the_fly_mappable =
+    requires(const Lyt& lyt, const on_the_fly_gate_library_params& params, const sidb::layout& surface) {
+        apply_parameterized_gate_library_to_defective_surface<on_the_fly_gate_library>(lyt, params, surface);
+    };
+
+static_assert(bestagon_mappable<hexagonal_gate_layout>);
+static_assert(!bestagon_mappable<cartesian_gate_layout>);
+static_assert(defective_bestagon_mappable<hexagonal_gate_layout>);
+static_assert(!defective_bestagon_mappable<cartesian_gate_layout>);
+static_assert(on_the_fly_mappable<hexagonal_gate_layout>);
+static_assert(!on_the_fly_mappable<cartesian_gate_layout>);
+static_assert(defective_on_the_fly_mappable<hexagonal_gate_layout>);
+static_assert(!defective_on_the_fly_mappable<cartesian_gate_layout>);
 
 namespace
 {
@@ -85,7 +115,7 @@ void check_equivalence(const sidb::layout& layout_designed, const std::string& p
 
 TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
 {
-    hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {3, 3}, clocking::row()};
+    hexagonal_gate_layout layout{arrangement::EVEN_ROW, {3, 3}, clocking::row()};
 
     kitty::dynamic_truth_table function{2};
     kitty::create_from_hex_string(function, "8");
@@ -128,7 +158,8 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
                 bestagon_and,
                 fmt::format("{}/resources/on_the_fly_gate_library/single_tile_layout/AND_gate.sqd", TEST_PATH));
 
-            CHECK(is_operational(bestagon_and, std::vector<tt>{create_and_tt()}, design_gate_params.operational_params)
+            CHECK(is_operational(bestagon_and, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
+                                 design_gate_params.operational_params)
                       .first == operational_status::OPERATIONAL);
 
             CHECK(bestagon_and.num_dots() == 19);
@@ -148,7 +179,8 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
                 CHECK(bestagon_and_with_defects.get_defect(site_at_row(30, 20)).type == defect_type::DB);
                 CHECK(bestagon_and_with_defects.get_defect(site_at_row(45, 55)).type == defect_type::DB);
 
-                CHECK(is_operational(bestagon_and_with_defects, std::vector<tt>{create_and_tt()},
+                CHECK(is_operational(bestagon_and_with_defects,
+                                     std::vector<kitty::dynamic_truth_table>{create_and_tt()},
                                      design_gate_params.operational_params)
                           .first == operational_status::OPERATIONAL);
 
@@ -168,7 +200,7 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
 
 TEST_CASE("Gate-level layout with two input wires, one double wire, and two output wires", "[apply-gate-library]")
 {
-    hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
+    hexagonal_gate_layout layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
 
     const auto x1   = layout.create_pi("x1", {0, 0});
     const auto buf1 = layout.create_buf(x1, {1, 1, 0});
@@ -255,7 +287,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 {
     SECTION("INV with input and output wire tile")
     {
-        hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
+        hexagonal_gate_layout layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
 
         const auto x1   = layout.create_pi("x1", {0, 0});
         const auto buf1 = layout.create_not(x1, {1, 1, 0});
@@ -310,7 +342,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
     SECTION("OR with input and output wire tile")
     {
-        hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
+        hexagonal_gate_layout layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
 
         const auto x1      = layout.create_pi("x1", {0, 0});
         const auto x2      = layout.create_pi("x2", {1, 0});
@@ -366,7 +398,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
     SECTION("NAND with input and output wire tile")
     {
-        hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
+        hexagonal_gate_layout layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
 
         const auto x1        = layout.create_pi("x1", {0, 0});
         const auto x2        = layout.create_pi("x2", {1, 0});
@@ -427,7 +459,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
     SECTION("NOR with input and output wire tile")
     {
-        hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
+        hexagonal_gate_layout layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
 
         const auto x1       = layout.create_pi("x1", {0, 0});
         const auto x2       = layout.create_pi("x2", {1, 0});
@@ -463,7 +495,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
     SECTION("XOR with input and output wire tile")
     {
-        hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
+        hexagonal_gate_layout layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
 
         const auto x1       = layout.create_pi("x1", {0, 0});
         const auto x2       = layout.create_pi("x2", {1, 0});
@@ -521,7 +553,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
     SECTION("XNOR with input and output wire tile")
     {
-        hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
+        hexagonal_gate_layout layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
 
         const auto x1        = layout.create_pi("x1", {0, 0});
         const auto x2        = layout.create_pi("x2", {1, 0});
@@ -558,11 +590,9 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
 TEST_CASE("Applying the QCA ONE gate library", "[apply-gate-library]")
 {
-    using GateLyt = shifted_cart_gate_clk_lyt;
-
     SECTION("Without crossings")
     {
-        const auto gate_lyt = blueprints::straight_wire_gate_layout<GateLyt>();
+        const auto gate_lyt = blueprints::straight_wire_gate_layout<shifted_cartesian_gate_layout>();
 
         const auto layout = apply_gate_library<qca_one_library>(gate_lyt);
 
@@ -573,7 +603,7 @@ TEST_CASE("Applying the QCA ONE gate library", "[apply-gate-library]")
 
     SECTION("With crossings")
     {
-        const auto gate_lyt = blueprints::optimization_layout_corner_case_outputs_2<GateLyt>();
+        const auto gate_lyt = blueprints::optimization_layout_corner_case_outputs_2<shifted_cartesian_gate_layout>();
 
         const auto layout = apply_gate_library<qca_one_library>(gate_lyt);
 
@@ -585,9 +615,7 @@ TEST_CASE("Applying the QCA ONE gate library", "[apply-gate-library]")
 
 TEST_CASE("Apply molecular QCA gate library end-to-end", "[apply-gate-library]")
 {
-    using gate_layout = gate_level_layout<cartesian_layout>;
-
-    const auto layout = blueprints::and_or_inv_gate_layout<gate_layout>();
+    const auto layout = blueprints::and_or_inv_gate_layout<cartesian_gate_layout>();
 
     const auto cell_layout = apply_gate_library<mol_qca::sim7_mol_library>(layout);
 
@@ -610,9 +638,9 @@ TEST_CASE("Gate-library application assigns synchronization to clock zones", "[a
 
     SECTION("Wire")
     {
-        cart_gate_clk_lyt layout{{3, 1}, clocking::twoddwave()};
-        const auto        input = layout.create_pi("x", {0, 0});
-        const auto        wire  = layout.create_buf(input, {1, 0});
+        cartesian_gate_layout layout{{3, 1}, clocking::twoddwave()};
+        const auto            input = layout.create_pi("x", {0, 0});
+        const auto            wire  = layout.create_buf(input, {1, 0});
         layout.create_po(wire, "f", {2, 0});
         layout.assign_synchronization_element({1, 0}, 2);
 
@@ -621,7 +649,7 @@ TEST_CASE("Gate-library application assigns synchronization to clock zones", "[a
     SECTION("Crossing")
     {
         // the ground tile carries the delay, as in layouts generated by exact; the crossing wire shares its clock zone
-        auto layout = blueprints::crossing_layout<cart_gate_clk_lyt>();
+        auto layout = blueprints::crossing_layout<cartesian_gate_layout>();
         layout.assign_synchronization_element({2, 1}, 2);
 
         const auto cells = apply_gate_library<qca_one_library>(layout);
@@ -644,7 +672,7 @@ TEST_CASE("Gate-library application assigns synchronization to clock zones", "[a
 
 TEST_CASE("On-the-fly SiDB fanout gate", "[apply-gate-library]")
 {
-    hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {3, 3}, clocking::row()};
+    hexagonal_gate_layout layout{arrangement::EVEN_ROW, {3, 3}, clocking::row()};
 
     const auto input  = layout.create_pi("input", {0, 0});
     const auto fanout = layout.create_buf(input, {1, 1});
@@ -674,7 +702,7 @@ TEST_CASE("On-the-fly SiDB fanout gate", "[apply-gate-library]")
 
 TEST_CASE("On-the-fly SiDB crossing gate", "[apply-gate-library]")
 {
-    hex_gate_clk_lyt layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
+    hexagonal_gate_layout layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
 
     const auto input1 = layout.create_pi("input1", {0, 0});
     const auto wire1  = layout.create_buf(input1, {1, 1, 0});
@@ -703,7 +731,7 @@ TEST_CASE("On-the-fly SiDB crossing gate", "[apply-gate-library]")
 
 TEST_CASE("Gate-library progress counts completed mappings", "[apply-gate-library]")
 {
-    const auto  gate_lyt = blueprints::straight_wire_gate_layout<shifted_cart_gate_clk_lyt>(arrangement::EVEN_ROW);
+    const auto  gate_lyt = blueprints::straight_wire_gate_layout<shifted_cartesian_gate_layout>(arrangement::EVEN_ROW);
     const auto  expected = gate_lyt.size();
     std::size_t completed{};
     std::size_t reports{};
@@ -725,7 +753,7 @@ TEST_CASE("Bestagon library rejects layouts that shift columns", "[apply-gate-li
 {
     const auto a = GENERATE(arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
 
-    hex_gate_clk_lyt layout{a, {3, 3}, clocking::row()};
+    hexagonal_gate_layout layout{a, {3, 3}, clocking::row()};
     layout.create_pi("x", {0, 0});
 
     CHECK_THROWS_AS(apply_gate_library<bestagon_library>(layout), std::invalid_argument);

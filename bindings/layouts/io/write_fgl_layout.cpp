@@ -15,9 +15,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
-
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/io/write_fgl_layout.hpp>
 #include <fiction/utils/progress.hpp>
 
@@ -46,7 +44,19 @@ void register_write_fgl_layout(nb::module_& m)
         "write_fgl_layout",
         [](const Lyt& lyt, const std::string_view& filename, const fiction::utils::progress_callback& on_progress)
         { fiction::layouts::io::write_fgl_layout(lyt, filename, on_progress); }, nb::arg("layout"), nb::arg("filename"),
-        nb::arg("on_progress").none() = nb::none(), DOC(fiction_layouts_io_write_fgl_layout_2),
+        nb::arg("on_progress").none() = nb::none(),
+        R"doc(Writes a finished layout to an FGL version-2 file with extent counts and declared interface order.
+
+Args:
+    layout: Layout to write.
+    filename: Output file path, preferably with the .fgl extension.
+    on_progress: Receives completed serialization work. Defaults to None.
+
+Raises:
+    ValueError: If the layout is incomplete, cyclic, physically invalid, uses an unsupported scheme,
+        or contains illegal XML text controls.
+    RuntimeError: If the output file cannot be created, written, closed, or replaced.
+)doc",
         nb::call_guard<nb::gil_scoped_release>());
 }
 
@@ -55,9 +65,9 @@ void register_write_fgl_layout(nb::module_& m)
 /** @brief Register FGL writers for supported layout topologies. @param m Layout I/O module. */
 void register_write_fgl_layout(nb::module_& m)
 {
-    detail::register_write_fgl_layout<py_cartesian_gate_layout>(m);
-    detail::register_write_fgl_layout<py_shifted_cartesian_gate_layout>(m);
-    detail::register_write_fgl_layout<py_hexagonal_gate_layout>(m);
+    detail::register_write_fgl_layout<fiction::layouts::cartesian_gate_layout>(m);
+    detail::register_write_fgl_layout<fiction::layouts::shifted_cartesian_gate_layout>(m);
+    detail::register_write_fgl_layout<fiction::layouts::hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction

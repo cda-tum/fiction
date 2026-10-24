@@ -19,7 +19,7 @@
 
 #include "fiction/layouts/arrangement.hpp"
 #include "fiction/layouts/cartesian_layout.hpp"
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/io/detail/fgl_layout_validation.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
@@ -312,7 +312,7 @@ class write_fgl_layout_impl
  * contains illegal XML text controls.
  */
 template <typename Geometry>
-void write_fgl_layout(const fiction::layouts::gate_level_layout<Geometry>& lyt, std::ostream& os,
+void write_fgl_layout(const fiction::layouts::gate_layout<Geometry>& lyt, std::ostream& os,
                       utils::progress_callback on_progress = {})
 {
     detail::write_fgl_layout_impl p{lyt, os, std::move(on_progress)};
@@ -330,9 +330,10 @@ void write_fgl_layout(const fiction::layouts::gate_level_layout<Geometry>& lyt, 
  * @param filename The file name to create and write into. Should preferably use the .fgl extension.
  * @throws std::invalid_argument If the layout is incomplete, cyclic, physically invalid, uses an unsupported scheme, or
  * contains illegal XML text controls.
+ * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
  */
 template <typename Geometry>
-void write_fgl_layout(const fiction::layouts::gate_level_layout<Geometry>& lyt, const std::string_view& filename,
+void write_fgl_layout(const fiction::layouts::gate_layout<Geometry>& lyt, const std::string_view& filename,
                       utils::progress_callback on_progress = {})
 {
     fiction::detail::atomic_write(filename, [&](std::ostream& os) { write_fgl_layout(lyt, os, on_progress); });

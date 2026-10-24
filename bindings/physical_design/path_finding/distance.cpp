@@ -34,6 +34,7 @@ namespace pyfiction
 /** @brief Binds distances between shared layout coordinates. @param m Physical-design module. */
 void register_distance(nb::module_& m)
 {
+    // Keep the GIL: these coordinate distances do constant-time arithmetic.
     m.def("manhattan_distance", &fiction::physical_design::path_finding::manhattan_distance, nb::arg("source"),
           nb::arg("target"), DOC(fiction_physical_design_path_finding_manhattan_distance));
     m.def("euclidean_distance", &fiction::physical_design::path_finding::euclidean_distance, nb::arg("source"),

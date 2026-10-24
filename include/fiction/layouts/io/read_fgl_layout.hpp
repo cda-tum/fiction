@@ -20,7 +20,7 @@
 #include "fiction/layouts/arrangement.hpp"
 #include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/io/detail/fgl_layout_validation.hpp"
 #include "fiction/layouts/layout_base.hpp"
@@ -733,18 +733,14 @@ class read_fgl_layout_impl
  *
  * May throw an `fgl_parsing_error` if the FGL file is malformed.
  *
- * @tparam Lyt The layout type to be created from an input.
+ * @tparam Geometry Coordinate geometry of the returned gate-level layout.
  * @param is The input stream to read from.
  * @param name The name to give to the generated layout.
  */
-template <typename Lyt>
-[[nodiscard]] Lyt read_fgl_layout(std::istream& is, const std::string_view& name = "")
+template <typename Geometry>
+[[nodiscard]] layouts::gate_layout<Geometry> read_fgl_layout(std::istream& is, const std::string_view& name = "")
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
-
-    detail::read_fgl_layout_impl<Lyt> p{is, name};
+    detail::read_fgl_layout_impl<layouts::gate_layout<Geometry>> p{is, name};
 
     return p.run();
 }
@@ -757,18 +753,14 @@ template <typename Lyt>
  *
  * This is an in-place version of `read_fgl_layout` that utilizes the given layout as a target to write to.
  *
- * @tparam Lyt The layout type to be used as input.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param lyt The layout to write to.
  * @param is The input stream to read from.
  */
-template <typename Lyt>
-void read_fgl_layout(Lyt& lyt, std::istream& is)
+template <typename Geometry>
+void read_fgl_layout(layouts::gate_layout<Geometry>& lyt, std::istream& is)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
-
-    detail::read_fgl_layout_impl<Lyt> p{lyt, is};
+    detail::read_fgl_layout_impl<layouts::gate_layout<Geometry>> p{lyt, is};
 
     lyt = p.run();
 }
@@ -777,12 +769,13 @@ void read_fgl_layout(Lyt& lyt, std::istream& is)
  *
  * May throw an `fgl_parsing_error` if the FGL file is malformed.
  *
- * @tparam Lyt The layout type to be created from an input.
+ * @tparam Geometry Coordinate geometry of the returned gate-level layout.
  * @param filename The file name to open and read from.
  * @param name The name to give to the generated layout.
  */
-template <typename Lyt>
-[[nodiscard]] Lyt read_fgl_layout(const std::string_view& filename, const std::string_view& name = "")
+template <typename Geometry>
+[[nodiscard]] layouts::gate_layout<Geometry> read_fgl_layout(const std::string_view& filename,
+                                                             const std::string_view& name = "")
 {
     std::ifstream is{std::string{filename}, std::ifstream::in};
 
@@ -791,7 +784,7 @@ template <typename Lyt>
         throw std::ifstream::failure("could not open file");
     }
 
-    return read_fgl_layout<Lyt>(is, name);
+    return read_fgl_layout<Geometry>(is, name);
 }
 /**
  * Reads a gate-level layout from an FGL file provided as a file name.
@@ -800,12 +793,12 @@ template <typename Lyt>
  *
  * This is an in-place version of `read_fgl_layout` that utilizes the given layout as a target to write to.
  *
- * @tparam Lyt The layout type to be used as input.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param lyt The layout to write to.
  * @param filename The file name to open and read from.
  */
-template <typename Lyt>
-void read_fgl_layout(Lyt& lyt, const std::string_view& filename)
+template <typename Geometry>
+void read_fgl_layout(layouts::gate_layout<Geometry>& lyt, const std::string_view& filename)
 {
     std::ifstream is{std::string{filename}, std::ifstream::in};
 
@@ -814,7 +807,7 @@ void read_fgl_layout(Lyt& lyt, const std::string_view& filename)
         throw std::ifstream::failure("could not open file");
     }
 
-    read_fgl_layout<Lyt>(lyt, is);
+    read_fgl_layout<Geometry>(lyt, is);
 }
 
 }  // namespace fiction::layouts::io

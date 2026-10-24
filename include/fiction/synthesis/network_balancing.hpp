@@ -12,10 +12,12 @@
  * @file
  * @brief Path-balances a logic network with identity-computing buffer nodes.
  * @author Marcel Walter (marcelwa)
+ * @author Benjamin Hien (hibenj)
  */
 
 #pragma once
 
+#include "fiction/networks/network_utils.hpp"
 #include "fiction/synthesis/network_conversion.hpp"
 #include "fiction/utils/progress.hpp"
 
@@ -42,6 +44,13 @@ struct network_balancing_params
      * Flag to indicate that all output nodes should be in the same rank.
      */
     bool unify_outputs = false;
+    /**
+     * @brief Whether primary outputs driven by a constant receive a buffer chain when unifying outputs.
+     *
+     * Placement flows that do not place constants set this to `false`: such outputs then stay unbuffered, and
+     * `is_balanced` ignores them.
+     */
+    bool buffer_constant_outputs = true;
     /** @brief Reports completed work in each bounded phase. */
     utils::progress_callback on_progress{};
 };
@@ -58,6 +67,7 @@ std::vector<uint32_t> get_po_levels(const Ntk& ntk)
     return po_levels;
 }
 
+/** @brief Balances network paths by inserting buffers. */
 template <typename NtkDest, typename NtkSrc>
 class network_balancing_impl
 {
@@ -74,17 +84,9 @@ class network_balancing_impl
             ps{std::move(p)}
     {}
 
+    /** @brief Returns a network with paths balanced by inserted buffers. */
     NtkDest run()
     {
-        // insert num buffers after child in balance_ntk
-        const auto insert_buf_chain = [](auto& balance_ntk, const auto& num, auto& child)
-        {
-            for (auto i = 0u; i < num; ++i)
-            {
-                child = balance_ntk.create_buf(child);
-            }
-        };
-
         // initialize a network copy
         auto init = mockturtle::initialize_copy_network<NtkDest>(ntk_topo);
 
@@ -93,13 +95,13 @@ class network_balancing_impl
 
         utils::progress_reporter progress{ps.on_progress, "balancing gates", ntk_topo.num_gates()};
         ntk_topo.foreach_gate(
-            [this, &balanced, &old2new, &insert_buf_chain, &progress](const auto& n)
+            [this, &balanced, &old2new, &progress](const auto& n)
             {
                 // gather children, but substitute fanins by buf where applicable
                 std::vector<typename mockturtle::topo_view<NtkDest>::signal> children{};
 
                 ntk_topo.foreach_fanin(n,
-                                       [this, &n, &balanced, &old2new, &children, &insert_buf_chain](const auto& f)
+                                       [this, &n, &balanced, &old2new, &children](const auto& f)
                                        {
                                            const auto fn = ntk_topo.get_node(f);
 
@@ -109,7 +111,7 @@ class network_balancing_impl
                                            if (!ntk_topo.is_constant(fn))
                                            {
                                                const auto level_diff = ntk_depth.level(n) - ntk_depth.level(fn) - 1;
-                                               insert_buf_chain(balanced, level_diff, child);
+                                               child = networks::buffer_chain(balanced, child, level_diff);
                                            }
 
                                            children.push_back(child);
@@ -126,15 +128,15 @@ class network_balancing_impl
 
         // add primary outputs to finalize the network
         ntk_topo.foreach_po(
-            [this, &old2new, &balanced, &po_levels, &max_po_level, &insert_buf_chain](const auto& po, auto i)
+            [this, &old2new, &balanced, &po_levels, &max_po_level](const auto& po, auto i)
             {
                 const auto tgt_signal = old2new[ntk_topo.get_node(po)];
 
                 auto tgt_po = ntk_topo.is_complemented(po) ? balanced.create_not(tgt_signal) : tgt_signal;
 
-                if (ps.unify_outputs)
+                if (ps.unify_outputs && (ps.buffer_constant_outputs || !ntk_topo.is_constant(ntk_topo.get_node(po))))
                 {
-                    insert_buf_chain(balanced, max_po_level - po_levels[i], tgt_po);
+                    tgt_po = networks::buffer_chain(balanced, tgt_po, max_po_level - po_levels[i]);
                 }
 
                 balanced.create_po(tgt_po);
@@ -155,6 +157,7 @@ class network_balancing_impl
     const network_balancing_params ps;
 };
 
+/** @brief Checks whether network paths have balanced depths. */
 template <typename Ntk>
 class is_balanced_impl
 {
@@ -166,6 +169,7 @@ class is_balanced_impl
      */
     is_balanced_impl(const Ntk& src, network_balancing_params p) : ntk{src}, ntk_depth{src}, ps{std::move(p)} {}
 
+    /** @brief Returns whether all network paths have balanced depths. */
     bool run()
     {
         ntk.foreach_gate(
@@ -194,7 +198,18 @@ class is_balanced_impl
 
         if (ps.unify_outputs)
         {
-            const auto po_levels = get_po_levels(ntk_depth);
+            // unbuffered constant outputs do not take part in the comparison
+            std::vector<uint32_t> po_levels{};
+            po_levels.reserve(ntk.num_pos());
+            ntk.foreach_po(
+                [this, &po_levels](const auto& po)
+                {
+                    if (const auto n = ntk.get_node(po); ps.buffer_constant_outputs || !ntk.is_constant(n))
+                    {
+                        po_levels.push_back(ntk_depth.level(n));
+                    }
+                });
+
             // check whether POs with different depth levels exist
             if (std::ranges::adjacent_find(po_levels, std::not_equal_to<>()) != po_levels.end())
             {
@@ -237,23 +252,14 @@ class is_balanced_impl
  * @return A path-balanced logic network of type `NtkDest` that is logically equivalent to `ntk_src`.
  */
 template <typename NtkDest, typename NtkSrc>
+    requires mockturtle::is_network_type_v<NtkSrc> && mockturtle::is_network_type_v<NtkDest> &&
+             mockturtle::has_get_node_v<NtkSrc> && mockturtle::has_is_complemented_v<NtkSrc> &&
+             mockturtle::has_foreach_gate_v<NtkSrc> && mockturtle::has_foreach_fanin_v<NtkSrc> &&
+             mockturtle::has_foreach_po_v<NtkSrc> && mockturtle::has_create_pi_v<NtkDest> &&
+             mockturtle::has_create_not_v<NtkDest> && mockturtle::has_create_po_v<NtkDest> &&
+             mockturtle::has_create_buf_v<NtkDest> && mockturtle::has_clone_node_v<NtkDest>
 NtkDest network_balancing(const NtkSrc& ntk_src, network_balancing_params ps = {})
 {
-    static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a network type");
-    static_assert(mockturtle::is_network_type_v<NtkDest>, "NtkDest is not a network type");
-
-    static_assert(mockturtle::has_get_node_v<NtkSrc>, "NtkSrc does not implement the get_node function");
-    static_assert(mockturtle::has_is_complemented_v<NtkSrc>, "NtkSrc does not implement the is_complemented function");
-    static_assert(mockturtle::has_foreach_gate_v<NtkSrc>, "NtkSrc does not implement the foreach_gate function");
-    static_assert(mockturtle::has_foreach_fanin_v<NtkSrc>, "NtkSrc does not implement the foreach_fanin function");
-    static_assert(mockturtle::has_foreach_po_v<NtkSrc>, "NtkSrc does not implement the foreach_po function");
-
-    static_assert(mockturtle::has_create_pi_v<NtkDest>, "NtkDest does not implement the create_pi function");
-    static_assert(mockturtle::has_create_not_v<NtkDest>, "NtkDest does not implement the create_not function");
-    static_assert(mockturtle::has_create_po_v<NtkDest>, "NtkDest does not implement the create_po function");
-    static_assert(mockturtle::has_create_buf_v<NtkDest>, "NtkDest does not implement the create_buf function");
-    static_assert(mockturtle::has_clone_node_v<NtkDest>, "NtkDest does not implement the clone_node function");
-
     detail::network_balancing_impl<NtkDest, NtkSrc> p{ntk_src, ps};
 
     auto result = p.run();
@@ -269,14 +275,11 @@ NtkDest network_balancing(const NtkSrc& ntk_src, network_balancing_params ps = {
  * @return `true` iff `ntk` is properly path-balanced with regard to `ps`.
  */
 template <typename Ntk>
+    requires mockturtle::is_network_type_v<Ntk> && mockturtle::has_foreach_gate_v<Ntk> &&
+             mockturtle::has_foreach_fanin_v<Ntk> && mockturtle::has_foreach_po_v<Ntk> &&
+             mockturtle::has_get_node_v<Ntk>
 bool is_balanced(const Ntk& ntk, network_balancing_params ps = {}) noexcept
 {
-    static_assert(mockturtle::is_network_type_v<Ntk>, "NtkSrc is not a network type");
-    static_assert(mockturtle::has_foreach_gate_v<Ntk>, "Ntk does not implement the foreach_gate function");
-    static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin function");
-    static_assert(mockturtle::has_foreach_po_v<Ntk>, "Ntk does not implement the foreach_po function");
-    static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node function");
-
     detail::is_balanced_impl<Ntk> p{ntk, ps};
 
     auto result = p.run();

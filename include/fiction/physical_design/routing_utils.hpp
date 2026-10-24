@@ -15,7 +15,7 @@
  */
 
 #pragma once
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
 
@@ -33,8 +33,12 @@ namespace fiction::physical_design
 {
 namespace detail
 {
-/** @brief Combines layout occupancy with explicit search constraints.
- * @tparam Lyt Layout type. @param lyt Layout. @param c Position. @param extra Search constraints.
+/**
+ * @brief Combines layout occupancy with explicit search constraints.
+ * @tparam Lyt Layout type.
+ * @param lyt Layout.
+ * @param c Position.
+ * @param extra Search constraints.
  * @return Whether the position is obstructed.
  */
 template <typename Lyt>
@@ -50,8 +54,13 @@ template <typename Lyt>
         return extra.is_obstructed_coordinate(c);
     }
 }
-/** @brief Combines layout connections with explicit search constraints.
- * @tparam Lyt Layout type. @param lyt Layout. @param src Source. @param tgt Target. @param extra Search constraints.
+/**
+ * @brief Combines layout connections with explicit search constraints.
+ * @tparam Lyt Layout type.
+ * @param lyt Layout.
+ * @param src Source.
+ * @param tgt Target.
+ * @param extra Search constraints.
  * @return Whether the directed connection is obstructed.
  */
 template <typename Lyt>
@@ -99,20 +108,29 @@ struct routing_objective
 class layout_coordinate_path : public std::vector<layouts::layout_base::coordinate>
 {
   public:
-    /** @brief Appends a coordinate. @param c Coordinate to append. @throws std::bad_alloc If storage allocation fails.
+    /**
+     * @brief Appends a coordinate.
+     * @param c Coordinate to append.
+     * @throws std::bad_alloc If storage allocation fails.
      */
     void append(const layouts::layout_base::coordinate& c)
     {
         this->push_back(c);
     }
 
-    /** @brief Returns the first coordinate, or the origin for an empty path. @return Source coordinate. */
+    /**
+     * @brief Returns the first coordinate, or the origin for an empty path.
+     * @return Source coordinate.
+     */
     [[nodiscard]] layouts::layout_base::coordinate source() const noexcept
     {
         return this->empty() ? layouts::layout_base::coordinate{} : this->front();
     }
 
-    /** @brief Returns the last coordinate, or the origin for an empty path. @return Target coordinate. */
+    /**
+     * @brief Returns the last coordinate, or the origin for an empty path.
+     * @return Target coordinate.
+     */
     [[nodiscard]] layouts::layout_base::coordinate target() const noexcept
     {
         return this->empty() ? layouts::layout_base::coordinate{} : this->back();
@@ -128,15 +146,16 @@ class layout_coordinate_path : public std::vector<layouts::layout_base::coordina
 };
 /**
  * An ordered collection of multiple paths in a layout.
- *
- * @tparam Path Path type.
  */
-template <typename Path>
-class path_collection : public std::vector<Path>
+class path_collection : public std::vector<layout_coordinate_path>
 {
   public:
-    /** @brief Adds a path. @param p Path to add. @throws std::bad_alloc If storage allocation fails. */
-    void add(const Path& p)
+    /**
+     * @brief Adds a path.
+     * @param p Path to add.
+     * @throws std::bad_alloc If storage allocation fails.
+     */
+    void add(const layout_coordinate_path& p)
     {
         this->push_back(p);
     }
@@ -147,43 +166,51 @@ class path_collection : public std::vector<Path>
      * @param p Path to search for.
      * @return `true` iff `p` is contained in the collection.
      */
-    [[nodiscard]] bool contains(const Path& p) const noexcept
+    [[nodiscard]] bool contains(const layout_coordinate_path& p) const noexcept
     {
         return std::ranges::find(*this, p) != std::cend(*this);
     }
 
   protected:
-    using base = std::vector<Path>;
+    /** @brief Path storage. */
+    using base = std::vector<layout_coordinate_path>;
 
   public:
-    // make all inherited constructors available
+    /** @brief Inherits path container constructors. */
     using base::base;
 };
 /**
  * A set of multiple paths in a layout.
- *
- * @tparam Path Path type.
  */
-template <typename Path>
-class path_set : public std::set<Path>
+class path_set : public std::set<layout_coordinate_path>
 {
   public:
-    /** @brief Adds a path. @param p Path to add. @throws std::bad_alloc If storage allocation fails. */
-    void add(const Path& p)
+    /**
+     * @brief Adds a path.
+     * @param p Path to add.
+     * @throws std::bad_alloc If storage allocation fails.
+     */
+    void add(const layout_coordinate_path& p)
     {
         this->insert(p);
     }
 
-    [[nodiscard]] bool contains(const Path& p) const noexcept
+    /**
+     * @brief Checks membership.
+     * @param p Path to find.
+     * @return Whether the set contains the path.
+     */
+    [[nodiscard]] bool contains(const layout_coordinate_path& p) const noexcept
     {
-        return this->count(p) > 0;
+        return base::contains(p);
     }
 
   protected:
-    using base = std::set<Path>;
+    /** @brief Unique path storage. */
+    using base = std::set<layout_coordinate_path>;
 
   public:
-    // make all inherited constructors available
+    /** @brief Inherits path container constructors. */
     using base::base;
 };
 
@@ -195,7 +222,7 @@ class path_set : public std::set<Path>
  * the wire segment coming from `src` were also horizontal and ran from west to east, the cross-over would be
  * prohibited.
  *
- * @Note This function can be called on layout types other than gate-level layouts, but will then always return
+ * @note This function can be called on layout types other than gate-level layouts, but will then always return
  * `false`. This is helpful for general routing in, e.g., clocked layouts.
  *
  * @tparam Lyt Layout type.
@@ -205,11 +232,10 @@ class path_set : public std::set<Path>
  * @return `true` iff `successor` hosts a wire that is crossable from `src`.
  */
 template <typename Lyt>
+    requires std::derived_from<Lyt, layouts::layout_base>
 [[nodiscard]] bool is_crossable_wire(const Lyt& lyt, const fiction::layouts::layout_base::coordinate& src,
                                      const fiction::layouts::layout_base::coordinate& successor) noexcept
 {
-    static_assert(std::derived_from<Lyt, fiction::layouts::layout_base>, "Lyt must be a coordinate layout type");
-
     assert(lyt.is_adjacent_elevation_of(src, successor));
 
     if constexpr (requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; })
@@ -305,20 +331,16 @@ routing_successor(const Lyt& lyt, const fiction::layouts::layout_base::coordinat
  * Occupied intermediate ground coordinates use their free crossing layer. Endpoints and all intermediate
  * placements are checked before mutation. A failed allocation removes newly created wires.
  * @tparam Geometry Coordinate geometry of the gate-level layout.
- * @tparam Path Coordinate path type.
  * @param lyt Layout to edit.
  * @param path Path containing at least its occupied source and target coordinates.
  * @param destination Ordered destination input.
  * @throws std::invalid_argument If an endpoint or intermediate placement is unavailable.
  * @throws std::out_of_range If the destination input index is invalid.
  */
-template <typename Geometry, typename Path>
-void route_path(fiction::layouts::gate_level_layout<Geometry>& lyt, const Path& path,
-                const typename fiction::layouts::gate_level_layout<Geometry>::input_port destination)
+template <typename Geometry>
+void route_path(fiction::layouts::gate_layout<Geometry>& lyt, const layout_coordinate_path& path,
+                const typename fiction::layouts::gate_layout<Geometry>::input_port destination)
 {
-    /** @brief Gate-level layout using the requested coordinate geometry. */
-    using Lyt = fiction::layouts::gate_level_layout<Geometry>;
-
     if (path.size() < 2 || path.target() != lyt.get_tile(destination.object))
     {
         throw std::invalid_argument("A routing path requires matching occupied endpoints");
@@ -350,8 +372,8 @@ void route_path(fiction::layouts::gate_level_layout<Geometry>& lyt, const Path& 
         }
         positions.push_back(position);
     }
-    auto                                 incoming = *source;
-    std::vector<typename Lyt::object_id> created{};
+    auto                                                                     incoming = *source;
+    std::vector<typename fiction::layouts::gate_layout<Geometry>::object_id> created{};
     created.reserve(positions.size());
     try
     {
@@ -376,17 +398,14 @@ void route_path(fiction::layouts::gate_level_layout<Geometry>& lyt, const Path& 
  *
  * Intermediate single-sink wires are followed through declared topology. Missing inputs produce no objective;
  * disconnected input slots keep their indices. Cycles of intermediate wires reject.
- * @tparam Lyt Gate-level layout type.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param lyt Layout to inspect.
  * @return Routing objectives that preserve logical input numbering.
  * @throws std::invalid_argument If an intermediate wire chain contains a cycle.
  */
-template <typename Lyt>
-std::vector<routing_objective> extract_routing_objectives(const Lyt& lyt)
+template <typename Geometry>
+std::vector<routing_objective> extract_routing_objectives(const layouts::gate_layout<Geometry>& lyt)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
     const auto intermediate = [&lyt](const auto id) { return lyt.is_wire(id) && !lyt.is_fanout(id); };
     std::vector<routing_objective> objectives{};
     lyt.foreach_object(
@@ -399,8 +418,8 @@ std::vector<routing_objective> extract_routing_objectives(const Lyt& lyt)
             lyt.foreach_fanin(id,
                               [&](const auto port, const auto input)
                               {
-                                  auto                                        source = port;
-                                  std::unordered_set<typename Lyt::object_id> visited{};
+                                  auto                                          source = port;
+                                  std::unordered_set<layouts::layout_object_id> visited{};
                                   while (intermediate(source))
                                   {
                                       if (!visited.insert(source).second)
@@ -425,12 +444,9 @@ std::vector<routing_objective> extract_routing_objectives(const Lyt& lyt)
  * @param lyt Layout to edit.
  */
 template <typename Geometry>
-void clear_routing(fiction::layouts::gate_level_layout<Geometry>& lyt)
+void clear_routing(fiction::layouts::gate_layout<Geometry>& lyt)
 {
-    /** @brief Gate-level layout using the requested coordinate geometry. */
-    using Lyt = fiction::layouts::gate_level_layout<Geometry>;
-
-    std::vector<typename Lyt::object_id> wires{};
+    std::vector<typename fiction::layouts::gate_layout<Geometry>::object_id> wires{};
     lyt.foreach_object(
         [&](const auto id)
         {

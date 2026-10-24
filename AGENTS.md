@@ -248,6 +248,16 @@ Use these commands to validate your work.
 - **Prek**: `prek run -a` (Runs all checks: formatting, linting, static analysis). Run this
   before finishing a task.
 
+## Contract Audits
+
+Use [the SpecAudit method](.agent/AUDITS.md) to investigate tests and the code they
+constrain. Start with a bounded concern and check contracts, callers, and evidence
+before recommending a change. AI authorship and a surviving mutation do not justify
+deleting code or tests. Report findings directly; keep useful records in ignored
+`.ai/audits/`. An audit alone authorizes investigation and a report; apply fixes or
+publish only when the maintainer has authorized that scope.
+Existing authorization, including the Working Principles, still applies.
+
 ## Code Review
 
 Fetch open comments before considering a pull request done:
@@ -285,11 +295,6 @@ imitate.
   CodeRabbit does not make your pull request AI-assisted.
 - You are responsible for everything you post under your name. Review it and understand it
   first; if you cannot explain it, do not submit it.
-- Never push, open or merge a pull request, post a comment, open an issue, or otherwise
-  change remote state unless the maintainer authorized that specific action. Authorization
-  for one task does not carry over to the next. It does carry within one pull request:
-  permission to open it covers pushing fixes to it until it is green and replying to its
-  review comments.
 - Opening a pull request does not finish the task. Watch it: poll `gh pr checks <PR>`, fix
   what fails, push, and poll again. The matrix spans Linux, macOS, and Windows in Debug
   and Release, plus the Python bindings, and takes hours — check back periodically rather

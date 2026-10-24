@@ -201,3 +201,13 @@ def test_critical_temperature_with_input_pattern_layouts() -> None:
             output_bdl_wires,
             **options,
         )
+
+
+@pytest.mark.parametrize("mixed_variables", [False, True])
+def test_invalid_specification_raises_value_error(*, mixed_variables: bool) -> None:
+    """Reject invalid specifications before gate-based temperature simulation."""
+    spec = [create_and_tt(), create_not_tt()] if mixed_variables else []
+    with pytest.raises(ValueError, match="variables" if mixed_variables else "empty"):
+        critical_temperature_gate_based(sidb_layout(), spec)
+    with pytest.raises(ValueError, match="variables" if mixed_variables else "empty"):
+        critical_temperature_gate_based([], spec, [], [], [])

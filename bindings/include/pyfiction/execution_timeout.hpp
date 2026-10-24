@@ -50,6 +50,7 @@ inline void register_execution_timeout()
             }
             catch (const fiction::utils::timeout_error& error)
             {
+                // The binding dispatcher holds the GIL while translating exceptions to Python.
                 PyErr_SetString(PyExc_TimeoutError, error.what());
             }
         });

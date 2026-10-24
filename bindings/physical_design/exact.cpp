@@ -20,9 +20,11 @@
 #if (FICTION_Z3_SOLVER)
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
+#include "pyfiction/types.hpp"  // NOLINT(misc-include-cleaner): preserves coordinate and extent tuple signatures.
 
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/exact.hpp>
+#include <fiction/types.hpp>
 
 #include <sstream>
 #include <type_traits>
@@ -64,7 +66,7 @@ void register_exact(nb::module_& m, const char* signature)
 {
     /** @brief Compute exact physical design for the selected layout representation. */
     const auto design =
-        [](const py_tec_network& network, const nb::handle layout_type,
+        [](const fiction::networks::named_technology_network& network, const nb::handle layout_type,
            fiction::physical_design::exact_physical_design_stats*                   statistics,
            const decltype(exact_physical_design_options{}.scheme)&                  scheme,
            const decltype(exact_physical_design_options{}.layout_arrangement)       layout_arrangement,
@@ -85,6 +87,7 @@ void register_exact(nb::module_& m, const char* signature)
            const decltype(exact_physical_design_options{}.on_progress)&             on_progress,
            const decltype(exact_physical_design_options{}.on_worker_progress)&      on_worker_progress)
     {
+        // Python type comparison requires the GIL; release it only for native design below.
         if (!layout_type.is(nb::type<Lyt>()))
         {
             throw nb::next_overload();
@@ -109,9 +112,9 @@ void register_exact(nb::module_& m, const char* signature)
         parameters.on_progress              = on_progress;
         parameters.on_worker_progress       = on_worker_progress;
         const nb::gil_scoped_release release{};
-        return fiction::physical_design::exact<Lyt, py_tec_network>(network, parameters, statistics);
+        return fiction::physical_design::exact<typename Lyt::coordinate_layout>(network, parameters, statistics);
     };
-    if constexpr (std::is_same_v<Lyt, py_cartesian_gate_layout>)
+    if constexpr (std::is_same_v<Lyt, fiction::layouts::cartesian_gate_layout>)
     {
         m.def("exact", design, nb::arg("network"), nb::kw_only(), nb::arg("layout_type") = nb::type<Lyt>(),
               nb::arg("statistics") = nullptr, nb::arg("scheme") = exact_physical_design_options{}.scheme,
@@ -197,6 +200,7 @@ void register_exact(nb::module_& m)
         .value("TOPOLINANO", fiction::physical_design::technology_constraints::TOPOLINANO,
                DOC(fiction_physical_design_technology_constraints_TOPOLINANO));
 
+    // Keep the GIL for statistics construction, field access, and bounded report formatting.
     nb::class_<fiction::physical_design::exact_physical_design_stats>(
         m, "exact_stats", DOC(fiction_physical_design_exact_physical_design_stats))
         .def(nb::init<>(), "Default constructor.")
@@ -224,7 +228,7 @@ void register_exact(nb::module_& m)
         .def_ro("num_aspect_ratios", &fiction::physical_design::exact_physical_design_stats::num_aspect_ratios,
                 DOC(fiction_physical_design_exact_physical_design_stats_num_aspect_ratios));
 
-    detail::register_exact<py_cartesian_gate_layout>(
+    detail::register_exact<fiction::layouts::cartesian_gate_layout>(
         m,
         "def exact(network: mnt.pyfiction.networks.technology_network, *, layout_type: "
         "type[mnt.pyfiction.layouts.cartesian_gate_layout] = mnt.pyfiction.layouts.cartesian_gate_layout, statistics: "
@@ -235,7 +239,7 @@ void register_exact(nb::module_& m)
         "bool = ..., timeout: int = ..., technology_specifics: technology_constraints = ..., on_progress: "
         "Callable[[str, int, int], None] | None = ..., on_worker_progress: Callable[[int, int, str, int, int, bool], "
         "None] | None = ...) -> mnt.pyfiction.layouts.cartesian_gate_layout | None");
-    detail::register_exact<py_shifted_cartesian_gate_layout>(
+    detail::register_exact<fiction::layouts::shifted_cartesian_gate_layout>(
         m, "def exact(network: mnt.pyfiction.networks.technology_network, *, layout_type: "
            "type[mnt.pyfiction.layouts.shifted_cartesian_gate_layout], statistics: exact_stats | None = None, scheme: "
            "str = ..., layout_arrangement: mnt.pyfiction.layouts.arrangement | None = ..., upper_bound_area: int = "
@@ -245,7 +249,7 @@ void register_exact(nb::module_& m)
            "timeout: int = ..., technology_specifics: technology_constraints = ..., on_progress: Callable[[str, int, "
            "int], None] | None = ..., on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = "
            "...) -> mnt.pyfiction.layouts.shifted_cartesian_gate_layout | None");
-    detail::register_exact<py_hexagonal_gate_layout>(
+    detail::register_exact<fiction::layouts::hexagonal_gate_layout>(
         m, "def exact(network: mnt.pyfiction.networks.technology_network, *, layout_type: "
            "type[mnt.pyfiction.layouts.hexagonal_gate_layout], statistics: exact_stats | None = None, scheme: str = "
            "..., layout_arrangement: mnt.pyfiction.layouts.arrangement | None = ..., upper_bound_area: int = ..., "
@@ -255,9 +259,11 @@ void register_exact(nb::module_& m)
            "timeout: int = ..., technology_specifics: technology_constraints = ..., on_progress: Callable[[str, int, "
            "int], None] | None = ..., on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = "
            "...) -> mnt.pyfiction.layouts.hexagonal_gate_layout | None");
+    // Keep the GIL while rejecting an unsupported Python layout type.
     m.def(
         "exact",
-        [](const py_tec_network&, const nb::handle, fiction::physical_design::exact_physical_design_stats*,
+        [](const fiction::networks::named_technology_network&, const nb::handle,
+           fiction::physical_design::exact_physical_design_stats*,
            const decltype(exact_physical_design_options{}.scheme)&,
            const decltype(exact_physical_design_options{}.layout_arrangement),
            const decltype(exact_physical_design_options{}.upper_bound_area),

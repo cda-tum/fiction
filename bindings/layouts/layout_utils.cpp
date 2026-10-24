@@ -17,8 +17,9 @@
 
 #include "fiction/layouts/layout_base.hpp"
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
+#include "pyfiction/types.hpp"  // NOLINT(misc-include-cleaner): preserves coordinate tuple input signatures.
 
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_utils.hpp>
 #include <fiction/technology/inml/layout.hpp>
 #include <fiction/technology/mol_qca/layout.hpp>
@@ -53,6 +54,7 @@ namespace detail
 template <typename Lyt>
 void register_num_adjacent_coordinates(nb::module_& m)
 {
+    // Keep the GIL for bounded neighbor queries; a release adds overhead.
     m.def("num_adjacent_coordinates", &fiction::layouts::num_adjacent_coordinates<Lyt>, nb::arg("lyt"), nb::arg("c"),
           DOC(fiction_layouts_num_adjacent_coordinates));
 }
@@ -66,7 +68,7 @@ template <typename Lyt>
 void register_normalize_layout_coordinates(nb::module_& m)
 {
     m.def("normalize_layout_coordinates", &fiction::layouts::normalize_layout_coordinates<Lyt>, nb::arg("lyt"),
-          DOC(fiction_layouts_normalize_layout_coordinates));
+          DOC(fiction_layouts_normalize_layout_coordinates), nb::call_guard<nb::gil_scoped_release>());
 }
 
 }  // namespace detail
@@ -79,14 +81,15 @@ void register_layout_utils(nb::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::register_num_adjacent_coordinates<py_cartesian_gate_layout>(m);
-    detail::register_num_adjacent_coordinates<py_shifted_cartesian_gate_layout>(m);
-    detail::register_num_adjacent_coordinates<py_hexagonal_gate_layout>(m);
+    detail::register_num_adjacent_coordinates<fiction::layouts::cartesian_gate_layout>(m);
+    detail::register_num_adjacent_coordinates<fiction::layouts::shifted_cartesian_gate_layout>(m);
+    detail::register_num_adjacent_coordinates<fiction::layouts::hexagonal_gate_layout>(m);
 
     detail::register_normalize_layout_coordinates<fiction::qca::layout>(m);
     detail::register_normalize_layout_coordinates<fiction::mol_qca::layout>(m);
     detail::register_normalize_layout_coordinates<fiction::inml::layout>(m);
 
+    // Keep the GIL for this constant-size random draw.
     m.def("random_coordinate", &fiction::layouts::random_coordinate<fiction::layouts::layout_base::coordinate>,
           nb::arg("corner1"), nb::arg("corner2"), DOC(fiction_layouts_random_coordinate));
 }

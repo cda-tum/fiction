@@ -95,6 +95,7 @@ inline nb::object convert_any_to_py(const std::any& value)
  */
 inline nb::dict convert_map_to_py(const std::unordered_map<std::string, std::any>& map)
 {
+    // Keep the GIL: dictionary insertion and value conversion call the Python API.
     nb::dict result;
 
     for (const auto& [key, value] : map)
@@ -121,6 +122,7 @@ inline nb::dict convert_map_to_py(const std::unordered_map<std::string, std::any
  */
 void register_result(nb::module_& m)
 {
+    // Keep the GIL for result properties; additional_simulation_parameters creates Python objects.
     using fiction::sidb::simulation::result;
 
     nb::class_<result>(m, "sidb_simulation_result", DOC(fiction_sidb_simulation_result))
@@ -138,8 +140,9 @@ void register_result(nb::module_& m)
             nb::sig("def additional_simulation_parameters(self) -> dict[str, int | float | bool | str]"),
             DOC(fiction_sidb_simulation_result_additional_simulation_parameters))
         .def("charge_state", &result::charge_state, nb::arg("distribution"), nb::arg("site"),
-             DOC(fiction_sidb_simulation_result_charge_state))
-        .def("groundstates", &result::groundstates, DOC(fiction_sidb_simulation_result_groundstates))
+             parameter_doc(DOC(fiction_sidb_simulation_result_charge_state), {{"s", "site"}}).c_str())
+        .def("groundstates", &result::groundstates, nb::call_guard<nb::gil_scoped_release>(),
+             DOC(fiction_sidb_simulation_result_groundstates))
 
         ;
 }

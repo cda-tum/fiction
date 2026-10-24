@@ -10,25 +10,14 @@
 
 /**
  * @file
- * @brief The concrete network and layout types the Python bindings instantiate.
+ * @brief Coordinate conversion and tuple-accepting type casters for Python bindings.
  * @author Marcel Walter (marcelwa)
  * @author Benjamin Hien (hibenj)
  */
 
 #pragma once
 
-#include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
-#include <fiction/layouts/shifted_cartesian_layout.hpp>
-#include <fiction/networks/technology_network.hpp>
-
-#include <kitty/dynamic_truth_table.hpp>
-#include <mockturtle/networks/aig.hpp>
-#include <mockturtle/networks/mig.hpp>
-#include <mockturtle/networks/xag.hpp>
-#include <mockturtle/views/names_view.hpp>
 
 #include <cstdint>
 #include <limits>
@@ -45,30 +34,6 @@ namespace pyfiction
 {
 
 /**
- * Truth table.
- */
-using py_tt = kitty::dynamic_truth_table;
-/**
- * @brief Technology network used by physical design and verification bindings.
- */
-using py_tec_network = mockturtle::names_view<fiction::networks::technology_network>;
-/**
- * @brief Named AND-inverter graph.
- */
-using py_aig_network = mockturtle::names_view<mockturtle::aig_network>;
-/**
- * @brief Named XOR-AND-inverter graph.
- */
-using py_xag_network = mockturtle::names_view<mockturtle::xag_network>;
-/**
- * @brief Named majority-inverter graph.
- */
-using py_mig_network = mockturtle::names_view<mockturtle::mig_network>;
-/**
- * Coordinates.
- */
-using py_coordinate = fiction::layouts::layout_base::coordinate;
-/**
  * Converts a Python integer to a signed coordinate axis.
  *
  * @param value Python integer.
@@ -84,34 +49,6 @@ inline int32_t coordinate_axis(const int64_t value)
 
     return static_cast<int32_t>(value);
 }
-/**
- * Nonnegative axis sizes of a zero-origin layout.
- */
-using py_extent = fiction::layouts::layout_base::extent;
-/**
- * Cartesian layout.
- */
-using py_cartesian_layout = fiction::layouts::cartesian_layout;
-/**
- * Shifted Cartesian layout.
- */
-using py_shifted_cartesian_layout = fiction::layouts::shifted_cartesian_layout;
-/**
- * Hexagonal layout.
- */
-using py_hexagonal_layout = fiction::layouts::hexagonal_layout;
-/**
- * Cartesian gate layout.
- */
-using py_cartesian_gate_layout = fiction::layouts::gate_level_layout<py_cartesian_layout>;
-/**
- * Shifted Cartesian gate layout.
- */
-using py_shifted_cartesian_gate_layout = fiction::layouts::gate_level_layout<py_shifted_cartesian_layout>;
-/**
- * Hexagonal gate layout.
- */
-using py_hexagonal_gate_layout = fiction::layouts::gate_level_layout<py_hexagonal_layout>;
 }  // namespace pyfiction
 
 namespace nanobind::detail
@@ -121,26 +58,27 @@ namespace nanobind::detail
  * @brief Describes coordinate tuple inputs while retaining the registered class caster.
  */
 template <>
-struct type_caster<pyfiction::py_coordinate> : type_caster_base<pyfiction::py_coordinate>
+struct type_caster<fiction::layouts::layout_base::coordinate>
+        : type_caster_base<fiction::layouts::layout_base::coordinate>
 {
     /**
      * @brief Accepted Python inputs and the concrete Python return type.
      */
     // NOLINTNEXTLINE(readability-identifier-naming): nanobind requires the member name Name.
-    static constexpr auto Name =
-        const_name<pyfiction::py_coordinate>() + io_name(" | tuple[int, int] | tuple[int, int, int]", "");
+    static constexpr auto Name = const_name<fiction::layouts::layout_base::coordinate>() +
+                                 io_name(" | tuple[int, int] | tuple[int, int, int]", "");
 };
 
 /**
  * @brief Describes size tuple inputs while retaining the registered class caster.
  */
 template <>
-struct type_caster<pyfiction::py_extent> : type_caster_base<pyfiction::py_extent>
+struct type_caster<fiction::layouts::layout_base::extent> : type_caster_base<fiction::layouts::layout_base::extent>
 {
     /** @brief Accepted Python inputs and the concrete return type. */
     // NOLINTNEXTLINE(readability-identifier-naming): nanobind requires the member name Name.
     static constexpr auto Name =
-        const_name<pyfiction::py_extent>() + io_name(" | tuple[int, int] | tuple[int, int, int]", "");
+        const_name<fiction::layouts::layout_base::extent>() + io_name(" | tuple[int, int] | tuple[int, int, int]", "");
 };
 
 /**
@@ -163,6 +101,7 @@ struct coordinate_constructor_caster
      */
     bool from_python(nb::handle src, std::uint32_t flags, cleanup_list* cleanup) noexcept
     {
+        // Keep the GIL: the registered-class caster inspects Python instances.
         type_caster_base<Coordinate> caster;
         if (!caster.from_python(src, flags, cleanup))
         {
@@ -177,13 +116,14 @@ struct coordinate_constructor_caster
  * @brief Preserves coordinate constructor dispatch.
  */
 template <>
-struct type_caster<nb::pointer_and_handle<pyfiction::py_coordinate>>
-        : coordinate_constructor_caster<pyfiction::py_coordinate>
+struct type_caster<nb::pointer_and_handle<fiction::layouts::layout_base::coordinate>>
+        : coordinate_constructor_caster<fiction::layouts::layout_base::coordinate>
 {};
 
 /** @brief Preserves extent constructor dispatch. */
 template <>
-struct type_caster<nb::pointer_and_handle<pyfiction::py_extent>> : coordinate_constructor_caster<pyfiction::py_extent>
+struct type_caster<nb::pointer_and_handle<fiction::layouts::layout_base::extent>>
+        : coordinate_constructor_caster<fiction::layouts::layout_base::extent>
 {};
 
 }  // namespace nanobind::detail

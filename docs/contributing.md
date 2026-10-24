@@ -27,18 +27,16 @@ You can contribute in several ways:
 
 ## First Contributions
 
-Ready to contribute? Check out the [documentation](https://fiction.readthedocs.io/en/latest/) to set up _fiction_ for local development and learn about the style guidelines and conventions used throughout the project.
+Start with {doc}`getting_started` to set up _fiction_ for local development.
+See {doc}`tooling` for the tools and configuration files used in development.
 
-We value contributions from people with all levels of experience.
-In particular if this is your first PR not everything has to be perfect.
-We will guide you through the PR process.
-Nevertheless, please try to follow the guidelines below as well as you can to help make the PR process quick and smooth.
+Follow the guidelines below when preparing a pull request.
 
 ## Core Guidelines
 
 - ["Commit early and push often"](https://www.worklytics.co/blog/commit-early-push-often).
 - Write meaningful commit messages. Prefix each subject with a single [gitmoji](https://gitmoji.dev) character matching the change's dominant nature; `AGENTS.md` documents the convention in full.
-- Focus on a single feature/bug at a time and only touch relevant files. Split multiple features into multiple contributions.
+- Focus on one feature or bug. Include fixes and cleanups found during the work as separate commits; discuss redesigns first. Keep dependency updates in separate pull requests.
 - If you added a new feature, you should add tests that ensure it works as intended. Furthermore, the new feature should be documented appropriately.
 - If you fixed a bug, you should add tests that demonstrate that the bug has been fixed.
 - Document your code thoroughly and write readable code.
@@ -68,7 +66,7 @@ every eligible C++ file.
 
 - Create PRs early. It is ok to create work-in-progress PRs. You may mark these as draft PRs on GitHub.
 
-- Describe your PR. Start with a descriptive title, reference any related issues by including the issue number in the PR description, and add a comprehensive description of the changes. We provide a PR template that you can (and should) follow to create a PR.
+- Follow the PR template. Use a descriptive title and a short paragraph explaining the need, resulting behavior, and any decision the diff cannot explain. Reference related issues and complete the checklist.
 
 - Whenever a PR is created or updated, the `CI` workflow runs. Its `🔍 Change` job classifies your diff and skips the jobs your changes cannot affect, so a documentation-only PR does not pay for the C++ matrix. `🚦 Check` aggregates every job and is the one status that has to be green. Here are some tips for finding the cause of certain failures:
 
@@ -112,6 +110,8 @@ binding code is not measured by `pytest-cov`.
 CI combines reports from the supported Python versions and platforms under Codecov's
 `python` flag. The `cpp` flag measures C++ headers. Each flag has its own project and
 patch status; Python project coverage is compared with the measured base revision.
+
+(code-review)=
 
 ## Code Review
 
@@ -165,6 +165,16 @@ Contributions written with the help of an AI agent are welcome, under two condit
 
 Agent instructions live in `AGENTS.md` at the repository root, with additional files in the subdirectories they apply to. If your tool expects a different file name, create a local symlink — for example `ln -s AGENTS.md CLAUDE.md`. Those names are gitignored, so the repository itself stays tool-neutral.
 
+## Contract Audits
+
+Use the [SpecAudit method](https://github.com/cda-tum/fiction/blob/main/.agent/AUDITS.md)
+to check whether tests protect intended behavior or constrain incidental choices.
+Start with one concrete concern, inspect the contract and consumers, and support
+behavioral claims with reproducible experiments. Preserve regression coverage,
+numerical accuracy, input validation, and compatibility. Keep optional audit
+records in ignored `.ai/audits/`; apply fixes and publish only within the scope
+the maintainer authorized. The method includes a SiDB text-printer example request.
+
 ```{raw} html
 <hr>
 ```
@@ -176,12 +186,14 @@ This document was inspired by and partially adapted from
 - <https://yeoman.io/contributing/pull-request.html>
 - <https://github.com/scikit-build/scikit-build>
 
+(building-documentation)=
+
 ## Building the Documentation
 
 Install [uv](https://docs.astral.sh/uv/), Doxygen, and the C++ build prerequisites
 listed in {doc}`getting_started`. The documentation session uses Python 3.12 and
-builds the checkout's Python bindings. Install Z3 and make its headers and library
-available to CMake, as required by the `pyfiction` preset.
+builds the checkout's Python bindings. The session installs the Python build dependencies,
+including `z3-solver`; CMake discovers Z3 from that environment.
 
 Run these commands from the repository root:
 
@@ -199,6 +211,8 @@ are passed to Sphinx. Read the Docs uses the same non-interactive build.
 The docs dependency group requires Python 3.12 or newer. `uv.lock` records the
 versions used by local and hosted builds. HTML builds also produce `llms.txt`,
 `llms-full.txt`, and a Markdown copy of each page alongside its HTML file.
+
+(citing-publications)=
 
 ### Citing Publications
 

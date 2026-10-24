@@ -17,9 +17,9 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/synthesis/technology_mapping.hpp>
+#include <fiction/types.hpp>
 
 #include <mockturtle/algorithms/emap.hpp>
 
@@ -47,6 +47,7 @@ namespace detail
  */
 inline nb::dict technology_mapping_keywords(const fiction::synthesis::technology_mapping_params& params)
 {
+    // Keep the GIL while constructing and populating the Python dictionary.
     nb::dict options{};
     options["decay"]   = params.decay;
     options["inv"]     = params.inv;
@@ -198,6 +199,7 @@ void register_technology_mapping(nb::module_& m)
         PyExc_RuntimeError);  // NOLINT(misc-include-cleaner): included through nanobind.h
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 
+    // Keep the GIL for statistics construction, field access, and bounded report formatting.
     nb::class_<mockturtle::emap_stats>(m, "mapper_stats", "Technology mapper results, including failure status.")
         .def_ro("mapping_error", &mockturtle::emap_stats::mapping_error)
         .def_ro("area", &mockturtle::emap_stats::area)
@@ -267,10 +269,10 @@ void register_technology_mapping(nb::module_& m)
         nb::sig("def all_supported_standard_functions() -> TechnologyMappingOptions"),
         "Return boolean mapping keywords for all supported standard functions.");
 
-    detail::register_technology_mapping_impl<py_tec_network>(m);
-    detail::register_technology_mapping_impl<py_aig_network>(m);
-    detail::register_technology_mapping_impl<py_xag_network>(m);
-    detail::register_technology_mapping_impl<py_mig_network>(m);
+    detail::register_technology_mapping_impl<fiction::networks::named_technology_network>(m);
+    detail::register_technology_mapping_impl<fiction::networks::named_aig_network>(m);
+    detail::register_technology_mapping_impl<fiction::networks::named_xag_network>(m);
+    detail::register_technology_mapping_impl<fiction::networks::named_mig_network>(m);
 }
 
 }  // namespace pyfiction

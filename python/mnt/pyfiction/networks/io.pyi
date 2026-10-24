@@ -89,15 +89,13 @@ def write_dot_network(network: mnt.pyfiction.networks.xag_network, filename: str
 @overload
 def write_dot_network(network: mnt.pyfiction.networks.mig_network, filename: str, indexes: bool = True) -> None:
     """
-    Writes a logic network in DOT format into an output stream, using one
-    of the drawers above.
+    Write a logic network to a DOT file with gate-type colors.
 
     Args:
-        ntk: Network to write.
-        os: Output stream.
-        drawer: Drawer that decides the node labels, colors, and styles.
+        network: Logic network to write.
+        filename: Path of the output file.
+        indexes: Include node indices in labels. Defaults to True.
 
-    Template Args:
-        Ntk: Logic network type.
-        Drawer: DOT drawer type.
+    Raises:
+        RuntimeError: The output file cannot be written.
     """

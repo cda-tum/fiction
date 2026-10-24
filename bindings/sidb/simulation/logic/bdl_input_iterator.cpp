@@ -53,6 +53,7 @@ using bdl_input_iterator_options = fiction::sidb::simulation::logic::bdl_input_i
  */
 void register_bdl_input_iterator(nb::module_& m)
 {
+    // Keep the GIL for cursor queries, mutations, and iterator references; cursor advances must remain atomic.
     using fiction::sidb::layout;
     using fiction::sidb::simulation::logic::bdl_input_iterator;
 
@@ -84,6 +85,7 @@ void register_bdl_input_iterator(nb::module_& m)
                     {.threshold_bdl_interdistance = threshold_bdl_interdistance,
                      .bdl_pairs_params = {.minimum_distance = minimum_distance, .maximum_distance = maximum_distance}},
                     input_bdl_config};
+                const nb::gil_scoped_release release{};
                 std::construct_at(self, lyt, params);
             },
             nb::arg("lyt"), nb::kw_only(),
@@ -118,6 +120,7 @@ Args:
                 const bdl_input_iterator_options params{
                     {.bdl_pairs_params = {.minimum_distance = minimum_distance, .maximum_distance = maximum_distance}},
                     input_bdl_config};
+                const nb::gil_scoped_release release{};
                 std::construct_at(self, lyt, params, input_wires);
             },
             nb::arg("lyt"), nb::arg("input_wires"), nb::kw_only(),
@@ -137,6 +140,7 @@ Args:
             "__next__",
             [](bdl_input_iterator& self) -> layout
             {
+                // Keep the snapshot and cursor advance under the GIL so concurrent next() calls cannot overlap.
                 if (self >= (uint64_t{1} << self.num_input_pairs()))
                 {
                     throw nb::stop_iteration();
@@ -162,7 +166,9 @@ Args:
         .def(
             "__ge__", [](const bdl_input_iterator& self, const uint64_t n) { return self >= n; }, nb::arg("m"))
         .def(
-            "__add__", [](const bdl_input_iterator& self, const int n) { return self + n; }, nb::arg("m"),
+            // Callers must synchronize these snapshots with cursor updates because they release the GIL.
+            "__add__", [](const bdl_input_iterator& self, const int n) { return self + n; },
+            nb::call_guard<nb::gil_scoped_release>(), nb::arg("m"),
             DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_add))
         .def(
             "__iadd__",
@@ -173,7 +179,8 @@ Args:
             },
             nb::arg("m"), DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_iadd))
         .def(
-            "__sub__", [](const bdl_input_iterator& self, const int n) { return self - n; }, nb::arg("m"),
+            "__sub__", [](const bdl_input_iterator& self, const int n) { return self - n; },
+            nb::call_guard<nb::gil_scoped_release>(), nb::arg("m"),
             DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_sub))
         .def(
             "__isub__",
@@ -184,7 +191,8 @@ Args:
             },
             nb::arg("m"), DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_isub))
         .def(
-            "__getitem__", [](const bdl_input_iterator& self, const int n) { return self[n]; }, nb::arg("m"),
+            "__getitem__", [](const bdl_input_iterator& self, const int n) { return self[n]; },
+            nb::call_guard<nb::gil_scoped_release>(), nb::arg("m"),
             DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_array))
         .def("num_input_pairs", &bdl_input_iterator::num_input_pairs,
              DOC(fiction_sidb_simulation_logic_bdl_input_iterator_num_input_pairs))
@@ -210,6 +218,7 @@ Args:
                 {.threshold_bdl_interdistance = threshold_bdl_interdistance,
                  .bdl_pairs_params = {.minimum_distance = minimum_distance, .maximum_distance = maximum_distance}},
                 input_bdl_config};
+            const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::generate_bdl_input_pattern_layouts(lyt, params);
         },
         nb::arg("lyt"), nb::kw_only(),
@@ -241,6 +250,7 @@ Args:
             const bdl_input_iterator_options params{
                 {.bdl_pairs_params = {.minimum_distance = minimum_distance, .maximum_distance = maximum_distance}},
                 input_bdl_config};
+            const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::generate_bdl_input_pattern_layouts(lyt, params, input_wires);
         },
         nb::arg("lyt"), nb::arg("input_wires"), nb::kw_only(),

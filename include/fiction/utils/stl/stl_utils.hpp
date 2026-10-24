@@ -80,29 +80,37 @@ template <class T, class Container = std::vector<T>, class Compare = std::less<t
 class searchable_priority_queue : public std::priority_queue<T, Container, Compare>
 {
   public:
-    using iterator       = typename std::priority_queue<T, Container, Compare>::container_type::iterator;
+    /** @brief Mutable iterator over the underlying container. */
+    using iterator = typename std::priority_queue<T, Container, Compare>::container_type::iterator;
+    /** @brief Constant iterator over the underlying container. */
     using const_iterator = typename std::priority_queue<T, Container, Compare>::container_type::const_iterator;
 
+    /** @brief Returns an iterator to the first stored element. */
     iterator begin() noexcept
     {
         return this->c.begin();
     }
+    /** @brief Returns an iterator to the first stored element. */
     const_iterator begin() const noexcept
     {
         return this->c.begin();
     }
+    /** @brief Returns an iterator past the last stored element. */
     iterator end() noexcept
     {
         return this->c.end();
     }
+    /** @brief Returns an iterator past the last stored element. */
     const_iterator end() const noexcept
     {
         return this->c.end();
     }
+    /** @brief Returns a constant iterator to the first stored element. */
     const_iterator cbegin() const noexcept
     {
         return this->c.cbegin();
     }
+    /** @brief Returns a constant iterator past the last stored element. */
     const_iterator cend() const noexcept
     {
         return this->c.cend();

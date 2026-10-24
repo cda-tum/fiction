@@ -11,19 +11,45 @@ from __future__ import annotations
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- bounded native deadlock regression
 import sys
 import textwrap
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
 from mnt.pyfiction.sidb import charge_distribution, lattice, lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.io import read_sqd_layout
 from mnt.pyfiction.sidb.simulation import sidb_simulation_engine
 from mnt.pyfiction.sidb.simulation.analysis import physically_valid_parameters
+from mnt.pyfiction.sidb.simulation.engines import quickexact
 from mnt.pyfiction.sidb.simulation.logic import (
     input_bdl_configuration,
     operational_analysis_strategy,
     operational_condition,
+    operational_domain_value_range,
     parameter_point,
+    sweep_parameter,
 )
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+
+def test_excited_state_number_counts_lower_energy_levels(resources_dir: Path) -> None:
+    """Physical-parameter analysis reports energy-level rank rather than state degeneracy.
+
+    Args:
+        resources_dir: Directory containing the reference SiDB layouts.
+    """
+    layout = read_sqd_layout(str(resources_dir / "Bestagon_AND_mu_025_v0.sqd"))
+    result = quickexact(layout, base=2)
+    highest = max(result.charge_distributions, key=lambda cd: cd.energy())
+    parameters = physically_valid_parameters(
+        layout,
+        highest,
+        base=2,
+        number_of_threads=1,
+        sweep_dimensions=[operational_domain_value_range(sweep_parameter.EPSILON_R, 5.6, 5.6, 0.1)],
+    )
+    assert parameters.get_excited_state_number_for_parameter(parameter_point([5.6])) == 2
 
 
 def test_one_sidb_100_lattice() -> None:

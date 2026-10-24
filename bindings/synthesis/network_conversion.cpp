@@ -14,10 +14,8 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
-
 #include <fiction/synthesis/network_conversion.hpp>
+#include <fiction/types.hpp>
 
 #include <cstdint>
 #include <type_traits>
@@ -65,7 +63,8 @@ enum class network_target : std::uint8_t
  * @brief A network of any type that `convert_network` accepts.
  */
 using any_network =
-    std::variant<const py_tec_network*, const py_aig_network*, const py_xag_network*, const py_mig_network*>;
+    std::variant<const fiction::networks::named_technology_network*, const fiction::networks::named_aig_network*,
+                 const fiction::networks::named_xag_network*, const fiction::networks::named_mig_network*>;
 
 /**
  * @brief Converts a network into `NtkDest` while the GIL is released.
@@ -85,6 +84,7 @@ nb::object convert_to(const any_network& network)
                 const nb::gil_scoped_release release{};
                 return fiction::synthesis::convert_network<NtkDest, std::remove_cvref_t<decltype(*ntk)>>(*ntk);
             }();
+            // Python object construction requires the GIL after native conversion.
             return nb::cast(std::move(converted));
         },
         network);
@@ -101,10 +101,10 @@ inline nb::object convert_to_target(const any_network& network, const network_ta
 {
     switch (target)
     {
-        case network_target::AIG: return convert_to<py_aig_network>(network);
-        case network_target::XAG: return convert_to<py_xag_network>(network);
-        case network_target::MIG: return convert_to<py_mig_network>(network);
-        default: return convert_to<py_tec_network>(network);
+        case network_target::AIG: return convert_to<fiction::networks::named_aig_network>(network);
+        case network_target::XAG: return convert_to<fiction::networks::named_xag_network>(network);
+        case network_target::MIG: return convert_to<fiction::networks::named_mig_network>(network);
+        default: return convert_to<fiction::networks::named_technology_network>(network);
     }
 }
 
@@ -167,7 +167,20 @@ void register_network_conversion(nb::module_& m)
             "mnt.pyfiction.networks.mig_network, target: typing.Literal[mnt.pyfiction.synthesis.network_target.TEC] = "
             "mnt.pyfiction.synthesis.network_target.TEC) "
             "-> mnt.pyfiction.networks.technology_network"),
-        DOC(fiction_synthesis_convert_network));
+        R"doc(Convert a logic network to the selected network type.
+Real buffer nodes used for fanouts and path balancing are supported. Converting
+to the input network's type returns a copy with dangling nodes removed.
+
+Args:
+    network: Input logic network.
+    target: Network type to produce: TEC, AIG, XAG, or MIG. Defaults to network_target.TEC.
+
+Returns:
+    A logically equivalent network of the selected type.
+
+Raises:
+    ValueError: A gate has neither a supported implementation nor a truth table.
+)doc");
     detail::register_convert_network_to<detail::network_target::AIG>(
         m, "def convert_network(network: mnt.pyfiction.networks.technology_network | "
            "mnt.pyfiction.networks.aig_network | mnt.pyfiction.networks.xag_network | "

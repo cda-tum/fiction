@@ -16,8 +16,8 @@
 
 #include "pyfiction/cell_grid.hpp"
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/technology/qca/layout.hpp>
 
 #include <nanobind/nanobind.h>
@@ -37,6 +37,7 @@ namespace pyfiction
  */
 void register_qca_layout(nb::module_& m)
 {
+    // Keep the GIL for cell access and mutation so calls on one layout remain serialized.
     using fiction::qca::cell_mode;
     using fiction::qca::cell_type;
     using fiction::qca::layout;
@@ -55,7 +56,7 @@ void register_qca_layout(nb::module_& m)
         .value("VERTICAL", cell_mode::VERTICAL, DOC(fiction_qca_cell_mode_VERTICAL))
         .value("CROSSOVER", cell_mode::CROSSOVER, DOC(fiction_qca_cell_mode_CROSSOVER));
 
-    nb::class_<layout, py_cartesian_layout> cls(m, "qca_layout", DOC(fiction_qca_layout));
+    nb::class_<layout, fiction::layouts::cartesian_layout> cls(m, "qca_layout", DOC(fiction_qca_layout));
 
     detail::register_clocked_constructors(cls);
     detail::register_cell_grid(cls);

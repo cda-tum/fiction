@@ -18,9 +18,10 @@
 #pragma once
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
+#include "pyfiction/types.hpp"  // NOLINT(misc-include-cleaner): preserves coordinate/extent tuple input signatures.
 
 #include <fiction/layouts/bounding_box.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/io/print_layout.hpp>
 
@@ -57,10 +58,11 @@ namespace pyfiction::detail
  * @param cls Python class of `Lyt`.
  */
 template <typename Lyt>
-void register_cell_grid(nb::class_<Lyt, py_cartesian_layout>& cls)
+void register_cell_grid(nb::class_<Lyt, fiction::layouts::cartesian_layout>& cls)
 {
     using cell = typename Lyt::cell;
 
+    // Keep the GIL for cached counts, local cell queries, and mutations; a release adds overhead.
     cls.def("get_cell_type", &Lyt::get_cell_type, nb::arg("c"), DOC(fiction_layouts_cell_grid_get_cell_type))
         .def("is_empty_cell", &Lyt::is_empty_cell, nb::arg("c"), DOC(fiction_layouts_cell_grid_is_empty_cell))
         .def("assign_cell_name", &Lyt::assign_cell_name, nb::arg("c"), nb::arg("n"),
@@ -83,7 +85,7 @@ void register_cell_grid(nb::class_<Lyt, py_cartesian_layout>& cls)
                 lyt.foreach_cell([&cells](const auto& c) { cells.push_back(c); });
                 return cells;
             },
-            "Returns the positions of all cells, in unspecified order.")
+            "Returns the positions of all cells, in unspecified order.", nb::call_guard<nb::gil_scoped_release>())
         .def(
             "pis",
             [](const Lyt& lyt)
@@ -92,7 +94,7 @@ void register_cell_grid(nb::class_<Lyt, py_cartesian_layout>& cls)
                 lyt.foreach_pi([&pis](const auto& c) { pis.push_back(c); });
                 return pis;
             },
-            "Returns the positions of all input cells, in unspecified order.")
+            "Returns the positions of all input cells, in unspecified order.", nb::call_guard<nb::gil_scoped_release>())
         .def(
             "pos",
             [](const Lyt& lyt)
@@ -101,7 +103,8 @@ void register_cell_grid(nb::class_<Lyt, py_cartesian_layout>& cls)
                 lyt.foreach_po([&pos](const auto& c) { pos.push_back(c); });
                 return pos;
             },
-            "Returns the positions of all output cells, in unspecified order.")
+            "Returns the positions of all output cells, in unspecified order.",
+            nb::call_guard<nb::gil_scoped_release>())
         .def(
             "bounding_box",
             [](const Lyt& lyt)
@@ -109,14 +112,16 @@ void register_cell_grid(nb::class_<Lyt, py_cartesian_layout>& cls)
                 const auto bb = fiction::layouts::bounding_box<Lyt>(lyt);
                 return std::make_pair(bb.get_min(), bb.get_max());
             },
-            BOUNDING_BOX_DOC)
+            BOUNDING_BOX_DOC, nb::call_guard<nb::gil_scoped_release>())
         .def(
-            "__copy__", [](const Lyt& lyt) { return Lyt{lyt}; }, "Returns an independent copy of the layout.")
+            "__copy__", [](const Lyt& lyt) { return Lyt{lyt}; }, "Returns an independent copy of the layout.",
+            nb::call_guard<nb::gil_scoped_release>())
         .def(
             "__deepcopy__", [](const Lyt& lyt, const nb::dict&) { return Lyt{lyt}; }, nb::arg("memo"),
-            "Returns an independent copy of the layout.")
-        .def(nb::self == nb::self)  // NOLINT(misc-redundant-expression)
-        .def(nb::self != nb::self)  // NOLINT(misc-redundant-expression)
+            "Returns an independent copy of the layout.", nb::call_guard<nb::gil_scoped_release>())
+        // nanobind compares placeholders to register same-type operators.
+        .def(nb::self == nb::self, nb::call_guard<nb::gil_scoped_release>())  // NOLINT(misc-redundant-expression)
+        .def(nb::self != nb::self, nb::call_guard<nb::gil_scoped_release>())  // NOLINT(misc-redundant-expression)
         .def(
             "__repr__",
             [](const Lyt& lyt) -> std::string
@@ -127,7 +132,7 @@ void register_cell_grid(nb::class_<Lyt, py_cartesian_layout>& cls)
 
                 return stream.str();
             },
-            "Returns a string representation of the layout.");
+            "Returns a string representation of the layout.", nb::call_guard<nb::gil_scoped_release>());
 }
 /**
  * @brief Binds the tile-based clocking of a cell grid layout.
@@ -136,14 +141,15 @@ void register_cell_grid(nb::class_<Lyt, py_cartesian_layout>& cls)
  * @param cls Python class of `Lyt`.
  */
 template <typename Lyt>
-void register_tile_clocking(nb::class_<Lyt, py_cartesian_layout>& cls)
+void register_tile_clocking(nb::class_<Lyt, fiction::layouts::cartesian_layout>& cls)
 {
+    // Keep the GIL for short clocking lookups and updates; a release adds overhead.
     cls.def("get_tile_size_x", &Lyt::get_tile_size_x, DOC(fiction_layouts_tile_clocking_get_tile_size_x))
         .def("set_tile_size_x", &Lyt::set_tile_size_x, nb::arg("size"),
-             DOC(fiction_layouts_tile_clocking_set_tile_size_x))
+             parameter_doc(DOC(fiction_layouts_tile_clocking_set_tile_size_x), {{"tile_size_x", "size"}}).c_str())
         .def("get_tile_size_y", &Lyt::get_tile_size_y, DOC(fiction_layouts_tile_clocking_get_tile_size_y))
         .def("set_tile_size_y", &Lyt::set_tile_size_y, nb::arg("size"),
-             DOC(fiction_layouts_tile_clocking_set_tile_size_y))
+             parameter_doc(DOC(fiction_layouts_tile_clocking_set_tile_size_y), {{"tile_size_y", "size"}}).c_str())
         .def("get_clock_zone", &Lyt::get_clock_zone, nb::arg("c"), DOC(fiction_layouts_tile_clocking_get_clock_zone))
         .def("assign_clock_number", &Lyt::assign_clock_number, nb::arg("cz"), nb::arg("cn"),
              DOC(fiction_layouts_tile_clocking_assign_clock_number))
@@ -182,8 +188,9 @@ void register_tile_clocking(nb::class_<Lyt, py_cartesian_layout>& cls)
  * @param cls Python class of `Lyt`.
  */
 template <typename Lyt>
-void register_clocked_constructors(nb::class_<Lyt, py_cartesian_layout>& cls)
+void register_clocked_constructors(nb::class_<Lyt, fiction::layouts::cartesian_layout>& cls)
 {
+    // Keep the GIL for construction and clocking validation; these create no cells.
     cls.def(nb::init<>())
         .def(nb::init<const typename Lyt::extent&>(), nb::arg("extent"))
         .def(

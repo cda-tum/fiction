@@ -18,13 +18,13 @@
 
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/operational_parameters.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 
 #include <fmt/format.h>
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -96,7 +96,8 @@ inline void register_operational_domain_functions(nb::module_& m)
 
     m.def(
         "operational_domain_grid_search",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const decltype(operational_options{}.timeout) timeout,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+           const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
            const decltype(operational_options{}.sim_params.epsilon_r) epsilon_r,
@@ -188,7 +189,7 @@ Args:
 )doc");
     m.def(
         "operational_domain_random_sampling",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples,
            const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
@@ -282,7 +283,7 @@ Args:
 )doc");
     m.def(
         "operational_domain_flood_fill",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples,
            const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
@@ -374,7 +375,7 @@ Args:
 )doc");
     m.def(
         "operational_domain_contour_tracing",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples,
            const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
@@ -468,7 +469,8 @@ Args:
 )doc");
     m.def(
         "critical_temperature_domain_grid_search",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const decltype(operational_options{}.timeout) timeout,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+           const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
            const decltype(operational_options{}.sim_params.epsilon_r) epsilon_r,
@@ -561,7 +563,7 @@ Args:
 )doc");
     m.def(
         "critical_temperature_domain_random_sampling",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples,
            const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
@@ -657,7 +659,7 @@ Args:
 )doc");
     m.def(
         "critical_temperature_domain_flood_fill",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples,
            const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
@@ -753,7 +755,7 @@ Args:
 )doc");
     m.def(
         "critical_temperature_domain_contour_tracing",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples,
            const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
@@ -856,6 +858,7 @@ Args:
  */
 void register_operational_domain(nb::module_& m)
 {
+    // Keep the GIL for domain lookups and Python conversion; native domain scans release it.
     nb::class_<fiction::sidb::simulation::logic::parameter_point>(m, "parameter_point",
                                                                   DOC(fiction_sidb_simulation_logic_parameter_point))
         .def(nb::init<>(), DOC(fiction_sidb_simulation_logic_parameter_point_parameter_point))
@@ -920,8 +923,10 @@ void register_operational_domain(nb::module_& m)
              &fiction::sidb::simulation::logic::critical_temperature_domain::get_number_of_dimensions,
              DOC(fiction_sidb_simulation_logic_critical_temperature_domain_get_number_of_dimensions))
         .def("minimum_ct", &fiction::sidb::simulation::logic::critical_temperature_domain::minimum_ct,
+             nb::call_guard<nb::gil_scoped_release>(),
              DOC(fiction_sidb_simulation_logic_critical_temperature_domain_minimum_ct))
         .def("maximum_ct", &fiction::sidb::simulation::logic::critical_temperature_domain::maximum_ct,
+             nb::call_guard<nb::gil_scoped_release>(),
              DOC(fiction_sidb_simulation_logic_critical_temperature_domain_maximum_ct))
 
         // Pythonic interface functions
@@ -958,41 +963,51 @@ void register_operational_domain(nb::module_& m)
             [](const fiction::sidb::simulation::logic::critical_temperature_domain& self)
             {
                 std::vector<fiction::sidb::simulation::logic::parameter_point> keys{};
-                keys.reserve(self.size());
-                self.for_each([&keys](const auto& key, const auto&) { keys.push_back(key); });
+                {
+                    const nb::gil_scoped_release release{};
+                    keys.reserve(self.size());
+                    self.for_each([&keys](const auto& key, const auto&) { keys.push_back(key); });
+                }
 
+                // Keep the GIL: casting keys and creating the iterator call the Python API.
                 const nb::object py_keys = nb::cast(keys);
                 return nb::iter(py_keys);
             },
             nb::sig(
                 "def __iter__(self) -> collections.abc.Iterator[mnt.pyfiction.sidb.simulation.logic.parameter_point]"),
             "Returns an iterator over the parameter points stored in the domain.")
-        .def("keys",
-             [](const fiction::sidb::simulation::logic::critical_temperature_domain& self)
-             {
-                 std::vector<fiction::sidb::simulation::logic::parameter_point> keys{};
-                 keys.reserve(self.size());
-                 self.for_each([&keys](const auto& key, const auto&) { keys.push_back(key); });
-                 return keys;
-             })
-        .def("values",
-             [](const fiction::sidb::simulation::logic::critical_temperature_domain& self)
-             {
-                 std::vector<std::tuple<fiction::sidb::simulation::logic::operational_status, double>> values{};
-                 values.reserve(self.size());
-                 self.for_each([&values](const auto&, const auto& value) { values.push_back(value); });
-                 return values;
-             })
-        .def("items",
-             [](const fiction::sidb::simulation::logic::critical_temperature_domain& self)
-             {
-                 std::vector<std::pair<fiction::sidb::simulation::logic::parameter_point,
-                                       std::tuple<fiction::sidb::simulation::logic::operational_status, double>>>
-                     items{};
-                 items.reserve(self.size());
-                 self.for_each([&items](const auto& key, const auto& value) { items.emplace_back(key, value); });
-                 return items;
-             })
+        .def(
+            "keys",
+            [](const fiction::sidb::simulation::logic::critical_temperature_domain& self)
+            {
+                std::vector<fiction::sidb::simulation::logic::parameter_point> keys{};
+                keys.reserve(self.size());
+                self.for_each([&keys](const auto& key, const auto&) { keys.push_back(key); });
+                return keys;
+            },
+            nb::call_guard<nb::gil_scoped_release>())
+        .def(
+            "values",
+            [](const fiction::sidb::simulation::logic::critical_temperature_domain& self)
+            {
+                std::vector<std::tuple<fiction::sidb::simulation::logic::operational_status, double>> values{};
+                values.reserve(self.size());
+                self.for_each([&values](const auto&, const auto& value) { values.push_back(value); });
+                return values;
+            },
+            nb::call_guard<nb::gil_scoped_release>())
+        .def(
+            "items",
+            [](const fiction::sidb::simulation::logic::critical_temperature_domain& self)
+            {
+                std::vector<std::pair<fiction::sidb::simulation::logic::parameter_point,
+                                      std::tuple<fiction::sidb::simulation::logic::operational_status, double>>>
+                    items{};
+                items.reserve(self.size());
+                self.for_each([&items](const auto& key, const auto& value) { items.emplace_back(key, value); });
+                return items;
+            },
+            nb::call_guard<nb::gil_scoped_release>())
 
         ;
 
@@ -1044,42 +1059,52 @@ void register_operational_domain(nb::module_& m)
             [](const fiction::sidb::simulation::logic::operational_domain& self)
             {
                 std::vector<fiction::sidb::simulation::logic::parameter_point> keys{};
-                keys.reserve(self.size());
-                self.for_each([&keys](const auto& key, const auto&) { keys.push_back(key); });
+                {
+                    const nb::gil_scoped_release release{};
+                    keys.reserve(self.size());
+                    self.for_each([&keys](const auto& key, const auto&) { keys.push_back(key); });
+                }
 
+                // Keep the GIL: casting keys and creating the iterator call the Python API.
                 const nb::object py_keys = nb::cast(keys);
                 return nb::iter(py_keys);
             },
             nb::sig(
                 "def __iter__(self) -> collections.abc.Iterator[mnt.pyfiction.sidb.simulation.logic.parameter_point]"),
             "Returns an iterator over the parameter points stored in the domain.")
-        .def("keys",
-             [](const fiction::sidb::simulation::logic::operational_domain& self)
-             {
-                 std::vector<fiction::sidb::simulation::logic::parameter_point> keys{};
-                 keys.reserve(self.size());
-                 self.for_each([&keys](const auto& key, const auto&) { keys.push_back(key); });
-                 return keys;
-             })
-        .def("values",
-             [](const fiction::sidb::simulation::logic::operational_domain& self)
-             {
-                 std::vector<fiction::sidb::simulation::logic::operational_status> values{};
-                 values.reserve(self.size());
-                 self.for_each([&values](const auto&, const auto& value) { values.push_back(std::get<0>(value)); });
-                 return values;
-             })
-        .def("items",
-             [](const fiction::sidb::simulation::logic::operational_domain& self)
-             {
-                 std::vector<std::pair<fiction::sidb::simulation::logic::parameter_point,
-                                       fiction::sidb::simulation::logic::operational_status>>
-                     items{};
-                 items.reserve(self.size());
-                 self.for_each([&items](const auto& key, const auto& value)
-                               { items.emplace_back(key, std::get<0>(value)); });
-                 return items;
-             })
+        .def(
+            "keys",
+            [](const fiction::sidb::simulation::logic::operational_domain& self)
+            {
+                std::vector<fiction::sidb::simulation::logic::parameter_point> keys{};
+                keys.reserve(self.size());
+                self.for_each([&keys](const auto& key, const auto&) { keys.push_back(key); });
+                return keys;
+            },
+            nb::call_guard<nb::gil_scoped_release>())
+        .def(
+            "values",
+            [](const fiction::sidb::simulation::logic::operational_domain& self)
+            {
+                std::vector<fiction::sidb::simulation::logic::operational_status> values{};
+                values.reserve(self.size());
+                self.for_each([&values](const auto&, const auto& value) { values.push_back(std::get<0>(value)); });
+                return values;
+            },
+            nb::call_guard<nb::gil_scoped_release>())
+        .def(
+            "items",
+            [](const fiction::sidb::simulation::logic::operational_domain& self)
+            {
+                std::vector<std::pair<fiction::sidb::simulation::logic::parameter_point,
+                                      fiction::sidb::simulation::logic::operational_status>>
+                    items{};
+                items.reserve(self.size());
+                self.for_each([&items](const auto& key, const auto& value)
+                              { items.emplace_back(key, std::get<0>(value)); });
+                return items;
+            },
+            nb::call_guard<nb::gil_scoped_release>())
         .def(
             "to_numpy",
             [](const fiction::sidb::simulation::logic::operational_domain& self)

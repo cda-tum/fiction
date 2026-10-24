@@ -16,8 +16,9 @@
 
 #include "fiction/layouts/layout_base.hpp"
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
+#include "pyfiction/types.hpp"  // NOLINT(misc-include-cleaner): preserves coordinate tuple input signatures.
 
+#include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/color_routing.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
 #include <fiction/utils/graph/graph_coloring.hpp>
@@ -82,9 +83,11 @@ void register_color_routing_impl(nb::module_& m)
         nb::arg("conduct_partial_routing") = color_routing_options{}.conduct_partial_routing,
         nb::arg("crossings")               = color_routing_options{}.crossings,
         nb::arg("path_limit") = color_routing_options{}.path_limit, nb::arg("engine") = color_routing_options{}.engine,
-        nb::arg("partial_sat") = color_routing_options{}.partial_sat,
+        nb::arg("partial_sat") = color_routing_options{}.partial_sat, nb::call_guard<nb::gil_scoped_release>(),
         R"doc(Route the supplied connections in place by coloring their path intersections.
 Returns True when all objectives are satisfied or conduct_partial_routing is enabled.
+With path_limit=0, no candidate paths are generated and endpoint bounds are not checked.
+Raises ValueError for an out-of-extent objective endpoint when path_limit is None or nonzero.
 
 Args:
     conduct_partial_routing: Do not abort if some objectives cannot be fulfilled, but partially route the layout as much as possible.
@@ -118,9 +121,9 @@ void register_color_routing(nb::module_& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::register_color_routing_impl<py_cartesian_gate_layout>(m);
-    detail::register_color_routing_impl<py_shifted_cartesian_gate_layout>(m);
-    detail::register_color_routing_impl<py_hexagonal_gate_layout>(m);
+    detail::register_color_routing_impl<fiction::layouts::cartesian_gate_layout>(m);
+    detail::register_color_routing_impl<fiction::layouts::shifted_cartesian_gate_layout>(m);
+    detail::register_color_routing_impl<fiction::layouts::hexagonal_gate_layout>(m);
 }
 
 }  // namespace pyfiction

@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
@@ -27,7 +27,6 @@
 #include <fmt/format.h>
 #include <phmap.h>
 
-#include <concepts>
 #include <stdexcept>
 #include <vector>
 
@@ -51,20 +50,17 @@ class qca_one_library : public fcn::gate_library<qca::layout, 5, 5>
      * information from the stored grid into account to choose the correct gate representation for that tile. May it
      * be a gate or wires. Rotation and special marks like input and output, const cells etc. are computed additionally.
      *
-     * @tparam GateLyt Cartesian gate-level layout type.
+     * @tparam Geometry Coordinate geometry of the gate-level layout.
      * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a QCA ONE gate.
      * @return QCA ONE gate representation of `t` including I/Os, rotation, const cells, etc.
      * @throws fcn::unsupported_gate_type_exception If a terminal also acts as a fanout. Connect the terminal to a
      * separate fanout wire instead.
      */
-    template <typename GateLyt>
-    [[nodiscard]] static gate set_up_gate(const GateLyt& lyt, const fiction::layouts::layout_base::coordinate& t)
+    template <typename Geometry>
+    [[nodiscard]] static gate set_up_gate(const layouts::gate_layout<Geometry>&            lyt,
+                                          const fiction::layouts::layout_base::coordinate& t)
     {
-        static_assert(
-            requires { requires std::same_as<typename GateLyt::object_id, fiction::layouts::layout_object_id>; },
-            "GateLyt must be a gate-level layout");
-
         const auto object = lyt.find_object(t);
         if (!object)
         {
@@ -161,14 +157,15 @@ class qca_one_library : public fcn::gate_library<qca::layout, 5, 5>
   private:
     /**
      * Routes the physical connector ports of an occupied tile.
-     * @tparam Lyt Gate-level layout type.
+     * @tparam Geometry Coordinate geometry of the gate-level layout.
      * @param lyt Layout.
      * @param t Occupied tile.
      * @return Physical connector ports.
      */
-    template <typename Lyt>
+    template <typename Geometry>
     [[nodiscard]] static fcn::port_list<fcn::port_position>
-    determine_port_routing(const Lyt& lyt, const fiction::layouts::layout_base::coordinate& t)
+    determine_port_routing(const layouts::gate_layout<Geometry>&            lyt,
+                           const fiction::layouts::layout_base::coordinate& t)
     {
         fcn::port_list<fcn::port_position> p{};
 

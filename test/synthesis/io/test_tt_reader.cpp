@@ -19,12 +19,14 @@
 #include <fiction/synthesis/io/tt_reader.hpp>
 
 #include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <kitty/operations.hpp>
 
 #include <sstream>
 #include <string>
 
 using namespace fiction;
+using namespace fiction::synthesis;
 using namespace fiction::synthesis::io;
 
 TEST_CASE("Read truth tables", "[tt-reader]")
