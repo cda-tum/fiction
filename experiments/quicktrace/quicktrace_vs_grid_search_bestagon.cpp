@@ -24,7 +24,6 @@
 #include "fiction/technology/sidb/simulation/defects/defect_influence.hpp"
 #include "fiction/technology/sidb/simulation/io/write_defect_influence_domain.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
-#include "fiction_experiments.hpp"
 
 #include <fmt/format.h>
 #include <kitty/dynamic_truth_table.hpp>
