@@ -16,6 +16,7 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/technology/qca/io/write_qca_layout.hpp>
@@ -24,13 +25,67 @@
 
 #include <fmt/format.h>
 
+#include <filesystem>
+#include <fstream>
+#include <iterator>
+#include <random>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::qca;
 using namespace fiction::qca::io;
+
+TEST_CASE("QCAD names must fit one text record", "[qcad]")
+{
+    const auto  name        = GENERATE(std::string("a\nb"), std::string("a\rb"), std::string("a\0b", 3));
+    const auto  layout_name = GENERATE(false, true);
+    qca::layout layout{{1, 1}, layout_name ? name : "valid"};
+    layout.assign_cell_type({0, 0}, qca::cell_type::INPUT);
+    layout.assign_cell_name({0, 0}, layout_name ? "valid" : name);
+
+    std::ostringstream stream{};
+    stream << "sentinel";
+    CHECK_THROWS_AS(write_qca_layout(layout, stream), std::invalid_argument);
+    CHECK(stream.str() == "sentinel");
+
+    const auto filename =
+        std::filesystem::temp_directory_path() / ("fiction-qca-name-" + std::to_string(std::random_device{}()));
+    {
+        std::ofstream original{filename};
+        original << "sentinel";
+    }
+    CHECK_THROWS_AS(write_qca_layout(layout, filename.string()), std::invalid_argument);
+    std::ifstream     original{filename};
+    const std::string contents{std::istreambuf_iterator<char>{original}, std::istreambuf_iterator<char>{}};
+    CHECK(contents == "sentinel");
+    original.close();
+    std::filesystem::remove(filename);
+}
+
+TEST_CASE("QCAD preserves representable names and clips cells to the frame", "[qcad]")
+{
+    const std::string name{"a=b\t<>&\xc2\xb5"};
+    qca::layout       layout{{2, 1}, name};
+    layout.assign_cell_type({0, 0}, qca::cell_type::INPUT);
+    layout.assign_cell_name({0, 0}, name);
+    layout.assign_cell_type({1, 0}, qca::cell_type::CONST_0);
+    std::ostringstream expected{};
+    write_qca_layout(layout, expected);
+
+    layout.assign_cell_name({1, 0}, "ignored\nconstant name");
+    layout.assign_cell_type({-1, 0}, qca::cell_type::INPUT);
+    layout.assign_cell_name({-1, 0}, "ignored\nnegative cell");
+    layout.assign_cell_type({2, 0}, qca::cell_type::INPUT);
+    layout.assign_cell_name({2, 0}, "ignored\noutside cell");
+    std::ostringstream actual{};
+    write_qca_layout(layout, actual);
+    CHECK(actual.str() == expected.str());
+    CHECK(actual.str().find("name=" + name + '\n') != std::string::npos);
+    CHECK(actual.str().find("psz=" + name + '\n') != std::string::npos);
+}
 
 TEST_CASE("Write empty QCAD layout", "[qcad]")
 {
@@ -1459,5 +1514,55 @@ TEST_CASE("Write wire crossing", "[qcad]")
         write_qca_layout(layout, layout_stream);
 
         CHECK(layout_stream.str() == qcad_layout);
+    }
+}
+
+TEST_CASE("QCAD retains quantum-dot offsets at large coordinates", "[qcad]")
+{
+    const auto [x, center, positive_dot, negative_dot] =
+        GENERATE(Catch::Generators::table<int, const char*, const char*, const char*>(
+            {{1000000, "20000100.000000", "20000104.500000", "20000095.500000"},
+             {107374183, "2147483760.000000", "2147483764.500000", "2147483755.500000"}}));
+    qca::layout layout{{x + 1, 1}};
+    layout.assign_cell_type({x, 0}, qca::cell_type::NORMAL);
+    std::ostringstream stream{};
+    write_qca_layout(layout, stream);
+    CHECK(stream.str().find(fmt::format("x={}\n", center)) != std::string::npos);
+    CHECK(stream.str().find(fmt::format("x={}\n", positive_dot)) != std::string::npos);
+    CHECK(stream.str().find(fmt::format("x={}\n", negative_dot)) != std::string::npos);
+}
+
+TEST_CASE("QCAD preserves optional via layers before empty crossing layers", "[qcad]")
+{
+    const auto  create_vias = GENERATE(false, true);
+    qca::layout layout{{3, 3, 2}};
+    for (const auto& cell : {qca::layout::cell{0, 2}, qca::layout::cell{2, 0}})
+    {
+        layout.assign_cell_type(cell, qca::cell_type::NORMAL);
+        layout.assign_cell_mode(cell, qca::cell_mode::VERTICAL);
+    }
+    std::ostringstream stream{};
+    write_qca_layout(layout, stream, {.create_inter_layer_via_cells = create_vias});
+    const auto output   = stream.str();
+    const auto ground   = output.find("pszDescription=Ground Layer\n");
+    const auto crossing = output.find("pszDescription=Crossing Layer 1\n");
+    const auto via      = output.find("pszDescription=Via Layer 1\n");
+    REQUIRE(ground != std::string::npos);
+    REQUIRE(crossing != std::string::npos);
+    if (create_vias)
+    {
+        REQUIRE(via != std::string::npos);
+        CHECK(ground < via);
+        CHECK(via < crossing);
+        const auto via_cells = output.substr(via, crossing - via);
+        const auto first     = via_cells.find("x=140.000000\ny=100.000000\n");
+        const auto second    = via_cells.find("x=100.000000\ny=140.000000\n");
+        REQUIRE(first != std::string::npos);
+        REQUIRE(second != std::string::npos);
+        CHECK(first < second);
+    }
+    else
+    {
+        CHECK(via == std::string::npos);
     }
 }

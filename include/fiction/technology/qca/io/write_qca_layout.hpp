@@ -23,10 +23,11 @@
 
 #include <fmt/format.h>
 
+#include <algorithm>
 #include <cmath>
-#include <cstddef>
 #include <cstdint>
 #include <ostream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -150,27 +151,31 @@ inline constexpr const char* CHARGE_1      = "1.602176e-19";
 inline constexpr const char* CHARGE_8      = "8.010882e-20";
 inline constexpr const char* NEGATIVE_SPIN = "-319472243083548083355648.000000";
 
-inline constexpr const int   COLOR_MAX       = 65535;
-inline constexpr const int   COLOR_HALF      = 32768;
-inline constexpr const int   COLOR_MIN       = 0;
-inline constexpr const int   CELL_DISTANCE   = 20;
-inline constexpr const int   X_Y_OFFSET      = 100;
-inline constexpr const float CELL_SIZE       = 18.0f;
-inline constexpr const float DOT_SIZE        = 5.0f;
-inline constexpr const float LABEL_Y_OFFSET  = 21.5f;
-inline constexpr const float BB_X_OFFSET     = 9.0f;
-inline constexpr const float BB_Y_OFFSET     = 33.0f;
-inline constexpr const float BB_CX_OFFSET    = 4.0f;
-inline constexpr const float BB_CY_OFFSET    = 23.0f;
-inline constexpr const float CHARACTER_WIDTH = 10.0f;
+inline constexpr const int COLOR_MAX     = 65535;
+inline constexpr const int COLOR_HALF    = 32768;
+inline constexpr const int COLOR_MIN     = 0;
+inline constexpr const int CELL_DISTANCE = 20;
+inline constexpr const int X_Y_OFFSET    = 100;
+/** @brief Cell edge length in QCADesigner coordinates. */
+inline constexpr const double CELL_SIZE = 18.0;
+inline constexpr const float  DOT_SIZE  = 5.0f;
+/** @brief Vertical offset of a cell label. */
+inline constexpr const double LABEL_Y_OFFSET = 21.5;
+/** @brief Horizontal offset of the label bounding box. */
+inline constexpr const double BB_X_OFFSET = 9.0;
+/** @brief Vertical offset of the label bounding box. */
+inline constexpr const double BB_Y_OFFSET     = 33.0;
+inline constexpr const float  BB_CX_OFFSET    = 4.0f;
+inline constexpr const float  BB_CY_OFFSET    = 23.0f;
+inline constexpr const float  CHARACTER_WIDTH = 10.0f;
 
 /** @brief Position of a QCADesigner cell. */
 struct cell_pos
 {
     /** @brief Horizontal cell coordinate in QCADesigner output. */
-    float x;
+    double x;
     /** @brief Vertical cell coordinate in QCADesigner output. */
-    float y;
+    double y;
 };
 
 /** @brief RGB color used in QCADesigner output. */
@@ -202,13 +207,39 @@ class write_qca_layout_impl
             ps{std::move(p)}
     {}
 
-    /** @brief Writes the QCA layout to the output stream in QCADesigner format. */
+    /**
+     * @brief Validates serialized names and writes the QCA layout in QCADesigner format.
+     * @throws std::invalid_argument If a serialized name contains CR, LF, or a null byte.
+     */
     void run()
     {
+        const auto validate_name = [](const std::string& name)
+        {
+            if (name.find_first_of("\r\n\0", 0, 3) != std::string::npos)
+            {
+                throw std::invalid_argument("QCADesigner names must not contain line breaks or null bytes");
+            }
+        };
+        validate_name(lyt.get_layout_name());
+        std::vector<qca::layout::cell> cells{};
+        cells.reserve(lyt.num_cells());
+        lyt.foreach_cell(
+            [&](const auto& c)
+            {
+                if (lyt.is_within_bounds(c))
+                {
+                    if (!qca::is_constant(lyt.get_cell_type(c)))
+                    {
+                        validate_name(lyt.get_cell_name(c));
+                    }
+                    cells.push_back(c);
+                }
+            });
+        std::ranges::sort(cells);
 
         write_header();
 
-        write_cell_layers();
+        write_cell_layers(cells);
 
         // close design block
         os << qcad::CLOSE_DESIGN << std::flush;
@@ -233,11 +264,14 @@ class write_qca_layout_impl
                           FICTION_VERSION, FICTION_REPO);
     }
 
-    void write_cell_layers()
+    /**
+     * @brief Writes occupied cells in layer, row, and column order, retaining empty layers and inter-layer vias.
+     * @param cells In-bounds cells sorted by layer, row, and column.
+     */
+    void write_cell_layers(const std::vector<qca::layout::cell>& cells)
     {
-        utils::progress_reporter progress{ps.on_progress, "writing rows",
-                                          static_cast<std::size_t>(lyt.height()) *
-                                              static_cast<std::size_t>(lyt.layers())};
+        utils::progress_reporter progress{ps.on_progress, "writing cells", cells.size()};
+        auto                     cell = cells.cbegin();
         // for each layer
         for (uint32_t z = 0; z < lyt.layers(); ++z)
         {
@@ -251,20 +285,9 @@ class write_qca_layout_impl
             os << qcad::PSZ_DESCRIPTION << ((z == 0) ? "Ground Layer" : ("Crossing Layer " + std::to_string(z)))
                << '\n';
 
-            // for each row
-            for (uint32_t y = 0; y < lyt.height(); ++y)
+            while (cell != cells.cend() && std::cmp_equal(cell->z, z))
             {
-                // for each cell
-                for (uint32_t x = 0; x < lyt.width(); ++x)
-                {
-                    const qca::layout::cell c{x, y, z};
-
-                    // skip empty cells
-                    if (!lyt.is_empty_cell(c))
-                    {
-                        write_cell(c, ps.create_inter_layer_via_cells);
-                    }
-                }
+                write_cell(*cell++, ps.create_inter_layer_via_cells);
                 progress.advance();
             }
 
@@ -389,6 +412,11 @@ class write_qca_layout_impl
         }
     }
 
+    /**
+     * @brief Writes the four quantum dots and their charge values around a cell center.
+     * @param c Cell whose quantum dots are serialized.
+     * @param pos Cell center in QCADesigner coordinates.
+     */
     void write_quantum_dots(const qca::layout::cell& c, const qcad::cell_pos pos)
     {
         const auto cell_type = lyt.get_cell_type(c);
@@ -405,8 +433,8 @@ class write_qca_layout_impl
                 // open dot
                 os << qcad::OPEN_CELL_DOT;
 
-                os << qcad::X_POS << std::to_string(pos.x + ((qcad::CELL_SIZE / 4.0f) * static_cast<float>(i))) << '\n';
-                os << qcad::Y_POS << std::to_string(pos.y + ((qcad::CELL_SIZE / 4.0f) * static_cast<float>(j))) << '\n';
+                os << qcad::X_POS << std::to_string(pos.x + ((qcad::CELL_SIZE / 4.0) * static_cast<double>(i))) << '\n';
+                os << qcad::Y_POS << std::to_string(pos.y + ((qcad::CELL_SIZE / 4.0) * static_cast<double>(j))) << '\n';
                 os << qcad::DIAMETER << qcad::DOT_SIZE << '\n';
 
                 // determine charge
@@ -490,6 +518,11 @@ class write_qca_layout_impl
         }
     };
 
+    /**
+     * @brief Writes a cell and its quantum dots in QCADesigner coordinates.
+     * @param c Cell to serialize.
+     * @param save_via_cells Whether to collect vertical cells for the next inter-layer via layer.
+     */
     void write_cell(const qca::layout::cell& c, const bool save_via_cells)
     {
         // open cell
@@ -498,9 +531,8 @@ class write_qca_layout_impl
         os << qcad::OPEN_QCAD_DESIGN_OBJECT;
 
         // calculate cell position
-        const qcad::cell_pos pos{
-            .x = static_cast<float>((c.x * static_cast<decltype(c.x)>(qcad::CELL_DISTANCE)) + qcad::X_Y_OFFSET),
-            .y = static_cast<float>((c.y * static_cast<decltype(c.y)>(qcad::CELL_DISTANCE)) + qcad::X_Y_OFFSET)};
+        const qcad::cell_pos pos{.x = (static_cast<double>(c.x) * qcad::CELL_DISTANCE) + qcad::X_Y_OFFSET,
+                                 .y = (static_cast<double>(c.y) * qcad::CELL_DISTANCE) + qcad::X_Y_OFFSET};
 
         // write cell position
         os << qcad::X_POS << std::to_string(pos.x) << '\n';
@@ -511,8 +543,8 @@ class write_qca_layout_impl
         const auto color = write_cell_colors(c);
 
         // write cell bounding box
-        os << qcad::BOUNDING_BOX_X << std::to_string(pos.x - (qcad::CELL_SIZE / 2.0f)) << '\n';
-        os << qcad::BOUNDING_BOX_Y << std::to_string(pos.y - (qcad::CELL_SIZE / 2.0f)) << '\n';
+        os << qcad::BOUNDING_BOX_X << std::to_string(pos.x - (qcad::CELL_SIZE / 2.0)) << '\n';
+        os << qcad::BOUNDING_BOX_Y << std::to_string(pos.y - (qcad::CELL_SIZE / 2.0)) << '\n';
         os << qcad::BOUNDING_BOX_CX << qcad::CELL_SIZE << '\n';
         os << qcad::BOUNDING_BOX_CY << qcad::CELL_SIZE << '\n';
 
@@ -573,12 +605,15 @@ class write_qca_layout_impl
 /**
  * Writes a QCA layout to a qca file that is used by QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/),
  * a physical simulator for the QCA technology platform.
+ * Cells outside the layout extent are skipped. Cells within each layer are written in row and column order.
  *
  * This overload uses an output stream to write into.
  *
  * @param lyt The layout to be written.
  * @param os The output stream to write into.
  * @param ps Parameters.
+ * @throws std::invalid_argument If the layout name or a serialized cell name contains CR, LF, or a null byte.
+ * Names are validated before writing to the stream.
  */
 inline void write_qca_layout(const qca::layout& lyt, std::ostream& os, write_qca_layout_params ps = {})
 {
@@ -590,6 +625,7 @@ inline void write_qca_layout(const qca::layout& lyt, std::ostream& os, write_qca
 /**
  * Writes a QCA layout to a qca file that is used by QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/),
  * a physical simulator for the QCA technology platform.
+ * Cells outside the layout extent are skipped. Cells within each layer are written in row and column order.
  *
  * This overload uses a file name to create and write into.
  *
@@ -597,6 +633,7 @@ inline void write_qca_layout(const qca::layout& lyt, std::ostream& os, write_qca
  * @param filename The file name to create and write into. Should preferably use the `.qca` extension.
  * @param ps Parameters.
  * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
+ * @throws std::invalid_argument If the layout name or a serialized cell name contains CR, LF, or a null byte.
  */
 inline void write_qca_layout(const qca::layout& lyt, const std::string_view& filename, write_qca_layout_params ps = {})
 {
