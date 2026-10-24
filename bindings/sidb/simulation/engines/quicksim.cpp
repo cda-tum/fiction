@@ -80,13 +80,13 @@ void register_quicksim(nb::module_& m)
         nb::arg("iteration_steps") = quicksim_options{}.iteration_steps, nb::arg("alpha") = quicksim_options{}.alpha,
         nb::arg("number_threads") = nb::none(), nb::arg("timeout") = quicksim_options{}.timeout,
         nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
-        R"doc(Search for low-energy charge distributions with QuickSim.
+        R"doc(Search for low-energy distributions of negative and neutral charges with QuickSim.
 The keyword options select physical values, iterations, threads, runtime, and progress callbacks.
 Returns None when the heuristic search finds no physically valid charge distribution.
 Raises ValueError when base is neither 2 nor 3.
 
 Args:
-    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    base: Accepts 2 or 3; QuickSim searches negative and neutral charge states for either value.
     mu_minus: Negative-charge transition energy in eV.
     epsilon_r: Relative permittivity (dimensionless).
     lambda_tf: Thomas-Fermi screening distance in nm.

@@ -15,7 +15,6 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/name_utils.hpp>
@@ -23,6 +22,7 @@
 #include <fiction/technology/mol_qca/layout.hpp>
 #include <fiction/technology/qca/layout.hpp>
 #include <fiction/technology/sidb/layout.hpp>
+#include <fiction/types.hpp>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>        // NOLINT(misc-include-cleaner)
@@ -73,10 +73,10 @@ void register_name_utils(nb::module_& m)
     detail::register_name_utils<fiction::mol_qca::layout>(m);
     detail::register_name_utils<fiction::inml::layout>(m);
     detail::register_name_utils<fiction::sidb::layout>(m);
-    detail::register_name_utils<py_tec_network>(m);
-    detail::register_name_utils<py_aig_network>(m);
-    detail::register_name_utils<py_xag_network>(m);
-    detail::register_name_utils<py_mig_network>(m);
+    detail::register_name_utils<fiction::networks::named_technology_network>(m);
+    detail::register_name_utils<fiction::networks::named_aig_network>(m);
+    detail::register_name_utils<fiction::networks::named_xag_network>(m);
+    detail::register_name_utils<fiction::networks::named_mig_network>(m);
 }
 
 }  // namespace pyfiction

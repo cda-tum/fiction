@@ -187,8 +187,8 @@ try
         const mockturtle::depth_view depth_mapped_network{mapped_network};
 
         // perform layout generation with an SMT-based exact algorithm
-        const auto gate_layout = exact_with_blacklist<hexagonal_layout>(convert_network<tec_nt>(mapped_network),
-                                                                        black_list, exact_params, &exact_stats);
+        const auto gate_layout = exact_with_blacklist<hexagonal_layout>(
+            convert_network<named_technology_network>(mapped_network), black_list, exact_params, &exact_stats);
 
         if (gate_layout.has_value())
         {
