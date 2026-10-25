@@ -52,6 +52,8 @@
 #include <stdexcept>
 #include <string>
 
+#include <experiments.hpp>
+
 using namespace fiction;
 using namespace fiction::sidb;
 using namespace fiction::layouts;
@@ -73,14 +75,12 @@ using namespace fiction::synthesis;
 int main()
 try
 {
-    design_gates_params design_gate_params{};
-    design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
     // needs to be changed if a different skeleton is used.
-    design_gate_params.canvas = {site_at_row(24, 17), site_at_row(34, 28)};
-
-    design_gate_params.number_of_canvas_sidbs        = 3;
-    design_gate_params.operational_params.sim_engine = engine::QUICKEXACT;
-    design_gate_params.termination_cond              = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION;
+    const design_gates_params design_gate_params{
+        .operational_params     = {.sim_params = simulation_parameters{2, -0.32}, .sim_engine = engine::QUICKEXACT},
+        .canvas                 = {site_at_row(24, 17), site_at_row(34, 28)},
+        .number_of_canvas_sidbs = 3,
+        .termination_cond       = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION};
 
     // save atomic defects which their respective physical parameters as experimentally determined by T. R. Huff, T.
     // Dienel, M. Rashidi, R. Achal, L. Livadaru, J. Croshaw, and R. A. Wolkow, "Electrostatic landscape of a
@@ -160,17 +160,16 @@ try
         // perform technology mapping
         const auto mapped_network = technology_mapping(cut_xag, tech_map_params);
 
-        on_the_fly_circuit_design_on_defective_surface_params params{};
-
-        params.exact_design_parameters.scheme        = "ROW4";
-        params.exact_design_parameters.crossings     = true;
-        params.exact_design_parameters.border_io     = false;
-        params.exact_design_parameters.desynchronize = true;
-        params.exact_design_parameters.upper_bound_x = 11;         // 12 x 31 tiles
-        params.exact_design_parameters.upper_bound_y = 30;         // 12 x 31 tiles
-        params.exact_design_parameters.timeout       = 3'600'000;  // 1h in ms
-
-        params.sidb_on_the_fly_gate_library_parameters.design_gate_params = design_gate_params;
+        // Bound the layout to 12 x 31 tiles and the runtime to 1h.
+        const on_the_fly_circuit_design_on_defective_surface_params params{
+            .sidb_on_the_fly_gate_library_parameters = {.design_gate_params = design_gate_params},
+            .exact_design_parameters                 = {.scheme        = "ROW4",
+                                                        .upper_bound_x = 11,
+                                                        .upper_bound_y = 30,
+                                                        .crossings     = true,
+                                                        .border_io     = false,
+                                                        .desynchronize = true,
+                                                        .timeout       = 3'600'000}};
 
         on_the_fly_circuit_design_on_defective_surface_stats st{};
 

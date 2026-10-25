@@ -263,7 +263,8 @@ class a_star_impl
             {
                 // update its f-value
                 it->f = f;
-                std::ranges::make_heap(open_list, std::greater<>{});
+                // A smaller f-value can move only toward the root of the heap.
+                std::ranges::push_heap(open_list.begin(), it + 1, std::greater<>{});
             }
             else
             {

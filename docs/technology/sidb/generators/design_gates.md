@@ -85,12 +85,10 @@ int main()
     place(sidb::dot_tag::INPUT, {{0, 0, 1}, {2, 1, 1}, {20, 0, 1}, {18, 1, 1}});
     place(sidb::dot_tag::NORMAL, {{4, 2, 1}, {6, 3, 1}, {14, 3, 1}, {16, 2, 1}, {10, 9, 1}});
     place(sidb::dot_tag::OUTPUT, {{10, 6, 0}, {10, 7, 0}});
-    sidb::generators::design_gates_params params{};
-    params.operational_params.sim_params.base = 2;
-    params.operational_params.sim_params.mu_minus = -0.28;
-    params.operational_params.timeout = 5'000;
-    params.canvas = {{4, 4, 0}, {14, 5, 1}};
-    params.number_of_canvas_sidbs = 1;
+    const sidb::generators::design_gates_params params{
+        .operational_params = {.sim_params = sidb::model::simulation_parameters{2, -0.28}, .timeout = 5'000},
+        .canvas = {{4, 4, 0}, {14, 5, 1}},
+        .number_of_canvas_sidbs = 1};
     const auto gates = sidb::generators::design_gates(skeleton, {fiction::synthesis::create_and_tt()}, params);
     assert(!gates.empty());
     std::cout << gates.size() << '\n';

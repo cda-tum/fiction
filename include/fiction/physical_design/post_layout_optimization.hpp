@@ -358,10 +358,9 @@ class post_layout_optimization_impl
             plyt{lyt},
             ps{std::move(p)},
             pst{st},
-            start{std::chrono::high_resolution_clock::now()}
-    {
-        wiring_reduction_params.on_progress = ps.on_progress;
-    }
+            start{std::chrono::high_resolution_clock::now()},
+            wiring_reduction_params{.on_progress = ps.on_progress}
+    {}
 
     /** @brief Optimizes placement and wiring until convergence or timeout. */
     void run()
@@ -551,7 +550,7 @@ class post_layout_optimization_impl
     /**
      * Wiring reduction parameters.
      */
-    fiction::physical_design::wiring_reduction_params wiring_reduction_params{};
+    fiction::physical_design::wiring_reduction_params wiring_reduction_params;
     /**
      * Wiring reduction stats.
      */
@@ -658,8 +657,7 @@ class post_layout_optimization_impl
     {
         using dist = physical_design::path_finding::twoddwave_distance_functor;
         using cost = physical_design::path_finding::unit_cost_functor<uint8_t>;
-        physical_design::path_finding::a_star_params astar_params{};
-        astar_params.crossings = !ps.planar_optimization;
+        const physical_design::path_finding::a_star_params astar_params{.crossings = !ps.planar_optimization};
 
         const auto path = physical_design::path_finding::a_star(lyt, {.source = start_tile, .target = end_tile}, dist(),
                                                                 cost(), astar_params, search_obstructions);

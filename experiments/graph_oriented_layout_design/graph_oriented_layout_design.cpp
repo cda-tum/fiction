@@ -26,7 +26,7 @@
 #include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/verification/equivalence_checking.hpp>                 // SAT-based equivalence checking
 
-#include <fmt/format.h>  // output formatting
+#include <fmt/base.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <cstdint>
@@ -36,6 +36,8 @@
 #include <memory>
 #include <sstream>
 #include <string>
+
+#include <experiments.hpp>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -78,11 +80,11 @@ try
                                          "runtime graph_oriented_layout_design (in sec)",
                                          "equivalent"};
 
-    graph_oriented_layout_design_stats  graph_oriented_layout_design_stats{};
-    graph_oriented_layout_design_params graph_oriented_layout_design_params{};
-    graph_oriented_layout_design_params.mode         = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
-    graph_oriented_layout_design_params.verbose      = true;
-    graph_oriented_layout_design_params.return_first = false;
+    graph_oriented_layout_design_stats        graph_oriented_layout_design_stats{};
+    const graph_oriented_layout_design_params graph_oriented_layout_design_params{
+        .mode         = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT,
+        .return_first = false,
+        .verbose      = true};
 
     static constexpr const uint64_t bench_select = fiction_experiments::trindade16 | fiction_experiments::fontes18;
 

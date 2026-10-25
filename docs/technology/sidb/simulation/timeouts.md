@@ -38,8 +38,8 @@ the next check, and cleanup callbacks can run afterward. Use a separate process 
 :sync: cpp
 
 ```cpp
-fiction::sidb::simulation::logic::operational_domain_params params{};
-params.operational_params.timeout = 5'000;
+const fiction::sidb::simulation::logic::operational_domain_params params{
+    .operational_params = {.timeout = 5'000}};
 const auto domain = fiction::sidb::simulation::logic::operational_domain_grid_search(layout, spec, params);
 ```
 

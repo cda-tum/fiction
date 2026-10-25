@@ -116,10 +116,9 @@ void register_detect_bdl_wires(nb::module_& m)
            const fiction::sidb::simulation::logic::bdl_wire_selection                   wire_selection)
         {
             validate_bdl_pair_distances(minimum_distance, maximum_distance);
-            detect_bdl_wires_options params{};
-            params.threshold_bdl_interdistance       = threshold_bdl_interdistance;
-            params.bdl_pairs_params.minimum_distance = minimum_distance;
-            params.bdl_pairs_params.maximum_distance = maximum_distance;
+            const detect_bdl_wires_options params{
+                .threshold_bdl_interdistance = threshold_bdl_interdistance,
+                .bdl_pairs_params = {.minimum_distance = minimum_distance, .maximum_distance = maximum_distance}};
             const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::detect_bdl_wires(lyt, params, wire_selection);
         },

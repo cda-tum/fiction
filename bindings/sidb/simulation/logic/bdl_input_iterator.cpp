@@ -82,9 +82,10 @@ void register_bdl_input_iterator(nb::module_& m)
             {
                 validate_bdl_pair_distances(minimum_distance, maximum_distance);
                 const bdl_input_iterator_options params{
-                    {.threshold_bdl_interdistance = threshold_bdl_interdistance,
-                     .bdl_pairs_params = {.minimum_distance = minimum_distance, .maximum_distance = maximum_distance}},
-                    input_bdl_config};
+                    .bdl_wire_params  = {.threshold_bdl_interdistance = threshold_bdl_interdistance,
+                                         .bdl_pairs_params            = {.minimum_distance = minimum_distance,
+                                                                         .maximum_distance = maximum_distance}},
+                    .input_bdl_config = input_bdl_config};
                 const nb::gil_scoped_release release{};
                 std::construct_at(self, lyt, params);
             },
@@ -118,8 +119,9 @@ Args:
             {
                 validate_bdl_pair_distances(minimum_distance, maximum_distance);
                 const bdl_input_iterator_options params{
-                    {.bdl_pairs_params = {.minimum_distance = minimum_distance, .maximum_distance = maximum_distance}},
-                    input_bdl_config};
+                    .bdl_wire_params  = {.bdl_pairs_params = {.minimum_distance = minimum_distance,
+                                                              .maximum_distance = maximum_distance}},
+                    .input_bdl_config = input_bdl_config};
                 const nb::gil_scoped_release release{};
                 std::construct_at(self, lyt, params, input_wires);
             },
@@ -215,9 +217,10 @@ Args:
         {
             validate_bdl_pair_distances(minimum_distance, maximum_distance);
             const bdl_input_iterator_options params{
-                {.threshold_bdl_interdistance = threshold_bdl_interdistance,
-                 .bdl_pairs_params = {.minimum_distance = minimum_distance, .maximum_distance = maximum_distance}},
-                input_bdl_config};
+                .bdl_wire_params  = {.threshold_bdl_interdistance = threshold_bdl_interdistance,
+                                     .bdl_pairs_params            = {.minimum_distance = minimum_distance,
+                                                                     .maximum_distance = maximum_distance}},
+                .input_bdl_config = input_bdl_config};
             const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::generate_bdl_input_pattern_layouts(lyt, params);
         },
@@ -248,8 +251,9 @@ Args:
         {
             validate_bdl_pair_distances(minimum_distance, maximum_distance);
             const bdl_input_iterator_options params{
-                {.bdl_pairs_params = {.minimum_distance = minimum_distance, .maximum_distance = maximum_distance}},
-                input_bdl_config};
+                .bdl_wire_params  = {.bdl_pairs_params = {.minimum_distance = minimum_distance,
+                                                          .maximum_distance = maximum_distance}},
+                .input_bdl_config = input_bdl_config};
             const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::generate_bdl_input_pattern_layouts(lyt, params, input_wires);
         },

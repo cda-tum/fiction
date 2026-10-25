@@ -1951,7 +1951,7 @@ class hexagonal_layout:
             c: Coordinate to check for border location.
 
         Returns:
-            `true` iff `c` is located at the layout's northern border.
+            `true` iff `c` is located at the layout's eastern border.
         """
 
     def is_at_southern_border(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
@@ -2096,7 +2096,7 @@ class hexagonal_layout:
         Returns a container that contains all coordinates that are adjacent to
         a given one. Thereby, cardinal and ordinal directions are being
         considered, i.e., the container will contain all coordinates `ac` for
-        which `is_adjacent(c, ac)` returns `true`.
+        which `is_adjacent_of(c, ac)` returns `true`.
 
         Coordinates that are outside of the layout bounds are not considered.
         Thereby, the size of the returned container is at most 6.

@@ -1238,10 +1238,10 @@ class node_duplication_planarization_impl
                                         run_trace* trace = nullptr) const
     {
         // the cone weights steer the tie-breaks, so the run must weigh like the main one
-        node_duplication_planarization_params sub_ps{};
-        sub_ps.strategy         = node_duplication_planarization_params::planarization_strategy::DUPLICATION;
-        sub_ps.max_duplications = 0;  // the budget cuts the run off
-        sub_ps.duplication_cost = ps.duplication_cost;
+        const node_duplication_planarization_params sub_ps{
+            .strategy         = node_duplication_planarization_params::planarization_strategy::DUPLICATION,
+            .duplication_cost = ps.duplication_cost,
+            .max_duplications = 0};  // the budget cuts the run off
 
         node_duplication_planarization_stats sub_st{};
 

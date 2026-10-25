@@ -67,15 +67,13 @@ void register_quickexact(nb::module_& m)
            const decltype(quickexact_options{}.global_potential)                         global_potential,
            const decltype(quickexact_options{}.on_progress)&                             on_progress)
         {
-            quickexact_options params{};
-            params.sim_params            = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            params.base_number_detection = base_number_detection;
-            if (local_external_potential)
-            {
-                params.local_external_potential = *local_external_potential;
-            }
-            params.global_potential = global_potential;
-            params.on_progress      = on_progress;
+            const quickexact_options params{
+                .sim_params               = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf),
+                .base_number_detection    = base_number_detection,
+                .local_external_potential = local_external_potential ? *local_external_potential :
+                                                                       quickexact_options{}.local_external_potential,
+                .global_potential         = global_potential,
+                .on_progress              = on_progress};
             const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::engines::quickexact(lyt, params);
         },
