@@ -927,6 +927,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - Domain keyword options now reuse the default sweep storage instead of allocating a second vector.
   - Cell-grid clocking names now remain valid when converted to Python strings.
   - Layout object IDs, input ports, and extents now compare unequal to unrelated Python values.
     Mutable extents are unhashable.
