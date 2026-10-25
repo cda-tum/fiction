@@ -233,8 +233,7 @@ TEST_CASE("Fanout degree three is kept", "[planar-rebalancing]")
     const auto ntk    = blueprints::parity_network<technology_network>();
     const auto planar = node_duplication_planarization(rank(ntk));
 
-    planar_fanout_substitution_params ps{};
-    ps.degree = 3;
+    const planar_fanout_substitution_params ps{.degree = 3};
 
     const auto substituted = planar_fanout_substitution(planar, ps);
     const auto rebalanced  = planar_rebalancing(substituted);
@@ -250,12 +249,12 @@ TEST_CASE("Progress is reported", "[planar-rebalancing]")
     std::vector<std::size_t> done{};
     std::size_t              total = 0;
 
-    planar_rebalancing_params ps{};
-    ps.on_progress = [&done, &total](std::string_view, const std::size_t d, const std::size_t t)
-    {
-        done.push_back(d);
-        total = t;
-    };
+    const planar_rebalancing_params ps{
+        .on_progress = [&done, &total](std::string_view, const std::size_t d, const std::size_t t)
+        {
+            done.push_back(d);
+            total = t;
+        }};
 
     const auto rebalanced = planar_rebalancing(substituted, ps);
 

@@ -236,6 +236,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Long options use hyphens. See the CLI migration table for renamed options, topology choices, clock
     phases, gate selectors, and gate-library aliases. `clustercomplete --base` defaults to 3.
 
+- Code quality:
+
+  - Parameter configurations now use C++20 designated initializers and `const` where possible.
+
 - Continuous integration:
   - Read the Docs now builds on Ubuntu 26.04.
   - Replaced Ubuntu 22.04 and GCC 11 CI coverage with Ubuntu 26.04, GCC 15, and Clang 22.
@@ -330,6 +334,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Experiments:
 
+  - Parameter configurations now use designated initializers with unchanged inputs and computations.
   - Experiments use canonical network types and `kitty::dynamic_truth_table` without changing their computations.
   - Clock-number assignment helpers now take concrete Cartesian gate layouts.
     Experiment parameters, inputs, and output columns are unchanged.
@@ -847,6 +852,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
 
+  - Binding docstring instructions now use the generator wrapper that CI runs.
   - Hexagonal layout documentation now names the eastern border and `is_adjacent_of` correctly.
   - `gate_layout::incoming_data_flow` now documents required adjacency and optional clocking.
   - Python keyword-only APIs document option meanings and units, including exact search bounds.
@@ -922,6 +928,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - Domain keyword options now reuse the default sweep storage instead of allocating a second vector.
   - Cell-grid clocking names now remain valid when converted to Python strings.
   - Layout object IDs, input ports, and extents now compare unequal to unrelated Python values.
     Mutable extents are unhashable.

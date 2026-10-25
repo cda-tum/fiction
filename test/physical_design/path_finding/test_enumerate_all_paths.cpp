@@ -227,7 +227,7 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
 {
 
     // enable crossings
-    const enumerate_all_paths_params params{true};
+    const enumerate_all_paths_params params{.crossings = true};
 
     SECTION("Single crossing")
     {

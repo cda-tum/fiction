@@ -279,24 +279,23 @@ TEST_CASE("Exception for missing required gates in AIG", "[technology-mapping]")
 {
     const auto aig = blueprints::maj1_network<mockturtle::aig_network>();
 
-    technology_mapping_params params{};
-
     SECTION("Missing INV")
     {
-        params.and2 = true;
+        const technology_mapping_params params{.and2 = true};
         // params.inv is false
         CHECK_THROWS_AS(technology_mapping(aig, params), missing_required_gates_exception);
     }
 
     SECTION("Missing AND")
     {
-        params.inv = true;
+        const technology_mapping_params params{.inv = true};
         // params.and2 is false
         CHECK_THROWS_AS(technology_mapping(aig, params), missing_required_gates_exception);
     }
 
     SECTION("Missing both INV and AND")
     {
+        const technology_mapping_params params{};
         // Both params.inv and params.and2 are false
         CHECK_THROWS_AS(technology_mapping(aig, params), missing_required_gates_exception);
     }
@@ -306,34 +305,30 @@ TEST_CASE("Exception for missing required gates in XAG", "[technology-mapping]")
 {
     const auto xag = blueprints::maj1_network<mockturtle::xag_network>();
 
-    technology_mapping_params params{};
-
     SECTION("Missing INV")
     {
-        params.and2 = true;
-        params.xor2 = true;
+        const technology_mapping_params params{.and2 = true, .xor2 = true};
         // params.inv is false
         CHECK_THROWS_AS(technology_mapping(xag, params), missing_required_gates_exception);
     }
 
     SECTION("Missing AND")
     {
-        params.inv  = true;
-        params.xor2 = true;
+        const technology_mapping_params params{.inv = true, .xor2 = true};
         // params.and2 is false
         CHECK_THROWS_AS(technology_mapping(xag, params), missing_required_gates_exception);
     }
 
     SECTION("Missing XOR")
     {
-        params.inv  = true;
-        params.and2 = true;
+        const technology_mapping_params params{.inv = true, .and2 = true};
         // params.xor2 is false
         CHECK_THROWS_AS(technology_mapping(xag, params), missing_required_gates_exception);
     }
 
     SECTION("Missing all required gates")
     {
+        const technology_mapping_params params{};
         // All required params are false
         CHECK_THROWS_AS(technology_mapping(xag, params), missing_required_gates_exception);
     }
@@ -343,24 +338,23 @@ TEST_CASE("Exception for missing required gates in MIG", "[technology-mapping]")
 {
     const auto mig = blueprints::maj1_network<mockturtle::mig_network>();
 
-    technology_mapping_params params{};
-
     SECTION("Missing INV")
     {
-        params.maj3 = true;
+        const technology_mapping_params params{.maj3 = true};
         // params.inv is false
         CHECK_THROWS_AS(technology_mapping(mig, params), missing_required_gates_exception);
     }
 
     SECTION("Missing MAJ")
     {
-        params.inv = true;
+        const technology_mapping_params params{.inv = true};
         // params.maj3 is false
         CHECK_THROWS_AS(technology_mapping(mig, params), missing_required_gates_exception);
     }
 
     SECTION("Missing both INV and MAJ")
     {
+        const technology_mapping_params params{};
         // Both params.inv and params.maj3 are false
         CHECK_THROWS_AS(technology_mapping(mig, params), missing_required_gates_exception);
     }
@@ -370,31 +364,24 @@ TEST_CASE("No exception when all required gates are present", "[technology-mappi
 {
     SECTION("AIG with AND and INV")
     {
-        const auto                aig = blueprints::maj1_network<mockturtle::aig_network>();
-        technology_mapping_params params{};
-        params.and2 = true;
-        params.inv  = true;
+        const auto                      aig = blueprints::maj1_network<mockturtle::aig_network>();
+        const technology_mapping_params params{.inv = true, .and2 = true};
 
         CHECK_NOTHROW(technology_mapping(aig, params));
     }
 
     SECTION("XAG with AND, XOR, and INV")
     {
-        const auto                xag = blueprints::maj1_network<mockturtle::xag_network>();
-        technology_mapping_params params{};
-        params.and2 = true;
-        params.xor2 = true;
-        params.inv  = true;
+        const auto                      xag = blueprints::maj1_network<mockturtle::xag_network>();
+        const technology_mapping_params params{.inv = true, .and2 = true, .xor2 = true};
 
         CHECK_NOTHROW(technology_mapping(xag, params));
     }
 
     SECTION("MIG with MAJ and INV")
     {
-        const auto                mig = blueprints::maj1_network<mockturtle::mig_network>();
-        technology_mapping_params params{};
-        params.maj3 = true;
-        params.inv  = true;
+        const auto                      mig = blueprints::maj1_network<mockturtle::mig_network>();
+        const technology_mapping_params params{.inv = true, .maj3 = true};
 
         CHECK_NOTHROW(technology_mapping(mig, params));
     }
@@ -414,11 +401,9 @@ TEST_CASE("Incomplete technology libraries report mapping failure", "[technology
     {
         network.create_po(network.create_maj(a, b, c));
     }
-    technology_mapping_params params{};
-    params.and2 = true;
-    params.inv  = true;
-    technology_mapping_stats stats{};
-    const auto               mapped = technology_mapping(network, params, &stats);
+    const technology_mapping_params params{.inv = true, .and2 = true};
+    technology_mapping_stats        stats{};
+    const auto                      mapped = technology_mapping(network, params, &stats);
     CHECK(stats.mapper_stats.mapping_error);
     CHECK(mapped.num_pos() == 0);
     CHECK(network.num_pis() == 3);

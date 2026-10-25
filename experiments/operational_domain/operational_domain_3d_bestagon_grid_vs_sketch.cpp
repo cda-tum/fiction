@@ -15,13 +15,12 @@
  * @author Jan Drewniok (Drewniok)
  */
 
-#include "fiction_experiments.hpp"  // experiment class
-
 #include <fiction/synthesis/truth_tables.hpp>                                  // truth tables helper functions
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>                      // reader for SiDB layouts
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>             // SiDB simulation parameters
 #include <fiction/technology/sidb/simulation/engine.hpp>                       // SiDB simulation engines
 #include <fiction/technology/sidb/simulation/io/write_operational_domain.hpp>  // writer for operational domains
+#include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>  // operational domain computation algorithms
 
 #include <fmt/format.h>  // output formatting
@@ -36,6 +35,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <experiments.hpp>
 
 using namespace fiction;
 using namespace fiction::sidb::io;
@@ -77,31 +78,17 @@ try
                      "t in s (grid search) / t in s (sketch)"};
 
     // simulation parameters
-    simulation_parameters sim_params{};
-    sim_params.base     = 2;
-    sim_params.mu_minus = -0.32;
+    const simulation_parameters sim_params{2, -0.32};
 
     // operational domain parameters
-    operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.sim_params = sim_params;
-    op_domain_params.operational_params.sim_engine = engine::QUICKEXACT;
-
     // the sketch's filtering steps are only defined when kinks are rejected
-    op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
-
-    op_domain_params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R},
-                                         {.dimension = sweep_parameter::LAMBDA_TF},
-                                         {.dimension = sweep_parameter::MU_MINUS}};
-
-    op_domain_params.sweep_dimensions[0].min  = 1.0;
-    op_domain_params.sweep_dimensions[0].max  = 10.0;
-    op_domain_params.sweep_dimensions[0].step = 0.2;
-    op_domain_params.sweep_dimensions[1].min  = 1.0;
-    op_domain_params.sweep_dimensions[1].max  = 10.0;
-    op_domain_params.sweep_dimensions[1].step = 0.2;
-    op_domain_params.sweep_dimensions[2].min  = -0.50;
-    op_domain_params.sweep_dimensions[2].max  = -0.10;
-    op_domain_params.sweep_dimensions[2].step = 0.05;
+    operational_domain_params op_domain_params{
+        .operational_params = {.sim_params   = sim_params,
+                               .sim_engine   = engine::QUICKEXACT,
+                               .op_condition = is_operational_params::operational_condition::REJECT_KINKS},
+        .sweep_dimensions   = {{.dimension = sweep_parameter::EPSILON_R, .min = 1.0, .max = 10.0, .step = 0.2},
+                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 1.0, .max = 10.0, .step = 0.2},
+                               {.dimension = sweep_parameter::MU_MINUS, .min = -0.50, .max = -0.10, .step = 0.05}}};
 
     static const std::string folder = fmt::format("{}sidb_gate_libraries/bestagon_gates/", EXPERIMENTS_PATH);
 

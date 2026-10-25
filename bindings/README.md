@@ -189,7 +189,7 @@ _fiction_'s base directory:
   cmake --preset pyfiction
   mkdoc_flags="$(python3 .github/scripts/mkdoc_compile_flags.py build-pyfiction)"
   mkdoc_headers="$(find include/fiction -name "*.hpp" -print | LC_ALL=C sort)"
-  python3 -m pybind11_mkdoc \
+  python3 .github/scripts/generate_docstrings.py \
     -o bindings/include/pyfiction/pybind11_mkdoc_docstrings.hpp \
     -std=c++20 \
     "-resource-dir=$(llvm-config-18 --libdir)/clang/18" \

@@ -21,8 +21,10 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <functional>
 #include <optional>
 #include <tuple>
+#include <utility>
 
 namespace fiction::sidb::simulation
 {

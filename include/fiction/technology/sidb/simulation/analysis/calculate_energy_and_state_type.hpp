@@ -136,7 +136,8 @@ using energy_and_state_type = std::vector<std::pair<double, state_type>>;
     const std::vector<kitty::dynamic_truth_table>& spec, const uint64_t input_index,
     const std::vector<logic::bdl_wire>& input_bdl_wires, const std::vector<logic::bdl_wire>& output_bdl_wires)
 {
-    energy_and_state_type              est{};
+    energy_and_state_type est{};
+    /** @brief Shared logic-match settings for every charge distribution. */
     const logic::is_operational_params params{.op_condition =
                                                   logic::is_operational_params::operational_condition::REJECT_KINKS};
 
