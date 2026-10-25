@@ -25,6 +25,7 @@
 
 #include <cstdint>
 #include <optional>
+#include <tuple>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner): converts progress callbacks
