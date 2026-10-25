@@ -34,7 +34,6 @@
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
-#include <fmt/core.h>
 #include <fmt/format.h>
 #include <kitty/dynamic_truth_table.hpp>
 

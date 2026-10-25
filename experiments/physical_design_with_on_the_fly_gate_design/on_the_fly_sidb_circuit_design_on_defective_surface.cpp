@@ -32,7 +32,6 @@
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
 
-#include <fmt/base.h>
 #include <fmt/format.h>
 #include <lorina/common.hpp>
 #include <lorina/verilog.hpp>

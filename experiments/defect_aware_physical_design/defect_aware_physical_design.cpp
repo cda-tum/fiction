@@ -38,7 +38,6 @@
 #include <fiction/types.hpp>                                    // pre-defined types suitable for the FCN domain
 #include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 
-#include <fmt/base.h>
 #include <fmt/format.h>  // output formatting
 #include <lorina/common.hpp>
 #include <lorina/genlib.hpp>                                   // Genlib file parsing
