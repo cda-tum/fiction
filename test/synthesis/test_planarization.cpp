@@ -68,6 +68,12 @@ void check_contract(const Spec& spec, const Impl& impl, const uint32_t degree = 
 
 }  // namespace
 
+TEST_CASE("Planarization defaults to the hybrid strategy", "[planarization]")
+{
+    CHECK(planarization_params{}.duplication.strategy ==
+          node_duplication_planarization_params::planarization_strategy::HYBRID);
+}
+
 TEST_CASE("Unbalanced networks are rejected", "[planarization]")
 {
     technology_network tec{};
