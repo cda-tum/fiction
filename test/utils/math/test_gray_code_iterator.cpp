@@ -11,6 +11,7 @@
 /**
  * @file
  * @brief Tests Gray-code traversal and random-access iterator contracts.
+ * @author Marcel Walter (marcelwa)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -96,6 +97,10 @@ TEST_CASE("Gray-code arithmetic covers 64-bit positions", "[gray-code-iterator]"
 
 TEST_CASE("Gray-code values work with standard copying algorithms", "[gray-code-iterator]")
 {
+    /** Default-initialized iterators both start at zero. */
+    constexpr std::array<gray_code_iterator, 2> iterators{};
+    STATIC_REQUIRE(*iterators.front() == 0);
+    STATIC_REQUIRE(*iterators.back() == 0);
     /** Values copied from a generated sequence. */
     std::array<uint64_t, 4> values{};
     std::copy(gray_code_iterator{}, gray_code_iterator{4}, values.begin());
@@ -104,4 +109,24 @@ TEST_CASE("Gray-code values work with standard copying algorithms", "[gray-code-
     gray_code_iterator it{};
     std::advance(it, 3);
     CHECK(it == 3);
+}
+
+TEST_CASE("Gray-code arithmetic handles extreme signed offsets", "[gray-code-iterator]")
+{
+    /** Largest signed distance between valid positions. */
+    constexpr auto max_offset{std::numeric_limits<int64_t>::max()};
+    /** Smallest signed offset, which cannot be negated in its signed type. */
+    constexpr auto min_offset{std::numeric_limits<int64_t>::min()};
+    /** First position with the high bit set. */
+    constexpr uint64_t boundary{uint64_t{1} << 63u};
+    STATIC_REQUIRE(gray_code_iterator{static_cast<uint64_t>(max_offset)} - gray_code_iterator{} == max_offset);
+    STATIC_REQUIRE(gray_code_iterator{} - gray_code_iterator{boundary} == min_offset);
+    STATIC_REQUIRE(*gray_code_iterator{boundary} == (boundary | (boundary >> 1u)));
+    /** Iterator moved through the full signed-offset domain. */
+    gray_code_iterator it{};
+    it += min_offset;
+    CHECK(it == boundary);
+    it -= min_offset;
+    CHECK(it == uint64_t{0});
+    CHECK(it[max_offset] == *gray_code_iterator{static_cast<uint64_t>(max_offset)});
 }

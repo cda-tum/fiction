@@ -36,14 +36,18 @@ class gray_code_iterator
 {
   public:
     /**
+     * @brief Constructs an iterator at position zero.
+     */
+    constexpr gray_code_iterator() noexcept = default;
+    /**
      * Constructs a Gray Code Iterator with a specified starting number.
      *
      * Constructs a `gray_code_iterator` that generates Gray codes for decimal numbers
      * starting from the given `start` number.
      *
-     * @param start The starting decimal number for the iterator, zero by default.
+     * @param start The starting decimal number for the iterator.
      */
-    explicit constexpr gray_code_iterator(const uint64_t start = 0) noexcept : current_iteration{start} {}
+    explicit constexpr gray_code_iterator(const uint64_t start) noexcept : current_iteration{start} {}
     /**
      * Dereference operator. Returns the Gray code of the current iteration.
      *
@@ -321,7 +325,7 @@ class gray_code_iterator
     /**
      * Current number (i.e., current iteration number).
      */
-    uint64_t current_iteration;
+    uint64_t current_iteration{};
 };
 
 }  // namespace fiction::utils::math
