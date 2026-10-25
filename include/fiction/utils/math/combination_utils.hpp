@@ -77,7 +77,7 @@ determine_all_combinations_of_distributing_k_entities_on_n_positions(
                                                           std::min<uint64_t>(number_of_combinations, 1024)));
 
     std::vector<std::size_t> numbers(n);
-    std::iota(numbers.begin(), numbers.end(), 0);
+    std::iota(numbers.begin(), numbers.end(), std::size_t{0});
 
     combinations::for_each_combination(
         numbers.begin(), numbers.begin() + static_cast<std::vector<std::size_t>::difference_type>(k), numbers.end(),
