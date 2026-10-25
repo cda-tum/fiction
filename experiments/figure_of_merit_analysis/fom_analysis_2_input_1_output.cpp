@@ -84,16 +84,14 @@ try
     experiments::experiment<std::string, std::size_t, double, double, double, double, double, double> minimal_cost{
         "Minimal Cost", "gate", "#canvas SiDBs", "CT", "OPD", "MDC_arsenic", "MDC_vacancy", "BBR", "X_custom,min"};
 
-    const auto          op_params = is_operational_params{.sim_params = simulation_parameters{2, -0.32}};
+    const auto op_params = is_operational_params{.sim_params = simulation_parameters{2, -0.32}};
+    // ClusterComplete preserves the published results and reduces the gate-design runtime.
     design_gates_params design_params{
-        .operational_params     = op_params,
+        .operational_params     = {.sim_params = op_params.sim_params, .sim_engine = engine::CLUSTERCOMPLETE},
         .design_mode            = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
         .canvas                 = {site_at_row(17, 14), site_at_row(21, 22)},
         .number_of_canvas_sidbs = 2,
         .termination_cond       = design_gates_params::termination_condition::ALL_COMBINATIONS_ENUMERATED};
-    // QuickExact was used for the paper. However, ClusterComplete is more efficient and faster but does not influence
-    // the results.
-    design_params.operational_params.sim_engine = engine::CLUSTERCOMPLETE;
 
     const std::size_t minimum_number_of_canvas_sidbs = 2;
     const std::size_t maximum_number_of_canvas_sidbs = 6;
