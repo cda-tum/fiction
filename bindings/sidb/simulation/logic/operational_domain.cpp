@@ -29,6 +29,7 @@
 #include <cstddef>
 #include <optional>
 #include <tuple>
+#include <utility>
 #include <vector>
 
 #include <nanobind/nanobind.h>
