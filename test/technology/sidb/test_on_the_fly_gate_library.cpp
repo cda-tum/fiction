@@ -83,11 +83,12 @@ TEST_CASE("Predefined SiDB gates on defective surfaces honor the per-gate timeou
         sidb::layout surface{};
         surface.assign_defect(site_at_row(0, 0), defect{defect_type::DB, -1, 2, 5});
 
-        on_the_fly_gate_library_params params{
-            .design_gate_params = {
-                .operational_params = {.sim_params = simulation_parameters{2, -0.32}, .timeout = 0}}};
+        /** @brief Enclosing budget that outlives the per-gate timeout. */
         const auto enclosing_deadline = std::chrono::steady_clock::now() + std::chrono::seconds{2};
-        params.design_gate_params.operational_params.deadline = enclosing_deadline;
+        const on_the_fly_gate_library_params params{
+            .design_gate_params = {.operational_params = {.sim_params = simulation_parameters{2, -0.32},
+                                                          .deadline   = enclosing_deadline,
+                                                          .timeout    = 0}}};
 
         CHECK_THROWS_AS(on_the_fly_gate_library::set_up_gate(gate_layout, {1, 1, 0}, params, surface),
                         utils::timeout_error);

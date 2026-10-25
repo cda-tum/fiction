@@ -67,9 +67,9 @@ TEST_CASE("Physical-validity sweeps reject colliding coordinates", "[determine-p
     /** @brief Layout whose parameter combinations are evaluated. */
     const layout lyt{};
     /** @brief Parameters of the sweep under test. */
-    operational_domain_params params{};
-    params.sweep_dimensions = {
-        {.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6000002, .step = 0.0000001}};
+    const operational_domain_params params{
+        .sweep_dimensions = {
+            {.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6000002, .step = 0.0000001}}};
     CHECK_THROWS_AS(physically_valid_parameters(lyt, charge_distribution{lyt}, params), std::invalid_argument);
 }
 

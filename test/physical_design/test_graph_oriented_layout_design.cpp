@@ -773,15 +773,15 @@ TEST_CASE("GOLD repeats completed sequential searches", "[graph-oriented-layout-
         /** @brief Full-adder search exercises fanout substitution and ordered routing. */
         const auto ntk = blueprints::full_adder_network<technology_network>();
         /** @brief Stop at the first solution to keep this seeded-search regression bounded. */
-        graph_oriented_layout_design_params params{};
-        params.mode                                = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
-        params.cost                                = cost;
-        params.seed                                = 7;
-        params.timeout                             = 60000;
-        params.return_first                        = true;
-        params.enable_multithreading               = false;
-        params.randomize_tiles_to_skip_between_pis = randomize_spacing;
-        params.tiles_to_skip_between_pis           = randomize_spacing ? 1 : 0;
+        graph_oriented_layout_design_params params{
+            .mode                                = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY,
+            .return_first                        = true,
+            .timeout                             = 60000,
+            .cost                                = cost,
+            .enable_multithreading               = false,
+            .seed                                = 7,
+            .tiles_to_skip_between_pis           = randomize_spacing ? 1 : 0,
+            .randomize_tiles_to_skip_between_pis = randomize_spacing};
         /** @brief Reference result for this input and seed. */
         const auto reference = graph_oriented_layout_design(ntk, params);
         REQUIRE(reference.has_value());

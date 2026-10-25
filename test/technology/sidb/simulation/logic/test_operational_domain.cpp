@@ -1235,12 +1235,11 @@ TEST_CASE("Random sampling finishes when the whole grid is sampled", "[operation
     /** @brief Layout whose parameter combinations are evaluated. */
     const layout lyt{blueprints::siqad_and_gate()};
     /** @brief Parameters of the sweep under test. */
-    operational_domain_params params{};
-    params.number_of_threads             = 1;
-    params.operational_params.sim_params = simulation_parameters{2, -0.32};
-    params.operational_params.timeout    = 2000;
-    params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6, .step = 0.1},
-                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.0, .step = 0.1}};
+    const operational_domain_params params{
+        .operational_params = {.sim_params = simulation_parameters{2, -0.32}, .timeout = 2000},
+        .sweep_dimensions   = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6, .step = 0.1},
+                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.0, .step = 0.1}},
+        .number_of_threads  = 1};
     /** @brief Statistics of the parameter sweep. */
     operational_domain_stats stats{};
     /** @brief Domain returned by the sampling algorithm. */
@@ -1257,9 +1256,10 @@ TEST_CASE("Operational-domain sweeps reject overflowing grid products", "[operat
     /** @brief Layout whose parameter combinations are evaluated. */
     const layout lyt{blueprints::siqad_and_gate()};
     /** @brief Parameters of the sweep under test. */
-    operational_domain_params params{};
-    params.sweep_dimensions.assign(std::numeric_limits<std::size_t>::digits,
-                                   {.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.7, .step = 0.1});
+    const operational_domain_params params{
+        .sweep_dimensions = std::vector<operational_domain_value_range>(
+            std::numeric_limits<std::size_t>::digits,
+            {.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.7, .step = 0.1})};
     /** @brief Statistics of the parameter sweep. */
     operational_domain_stats stats{};
     stats.num_total_parameter_points = 42;
@@ -2167,12 +2167,11 @@ TEST_CASE("Operational-domain sweeps preserve distinct parameter identities", "[
     /** @brief AND specification for the layout. */
     const std::vector spec{create_and_tt()};
     /** @brief Parameters of the sweep under test. */
-    operational_domain_params params{};
-    params.number_of_threads             = 1;
-    params.operational_params.sim_params = simulation_parameters{2, -0.32};
-    params.sweep_dimensions              = {
-        {.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6000002, .step = 0.0000001},
-        {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.0, .step = 0.1}};
+    operational_domain_params params{
+        .operational_params = {.sim_params = simulation_parameters{2, -0.32}},
+        .sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6000002, .step = 0.0000001},
+                             {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.0, .step = 0.1}},
+        .number_of_threads = 1};
 
     SECTION("reject colliding coordinates before sampling")
     {
@@ -2231,12 +2230,11 @@ TEST_CASE("Contour tracing finishes isolated operational points", "[operational-
     /** @brief AND specification for the layout. */
     const std::vector spec{create_and_tt()};
     /** @brief Parameters of the sweep under test. */
-    operational_domain_params params{};
-    params.number_of_threads             = 1;
-    params.operational_params.sim_params = simulation_parameters{2, -0.32};
-    params.operational_params.timeout    = 2000;
-    params.sweep_dimensions = {{.dimension = sweep_parameter::MU_MINUS, .min = -1.32, .max = 0.68, .step = 1.0},
-                               {.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6, .step = 0.1}};
+    const operational_domain_params params{
+        .operational_params = {.sim_params = simulation_parameters{2, -0.32}, .timeout = 2000},
+        .sweep_dimensions   = {{.dimension = sweep_parameter::MU_MINUS, .min = -1.32, .max = 0.68, .step = 1.0},
+                               {.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6, .step = 0.1}},
+        .number_of_threads  = 1};
     /** @brief Statistics of the exhaustive reference grid. */
     operational_domain_stats reference_stats{};
     REQUIRE(operational_domain_grid_search(lyt, spec, params, &reference_stats).size() == 3);
