@@ -219,14 +219,14 @@ TEST_CASE("Connection visitors preserve ports while unrelated storage grows", "[
                       });
     CHECK((sources == std::vector<std::pair<layout_object_id, uint32_t>>{{a, 0}, {b, 4}}));
 
-    /** @brief Visited sink membership without an ordering requirement. */
-    std::set<layout_input_port> sinks{};
+    /** @brief Visited sinks, including multiplicity, without an ordering requirement. */
+    std::vector<layout_input_port> sinks{};
     /** @brief Free row for each sink callback to create unrelated objects. */
     int32_t row{20};
     lyt.foreach_sink(a,
                      [&](const auto sink)
                      {
-                         sinks.insert(sink);
+                         sinks.push_back(sink);
                          /** @brief Column of the unrelated buffer pair. */
                          for (int32_t x{}; x < 256; ++x)
                          {
@@ -236,7 +236,7 @@ TEST_CASE("Connection visitors preserve ports while unrelated storage grows", "[
                          }
                          row += 2;
                      });
-    CHECK((sinks == std::set<layout_input_port>{{gate, 0}, {wire, 0}}));
+    CHECK_THAT(sinks, UnorderedRangeEquals(std::vector<layout_input_port>{{gate, 0}, {wire, 0}}));
     CHECK(lyt.source({gate, 0}) == a);
     CHECK(lyt.source({gate, 4}) == b);
 }
