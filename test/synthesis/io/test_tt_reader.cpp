@@ -70,6 +70,12 @@ TEST_CASE("Empty truth-table input", "[tt-reader]")
     CHECK_FALSE(reader.next().has_value());
 }
 
+TEST_CASE("Unreadable truth-table file", "[tt-reader]")
+{
+    CHECK_THROWS_AS(tt_reader<>{std::string{TEST_PATH} + "/missing-tt-reader-directory/input.tt"},
+                    std::ifstream::failure);
+}
+
 TEST_CASE("Invalid truth-table records", "[tt-reader]")
 {
     std::stringstream stream{GENERATE("0x8", "0x expr", "x expr", "xx8 expr", "0xg expr", "0xG expr", "0x/ expr",
@@ -77,13 +83,14 @@ TEST_CASE("Invalid truth-table records", "[tt-reader]")
     tt_reader<>       reader{stream};
 
     CHECK_THROWS_AS(reader.next(), std::invalid_argument);
+    CHECK_THROWS_AS(reader.next(), std::invalid_argument);
 }
 
 TEST_CASE("Truth-table digit counts and hexadecimal case", "[tt-reader]")
 {
-    const auto hex =
-        GENERATE(std::string{"f"}, std::string{"e8"}, std::string{"abCd"}, std::string{"0123456789ABCDEF"});
-    const auto        prefix = GENERATE("0x", "0X");
+    const auto hex = GENERATE(std::string{"f"}, std::string{"e8"}, std::string{"abCd"}, std::string{"0123456789ABCDEF"},
+                              std::string{"0123456789abcdef0123456789ABCDEF"});
+    const auto prefix = GENERATE("0x", "0X");
     std::stringstream stream{prefix + hex + " expression"};
     tt_reader<>       reader{stream};
 

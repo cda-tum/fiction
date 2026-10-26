@@ -58,17 +58,20 @@ class tt_reader
      * Standard constructor. Reads the given file into a vector of tokens.
      *
      * @param filename File to parse.
+     * @throws std::ifstream::failure If the file cannot be opened.
      */
     explicit tt_reader(const std::string& filename)
     {
         std::ifstream file{filename, std::ios::in};
-        if (file.is_open())
+        if (!file.is_open())
         {
-            read(file);
+            throw std::ifstream::failure("could not open file");
         }
+        read(file);
     }
     /**
      * Returns the next truth table, or `std::nullopt` when all records have been read.
+     * A parsing error leaves the current record unchanged.
      *
      * @return Next truth table from the file.
      * @throws std::invalid_argument If a record is incomplete, has an invalid prefix, digit count, or character, or
