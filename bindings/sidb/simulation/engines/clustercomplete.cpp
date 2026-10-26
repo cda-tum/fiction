@@ -28,6 +28,8 @@
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engines/clustercomplete.hpp>
 
+#include <utility>
+
 #include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string_view.h>    // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
@@ -77,23 +79,19 @@ void register_clustercomplete(nb::module_& m)
            const decltype(clustercomplete_options{}.validity_witness_partitioning_max_cluster_size_gss)
                validity_witness_partitioning_max_cluster_size_gss)
         {
-            clustercomplete_options params{};
-            params.validity_witness_partitioning_max_cluster_size_gss =
-                validity_witness_partitioning_max_cluster_size_gss;
-            params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            if (local_external_potential)
-            {
-                params.local_external_potential = *local_external_potential;
-            }
-            params.global_potential                    = global_potential;
-            params.num_overlapping_witnesses_limit_gss = num_overlapping_witnesses_limit_gss;
-            if (available_threads)
-            {
-                params.available_threads = *available_threads;
-            }
-            params.report_gss_stats   = report_gss_stats;
-            params.on_progress        = on_progress;
-            params.on_worker_progress = on_worker_progress;
+            clustercomplete_options       defaults{};
+            const clustercomplete_options params{
+                .sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf),
+                .local_external_potential =
+                    local_external_potential.value_or(std::move(defaults.local_external_potential)),
+                .global_potential = global_potential,
+                .validity_witness_partitioning_max_cluster_size_gss =
+                    validity_witness_partitioning_max_cluster_size_gss,
+                .num_overlapping_witnesses_limit_gss = num_overlapping_witnesses_limit_gss,
+                .available_threads  = available_threads ? *available_threads : defaults.available_threads,
+                .report_gss_stats   = report_gss_stats,
+                .on_progress        = on_progress,
+                .on_worker_progress = on_worker_progress};
             const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::engines::clustercomplete(lyt, params);
         },

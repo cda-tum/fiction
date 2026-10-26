@@ -4127,7 +4127,7 @@ static const char *mkd_doc_fiction_layouts_hexagonal_layout_adjacent_coordinates
 R"doc(Returns a container that contains all coordinates that are adjacent to
 a given one. Thereby, cardinal and ordinal directions are being
 considered, i.e., the container will contain all coordinates `ac` for
-which `is_adjacent(c, ac)` returns `true`.
+which `is_adjacent_of(c, ac)` returns `true`.
 
 Coordinates that are outside of the layout bounds are not considered.
 Thereby, the size of the returned container is at most 6.
@@ -4349,7 +4349,8 @@ static const char *mkd_doc_fiction_layouts_hexagonal_layout_foreach_adjacent_coo
 R"doc(Applies a function to all coordinates adjacent to a given one in
 accordance with `adjacent_coordinates`. Thereby, cardinal and ordinal
 directions are being considered, i.e., the given function is applied
-to all coordinates ac for which `is_adjacent(c, ac)` returns `true`.
+to all coordinates ac for which `is_adjacent_of(c, ac)` returns
+`true`.
 
 Coordinates that are outside of the layout bounds are not considered.
 Thereby, at most 6 coordinates are touched.
@@ -4560,7 +4561,7 @@ Args:
     c: Coordinate to check for border location.
 
 Returns:
-    `true` iff `c` is located at the layout's northern border.
+    `true` iff `c` is located at the layout's eastern border.
 
 )doc";
 
@@ -8564,6 +8565,20 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_candidate_layout_area =
+R"doc(Estimates candidate area without the spare eastern and southern
+borders.
+
+Args:
+    width: Layout width in tiles.
+    height: Layout height in tiles.
+    position: Candidate position to include in the area.
+
+Returns:
+    Geometric area in tiles, including one-tile axes.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_check_and_optimize_po_positions =
 R"doc(Extends outputs one tile to the nearest border while preserving their
 logical inputs.
@@ -11614,7 +11629,8 @@ When set to `true`, the algorithm will utilize multiple threads to
 process different search space graphs in parallel, improving
 performance by distributing the workload across available CPU cores.
 If set to `false`, the algorithm will run sequentially on a single
-thread.
+thread. Parallel search results can depend on worker scheduling, even
+with a fixed seed.
 
 Only recommended for `HIGH_EFFORT` and `HIGHEST_EFFORT` modes and
 complex networks (> 100 nodes).
@@ -11667,7 +11683,9 @@ can be found fast.)doc";
 
 static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_params_seed =
 R"doc(Random seed for PI spacing, fanout substitution, and topological
-ordering. Generated randomly if not specified.)doc";
+ordering. Generated randomly if not specified. Within one build, a
+fixed seed reproduces sequential searches that finish before their
+timeout, provided custom cost functions are deterministic.)doc";
 
 static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_params_straight_inverters = R"doc(Enforce NOT gates to be routed non-bending only.)doc";
 
@@ -11686,7 +11704,10 @@ probability of finding a routable layout at the expense of a
 temporarily larger footprint, which post-layout optimization may later
 shrink. Must lie in :math:`[0, 2^{20}]`. Defaults to `0`.)doc";
 
-static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_params_timeout = R"doc(Timeout limit (in ms).)doc";
+static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_params_timeout =
+R"doc(Wall-clock timeout limit (in ms). Time-limited results depend on how
+many expansions finish. Without an explicit limit, `HIGH_EFFICIENCY`
+stops after 10 seconds once a solution exists.)doc";
 
 static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design_params_verbose = R"doc(Verbosity.)doc";
 
@@ -28128,27 +28149,19 @@ decimal numbers.
 
 The `gray_code_iterator` class provides an iterator for generating
 Gray code representations for a range of decimal numbers. It starts
-from a specified number and produces Gray codes in ascending order
-based on bitwise XOR operations.)doc";
-
-static const char *mkd_doc_fiction_utils_math_gray_code_iterator_binary_to_gray =
-R"doc(Converts the current decimal number into its corresponding Gray code
-representation.
-
-This function operates on the current decimal number and produces its
-Gray code representation using the bitwise XOR operation. Gray code is
-a binary numeral system in which two successive values differ in only
-one bit.
-
-The result is stored in the 'current_gray_code' variable.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_math_gray_code_iterator_current_gray_code = R"doc(Current Gray Code.)doc";
+from a specified number and produces Gray codes for consecutive
+decimal numbers using bitwise XOR operations. Position arithmetic
+wraps modulo 2^64. Dereferencing returns a value. C++20 ranges support
+constant-time random access; legacy iterator algorithms use the input
+category because the iterator does not refer to stored sequence
+elements. Iterator ranges must not wrap, and distances must fit in
+`int64_t`.)doc";
 
 static const char *mkd_doc_fiction_utils_math_gray_code_iterator_current_iteration = R"doc(Current number (i.e., current iteration number).)doc";
 
-static const char *mkd_doc_fiction_utils_math_gray_code_iterator_gray_code_iterator =
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_gray_code_iterator = R"doc(Constructs an iterator at position zero.)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_gray_code_iterator_2 =
 R"doc(Constructs a Gray Code Iterator with a specified starting number.
 
 Constructs a `gray_code_iterator` that generates Gray codes for
@@ -28160,8 +28173,7 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_add =
-R"doc(Addition operator. Computes the Gray code of the current iterator plus
-the given integer.
+R"doc(Addition operator. Returns an iterator advanced by the given offset.
 
 Args:
     m: The amount of Gray codes to skip.
@@ -28172,11 +28184,11 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_array =
-R"doc(Subscript operator. Returns the Gray code at a specific position in
-the iteration range.
+R"doc(Subscript operator. Returns the Gray code at an offset from the
+current position.
 
 Args:
-    index: The position in the iteration range.
+    index: The offset from the current position.
 
 Returns:
     The Gray code at the specified position.
@@ -28232,6 +28244,18 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_ge =
+R"doc(Compares iterator positions.
+
+Args:
+    other: Iterator to compare with.
+
+Returns:
+    Whether this position is greater than or equal to the other
+    position.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_ge_2 =
 R"doc(Greater-or-equal-than operator. Compares the current number with the
 given integer.
 
@@ -28245,6 +28269,17 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_gt =
+R"doc(Compares iterator positions.
+
+Args:
+    other: Iterator to compare with.
+
+Returns:
+    Whether this position is greater than the other position.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_gt_2 =
 R"doc(Greater-than operator. Compares the current number with the given
 integer.
 
@@ -28269,8 +28304,7 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_inc =
-R"doc(Prefix increment operator. Sets the number and the corresponding Gray
-code.
+R"doc(Prefix increment operator. Advances to the next position.
 
 Returns:
     Reference to `this`.
@@ -28348,11 +28382,10 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_mul =
-R"doc(Dereference operator. Returns a reference to the Gray code of the
-current iteration.
+R"doc(Dereference operator. Returns the Gray code of the current iteration.
 
 Returns:
-    Reference to the current Gray code.
+    Current Gray code.
 
 )doc";
 
@@ -28389,7 +28422,7 @@ gray_code_iterators.
 This operator calculates the difference between the current iterator
 and another gray_code_iterator provided as input. The result is
 returned as an int64_t representing the number of positions between
-the iterators.
+the iterators. The distance must fit in int64_t.
 
 Args:
     other: The gray_code_iterator to subtract from the current
@@ -28402,8 +28435,8 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_sub_2 =
-R"doc(Subtraction operator. Computes the Gray code of the current iterator
-minus the given integer.
+R"doc(Subtraction operator. Returns an iterator moved back by the given
+offset.
 
 Args:
     m: The amount of Gray codes to skip.
@@ -28412,8 +28445,6 @@ Returns:
     Iterator of the current iterator minus the given integer.
 
 )doc";
-
-static const char *mkd_doc_fiction_utils_math_gray_code_iterator_start_number = R"doc(Start number of the iteration.)doc";
 
 static const char *mkd_doc_fiction_utils_math_integral_abs =
 R"doc(Takes the absolute value of an integral number if it is signed, and

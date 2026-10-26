@@ -176,8 +176,7 @@ TEST_CASE("The fanout degree is respected", "[planar-fanout-substitution]")
     }
     SECTION("degree 3")
     {
-        planar_fanout_substitution_params ps{};
-        ps.degree = 3;
+        const planar_fanout_substitution_params ps{.degree = 3};
 
         const auto substituted = planar_fanout_substitution(ranked, ps);
 
@@ -195,12 +194,12 @@ TEST_CASE("Progress is reported once per rank", "[planar-fanout-substitution]")
     std::vector<std::size_t> done{};
     std::size_t              total = 0;
 
-    planar_fanout_substitution_params ps{};
-    ps.on_progress = [&done, &total](std::string_view, const std::size_t d, const std::size_t t)
-    {
-        done.push_back(d);
-        total = t;
-    };
+    const planar_fanout_substitution_params ps{
+        .on_progress = [&done, &total](std::string_view, const std::size_t d, const std::size_t t)
+        {
+            done.push_back(d);
+            total = t;
+        }};
 
     const auto substituted = planar_fanout_substitution(ranked, ps);
 
@@ -223,8 +222,7 @@ TEST_CASE("Invalid parameters and inputs are rejected", "[planar-fanout-substitu
 
     const auto ranked = rank(blueprints::full_adder_network<technology_network>());
 
-    planar_fanout_substitution_params ps{};
-    ps.degree = 1;
+    const planar_fanout_substitution_params ps{.degree = 1};
     CHECK_THROWS_AS(planar_fanout_substitution(ranked, ps), std::invalid_argument);
 }
 
@@ -237,8 +235,7 @@ TEST_CASE("No buffer is left without a consumer", "[planar-fanout-substitution]"
 
         for (const uint32_t degree : {2u, 3u})
         {
-            planar_fanout_substitution_params ps{};
-            ps.degree = degree;
+            const planar_fanout_substitution_params ps{.degree = degree};
 
             const auto substituted = planar_fanout_substitution(planar, ps);
 
@@ -265,13 +262,11 @@ TEST_CASE("A huge fanout degree needs one fanout node with as many outputs as co
 
     for (const uint32_t degree : {3u, 1u << 31u, std::numeric_limits<uint32_t>::max()})
     {
-        planar_fanout_substitution_params ps{};
-        ps.degree = degree;
+        const planar_fanout_substitution_params ps{.degree = degree};
 
         const auto substituted = planar_fanout_substitution(ranked, ps);
 
-        fanout_substitution_params fs_ps{};
-        fs_ps.degree = degree;
+        const fanout_substitution_params fs_ps{.degree = degree};
         check_contract(tec, substituted, fs_ps);
 
         // the one fanout node of `a` has exactly three outputs

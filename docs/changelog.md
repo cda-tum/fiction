@@ -76,6 +76,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Documentation:
 
   - Added SiQAD OR gate operational domain plots for all four reconstruction methods.
+  - Documented GOLD's fixed-seed repeatability limits and geometric `AREA` priority on one-tile axes.
   - Added an FCN bibliography, BibTeX download, and OpenGraph metadata.
   - Added `nox -s docs` for local previews, link checks, and Read the Docs builds.
   - Added synchronized C++/Python tabs and code copy buttons.
@@ -157,6 +158,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Combination generation avoids one allocation and copy per result.
   - SiDB domain sampling now stops once every grid point has been collected.
   - **Breaking:** Physical design accepts only named technology networks (`networks::named_technology_network`). Convert other network types
     with `convert_network<networks::named_technology_network>` before placement; names survive conversion and extraction.
@@ -178,6 +180,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Layout extraction and critical-path analysis reduce per-object allocations with flat traversal maps.
   - Gate-layout iteration skips removed objects through a compact live-object bitmap.
   - GOLD reuses built-in objective costs while ranking candidates and accepting solutions.
+  - GOLD reduces placement-sequence copies, repeated frontier-cost lookups, and buffer allocations.
   - **Breaking:** A*, path enumeration, and Yen's algorithm route around the gates and wires of every gate-level
     layout and take temporary constraints as a separate `obstructions` argument, leaving the caller's data unchanged.
     `&a_star_distance<Lyt>` no longer converts to a `distance_functor`; use `a_star_distance_functor`.
@@ -245,6 +248,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Long options use hyphens. See the CLI migration table for renamed options, topology choices, clock
     phases, gate selectors, and gate-library aliases. `clustercomplete --base` defaults to 3.
 
+- Code quality:
+
+  - Parameter configurations now use C++20 designated initializers and `const` where possible.
+
 - Continuous integration:
   - Read the Docs now builds on Ubuntu 26.04.
   - Replaced Ubuntu 22.04 and GCC 11 CI coverage with Ubuntu 26.04, GCC 15, and Clang 22.
@@ -259,6 +266,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - **Breaking:** Gray-code iterators now satisfy C++20 random access and return values; replace `auto&` bindings
+    with `auto`. Use C++20 ranges for constant-time advancement and distance; legacy traversal is forward-only
+    and linear.
   - **Breaking:** Network presets replace `*_nt` with `networks::named_aig_network`,
     `named_xag_network`, `named_mig_network`, and `named_technology_network`.
     `kitty::dynamic_truth_table` replaces `fiction::tt`; Python names stay unchanged.
@@ -340,6 +350,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Experiments:
 
+  - Parameter configurations now use designated initializers with unchanged inputs and computations.
   - Experiments use canonical network types and `kitty::dynamic_truth_table` without changing their computations.
   - Clock-number assignment helpers now take concrete Cartesian gate layouts.
     Experiment parameters, inputs, and output columns are unchanged.
@@ -681,6 +692,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Combination generation now uses full-width position indices.
   - Kinks-rejected energy labels now count each matching charge distribution once, preserving degenerate-state
     occupation probabilities. Both energy-labeling variants document ascending energy order.
   - Operational checks now reject invalid specifications and unsupported QuickSim inputs across entry points.
@@ -769,6 +781,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Build system:
 
+  - PCH cache hashes now retain comments so GCC builds accept documentation-only header edits.
   - Release benchmark builds now skip stripping when no strip tool is available.
   - Rebuild Python bindings when uncommitted C++ binding sources change.
   - Keep tinyxml2 static across build reconfiguration so Python imports find all libraries.
@@ -811,6 +824,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - Gray-code iterators now index from their current position, compare positions, support copy assignment,
+    and preserve 64-bit offsets and distances across the signed boundary.
   - Edge-color views now support clearing only node colors and clearing both node and edge colors.
   - Gate-level layout moves now propagate geometry failures and preserve owned state.
     Custom geometry controls its assignment failure guarantee.
@@ -857,6 +872,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
 
+  - Binding docstring instructions now use the generator wrapper that CI runs.
+  - Hexagonal layout documentation now names the eastern border and `is_adjacent_of` correctly.
   - `gate_layout::incoming_data_flow` now documents required adjacency and optional clocking.
   - Python keyword-only APIs document option meanings and units, including exact search bounds.
   - SiDB layout documentation now distinguishes charged defect types from non-zero defect charges.
@@ -931,6 +948,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - Domain keyword options now reuse the default sweep storage instead of allocating a second vector.
   - Cell-grid clocking names now remain valid when converted to Python strings.
   - Layout object IDs, input ports, and extents now compare unequal to unrelated Python values.
     Mutable extents are unhashable.

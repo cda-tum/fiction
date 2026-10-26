@@ -132,8 +132,8 @@ TEST_CASE("AND gate mirrored on the x-axis on the H-Si 111 surface", "[verify-lo
 
         REQUIRE(!gs.empty());
 
-        is_operational_params op_params{};
-        op_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+        const is_operational_params op_params{.op_condition =
+                                                  is_operational_params::operational_condition::REJECT_KINKS};
 
         SECTION("Correct index")
         {
@@ -156,8 +156,7 @@ TEST_CASE("Logic matching propagates invalid lattice basis errors", "[verify-log
     lattice_site invalid{};
     invalid.z = 2;
     lyt.assign_sidb(invalid, dot_tag::NORMAL);
-    is_operational_params params{};
-    params.sim_params.base = 2;
+    const is_operational_params params{.sim_params = simulation_parameters{2}};
 
     CHECK_THROWS_AS(verify_logic_match(lyt, charge_distribution{lyt}, params, std::vector{create_id_tt()}, 0, {}, {}),
                     std::out_of_range);

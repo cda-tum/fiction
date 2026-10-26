@@ -198,9 +198,8 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
         {
             auto layout = orthogonal<cartesian_layout>(blueprints::mux21_network<technology_network>(), {});
 
-            post_layout_optimization_stats  stats{};
-            post_layout_optimization_params params{};
-            params.max_gate_relocations = max_gate_relocations;
+            post_layout_optimization_stats        stats{};
+            const post_layout_optimization_params params{.max_gate_relocations = max_gate_relocations};
             post_layout_optimization(layout, params, &stats);
 
             check_eq(blueprints::mux21_network<technology_network>(), layout);
@@ -211,9 +210,8 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
     {
         auto layout = orthogonal<cartesian_layout>(blueprints::mux21_network<technology_network>(), {});
 
-        post_layout_optimization_stats  stats{};
-        post_layout_optimization_params params{};
-        params.optimize_pos_only = true;
+        post_layout_optimization_stats        stats{};
+        const post_layout_optimization_params params{.optimize_pos_only = true};
         post_layout_optimization(layout, params, &stats);
 
         check_eq(blueprints::mux21_network<technology_network>(), layout);
@@ -223,9 +221,8 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
     {
         auto layout = orthogonal<cartesian_layout>(blueprints::mux21_network<technology_network>(), {});
 
-        post_layout_optimization_stats  stats{};
-        post_layout_optimization_params params{};
-        params.timeout = 1000000;
+        post_layout_optimization_stats        stats{};
+        const post_layout_optimization_params params{.timeout = 1000000};
         post_layout_optimization(layout, params, &stats);
 
         check_eq(blueprints::mux21_network<technology_network>(), layout);
@@ -235,9 +232,8 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
     {
         auto layout = orthogonal<cartesian_layout>(blueprints::mux21_network<technology_network>(), {});
 
-        post_layout_optimization_stats  stats{};
-        post_layout_optimization_params params{};
-        params.timeout = 0;
+        post_layout_optimization_stats        stats{};
+        const post_layout_optimization_params params{.timeout = 0};
         post_layout_optimization(layout, params, &stats);
 
         check_eq(blueprints::mux21_network<technology_network>(), layout);
@@ -248,9 +244,8 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
     {
         auto layout = blueprints::planar_unoptimized_layout<cartesian_gate_layout>();
 
-        post_layout_optimization_stats  stats{};
-        post_layout_optimization_params params{};
-        params.planar_optimization = true;
+        post_layout_optimization_stats        stats{};
+        const post_layout_optimization_params params{.planar_optimization = true};
         post_layout_optimization(layout, params, &stats);
 
         check_eq(blueprints::planar_unoptimized_layout<cartesian_gate_layout>(), layout);
@@ -262,9 +257,7 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
         auto layout = blueprints::planar_optimization_layout<cartesian_gate_layout>();
 
         post_layout_optimization_stats  stats{};
-        post_layout_optimization_params params{};
-
-        params.planar_optimization = true;
+        post_layout_optimization_params params{.planar_optimization = true};
         post_layout_optimization(layout, params, &stats);
         /** @brief Object at the position whose inverter has been moved. */
         const auto planar_object = layout.find_object({1, 0});
@@ -331,9 +324,8 @@ TEST_CASE("Post-layout optimization reports progress", "[post-layout-optimizatio
     const auto ntk    = blueprints::mux21_network<technology_network>();
     auto       layout = orthogonal<cartesian_layout>(ntk);
 
-    progress_recorder               rec{};
-    post_layout_optimization_params params{};
-    params.on_progress = rec.callback();
+    progress_recorder                     rec{};
+    const post_layout_optimization_params params{.on_progress = rec.callback()};
 
     post_layout_optimization(layout, params);
 
@@ -347,14 +339,13 @@ TEST_CASE("Post-layout optimization reports progress", "[post-layout-optimizatio
 
 TEST_CASE("Post-layout optimization edits its caller and preserves terminal identities", "[post-layout-optimization]")
 {
-    gate_layout<cartesian_layout>   layout{{6, 3}, layouts::clocking::twoddwave()};
-    const auto                      a           = layout.create_pi("a", {0, 0});
-    const auto                      wire        = layout.create_buf(a, {1, 0});
-    const auto                      po          = layout.create_po(wire, "f", {5, 0});
-    const auto                      independent = layout;
-    post_layout_optimization_params params{};
-    params.timeout = 0;
-    post_layout_optimization_stats stats{};
+    gate_layout<cartesian_layout>         layout{{6, 3}, layouts::clocking::twoddwave()};
+    const auto                            a           = layout.create_pi("a", {0, 0});
+    const auto                            wire        = layout.create_buf(a, {1, 0});
+    const auto                            po          = layout.create_po(wire, "f", {5, 0});
+    const auto                            independent = layout;
+    const post_layout_optimization_params params{.timeout = 0};
+    post_layout_optimization_stats        stats{};
     post_layout_optimization(layout, params, &stats);
     CHECK(layout.contains(a));
     CHECK(layout.contains(po));
@@ -388,11 +379,10 @@ TEST_CASE("Post-layout rerouting preserves noncommutative input order", "[post-l
     {
         left = layout.create_buf(left, t);
     }
-    const auto                      right = layout.create_buf(layout.create_buf(b, {1, 2}), {2, 2});
-    const auto                      gate  = layout.create_lt(left, right, {3, 2});
-    const auto                      po    = layout.create_po(gate, "f", {3, 3});
-    post_layout_optimization_params params{};
-    params.max_gate_relocations = 20;
+    const auto                            right = layout.create_buf(layout.create_buf(b, {1, 2}), {2, 2});
+    const auto                            gate  = layout.create_lt(left, right, {3, 2});
+    const auto                            po    = layout.create_po(gate, "f", {3, 3});
+    const post_layout_optimization_params params{.max_gate_relocations = 20};
     post_layout_optimization(layout, params);
     CHECK(layout.contains(gate));
     CHECK(layout.contains(po));
