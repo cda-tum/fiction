@@ -92,19 +92,16 @@ class tt_reader
 
         /** @brief Hexadecimal digits without the prefix. */
         const auto table = elements[pos].substr(2u);
-        if (!std::has_single_bit(table.size()) ||
+        /** @brief Number of variables represented by the hexadecimal digits. */
+        const auto num_vars = static_cast<uint32_t>(std::bit_width(table.size())) + 1u;
+        // kitty's dynamic truth table uses a 32-bit shift to allocate blocks above six variables.
+        if (!std::has_single_bit(table.size()) || num_vars >= 38u ||
             !std::ranges::all_of(
                 table, [](const char c)
                 { return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'); }))
         {
-            throw std::invalid_argument("truth tables require a power-of-two number of hexadecimal digits");
-        }
-        /** @brief Number of variables represented by the hexadecimal digits. */
-        const auto num_vars = static_cast<uint32_t>(std::bit_width(table.size())) + 1u;
-        // kitty's dynamic truth table uses a 32-bit shift to allocate blocks above six variables.
-        if (num_vars >= 38u)
-        {
-            throw std::invalid_argument("truth tables require fewer than 38 variables");
+            throw std::invalid_argument(
+                "truth tables require hexadecimal digits, a power-of-two digit count, and fewer than 38 variables");
         }
         /** @brief Truth table represented by the current record. */
         TT tt{num_vars};
