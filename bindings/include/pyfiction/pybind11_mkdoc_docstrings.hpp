@@ -29100,18 +29100,16 @@ declared input ports, independent of physical adjacency and clocking
 legality. Only output dependencies enter the analysis. Explicit placed
 zero-input functions act as path sources.
 
-The throughput is defined as :math:`\frac{1}{x}` where :math:`x` is
-the highest path length difference between any sets of paths that lead
-to the same gate. This function provides only the denominator
-:math:`x`, as the numerator is always :math:`1`. Furthermore,
-:math:`x` is given in clock cycles rather than clock phases because it
-is assumed that a path length difference smaller than
-`lyt.num_clocks()` does not lead to any delay. Contrary, for any
-throughput value :math:`\frac{1}{x}` with :math:`x > 1`, the layout
-computes its represented Boolean function only every :math:`x` full
-clock cycles after the first inputs have been propagated through the
-design. Thereby, all PIs need to be held constant for :math:`x` clock
-phases to ensure proper computation.
+The throughput is :math:`\frac{1}{x}`, where :math:`x = \lfloor d / c
+\rfloor + 1`, :math:`c = \text{lyt.num_clocks()}`, and :math:`d` is
+the maximum difference between input arrival phases at any analyzed
+gate. Each source starts at its clock number; each following object
+adds one phase to its latest input arrival. Differences smaller than
+one clock cycle do not reduce throughput.
+
+This function returns the denominator :math:`x` in full clock cycles.
+All PIs must remain constant for :math:`x` clock cycles to ensure
+proper computation.
 
 For more information on the concept of throughput and delay see
 \"Synchronization of Clocked Field-Coupled Circuits\" by F. Sill
