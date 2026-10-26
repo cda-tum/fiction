@@ -23,6 +23,7 @@
 #include <kitty/dynamic_truth_table.hpp>
 #include <kitty/operations.hpp>
 
+#include <fstream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -90,16 +91,19 @@ TEST_CASE("Truth-table digit counts and hexadecimal case", "[tt-reader]")
 {
     const auto hex = GENERATE(std::string{"f"}, std::string{"e8"}, std::string{"abCd"}, std::string{"0123456789ABCDEF"},
                               std::string{"0123456789abcdef0123456789ABCDEF"});
-    const auto prefix = GENERATE("0x", "0X");
+    const auto* const prefix = GENERATE("0x", "0X");
     std::stringstream stream{prefix + hex + " expression"};
     tt_reader<>       reader{stream};
 
     const auto result = reader.next();
     REQUIRE(result.has_value());
-    CHECK(result->num_bits() == hex.size() * 4u);
-    kitty::dynamic_truth_table expected{result->num_vars()};
-    kitty::create_from_hex_string(expected, hex);
-    CHECK(kitty::equal(*result, expected));
+    if (result.has_value())
+    {
+        CHECK(result->num_bits() == hex.size() * 4u);
+        kitty::dynamic_truth_table expected{result->num_vars()};
+        kitty::create_from_hex_string(expected, hex);
+        CHECK(kitty::equal(*result, expected));
+    }
     CHECK_FALSE(reader.next().has_value());
 }
 

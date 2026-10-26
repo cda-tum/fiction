@@ -24,6 +24,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <fstream>
+#include <ios>
 #include <istream>
 #include <iterator>
 #include <optional>
