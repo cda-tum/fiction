@@ -77,6 +77,21 @@ TEST_CASE("Unreadable truth-table file", "[tt-reader]")
                     std::ifstream::failure);
 }
 
+TEST_CASE("Read truth table from a file", "[tt-reader]")
+{
+    tt_reader<> reader{std::string{TEST_PATH} + "resources/truth_tables/valid.tt"};
+
+    const auto result = reader.next();
+    REQUIRE(result.has_value());
+    if (result.has_value())
+    {
+        kitty::dynamic_truth_table expected{2u};
+        kitty::create_from_hex_string(expected, "8");
+        CHECK(kitty::equal(*result, expected));
+    }
+    CHECK_FALSE(reader.next().has_value());
+}
+
 TEST_CASE("Invalid truth-table records", "[tt-reader]")
 {
     std::stringstream stream{GENERATE("0x8", "0x expr", "x expr", "xx8 expr", "0xg expr", "0xG expr", "0x/ expr",
