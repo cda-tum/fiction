@@ -148,10 +148,9 @@ TEST_CASE("ToPoliNano rejects primary-input fanout", "[inml-topolinano-library]"
     lyt.create_po(pi, "north", {1, 0});
     lyt.create_po(pi, "south", {1, 1});
 
-    std::ostringstream    report{};
-    gate_level_drv_params ps{};
-    ps.out = &report;
-    gate_level_drv_stats st{};
+    std::ostringstream          report{};
+    const gate_level_drv_params ps{.out = &report};
+    gate_level_drv_stats        st{};
     gate_level_drvs(lyt, ps, &st);
     INFO(report.str());
     REQUIRE(st.drvs == 0);

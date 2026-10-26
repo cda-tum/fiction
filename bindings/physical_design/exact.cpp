@@ -92,26 +92,25 @@ void register_exact(nb::module_& m, const char* signature)
         {
             throw nb::next_overload();
         }
-        exact_physical_design_options parameters{};
-        parameters.scheme                   = scheme;
-        parameters.layout_arrangement       = layout_arrangement;
-        parameters.upper_bound_area         = upper_bound_area;
-        parameters.upper_bound_x            = upper_bound_x;
-        parameters.upper_bound_y            = upper_bound_y;
-        parameters.fixed_size               = fixed_size;
-        parameters.num_threads              = num_threads;
-        parameters.synchronization_elements = synchronization_elements;
-        parameters.crossings                = crossings;
-        parameters.border_io                = border_io;
-        parameters.straight_inverters       = straight_inverters;
-        parameters.desynchronize            = desynchronize;
-        parameters.minimize_wires           = minimize_wires;
-        parameters.minimize_crossings       = minimize_crossings;
-        parameters.timeout                  = timeout;
-        parameters.technology_specifics     = technology_specifics;
-        parameters.on_progress              = on_progress;
-        parameters.on_worker_progress       = on_worker_progress;
-        const nb::gil_scoped_release release{};
+        const exact_physical_design_options parameters{.scheme                   = scheme,
+                                                       .layout_arrangement       = layout_arrangement,
+                                                       .upper_bound_area         = upper_bound_area,
+                                                       .upper_bound_x            = upper_bound_x,
+                                                       .upper_bound_y            = upper_bound_y,
+                                                       .fixed_size               = fixed_size,
+                                                       .num_threads              = num_threads,
+                                                       .crossings                = crossings,
+                                                       .border_io                = border_io,
+                                                       .synchronization_elements = synchronization_elements,
+                                                       .straight_inverters       = straight_inverters,
+                                                       .desynchronize            = desynchronize,
+                                                       .minimize_wires           = minimize_wires,
+                                                       .minimize_crossings       = minimize_crossings,
+                                                       .timeout                  = timeout,
+                                                       .technology_specifics     = technology_specifics,
+                                                       .on_progress              = on_progress,
+                                                       .on_worker_progress       = on_worker_progress};
+        const nb::gil_scoped_release        release{};
         return fiction::physical_design::exact<typename Lyt::coordinate_layout>(network, parameters, statistics);
     };
     if constexpr (std::is_same_v<Lyt, fiction::layouts::cartesian_gate_layout>)

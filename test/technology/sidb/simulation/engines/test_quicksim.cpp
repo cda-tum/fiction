@@ -149,7 +149,7 @@ TEST_CASE("QuickSim simulation of several SiDBs with varying thread counts", "[q
 
     const simulation_parameters params{2, -0.30};
 
-    quicksim_params qs_params{.sim_params = params};
+    const quicksim_params qs_params{.sim_params = params};
 
     REQUIRE(qs_params.sim_params.mu_minus == -0.30);
 
@@ -164,9 +164,7 @@ TEST_CASE("QuickSim simulation of several SiDBs with varying thread counts", "[q
     }
     SECTION("0 threads")
     {
-        qs_params.number_threads = 0;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 0});
 
         REQUIRE(simulation_results.has_value());
 
@@ -176,9 +174,7 @@ TEST_CASE("QuickSim simulation of several SiDBs with varying thread counts", "[q
 
     SECTION("1 thread")
     {
-        qs_params.number_threads = 1;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 1});
 
         REQUIRE(simulation_results.has_value());
 
@@ -187,9 +183,7 @@ TEST_CASE("QuickSim simulation of several SiDBs with varying thread counts", "[q
     }
     SECTION("2 threads")
     {
-        qs_params.number_threads = 2;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 2});
 
         REQUIRE(simulation_results.has_value());
 
@@ -198,9 +192,7 @@ TEST_CASE("QuickSim simulation of several SiDBs with varying thread counts", "[q
     }
     SECTION("100 threads")
     {
-        qs_params.number_threads = 100;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 100});
 
         REQUIRE(simulation_results.has_value());
 
@@ -232,7 +224,7 @@ TEST_CASE("QuickSim simulation of an SiDB layout comprising of 10 SiDBs with var
 
     const simulation_parameters params{2, -0.32};
 
-    quicksim_params qs_params{.sim_params = params};
+    const quicksim_params qs_params{.sim_params = params};
 
     REQUIRE(qs_params.sim_params.mu_minus == -0.32);
 
@@ -273,9 +265,7 @@ TEST_CASE("QuickSim simulation of an SiDB layout comprising of 10 SiDBs with var
     }
     SECTION("0 threads")
     {
-        qs_params.number_threads = 0;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 0});
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(checked_result(simulation_results));
@@ -284,9 +274,7 @@ TEST_CASE("QuickSim simulation of an SiDB layout comprising of 10 SiDBs with var
     }
     SECTION("1 thread")
     {
-        qs_params.number_threads = 1;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 1});
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(checked_result(simulation_results));
@@ -295,9 +283,7 @@ TEST_CASE("QuickSim simulation of an SiDB layout comprising of 10 SiDBs with var
     }
     SECTION("2 threads")
     {
-        qs_params.number_threads = 2;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 2});
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(checked_result(simulation_results));
@@ -306,9 +292,7 @@ TEST_CASE("QuickSim simulation of an SiDB layout comprising of 10 SiDBs with var
     }
     SECTION("100 threads")
     {
-        qs_params.number_threads = 100;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 100});
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(checked_result(simulation_results));
@@ -333,7 +317,7 @@ TEST_CASE("QuickSim simulation of a Y-shaped SiDB arrangement with varying threa
 
     const simulation_parameters params{2, -0.32};
 
-    quicksim_params qs_params{.sim_params = params};
+    const quicksim_params qs_params{.sim_params = params};
 
     REQUIRE(qs_params.sim_params.mu_minus == -0.32);
 
@@ -365,9 +349,7 @@ TEST_CASE("QuickSim simulation of a Y-shaped SiDB arrangement with varying threa
     }
     SECTION("0 threads")
     {
-        qs_params.number_threads = 0;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 0});
 
         REQUIRE(simulation_results.has_value());
 
@@ -377,9 +359,7 @@ TEST_CASE("QuickSim simulation of a Y-shaped SiDB arrangement with varying threa
     }
     SECTION("1 thread")
     {
-        qs_params.number_threads = 1;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 1});
 
         REQUIRE(simulation_results.has_value());
 
@@ -389,9 +369,7 @@ TEST_CASE("QuickSim simulation of a Y-shaped SiDB arrangement with varying threa
     }
     SECTION("2 threads")
     {
-        qs_params.number_threads = 2;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 2});
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(checked_result(simulation_results));
@@ -400,9 +378,7 @@ TEST_CASE("QuickSim simulation of a Y-shaped SiDB arrangement with varying threa
     }
     SECTION("100 threads")
     {
-        qs_params.number_threads = 100;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 100});
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(checked_result(simulation_results));
@@ -428,7 +404,7 @@ TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01 and vary
 
     const simulation_parameters params{2, -0.28};
 
-    quicksim_params qs_params{.sim_params = params};
+    const quicksim_params qs_params{.sim_params = params};
 
     REQUIRE(qs_params.sim_params.mu_minus == -0.28);
 
@@ -461,9 +437,7 @@ TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01 and vary
     }
     SECTION("0 threads")
     {
-        qs_params.number_threads = 0;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 0});
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(checked_result(simulation_results));
@@ -472,9 +446,7 @@ TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01 and vary
     }
     SECTION("1 thread")
     {
-        qs_params.number_threads = 1;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 1});
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(checked_result(simulation_results));
@@ -483,9 +455,7 @@ TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01 and vary
     }
     SECTION("2 threads")
     {
-        qs_params.number_threads = 2;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 2});
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(checked_result(simulation_results));
@@ -494,9 +464,7 @@ TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01 and vary
     }
     SECTION("100 threads")
     {
-        qs_params.number_threads = 100;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 100});
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(checked_result(simulation_results));
@@ -505,8 +473,8 @@ TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01 and vary
 
         SECTION("timeout with 0 ms")
         {
-            qs_params.timeout                       = 0;
-            const auto simulation_results_timeout_0 = quicksim(lyt, qs_params);
+            const auto simulation_results_timeout_0 =
+                quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 100, .timeout = 0});
 
             CHECK(!simulation_results_timeout_0.has_value());
         }
@@ -522,7 +490,7 @@ TEST_CASE("QuickSim simulation of an SiDB BDL pair with varying thread counts", 
 
     const simulation_parameters params{2, -0.25};
 
-    quicksim_params qs_params{.sim_params = params};
+    const quicksim_params qs_params{.sim_params = params};
 
     REQUIRE(qs_params.sim_params.mu_minus == -0.25);
 
@@ -551,9 +519,7 @@ TEST_CASE("QuickSim simulation of an SiDB BDL pair with varying thread counts", 
     }
     SECTION("0 threads")
     {
-        qs_params.number_threads = 0;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 0});
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(checked_result(simulation_results));
@@ -562,9 +528,7 @@ TEST_CASE("QuickSim simulation of an SiDB BDL pair with varying thread counts", 
     }
     SECTION("1 thread")
     {
-        qs_params.number_threads = 1;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 1});
 
         REQUIRE(simulation_results.has_value());
 
@@ -574,9 +538,7 @@ TEST_CASE("QuickSim simulation of an SiDB BDL pair with varying thread counts", 
     }
     SECTION("2 threads")
     {
-        qs_params.number_threads = 2;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 2});
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(checked_result(simulation_results));
@@ -585,9 +547,7 @@ TEST_CASE("QuickSim simulation of an SiDB BDL pair with varying thread counts", 
     }
     SECTION("100 threads")
     {
-        qs_params.number_threads = 100;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 100});
 
         REQUIRE(simulation_results.has_value());
 
@@ -625,7 +585,7 @@ TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs", "[quicksim]
 
     const simulation_parameters params{2, -0.32};
 
-    quicksim_params qs_params{.sim_params = params};
+    const quicksim_params qs_params{.sim_params = params};
 
     // check QuickSim parameters
     REQUIRE(qs_params.sim_params.mu_minus == -0.32);
@@ -666,9 +626,7 @@ TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs", "[quicksim]
 
     SECTION("0 threads")
     {
-        qs_params.number_threads = 0;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 0});
 
         REQUIRE(simulation_results.has_value());
 
@@ -678,9 +636,7 @@ TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs", "[quicksim]
     }
     SECTION("1 thread")
     {
-        qs_params.number_threads = 1;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 1});
 
         REQUIRE(simulation_results.has_value());
 
@@ -690,9 +646,7 @@ TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs", "[quicksim]
     }
     SECTION("2 threads")
     {
-        qs_params.number_threads = 2;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 2});
 
         REQUIRE(simulation_results.has_value());
 
@@ -702,9 +656,7 @@ TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs", "[quicksim]
     }
     SECTION("100 threads")
     {
-        qs_params.number_threads = 100;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 100});
 
         REQUIRE(simulation_results.has_value());
 
@@ -740,7 +692,7 @@ TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs, all negative
 
     const simulation_parameters params{2, -0.32};
 
-    quicksim_params qs_params{.sim_params = params};
+    const quicksim_params qs_params{.sim_params = params};
 
     REQUIRE(qs_params.sim_params.mu_minus == -0.32);
 
@@ -770,9 +722,7 @@ TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs, all negative
     }
     SECTION("0 threads")
     {
-        qs_params.number_threads = 0;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 0});
 
         REQUIRE(simulation_results.has_value());
 
@@ -782,9 +732,7 @@ TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs, all negative
     }
     SECTION("1 thread")
     {
-        qs_params.number_threads = 1;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 1});
 
         REQUIRE(simulation_results.has_value());
 
@@ -794,9 +742,7 @@ TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs, all negative
     }
     SECTION("2 threads")
     {
-        qs_params.number_threads = 2;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 2});
 
         REQUIRE(simulation_results.has_value());
 
@@ -806,9 +752,7 @@ TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs, all negative
     }
     SECTION("100 threads")
     {
-        qs_params.number_threads = 100;
-
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const auto simulation_results = quicksim(lyt, quicksim_params{.sim_params = params, .number_threads = 100});
 
         REQUIRE(simulation_results.has_value());
 
@@ -827,18 +771,16 @@ TEST_CASE("Edge case with four SiDBs", "[quicksim]")
     lyt.assign_sidb({3, 0, 1}, dot_tag::NORMAL);
     lyt.assign_sidb({7, 0, 0}, dot_tag::NORMAL);
 
-    quicksim_params qs_params{};
-
     SECTION("alpha = 1.0 does not work")
     {
-        qs_params.alpha               = 1.0;
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const quicksim_params qs_params{.alpha = 1.0};
+        const auto            simulation_results = quicksim(lyt, qs_params);
         CHECK(!simulation_results.has_value());
     }
     SECTION("alpha = 0.7 works")
     {
-        qs_params.alpha               = 0.7;
-        const auto simulation_results = quicksim(lyt, qs_params);
+        const quicksim_params qs_params{.alpha = 0.7};
+        const auto            simulation_results = quicksim(lyt, qs_params);
         REQUIRE(simulation_results.has_value());
         CHECK(!checked_result(simulation_results).charge_distributions.empty());
     }
@@ -1156,10 +1098,10 @@ TEST_CASE("QuickSim reports progress", "[quicksim]")
 
     progress_recorder rec{};
 
-    quicksim_params qs_params{.sim_params      = simulation_parameters{2, -0.32},
-                              .iteration_steps = 10,
-                              .number_threads  = 2};
-    qs_params.on_progress = rec.callback();
+    const quicksim_params qs_params{.sim_params      = simulation_parameters{2, -0.32},
+                                    .iteration_steps = 10,
+                                    .number_threads  = 2,
+                                    .on_progress     = rec.callback()};
 
     const auto simulation_results = quicksim(lyt, qs_params);
 

@@ -90,10 +90,8 @@ void register_wiring_reduction(nb::module_& m)
            const decltype(wiring_reduction_options{}.on_progress)& on_progress,
            fiction::physical_design::wiring_reduction_stats*       statistics)
         {
-            wiring_reduction_options params{};
-            params.timeout     = timeout;
-            params.on_progress = on_progress;
-            const nb::gil_scoped_release release{};
+            const wiring_reduction_options params{.timeout = timeout, .on_progress = on_progress};
+            const nb::gil_scoped_release   release{};
             fiction::physical_design::wiring_reduction(layout, params, statistics);
         },
         nb::arg("layout"), nb::kw_only(), nb::arg("timeout") = wiring_reduction_options{}.timeout,

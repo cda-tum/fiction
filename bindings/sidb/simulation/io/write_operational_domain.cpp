@@ -68,10 +68,9 @@ void register_domain_writer(nb::module_& m, const char* file_name, const char* s
            const decltype(write_operational_domain_options{}.non_operational_tag) non_operational_tag,
            const decltype(write_operational_domain_options{}.writing_mode)        writing_mode)
         {
-            write_operational_domain_options params{};
-            params.operational_tag     = operational_tag;
-            params.non_operational_tag = non_operational_tag;
-            params.writing_mode        = writing_mode;
+            const write_operational_domain_options params{.operational_tag     = operational_tag,
+                                                          .non_operational_tag = non_operational_tag,
+                                                          .writing_mode        = writing_mode};
             fiction::sidb::simulation::io::write_operational_domain(opdom, filename, params);
         },
         nb::call_guard<nb::gil_scoped_release>(), nb::arg("opdom"), nb::arg("filename"), nb::kw_only(),
@@ -85,10 +84,9 @@ void register_domain_writer(nb::module_& m, const char* file_name, const char* s
            const decltype(write_operational_domain_options{}.non_operational_tag) non_operational_tag,
            const decltype(write_operational_domain_options{}.writing_mode)        writing_mode) -> std::string
         {
-            write_operational_domain_options params{};
-            params.operational_tag     = operational_tag;
-            params.non_operational_tag = non_operational_tag;
-            params.writing_mode        = writing_mode;
+            const write_operational_domain_options params{.operational_tag     = operational_tag,
+                                                          .non_operational_tag = non_operational_tag,
+                                                          .writing_mode        = writing_mode};
 
             std::ostringstream oss;
             fiction::sidb::simulation::io::write_operational_domain(opdom, oss, params);

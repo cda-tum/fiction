@@ -61,9 +61,7 @@ namespace
 template <typename Ntk>
 mutable_rank_view<technology_network> prepare(const Ntk& ntk)
 {
-    network_balancing_params ps{};
-    ps.unify_outputs           = true;
-    ps.buffer_constant_outputs = false;
+    const network_balancing_params ps{.unify_outputs = true, .buffer_constant_outputs = false};
 
     return mutable_rank_view{network_balancing<technology_network>(fanout_substitution<technology_network>(ntk), ps)};
 }
@@ -211,9 +209,9 @@ TEST_CASE("Random primary output order with a fixed seed", "[node-duplication-pl
     const auto ntk    = blueprints::full_adder_network<mockturtle::aig_network>();
     const auto ranked = prepare(ntk);
 
-    node_duplication_planarization_params ps{};
-    ps.po_order = node_duplication_planarization_params::output_order::RANDOM_PO_ORDER;
-    ps.seed     = 42;
+    const node_duplication_planarization_params ps{
+        .po_order = node_duplication_planarization_params::output_order::RANDOM_PO_ORDER,
+        .seed     = 42};
 
     const auto planar_a = node_duplication_planarization(ranked, ps);
     const auto planar_b = node_duplication_planarization(ranked, ps);
@@ -230,12 +228,12 @@ TEST_CASE("Progress is reported once per level", "[node-duplication-planarizatio
     std::vector<std::size_t> done_values{};
     std::size_t              total = 0;
 
-    node_duplication_planarization_params ps{};
-    ps.on_progress = [&done_values, &total](std::string_view, const std::size_t done, const std::size_t t)
-    {
-        done_values.push_back(done);
-        total = t;
-    };
+    const node_duplication_planarization_params ps{
+        .on_progress = [&done_values, &total](std::string_view, const std::size_t done, const std::size_t t)
+        {
+            done_values.push_back(done);
+            total = t;
+        }};
 
     const auto planar = node_duplication_planarization(ranked, ps);
 
@@ -292,9 +290,7 @@ TEST_CASE("Consecutive consumers share one copy", "[node-duplication-planarizati
     tec.create_po(f2);
     tec.create_po(f3);
 
-    network_balancing_params ps{};
-    ps.unify_outputs           = true;
-    ps.buffer_constant_outputs = false;
+    const network_balancing_params ps{.unify_outputs = true, .buffer_constant_outputs = false};
 
     // balance without fanout substitution: the input keeps nodes with fanout greater than one
     const mutable_rank_view ranked{network_balancing<technology_network>(tec, ps)};
@@ -352,9 +348,9 @@ TEST_CASE("Hybrid strategy keeps crossings only where crossing gates are cheaper
 
         for (const bool xor_gates : {false, true})
         {
-            node_duplication_planarization_params ps{};
-            ps.strategy                 = node_duplication_planarization_params::planarization_strategy::HYBRID;
-            ps.crossing_gates.xor_gates = xor_gates;
+            const node_duplication_planarization_params ps{
+                .strategy       = node_duplication_planarization_params::planarization_strategy::HYBRID,
+                .crossing_gates = {.xor_gates = xor_gates}};
 
             node_duplication_planarization_stats st{};
             const auto                           hybrid = node_duplication_planarization(ranked, ps, &st);
@@ -366,8 +362,7 @@ TEST_CASE("Hybrid strategy keeps crossings only where crossing gates are cheaper
             CHECK((st.num_crossings == 0) == (st.num_crossing_levels == 0));
 
             // the crossing gates finish the job
-            crossing_gate_planarization_params cg_ps{};
-            cg_ps.xor_gates = xor_gates;
+            const crossing_gate_planarization_params cg_ps{.xor_gates = xor_gates};
 
             crossing_gate_planarization_stats cg_st{};
             const auto                        planar = crossing_gate_planarization(hybrid, cg_ps, &cg_st);
@@ -387,9 +382,9 @@ TEST_CASE("Hybrid strategy with an infinite crossing cost duplicates everything"
     node_duplication_planarization_stats dup_st{};
     const auto                           duplicated = node_duplication_planarization(ranked, {}, &dup_st);
 
-    node_duplication_planarization_params ps{};
-    ps.strategy                               = node_duplication_planarization_params::planarization_strategy::HYBRID;
-    ps.crossing_gates.max_crossings_per_level = 0;
+    const node_duplication_planarization_params ps{
+        .strategy       = node_duplication_planarization_params::planarization_strategy::HYBRID,
+        .crossing_gates = {.max_crossings_per_level = 0}};
 
     node_duplication_planarization_stats st{};
     const auto                           hybrid = node_duplication_planarization(ranked, ps, &st);
@@ -405,10 +400,10 @@ TEST_CASE("Hybrid strategy with a prohibitive duplication cost keeps crossings",
     const auto ntk    = blueprints::parity_network<technology_network>();
     const auto ranked = rank(ntk);
 
-    node_duplication_planarization_params ps{};
-    ps.strategy                     = node_duplication_planarization_params::planarization_strategy::HYBRID;
-    ps.criterion                    = node_duplication_planarization_params::decision_criterion::WEIGHTED_CONE;
-    ps.duplication_cost.node_weight = 1e6;
+    const node_duplication_planarization_params ps{
+        .strategy         = node_duplication_planarization_params::planarization_strategy::HYBRID,
+        .criterion        = node_duplication_planarization_params::decision_criterion::WEIGHTED_CONE,
+        .duplication_cost = {.node_weight = 1e6}};
 
     node_duplication_planarization_stats st{};
     const auto                           hybrid = node_duplication_planarization(ranked, ps, &st);
@@ -428,8 +423,7 @@ TEST_CASE("The duplication limit aborts the planarization", "[node-duplication-p
     const auto ntk    = blueprints::parity_network<technology_network>();
     const auto ranked = prepare(ntk);
 
-    node_duplication_planarization_params ps{};
-    ps.max_duplications = 1;
+    node_duplication_planarization_params ps{.max_duplications = 1};
 
     CHECK_THROWS_AS(node_duplication_planarization(ranked, ps), std::runtime_error);
 
@@ -455,8 +449,7 @@ TEST_CASE("Invalid parameters are rejected", "[node-duplication-planarization]")
 
     SECTION("lookahead budget of zero")
     {
-        node_duplication_planarization_params ps{};
-        ps.lookahead_budget = 0;
+        const node_duplication_planarization_params ps{.lookahead_budget = 0};
 
         CHECK_THROWS_AS(node_duplication_planarization(ranked, ps), std::invalid_argument);
     }
@@ -465,8 +458,7 @@ TEST_CASE("Invalid parameters are rejected", "[node-duplication-planarization]")
         for (const double weight :
              {-1.0, std::numeric_limits<double>::infinity(), std::numeric_limits<double>::quiet_NaN()})
         {
-            node_duplication_planarization_params ps{};
-            ps.duplication_cost.node_weight = weight;
+            node_duplication_planarization_params ps{.duplication_cost = {.node_weight = weight}};
             CHECK_THROWS_AS(node_duplication_planarization(ranked, ps), std::invalid_argument);
 
             ps                                = {};
@@ -476,8 +468,7 @@ TEST_CASE("Invalid parameters are rejected", "[node-duplication-planarization]")
     }
     SECTION("depth growth that is not positive")
     {
-        node_duplication_planarization_params ps{};
-        ps.duplication_cost.depth_growth = 0.0;
+        const node_duplication_planarization_params ps{.duplication_cost = {.depth_growth = 0.0}};
 
         CHECK_THROWS_AS(node_duplication_planarization(ranked, ps), std::invalid_argument);
     }
@@ -499,8 +490,7 @@ TEST_CASE("Outputs driven by inputs pass through unchanged", "[node-duplication-
     for (const auto strategy : {node_duplication_planarization_params::planarization_strategy::DUPLICATION,
                                 node_duplication_planarization_params::planarization_strategy::HYBRID})
     {
-        node_duplication_planarization_params ps{};
-        ps.strategy = strategy;
+        const node_duplication_planarization_params ps{.strategy = strategy};
 
         node_duplication_planarization_stats st{};
         const auto                           planar = node_duplication_planarization(ranked, ps, &st);
@@ -690,10 +680,10 @@ TEST_CASE("Hybrid strategy with lookahead", "[node-duplication-planarization]")
     {
         const auto ranked = rank(ntk);
 
-        node_duplication_planarization_params ps{};
-        ps.strategy                 = node_duplication_planarization_params::planarization_strategy::HYBRID;
-        ps.criterion                = node_duplication_planarization_params::decision_criterion::LOOKAHEAD;
-        ps.crossing_gates.xor_gates = true;
+        const node_duplication_planarization_params ps{
+            .strategy       = node_duplication_planarization_params::planarization_strategy::HYBRID,
+            .crossing_gates = {.xor_gates = true},
+            .criterion      = node_duplication_planarization_params::decision_criterion::LOOKAHEAD};
 
         node_duplication_planarization_stats st{};
         const auto                           hybrid = node_duplication_planarization(ranked, ps, &st);
@@ -701,8 +691,7 @@ TEST_CASE("Hybrid strategy with lookahead", "[node-duplication-planarization]")
         check_virtual_eq(ntk, hybrid);
         CHECK((count_crossings(hybrid) == 0) == (st.num_crossing_levels == 0));
 
-        crossing_gate_planarization_params cg_ps{};
-        cg_ps.xor_gates = true;
+        const crossing_gate_planarization_params cg_ps{.xor_gates = true};
 
         const auto planar = crossing_gate_planarization(hybrid, cg_ps);
 
@@ -752,10 +741,10 @@ TEST_CASE("Hybrid strategy falls back to the cone model when the lookahead budge
     const auto ntk    = blueprints::parity_network<technology_network>();
     const auto ranked = rank(ntk);
 
-    node_duplication_planarization_params ps{};
-    ps.strategy         = node_duplication_planarization_params::planarization_strategy::HYBRID;
-    ps.criterion        = node_duplication_planarization_params::decision_criterion::LOOKAHEAD;
-    ps.lookahead_budget = 1;
+    node_duplication_planarization_params ps{
+        .strategy         = node_duplication_planarization_params::planarization_strategy::HYBRID,
+        .criterion        = node_duplication_planarization_params::decision_criterion::LOOKAHEAD,
+        .lookahead_budget = 1};
 
     node_duplication_planarization_stats st{};
     const auto                           hybrid = node_duplication_planarization(ranked, ps, &st);
@@ -777,8 +766,8 @@ TEST_CASE("Random primary output order without a seed", "[node-duplication-plana
     const auto ntk    = blueprints::full_adder_network<mockturtle::aig_network>();
     const auto ranked = prepare(ntk);
 
-    node_duplication_planarization_params ps{};
-    ps.po_order = node_duplication_planarization_params::output_order::RANDOM_PO_ORDER;
+    const node_duplication_planarization_params ps{
+        .po_order = node_duplication_planarization_params::output_order::RANDOM_PO_ORDER};
 
     const auto planar = node_duplication_planarization(ranked, ps);
 

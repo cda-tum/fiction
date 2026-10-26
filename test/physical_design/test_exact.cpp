@@ -333,10 +333,9 @@ void check_tp(const Lyt& lyt, const uint64_t tp)
 template <typename Lyt>
 void check_drvs(const Lyt& lyt)
 {
-    gate_level_drv_params ps{};
-    std::stringstream     ss{};
-    ps.out = &ss;
-    gate_level_drv_stats st{};
+    std::stringstream           ss{};
+    const gate_level_drv_params ps{.out = &ss};
+    gate_level_drv_stats        st{};
     gate_level_drvs(lyt, ps, &st);
 
     REQUIRE(st.drvs == 0);

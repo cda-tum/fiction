@@ -23,6 +23,8 @@
 #include <fiction/physical_design/routing_utils.hpp>
 
 #include <algorithm>
+#include <cstdint>
+#include <optional>
 #include <stdexcept>
 #include <vector>
 
@@ -275,7 +277,8 @@ TEST_CASE("EPG on 4x4 layouts with obstruction", "[generate-edge-intersection-gr
 TEST_CASE("Limited paths retain interior conflicts", "[generate-edge-intersection-graph]")
 {
     const cartesian_gate_layout          layout{{3, 3, 2}, clocking::twoddwave()};
-    const std::vector<routing_objective> objectives{{{0, 1}, {2, 1}}, {{1, 0}, {1, 2}}};
+    const std::vector<routing_objective> objectives{{.source = {0, 1}, .target = {2, 1}},
+                                                    {.source = {1, 0}, .target = {1, 2}}};
     for (const auto limit : {1u, 2u})
     {
         const auto graph = generate_edge_intersection_graph(layout, objectives, {.path_limit = limit});
@@ -289,16 +292,15 @@ TEST_CASE("Candidate labels retain their routing objective", "[generate-edge-int
     /** @brief Clocked geometry for routing-objective label checks. */
     const cartesian_gate_layout layout{{2, 2}, clocking::twoddwave()};
     /** @brief Routing objectives with two routable pairs and one unroutable pair. */
-    const std::vector<routing_objective> objectives{{{0, 0}, {1, 1}}, {{1, 1}, {0, 0}}, {{0, 0}, {0, 1}}};
+    const std::vector<routing_objective> objectives{{.source = {0, 0}, .target = {1, 1}},
+                                                    {.source = {1, 1}, .target = {0, 0}},
+                                                    {.source = {0, 0}, .target = {0, 1}}};
     /** @brief Whether this run limits path enumeration. */
     for (const auto limited : {false, true})
     {
         /** @brief Enumeration options for the current graph run. */
-        generate_edge_intersection_graph_params params{};
-        if (limited)
-        {
-            params.path_limit = 2;
-        }
+        const generate_edge_intersection_graph_params params{.path_limit =
+                                                                 limited ? std::optional<uint32_t>{2u} : std::nullopt};
         /** @brief Graph statistics used to verify objective labels. */
         generate_edge_intersection_graph_stats st{};
         /** @brief Intersection graph for the current enumeration mode. */
