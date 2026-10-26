@@ -112,7 +112,7 @@ TEST_CASE("Canonical gate layouts expose their geometry", "[gate-layout]")
 TEMPLATE_TEST_CASE("Elementary truth tables retain logical input order", "[gate-layout]", cartesian_layout,
                    shifted_cartesian_layout, hexagonal_layout)
 {
-    /** @brief Independent layout and inputs for this geometry and section. */
+    /** @brief Independent layout and inputs for this test run. */
     gate_layout_fixture<TestType> fixture{};
     auto&                         lyt = fixture.lyt;
     const auto                    a   = fixture.a;
@@ -151,7 +151,7 @@ TEMPLATE_TEST_CASE("Elementary truth tables retain logical input order", "[gate-
 TEMPLATE_TEST_CASE("Gate iteration excludes identity functions and terminals", "[gate-layout]", cartesian_layout,
                    shifted_cartesian_layout, hexagonal_layout)
 {
-    /** @brief Independent layout and inputs for this geometry and section. */
+    /** @brief Independent layout and inputs for this test run. */
     gate_layout_fixture<TestType> fixture{};
     auto&                         lyt  = fixture.lyt;
     const auto                    wire = lyt.create_buf(fixture.a, {0, 2});
@@ -244,7 +244,7 @@ TEST_CASE("Connection visitors preserve ports while unrelated storage grows", "[
 TEMPLATE_TEST_CASE("Object identity survives placement and stale IDs reject reuse", "[gate-layout]", cartesian_layout,
                    shifted_cartesian_layout, hexagonal_layout)
 {
-    /** @brief Independent layout and inputs for this geometry and section. */
+    /** @brief Independent layout and inputs for this test run. */
     gate_layout_fixture<TestType> fixture{};
     auto&                         lyt  = fixture.lyt;
     const auto                    a    = fixture.a;
@@ -372,7 +372,7 @@ TEMPLATE_TEST_CASE("Deletion disconnects self loops and duplicate destination in
 TEMPLATE_TEST_CASE("Copies isolate geometry, terminals, and connectivity", "[gate-layout]", cartesian_layout,
                    shifted_cartesian_layout, hexagonal_layout)
 {
-    /** @brief Independent layout and inputs for this geometry and section. */
+    /** @brief Independent layout and inputs for this test run. */
     gate_layout_fixture<TestType> fixture{};
     auto&                         original = fixture.lyt;
     const auto                    a        = fixture.a;
@@ -859,7 +859,7 @@ TEMPLATE_TEST_CASE("Five-input objects keep ordered ports", "[gate-layout]", car
 TEMPLATE_TEST_CASE("Large-arity objects preserve disconnected ports through copying, moving, and removal",
                    "[gate-layout]", cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
-    /** @brief Independent layout and inputs for this geometry and section. */
+    /** @brief Independent layout and inputs for this test run. */
     gate_layout_fixture<TestType> fixture{};
     auto&                         original = fixture.lyt;
     const auto                    a        = fixture.a;

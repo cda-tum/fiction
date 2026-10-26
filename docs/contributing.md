@@ -183,6 +183,8 @@ Equal line coverage or one detected mutation does not establish redundancy; use 
 - Use `TEST_CASE_METHOD` or `TEMPLATE_TEST_CASE_METHOD` when several cases need the same nontrivial setup or
   resource lifetime. Prefer an existing blueprint or a local setup expression for simple construction.
   Fixtures own per-test state; avoid shared mutable state and configurable fixture hierarchies.
+  Catch2's typed fixture macros expand to C arrays flagged by clang-tidy; use `TEMPLATE_TEST_CASE` with
+  a local fixture object for typed setup.
 - Use `GENERATE` and table generators for independent input/expected-output rows. Keep related values in one
   row: separate generators create a Cartesian product. Place generators inside the section that needs them.
   Keep loops for state transitions and bounded failure sweeps whose next step depends on the previous result.
@@ -216,14 +218,14 @@ See Catch2's [sections](https://catch2-temp.readthedocs.io/en/latest/test-cases-
 See Catch2's [assertions](https://catch2-temp.readthedocs.io/en/latest/assertions.html) and
 [generic range matchers](https://catch2-temp.readthedocs.io/en/latest/matchers.html#generic-range-matchers).
 
-### Pilot examples and verification
+### Examples and verification
 
 The [gate-layout tests](https://github.com/cda-tum/fiction/blob/main/test/layouts/test_gate_layout.cpp)
 demonstrate these choices using real contracts:
 
 | Technique | Example |
 | --- | --- |
-| Typed fixture and independent sections | Object identity; copies isolating geometry, terminals, and connectivity |
+| Typed local setup and independent sections | Object identity; copies isolating geometry, terminals, and connectivity |
 | Named table rows and diagnostics | Elementary truth tables; clocked neighbor degrees |
 | Complete unordered collections | Iteration over clocking zones; five-input objects and their sinks |
 | Ordered collections | Five-input source ports; sorted observations of sparse object iteration |
@@ -236,7 +238,7 @@ seeds, and confirm that the intended cases ran. Use CTest for normal integration
 cost when adding type/value combinations, fixtures, or matchers. More assertions are not a quality target.
 See Catch2's [execution guidance](https://catch2-temp.readthedocs.io/en/latest/usage-tips.html).
 
-The pilot does not cover every testing domain. Numerical tests need justified absolute, relative, or ULP
+These examples do not cover every testing domain. Numerical tests need justified absolute, relative, or ULP
 tolerances using [floating-point matchers](https://catch2-temp.readthedocs.io/en/latest/comparing-floating-point-numbers.html).
 Parser tests need independent valid and malformed inputs; constructing every input with the matching writer
 can conceal shared errors. Adopt these techniques through a separate contract audit of the relevant module.
