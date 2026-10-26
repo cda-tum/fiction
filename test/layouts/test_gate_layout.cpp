@@ -48,7 +48,6 @@
 #include <set>
 #include <stdexcept>
 #include <string>
-#include <tuple>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -59,9 +58,6 @@ using namespace fiction::layouts;
 
 using Catch::Matchers::RangeEquals;
 using Catch::Matchers::UnorderedRangeEquals;
-
-/** @brief Coordinate geometries covered by gate-layout fixture tests. */
-using gate_geometries = std::tuple<cartesian_layout, shifted_cartesian_layout, hexagonal_layout>;
 
 /** @brief Checks whether a geometry can back a gate layout. @tparam Geometry Coordinate geometry. */
 template <typename Geometry>
@@ -113,12 +109,14 @@ TEST_CASE("Canonical gate layouts expose their geometry", "[gate-layout]")
     }
 }
 
-TEMPLATE_LIST_TEST_CASE_METHOD(gate_layout_fixture, "Elementary truth tables retain logical input order",
-                               "[gate-layout]", gate_geometries)
+TEMPLATE_TEST_CASE("Elementary truth tables retain logical input order", "[gate-layout]", cartesian_layout,
+                   shifted_cartesian_layout, hexagonal_layout)
 {
-    auto&      lyt = this->lyt;
-    const auto a   = this->a;
-    const auto b   = this->b;
+    /** @brief Independent layout and inputs for this geometry and section. */
+    gate_layout_fixture<TestType> fixture{};
+    auto&                         lyt = fixture.lyt;
+    const auto                    a   = fixture.a;
+    const auto                    b   = fixture.b;
     /** @brief Constructor of a binary gate with ordered logical inputs. */
     using binary_creator =
         layout_object_id (gate_layout<TestType>::*)(layout_object_id, layout_object_id, const layout_base::coordinate&);
@@ -150,19 +148,21 @@ TEMPLATE_LIST_TEST_CASE_METHOD(gate_layout_fixture, "Elementary truth tables ret
     }
 }
 
-TEMPLATE_LIST_TEST_CASE_METHOD(gate_layout_fixture, "Gate iteration excludes identity functions and terminals",
-                               "[gate-layout]", gate_geometries)
+TEMPLATE_TEST_CASE("Gate iteration excludes identity functions and terminals", "[gate-layout]", cartesian_layout,
+                   shifted_cartesian_layout, hexagonal_layout)
 {
-    auto&      lyt  = this->lyt;
-    const auto wire = lyt.create_buf(this->a, {0, 2});
-    const auto inv  = lyt.create_not(this->a, {1, 2});
-    const auto maj  = lyt.create_maj(this->a, this->b, wire, {2, 2});
+    /** @brief Independent layout and inputs for this geometry and section. */
+    gate_layout_fixture<TestType> fixture{};
+    auto&                         lyt  = fixture.lyt;
+    const auto                    wire = lyt.create_buf(fixture.a, {0, 2});
+    const auto                    inv  = lyt.create_not(fixture.a, {1, 2});
+    const auto                    maj  = lyt.create_maj(fixture.a, fixture.b, wire, {2, 2});
     CHECK(lyt.is_buf(wire));
     CHECK(lyt.is_inv(inv));
     CHECK(lyt.is_maj(maj));
     kitty::dynamic_truth_table identity{1};
     kitty::create_nth_var(identity, 0);
-    const auto generic_wire = lyt.create_gate({this->a}, identity, {3, 2});
+    const auto generic_wire = lyt.create_gate({fixture.a}, identity, {3, 2});
     CHECK(lyt.is_wire(generic_wire));
     CHECK_FALSE(lyt.is_gate(generic_wire));
     std::vector<layout_object_id> gates{};
@@ -241,13 +241,15 @@ TEST_CASE("Connection visitors preserve ports while unrelated storage grows", "[
     CHECK(lyt.source({gate, 4}) == b);
 }
 
-TEMPLATE_LIST_TEST_CASE_METHOD(gate_layout_fixture, "Object identity survives placement and stale IDs reject reuse",
-                               "[gate-layout]", gate_geometries)
+TEMPLATE_TEST_CASE("Object identity survives placement and stale IDs reject reuse", "[gate-layout]", cartesian_layout,
+                   shifted_cartesian_layout, hexagonal_layout)
 {
-    auto&      lyt  = this->lyt;
-    const auto a    = this->a;
-    const auto b    = this->b;
-    const auto gate = lyt.create_lt(a, b, {1, 1});
+    /** @brief Independent layout and inputs for this geometry and section. */
+    gate_layout_fixture<TestType> fixture{};
+    auto&                         lyt  = fixture.lyt;
+    const auto                    a    = fixture.a;
+    const auto                    b    = fixture.b;
+    const auto                    gate = lyt.create_lt(a, b, {1, 1});
     SECTION("Placement preserves declared connectivity outside the frame")
     {
         lyt.move_object(a, {-2, 3, 7});
@@ -367,13 +369,15 @@ TEMPLATE_TEST_CASE("Deletion disconnects self loops and duplicate destination in
     CHECK(lyt.size() == 1);
 }
 
-TEMPLATE_LIST_TEST_CASE_METHOD(gate_layout_fixture, "Copies isolate geometry, terminals, and connectivity",
-                               "[gate-layout]", gate_geometries)
+TEMPLATE_TEST_CASE("Copies isolate geometry, terminals, and connectivity", "[gate-layout]", cartesian_layout,
+                   shifted_cartesian_layout, hexagonal_layout)
 {
-    auto&      original = this->lyt;
-    const auto a        = this->a;
-    const auto b        = this->b;
-    const auto gate     = original.create_and(a, b, {1, 1});
+    /** @brief Independent layout and inputs for this geometry and section. */
+    gate_layout_fixture<TestType> fixture{};
+    auto&                         original = fixture.lyt;
+    const auto                    a        = fixture.a;
+    const auto                    b        = fixture.b;
+    const auto                    gate     = original.create_and(a, b, {1, 1});
     original.assign_clock_number({1, 1}, 3);
     original.assign_synchronization_element({1, 1}, 2);
     original.obstruct_coordinate({2, 2});
@@ -852,14 +856,15 @@ TEMPLATE_TEST_CASE("Five-input objects keep ordered ports", "[gate-layout]", car
     CHECK(lyt.template outgoing_data_flow<true>({2, 1}).empty());
 }
 
-TEMPLATE_LIST_TEST_CASE_METHOD(gate_layout_fixture,
-                               "Large-arity objects preserve disconnected ports through copying, moving, and removal",
-                               "[gate-layout]", gate_geometries)
+TEMPLATE_TEST_CASE("Large-arity objects preserve disconnected ports through copying, moving, and removal",
+                   "[gate-layout]", cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
-    auto&                      original = this->lyt;
-    const auto                 a        = this->a;
-    const auto                 b        = this->b;
-    kitty::dynamic_truth_table parity{5};
+    /** @brief Independent layout and inputs for this geometry and section. */
+    gate_layout_fixture<TestType> fixture{};
+    auto&                         original = fixture.lyt;
+    const auto                    a        = fixture.a;
+    const auto                    b        = fixture.b;
+    kitty::dynamic_truth_table    parity{5};
     kitty::create_from_hex_string(parity, "96696996");
     const auto gate = original.create_gate({a}, parity, {2, 2});
     original.connect(b, {gate, 4});
