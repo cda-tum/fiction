@@ -23,7 +23,9 @@ def test_generate_docstrings(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
     header = tmp_path / "concept.hpp"
     header.write_text(
         "template<class T> concept HasValue = requires(T value) { value.x; };\n"
-        "/** @brief A documented constrained value. */\n"
+        "/** @brief A documented constrained value.\n"
+        " * @hideinitializer\n"
+        " */\n"
         "template<class T> requires HasValue<T> struct Constrained {};\n",
         encoding="utf-8",
     )
@@ -45,3 +47,4 @@ def test_generate_docstrings(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
     generated = output.read_text(encoding="utf-8")
     assert "mkd_doc_Constrained" in generated
     assert "A documented constrained value." in generated
+    assert "hideinitializer" not in generated

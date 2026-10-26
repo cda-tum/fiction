@@ -48,7 +48,8 @@ using namespace fiction::physical_design;
 template <typename Lyt, typename Ntk>
 static void check_layout_equiv(const Ntk& ntk)
 {
-    auto layout = orthogonal<typename Lyt::coordinate_layout>(fiction::synthesis::convert_network<tec_nt>(ntk), {});
+    auto layout = orthogonal<typename Lyt::coordinate_layout>(
+        fiction::synthesis::convert_network<named_technology_network>(ntk), {});
 
     wiring_reduction_stats stats{};
     wiring_reduction(layout, {}, &stats);
@@ -171,9 +172,8 @@ TEST_CASE("Layout equivalence", "[wiring-reduction]")
     {
         auto layout = orthogonal<cartesian_layout>(blueprints::mux21_network<technology_network>(), {});
 
-        wiring_reduction_stats  stats{};
-        wiring_reduction_params params{};
-        params.timeout = 1000000;
+        wiring_reduction_stats        stats{};
+        const wiring_reduction_params params{.timeout = 1000000};
         wiring_reduction(layout, params, &stats);
 
         check_eq(blueprints::mux21_network<technology_network>(), layout);
@@ -183,9 +183,8 @@ TEST_CASE("Layout equivalence", "[wiring-reduction]")
     {
         auto layout = orthogonal<cartesian_layout>(blueprints::mux21_network<technology_network>(), {});
 
-        wiring_reduction_stats  stats{};
-        wiring_reduction_params params{};
-        params.timeout = 0;
+        wiring_reduction_stats        stats{};
+        const wiring_reduction_params params{.timeout = 0};
         wiring_reduction(layout, params, &stats);
 
         check_eq(blueprints::mux21_network<technology_network>(), layout);
@@ -242,9 +241,8 @@ TEST_CASE("Wiring reduction reports progress", "[wiring-reduction]")
     const auto ntk    = blueprints::mux21_network<technology_network>();
     auto       layout = orthogonal<cartesian_layout>(ntk);
 
-    progress_recorder       rec{};
-    wiring_reduction_params params{};
-    params.on_progress = rec.callback();
+    progress_recorder             rec{};
+    const wiring_reduction_params params{.on_progress = rec.callback()};
 
     wiring_reduction(layout, params);
 

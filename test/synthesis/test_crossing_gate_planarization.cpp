@@ -144,8 +144,7 @@ TEST_CASE("A single crossing becomes one crossing gate", "[crossing-gate-planari
 
     SECTION("AND, OR, and NOT gates")
     {
-        crossing_gate_planarization_params ps{};
-        ps.xor_gates = false;
+        const crossing_gate_planarization_params ps{.xor_gates = false};
 
         crossing_gate_planarization_stats st{};
         const auto                        planar = crossing_gate_planarization(ranked, ps, &st);
@@ -159,8 +158,7 @@ TEST_CASE("A single crossing becomes one crossing gate", "[crossing-gate-planari
     }
     SECTION("XOR gates")
     {
-        crossing_gate_planarization_params ps{};
-        ps.xor_gates = true;
+        const crossing_gate_planarization_params ps{.xor_gates = true};
 
         crossing_gate_planarization_stats st{};
         const auto                        planar = crossing_gate_planarization(ranked, ps, &st);
@@ -203,8 +201,7 @@ TEST_CASE("Blueprint networks with several crossings", "[crossing-gate-planariza
 
         for (const bool xor_gates : {false, true})
         {
-            crossing_gate_planarization_params ps{};
-            ps.xor_gates = xor_gates;
+            const crossing_gate_planarization_params ps{.xor_gates = xor_gates};
 
             crossing_gate_planarization_stats st{};
             const auto                        planar = crossing_gate_planarization(ranked, ps, &st);
@@ -221,8 +218,7 @@ TEST_CASE("Ranks with too many crossings are rejected", "[crossing-gate-planariz
     const auto ranked = rank(blueprints::clpl<technology_network>());
     REQUIRE(count_crossings(ranked) > 1);
 
-    crossing_gate_planarization_params ps{};
-    ps.max_crossings_per_level = 0;
+    const crossing_gate_planarization_params ps{.max_crossings_per_level = 0};
 
     CHECK_THROWS_AS(crossing_gate_planarization(ranked, ps), std::runtime_error);
 }
@@ -235,12 +231,12 @@ TEST_CASE("Progress is reported", "[crossing-gate-planarization]")
     std::vector<std::size_t> done{};
     std::size_t              total = 0;
 
-    crossing_gate_planarization_params ps{};
-    ps.on_progress = [&done, &total](std::string_view, const std::size_t d, const std::size_t t)
-    {
-        done.push_back(d);
-        total = t;
-    };
+    const crossing_gate_planarization_params ps{
+        .on_progress = [&done, &total](std::string_view, const std::size_t d, const std::size_t t)
+        {
+            done.push_back(d);
+            total = t;
+        }};
 
     const auto planar = crossing_gate_planarization(ranked, ps);
 

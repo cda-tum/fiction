@@ -15,9 +15,8 @@
  * @author Benjamin Hien (hibenj)
  */
 
-#include "pyfiction/types.hpp"
-
 #include <fiction/synthesis/network_balancing.hpp>
+#include <fiction/types.hpp>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner): enables callback conversion
@@ -41,18 +40,19 @@ void register_network_balancing(nb::module_& m)
 {
     m.def(
         "network_balancing",
-        [](const py_tec_network&                                                        network,
+        [](const fiction::networks::named_technology_network&                           network,
            const decltype(fiction::synthesis::network_balancing_params{}.on_progress)&  on_progress,
            const decltype(fiction::synthesis::network_balancing_params{}.unify_outputs) unify_outputs,
            const decltype(fiction::synthesis::network_balancing_params{}
                               .buffer_constant_outputs)                                 buffer_constant_outputs)
         {
-            fiction::synthesis::network_balancing_params params{};
-            params.on_progress             = on_progress;
-            params.unify_outputs           = unify_outputs;
-            params.buffer_constant_outputs = buffer_constant_outputs;
-            const nb::gil_scoped_release release{};
-            return fiction::synthesis::network_balancing<py_tec_network, py_tec_network>(network, params);
+            const fiction::synthesis::network_balancing_params params{.unify_outputs = unify_outputs,
+                                                                      .buffer_constant_outputs =
+                                                                          buffer_constant_outputs,
+                                                                      .on_progress = on_progress};
+            const nb::gil_scoped_release                       release{};
+            return fiction::synthesis::network_balancing<fiction::networks::named_technology_network,
+                                                         fiction::networks::named_technology_network>(network, params);
         },
         nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
         nb::arg("unify_outputs")           = fiction::synthesis::network_balancing_params{}.unify_outputs,
@@ -70,18 +70,18 @@ Args:
 
     m.def(
         "is_balanced",
-        [](const py_tec_network&                                                        network,
+        [](const fiction::networks::named_technology_network&                           network,
            const decltype(fiction::synthesis::network_balancing_params{}.on_progress)&  on_progress,
            const decltype(fiction::synthesis::network_balancing_params{}.unify_outputs) unify_outputs,
            const decltype(fiction::synthesis::network_balancing_params{}
                               .buffer_constant_outputs)                                 buffer_constant_outputs)
         {
-            fiction::synthesis::network_balancing_params params{};
-            params.on_progress             = on_progress;
-            params.unify_outputs           = unify_outputs;
-            params.buffer_constant_outputs = buffer_constant_outputs;
-            const nb::gil_scoped_release release{};
-            return fiction::synthesis::is_balanced<py_tec_network>(network, params);
+            const fiction::synthesis::network_balancing_params params{.unify_outputs = unify_outputs,
+                                                                      .buffer_constant_outputs =
+                                                                          buffer_constant_outputs,
+                                                                      .on_progress = on_progress};
+            const nb::gil_scoped_release                       release{};
+            return fiction::synthesis::is_balanced<fiction::networks::named_technology_network>(network, params);
         },
         nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
         nb::arg("unify_outputs")           = fiction::synthesis::network_balancing_params{}.unify_outputs,

@@ -17,12 +17,18 @@ from mnt.pyfiction.sidb import sidb_dot_tag
 from mnt.pyfiction.sidb.io import read_sqd_layout
 from mnt.pyfiction.sidb.simulation.analysis import (
     calculate_energy_and_state_type_with_kinks_accepted,
+    calculate_energy_and_state_type_with_kinks_rejected,
     calculate_energy_distribution,
     occupation_probability_gate_based,
     state_type,
 )
 from mnt.pyfiction.sidb.simulation.engines import quickexact
-from mnt.pyfiction.sidb.simulation.logic import bdl_input_iterator, detect_bdl_pairs
+from mnt.pyfiction.sidb.simulation.logic import (
+    bdl_input_iterator,
+    bdl_wire_selection,
+    detect_bdl_pairs,
+    detect_bdl_wires,
+)
 from mnt.pyfiction.synthesis import create_and_tt
 
 if TYPE_CHECKING:
@@ -32,6 +38,7 @@ if TYPE_CHECKING:
 # distributions. The two lowest-energy ones encode AND(0, 1) = 0; the three above them do not.
 # Energies in eV, taken from the C++ suite, which asserts the same five constants against the same
 # layout in `test/technology/sidb/simulation/analysis/test_calculate_energy_and_state_type.cpp`.
+# The first excited state contains a kink, so rejecting kinks accepts only the ground state.
 EXPECTED_ENERGIES_AND_STATE_TYPES = [
     (0.9915, state_type.ACCEPTED),
     (0.9966, state_type.ACCEPTED),
@@ -41,11 +48,13 @@ EXPECTED_ENERGIES_AND_STATE_TYPES = [
 ]
 
 
-def test_calculate_energy_and_state_type(resources_dir: Path) -> None:
+@pytest.mark.parametrize("reject_kinks", [False, True])
+def test_calculate_energy_and_state_type(resources_dir: Path, *, reject_kinks: bool) -> None:
     """Validate energy ordering, state types, and occupation probability.
 
     Args:
         resources_dir: Directory that contains the test layout.
+        reject_kinks: Whether to reject charge distributions with kinks.
     """
     layout = read_sqd_layout(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
 
@@ -62,13 +71,24 @@ def test_calculate_energy_and_state_type(resources_dir: Path) -> None:
 
     distribution = calculate_energy_distribution(charge_distributions)
 
-    energies_and_state_types = calculate_energy_and_state_type_with_kinks_accepted(
-        distribution,
-        charge_distributions,
-        output_bdl_pairs,
-        [create_and_tt()],
-        1,
-    )
+    if reject_kinks:
+        energies_and_state_types = calculate_energy_and_state_type_with_kinks_rejected(
+            layout_with_inputs,
+            distribution,
+            charge_distributions,
+            [create_and_tt()],
+            1,
+            detect_bdl_wires(layout, wire_selection=bdl_wire_selection.INPUT),
+            detect_bdl_wires(layout, wire_selection=bdl_wire_selection.OUTPUT),
+        )
+    else:
+        energies_and_state_types = calculate_energy_and_state_type_with_kinks_accepted(
+            distribution,
+            charge_distributions,
+            output_bdl_pairs,
+            [create_and_tt()],
+            1,
+        )
 
     assert len(energies_and_state_types) == len(EXPECTED_ENERGIES_AND_STATE_TYPES)
 
@@ -76,12 +96,15 @@ def test_calculate_energy_and_state_type(resources_dir: Path) -> None:
     energies = [energy for energy, _ in energies_and_state_types]
     assert all(lower < higher for lower, higher in pairwise(energies))
 
-    for (energy, state), (expected_energy, expected_state) in zip(
-        energies_and_state_types, EXPECTED_ENERGIES_AND_STATE_TYPES, strict=True
-    ):
+    expected = list(EXPECTED_ENERGIES_AND_STATE_TYPES)
+    if reject_kinks:
+        expected[1] = (0.9966, state_type.REJECTED)
+
+    for (energy, state), (expected_energy, expected_state) in zip(energies_and_state_types, expected, strict=True):
         assert energy == pytest.approx(expected_energy, abs=1e-4)
         assert state == expected_state
 
     # the result is accepted by the one consumer of `state_type` in the library, which sums the
     # Boltzmann factors of the REJECTED states over those of all five
-    assert occupation_probability_gate_based(energies_and_state_types, 300) == pytest.approx(1.5974e-05, abs=1e-9)
+    if not reject_kinks:
+        assert occupation_probability_gate_based(energies_and_state_types, 300) == pytest.approx(1.5974e-05, abs=1e-9)

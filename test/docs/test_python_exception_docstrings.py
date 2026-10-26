@@ -39,7 +39,10 @@ def test_python_exception_docstrings(cpp_name: str, python_name: str, monkeypatc
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     replacements = []
-    generator = SimpleNamespace(mkdoc_lib=SimpleNamespace(INLINE_DOXYGEN_REPLACEMENTS=replacements), main=lambda: 0)
+    generator = SimpleNamespace(
+        mkdoc_lib=SimpleNamespace(INLINE_DOXYGEN_REPLACEMENTS=replacements, IGNORED_DOXYGEN_COMMANDS=set()),
+        main=lambda: 0,
+    )
     imports = {
         "clang.cindex": SimpleNamespace(CursorKind=SimpleNamespace(from_id=lambda _kind: None)),
         "pybind11_mkdoc": generator,

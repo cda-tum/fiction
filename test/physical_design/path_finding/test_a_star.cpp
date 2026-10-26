@@ -265,6 +265,32 @@ TEST_CASE("A* on 4x4 layouts with varying cost functions", "[A*]")
     }
 }
 
+TEST_CASE("A* minimizes nonuniform path costs", "[A*]")
+{
+    /** @brief Two routes reach the target with costs six and five. */
+    const cartesian_gate_layout layout{cartesian_gate_layout::extent{3, 2, 1}, clocking::twoddwave()};
+    /** @brief Zero is an admissible heuristic for every nonnegative edge cost. */
+    const distance_functor<uint64_t> estimate{[](const auto&, const auto&) { return uint64_t{0}; }};
+    /** @brief An expensive target is queued before a cheaper route improves another open coordinate. */
+    const cost_functor<uint64_t> cost{
+        [](const layout_base::coordinate& source, const layout_base::coordinate& target) -> uint64_t
+        {
+            if (source == layout_base::coordinate{0, 0})
+            {
+                return target == layout_base::coordinate{1, 0} ? 1 : 3;
+            }
+            if (source == layout_base::coordinate{1, 0})
+            {
+                return target == layout_base::coordinate{2, 0} ? 1 : 10;
+            }
+            return source == layout_base::coordinate{2, 0} ? 4 : 1;
+        }};
+    /** @brief The minimum-cost route has three edges. */
+    const auto path = a_star(layout, {.source = {0, 0}, .target = {2, 1}}, estimate, cost);
+    REQUIRE(path.size() == 4);
+    CHECK(cost(path[0], path[1]) + cost(path[1], path[2]) + cost(path[2], path[3]) == 5);
+}
+
 TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
 {
     using lyt = cartesian_layout;
@@ -556,7 +582,7 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
     using cost = unit_cost_functor<uint8_t>;
 
     // enable crossings
-    const a_star_params params{true};
+    const a_star_params params{.crossings = true};
 
     SECTION("Single crossing")
     {
