@@ -50,6 +50,7 @@ class tt_reader
      * Standard constructor. Reads the given stream into a vector of tokens.
      *
      * @param stream Stream to parse.
+     * @throws std::ios_base::failure If reading fails before normal end of input.
      */
     explicit tt_reader(std::istream& stream)
     {
@@ -59,7 +60,7 @@ class tt_reader
      * Standard constructor. Reads the given file into a vector of tokens.
      *
      * @param filename File to parse.
-     * @throws std::ifstream::failure If the file cannot be opened.
+     * @throws std::ios_base::failure If the file cannot be opened or read.
      */
     explicit tt_reader(const std::string& filename)
     {
@@ -117,11 +118,16 @@ class tt_reader
      * Reads hexadecimal truth table representations as well as Boolean expressions from the given stream.
      *
      * @param in_stream Stream of truth table representations.
+     * @throws std::ios_base::failure If reading fails before normal end of input.
      */
     void read(std::istream& in_stream)
     {
         elements = std::vector<std::string>{std::istream_iterator<std::string>{in_stream},
                                             std::istream_iterator<std::string>{}};
+        if (in_stream.bad() || (in_stream.fail() && !in_stream.eof()))
+        {
+            throw std::ios_base::failure("could not read truth-table input");
+        }
     }
     /**
      * Contains the hexadecimal truth tables and their Boolean expressions in string representation. The two are

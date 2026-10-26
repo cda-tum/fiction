@@ -24,13 +24,27 @@
 #include <kitty/operations.hpp>
 
 #include <fstream>
+#include <ios>
+#include <istream>
 #include <sstream>
 #include <stdexcept>
+#include <streambuf>
 #include <string>
 
 using namespace fiction;
 using namespace fiction::synthesis;
 using namespace fiction::synthesis::io;
+
+/** @brief Stream buffer that reports an I/O failure when read. */
+class failing_truth_table_streambuf : public std::streambuf
+{
+  protected:
+    /** @brief Reports an I/O failure instead of supplying input. */
+    int_type underflow() override
+    {
+        throw std::ios_base::failure("test read failure");
+    }
+};
 
 TEST_CASE("Read truth tables", "[tt-reader]")
 {
@@ -92,6 +106,30 @@ TEST_CASE("Read truth table from a file", "[tt-reader]")
     CHECK_FALSE(reader.next().has_value());
 }
 
+TEST_CASE("Empty truth-table file", "[tt-reader]")
+{
+    tt_reader<> reader{std::string{TEST_PATH} + "resources/truth_tables/empty.tt"};
+
+    CHECK_FALSE(reader.next().has_value());
+    CHECK_FALSE(reader.next().has_value());
+}
+
+TEST_CASE("Unreadable truth-table stream", "[tt-reader]")
+{
+    std::stringstream stream{"0x8 (a*b)"};
+    stream.setstate(GENERATE(std::ios::badbit, std::ios::failbit));
+
+    CHECK_THROWS_AS(tt_reader<>{stream}, std::ios_base::failure);
+}
+
+TEST_CASE("Truth-table stream read failure", "[tt-reader]")
+{
+    failing_truth_table_streambuf buffer{};
+    std::istream                  stream{&buffer};
+
+    CHECK_THROWS_AS(tt_reader<>{stream}, std::ios_base::failure);
+}
+
 TEST_CASE("Invalid truth-table records", "[tt-reader]")
 {
     std::stringstream stream{GENERATE("0x8", "0x expr", "x expr", "xx8 expr", "0xg expr", "0xG expr", "0x/ expr",
@@ -128,5 +166,6 @@ TEST_CASE("Incomplete record after a truth table", "[tt-reader]")
     tt_reader<>       reader{stream};
 
     REQUIRE(reader.next().has_value());
+    CHECK_THROWS_AS(reader.next(), std::invalid_argument);
     CHECK_THROWS_AS(reader.next(), std::invalid_argument);
 }
