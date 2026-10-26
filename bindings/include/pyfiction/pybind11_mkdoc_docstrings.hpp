@@ -26802,6 +26802,9 @@ expressions from the given stream.
 Args:
     in_stream: Stream of truth table representations.
 
+Raises:
+    RuntimeError: If reading fails before normal end of input.
+
 )doc";
 
 static const char *mkd_doc_fiction_synthesis_io_tt_reader_tt_reader =
@@ -26809,6 +26812,9 @@ R"doc(Standard constructor. Reads the given stream into a vector of tokens.
 
 Args:
     stream: Stream to parse.
+
+Raises:
+    RuntimeError: If reading fails before normal end of input.
 
 )doc";
 
@@ -26819,7 +26825,7 @@ Args:
     filename: File to parse.
 
 Raises:
-    RuntimeError: If the file cannot be opened.
+    RuntimeError: If the file cannot be opened or read.
 
 )doc";
 
