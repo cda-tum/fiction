@@ -17,10 +17,11 @@
 
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/operational_parameters.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/generators/design_gates.hpp>
 #include <fiction/technology/sidb/layout.hpp>
+
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <sstream>
 #include <vector>
@@ -92,7 +93,8 @@ void register_design_gates(nb::module_& m)
     m.def(
         "design_sidb_gates",
         // NOLINTNEXTLINE(performance-unnecessary-value-param): Copy Python inputs before releasing the GIL.
-        [](const layout skeleton, const std::vector<py_tt> spec, const decltype(operational_options{}.timeout) timeout,
+        [](const layout skeleton, const std::vector<kitty::dynamic_truth_table> spec,
+           const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
            const decltype(operational_options{}.sim_params.epsilon_r) epsilon_r,
@@ -117,18 +119,17 @@ void register_design_gates(nb::module_& m)
            const decltype(design_gates_options{}.termination_cond)               termination_cond,
            const decltype(design_gates_options{}.on_progress)& on_progress, design_gates_stats* stats)
         {
-            design_gates_options params{};
-            params.operational_params =
-                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
-
-            params.design_mode                    = design_mode;
-            params.canvas                         = canvas;
-            params.number_of_canvas_sidbs         = number_of_canvas_sidbs;
-            params.maximal_random_design_attempts = maximal_random_design_attempts;
-            params.termination_cond               = termination_cond;
-            params.on_progress                    = on_progress;
+            const design_gates_options params{
+                .operational_params =
+                    make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                                threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                                input_bdl_config, op_condition, strategy_to_analyze_operational_status),
+                .design_mode                    = design_mode,
+                .canvas                         = canvas,
+                .number_of_canvas_sidbs         = number_of_canvas_sidbs,
+                .maximal_random_design_attempts = maximal_random_design_attempts,
+                .termination_cond               = termination_cond,
+                .on_progress                    = on_progress};
 
             // Copy Python-owned inputs before releasing the GIL; publish statistics after reacquiring it.
             design_gates_stats  local_stats{};

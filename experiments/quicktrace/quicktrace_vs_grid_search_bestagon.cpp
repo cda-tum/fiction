@@ -24,10 +24,9 @@
 #include "fiction/technology/sidb/simulation/defects/defect_influence.hpp"
 #include "fiction/technology/sidb/simulation/io/write_defect_influence_domain.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
-#include "fiction/types.hpp"
-#include "fiction_experiments.hpp"
 
 #include <fmt/format.h>
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <array>
 #include <cstdint>
@@ -38,6 +37,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <experiments.hpp>
 
 using namespace fiction;
 using namespace fiction::sidb::io;
@@ -63,17 +64,17 @@ try
     static const std::string bestagon_folder = fmt::format("{}sidb_gate_libraries/bestagon_gates/", EXPERIMENTS_PATH);
     static const std::string plot_folder     = fmt::format("{}quicktrace/plots/", EXPERIMENTS_PATH);
 
-    static const std::array<std::pair<std::string, std::vector<tt>>, 10> gates = {
-        std::make_pair("and", std::vector<tt>{create_and_tt()}),
-        std::make_pair("nand", std::vector<tt>{create_nand_tt()}),
-        std::make_pair("or", std::vector<tt>{create_or_tt()}),
-        std::make_pair("nor", std::vector<tt>{create_nor_tt()}),
-        std::make_pair("xor", std::vector<tt>{create_xor_tt()}),
-        std::make_pair("xnor", std::vector<tt>{create_xnor_tt()}),
-        std::make_pair("wire", std::vector<tt>{create_id_tt()}),
-        std::make_pair("wire_diag", std::vector<tt>{create_id_tt()}),
-        std::make_pair("inv", std::vector<tt>{create_not_tt()}),
-        std::make_pair("inv_diag", std::vector<tt>{create_not_tt()})};
+    static const std::array<std::pair<std::string, std::vector<kitty::dynamic_truth_table>>, 10> gates = {
+        std::make_pair("and", std::vector<kitty::dynamic_truth_table>{create_and_tt()}),
+        std::make_pair("nand", std::vector<kitty::dynamic_truth_table>{create_nand_tt()}),
+        std::make_pair("or", std::vector<kitty::dynamic_truth_table>{create_or_tt()}),
+        std::make_pair("nor", std::vector<kitty::dynamic_truth_table>{create_nor_tt()}),
+        std::make_pair("xor", std::vector<kitty::dynamic_truth_table>{create_xor_tt()}),
+        std::make_pair("xnor", std::vector<kitty::dynamic_truth_table>{create_xnor_tt()}),
+        std::make_pair("wire", std::vector<kitty::dynamic_truth_table>{create_id_tt()}),
+        std::make_pair("wire_diag", std::vector<kitty::dynamic_truth_table>{create_id_tt()}),
+        std::make_pair("inv", std::vector<kitty::dynamic_truth_table>{create_not_tt()}),
+        std::make_pair("inv_diag", std::vector<kitty::dynamic_truth_table>{create_not_tt()})};
 
     const is_operational_params is_op_params{.sim_params = simulation_parameters{2, -0.32, 5.6, 5.0}};
 
@@ -81,10 +82,9 @@ try
     const auto stray_db = defect{defect_type::DB, -1, 4.1, 1.8};
     // const auto si_vacancy = sidb_defect{sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
 
-    defect_influence_params params{};
-    params.additional_scanning_area = {100, 100};
-    params.defect                   = stray_db;
-    params.operational_params       = is_op_params;
+    const defect_influence_params params{.defect                   = stray_db,
+                                         .operational_params       = is_op_params,
+                                         .additional_scanning_area = {100, 100}};
 
     std::size_t total_number_of_samples_grid       = 0;
     std::size_t total_number_of_samples_quicktrace = 0;

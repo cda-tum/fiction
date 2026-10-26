@@ -15,13 +15,13 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/networks/name_utils.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>
 #include <fiction/synthesis/network_balancing.hpp>
 #include <fiction/synthesis/node_duplication_planarization.hpp>
 #include <fiction/synthesis/planarization.hpp>
+#include <fiction/types.hpp>
 
 #include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/traits.hpp>
@@ -64,11 +64,11 @@ namespace detail
  * @return The plain network and the original input index of every input.
  */
 template <typename Planar>
-std::pair<py_tec_network, std::vector<uint32_t>> flatten(const Planar& planar)
+std::pair<fiction::networks::named_technology_network, std::vector<uint32_t>> flatten(const Planar& planar)
 {
-    py_tec_network                                                   dest{};
-    mockturtle::node_map<mockturtle::signal<py_tec_network>, Planar> old2new{planar};
-    std::vector<uint32_t>                                            original_input{};
+    fiction::networks::named_technology_network                                                   dest{};
+    mockturtle::node_map<mockturtle::signal<fiction::networks::named_technology_network>, Planar> old2new{planar};
+    std::vector<uint32_t>                                                                         original_input{};
 
     old2new[planar.get_constant(false)] = dest.get_constant(false);
     old2new[planar.get_constant(true)]  = dest.get_constant(true);
@@ -96,20 +96,20 @@ std::pair<py_tec_network, std::vector<uint32_t>> flatten(const Planar& planar)
 
     for (uint32_t level = 1; level <= planar.depth(); ++level)
     {
-        planar.foreach_node_in_rank(level,
-                                    [&](const auto& n)
-                                    {
-                                        if (planar.is_constant(n) || planar.is_pi(n))
-                                        {
-                                            return;
-                                        }
+        planar.foreach_node_in_rank(
+            level,
+            [&](const auto& n)
+            {
+                if (planar.is_constant(n) || planar.is_pi(n))
+                {
+                    return;
+                }
 
-                                        std::vector<mockturtle::signal<py_tec_network>> children{};
-                                        planar.foreach_fanin(n, [&](const auto& f)
-                                                             { children.push_back(old2new[planar.get_node(f)]); });
+                std::vector<mockturtle::signal<fiction::networks::named_technology_network>> children{};
+                planar.foreach_fanin(n, [&](const auto& f) { children.push_back(old2new[planar.get_node(f)]); });
 
-                                        old2new[n] = dest.create_node(children, planar.node_function(n));
-                                    });
+                old2new[n] = dest.create_node(children, planar.node_function(n));
+            });
     }
 
     planar.foreach_po([&](const auto& po) { dest.create_po(old2new[planar.get_node(po)]); });
@@ -178,9 +178,10 @@ void register_planarization(nb::module_& m)
 
     m.def(
         "planarization",
-        [](const py_tec_network& network, const decltype(params{}.on_progress)& on_progress,
-           const decltype(params{}.strategy) strategy, const decltype(params{}.criterion) criterion,
-           const decltype(params{}.crossing_gates.xor_gates) xor_gates, const decltype(params{}.max_swaps) max_swaps,
+        [](const fiction::networks::named_technology_network& network,
+           const decltype(params{}.on_progress)& on_progress, const decltype(params{}.strategy) strategy,
+           const decltype(params{}.criterion) criterion, const decltype(params{}.crossing_gates.xor_gates) xor_gates,
+           const decltype(params{}.max_swaps)                              max_swaps,
            const decltype(params{}.crossing_gates.max_crossings_per_level) max_crossings_per_level,
            const decltype(params{}.duplication_cost.node_weight)           node_weight,
            const decltype(params{}.duplication_cost.buffer_weight)         buffer_weight,
@@ -190,21 +191,21 @@ void register_planarization(nb::module_& m)
            const decltype(params{}.seed)&                                           seed,
            const decltype(fiction::synthesis::planarization_params{}.fanout_degree) fanout_degree, stats* statistics)
         {
-            fiction::synthesis::planarization_params ps{};
-            ps.on_progress                                        = on_progress;
-            ps.duplication.strategy                               = strategy;
-            ps.duplication.criterion                              = criterion;
-            ps.duplication.crossing_gates.xor_gates               = xor_gates;
-            ps.duplication.max_swaps                              = max_swaps;
-            ps.duplication.crossing_gates.max_crossings_per_level = max_crossings_per_level;
-            ps.duplication.duplication_cost.node_weight           = node_weight;
-            ps.duplication.duplication_cost.buffer_weight         = buffer_weight;
-            ps.duplication.duplication_cost.depth_growth          = depth_growth;
-            ps.duplication.lookahead_budget                       = lookahead_budget;
-            ps.duplication.max_duplications                       = max_duplications;
-            ps.duplication.po_order                               = po_order;
-            ps.duplication.seed                                   = seed;
-            ps.fanout_degree                                      = fanout_degree;
+            const fiction::synthesis::planarization_params ps{
+                .on_progress   = on_progress,
+                .duplication   = {.strategy         = strategy,
+                                  .po_order         = po_order,
+                                  .seed             = seed,
+                                  .max_swaps        = max_swaps,
+                                  .crossing_gates   = {.xor_gates               = xor_gates,
+                                                       .max_crossings_per_level = max_crossings_per_level},
+                                  .criterion        = criterion,
+                                  .duplication_cost = {.node_weight   = node_weight,
+                                                       .buffer_weight = buffer_weight,
+                                                       .depth_growth  = depth_growth},
+                                  .lookahead_budget = lookahead_budget,
+                                  .max_duplications = max_duplications},
+                .fanout_degree = fanout_degree};
 
             // gates that no output reaches have no level and cannot be ranked, so they are dropped
             const auto cleaned = mockturtle::cleanup_dangling(network);

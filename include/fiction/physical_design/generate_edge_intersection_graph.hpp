@@ -126,51 +126,52 @@ class generate_edge_intersection_graph_impl
         // measure runtime
         mockturtle::stopwatch stop{pst.time_total};
 
-        std::ranges::for_each(
-            objectives,
-            [this](const auto& obj)
-            {
-                /** @brief Candidate coordinate paths for the current routing objective. */
-                path_collection paths{};
+        std::ranges::for_each(objectives,
+                              [this](const auto& obj)
+                              {
+                                  /** @brief Candidate coordinate paths for the current routing objective. */
+                                  path_collection paths{};
 
-                if (!ps.path_limit.has_value())
-                {
-                    // enumerate all paths for the current objective
-                    paths = physical_design::path_finding::enumerate_all_paths(layout, {obj.source, obj.target},
-                                                                               {ps.crossings});
-                }
-                else
-                {
-                    // enumerate k paths for the current objective
-                    paths = physical_design::path_finding::yen_k_shortest_paths(layout, {obj.source, obj.target},
-                                                                                *ps.path_limit, {ps.crossings});
-                }
+                                  if (!ps.path_limit.has_value())
+                                  {
+                                      // enumerate all paths for the current objective
+                                      paths = physical_design::path_finding::enumerate_all_paths(
+                                          layout, {obj.source, obj.target}, {.crossings = ps.crossings});
+                                  }
+                                  else
+                                  {
+                                      // enumerate k paths for the current objective
+                                      paths = physical_design::path_finding::yen_k_shortest_paths(
+                                          layout, {obj.source, obj.target}, *ps.path_limit,
+                                          {.astar_params = {.crossings = ps.crossings}});
+                                  }
 
-                /** @brief Candidate paths with storage for graph vertex labels. */
-                std::vector<clk_path> obj_paths{std::make_move_iterator(paths.begin()),
-                                                std::make_move_iterator(paths.end())};
+                                  /** @brief Candidate paths with storage for graph vertex labels. */
+                                  std::vector<clk_path> obj_paths{std::make_move_iterator(paths.begin()),
+                                                                  std::make_move_iterator(paths.end())};
 
-                // assign a unique label to each path and create a corresponding node in the graph
-                initiate_objective_nodes(obj_paths, static_cast<std::size_t>(&obj - objectives.data()));
+                                  // assign a unique label to each path and create a corresponding node in the graph
+                                  initiate_objective_nodes(obj_paths,
+                                                           static_cast<std::size_t>(&obj - objectives.data()));
 
-                // if there are no paths, the objective could not be fulfilled
-                if (obj_paths.empty())
-                {
-                    pst.number_of_unroutable_objectives++;
-                }
-                else if (obj_paths.size() > 1)
-                {
-                    // since all paths of the same objective have intersections by definition, create
-                    // edges between all of them by iterating over all possible combinations of size 2
-                    connect_clique(obj_paths);
-                }
-                // for each previously stored path, create an edge if there is an intersection
-                create_intersection_edges(obj_paths);
+                                  // if there are no paths, the objective could not be fulfilled
+                                  if (obj_paths.empty())
+                                  {
+                                      pst.number_of_unroutable_objectives++;
+                                  }
+                                  else if (obj_paths.size() > 1)
+                                  {
+                                      // since all paths of the same objective have intersections by definition, create
+                                      // edges between all of them by iterating over all possible combinations of size 2
+                                      connect_clique(obj_paths);
+                                  }
+                                  // for each previously stored path, create an edge if there is an intersection
+                                  create_intersection_edges(obj_paths);
 
-                // add the collection to all paths gathered thus far
-                all_paths.insert(all_paths.end(), std::make_move_iterator(obj_paths.begin()),
-                                 std::make_move_iterator(obj_paths.end()));
-            });
+                                  // add the collection to all paths gathered thus far
+                                  all_paths.insert(all_paths.end(), std::make_move_iterator(obj_paths.begin()),
+                                                   std::make_move_iterator(obj_paths.end()));
+                              });
 
         // store size of the generated graph
         pst.num_vertices = graph.size_vertices();

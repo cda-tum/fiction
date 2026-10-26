@@ -55,10 +55,7 @@ TEST_CASE("BDL wire", "[detect-bdl-pairs]")
     // output perturber
     lyt.assign_sidb({24, 0, 0}, dot_tag::NORMAL);
 
-    detect_bdl_pairs_params params{};
-
-    params.minimum_distance = 0.2;
-    params.maximum_distance = 2.2;
+    const detect_bdl_pairs_params params{.minimum_distance = 0.2, .maximum_distance = 2.2};
 
     const auto& lat = lyt;
 
@@ -189,9 +186,8 @@ TEST_CASE("BDL wire BDL detection", "[detect-bdl-pairs]")
     lyt.assign_sidb({18, 0, 0}, dot_tag::OUTPUT);
     lyt.assign_sidb({20, 0, 0}, dot_tag::OUTPUT);
 
-    detect_bdl_pairs_params params{};
     // set default minimum distance to 0 for testing
-    params.minimum_distance = 0;
+    detect_bdl_pairs_params params{.minimum_distance = 0};
 
     const auto& lat = lyt;
 

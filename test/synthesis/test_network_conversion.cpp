@@ -32,7 +32,6 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
-#include <mockturtle/views/names_view.hpp>
 
 #include <array>
 #include <string>
@@ -47,7 +46,7 @@ using namespace fiction::synthesis;
  * @tparam Ntk Source network type.
  */
 template <typename Ntk>
-concept technology_convertible = requires(const Ntk& ntk) { convert_network<tec_nt>(ntk); };
+concept technology_convertible = requires(const Ntk& ntk) { convert_network<named_technology_network>(ntk); };
 
 static_assert(technology_convertible<mockturtle::aig_network>);
 static_assert(!technology_convertible<int>);
@@ -114,10 +113,10 @@ TEST_CASE("Simple network conversion", "[network-conversion]")
 
 TEST_CASE("Name conservation after network conversion", "[network-conversion]")
 {
-    auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
+    auto maj = blueprints::maj1_network<named_mig_network>();
     maj.set_network_name("maj");
 
-    const auto converted_maj = convert_network<mockturtle::names_view<technology_network>>(maj);
+    const auto converted_maj = convert_network<named_technology_network>(maj);
 
     // network name
     CHECK(converted_maj.get_network_name() == "maj");
@@ -239,8 +238,8 @@ TEST_CASE("Convert every two- and three-input function without losing the interf
     {
         for (auto function = 0u; function < (1u << (1u << variables)); ++function)
         {
-            mockturtle::names_view<technology_network> source{};
-            std::vector<technology_network::signal>    inputs{};
+            named_technology_network                source{};
+            std::vector<technology_network::signal> inputs{};
             inputs.reserve(variables);
             for (auto index = 0u; index < variables; ++index)
             {
@@ -267,10 +266,10 @@ TEST_CASE("Convert every two- and three-input function without losing the interf
                 CHECK(actual[1] == ~expected);
                 CHECK(kitty::is_const0(~actual[2]));
             };
-            verify(convert_network<mockturtle::names_view<technology_network>>(source));
-            verify(convert_network<mockturtle::names_view<mockturtle::aig_network>>(source));
-            verify(convert_network<mockturtle::names_view<mockturtle::xag_network>>(source));
-            verify(convert_network<mockturtle::names_view<mockturtle::mig_network>>(source));
+            verify(convert_network<named_technology_network>(source));
+            verify(convert_network<named_aig_network>(source));
+            verify(convert_network<named_xag_network>(source));
+            verify(convert_network<named_mig_network>(source));
         }
     }
 }

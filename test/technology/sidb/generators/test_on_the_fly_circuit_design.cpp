@@ -43,6 +43,7 @@
 #include <thread>
 
 using namespace fiction;
+using namespace fiction::networks;
 using namespace fiction::layouts;
 using namespace fiction::sidb;
 using namespace fiction::sidb::generators;
@@ -54,21 +55,21 @@ TEST_CASE("Circuit design accepts a hexagonal gate layout", "[on-the-fly-circuit
     const auto            second = gate_layout.create_pi("b", {1, 0});
     gate_layout.create_and(first, second, {1, 2});
 
-    on_the_fly_circuit_design_params params{};
-    params.sidb_on_the_fly_gate_library_parameters.design_gate_params.number_of_canvas_sidbs = 0;
+    const on_the_fly_circuit_design_params params{
+        .sidb_on_the_fly_gate_library_parameters = {.design_gate_params = {.number_of_canvas_sidbs = 0}}};
 
     CHECK_THROWS_AS(on_the_fly_circuit_design(gate_layout, params), unsuccessful_gate_design_error);
 }
 
 TEST_CASE("Circuit design rejects unsupported gates before gate search", "[on-the-fly-circuit-design]")
 {
-    hexagonal_gate_layout            gate_layout{arrangement::EVEN_ROW, {3, 2}, clocking::row()};
-    const auto                       first    = gate_layout.create_pi("a", {0, 0});
-    const auto                       second   = gate_layout.create_pi("b", {1, 0});
-    const auto                       third    = gate_layout.create_pi("c", {2, 0});
-    const auto                       majority = gate_layout.create_maj(first, second, third, {1, 1});
-    on_the_fly_circuit_design_params params{};
-    params.sidb_on_the_fly_gate_library_parameters.design_gate_params.number_of_canvas_sidbs = 0;
+    hexagonal_gate_layout                  gate_layout{arrangement::EVEN_ROW, {3, 2}, clocking::row()};
+    const auto                             first    = gate_layout.create_pi("a", {0, 0});
+    const auto                             second   = gate_layout.create_pi("b", {1, 0});
+    const auto                             third    = gate_layout.create_pi("c", {2, 0});
+    const auto                             majority = gate_layout.create_maj(first, second, third, {1, 1});
+    const on_the_fly_circuit_design_params params{
+        .sidb_on_the_fly_gate_library_parameters = {.design_gate_params = {.number_of_canvas_sidbs = 0}}};
 
     CHECK_THROWS_AS(on_the_fly_circuit_design(gate_layout, params),
                     fcn::unsupported_gate_type_exception<fiction::layouts::layout_base::coordinate>);
@@ -118,21 +119,20 @@ TEST_CASE("Circuit design honors both circuit and gate timeouts", "[on-the-fly-c
 #if (FICTION_Z3_SOLVER)
 TEST_CASE("Defect-aware circuit design propagates gate errors", "[on-the-fly-circuit-design]")
 {
-    tec_nt     network{};
-    const auto first  = network.create_pi();
-    const auto second = network.create_pi();
+    named_technology_network network{};
+    const auto               first  = network.create_pi();
+    const auto               second = network.create_pi();
     network.create_po(network.create_and(first, second));
 
     const hexagonal_gate_layout tiling{arrangement::EVEN_ROW, {3, 3}, clocking::row()};
     const sidb::layout          surface{};
 
-    on_the_fly_circuit_design_on_defective_surface_params params{};
-    params.exact_design_parameters.scheme        = "Row";
-    params.exact_design_parameters.upper_bound_x = 3;
-    params.exact_design_parameters.upper_bound_y = 3;
-    params.exact_design_parameters.fixed_size    = true;
-    params.exact_design_parameters.timeout       = 10'000;
-    auto& gates                                  = params.sidb_on_the_fly_gate_library_parameters.design_gate_params;
+    on_the_fly_circuit_design_on_defective_surface_params params{.exact_design_parameters = {.scheme        = "Row",
+                                                                                             .upper_bound_x = 3,
+                                                                                             .upper_bound_y = 3,
+                                                                                             .fixed_size    = true,
+                                                                                             .timeout       = 10'000}};
+    auto& gates = params.sidb_on_the_fly_gate_library_parameters.design_gate_params;
 
     SECTION("Expired circuit budget")
     {

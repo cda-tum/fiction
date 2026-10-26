@@ -16,10 +16,10 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/graph_oriented_layout_design.hpp>
+#include <fiction/types.hpp>
 
 #include <cstdint>
 #include <functional>
@@ -106,7 +106,8 @@ void register_graph_oriented_layout_design(nb::module_& m)
 
     m.def(
         "graph_oriented_layout_design",
-        [](py_tec_network& network, const decltype(graph_oriented_layout_design_options{}.timeout) timeout,
+        [](fiction::networks::named_technology_network&                                     network,
+           const decltype(graph_oriented_layout_design_options{}.timeout)                   timeout,
            const decltype(graph_oriented_layout_design_options{}.num_vertex_expansions)     num_vertex_expansions,
            const decltype(graph_oriented_layout_design_options{}.verbose)                   verbose,
            const decltype(graph_oriented_layout_design_options{}.mode)                      mode,
@@ -124,22 +125,22 @@ void register_graph_oriented_layout_design(nb::module_& m)
            fiction::physical_design::graph_oriented_layout_design_stats*                  statistics,
            const std::function<uint64_t(const fiction::layouts::cartesian_gate_layout&)>& custom_cost_objective)
         {
-            graph_oriented_layout_design_options params{};
-            params.timeout                             = timeout;
-            params.num_vertex_expansions               = num_vertex_expansions;
-            params.verbose                             = verbose;
-            params.mode                                = mode;
-            params.cost                                = cost;
-            params.return_first                        = return_first;
-            params.planar                              = planar;
-            params.enable_multithreading               = enable_multithreading;
-            params.seed                                = seed;
-            params.straight_inverters                  = straight_inverters;
-            params.tiles_to_skip_between_pis           = tiles_to_skip_between_pis;
-            params.randomize_tiles_to_skip_between_pis = randomize_tiles_to_skip_between_pis;
-            params.on_progress                         = on_progress;
-            params.on_worker_progress                  = on_worker_progress;
-            const nb::gil_scoped_release release{};
+            graph_oriented_layout_design_options params{.mode                      = mode,
+                                                        .num_vertex_expansions     = num_vertex_expansions,
+                                                        .return_first              = return_first,
+                                                        .timeout                   = timeout,
+                                                        .planar                    = planar,
+                                                        .cost                      = cost,
+                                                        .enable_multithreading     = enable_multithreading,
+                                                        .verbose                   = verbose,
+                                                        .seed                      = seed,
+                                                        .straight_inverters        = straight_inverters,
+                                                        .tiles_to_skip_between_pis = tiles_to_skip_between_pis,
+                                                        .randomize_tiles_to_skip_between_pis =
+                                                            randomize_tiles_to_skip_between_pis,
+                                                        .on_progress        = on_progress,
+                                                        .on_worker_progress = on_worker_progress};
+            const nb::gil_scoped_release         release{};
             return fiction::physical_design::graph_oriented_layout_design(network, std::move(params), statistics,
                                                                           custom_cost_objective);
         },
@@ -163,22 +164,22 @@ The keyword options control search effort, clocking, and progress reporting.
 tiles_to_skip_between_pis must lie in [0, 2**20]; values outside this range raise ValueError.
 
 Args:
-    timeout: Execution budget in milliseconds.
+    timeout: Wall-clock budget in milliseconds; time-limited results can vary. HIGH_EFFICIENCY defaults to 10 seconds and stops on this limit only after finding a solution.
     num_vertex_expansions: Candidate positions explored per gate; larger values increase search effort.
     verbose: Print search details.
     mode: Search effort mode.
     cost: Layout cost objective.
     return_first: Return the first valid layout instead of continuing cost optimization.
     planar: Require crossing-free wiring during layout generation.
-    enable_multithreading: Explore search-space graphs in parallel.
-    seed: Random seed; None selects a fresh random seed.
+    enable_multithreading: Explore search-space graphs in parallel; worker scheduling can affect results.
+    seed: Random seed; None selects a fresh random seed. Within one build, a fixed seed repeats sequential searches that return their first solution or exhaust the frontier before timeout, with deterministic custom costs.
     straight_inverters: Require straight wires through inverters.
     tiles_to_skip_between_pis: Empty tiles reserved between primary inputs; must lie in [0, 2**20].
     randomize_tiles_to_skip_between_pis: Choose each PI spacing from max(0, tiles_to_skip_between_pis - 1) through tiles_to_skip_between_pis, using seed.
     on_progress: Callback receiving (task, completed, total); None disables progress reporting.
     on_worker_progress: Callback receiving (worker, count, description, completed, total, active); None disables worker reports.
     statistics: Statistics object filled by the algorithm; None discards statistics.
-    custom_cost_objective: Layout cost callback used when cost is CUSTOM.
+    custom_cost_objective: Layout cost callback used when cost is CUSTOM; must be thread-safe in parallel mode.
 )doc");
 }
 
