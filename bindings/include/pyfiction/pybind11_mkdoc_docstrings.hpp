@@ -12018,10 +12018,11 @@ flow imposed by `layout`'s clocking scheme.
 A* is an extension of Dijkstra's algorithm for shortest paths but
 offers better average complexity. It uses a heuristic distance
 function that estimates the remaining costs towards the target in
-every step. Thus, this heuristic function should neither be complex to
-calculate nor overestimating the remaining costs. Common heuristics to
-be used are the Manhattan and the Euclidean distance functions. See
-`distance_functor` for implementations.
+every step. The heuristic must be consistent with the step costs:
+`h(u) <= cost(u, v) + h(v)` for every traversable step, with
+`h(target) = 0`. Step costs must be nonnegative. Manhattan and
+Euclidean distance satisfy this condition for unit-cost Cartesian
+steps. See `distance_functor` for implementations.
 
 Paths do not pass obstructed coordinates or connections, except that
 the target is never obstructed. A coordinate or connection is
@@ -12222,18 +12223,6 @@ static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_im
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_coordinate_f_f = R"doc(f-value of the coordinate.)doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_coordinate_f_operator_eq =
-R"doc(Equality operator that only compares the stored coordinates. This
-allows for a convenient lookup in the priority queue.
-
-Args:
-    other: Other coordinate_f to compare with.
-
-Returns:
-    `true` iff this coord value is equal to the other's.
-
-)doc";
-
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_coordinate_f_operator_gt =
 R"doc(Comparator for the priority queue. Compares only the f-values.
 
@@ -12300,26 +12289,11 @@ static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_im
 R"doc(The layout in which the shortest path between `source` and `target` is
 to be found.)doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_no_improvement =
-R"doc(Checks if the given g-value is greater or equal than the stored
-g-value of the given coordinate. If that is the case, the new g-value
-does not improve the path.
-
-Args:
-    c: Coordinate to whose g-value is to be checked.
-    g_val: g-value to compare to c's.
-
-Returns:
-    `true` iff the given g-value does not mean an improvement for the
-    given coordinate.
-
-)doc";
-
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_objective = R"doc(The source-target coordinate pair.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_open_list =
-R"doc(Open list that contains all coordinates to process next sorted by
-their f-value.)doc";
+R"doc(Queued improvements sorted by f-value. Superseded entries are skipped
+after their coordinate is processed.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_params = R"doc(Routing parameters.)doc";
 
