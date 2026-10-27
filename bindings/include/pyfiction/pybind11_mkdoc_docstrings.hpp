@@ -26766,10 +26766,11 @@ R"doc(Maximum number of outputs any gate is allowed to have before
 substitution applies. Must be at least one.)doc";
 
 static const char *mkd_doc_fiction_synthesis_io_tt_reader =
-R"doc(Simple reader to parse truth tables from files. The files must be
-organized as follows: Each line consists of a truth table in
-hexadecimal form plus its corresponding Boolean expression. The two
-are separated by a space.
+R"doc(Reads whitespace-separated pairs of a hexadecimal truth table and its
+corresponding Boolean expression. Truth tables use a `0x` or `0X`
+prefix and a power-of-two number of hexadecimal digits. A single digit
+represents two variables. Expressions must be single tokens; the
+reader does not parse them.
 
 This format is used by, e.g., Alan Mishchenko for his DSD functions:
 https://people.eecs.berkeley.edu/~alanmi/temp5/)doc";
@@ -26779,11 +26780,16 @@ R"doc(Contains the hexadecimal truth tables and their Boolean expressions in
 string representation. The two are alternating.)doc";
 
 static const char *mkd_doc_fiction_synthesis_io_tt_reader_next =
-R"doc(Returns the next truth table parsed from the file or std::nullopt if
-no further truth tables are available.
+R"doc(Returns the next truth table, or `std::nullopt` when all records have
+been read. A parsing error leaves the current record unchanged.
 
 Returns:
     Next truth table from the file.
+
+Raises:
+    ValueError: If a record is incomplete, has an invalid prefix,
+                digit count, or character, or requires 38 or more
+                variables.
 
 )doc";
 
@@ -26796,21 +26802,30 @@ expressions from the given stream.
 Args:
     in_stream: Stream of truth table representations.
 
+Raises:
+    RuntimeError: If reading fails before normal end of input.
+
 )doc";
 
 static const char *mkd_doc_fiction_synthesis_io_tt_reader_tt_reader =
-R"doc(Standard constructor. Reads the given stream into a vector of lines.
+R"doc(Standard constructor. Reads the given stream into a vector of tokens.
 
 Args:
     stream: Stream to parse.
 
+Raises:
+    RuntimeError: If reading fails before normal end of input.
+
 )doc";
 
 static const char *mkd_doc_fiction_synthesis_io_tt_reader_tt_reader_2 =
-R"doc(Standard constructor. Reads the given file into a vector of lines.
+R"doc(Standard constructor. Reads the given file into a vector of tokens.
 
 Args:
     filename: File to parse.
+
+Raises:
+    RuntimeError: If the file cannot be opened or read.
 
 )doc";
 
