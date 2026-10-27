@@ -476,7 +476,7 @@ class write_qca_layout_svg_impl
             (2 * fcn::io::detail::svg::VIEWBOX_DISTANCE) + (static_cast<double>(lyt.height()) * svg::CELL_DISTANCE);
 
         os << fmt::format(fcn::io::detail::svg::HEADER, FICTION_VERSION, FICTION_REPO, viewbox_x, viewbox_y,
-                          cell_descriptions.str());
+                          std::move(cell_descriptions).str());
     }
 
     /**
@@ -543,9 +543,9 @@ class write_qca_layout_svg_impl
                 assembly.advance();
                 continue;
             }
-            const auto [descr, czone] = tdscr;
+            const auto& [descr, czone] = tdscr;
 
-            const auto cell_descriptions = coord_to_cells[coord];
+            const auto& cell_descriptions = coord_to_cells[coord];
 
             const double x_pos = fcn::io::detail::svg::STARTING_OFFSET_TILE_X + (coord.x * svg::TILE_DISTANCE);
             const double y_pos = fcn::io::detail::svg::STARTING_OFFSET_TILE_Y + (coord.y * svg::TILE_DISTANCE);
@@ -590,7 +590,7 @@ class write_qca_layout_svg_impl
             (2 * fcn::io::detail::svg::VIEWBOX_DISTANCE) + (static_cast<double>(height) * svg::TILE_DISTANCE);
 
         os << fmt::format(fcn::io::detail::svg::HEADER, FICTION_VERSION, FICTION_REPO, viewbox_x, viewbox_y,
-                          tile_descriptions.str());
+                          std::move(tile_descriptions).str());
     }
 };
 

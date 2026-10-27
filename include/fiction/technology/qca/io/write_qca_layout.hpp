@@ -479,8 +479,8 @@ class write_qca_layout_impl
     {
         const auto cell_type = lyt.get_cell_type(c);
 
-        // override cell_name if cell is constant; if cell has a name
-        auto cell_name = lyt.get_cell_name(c);
+        // Constants serialize their polarization instead of their stored name.
+        std::string cell_name{};
         if (cell_type == qca::cell_type::CONST_0)
         {
             cell_name = "-1.00";
@@ -488,6 +488,10 @@ class write_qca_layout_impl
         else if (cell_type == qca::cell_type::CONST_1)
         {
             cell_name = "1.00";
+        }
+        else
+        {
+            cell_name = lyt.get_cell_name(c);
         }
 
         if (!cell_name.empty())
