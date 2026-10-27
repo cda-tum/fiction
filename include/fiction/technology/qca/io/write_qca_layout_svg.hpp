@@ -561,7 +561,7 @@ class write_qca_layout_svg_impl
         utils::progress_reporter latch_assembly{ps.on_progress, "assembling latch_tile", coord_to_latch_tile.size()};
         for (const auto& [coord, ldscr] : coord_to_latch_tile)
         {
-            const auto [descr, czone_up, latch_delay] = ldscr;
+            const auto& [descr, czone_up, latch_delay] = ldscr;
             const auto czone_lo = static_cast<std::size_t>((czone_up + latch_delay) % lyt.num_clocks());
 
             // Tile templates have different origins; all cells use the ordinary tile's coordinate system.
