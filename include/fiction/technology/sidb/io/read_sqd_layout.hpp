@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -238,6 +239,14 @@ class sqd_reader
         if (xml_document.RootElement() != siqad_root || siqad_root->NextSiblingElement() != nullptr)
         {
             throw sqd_parsing_error("Error parsing SQD file: multiple root elements");
+        }
+
+        for (const auto* node = xml_document.FirstChild(); node != nullptr; node = node->NextSibling())
+        {
+            if (node->ToText() != nullptr)
+            {
+                throw sqd_parsing_error("Error parsing SQD file: text outside root element");
+            }
         }
 
         const auto* const layers_element = siqad_root->FirstChildElement("layers");
@@ -506,7 +515,7 @@ class sqd_reader
  * and surface defects are placed at the `(n, m, l)` lattice coordinates the file names.
  * Explicit geometry must contain finite vectors and two basis sites. Without geometry, the reader accepts the two
  * predefined reconstruction names and defaults to H-Si(100)-2x1 when the name is absent.
- * The input must have a single `siqad` root and contain no NUL bytes.
+ * The input must have a single `siqad` root, no text outside the root, and no NUL bytes.
  * Open file streams in binary mode to preserve every input byte.
  *
  * @param is The input stream to read from.

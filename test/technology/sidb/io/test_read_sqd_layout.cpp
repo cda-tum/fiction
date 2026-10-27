@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_message.hpp>
@@ -1213,7 +1214,8 @@ TEST_CASE("SQD readers reject incomplete document consumption", "[sqd]")
     /** @brief Minimal valid SQD document. */
     const std::string xml{"<siqad><layers><layer_prop><lat_vec/></layer_prop></layers><design/></siqad>"};
     for (const auto& malformed : {xml + '\0' + "<invalid>", xml + "<other/>", "<other/>" + xml, xml + xml, xml + "text",
-                                  xml.substr(0, xml.size() - 1)})
+                                  xml.substr(0, xml.size() - 1), "text" + xml, xml + "text<!-- after -->",
+                                  xml + "<!-- before -->text<!-- after -->", xml + "<![CDATA[text]]>"})
     {
         /** @brief Stream whose valid SQD portion must not hide other input. */
         std::istringstream stream{malformed};
