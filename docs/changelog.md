@@ -924,7 +924,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - BLIF network readers now accept empty and whitespace-only lines without aborting.
   - QCC and QLL writers now propagate allocation failures while sorting terminal cells.
   - QCADesigner output now rejects names containing CR, LF, or null bytes before changing output.
-  - QCADesigner and cell-based QCA SVG output now traverse occupied cells in coordinate order.
+  - QCADesigner and cell-based QCA SVG output now avoid scanning empty cell positions in sparse layouts.
   - QCADesigner output now preserves quantum-dot offsets and avoids integer overflow at large coordinates.
   - Gate-layout DOT output now preserves signed coordinate IDs and quoted terminal names.
   - FGL round trips now preserve whitespace-only layout and port names.
