@@ -11,6 +11,7 @@
 /**
  * @file
  * @brief Matches declared primary interfaces by unique names and position.
+ * @author Marcel Walter (marcelwa)
  */
 
 #pragma once
@@ -164,7 +165,10 @@ template <typename Left, typename Right>
     {
         throw std::invalid_argument("Primary interface sizes differ");
     }
-    return {detail::match_interface_names(detail::interface_input_names(left), detail::interface_input_names(right)),
+    /** @brief Input permutation; temporary input names expire before output matching. */
+    auto inputs =
+        detail::match_interface_names(detail::interface_input_names(left), detail::interface_input_names(right));
+    return {std::move(inputs),
             detail::match_interface_names(detail::interface_output_names(left), detail::interface_output_names(right))};
 }
 
