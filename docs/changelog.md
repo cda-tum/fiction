@@ -21,6 +21,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `synthesis::planar_fanout_substitution` and `synthesis::planar_rebalancing` substitute fanouts and rebalance
     with shared buffers while keeping ranks and planarity
   - `utils::graph::count_crossings` counts the edge crossings of a ranked, balanced network without copying it
+  - `physical_design::plane` places and routes a planar, ranked network on the diagonals of a 2DDWave layout
+    without wire crossings (PLANE)
   - `fcn::area` computes the bounding-box area of a `sidb::layout`, including defects
   - `physical_design::cell_grid_extent` returns the extent of the cell grid that a gate library spans on a
     gate-level layout
@@ -39,6 +41,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `show` supports optional Graphviz SVG rendering, explicit viewers, and temporary-file cleanup.
   - Long-running CLI commands show responsive progress. Counted phases use real bars; searches show
     candidate extents on one aggregate row. Quiet mode and redirected output suppress displays.
+  - `plane` balances and planarizes the active network and places and routes it without wire crossings.
 
 - Code quality:
 
@@ -81,6 +84,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `planarization` runs the trindade16, fontes18, ISCAS85, EPFL, and IWLS93 benchmarks whose balanced network has at
     most 8000 nodes through node duplication and through the planarization pipeline, and checks every result by SAT
     or, above 50000 nodes, by random simulation
+  - `plane` planarizes the same benchmarks, places and routes them with PLANE, and checks every layout for crossings
+    and for equivalence by SAT or, above 200000 nodes, by random simulation; layouts above 1000000 gates are only
+    checked for crossings and reported as unchecked
 
 - I/O:
   - `read_sqd_layout`, `write_sqd_layout`, `write_sidb_layout_svg`, `read_surface_defects`, and
@@ -91,6 +97,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - `mnt.pyfiction.synthesis.planarization` planarizes a balanced technology network and reports its virtual inputs
   - `mnt.pyfiction.synthesis.network_balancing` and `is_balanced` accept the `buffer_constant_outputs` keyword
+  - `mnt.pyfiction.physical_design.plane` places and routes a planarized technology network without crossings
   - The callback members of parameter classes accept `None`, which clears the callback.
   - Shared SiDB deadlines raise `TimeoutError`; gate design releases the GIL.
   - Added directory-based test markers, including `pytest -m simulation`.

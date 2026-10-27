@@ -1,0 +1,371 @@
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Tests for `fiction/physical_design/plane.hpp`.
+ * @author Benjamin Hien (hibenj)
+ */
+
+#include <catch2/catch_test_macros.hpp>
+
+#include "utils/blueprints/network_blueprints.hpp"
+#include "utils/equivalence_checking_utils.hpp"
+#include "utils/network_ranking_utils.hpp"
+#include "utils/progress_recorder.hpp"
+
+#include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/layouts/gate_layout.hpp>
+#include <fiction/networks/extract_layout_network.hpp>
+#include <fiction/networks/network_utils.hpp>
+#include <fiction/networks/technology_network.hpp>
+#include <fiction/networks/views/mutable_rank_view.hpp>
+#include <fiction/networks/virtual_pi_network.hpp>
+#include <fiction/physical_design/apply_gate_library.hpp>
+#include <fiction/physical_design/plane.hpp>
+#include <fiction/synthesis/node_duplication_planarization.hpp>
+#include <fiction/synthesis/planarization.hpp>
+#include <fiction/technology/qca/qca_one_library.hpp>
+
+#include <mockturtle/networks/aig.hpp>
+#include <mockturtle/networks/mig.hpp>
+
+#include <cstdint>
+#include <stdexcept>
+
+using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::networks;
+using namespace fiction::networks::views;
+using namespace fiction::physical_design;
+using namespace fiction::synthesis;
+
+namespace
+{
+
+void check_stats(const plane_stats& st)
+{
+    CHECK(st.x_size > 0);
+    CHECK(st.y_size > 0);
+    CHECK(st.num_gates > 0);
+    CHECK(st.num_wires > 0);
+    CHECK(st.num_crossings == 0);
+}
+
+/**
+ * Planarizes the network, places and routes it, and checks that the layout is crossing-free and computes the planar
+ * network's functions.
+ */
+template <typename Ntk>
+void check_plane(const Ntk& ntk, const bool xor_gates, const clocking::num_clks phases = clocking::num_clks::FOUR)
+{
+    planarization_params p_ps{};
+    p_ps.duplication.crossing_gates.xor_gates = xor_gates;
+
+    const auto planar = planarization(rank(ntk), p_ps);
+
+    plane_params ps{};
+    ps.number_of_clock_phases = phases;
+    plane_stats st{};
+
+    const auto layout = plane<cartesian_gate_layout>(planar, ps, &st);
+
+    check_stats(st);
+    CHECK(layout.num_crossings() == 0);
+    CHECK(layout.num_pis() == planar.num_pis());
+    CHECK(layout.num_pos() == planar.num_pos());
+    check_eq(planar, extract_layout_network(layout));
+}
+
+template <typename Ntk>
+void check_plane_both_crossing_gates(const Ntk& ntk)
+{
+    check_plane(ntk, false);
+    check_plane(ntk, true);
+}
+
+}  // namespace
+
+TEST_CASE("Layout equivalence", "[plane]")
+{
+    check_plane_both_crossing_gates(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
+    check_plane_both_crossing_gates(blueprints::maj1_network<mockturtle::aig_network>());
+    check_plane_both_crossing_gates(blueprints::maj4_network<mockturtle::aig_network>());
+    check_plane_both_crossing_gates(blueprints::half_adder_network<mockturtle::mig_network>());
+    check_plane_both_crossing_gates(blueprints::full_adder_network<mockturtle::mig_network>());
+    check_plane_both_crossing_gates(blueprints::mux21_network<technology_network>());
+    check_plane_both_crossing_gates(blueprints::parity_network<technology_network>());
+    check_plane_both_crossing_gates(blueprints::clpl<technology_network>());
+    check_plane_both_crossing_gates(blueprints::multi_output_network<technology_network>());
+    check_plane_both_crossing_gates(blueprints::fanout_substitution_corner_case_network<technology_network>());
+    check_plane_both_crossing_gates(blueprints::nary_operation_network<technology_network>());
+}
+
+TEST_CASE("Three clock phases", "[plane]")
+{
+    check_plane(blueprints::full_adder_network<mockturtle::mig_network>(), true, clocking::num_clks::THREE);
+    check_plane(blueprints::parity_network<technology_network>(), false, clocking::num_clks::THREE);
+}
+
+TEST_CASE("Gate library applies to the layout", "[plane]")
+{
+    const auto planar = planarization(rank(blueprints::full_adder_network<mockturtle::mig_network>()));
+    const auto layout = plane<cartesian_gate_layout>(planar);
+
+    CHECK_NOTHROW(apply_gate_library<qca::qca_one_library>(layout));
+}
+
+TEST_CASE("Constant fanins", "[plane]")
+{
+    SECTION("a gate with two inputs and a constant third one is placed")
+    {
+        // the MIG adders map to majority gates with a constant fanin
+        check_plane_both_crossing_gates(blueprints::half_adder_network<mockturtle::mig_network>());
+    }
+    SECTION("a gate with a single input next to a constant is rejected")
+    {
+        technology_network tec{};
+
+        const auto x1 = tec.create_pi();
+        const auto x2 = tec.create_pi();
+        const auto a1 = tec.create_and(x1, tec.get_constant(true));
+        tec.create_po(tec.create_or(a1, x2));
+        tec.create_po(tec.create_and(x1, x2));
+
+        const auto planar = planarization(rank(tec));
+
+        CHECK_THROWS_AS(plane<cartesian_gate_layout>(planar), std::invalid_argument);
+    }
+}
+
+TEST_CASE("Inputs that drive outputs directly", "[plane]")
+{
+    technology_network tec{};
+
+    const auto x1 = tec.create_pi();
+    const auto x2 = tec.create_pi();
+    const auto x3 = tec.create_pi();
+    tec.create_po(x1);
+    tec.create_po(tec.create_and(x2, x3));
+    tec.create_po(x3);
+
+    check_plane_both_crossing_gates(tec);
+}
+
+TEST_CASE("Nodes with two outputs push the following output rows down", "[plane]")
+{
+    // the first node of the output level drives two outputs; the next node sits right below it on the diagonal, so
+    // its output row has to move down, and so has the row of the node after that
+    technology_network tec{};
+
+    const auto x1 = tec.create_pi();
+    const auto x2 = tec.create_pi();
+    const auto x3 = tec.create_pi();
+    const auto x4 = tec.create_pi();
+    const auto a1 = tec.create_and(x1, x2);
+    const auto o1 = tec.create_or(x2, x3);
+    const auto a2 = tec.create_and(x3, x4);
+    tec.create_po(a1);
+    tec.create_po(a1);
+    tec.create_po(o1);
+    tec.create_po(a2);
+    tec.create_po(a2);
+
+    check_plane_both_crossing_gates(tec);
+
+    const auto planar = planarization(rank(tec));
+    const auto layout = plane<cartesian_gate_layout>(planar);
+
+    CHECK(layout.num_pos() == 5);
+    CHECK(layout.num_crossings() == 0);
+}
+
+TEST_CASE("Constant outputs keep their position", "[plane]")
+{
+    technology_network tec{};
+
+    const auto x1 = tec.create_pi();
+    const auto x2 = tec.create_pi();
+    tec.create_po(tec.create_and(x1, x2));
+    tec.create_po(tec.get_constant(true));
+    tec.create_po(tec.create_or(x1, x2));
+    tec.create_po(tec.get_constant(false));
+
+    check_plane_both_crossing_gates(tec);
+
+    const auto planar = planarization(rank(tec));
+    const auto layout = plane<cartesian_gate_layout>(planar);
+
+    CHECK(layout.num_pos() == 4);
+    CHECK(layout.is_po_tile(layout.get_tile(layout.po_at(1))));
+}
+
+TEST_CASE("Unused inputs stay at the border", "[plane]")
+{
+    technology_network tec{};
+
+    const auto                  x1 = tec.create_pi();
+    [[maybe_unused]] const auto x2 = tec.create_pi();
+    const auto                  x3 = tec.create_pi();
+    [[maybe_unused]] const auto x4 = tec.create_pi();
+    tec.create_po(tec.create_and(x1, x3));
+
+    check_plane_both_crossing_gates(tec);
+
+    const auto planar = planarization(rank(tec));
+    const auto layout = plane<cartesian_gate_layout>(planar);
+
+    CHECK(layout.num_pis() == 4);
+
+    // the two unused inputs sit at the border and drive nothing, so they have no wire
+    uint32_t unused = 0;
+    layout.foreach_pi([&layout, &unused](const auto& pi) { unused += layout.fanout_size(pi) == 0; });
+    CHECK(unused == 2);
+}
+
+TEST_CASE("Progress is reported", "[plane]")
+{
+    const auto planar = planarization(rank(blueprints::full_adder_network<mockturtle::mig_network>()));
+
+    progress_recorder rec{};
+    plane_params      ps{};
+    ps.on_progress = rec.callback();
+
+    const auto layout = plane<cartesian_gate_layout>(planar, ps);
+
+    check_eq(planar, extract_layout_network(layout));
+
+    CHECK(rec.is_consistent("placing levels"));
+    CHECK(rec.final_count("placing levels") == planar.depth() + 2);
+}
+
+TEST_CASE("Asymmetric gates keep their fanin order", "[plane]")
+{
+    // a less-than gate in both fanin orders: the second fanin ends up north of the first in one of them
+    const auto check = [](const bool swap_fanins)
+    {
+        technology_network tec{};
+
+        const auto x1 = tec.create_pi();
+        const auto x2 = tec.create_pi();
+        tec.create_po(swap_fanins ? tec.create_lt(x2, x1) : tec.create_lt(x1, x2));
+
+        const auto ranked = rank(tec);
+        const auto layout = plane<cartesian_gate_layout>(ranked);
+
+        CHECK(layout.num_crossings() == 0);
+        check_eq(ranked, extract_layout_network(layout));
+    };
+
+    SECTION("first fanin north")
+    {
+        check(false);
+    }
+    SECTION("second fanin north")
+    {
+        check(true);
+    }
+}
+
+TEST_CASE("Invalid inputs are rejected", "[plane]")
+{
+    SECTION("a rank order with crossings")
+    {
+        // two gates whose fanins cross in the input order
+        technology_network tec{};
+
+        const auto x1 = tec.create_pi();
+        const auto x2 = tec.create_pi();
+        const auto x3 = tec.create_pi();
+        const auto x4 = tec.create_pi();
+        tec.create_po(tec.create_and(x1, x3));
+        tec.create_po(tec.create_and(x2, x4));
+
+        const auto ranked = rank(tec);
+
+        CHECK_THROWS_AS(plane<cartesian_gate_layout>(ranked), std::invalid_argument);
+    }
+    SECTION("a gate with three fanins")
+    {
+        const auto ranked = rank(blueprints::maj1_network<technology_network>());
+
+        CHECK_THROWS_AS(plane<cartesian_gate_layout>(ranked), high_degree_fanin_exception);
+    }
+    SECTION("a node with three fanouts")
+    {
+        // not fanout-substituted: the gate drives three outputs
+        technology_network tec{};
+
+        const auto x1 = tec.create_pi();
+        const auto x2 = tec.create_pi();
+        const auto a1 = tec.create_and(x1, x2);
+        tec.create_po(a1);
+        tec.create_po(a1);
+        tec.create_po(a1);
+
+        const mutable_rank_view ranked{tec};
+
+        CHECK_THROWS_AS(plane<cartesian_gate_layout>(ranked), std::invalid_argument);
+    }
+    SECTION("a network without primary inputs")
+    {
+        technology_network tec{};
+        tec.create_po(tec.get_constant(true));
+
+        const mutable_rank_view ranked{tec};
+
+        CHECK_THROWS_AS(plane<cartesian_gate_layout>(ranked), std::invalid_argument);
+    }
+    SECTION("an unbalanced network")
+    {
+        // the third input skips a level
+        technology_network tec{};
+
+        const auto x1 = tec.create_pi();
+        const auto x2 = tec.create_pi();
+        const auto x3 = tec.create_pi();
+        tec.create_po(tec.create_and(tec.create_and(x1, x2), x3));
+
+        const mutable_rank_view ranked{tec};
+
+        CHECK_THROWS_AS(plane<cartesian_gate_layout>(ranked), std::invalid_argument);
+    }
+}
+
+TEST_CASE("Shared wires and routing conflicts", "[plane]")
+{
+    cartesian_gate_layout lyt{{5, 5}, clocking::twoddwave(clocking::num_clks::FOUR)};
+
+    const auto a = lyt.create_pi("a", {0, 0});
+
+    // a wire east of the input, then a second consumer that reuses it
+    const auto first = physical_design::detail::wire_straight(lyt, {0, 0}, {3, 0});
+    CHECK(lyt.get_tile(first) == cartesian_gate_layout::tile{2, 0});
+    CHECK(lyt.fanout_size(a) == 1);
+
+    const auto wires_after_first = lyt.num_wires();
+
+    const auto second = physical_design::detail::wire_straight(lyt, {0, 0}, {2, 0});
+    CHECK(lyt.find_object(cartesian_gate_layout::tile{1, 0}) == second);
+    CHECK(lyt.num_wires() == wires_after_first);
+
+    // a foreign signal on the way is a conflict
+    const auto b = lyt.create_pi("b", {1, 2});
+    lyt.create_po(b, "o", {1, 3});
+
+    CHECK_THROWS_AS(physical_design::detail::wire_straight(lyt, {1, 0}, {1, 4}), std::logic_error);
+
+    // neither east nor south
+    CHECK_THROWS_AS(physical_design::detail::wire_straight(lyt, {2, 0}, {1, 1}), std::logic_error);
+    CHECK_THROWS_AS(physical_design::detail::wire_straight(lyt, {3, 3}, {3, 4}), std::logic_error);  // empty source
+
+    CHECK(physical_design::detail::rows_between({0, 0}, {0, 3}) == 2);
+    CHECK_THROWS_AS(physical_design::detail::rows_between({0, 3}, {0, 0}), std::logic_error);
+}

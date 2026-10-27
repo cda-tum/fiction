@@ -50,6 +50,22 @@ def test_ortho_converts_other_network_types(shell: Shell, resource: Callable[[st
     assert isinstance(shell.session.gate_layouts.current(), cartesian_gate_layout)
 
 
+def test_plane(mux21_shell: Shell) -> None:
+    mux21_shell.ok("plane -v")
+    layout = mux21_shell.session.gate_layouts.current()
+    assert isinstance(layout, cartesian_gate_layout)
+    assert layout.get_clocking_scheme_name() == "2DDWAVE"
+    assert layout.num_crossings() == 0
+    assert "Num gates" in mux21_shell.output
+
+
+def test_plane_options(mux21_shell: Shell) -> None:
+    mux21_shell.ok("plane -n 3 -x")
+    layout = mux21_shell.session.gate_layouts.current()
+    assert layout.num_clocks() == 3
+    assert layout.num_crossings() == 0
+
+
 def test_gold(mux21_shell: Shell) -> None:
     """Timed GOLD creates a layout that implements the active network."""
     mux21_shell.ok("gold -r -e high_efficiency -c wires --seed 1 -t 60")
