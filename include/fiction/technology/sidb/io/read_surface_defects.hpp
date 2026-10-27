@@ -13,6 +13,7 @@
  * @brief Reader for defective SiDB surfaces in a plain-text index format.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -141,16 +142,14 @@ class surface_defects_reader
      */
     layout run()
     {
-        // each match is one row
-        const std::vector<std::smatch> matrix_matches{
-            std::sregex_iterator(std::cbegin(defect_matrix), std::cend(defect_matrix), defects::RE_DEFECT_MATRIX),
-            std::sregex_iterator()};
-
         std::size_t row_length = 0;
-
-        for (std::size_t y = 0; y < matrix_matches.size(); ++y)
+        /** @brief Index of the current recognized row. */
+        std::size_t y = 0;
+        for (auto row =
+                 std::sregex_iterator(std::cbegin(defect_matrix), std::cend(defect_matrix), defects::RE_DEFECT_MATRIX);
+             row != std::sregex_iterator(); ++row, ++y)
         {
-            const auto row_str = matrix_matches[y].str();
+            const auto row_str = row->str();
 
             // each match is a defect index
             const std::vector<std::smatch> row_matches{
@@ -234,10 +233,7 @@ class surface_defects_reader
         throw std::ifstream::failure("could not open file");
     }
 
-    auto lyt = read_surface_defects(is, name);
-    is.close();
-
-    return lyt;
+    return read_surface_defects(is, name);
 }
 
 }  // namespace fiction::sidb::io

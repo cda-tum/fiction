@@ -214,7 +214,7 @@ class sqd_reader
         // tinyXML2 does not support std::istream, so we have to read the whole file into a string first
         std::stringstream buffer{};
         buffer << is.rdbuf();
-        const std::string sqd_content{buffer.str()};
+        const std::string sqd_content{std::move(buffer).str()};
 
         if (sqd_content.find('\0') != std::string::npos)
         {
@@ -547,10 +547,7 @@ class sqd_reader
         throw std::ifstream::failure("could not open file");
     }
 
-    auto lyt = read_sqd_layout(is, name);
-    is.close();
-
-    return lyt;
+    return read_sqd_layout(is, name);
 }
 
 }  // namespace fiction::sidb::io
