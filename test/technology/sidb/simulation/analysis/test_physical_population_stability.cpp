@@ -131,8 +131,8 @@ TEST_CASE("Population stability validates conversion parameters before simulatio
           "[assess-physical-population-stability]")
 {
     const layout                         lyt{};
-    physical_population_stability_params params{};
-    params.precision_for_distance_corresponding_to_potential = std::numeric_limits<double>::digits10 + 1;
+    physical_population_stability_params params{.precision_for_distance_corresponding_to_potential =
+                                                    std::numeric_limits<double>::digits10 + 1};
     CHECK_THROWS_AS(physical_population_stability(lyt, params), std::invalid_argument);
     params.precision_for_distance_corresponding_to_potential = 2;
     params.sim_params.epsilon_r                              = 0.0;

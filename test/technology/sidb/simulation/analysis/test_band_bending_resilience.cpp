@@ -43,8 +43,7 @@ using namespace fiction::utils::math;
 TEST_CASE("Band bending resilience shares its population analysis budget",
           "[band-bending-resilience][application-timeout]")
 {
-    band_bending_resilience_params params{};
-    params.assess_population_stability_params.timeout = 0;
+    const band_bending_resilience_params params{.assess_population_stability_params = {.timeout = 0}};
     CHECK_THROWS_AS(band_bending_resilience(blueprints::bestagon_and_gate(), {create_and_tt()}, params),
                     utils::timeout_error);
 }

@@ -27,6 +27,7 @@ def main() -> int:
         # Clang 18 emits concept expressions that its Python bindings do not name.
         cursor_kind.CONCEPT_SPECIALIZATION_EXPR = cursor_kind(153)
     generator = import_module("pybind11_mkdoc")
+    generator.mkdoc_lib.IGNORED_DOXYGEN_COMMANDS.add("hideinitializer")
     for cpp_name, python_name in {
         "invalid_argument": "ValueError",
         "out_of_range": "IndexError",

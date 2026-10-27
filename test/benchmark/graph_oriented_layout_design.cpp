@@ -27,55 +27,65 @@
 #include <mockturtle/networks/aig.hpp>
 
 using namespace fiction;
+using namespace fiction::networks;
 using namespace fiction::layouts;
 using namespace fiction::physical_design;
 
 TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
 {
-    auto ntk    = blueprints::mux21_network<mockturtle::aig_network>();
-    auto params = graph_oriented_layout_design_params{};
+    auto ntk = blueprints::mux21_network<mockturtle::aig_network>();
 
     BENCHMARK("graph_oriented_layout_design: high-efficiency")
     {
-        params.mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
+        const graph_oriented_layout_design_params params{
+            .mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY};
 
-        return graph_oriented_layout_design(fiction::synthesis::convert_network<tec_nt>(ntk), params);
+        return graph_oriented_layout_design(fiction::synthesis::convert_network<named_technology_network>(ntk), params);
     };
 
     BENCHMARK("graph_oriented_layout_design: high-effort")
     {
-        params.mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
+        const graph_oriented_layout_design_params params{
+            .mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT};
 
-        return graph_oriented_layout_design(fiction::synthesis::convert_network<tec_nt>(ntk), params);
+        return graph_oriented_layout_design(fiction::synthesis::convert_network<named_technology_network>(ntk), params);
     };
 
     BENCHMARK("graph_oriented_layout_design: highest-effort")
     {
-        params.mode = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
+        const graph_oriented_layout_design_params params{
+            .mode = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT};
 
-        return graph_oriented_layout_design(fiction::synthesis::convert_network<tec_nt>(ntk), params);
+        return graph_oriented_layout_design(fiction::synthesis::convert_network<named_technology_network>(ntk), params);
     };
 
     BENCHMARK("graph_oriented_layout_design: maximum-effort")
     {
-        params.mode = graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT;
-        params.seed = 12345;
+        const graph_oriented_layout_design_params params{
+            .mode = graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT,
+            .seed = 12345};
 
-        return graph_oriented_layout_design(fiction::synthesis::convert_network<tec_nt>(ntk), params);
+        return graph_oriented_layout_design(fiction::synthesis::convert_network<named_technology_network>(ntk), params);
     };
 
-    ntk                 = blueprints::parity_network<mockturtle::aig_network>();
-    params.return_first = true;
-    params.mode         = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
+    ntk = blueprints::parity_network<mockturtle::aig_network>();
     BENCHMARK("graph_oriented_layout_design: single-threading")
     {
-        return graph_oriented_layout_design(fiction::synthesis::convert_network<tec_nt>(ntk), params);
+        const graph_oriented_layout_design_params params{
+            .mode         = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT,
+            .return_first = true,
+            .seed         = 12345};
+        return graph_oriented_layout_design(fiction::synthesis::convert_network<named_technology_network>(ntk), params);
     };
 
     BENCHMARK("graph_oriented_layout_design: multi-threading")
     {
-        params.enable_multithreading = true;
-        return graph_oriented_layout_design(fiction::synthesis::convert_network<tec_nt>(ntk), params);
+        const graph_oriented_layout_design_params params{
+            .mode                  = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT,
+            .return_first          = true,
+            .enable_multithreading = true,
+            .seed                  = 12345};
+        return graph_oriented_layout_design(fiction::synthesis::convert_network<named_technology_network>(ntk), params);
     };
 }
 

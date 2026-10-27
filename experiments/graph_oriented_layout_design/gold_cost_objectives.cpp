@@ -25,17 +25,20 @@
 #include <fiction/types.hpp>
 #include <fiction/verification/equivalence_checking.hpp>
 
-#include <fmt/format.h>
+#include <fmt/base.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <experiments.hpp>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -49,10 +52,10 @@ Ntk read_ntk(const std::string& name)
 {
     fmt::print("[i] processing {}\n", name);
 
-    std::ostringstream      os{};
-    network_reader<tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
-    const auto              nets    = reader.get_networks();
-    const auto              network = *nets.front();
+    std::ostringstream                                        os{};
+    network_reader<std::shared_ptr<named_technology_network>> reader{fiction_experiments::benchmark_path(name), os};
+    const auto                                                nets    = reader.get_networks();
+    const auto                                                network = *nets.front();
 
     return network;
 }
@@ -73,11 +76,11 @@ try
                                  "equivalent"};
 
     graph_oriented_layout_design_stats  graph_oriented_layout_design_stats{};
-    graph_oriented_layout_design_params graph_oriented_layout_design_params{};
-    graph_oriented_layout_design_params.mode         = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
-    graph_oriented_layout_design_params.verbose      = true;
-    graph_oriented_layout_design_params.return_first = false;
-    graph_oriented_layout_design_params.timeout      = 60000;
+    graph_oriented_layout_design_params graph_oriented_layout_design_params{
+        .mode         = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT,
+        .return_first = false,
+        .timeout      = 60000,
+        .verbose      = true};
 
     static constexpr const uint64_t bench_select = fiction_experiments::trindade16 | fiction_experiments::fontes18;
 
@@ -93,7 +96,7 @@ try
             const auto& [cost, cost_name]            = cost_pair;
             graph_oriented_layout_design_params.cost = cost;
 
-            auto network = read_ntk<tec_nt>(benchmark);
+            auto network = read_ntk<named_technology_network>(benchmark);
 
             auto gate_layout = graph_oriented_layout_design(network, graph_oriented_layout_design_params,
                                                             &graph_oriented_layout_design_stats);

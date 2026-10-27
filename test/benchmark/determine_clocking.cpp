@@ -30,6 +30,7 @@
 #include <mockturtle/networks/aig.hpp>
 
 using namespace fiction;
+using namespace fiction::networks;
 using namespace fiction::layouts;
 using namespace fiction::physical_design;
 
@@ -44,29 +45,27 @@ void remove_clocking(cartesian_gate_layout& lyt)
 
 TEST_CASE("Benchmark SAT-based clocking determination", "[benchmark]")
 {
-    auto lyt = orthogonal<cartesian_layout>(
-        fiction::synthesis::convert_network<tec_nt>(blueprints::nary_operation_network<mockturtle::aig_network>()));
+    auto lyt = orthogonal<cartesian_layout>(fiction::synthesis::convert_network<named_technology_network>(
+        blueprints::nary_operation_network<mockturtle::aig_network>()));
     remove_clocking(lyt);
-
-    auto params = determine_clocking_params{};
 
     BENCHMARK("determine_clocking: ghack")
     {
-        params.sat_engine = bill::solvers::ghack;
+        const determine_clocking_params params{.sat_engine = bill::solvers::ghack};
 
         return determine_clocking(lyt, params);
     };
 
     BENCHMARK("determine_clocking: glucose_41")
     {
-        params.sat_engine = bill::solvers::glucose_41;
+        const determine_clocking_params params{.sat_engine = bill::solvers::glucose_41};
 
         return determine_clocking(lyt, params);
     };
 
     BENCHMARK("determine_clocking: bsat2")
     {
-        params.sat_engine = bill::solvers::bsat2;
+        const determine_clocking_params params{.sat_engine = bill::solvers::bsat2};
 
         return determine_clocking(lyt, params);
     };
@@ -74,14 +73,14 @@ TEST_CASE("Benchmark SAT-based clocking determination", "[benchmark]")
 #ifndef BILL_WINDOWS_PLATFORM
     BENCHMARK("determine_clocking: maple")
     {
-        params.sat_engine = bill::solvers::maple;
+        const determine_clocking_params params{.sat_engine = bill::solvers::maple};
 
         return determine_clocking(lyt, params);
     };
 
     BENCHMARK("determine_clocking: bmcg")
     {
-        params.sat_engine = bill::solvers::bmcg;
+        const determine_clocking_params params{.sat_engine = bill::solvers::bmcg};
 
         return determine_clocking(lyt, params);
     };

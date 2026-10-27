@@ -83,8 +83,8 @@ static void check_no_explicit_obstructions(const HexLyt& hex_layout)
 template <typename Lyt, typename Ntk>
 static void check_mapping_equiv(const Ntk& ntk)
 {
-    const auto layout =
-        orthogonal<typename Lyt::coordinate_layout>(fiction::synthesis::convert_network<tec_nt>(ntk), {});
+    const auto layout = orthogonal<typename Lyt::coordinate_layout>(
+        fiction::synthesis::convert_network<named_technology_network>(ntk), {});
 
     hexagonalization_stats  stats{};
     hexagonalization_params params{};
@@ -192,10 +192,9 @@ template <typename Lyt>
 static void check_mapping_equiv_layout_with_planar_rerouting(const Lyt& lyt)
 {
     hexagonalization_stats  stats{};
-    hexagonalization_params params{};
-
-    params.input_pin_extension    = hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR;
-    const auto hex_layout_top_pis = hexagonalization(lyt, params, &stats);
+    hexagonalization_params params{.input_pin_extension =
+                                       hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR};
+    const auto              hex_layout_top_pis = hexagonalization(lyt, params, &stats);
 
     check_eq(lyt, hex_layout_top_pis);
 
@@ -348,11 +347,10 @@ TEST_CASE("Hexagonalization reports progress", "[hexagonalization]")
     const auto ntk    = blueprints::mux21_network<technology_network>();
     const auto layout = orthogonal<cartesian_layout>(ntk);
 
-    progress_recorder       rec{};
-    hexagonalization_params params{};
-    params.input_pin_extension  = hexagonalization_params::io_pin_extension_mode::EXTEND;
-    params.output_pin_extension = hexagonalization_params::io_pin_extension_mode::EXTEND;
-    params.on_progress          = rec.callback();
+    progress_recorder             rec{};
+    const hexagonalization_params params{.input_pin_extension  = hexagonalization_params::io_pin_extension_mode::EXTEND,
+                                         .output_pin_extension = hexagonalization_params::io_pin_extension_mode::EXTEND,
+                                         .on_progress          = rec.callback()};
 
     const auto hex_layout = hexagonalization(layout, params);
 

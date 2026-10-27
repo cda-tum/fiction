@@ -47,7 +47,8 @@ namespace fiction::physical_design
 template <typename Geometry>
 [[nodiscard]] typename fiction::layouts::gate_layout<Geometry>::object_id
 place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t,
-      const tec_nt& ntk, const tec_nt::node& n)
+      const fiction::networks::named_technology_network&       ntk,
+      const fiction::networks::named_technology_network::node& n)
 {
     if (ntk.is_pi(n))
     {
@@ -69,7 +70,9 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
 template <typename Geometry>
 [[nodiscard]] typename fiction::layouts::gate_layout<Geometry>::object_id
 place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t,
-      const tec_nt& ntk, const tec_nt::node& n, const typename fiction::layouts::gate_layout<Geometry>::object_id& a)
+      const fiction::networks::named_technology_network&                 ntk,
+      const fiction::networks::named_technology_network::node&           n,
+      const typename fiction::layouts::gate_layout<Geometry>::object_id& a)
 {
     if (ntk.is_inv(n))
     {
@@ -100,7 +103,9 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
 template <typename Geometry>
 [[nodiscard]] typename fiction::layouts::gate_layout<Geometry>::object_id
 place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t,
-      const tec_nt& ntk, const tec_nt::node& n, const typename fiction::layouts::gate_layout<Geometry>::object_id& a,
+      const fiction::networks::named_technology_network&                 ntk,
+      const fiction::networks::named_technology_network::node&           n,
+      const typename fiction::layouts::gate_layout<Geometry>::object_id& a,
       const typename fiction::layouts::gate_layout<Geometry>::object_id& b, const std::optional<bool>& c = std::nullopt)
 {
     if (ntk.is_and(n))
@@ -207,7 +212,9 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
 template <typename Geometry>
 [[nodiscard]] typename fiction::layouts::gate_layout<Geometry>::object_id
 place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t,
-      const tec_nt& ntk, const tec_nt::node& n, const typename fiction::layouts::gate_layout<Geometry>::object_id& a,
+      const fiction::networks::named_technology_network&                 ntk,
+      const fiction::networks::named_technology_network::node&           n,
+      const typename fiction::layouts::gate_layout<Geometry>::object_id& a,
       const typename fiction::layouts::gate_layout<Geometry>::object_id& b,
       const typename fiction::layouts::gate_layout<Geometry>::object_id& c)
 {
@@ -239,8 +246,10 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
 template <typename Geometry>
 [[nodiscard]] typename fiction::layouts::gate_layout<Geometry>::object_id
 place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t,
-      const tec_nt& ntk, const tec_nt::node& n,
-      const mockturtle::node_map<typename fiction::layouts::gate_layout<Geometry>::object_id, tec_nt>& node2pos)
+      const fiction::networks::named_technology_network&                       ntk,
+      const fiction::networks::named_technology_network::node&                 n,
+      const mockturtle::node_map<typename fiction::layouts::gate_layout<Geometry>::object_id,
+                                 fiction::networks::named_technology_network>& node2pos)
 {
     const auto fc = networks::fanins(ntk, n);
 
@@ -293,7 +302,7 @@ struct branching_signal_container
         /**
          * Destination network node.
          */
-        const tec_nt::node ntk_node;
+        const fiction::networks::named_technology_network::node ntk_node;
         /**
          * Output port at the end of the route.
          */
@@ -302,7 +311,11 @@ struct branching_signal_container
         /**
          * Associates a network destination with a layout output port.
          */
-        branching_signal(const tec_nt::node& n, const layouts::layout_object_id& s) : ntk_node{n}, lyt_signal{s} {}
+        branching_signal(const fiction::networks::named_technology_network::node& n,
+                         const layouts::layout_object_id&                         s) :
+                ntk_node{n},
+                lyt_signal{s}
+        {}
     };
     /**
      * Accesses the branching container to find the location of a given node `n`. Returns the signal to that location if
@@ -311,7 +324,7 @@ struct branching_signal_container
      * @param n Node whose branching position is desired.
      * @return Signal to `n`'s layout location or the default signal if it wasn't found.
      */
-    [[nodiscard]] layouts::layout_object_id operator[](const tec_nt::node& n) const
+    [[nodiscard]] layouts::layout_object_id operator[](const fiction::networks::named_technology_network::node& n) const
     {
         if (const auto branch =
                 std::ranges::find_if(branches, [&n](const auto& b) { return b != nullptr && b->ntk_node == n; });
@@ -329,7 +342,8 @@ struct branching_signal_container
      * @param ntk_node Node whose branch is to be updated.
      * @param lyt_signal New signal pointing to the end of the branch.
      */
-    void update_branch(const tec_nt::node& ntk_node, const layouts::layout_object_id& lyt_signal)
+    void update_branch(const fiction::networks::named_technology_network::node& ntk_node,
+                       const layouts::layout_object_id&                         lyt_signal)
     {
         for (auto i = 0u; i < branches.size(); ++i)
         {
@@ -375,8 +389,10 @@ struct branching_signal_container
 template <typename Geometry, uint16_t fanout_size = 2>
 [[nodiscard]] typename fiction::layouts::gate_layout<Geometry>::object_id
 place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layout_base::coordinate& t,
-      const tec_nt& ntk, const tec_nt::node& n,
-      const mockturtle::node_map<branching_signal_container<fanout_size>, tec_nt>& node2pos)
+      const fiction::networks::named_technology_network&       ntk,
+      const fiction::networks::named_technology_network::node& n,
+      const mockturtle::node_map<branching_signal_container<fanout_size>, fiction::networks::named_technology_network>&
+          node2pos)
 {
     const auto fc = networks::fanins(ntk, n);
 

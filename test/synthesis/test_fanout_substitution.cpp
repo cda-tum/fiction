@@ -24,13 +24,12 @@
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/synthesis/fanout_substitution.hpp>
 #include <fiction/synthesis/network_balancing.hpp>
+#include <fiction/types.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
-#include <mockturtle/networks/mig.hpp>
 #include <mockturtle/views/depth_view.hpp>
-#include <mockturtle/views/names_view.hpp>
 
 #include <cstdint>
 #include <limits>
@@ -93,10 +92,10 @@ TEST_CASE("Complex fanout substitution", "[fanout-substitution]")
 
 TEST_CASE("Name conservation after fanout substitution", "[fanout-substitution]")
 {
-    auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
+    auto maj = blueprints::maj1_network<named_mig_network>();
     maj.set_network_name("maj");
 
-    const auto substituted_maj = fanout_substitution<mockturtle::names_view<technology_network>>(maj);
+    const auto substituted_maj = fanout_substitution<named_technology_network>(maj);
 
     // network name
     CHECK(substituted_maj.get_network_name() == "maj");
@@ -210,8 +209,8 @@ TEST_CASE("Random fanout substitution with fixed vs. varying seeds", "[fanout-su
 
     SECTION("Fixed seed yields deterministic behavior")
     {
-        fanout_substitution_params ps{.strategy = fanout_substitution_params::substitution_strategy::RANDOM};
-        ps.seed = 42;
+        const fanout_substitution_params ps{.strategy = fanout_substitution_params::substitution_strategy::RANDOM,
+                                            .seed     = 42};
 
         // expect no exceptions and consistent substitution
         substitute(aig, ps, aig.size() + 41);
@@ -219,10 +218,9 @@ TEST_CASE("Random fanout substitution with fixed vs. varying seeds", "[fanout-su
 
     SECTION("Different seeds produce different results")
     {
-        fanout_substitution_params ps{.strategy = fanout_substitution_params::substitution_strategy::RANDOM};
+        fanout_substitution_params ps{.strategy = fanout_substitution_params::substitution_strategy::RANDOM, .seed = 1};
 
         // compute baseline depth using seed = 1
-        ps.seed               = 1;
         const auto base_sub   = mockturtle::depth_view{fanout_substitution<technology_network>(aig, ps)};
         const auto base_depth = base_sub.depth();
 

@@ -30,20 +30,20 @@
 #include <mockturtle/networks/aig.hpp>
 
 using namespace fiction;
+using namespace fiction::networks;
 using namespace fiction::layouts;
 using namespace fiction::physical_design;
 
 TEST_CASE("Benchmark Post-Layout Optimization", "[benchmark]")
 {
-    const auto ntk    = blueprints::parity_network<mockturtle::aig_network>();
-    const auto layout = orthogonal<cartesian_layout>(fiction::synthesis::convert_network<tec_nt>(ntk));
+    const auto ntk = blueprints::parity_network<mockturtle::aig_network>();
+    const auto layout =
+        orthogonal<cartesian_layout>(fiction::synthesis::convert_network<named_technology_network>(ntk));
 
-    post_layout_optimization_params full_optimization_params{};
-
-    full_optimization_params.max_gate_relocations = layout.area();
-    full_optimization_params.optimize_pos_only    = false;
-    full_optimization_params.planar_optimization  = false;
-    full_optimization_params.timeout              = 100000;
+    const post_layout_optimization_params full_optimization_params{.max_gate_relocations = layout.area(),
+                                                                   .optimize_pos_only    = false,
+                                                                   .planar_optimization  = false,
+                                                                   .timeout              = 100000};
 
     BENCHMARK("post_layout_optimization: full optimization")
     {
@@ -52,12 +52,10 @@ TEST_CASE("Benchmark Post-Layout Optimization", "[benchmark]")
         post_layout_optimization(optimized_layout, full_optimization_params);
     };
 
-    post_layout_optimization_params wiring_reduction_only_params{};
-
-    wiring_reduction_only_params.max_gate_relocations = 0;
-    wiring_reduction_only_params.optimize_pos_only    = false;
-    wiring_reduction_only_params.planar_optimization  = false;
-    wiring_reduction_only_params.timeout              = 100000;
+    const post_layout_optimization_params wiring_reduction_only_params{.max_gate_relocations = 0,
+                                                                       .optimize_pos_only    = false,
+                                                                       .planar_optimization  = false,
+                                                                       .timeout              = 100000};
 
     BENCHMARK("post_layout_optimization: wiring reduction only")
     {

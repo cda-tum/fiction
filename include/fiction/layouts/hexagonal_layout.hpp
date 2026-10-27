@@ -606,7 +606,7 @@ class hexagonal_layout : public layout_base
      * Returns whether the given coordinate is located at the layout's eastern border where x is maximal.
      *
      * @param c Coordinate to check for border location.
-     * @return `true` iff `c` is located at the layout's northern border.
+     * @return `true` iff `c` is located at the layout's eastern border.
      */
     [[nodiscard]] bool is_at_eastern_border(const coordinate& c) const noexcept
     {
@@ -822,8 +822,8 @@ class hexagonal_layout : public layout_base
     }
     /**
      * Returns a container that contains all coordinates that are adjacent to a given one. Thereby, cardinal and ordinal
-     * directions are being considered, i.e., the container will contain all coordinates `ac` for which `is_adjacent(c,
-     * ac)` returns `true`.
+     * directions are being considered, i.e., the container will contain all coordinates `ac` for which
+     * `is_adjacent_of(c, ac)` returns `true`.
      *
      * Coordinates that are outside of the layout bounds are not considered. Thereby, the size of the returned container
      * is at most 6.
@@ -843,7 +843,7 @@ class hexagonal_layout : public layout_base
     /**
      * Applies a function to all coordinates adjacent to a given one in accordance with `adjacent_coordinates`. Thereby,
      * cardinal and ordinal directions are being considered, i.e., the given function is applied to all coordinates ac
-     * for which `is_adjacent(c, ac)` returns `true`.
+     * for which `is_adjacent_of(c, ac)` returns `true`.
      *
      * Coordinates that are outside of the layout bounds are not considered. Thereby, at most 6 coordinates are touched.
      *

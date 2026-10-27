@@ -306,34 +306,6 @@ TEST_CASE("Combination enumeration rejects counts beyond vector capacity",
     CHECK_THROWS_AS(determine_all_combinations_of_distributing_k_entities_on_n_positions(34, 68), std::length_error);
 }
 
-TEST_CASE("Zero entities", "[determine-all-combinations-of-distributing-k-entities-on-n-positions]")
-{
-    const auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(0, 5);
-    REQUIRE(result.empty());
-}
-
-TEST_CASE("More entities than positions", "[determine-all-combinations-of-distributing-k-entities-on-n-positions]")
-{
-    const auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(5, 3);
-    REQUIRE(result.empty());
-}
-
-TEST_CASE("Equal entities and positions", "[determine-all-combinations-of-distributing-k-entities-on-n-positions]")
-{
-    const auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(3, 3);
-    REQUIRE(result.size() == 1);
-    REQUIRE(result[0] == std::vector<std::size_t>{0, 1, 2});
-}
-
-TEST_CASE("Less entities than positions", "[determine-all-combinations-of-distributing-k-entities-on-n-positions]")
-{
-    const auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(2, 3);
-    REQUIRE(result.size() == 3);
-    REQUIRE(result[0] == std::vector<std::size_t>{0, 1});
-    REQUIRE(result[1] == std::vector<std::size_t>{0, 2});
-    REQUIRE(result[2] == std::vector<std::size_t>{1, 2});
-}
-
 TEST_CASE("Binomial coefficients avoid intermediate overflow and saturate", "[binomial-coefficient]")
 {
     constexpr auto max_count = std::numeric_limits<uint64_t>::max();

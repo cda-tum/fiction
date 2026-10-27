@@ -16,11 +16,12 @@
  */
 
 #include "pyfiction/operational_parameters.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain_ratio.hpp>
+
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <optional>
 #include <vector>
@@ -60,7 +61,7 @@ void register_operational_domain_ratio(nb::module_& m)
 
     m.def(
         "operational_domain_ratio",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const parameter_point& pp,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const parameter_point& pp,
            const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
@@ -86,11 +87,13 @@ void register_operational_domain_ratio(nb::module_& m)
            const decltype(operational_domain_ratio_options{}.op_domain_params.on_progress)&        on_progress,
            const decltype(operational_domain_ratio_options{}.op_domain_params.on_worker_progress)& on_worker_progress)
         {
-            operational_domain_ratio_options params{};
-            params.op_domain_params.operational_params =
-                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
+            operational_domain_ratio_options params{
+                .op_domain_params = {.operational_params = make_operational_parameters(
+                                         timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                         threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                         input_bdl_config, op_condition, strategy_to_analyze_operational_status),
+                                     .on_progress        = on_progress,
+                                     .on_worker_progress = on_worker_progress}};
             if (sweep_dimensions)
             {
                 params.op_domain_params.sweep_dimensions = *sweep_dimensions;
@@ -99,8 +102,6 @@ void register_operational_domain_ratio(nb::module_& m)
             {
                 params.op_domain_params.number_of_threads = *number_of_threads;
             }
-            params.op_domain_params.on_progress        = on_progress;
-            params.op_domain_params.on_worker_progress = on_worker_progress;
             const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::operational_domain_ratio(lyt, spec, pp, params);
         },

@@ -76,14 +76,13 @@ void register_write_sidb_layout_svg(nb::module_& m)
            const decltype(fiction::sidb::io::write_sidb_layout_svg_params{}.color_background)   color_background,
            const decltype(fiction::sidb::io::write_sidb_layout_svg_params{}.lattice_mode)       lattice_mode)
         {
-            fiction::sidb::io::write_sidb_layout_svg_params ps{};
-            ps.on_progress        = on_progress;
-            ps.lattice_point_size = lattice_point_size;
-            ps.sidb_size          = sidb_size;
-            ps.sidb_border_width  = sidb_border_width;
-            ps.color_background   = color_background;
-            ps.lattice_mode       = lattice_mode;
-            const nb::gil_scoped_release release{};
+            const fiction::sidb::io::write_sidb_layout_svg_params ps{.lattice_point_size = lattice_point_size,
+                                                                     .sidb_size          = sidb_size,
+                                                                     .sidb_border_width  = sidb_border_width,
+                                                                     .color_background   = color_background,
+                                                                     .lattice_mode       = lattice_mode,
+                                                                     .on_progress        = on_progress};
+            const nb::gil_scoped_release                          release{};
             fiction::sidb::io::write_sidb_layout_svg(layout, filename, ps);
         },
         nb::arg("layout"), nb::arg("filename"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
@@ -120,14 +119,13 @@ Raises:
            const decltype(write_sidb_layout_svg_options{}.color_background)   color_background,
            const decltype(write_sidb_layout_svg_options{}.lattice_mode)       lattice_mode)
         {
-            write_sidb_layout_svg_options params{};
-            params.on_progress        = on_progress;
-            params.lattice_point_size = lattice_point_size;
-            params.sidb_size          = sidb_size;
-            params.sidb_border_width  = sidb_border_width;
-            params.color_background   = color_background;
-            params.lattice_mode       = lattice_mode;
-            const nb::gil_scoped_release release{};
+            const write_sidb_layout_svg_options params{.lattice_point_size = lattice_point_size,
+                                                       .sidb_size          = sidb_size,
+                                                       .sidb_border_width  = sidb_border_width,
+                                                       .color_background   = color_background,
+                                                       .lattice_mode       = lattice_mode,
+                                                       .on_progress        = on_progress};
+            const nb::gil_scoped_release        release{};
 
             std::ostringstream oss;
             fiction::sidb::io::write_sidb_layout_svg(layout, oss, params);
@@ -169,14 +167,13 @@ Raises:
            const decltype(fiction::sidb::io::write_sidb_layout_svg_params{}.color_background)   color_background,
            const decltype(fiction::sidb::io::write_sidb_layout_svg_params{}.lattice_mode)       lattice_mode)
         {
-            fiction::sidb::io::write_sidb_layout_svg_params ps{};
-            ps.on_progress        = on_progress;
-            ps.lattice_point_size = lattice_point_size;
-            ps.sidb_size          = sidb_size;
-            ps.sidb_border_width  = sidb_border_width;
-            ps.color_background   = color_background;
-            ps.lattice_mode       = lattice_mode;
-            const nb::gil_scoped_release release{};
+            const fiction::sidb::io::write_sidb_layout_svg_params ps{.lattice_point_size = lattice_point_size,
+                                                                     .sidb_size          = sidb_size,
+                                                                     .sidb_border_width  = sidb_border_width,
+                                                                     .color_background   = color_background,
+                                                                     .lattice_mode       = lattice_mode,
+                                                                     .on_progress        = on_progress};
+            const nb::gil_scoped_release                          release{};
             fiction::sidb::io::write_sidb_layout_svg(layout, charge_distribution, filename, ps);
         },
         nb::arg("layout"), nb::arg("charge_distribution"), nb::arg("filename"), nb::kw_only(),
@@ -216,14 +213,13 @@ Raises:
            const decltype(write_sidb_layout_svg_options{}.color_background)   color_background,
            const decltype(write_sidb_layout_svg_options{}.lattice_mode)       lattice_mode)
         {
-            write_sidb_layout_svg_options params{};
-            params.on_progress        = on_progress;
-            params.lattice_point_size = lattice_point_size;
-            params.sidb_size          = sidb_size;
-            params.sidb_border_width  = sidb_border_width;
-            params.color_background   = color_background;
-            params.lattice_mode       = lattice_mode;
-            const nb::gil_scoped_release release{};
+            const write_sidb_layout_svg_options params{.lattice_point_size = lattice_point_size,
+                                                       .sidb_size          = sidb_size,
+                                                       .sidb_border_width  = sidb_border_width,
+                                                       .color_background   = color_background,
+                                                       .lattice_mode       = lattice_mode,
+                                                       .on_progress        = on_progress};
+            const nb::gil_scoped_release        release{};
 
             std::ostringstream oss;
             fiction::sidb::io::write_sidb_layout_svg(layout, cd, oss, params);
