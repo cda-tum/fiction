@@ -20,9 +20,13 @@
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 
+#include <filesystem>
 #include <fstream>
 #include <initializer_list>
+#include <ios>
+#include <random>
 #include <sstream>
+#include <string>
 
 using namespace fiction;
 using namespace fiction::sidb;
@@ -79,7 +83,9 @@ TEST_CASE("Read surface defects into an sidb::layout", "[read-sidb-surface-defec
     }
     SECTION("lines with negative numbers or non-numeral characters are ignored")
     {
-        for (const auto* const surface : {"[[0 1 0 0] [0 -5 0 0] [0 1 0 0]]", "[[0 1 0 0] [0 Z 0 0] [0 1 0 0]]"})
+        for (const auto* const surface :
+             {"[[0 1 0 0] [0 -5 0 0] [0 1 0 0]]", "[[0 1 0 0] [0 Z 0 0] [0 1 0 0]]",
+              "[[0 1 0 0] [1111111111111111111111111111111111111111111111111111111111111111x] [0 1 0 0]]"})
         {
             std::istringstream surface_stream{surface};
             const auto         lyt = read_surface_defects(surface_stream);
@@ -88,6 +94,18 @@ TEST_CASE("Read surface defects into an sidb::layout", "[read-sidb-surface-defec
             CHECK(lyt.get_defect(site_at_row(1, 0)).type == defect_type::DB);
             CHECK(lyt.get_defect(site_at_row(1, 1)).type == defect_type::DB);
         }
+    }
+    SECTION("rows allow whitespace between indices")
+    {
+        /** @brief Mixed whitespace and surrounding non-row text retain row extraction. */
+        std::istringstream stream{"text[[1\t2]\n[3\r\n4]]text"};
+        /** @brief Parsed defects retain their row and column. */
+        const auto lyt = read_surface_defects(stream);
+        CHECK(lyt.num_defects() == 4);
+        CHECK(lyt.get_defect(site_at_row(0, 0)).type == defect_type::DB);
+        CHECK(lyt.get_defect(site_at_row(0, 1)).type == defect_type::DIHYDRIDE_PAIR);
+        CHECK(lyt.get_defect(site_at_row(1, 0)).type == defect_type::SI_VACANCY);
+        CHECK(lyt.get_defect(site_at_row(1, 1)).type == defect_type::SINGLE_DIHYDRIDE);
     }
     SECTION("exceptions")
     {
@@ -102,4 +120,26 @@ TEST_CASE("Read surface defects into an sidb::layout", "[read-sidb-surface-defec
 
         CHECK_THROWS_AS(read_surface_defects("/this/file/does/not/exist.txt"), std::ifstream::failure);
     }
+}
+
+TEST_CASE("Surface defect files preserve every parsed row", "[read-sidb-surface-defects]")
+{
+    /** @brief Two recognized rows separated by a Windows text-mode end-of-file byte. */
+    const auto surface = std::string{"[1]"} + char{26} + "[2]";
+    /** @brief Stream establishes the existing row-extraction contract. */
+    std::istringstream stream{surface};
+    /** @brief Expected defects after parsing the complete input. */
+    const auto expected = read_surface_defects(stream);
+    REQUIRE(expected.num_defects() == 2);
+    /** @brief File containing the same bytes as the stream. */
+    const auto filename =
+        std::filesystem::temp_directory_path() / ("fiction-surface-input-" + std::to_string(std::random_device{}()));
+    {
+        /** @brief Binary output preserves the separator. */
+        std::ofstream output{filename, std::ios::binary};
+        REQUIRE(output.is_open());
+        output << surface;
+    }
+    CHECK(read_surface_defects(filename.string()) == expected);
+    std::filesystem::remove(filename);
 }
