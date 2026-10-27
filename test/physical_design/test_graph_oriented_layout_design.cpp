@@ -18,6 +18,7 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "fiction/layouts/layout_base.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
@@ -34,6 +35,7 @@
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/types.hpp>
 
+#include <fmt/format.h>
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
 #include <mockturtle/networks/aig.hpp>
@@ -51,6 +53,8 @@
 #include <future>
 #include <optional>
 #include <stdexcept>
+#include <tuple>
+#include <utility>
 #include <vector>
 
 // The tests dereference optionals right after REQUIRE(x.has_value()), which the check does not model.
@@ -89,10 +93,8 @@ const T& required_value(const std::optional<T>& optional)
 template <typename Ntk>
 void check_graph_oriented_layout_design_equiv(const Ntk& ntk)
 {
-    graph_oriented_layout_design_stats  stats{};
-    graph_oriented_layout_design_params params{};
-    params.timeout      = 100000;
-    params.return_first = true;
+    graph_oriented_layout_design_stats        stats{};
+    const graph_oriented_layout_design_params params{.return_first = true, .timeout = 100000};
 
     const auto layout = graph_oriented_layout_design(fiction::synthesis::convert_network<named_technology_network>(ntk),
                                                      params, &stats);
@@ -134,10 +136,8 @@ TEST_CASE("Gate library application", "[graph-oriented-layout-design]")
 {
     const auto check = [](const auto& ntk)
     {
-        graph_oriented_layout_design_stats  stats{};
-        graph_oriented_layout_design_params params{};
-        params.timeout      = 100000;
-        params.return_first = true;
+        graph_oriented_layout_design_stats        stats{};
+        const graph_oriented_layout_design_params params{.return_first = true, .timeout = 100000};
 
         const auto layout = graph_oriented_layout_design(
             fiction::synthesis::convert_network<named_technology_network>(ntk), params, &stats);
@@ -154,8 +154,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
     const auto ntk = blueprints::mux21_network<technology_network>();
 
     graph_oriented_layout_design_stats  stats{};
-    graph_oriented_layout_design_params params{};
-    params.return_first = true;
+    graph_oriented_layout_design_params params{.return_first = true};
 
     SECTION("High-efficiency mode, return first found layout")
     {
@@ -322,10 +321,9 @@ TEST_CASE("Multithreading", "[graph-oriented-layout-design]")
 {
     const auto ntk = blueprints::mux21_network<technology_network>();
 
-    graph_oriented_layout_design_stats  stats{};
-    graph_oriented_layout_design_params params{};
+    graph_oriented_layout_design_stats stats{};
     // enable multithreading for all sections
-    params.enable_multithreading = true;
+    graph_oriented_layout_design_params params{.enable_multithreading = true};
 
     SECTION("Highest-effort mode with multithreading")
     {
@@ -363,9 +361,8 @@ TEST_CASE("Different cost objectives", "[graph-oriented-layout-design]")
 
     graph_oriented_layout_design_stats stats{};
 
-    graph_oriented_layout_design_params params{};
-
-    params.mode = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
+    graph_oriented_layout_design_params params{.mode =
+                                                   graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT};
 
     // array of cost objectives to iterate over
     const std::array cost_objectives = {graph_oriented_layout_design_params::cost_objective::AREA,
@@ -389,10 +386,9 @@ TEST_CASE("Skip tiles for PI placement", "[graph-oriented-layout-design]")
     const auto ntk = blueprints::clpl<technology_network>();
 
     graph_oriented_layout_design_stats  stats{};
-    graph_oriented_layout_design_params params{};
-
-    params.mode         = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
-    params.return_first = true;
+    graph_oriented_layout_design_params params{.mode =
+                                                   graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY,
+                                               .return_first = true};
 
     for (int32_t skip = 0; skip < 5; ++skip)
     {
@@ -447,10 +443,9 @@ TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
 
     graph_oriented_layout_design_stats stats{};
 
-    graph_oriented_layout_design_params params{};
-    params.mode         = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
-    params.cost         = graph_oriented_layout_design_params::cost_objective::CUSTOM;
-    params.return_first = true;
+    graph_oriented_layout_design_params params{.mode = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT,
+                                               .return_first = true,
+                                               .cost = graph_oriented_layout_design_params::cost_objective::CUSTOM};
 
     /** @brief Records callback evaluation without constraining invocation counts. */
     std::atomic_bool custom_cost_evaluated{false};
@@ -499,10 +494,8 @@ TEST_CASE("Name conservation after graph-oriented layout design", "[graph-orient
     auto maj = blueprints::maj1_network<mockturtle::aig_network>();
     maj.set_network_name("maj");
 
-    graph_oriented_layout_design_stats  stats{};
-    graph_oriented_layout_design_params params{};
-    params.timeout      = 100000;
-    params.return_first = true;
+    graph_oriented_layout_design_stats        stats{};
+    const graph_oriented_layout_design_params params{.return_first = true, .timeout = 100000};
 
     const auto layout = graph_oriented_layout_design(fiction::synthesis::convert_network<named_technology_network>(maj),
                                                      params, &stats);
@@ -539,10 +532,10 @@ TEST_CASE("No custom cost objective provided exception", "[graph-oriented-layout
 
     graph_oriented_layout_design_stats stats{};
 
-    graph_oriented_layout_design_params params{};
-    params.mode         = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
-    params.cost         = graph_oriented_layout_design_params::cost_objective::CUSTOM;
-    params.return_first = true;
+    const graph_oriented_layout_design_params params{
+        .mode         = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT,
+        .return_first = true,
+        .cost         = graph_oriented_layout_design_params::cost_objective::CUSTOM};
 
     CHECK_THROWS_AS(graph_oriented_layout_design(ntk, params, &stats), std::invalid_argument);
 }
@@ -551,8 +544,7 @@ TEST_CASE("PI spacing outside of its range is rejected", "[graph-oriented-layout
 {
     const auto ntk = blueprints::mux21_network<technology_network>();
 
-    graph_oriented_layout_design_params params{};
-    params.return_first = true;
+    graph_oriented_layout_design_params params{.return_first = true};
 
     for (const int32_t skip : {-1, 1'048'577, 2147483647})
     {
@@ -569,10 +561,10 @@ TEST_CASE("Random PI spacing respects each invocation's parameters", "[graph-ori
     const auto layouts = std::async(std::launch::async,
                                     [&ntk]
                                     {
-                                        graph_oriented_layout_design_params params{};
-                                        params.mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
-                                        params.return_first = true;
-                                        params.seed         = 42;
+                                        graph_oriented_layout_design_params params{
+                                            .mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY,
+                                            .return_first = true,
+                                            .seed         = 42};
 
                                         const auto zero_reference = graph_oriented_layout_design(ntk, params);
                                         params.randomize_tiles_to_skip_between_pis = true;
@@ -613,10 +605,10 @@ TEST_CASE("Graph-oriented layout design reports progress", "[graph-oriented-layo
 
     progress_recorder rec{};
 
-    graph_oriented_layout_design_params params{};
-    params.mode         = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
-    params.return_first = true;
-    params.on_progress  = rec.callback();
+    graph_oriented_layout_design_params params{.mode =
+                                                   graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY,
+                                               .return_first = true,
+                                               .on_progress  = rec.callback()};
 
     SECTION("single-threaded")
     {
@@ -652,11 +644,10 @@ TEST_CASE("GOLD preserves declared PI order and noncommutative input ports", "[g
     ntk.create_po(ntk.create_lt(b, a), "less");
     ntk.set_network_name("ordered");
     static_cast<void>(unused);
-    graph_oriented_layout_design_params params{};
-    params.return_first          = true;
-    params.enable_multithreading = false;
-    params.timeout               = 10000;
-    const auto result            = graph_oriented_layout_design(ntk, params);
+    const graph_oriented_layout_design_params params{.return_first          = true,
+                                                     .timeout               = 10000,
+                                                     .enable_multithreading = false};
+    const auto                                result = graph_oriented_layout_design(ntk, params);
     REQUIRE(result.has_value());
     const auto& layout = required_value(result);
     CHECK(layout.num_pis() == 3);
@@ -675,12 +666,11 @@ TEST_CASE("GOLD preserves declared PI order and noncommutative input ports", "[g
 TEST_CASE("GOLD represents constant outputs explicitly and keeps empty networks empty",
           "[graph-oriented-layout-design]")
 {
-    const named_technology_network      empty{};
-    graph_oriented_layout_design_params params{};
-    params.return_first          = true;
-    params.enable_multithreading = false;
-    params.timeout               = 10000;
-    const auto empty_result      = graph_oriented_layout_design(empty, params);
+    const named_technology_network            empty{};
+    const graph_oriented_layout_design_params params{.return_first          = true,
+                                                     .timeout               = 10000,
+                                                     .enable_multithreading = false};
+    const auto                                empty_result = graph_oriented_layout_design(empty, params);
     REQUIRE(empty_result.has_value());
     CHECK(required_value(empty_result).is_empty());
     CHECK(required_value(empty_result).area() == 0);
@@ -704,11 +694,10 @@ TEST_CASE("GOLD preserves mixed constant and logic output order", "[graph-orient
     ntk.create_po(input, "input_copy");
     ntk.create_po(ntk.get_constant(true), "one");
     ntk.create_po(ntk.get_constant(false), "zero");
-    graph_oriented_layout_design_params params{};
-    params.return_first          = true;
-    params.enable_multithreading = false;
-    params.timeout               = 10000;
-    const auto result            = graph_oriented_layout_design(ntk, params);
+    const graph_oriented_layout_design_params params{.return_first          = true,
+                                                     .timeout               = 10000,
+                                                     .enable_multithreading = false};
+    const auto                                result = graph_oriented_layout_design(ntk, params);
     REQUIRE(result.has_value());
     CHECK(required_value(result).get_output_name(0) == "input_copy");
     CHECK(required_value(result).get_output_name(1) == "one");
@@ -731,9 +720,8 @@ TEMPLATE_TEST_CASE("Named specification conversion for graph_oriented_layout_des
     CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(0))) == "left");
     CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(1))) == "right");
     CHECK(ntk.get_output_name(0) == "result");
-    graph_oriented_layout_design_params ps{};
-    ps.return_first   = true;
-    const auto result = graph_oriented_layout_design(ntk, ps);
+    const graph_oriented_layout_design_params ps{.return_first = true};
+    const auto                                result = graph_oriented_layout_design(ntk, ps);
     REQUIRE(result.has_value());
     const auto& lyt = required_value(result);
     CHECK(lyt.get_layout_name() == "named_spec");
@@ -746,4 +734,83 @@ TEMPLATE_TEST_CASE("Named specification conversion for graph_oriented_layout_des
     CHECK(extracted.get_name(extracted.make_signal(extracted.pi_at(1))) == "right");
     CHECK(extracted.get_output_name(0) == "result");
     check_eq(source, extracted);
+}
+
+TEST_CASE("GOLD repeats completed sequential searches", "[graph-oriented-layout-design]")
+{
+    /** @brief Exercise fixed-spacing and seeded PI placement. */
+    const auto randomize_spacing = GENERATE(false, true);
+    /** @brief Captures geometry, functions, terminal kinds, and ordered connections without object identities. */
+    const auto snapshot = [](const cartesian_gate_layout& layout)
+    {
+        /** @brief Placed objects keyed by their coordinates. */
+        std::vector<std::tuple<layout_base::coordinate, kitty::dynamic_truth_table, bool, bool>> objects{};
+        /** @brief Connections keyed by destination coordinate and input index. */
+        std::vector<std::tuple<layout_base::coordinate, uint32_t, layout_base::coordinate>> connections{};
+        /** @brief Terminal coordinates in their public input and output order. */
+        std::array<std::vector<layout_base::coordinate>, 2> terminals{};
+        layout.foreach_pi([&](const auto id) { terminals[0].push_back(layout.get_tile(id)); });
+        layout.foreach_po([&](const auto id) { terminals[1].push_back(layout.get_tile(id)); });
+        layout.foreach_object(
+            [&](const auto id)
+            {
+                /** @brief Physical position independent of the layout's object identities. */
+                const auto position = layout.get_tile(id);
+                objects.emplace_back(position, layout.object_function(id), layout.is_pi(id), layout.is_po(id));
+                layout.foreach_fanin(id, [&](const auto source, const auto index)
+                                     { connections.emplace_back(position, index, layout.get_tile(source)); });
+            });
+        std::ranges::sort(objects, [](const auto& a, const auto& b) { return std::get<0>(a) < std::get<0>(b); });
+        std::ranges::sort(connections);
+        return std::tuple{layout.width(),     layout.height(),        layout.layers(),
+                          std::move(objects), std::move(connections), std::move(terminals)};
+    };
+
+    for (const auto cost : {graph_oriented_layout_design_params::cost_objective::AREA,
+                            graph_oriented_layout_design_params::cost_objective::ACP})
+    {
+        CAPTURE(cost);
+        /** @brief Full-adder search exercises fanout substitution and ordered routing. */
+        const auto ntk = blueprints::full_adder_network<technology_network>();
+        /** @brief Stop at the first solution to keep this seeded-search regression bounded. */
+        graph_oriented_layout_design_params params{
+            .mode                                = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY,
+            .return_first                        = true,
+            .timeout                             = 60000,
+            .cost                                = cost,
+            .enable_multithreading               = false,
+            .seed                                = 7,
+            .tiles_to_skip_between_pis           = randomize_spacing ? 1 : 0,
+            .randomize_tiles_to_skip_between_pis = randomize_spacing};
+        /** @brief Reference result for this input and seed. */
+        const auto reference = graph_oriented_layout_design(ntk, params);
+        REQUIRE(reference.has_value());
+        check_eq(ntk, required_value(reference));
+
+        params.seed                                = 42;
+        params.tiles_to_skip_between_pis           = 3;
+        params.randomize_tiles_to_skip_between_pis = true;
+        /** @brief Intervening invocation with different randomization parameters. */
+        const auto intervening = graph_oriented_layout_design(ntk, params);
+        REQUIRE(intervening.has_value());
+        check_eq(ntk, required_value(intervening));
+
+        params.seed                                = 7;
+        params.tiles_to_skip_between_pis           = randomize_spacing ? 1 : 0;
+        params.randomize_tiles_to_skip_between_pis = randomize_spacing;
+        /** @brief Repeating the original invocation must reproduce its complete physical result. */
+        const auto repeated = graph_oriented_layout_design(ntk, params);
+        REQUIRE(repeated.has_value());
+        check_eq(ntk, required_value(repeated));
+        CHECK(snapshot(required_value(reference)) == snapshot(required_value(repeated)));
+    }
+}
+
+TEST_CASE("GOLD estimates geometric area on one-tile axes", "[graph-oriented-layout-design]")
+{
+    CHECK(fiction::physical_design::detail::candidate_layout_area(1, 1, {0, 0}) == 1.0);
+    CHECK(fiction::physical_design::detail::candidate_layout_area(1, 6, {0, 2}) == 5.0);
+    CHECK(fiction::physical_design::detail::candidate_layout_area(6, 1, {2, 0}) == 5.0);
+    CHECK(fiction::physical_design::detail::candidate_layout_area(4, 5, {1, 1}) == 12.0);
+    CHECK(fiction::physical_design::detail::candidate_layout_area(4, 5, {5, 6}) == 42.0);
 }

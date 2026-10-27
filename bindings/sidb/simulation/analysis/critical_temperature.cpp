@@ -92,16 +92,15 @@ inline void register_critical_temperature_functions(nb::module_& m)
         {
             validate_confidence_level(confidence_level);
             validate_max_temperature(max_temperature);
-            critical_temperature_options params{};
-            params.operational_params =
-                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
-
-            params.confidence_level   = confidence_level;
-            params.max_temperature    = max_temperature;
-            params.on_progress        = on_progress;
-            params.on_worker_progress = on_worker_progress;
+            const critical_temperature_options params{
+                .operational_params =
+                    make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                                threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                                input_bdl_config, op_condition, strategy_to_analyze_operational_status),
+                .confidence_level   = confidence_level,
+                .max_temperature    = max_temperature,
+                .on_progress        = on_progress,
+                .on_worker_progress = on_worker_progress};
             const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::analysis::critical_temperature_gate_based(lyt, spec, params, stats);
         },
@@ -133,6 +132,7 @@ inline void register_critical_temperature_functions(nb::module_& m)
         R"doc(Determine the critical temperature of an SiDB gate implementing the truth tables.
 The keyword options select physical values, operational analysis, confidence, and temperature bounds.
 Raises ValueError for confidence outside (0, 1) or a temperature outside the centikelvin iteration range.
+Raises ValueError for an empty specification or truth tables with different variable counts.
 The overload with input and output wires bypasses automatic wire detection.
 
 Args:
@@ -182,18 +182,17 @@ Args:
         {
             validate_confidence_level(confidence_level);
             validate_max_temperature(max_temperature);
-            critical_temperature_options params{};
-            params.operational_params = make_operational_parameters(
-                timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                critical_temperature_options{}
-                    .operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
-                minimum_distance, maximum_distance, input_bdl_config, op_condition,
-                strategy_to_analyze_operational_status);
-
-            params.confidence_level   = confidence_level;
-            params.max_temperature    = max_temperature;
-            params.on_progress        = on_progress;
-            params.on_worker_progress = on_worker_progress;
+            const critical_temperature_options params{
+                .operational_params = make_operational_parameters(
+                    timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                    critical_temperature_options{}
+                        .operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance,
+                    minimum_distance, maximum_distance, input_bdl_config, op_condition,
+                    strategy_to_analyze_operational_status),
+                .confidence_level   = confidence_level,
+                .max_temperature    = max_temperature,
+                .on_progress        = on_progress,
+                .on_worker_progress = on_worker_progress};
             const nb::gil_scoped_release release{};
 
             return fiction::sidb::simulation::analysis::critical_temperature_gate_based(
@@ -225,6 +224,9 @@ Args:
         R"doc(Determine the critical temperature of an SiDB gate implementing the truth tables.
 The keyword options select physical values, operational analysis, confidence, and temperature bounds.
 Raises ValueError for confidence outside (0, 1) or a temperature outside the centikelvin iteration range.
+Raises ValueError for an empty specification or truth tables with different variable counts.
+Raises ValueError if the input-layout count differs from the number of input combinations
+or the output BDL pair count differs from the number of truth tables.
 The overload with input and output wires bypasses automatic wire detection.
 
 Args:
@@ -261,15 +263,14 @@ Args:
         {
             validate_confidence_level(confidence_level);
             validate_max_temperature(max_temperature);
-            critical_temperature_options params{};
-            params.operational_params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            params.operational_params.timeout    = timeout;
-            params.operational_params.sim_engine = sim_engine;
-
-            params.confidence_level   = confidence_level;
-            params.max_temperature    = max_temperature;
-            params.on_progress        = on_progress;
-            params.on_worker_progress = on_worker_progress;
+            const critical_temperature_options params{
+                .operational_params = {.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf),
+                                       .sim_engine = sim_engine,
+                                       .timeout    = timeout},
+                .confidence_level   = confidence_level,
+                .max_temperature    = max_temperature,
+                .on_progress        = on_progress,
+                .on_worker_progress = on_worker_progress};
             const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::analysis::critical_temperature_non_gate_based(lyt, params, stats);
         },

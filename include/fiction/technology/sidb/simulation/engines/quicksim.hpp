@@ -90,7 +90,8 @@ struct quicksim_params
  * Physical Simulation of Silicon Dangling Bond Logic\" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille
  * in IEEE NANO 2023 (https://ieeexplore.ieee.org/document/10231266). It grows candidate charge distributions from the
  * SiDBs that have to be negative by repeatedly charging the neutral SiDB farthest from every negative one, keeping
- * the physically valid intermediate states. Every worker thread owns one simulation state and shares the layout's
+ * the physically valid intermediate states. The search uses negative and neutral charge states regardless of
+ * `ps.sim_params.base`. Every worker thread owns one simulation state and shares the layout's
  * potential landscape. Charged surface defects are not supported: a layout that holds any yields `std::nullopt`.
  *
  * @param lyt Layout to simulate.

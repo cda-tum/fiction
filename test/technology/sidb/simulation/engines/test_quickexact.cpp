@@ -21,7 +21,10 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#ifdef NDEBUG
 #include "utils/blueprints/layout_blueprints.hpp"
+#endif
+
 #include "utils/progress_recorder.hpp"
 
 #include <fiction/technology/sidb/lattice.hpp>
@@ -269,9 +272,8 @@ TEST_CASE("Single SiDB QuickExact simulation with local external potential", "[q
     layout lyt{};
     lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
 
-    quickexact_params params{.sim_params = simulation_parameters{2, -0.25}};
-
-    params.local_external_potential.insert({{0, 0, 0}, -0.5});
+    const quickexact_params params{.sim_params               = simulation_parameters{2, -0.25},
+                                   .local_external_potential = {{{0, 0, 0}, -0.5}}};
 
     const auto simulation_results = quickexact(lyt, params);
 
@@ -284,10 +286,9 @@ TEST_CASE("Single SiDB QuickExact simulation with local external potential (high
     layout lyt{};
     lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
 
-    quickexact_params params{.sim_params = simulation_parameters{3, -0.25}};
-
-    params.local_external_potential.insert({{{0, 0, 0}, -1}});
-    const auto simulation_results = quickexact(lyt, params);
+    const quickexact_params params{.sim_params               = simulation_parameters{3, -0.25},
+                                   .local_external_potential = {{{0, 0, 0}, -1}}};
+    const auto              simulation_results = quickexact(lyt, params);
 
     REQUIRE(simulation_results.charge_distributions.size() == 1);
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == charge_state::POSITIVE);
@@ -298,8 +299,7 @@ TEST_CASE("Single SiDB QuickExact simulation with global external potential", "[
     layout lyt{};
     lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
 
-    quickexact_params params{.sim_params = simulation_parameters{2, -0.25}};
-    params.global_potential = -0.26;
+    const quickexact_params params{.sim_params = simulation_parameters{2, -0.25}, .global_potential = -0.26};
 
     const auto simulation_results = quickexact(lyt, params);
 
@@ -313,8 +313,7 @@ TEST_CASE("Single SiDB QuickExact simulation with global external potential (hig
     layout lyt{};
     lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
 
-    quickexact_params params{.sim_params = simulation_parameters{3, -0.25}};
-    params.global_potential = -1;
+    const quickexact_params params{.sim_params = simulation_parameters{3, -0.25}, .global_potential = -1};
 
     const auto simulation_results = quickexact(lyt, params);
     REQUIRE(simulation_results.charge_distributions.size() == 1);
@@ -326,8 +325,7 @@ TEST_CASE("Single SiDB QuickExact simulation with global external potential (hig
     layout lyt{};
     lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
 
-    quickexact_params params{.sim_params = simulation_parameters{3, -0.25}};
-    params.global_potential = 1;
+    const quickexact_params params{.sim_params = simulation_parameters{3, -0.25}, .global_potential = 1};
 
     const auto simulation_results = quickexact(lyt, params);
     REQUIRE(simulation_results.charge_distributions.size() == 1);
@@ -517,8 +515,8 @@ TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 01 and lo
     lyt.assign_sidb({10, 8, 1}, dot_tag::NORMAL);
     lyt.assign_sidb({16, 1, 0}, dot_tag::NORMAL);
 
-    quickexact_params params{.sim_params = simulation_parameters{3, -0.28}};
-    params.local_external_potential.insert({{{6, 2, 0}, -0.5}});
+    const quickexact_params params{.sim_params               = simulation_parameters{3, -0.28},
+                                   .local_external_potential = {{{6, 2, 0}, -0.5}}};
 
     const auto simulation_results = quickexact(lyt, params);
 
@@ -551,8 +549,7 @@ TEST_CASE("QuickExact simulation  of a Y-shaped SiDB OR gate with input 01 and g
     lyt.assign_sidb({10, 8, 1}, dot_tag::NORMAL);
     lyt.assign_sidb({16, 1, 0}, dot_tag::NORMAL);
 
-    quickexact_params params{.sim_params = simulation_parameters{3, -0.28}};
-    params.global_potential = -0.5;
+    const quickexact_params params{.sim_params = simulation_parameters{3, -0.28}, .global_potential = -0.5};
 
     const auto simulation_results = quickexact(lyt, params);
 
@@ -585,8 +582,7 @@ TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 01 and gl
     lyt.assign_sidb({10, 8, 1}, dot_tag::NORMAL);
     lyt.assign_sidb({16, 1, 0}, dot_tag::NORMAL);
 
-    quickexact_params params{.sim_params = simulation_parameters{3, -0.28}};
-    params.global_potential = -2;
+    const quickexact_params params{.sim_params = simulation_parameters{3, -0.28}, .global_potential = -2};
 
     const auto simulation_results = quickexact(lyt, params);
 
@@ -1968,8 +1964,8 @@ TEST_CASE("QuickExact reports progress", "[quickexact]")
 
     progress_recorder rec{};
 
-    quickexact_params params{.base_number_detection = quickexact_params::automatic_base_number_detection::OFF};
-    params.on_progress = rec.callback();
+    quickexact_params params{.base_number_detection = quickexact_params::automatic_base_number_detection::OFF,
+                             .on_progress           = rec.callback()};
 
     SECTION("two-state simulation")
     {

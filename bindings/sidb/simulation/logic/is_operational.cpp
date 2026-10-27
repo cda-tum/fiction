@@ -123,6 +123,10 @@ Args:
     input_bdl_config: Input encoding: perturber absence or perturber distance.
     op_condition: Condition used to decide whether the layout is operational.
     strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+Raises:
+    ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+        a QuickSim simulation requests base 3.
 )doc");
     m.def(
         "is_operational",
@@ -187,6 +191,11 @@ Args:
     op_condition: Condition used to decide whether the layout is operational.
     canvas_lyt: Optional canvas layout for operational analysis.
     strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+Raises:
+    ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+        a QuickSim simulation requests base 3, or filtering with rejected kinks encounters a canvas site
+        absent from the layout.
 )doc");
     m.def(
         "is_operational",
@@ -252,6 +261,11 @@ Args:
     op_condition: Condition used to decide whether the layout is operational.
     canvas_lyt: Optional canvas layout for operational analysis.
     strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+Raises:
+    ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, a
+        QuickSim simulation requests base 3, the layout count does not match the number of input patterns, or
+        filtering with rejected kinks encounters a canvas site absent from the layout.
 )doc");
     m.def(
         "operational_input_patterns",
@@ -316,6 +330,10 @@ Args:
     input_bdl_config: Input encoding: perturber absence or perturber distance.
     op_condition: Condition used to decide whether the layout is operational.
     strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+Raises:
+    ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+        a QuickSim simulation requests base 3.
 )doc");
     m.def(
         "operational_input_patterns",
@@ -379,6 +397,10 @@ Args:
     op_condition: Condition used to decide whether the layout is operational.
     canvas_lyt: Optional canvas layout for operational analysis.
     strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+Raises:
+    ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+        a QuickSim simulation requests base 3.
 )doc");
     m.def(
         "kink_induced_non_operational_input_patterns",
@@ -443,6 +465,10 @@ Args:
     input_bdl_config: Input encoding: perturber absence or perturber distance.
     op_condition: Condition used to decide whether the layout is operational.
     strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+Raises:
+    ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+        a QuickSim simulation requests base 3.
 )doc");
     m.def(
         "kink_induced_non_operational_input_patterns",
@@ -507,6 +533,10 @@ Args:
     op_condition: Condition used to decide whether the layout is operational.
     canvas_lyt: Optional canvas layout for operational analysis.
     strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+Raises:
+    ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+        a QuickSim simulation requests base 3.
 )doc");
     m.def(
         "is_kink_induced_non_operational",
@@ -571,6 +601,10 @@ Args:
     input_bdl_config: Input encoding: perturber absence or perturber distance.
     op_condition: Condition used to decide whether the layout is operational.
     strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+Raises:
+    ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+        a QuickSim simulation requests base 3.
 )doc");
     m.def(
         "is_kink_induced_non_operational",
@@ -634,6 +668,10 @@ Args:
     op_condition: Condition used to decide whether the layout is operational.
     canvas_lyt: Optional canvas layout for operational analysis.
     strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+Raises:
+    ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+        a QuickSim simulation requests base 3, or filtering encounters a canvas site absent from the layout.
 )doc");
 }
 

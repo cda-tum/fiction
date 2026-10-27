@@ -152,13 +152,13 @@ class critical_path_length_and_throughput_impl
  * Traversal follows declared input ports, independent of physical adjacency and clocking legality.
  * Only output dependencies enter the analysis. Explicit placed zero-input functions act as path sources.
  *
- * The throughput is defined as \f$\frac{1}{x}\f$ where \f$x\f$ is the highest path length difference between any
- * sets of paths that lead to the same gate. This function provides only the denominator \f$x\f$, as the numerator is
- * always \f$1\f$. Furthermore, \f$x\f$ is given in clock cycles rather than clock phases because it is assumed that
- * a path length difference smaller than `lyt.num_clocks()` does not lead to any delay. Contrary, for any throughput
- * value \f$\frac{1}{x}\f$ with \f$x > 1\f$, the layout computes its represented Boolean function only every \f$x\f$
- * full clock cycles after the first inputs have been propagated through the design. Thereby, all PIs need to be
- * held constant for \f$x\f$ clock phases to ensure proper computation.
+ * The throughput is \f$\frac{1}{x}\f$, where \f$x = \lfloor d / c \rfloor + 1\f$, \f$c = \text{lyt.num_clocks()}\f$,
+ * and \f$d\f$ is the maximum difference between input arrival phases at any analyzed gate. Each source starts at
+ * its clock number; each following object adds one phase to its latest input arrival. Differences smaller than
+ * one clock cycle do not reduce throughput.
+ *
+ * This function returns the denominator \f$x\f$ in full clock cycles. All PIs must remain constant for \f$x\f$
+ * clock cycles to ensure proper computation.
  *
  * For more information on the concept of throughput and delay see \"Synchronization of Clocked Field-Coupled Circuits\"
  * by F. Sill Torres, M. Walter, R. Wille, D. Große, and R. Drechsler in IEEE NANO 2018; or \"Design Automation for
