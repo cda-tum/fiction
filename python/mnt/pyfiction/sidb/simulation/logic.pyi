@@ -606,6 +606,10 @@ def is_operational(
         input_bdl_config: Input encoding: perturber absence or perturber distance.
         op_condition: Condition used to decide whether the layout is operational.
         strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+    Raises:
+        ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+            a QuickSim simulation requests base 3.
     """
 
 @overload
@@ -627,7 +631,32 @@ def is_operational(
     op_condition: operational_condition = ...,
     strategy_to_analyze_operational_status: operational_analysis_strategy = ...,
     canvas_lyt: mnt.pyfiction.sidb.sidb_layout | None = None,
-) -> tuple[operational_status, int]: ...
+) -> tuple[operational_status, int]:
+    """
+    Determine whether the SiDB layout implements the supplied truth tables for every input pattern.
+    The keyword options select physical values, simulation, BDL encoding, and operational analysis.
+    Overloads accept supplied wires or one layout per input pattern.
+
+    Args:
+        timeout: Execution budget in milliseconds.
+        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        mu_minus: Negative-charge transition energy in eV.
+        epsilon_r: Relative permittivity (dimensionless).
+        lambda_tf: Thomas-Fermi screening distance in nm.
+        sim_engine: SiDB simulation engine used for operational analysis.
+        minimum_distance: Minimum SiDB separation for a BDL pair in nm.
+        maximum_distance: Maximum SiDB separation for a BDL pair in nm.
+        input_bdl_config: Input encoding: perturber absence or perturber distance.
+        op_condition: Condition used to decide whether the layout is operational.
+        canvas_lyt: Optional canvas layout for operational analysis.
+        strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+    Raises:
+        ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+            a QuickSim simulation requests base 3, or filtering with rejected kinks encounters a canvas site
+            absent from the layout.
+    """
+
 @overload
 def is_operational(
     input_pattern_layouts: Sequence[mnt.pyfiction.sidb.sidb_layout],
@@ -666,6 +695,11 @@ def is_operational(
         op_condition: Condition used to decide whether the layout is operational.
         canvas_lyt: Optional canvas layout for operational analysis.
         strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+    Raises:
+        ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, a
+            QuickSim simulation requests base 3, the layout count does not match the number of input patterns, or
+            filtering with rejected kinks encounters a canvas site absent from the layout.
     """
 
 @overload
@@ -703,6 +737,10 @@ def operational_input_patterns(
         input_bdl_config: Input encoding: perturber absence or perturber distance.
         op_condition: Condition used to decide whether the layout is operational.
         strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+    Raises:
+        ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+            a QuickSim simulation requests base 3.
     """
 
 @overload
@@ -742,6 +780,10 @@ def operational_input_patterns(
         op_condition: Condition used to decide whether the layout is operational.
         canvas_lyt: Optional canvas layout for operational analysis.
         strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+    Raises:
+        ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+            a QuickSim simulation requests base 3.
     """
 
 @overload
@@ -779,6 +821,10 @@ def kink_induced_non_operational_input_patterns(
         input_bdl_config: Input encoding: perturber absence or perturber distance.
         op_condition: Condition used to decide whether the layout is operational.
         strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+    Raises:
+        ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+            a QuickSim simulation requests base 3.
     """
 
 @overload
@@ -818,6 +864,10 @@ def kink_induced_non_operational_input_patterns(
         op_condition: Condition used to decide whether the layout is operational.
         canvas_lyt: Optional canvas layout for operational analysis.
         strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+    Raises:
+        ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+            a QuickSim simulation requests base 3.
     """
 
 @overload
@@ -855,6 +905,10 @@ def is_kink_induced_non_operational(
         input_bdl_config: Input encoding: perturber absence or perturber distance.
         op_condition: Condition used to decide whether the layout is operational.
         strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+    Raises:
+        ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+            a QuickSim simulation requests base 3.
     """
 
 @overload
@@ -894,6 +948,10 @@ def is_kink_induced_non_operational(
         op_condition: Condition used to decide whether the layout is operational.
         canvas_lyt: Optional canvas layout for operational analysis.
         strategy_to_analyze_operational_status: Operational-status analysis strategy.
+
+    Raises:
+        ValueError: If spec is empty, truth-table variable counts differ, QuickSim encounters charged defects, or
+            a QuickSim simulation requests base 3, or filtering encounters a canvas site absent from the layout.
     """
 
 class parameter_point:
@@ -1136,7 +1194,10 @@ class operational_domain:
 class operational_domain_value_range:
     """
     A range of values for a dimension sweep. The range is defined by a
-    minimum value, a maximum value and a step size.
+    minimum value, a maximum value and a step size. Generated coordinates
+    must occupy distinct `parameter_point` identity cells, whose width is
+    `utils::math::ERROR_MARGIN`. Domain algorithms throw `ValueError` if
+    coordinates collide.
     """
 
     @overload

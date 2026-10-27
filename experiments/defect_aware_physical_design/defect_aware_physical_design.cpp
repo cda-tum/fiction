@@ -64,6 +64,8 @@
 #include <string>
 #include <vector>
 
+#include <experiments.hpp>
+
 using namespace fiction;
 using namespace fiction::fcn;
 using namespace fiction::layouts;
@@ -145,16 +147,16 @@ try
     const auto black_list = surface_analysis<bestagon_library>(lattice_tiling, surface_lattice);
 
     // parameters for SMT-based physical design
-    exact_physical_design_params exact_params{};
-    exact_params.scheme             = "ROW4";
-    exact_params.layout_arrangement = arrangement::EVEN_ROW;
-    exact_params.crossings          = true;
-    exact_params.border_io          = false;
-    exact_params.desynchronize      = true;
-    exact_params.upper_bound_x      = 11;         // 12 x 31 tiles
-    exact_params.upper_bound_y      = 30;         // 12 x 31 tiles
-    exact_params.timeout            = 3'600'000;  // 1h in ms
-    exact_physical_design_stats exact_stats{};
+    // Bound the layout to 12 x 31 tiles.
+    const exact_physical_design_params exact_params{.scheme             = "ROW4",
+                                                    .layout_arrangement = arrangement::EVEN_ROW,
+                                                    .upper_bound_x      = 11,
+                                                    .upper_bound_y      = 30,
+                                                    .crossings          = true,
+                                                    .border_io          = false,
+                                                    .desynchronize      = true,
+                                                    .timeout            = 3'600'000};  // 1h in ms
+    exact_physical_design_stats        exact_stats{};
 
     constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::parity &
                                             ~fiction_experiments::two_bit_add_maj & ~fiction_experiments::b1_r2 &

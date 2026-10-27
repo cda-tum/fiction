@@ -15,6 +15,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
@@ -25,17 +26,23 @@
 #include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
+#include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/simulation/analysis/calculate_energy_and_state_type.hpp>
 #include <fiction/technology/sidb/simulation/analysis/energy_distribution.hpp>
+#include <fiction/technology/sidb/simulation/analysis/occupation_probability_of_excited_states.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp>
+#include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 
 #include <kitty/dynamic_truth_table.hpp>
 
+#include <algorithm>
+#include <cstddef>
 #include <limits>
 #include <set>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
@@ -104,6 +111,18 @@ TEST_CASE("Single SiDB", "[calculate-energy-and-state-type]")
 
     CHECK_THAT(fourth_excited.first, Catch::Matchers::WithinAbs(1.2976, 0.0001));
     CHECK(fourth_excited.second == state_type::REJECTED);
+
+    const auto kinks_rejected = calculate_energy_and_state_type_with_kinks_rejected(
+        *bii, energy_distribution, simulated_charge_distributions, {create_and_tt()}, 1,
+        detect_bdl_wires(bestagon_and, {}, bdl_wire_selection::INPUT),
+        detect_bdl_wires(bestagon_and, {}, bdl_wire_selection::OUTPUT));
+    REQUIRE(kinks_rejected.size() == 5);
+    for (std::size_t i = 0; i < kinks_rejected.size(); ++i)
+    {
+        CAPTURE(i);
+        CHECK(kinks_rejected[i].first == energy_state_with_state_info[i].first);
+        CHECK(kinks_rejected[i].second == (i == 0 ? state_type::ACCEPTED : state_type::REJECTED));
+    }
 }
 
 TEST_CASE("Energy labeling propagates invalid lattice basis errors", "[calculate-energy-and-state-type]")
@@ -119,4 +138,94 @@ TEST_CASE("Energy labeling propagates invalid lattice basis errors", "[calculate
     CHECK_THROWS_AS(calculate_energy_and_state_type_with_kinks_rejected(lyt, energies, distributions,
                                                                         std::vector{create_id_tt()}, 0, {}, {}),
                     std::out_of_range);
+}
+
+TEST_CASE("Kinks-rejected labels count each matching charge distribution once", "[calculate-energy-and-state-type]")
+{
+    const auto lyt          = blueprints::bestagon_and_gate();
+    const auto input_wires  = detect_bdl_wires(lyt, {}, bdl_wire_selection::INPUT);
+    const auto output_wires = detect_bdl_wires(lyt, {}, bdl_wire_selection::OUTPUT);
+    auto       bii          = bdl_input_iterator{lyt};
+    bii                     = 1;
+
+    const auto groundstates = quickexact(*bii).groundstates();
+    REQUIRE(!groundstates.empty());
+    REQUIRE(output_wires.size() == 1);
+
+    auto       accepted     = groundstates.front();
+    auto       wrong_output = accepted;
+    const auto output_pairs = detect_bdl_pairs(*bii, dot_tag::OUTPUT);
+    REQUIRE(output_pairs.size() == 1);
+    wrong_output.assign_charge_state(output_pairs.front().lower, model::charge_state::NEGATIVE);
+    wrong_output.assign_charge_state(output_pairs.front().upper, model::charge_state::NEUTRAL);
+
+    auto       kinked = accepted;
+    const auto internal_pair =
+        std::ranges::find_if(output_wires.front().pairs, [](const auto& pair) { return pair.type == dot_tag::NORMAL; });
+    REQUIRE(internal_pair != output_wires.front().pairs.cend());
+    kinked.assign_charge_state(internal_pair->lower, accepted.get_charge_state(internal_pair->upper));
+    kinked.assign_charge_state(internal_pair->upper, accepted.get_charge_state(internal_pair->lower));
+
+    const std::vector<kitty::dynamic_truth_table> spec{create_and_tt()};
+    CHECK(calculate_energy_and_state_type_with_kinks_accepted(calculate_energy_distribution({kinked}), {kinked},
+                                                              output_pairs, spec, 1)
+              .front()
+              .second == state_type::ACCEPTED);
+
+    accepted.assign_energy(3.0);
+    wrong_output.assign_energy(1.0);
+    kinked.assign_energy(2.0);
+    std::vector distributions{accepted, wrong_output, kinked};
+
+    SECTION("Ascending energies despite unsorted charge distributions")
+    {
+        const energy_and_state_type expected{{1.0, state_type::REJECTED},
+                                             {2.0, state_type::REJECTED},
+                                             {3.0, state_type::ACCEPTED}};
+        CHECK(calculate_energy_and_state_type_with_kinks_rejected(*bii, calculate_energy_distribution(distributions),
+                                                                  distributions, spec, 1, input_wires,
+                                                                  output_wires) == expected);
+    }
+    SECTION("Equal energies retain each label regardless of input order")
+    {
+        for (auto& cd : distributions)
+        {
+            cd.assign_energy(1.0);
+        }
+        const auto energies = calculate_energy_distribution(distributions);
+        for (auto order = 0; order < 2; ++order)
+        {
+            const auto labels = calculate_energy_and_state_type_with_kinks_rejected(*bii, energies, distributions, spec,
+                                                                                    1, input_wires, output_wires);
+            REQUIRE(labels.size() == distributions.size());
+            CHECK(std::ranges::count(labels, std::pair{1.0, state_type::ACCEPTED}) == 1);
+            CHECK(std::ranges::count(labels, std::pair{1.0, state_type::REJECTED}) == 2);
+            CHECK_THAT(occupation_probability_gate_based(labels, 300), Catch::Matchers::WithinAbs(2.0 / 3.0, 1e-12));
+            std::ranges::reverse(distributions);
+        }
+    }
+    SECTION("An energy without matching distributions produces no labels")
+    {
+        energy_distribution energies{};
+        energies.add_energy_state({4.0, 1});
+        CHECK(calculate_energy_and_state_type_with_kinks_rejected(*bii, energies, distributions, spec, 1, input_wires,
+                                                                  output_wires)
+                  .empty());
+    }
+    SECTION("Only accepted states have zero error probability")
+    {
+        const std::vector only_accepted{accepted};
+        const auto        labels = calculate_energy_and_state_type_with_kinks_rejected(
+            *bii, calculate_energy_distribution(only_accepted), only_accepted, spec, 1, input_wires, output_wires);
+        REQUIRE(labels.size() == 1);
+        CHECK(occupation_probability_gate_based(labels, 300) == 0.0);
+    }
+    SECTION("Only rejected states have unit error probability")
+    {
+        const std::vector only_rejected{wrong_output, kinked};
+        const auto        labels = calculate_energy_and_state_type_with_kinks_rejected(
+            *bii, calculate_energy_distribution(only_rejected), only_rejected, spec, 1, input_wires, output_wires);
+        REQUIRE(labels.size() == 2);
+        CHECK(occupation_probability_gate_based(labels, 300) == 1.0);
+    }
 }

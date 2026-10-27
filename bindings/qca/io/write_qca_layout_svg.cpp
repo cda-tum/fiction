@@ -52,10 +52,8 @@ void register_write_qca_layout_svg(nb::module_& m)
            const decltype(write_qca_layout_svg_options{}.on_progress)& on_progress,
            const decltype(write_qca_layout_svg_options{}.simple)       simple)
         {
-            write_qca_layout_svg_options params{};
-            params.on_progress = on_progress;
-            params.simple      = simple;
-            const nb::gil_scoped_release release{};
+            const write_qca_layout_svg_options params{.simple = simple, .on_progress = on_progress};
+            const nb::gil_scoped_release       release{};
             fiction::qca::io::write_qca_layout_svg(layout, filename, params);
         },
         nb::arg("layout"), nb::arg("filename"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),

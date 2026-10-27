@@ -102,11 +102,10 @@ void register_hexagonalization(nb::module_& m)
            const decltype(hexagonalization_options{}.on_progress)&         on_progress,
            fiction::physical_design::hexagonalization_stats*               statistics)
         {
-            hexagonalization_options params{};
-            params.input_pin_extension  = input_pin_extension;
-            params.output_pin_extension = output_pin_extension;
-            params.on_progress          = on_progress;
-            const nb::gil_scoped_release release{};
+            const hexagonalization_options params{.input_pin_extension  = input_pin_extension,
+                                                  .output_pin_extension = output_pin_extension,
+                                                  .on_progress          = on_progress};
+            const nb::gil_scoped_release   release{};
             return fiction::physical_design::hexagonalization(layout, params, statistics);
         },
         nb::arg("layout"), nb::kw_only(),

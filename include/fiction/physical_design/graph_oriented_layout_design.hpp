@@ -265,8 +265,9 @@ struct graph_oriented_layout_design_params
 
     return "";
 }
+// NOLINTBEGIN(bugprone-exception-escape): Preserve the public noexcept contract; stream exceptions terminate.
 /**
- * Streams an effort mode to an output stream.
+ * @brief Streams an effort mode to an output stream.
  *
  * @param os Output stream.
  * @param mode Effort mode to stream.
@@ -276,6 +277,7 @@ inline std::ostream& operator<<(std::ostream& os, const graph_oriented_layout_de
 {
     return os << to_string(mode);
 }
+// NOLINTEND(bugprone-exception-escape)
 /**
  * Converts a cost objective to a string representation.
  *
@@ -310,8 +312,9 @@ inline std::ostream& operator<<(std::ostream& os, const graph_oriented_layout_de
 
     return "";
 }
+// NOLINTBEGIN(bugprone-exception-escape): Preserve the public noexcept contract; stream exceptions terminate.
 /**
- * Streams a cost objective to an output stream.
+ * @brief Streams a cost objective to an output stream.
  *
  * @param os Output stream.
  * @param cost Cost objective to stream.
@@ -322,6 +325,7 @@ inline std::ostream& operator<<(std::ostream&                                   
 {
     return os << to_string(cost);
 }
+// NOLINTEND(bugprone-exception-escape)
 /**
  * This struct stores statistics about the graph-oriented layout design process.
  */
@@ -930,6 +934,10 @@ class graph_oriented_layout_design_impl
                     worker_joiner& operator=(const worker_joiner&) = delete;
                     worker_joiner& operator=(worker_joiner&&)      = delete;
 
+                    /**
+                     * @brief Waits for workers that still own a shared state.
+                     */
+                    // NOLINTNEXTLINE(bugprone-exception-escape): valid() excludes future::wait()'s no_state exception.
                     ~worker_joiner()
                     {
                         for (auto& f : pool)
@@ -1279,8 +1287,7 @@ class graph_oriented_layout_design_impl
             using dist = physical_design::path_finding::twoddwave_distance_functor;
             using cost = physical_design::path_finding::unit_cost_functor<uint8_t>;
 
-            physical_design::path_finding::a_star_params a_star_crossing_params{};
-            a_star_crossing_params.crossings = !ps.planar;
+            const physical_design::path_finding::a_star_params a_star_crossing_params{.crossings = !ps.planar};
 
             auto path = physical_design::path_finding::a_star(layout, {.source = src, .target = dest}, dist(), cost(),
                                                               a_star_crossing_params);
@@ -2369,7 +2376,7 @@ class graph_oriented_layout_design_impl
         }
 
         return generate_next_positions(possible_positions, layout, ssg);
-    }
+    }  // NOLINT(clang-analyzer-cplusplus.NewDeleteLeaks): node_map releases MSVC shared control blocks.
     /**
      * @brief Reports a graph's current candidate without interpreting search depth as completion.
      * @param ssg Search graph with a stable vector index.
@@ -2509,10 +2516,10 @@ class graph_oriented_layout_design_impl
             }
         };
 
-        synthesis::fanout_substitution_params params{};
-        params.strategy = synthesis::fanout_substitution_params::substitution_strategy::BREADTH;
+        const synthesis::fanout_substitution_params breadth_params{
+            .strategy = synthesis::fanout_substitution_params::substitution_strategy::BREADTH};
         const mockturtle::fanout_view network_substituted_breadth{
-            synthesis::fanout_substitution<fiction::networks::named_technology_network>(ntk, params)};
+            synthesis::fanout_substitution<fiction::networks::named_technology_network>(ntk, breadth_params)};
 
         const topo_view_co_to_ci network_breadth_co_to_ci{network_substituted_breadth, seed};
 
@@ -2531,9 +2538,10 @@ class graph_oriented_layout_design_impl
         // further network and nodes initialization for high-, highest-, and maximum-effort
         if (ps.mode != graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY)
         {
-            params.strategy = synthesis::fanout_substitution_params::substitution_strategy::DEPTH;
+            const synthesis::fanout_substitution_params depth_params{
+                .strategy = synthesis::fanout_substitution_params::substitution_strategy::DEPTH};
             const mockturtle::fanout_view network_substituted_depth{
-                synthesis::fanout_substitution<fiction::networks::named_technology_network>(ntk, params)};
+                synthesis::fanout_substitution<fiction::networks::named_technology_network>(ntk, depth_params)};
 
             const topo_view_ci_to_co network_breadth_ci_to_co{network_substituted_breadth, seed};
             const topo_view_co_to_ci network_depth_co_to_ci{network_substituted_depth, seed};
@@ -2576,10 +2584,12 @@ class graph_oriented_layout_design_impl
 
                 if (ps.mode != graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT)
                 {
-                    params.strategy = synthesis::fanout_substitution_params::substitution_strategy::RANDOM;
-                    params.seed     = seed;
+                    const synthesis::fanout_substitution_params random_params{
+                        .strategy = synthesis::fanout_substitution_params::substitution_strategy::RANDOM,
+                        .seed     = seed};
                     const mockturtle::fanout_view network_substituted_random{
-                        synthesis::fanout_substitution<fiction::networks::named_technology_network>(ntk, params)};
+                        synthesis::fanout_substitution<fiction::networks::named_technology_network>(ntk,
+                                                                                                    random_params)};
 
                     const topo_view_co_to_ci_random network_co_to_ci_random{network_substituted_random, seed};
                     const topo_view_ci_to_co_random network_ci_to_co_random{network_substituted_random, seed};
