@@ -15,6 +15,7 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
@@ -96,10 +97,20 @@ TEST_CASE("A* retains least costs after multiple route improvements", "[A*]")
             return source == layout_base::coordinate{1, 1} && target == layout_base::coordinate{1, 0} ? uint32_t{1} :
                                                                                                         uint32_t{1000};
         }};
-    /** @brief Admissible heuristic for the weighted search. */
-    const distance_functor<uint32_t> zero{[](const auto&, const auto&) { return uint32_t{0}; }};
+    /** @brief Exercise Dijkstra search and a nonzero consistent heuristic. */
+    const auto heuristic_enabled = GENERATE(false, true);
+    /** @brief Minimum remaining costs for the six coordinates. */
+    const std::array<std::array<uint32_t, 3>, 2> remaining{{{53, 51, 50}, {52, 52, 0}}};
+    /** @brief Consistent lower bounds on the remaining route cost. */
+    const distance_functor<uint32_t> heuristic{
+        [&](const auto& source, const auto&)
+        {
+            return heuristic_enabled ?
+                       remaining.at(static_cast<std::size_t>(source.y)).at(static_cast<std::size_t>(source.x)) :
+                       uint32_t{0};
+        }};
     /** @brief Minimum-cost route through the zero-cost edge. */
-    const auto path = a_star(layout, {.source = {0, 0}, .target = {2, 1}}, zero, cost);
+    const auto path = a_star(layout, {.source = {0, 0}, .target = {2, 1}}, heuristic, cost);
     REQUIRE_FALSE(path.empty());
     /** @brief Accumulated route cost. */
     uint32_t total_cost{};

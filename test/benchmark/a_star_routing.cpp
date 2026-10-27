@@ -11,6 +11,7 @@
 /**
  * @file
  * @brief Benchmarks for A* routing and its layout optimization callers.
+ * @author Marcel Walter (marcelwa)
  */
 
 #include <catch2/benchmark/catch_benchmark.hpp>

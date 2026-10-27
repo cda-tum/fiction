@@ -328,9 +328,10 @@ class a_star_impl
  * `gate_layout`) and respects the underlying information flow imposed by `layout`'s clocking scheme.
  *
  * A* is an extension of Dijkstra's algorithm for shortest paths but offers better average complexity. It uses a
- * heuristic distance function that estimates the remaining costs towards the target in every step. Thus, this heuristic
- * function should neither be complex to calculate nor overestimating the remaining costs. Common heuristics to be used
- * are the Manhattan and the Euclidean distance functions. See `distance_functor` for implementations.
+ * heuristic distance function that estimates the remaining costs towards the target in every step. The heuristic must
+ * be consistent with the step costs: `h(u) <= cost(u, v) + h(v)` for every traversable step, with `h(target) = 0`.
+ * Step costs must be nonnegative. Manhattan and Euclidean distance satisfy this condition for unit-cost Cartesian
+ * steps. See `distance_functor` for implementations.
  *
  * Paths do not pass obstructed coordinates or connections, except that the target is never obstructed. A coordinate
  * or connection is obstructed if the `obstructions` argument marks it or if the layout's `is_obstructed_coordinate`
