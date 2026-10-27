@@ -925,7 +925,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - QCC and QLL writers now propagate allocation failures while sorting terminal cells.
   - QCADesigner output now rejects names containing CR, LF, or null bytes before changing output.
   - QCADesigner and cell-based QCA SVG output now avoid scanning empty cell positions in sparse layouts.
-  - QCADesigner output now preserves quantum-dot offsets and avoids integer overflow at large coordinates.
+  - QCADesigner output now preserves quantum-dot offsets and avoids integer overflow at large coordinates, and retains label widths for long names.
   - Gate-layout DOT output now preserves signed coordinate IDs and quoted terminal names.
   - FGL round trips now preserve whitespace-only layout and port names.
   - `tt_reader` now handles empty input, rejects incomplete or malformed hexadecimal records, and reports file-open and read failures.

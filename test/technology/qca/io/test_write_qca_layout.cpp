@@ -1536,6 +1536,16 @@ TEST_CASE("QCAD retains quantum-dot offsets at large coordinates", "[qcad]")
     CHECK(stream.str().find(fmt::format("{}={}\n", axis, negative_dot)) != std::string::npos);
 }
 
+TEST_CASE("QCAD retains label widths for long names", "[qcad]")
+{
+    qca::layout layout{{1, 1}};
+    layout.assign_cell_type({0, 0}, qca::cell_type::INPUT);
+    layout.assign_cell_name({0, 0}, std::string(3355443, 'x'));
+    std::ostringstream stream{};
+    write_qca_layout(layout, stream);
+    CHECK(stream.str().find("bounding_box.cxWorld=33554434.000000\n") != std::string::npos);
+}
+
 TEST_CASE("QCAD preserves optional via layers before empty crossing layers", "[qcad]")
 {
     const auto  create_vias = GENERATE(false, true);

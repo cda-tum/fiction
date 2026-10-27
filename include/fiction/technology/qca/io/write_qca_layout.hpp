@@ -164,10 +164,12 @@ inline constexpr const double LABEL_Y_OFFSET = 21.5;
 /** @brief Horizontal offset of the label bounding box. */
 inline constexpr const double BB_X_OFFSET = 9.0;
 /** @brief Vertical offset of the label bounding box. */
-inline constexpr const double BB_Y_OFFSET     = 33.0;
-inline constexpr const float  BB_CX_OFFSET    = 4.0f;
-inline constexpr const float  BB_CY_OFFSET    = 23.0f;
-inline constexpr const float  CHARACTER_WIDTH = 10.0f;
+inline constexpr const double BB_Y_OFFSET = 33.0;
+/** @brief Extra width of the label bounding box. */
+inline constexpr const double BB_CX_OFFSET = 4.0;
+inline constexpr const float  BB_CY_OFFSET = 23.0f;
+/** @brief Width of one byte of a serialized cell label. */
+inline constexpr const double CHARACTER_WIDTH = 10.0;
 
 /** @brief Position of a QCADesigner cell. */
 struct cell_pos
@@ -475,6 +477,12 @@ class write_qca_layout_impl
         }
     }
 
+    /**
+     * @brief Writes the stored cell name or the fixed polarization label of a constant cell.
+     * @param c Cell whose label is serialized.
+     * @param pos Cell center in QCADesigner coordinates.
+     * @param color Label color.
+     */
     void write_cell_name(const qca::layout::cell& c, const qcad::cell_pos pos, const qcad::color color)
     {
         const auto cell_type = lyt.get_cell_type(c);
@@ -508,7 +516,7 @@ class write_qca_layout_impl
             os << qcad::BOUNDING_BOX_X << std::to_string(pos.x - qcad::BB_X_OFFSET) << '\n';
             os << qcad::BOUNDING_BOX_Y << std::to_string(pos.y - qcad::BB_Y_OFFSET) << '\n';
             os << qcad::BOUNDING_BOX_CX
-               << std::to_string((static_cast<float>(cell_name.size()) * qcad::CHARACTER_WIDTH) + qcad::BB_CX_OFFSET)
+               << std::to_string((static_cast<double>(cell_name.size()) * qcad::CHARACTER_WIDTH) + qcad::BB_CX_OFFSET)
                << '\n';
             os << qcad::BOUNDING_BOX_CY << qcad::BB_CY_OFFSET << '\n';
 
