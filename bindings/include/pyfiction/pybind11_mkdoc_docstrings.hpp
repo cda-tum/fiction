@@ -13440,23 +13440,54 @@ static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_os = R"do
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_ps = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_run = R"doc(Writes the QCA layout to the output stream in QCADesigner format.)doc";
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_run =
+R"doc(Validates serialized names and writes the QCA layout in QCADesigner
+format.
+
+Raises:
+    ValueError: If a serialized name contains CR, LF, or a null byte.
+
+)doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_via_counter = R"doc()doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_via_layer_cells = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_cell = R"doc()doc";
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_cell =
+R"doc(Writes a cell and its quantum dots in QCADesigner coordinates.
+
+Args:
+    c: Cell to serialize.
+    save_via_cells: Whether to collect vertical cells for the next
+                    inter-layer via layer.
+
+)doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_cell_colors = R"doc()doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_cell_function = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_cell_layers = R"doc()doc";
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_cell_layers =
+R"doc(Writes occupied cells in layer, row, and column order, retaining empty
+layers and inter-layer vias.
+
+Args:
+    cells: In-bounds cells sorted by layer, row, and column.
+
+)doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_cell_mode = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_cell_name = R"doc()doc";
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_cell_name =
+R"doc(Writes the stored cell name or the fixed polarization label of a
+constant cell.
+
+Args:
+    c: Cell whose label is serialized.
+    pos: Cell center in QCADesigner coordinates.
+    color: Label color.
+
+)doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_header = R"doc()doc";
 
@@ -13470,28 +13501,34 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_quantum_dots = R"doc()doc";
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_quantum_dots =
+R"doc(Writes the four quantum dots and their charge values around a cell
+center.
+
+Args:
+    c: Cell whose quantum dots are serialized.
+    pos: Cell center in QCADesigner coordinates.
+
+)doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_via_cells = R"doc()doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl = R"doc(Draws a QCA layout as SVG.)doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl_generate_cell_based_svg =
-R"doc(Generates an SVG string representing the cell-based clocked cell
-layout and appends it to the output stream.
+R"doc(Generates an SVG string from in-bounds occupied cells in layer, row,
+and column painting order.
 
 )doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl_generate_description_color =
-R"doc(Generates and returns a pair of strings representing the description
-and color of the given cell.
+R"doc(Selects the static SVG description and color of the given cell.
 
 Args:
     c: The cell for which to generate the description and color.
 
 Returns:
-    A pair of strings representing the description and color of the
-    given cell `c`.
+    Views of the static description and color of the given cell `c`.
 
 )doc";
 
@@ -13522,7 +13559,8 @@ Args:
 static const char *mkd_doc_fiction_qca_io_write_qca_layout =
 R"doc(Writes a QCA layout to a qca file that is used by QCADesigner
 (https://waluslab.ece.ubc.ca/qcadesigner/), a physical simulator for
-the QCA technology platform.
+the QCA technology platform. Cells outside the layout extent are
+skipped. Cells within each layer are written in row and column order.
 
 This overload uses an output stream to write into.
 
@@ -13531,12 +13569,18 @@ Args:
     os: The output stream to write into.
     ps: Parameters.
 
+Raises:
+    ValueError: If the layout name or a serialized cell name contains
+                CR, LF, or a null byte. Names are validated before
+                writing to the stream.
+
 )doc";
 
 static const char *mkd_doc_fiction_qca_io_write_qca_layout_2 =
 R"doc(Writes a QCA layout to a qca file that is used by QCADesigner
 (https://waluslab.ece.ubc.ca/qcadesigner/), a physical simulator for
-the QCA technology platform.
+the QCA technology platform. Cells outside the layout extent are
+skipped. Cells within each layer are written in row and column order.
 
 This overload uses a file name to create and write into.
 
@@ -13549,6 +13593,8 @@ Args:
 Raises:
     RuntimeError: If creating, writing, closing, or replacing the
                   output file fails.
+    ValueError: If the layout name or a serialized cell name contains
+                CR, LF, or a null byte.
 
 )doc";
 
@@ -13563,6 +13609,9 @@ R"doc(Writes an SVG representation of a QCA layout into an output stream.
 Both tile- and cell-based layouts are supported. For tile-based
 layouts, QCA layouts of tile size :math:`5 \times 5` are supported
 exclusively so far.
+
+Cells outside the layout extent are skipped. Cells at the same
+position paint lower layers before upper layers.
 
 The utilized color scheme is based on the standard scheme used in
 QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
@@ -13582,6 +13631,9 @@ R"doc(Writes an SVG representation of a QCA layout into a file. Both tile-
 and cell-based layouts are supported. For tile-based layouts, QCA
 layouts of tile size :math:`5 \times 5` are supported exclusively so
 far.
+
+Cells outside the layout extent are skipped. Cells at the same
+position paint lower layers before upper layers.
 
 The utilized color scheme is based on the standard scheme used in
 QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).

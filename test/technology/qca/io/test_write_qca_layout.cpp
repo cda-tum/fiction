@@ -25,6 +25,7 @@
 
 #include <fmt/format.h>
 
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <iterator>
