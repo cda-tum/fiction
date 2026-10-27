@@ -83,8 +83,9 @@ TEST_CASE("Read surface defects into an sidb::layout", "[read-sidb-surface-defec
     }
     SECTION("lines with negative numbers or non-numeral characters are ignored")
     {
-        for (const auto* const surface : {"[[0 1 0 0] [0 -5 0 0] [0 1 0 0]]", "[[0 1 0 0] [0 Z 0 0] [0 1 0 0]]",
-                                          "[[0 1 0 0] [111111111111111111111111x] [0 1 0 0]]"})
+        for (const auto* const surface :
+             {"[[0 1 0 0] [0 -5 0 0] [0 1 0 0]]", "[[0 1 0 0] [0 Z 0 0] [0 1 0 0]]",
+              "[[0 1 0 0] [1111111111111111111111111111111111111111111111111111111111111111x] [0 1 0 0]]"})
         {
             std::istringstream surface_stream{surface};
             const auto         lyt = read_surface_defects(surface_stream);

@@ -14,7 +14,6 @@
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
- * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_message.hpp>
@@ -1222,7 +1221,7 @@ TEST_CASE("SQD readers reject incomplete document consumption", "[sqd]")
         CHECK_THROWS_AS(read_sqd_layout(stream), sqd_parsing_error);
     }
     /** @brief Comments and whitespace outside the root remain valid XML. */
-    std::istringstream valid{"<?xml version=\"1.0\"?><!-- before -->\n" + xml + "\n<!-- after -->"};
+    std::istringstream valid{"<?xml version=\"1.0\"?><!-- before -->\r\n" + xml + "\r\n<!-- after -->"};
     CHECK(read_sqd_layout(valid).is_empty());
 
     for (const auto control : {char{0}, char{26}})

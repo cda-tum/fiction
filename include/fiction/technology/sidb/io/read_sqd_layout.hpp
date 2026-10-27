@@ -14,7 +14,6 @@
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
- * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -530,7 +529,8 @@ class sqd_reader
     return p.run();
 }
 /**
- * Reads an SQD file into an `sidb::layout`. See the stream overload for the file's interpretation.
+ * Reads an SQD file into an `sidb::layout` in binary mode. The input must have a single `siqad` root, no text outside
+ * the root, and no NUL bytes. See the stream overload for the lattice interpretation.
  *
  * @param filename The file to read.
  * @param name The name to give to the layout.

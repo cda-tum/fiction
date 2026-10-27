@@ -13,7 +13,6 @@
  * @brief Reader for defective SiDB surfaces in a plain-text index format.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
- * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -217,7 +216,8 @@ class surface_defects_reader
     return p.run();
 }
 /**
- * Reads a defect matrix from a file into a defects-only `sidb::layout`. See the stream overload for the format.
+ * Reads a defect matrix from a file in binary mode into a defects-only `sidb::layout`. See the stream overload for
+ * the format.
  *
  * @param filename The file to read.
  * @param name The name to give to the layout.
