@@ -15062,7 +15062,9 @@ comes from the file's lattice definition; SiDBs and surface defects
 are placed at the `(n, m, l)` lattice coordinates the file names.
 Explicit geometry must contain finite vectors and two basis sites.
 Without geometry, the reader accepts the two predefined reconstruction
-names and defaults to H-Si(100)-2x1 when the name is absent.
+names and defaults to H-Si(100)-2x1 when the name is absent. The input
+must have a single `siqad` root, no text outside the root, and no NUL
+bytes. Open file streams in binary mode to preserve every input byte.
 
 Args:
     is: The input stream to read from.
@@ -15078,8 +15080,9 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_io_read_sqd_layout_2 =
-R"doc(Reads an SQD file into an `sidb::layout`. See the stream overload for
-the file's interpretation.
+R"doc(Reads an SQD file into an `sidb::layout` in binary mode. The input
+must have a single `siqad` root, no text outside the root, and no NUL
+bytes. See the stream overload for the lattice interpretation.
 
 Args:
     filename: The file to read.
@@ -15099,7 +15102,8 @@ static const char *mkd_doc_fiction_sidb_io_read_surface_defects =
 R"doc(Reads a defect matrix from a stream into a defects-only `sidb::layout`
 on the H-Si(100)-2x1 lattice. Each `[...]` row lists one defect index
 per column; entry `x` of row `y` becomes the defect at column `x` of
-single-SiDB row `y`.
+single-SiDB row `y`. Open file streams in binary mode to preserve
+every input byte.
 
 Args:
     is: The input stream to read from.
@@ -15117,8 +15121,8 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_io_read_surface_defects_2 =
-R"doc(Reads a defect matrix from a file into a defects-only `sidb::layout`.
-See the stream overload for the format.
+R"doc(Reads a defect matrix from a file in binary mode into a defects-only
+`sidb::layout`. See the stream overload for the format.
 
 Args:
     filename: The file to read.
