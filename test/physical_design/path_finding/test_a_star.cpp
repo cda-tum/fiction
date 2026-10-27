@@ -15,6 +15,7 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
@@ -71,6 +72,53 @@ TEST_CASE("A* preserves priority after improving a queued coordinate", "[A*]")
         total_cost += cost(path[i - 1], path[i]);
     }
     CHECK(total_cost == 34);
+}
+
+TEST_CASE("A* retains least costs after multiple route improvements", "[A*]")
+{
+    /** @brief Weighted geometry with a zero-cost edge and two routes improved before reaching the target. */
+    const cartesian_layout layout{{3, 2}};
+    /** @brief Eastbound costs for each row. */
+    const std::array<uint32_t, 4> east{20, 1, 0, 100};
+    /** @brief Southbound costs for each column. */
+    const std::array<uint32_t, 3> south{1, 1000, 50};
+    /** @brief Directed edge costs, including a cheap northbound step from the lower middle tile. */
+    const cost_functor<uint32_t> cost{
+        [&](const auto& source, const auto& target)
+        {
+            if (target.x > source.x)
+            {
+                return east.at((2 * static_cast<std::size_t>(source.y)) + static_cast<std::size_t>(source.x));
+            }
+            if (target.y > source.y)
+            {
+                return south.at(static_cast<std::size_t>(source.x));
+            }
+            return source == layout_base::coordinate{1, 1} && target == layout_base::coordinate{1, 0} ? uint32_t{1} :
+                                                                                                        uint32_t{1000};
+        }};
+    /** @brief Exercise Dijkstra search and a nonzero consistent heuristic. */
+    const auto heuristic_enabled = GENERATE(false, true);
+    /** @brief Minimum remaining costs for the six coordinates. */
+    const std::array<std::array<uint32_t, 3>, 2> remaining{{{53, 51, 50}, {52, 52, 0}}};
+    /** @brief Consistent lower bounds on the remaining route cost. */
+    const distance_functor<uint32_t> heuristic{
+        [&](const auto& source, const auto&)
+        {
+            return heuristic_enabled ?
+                       remaining.at(static_cast<std::size_t>(source.y)).at(static_cast<std::size_t>(source.x)) :
+                       uint32_t{0};
+        }};
+    /** @brief Minimum-cost route through the zero-cost edge. */
+    const auto path = a_star(layout, {.source = {0, 0}, .target = {2, 1}}, heuristic, cost);
+    REQUIRE_FALSE(path.empty());
+    /** @brief Accumulated route cost. */
+    uint32_t total_cost{};
+    for (std::size_t i = 1; i < path.size(); ++i)
+    {
+        total_cost += cost(path[i - 1], path[i]);
+    }
+    CHECK(total_cost == 53);
 }
 
 TEST_CASE("A* on 2x2 layouts", "[A*]")
@@ -263,6 +311,32 @@ TEST_CASE("A* on 4x4 layouts with varying cost functions", "[A*]")
         CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
         CHECK(path.target() == fiction::layouts::layout_base::coordinate{3, 3});
     }
+}
+
+TEST_CASE("A* minimizes nonuniform path costs", "[A*]")
+{
+    /** @brief Two routes reach the target with costs six and five. */
+    const cartesian_gate_layout layout{cartesian_gate_layout::extent{3, 2, 1}, clocking::twoddwave()};
+    /** @brief Zero is an admissible heuristic for every nonnegative edge cost. */
+    const distance_functor<uint64_t> estimate{[](const auto&, const auto&) { return uint64_t{0}; }};
+    /** @brief An expensive target is queued before a cheaper route improves another open coordinate. */
+    const cost_functor<uint64_t> cost{
+        [](const layout_base::coordinate& source, const layout_base::coordinate& target) -> uint64_t
+        {
+            if (source == layout_base::coordinate{0, 0})
+            {
+                return target == layout_base::coordinate{1, 0} ? 1 : 3;
+            }
+            if (source == layout_base::coordinate{1, 0})
+            {
+                return target == layout_base::coordinate{2, 0} ? 1 : 10;
+            }
+            return source == layout_base::coordinate{2, 0} ? 4 : 1;
+        }};
+    /** @brief The minimum-cost route has three edges. */
+    const auto path = a_star(layout, {.source = {0, 0}, .target = {2, 1}}, estimate, cost);
+    REQUIRE(path.size() == 4);
+    CHECK(cost(path[0], path[1]) + cost(path[1], path[2]) + cost(path[2], path[3]) == 5);
 }
 
 TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
@@ -556,7 +630,7 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
     using cost = unit_cost_functor<uint8_t>;
 
     // enable crossings
-    const a_star_params params{true};
+    const a_star_params params{.crossings = true};
 
     SECTION("Single crossing")
     {

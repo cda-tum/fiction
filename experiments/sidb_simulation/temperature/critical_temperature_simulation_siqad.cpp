@@ -15,12 +15,11 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "fiction_experiments.hpp"
-
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/analysis/critical_temperature.hpp>
+#include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 
 #include <fmt/format.h>
 #include <kitty/dynamic_truth_table.hpp>
@@ -32,6 +31,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <experiments.hpp>
 
 using namespace fiction;
 using namespace fiction::sidb::io;
@@ -61,14 +62,15 @@ try
         std::make_pair("or", std::vector<kitty::dynamic_truth_table>{create_or_tt()})};
 
     const simulation_parameters sim_params{2, -0.28};
-    critical_temperature_params ct_params{.operational_params = {.sim_params = sim_params}};
-
     // this is how the gates are presented and simulated in "SiQAD: A Design and Simulation Tool for Atomic Silicon
     // Quantum Dot Circuits\" by Samuel Sze Hang Ng, Jacob Retallick, Hsi Nien Chiu, Robert Lupoiu, Lucian Livadaru,
     // Taleana Huff, Mohammad Rashidi, Wyatt Vine, Thomas Dienel, Robert A. Wolkow, and Konrad Walus in IEEE
     // TRANSACTIONS ON NANOTECHNOLOGY, Volume 19, 2020. (https://ieeexplore.ieee.org/abstract/document/8963859)
-    ct_params.operational_params.input_bdl_iterator_params.input_bdl_config =
-        bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED;
+    const critical_temperature_params ct_params{
+        .operational_params = {
+            .sim_params                = sim_params,
+            .input_bdl_iterator_params = {
+                .input_bdl_config = bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED}}};
 
     for (const auto& [gate, truth_table] : gates)
     {

@@ -84,7 +84,7 @@ void remove_assign_and_check_clocking(gate_layout<Geometry> lyt)
 
         determine_clocking_stats st{};
 
-        const auto result = determine_clocking(lyt, determine_clocking_params{solver}, &st);
+        const auto result = determine_clocking(lyt, determine_clocking_params{.sat_engine = solver}, &st);
 
         REQUIRE(result == true);
         CHECK(mockturtle::to_seconds(st.time_total) > 0);

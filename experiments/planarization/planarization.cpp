@@ -31,7 +31,7 @@
 #include <fiction/utils/graph/mincross.hpp>
 #include <fiction/verification/virtual_miter.hpp>
 
-#include <fmt/format.h>
+#include <fmt/base.h>
 #include <kitty/partial_truth_table.hpp>
 #include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/algorithms/equivalence_checking.hpp>
@@ -50,6 +50,8 @@
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include <experiments.hpp>
 
 using namespace fiction;
 using namespace fiction::networks;
@@ -284,9 +286,7 @@ try
         {
             const auto ntk = mockturtle::cleanup_dangling(read_network(benchmark));
 
-            network_balancing_params b_ps{};
-            b_ps.unify_outputs           = true;
-            b_ps.buffer_constant_outputs = false;
+            const network_balancing_params b_ps{.unify_outputs = true, .buffer_constant_outputs = false};
 
             const auto balanced = network_balancing<technology_network>(ntk, b_ps);
 

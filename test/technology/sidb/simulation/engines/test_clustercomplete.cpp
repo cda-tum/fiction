@@ -63,9 +63,9 @@ TEST_CASE("Empty layout ClusterComplete simulation", "[clustercomplete]")
 {
     const layout lyt{};
 
-    clustercomplete_params params{.sim_params = simulation_parameters{2, -0.32}};
-    params.validity_witness_partitioning_max_cluster_size_gss = 3;
-    params.num_overlapping_witnesses_limit_gss                = 8;
+    const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.32},
+                                        .validity_witness_partitioning_max_cluster_size_gss = 3,
+                                        .num_overlapping_witnesses_limit_gss                = 8};
 
     const auto simulation_results = clustercomplete(lyt, params);
 
@@ -230,9 +230,8 @@ TEST_CASE("Single SiDB ClusterComplete simulation with local external potential"
     layout lyt{};
     lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
 
-    clustercomplete_params params{.sim_params = simulation_parameters{2, -0.25}};
-
-    params.local_external_potential.insert({{0, 0, 0}, -0.5});
+    const clustercomplete_params params{.sim_params               = simulation_parameters{2, -0.25},
+                                        .local_external_potential = {{{0, 0, 0}, -0.5}}};
 
     const auto simulation_results = clustercomplete(lyt, params);
 
@@ -245,10 +244,9 @@ TEST_CASE("Single SiDB ClusterComplete simulation with local external potential 
     layout lyt{};
     lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
 
-    clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
-
-    params.local_external_potential.insert({{{0, 0, 0}, -1}});
-    const auto simulation_results = clustercomplete(lyt, params);
+    const clustercomplete_params params{.sim_params               = simulation_parameters{3, -0.25},
+                                        .local_external_potential = {{{0, 0, 0}, -1}}};
+    const auto                   simulation_results = clustercomplete(lyt, params);
 
     REQUIRE(simulation_results.charge_distributions.size() == 1);
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == charge_state::POSITIVE);
@@ -259,8 +257,7 @@ TEST_CASE("Single SiDB ClusterComplete simulation with global external potential
     layout lyt{};
     lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
 
-    clustercomplete_params params{.sim_params = simulation_parameters{2, -0.25}};
-    params.global_potential = -0.26;
+    const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.25}, .global_potential = -0.26};
 
     const auto simulation_results = clustercomplete(lyt, params);
 
@@ -274,8 +271,7 @@ TEST_CASE("Single SiDB ClusterComplete simulation with global external potential
     layout lyt{};
     lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
 
-    clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
-    params.global_potential = -1;
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}, .global_potential = -1};
 
     const auto simulation_results = clustercomplete(lyt, params);
     REQUIRE(simulation_results.charge_distributions.size() == 1);
@@ -287,8 +283,7 @@ TEST_CASE("Single SiDB ClusterComplete simulation with global external potential
     layout lyt{};
     lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
 
-    clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
-    params.global_potential = 1;
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}, .global_potential = 1};
 
     const auto simulation_results = clustercomplete(lyt, params);
     REQUIRE(simulation_results.charge_distributions.size() == 1);
@@ -1179,8 +1174,8 @@ TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 an
     lyt.assign_sidb({10, 8, 1}, dot_tag::NORMAL);
     lyt.assign_sidb({16, 1, 0}, dot_tag::NORMAL);
 
-    clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
-    params.local_external_potential.insert({{{6, 2, 0}, -0.5}});
+    const clustercomplete_params params{.sim_params               = simulation_parameters{3, -0.28},
+                                        .local_external_potential = {{{6, 2, 0}, -0.5}}};
 
     const auto simulation_results = clustercomplete(lyt, params);
 
@@ -1213,8 +1208,7 @@ TEST_CASE("ClusterComplete simulation  of a Y-shape SiDB OR gate with input 01 a
     lyt.assign_sidb({10, 8, 1}, dot_tag::NORMAL);
     lyt.assign_sidb({16, 1, 0}, dot_tag::NORMAL);
 
-    clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
-    params.global_potential = -0.5;
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}, .global_potential = -0.5};
 
     const auto simulation_results = clustercomplete(lyt, params);
 
@@ -1247,8 +1241,7 @@ TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 an
     lyt.assign_sidb({10, 8, 1}, dot_tag::NORMAL);
     lyt.assign_sidb({16, 1, 0}, dot_tag::NORMAL);
 
-    clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
-    params.global_potential = -2;
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}, .global_potential = -2};
 
     const auto simulation_results = clustercomplete(lyt, params);
 
@@ -1844,8 +1837,7 @@ TEST_CASE("ClusterComplete reports progress", "[clustercomplete]")
 
     progress_recorder rec{};
 
-    clustercomplete_params params{.sim_params = simulation_parameters{2}};
-    params.on_progress = rec.callback();
+    clustercomplete_params params{.sim_params = simulation_parameters{2}, .on_progress = rec.callback()};
 
     SECTION("single-threaded")
     {

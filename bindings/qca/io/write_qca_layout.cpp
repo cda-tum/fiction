@@ -49,10 +49,9 @@ void register_write_qca_layout(nb::module_& m)
            const decltype(write_qca_layout_options{}.on_progress)&                 on_progress,
            const decltype(write_qca_layout_options{}.create_inter_layer_via_cells) create_inter_layer_via_cells)
         {
-            write_qca_layout_options params{};
-            params.on_progress                  = on_progress;
-            params.create_inter_layer_via_cells = create_inter_layer_via_cells;
-            const nb::gil_scoped_release release{};
+            const write_qca_layout_options params{.create_inter_layer_via_cells = create_inter_layer_via_cells,
+                                                  .on_progress                  = on_progress};
+            const nb::gil_scoped_release   release{};
             fiction::qca::io::write_qca_layout(layout, filename, params);
         },
         nb::arg("layout"), nb::arg("filename"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),

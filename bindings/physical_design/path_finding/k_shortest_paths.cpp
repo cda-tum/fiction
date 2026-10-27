@@ -66,9 +66,8 @@ void register_yen_k_shortest_paths_impl(nb::module_& m)
            const decltype(yen_k_shortest_paths_options{}.astar_params.crossings) crossings,
            const std::optional<fiction::layouts::obstructions>&                  supplied_obstructions)
         {
-            yen_k_shortest_paths_options params{};
-            const auto obstructions       = supplied_obstructions.value_or(fiction::layouts::obstructions{});
-            params.astar_params.crossings = crossings;
+            const yen_k_shortest_paths_options params{.astar_params = {.crossings = crossings}};
+            const auto obstructions = supplied_obstructions.value_or(fiction::layouts::obstructions{});
 
             const auto k_paths = fiction::physical_design::path_finding::yen_k_shortest_paths<Lyt>(
                 lyt, {source, target}, k, params, obstructions);

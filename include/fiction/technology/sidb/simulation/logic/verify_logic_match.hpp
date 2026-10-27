@@ -25,8 +25,8 @@
 
 #include <kitty/dynamic_truth_table.hpp>
 
-#include <cassert>
 #include <cstdint>
+#include <stdexcept>
 #include <vector>
 
 namespace fiction::sidb::simulation::logic
@@ -46,17 +46,19 @@ namespace fiction::sidb::simulation::logic
  * @param input_wires The input BDL wires of `lyt`.
  * @param output_wires The output BDL wires of `lyt`.
  * @return The operational status.
- * @throws std::out_of_range if validation encounters an invalid lattice basis index.
+ * @throws std::invalid_argument if `spec` is empty or truth-table variable counts differ.
+ * @throws std::out_of_range if `input_pattern` exceeds the specification or a lattice basis index is invalid.
  */
 [[nodiscard]] inline operational_status
 verify_logic_match(const layout& lyt, const charge_distribution& cd, const is_operational_params& params,
                    const std::vector<kitty::dynamic_truth_table>& spec, const uint64_t input_pattern,
                    const std::vector<bdl_wire>& input_wires, const std::vector<bdl_wire>& output_wires)
 {
-    assert(!spec.empty());
-    // all elements in tts must have the same number of variables
-    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
-                                      { return a.num_vars() != b.num_vars(); }) == spec.cend());
+    detail::check_specification(spec);
+    if (input_pattern >= spec.front().num_bits())
+    {
+        throw std::out_of_range("input pattern exceeds the specification");
+    }
 
     if (params.sim_params.base == 2 && analysis::can_positive_charges_occur(lyt, params.sim_params))
     {

@@ -59,17 +59,16 @@ void register_quicksim(nb::module_& m)
            const decltype(quicksim_options{}.on_progress)&                  on_progress,
            const decltype(quicksim_options{}.on_worker_progress)&           on_worker_progress)
         {
-            quicksim_options params{};
-            params.sim_params      = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            params.iteration_steps = iteration_steps;
-            params.alpha           = alpha;
-            if (number_threads)
-            {
-                params.number_threads = *number_threads;
-            }
-            params.timeout            = timeout;
-            params.on_progress        = on_progress;
-            params.on_worker_progress = on_worker_progress;
+            // MSVC 19.44 crashes when the fallback constructs QuickSim options inside the initializer.
+            const quicksim_options defaults{};
+            const quicksim_options params{.sim_params =
+                                              make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf),
+                                          .iteration_steps = iteration_steps,
+                                          .alpha           = alpha,
+                                          .number_threads  = number_threads ? *number_threads : defaults.number_threads,
+                                          .timeout         = timeout,
+                                          .on_progress     = on_progress,
+                                          .on_worker_progress = on_worker_progress};
             const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::engines::quicksim(lyt, params);
         },
@@ -80,13 +79,13 @@ void register_quicksim(nb::module_& m)
         nb::arg("iteration_steps") = quicksim_options{}.iteration_steps, nb::arg("alpha") = quicksim_options{}.alpha,
         nb::arg("number_threads") = nb::none(), nb::arg("timeout") = quicksim_options{}.timeout,
         nb::arg("on_progress").none() = nb::none(), nb::arg("on_worker_progress").none() = nb::none(),
-        R"doc(Search for low-energy charge distributions with QuickSim.
+        R"doc(Search for low-energy distributions of negative and neutral charges with QuickSim.
 The keyword options select physical values, iterations, threads, runtime, and progress callbacks.
 Returns None when the heuristic search finds no physically valid charge distribution.
 Raises ValueError when base is neither 2 nor 3.
 
 Args:
-    base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+    base: Accepts 2 or 3; QuickSim searches negative and neutral charge states for either value.
     mu_minus: Negative-charge transition energy in eV.
     epsilon_r: Relative permittivity (dimensionless).
     lambda_tf: Thomas-Fermi screening distance in nm.

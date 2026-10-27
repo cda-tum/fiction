@@ -21,7 +21,10 @@
 
 #include <fiction/networks/views/bfs_topo_view.hpp>
 
+#include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
+#include <mockturtle/networks/klut.hpp>
 #include <mockturtle/traits.hpp>
 
 #include <cstdint>
@@ -127,6 +130,49 @@ TEST_CASE("Check BFS order", "[bfs-topo-view]")
     nodes.clear();
     aig2.foreach_node([&nodes](auto node) { nodes.push_back(node); });
     CHECK(*nodes.rbegin() == 7);
+}
+
+TEST_CASE("BFS visits repeated fanins and dangling gates", "[bfs-topo-view]")
+{
+    mockturtle::klut_network   ntk{};
+    const auto                 a      = ntk.create_pi();
+    const auto                 unused = ntk.create_pi();
+    kitty::dynamic_truth_table function{2};
+    kitty::create_from_hex_string(function, "8");
+    const auto repeated = ntk.create_node({a, a}, function);
+    const auto dangling = ntk.create_not(repeated);
+    ntk.create_po(repeated);
+    ntk.create_po(repeated);
+
+    const bfs_topo_view topo{ntk};
+    CHECK(topo.size() == ntk.size());
+    CHECK(topo.num_gates() == ntk.num_gates());
+    CHECK(topo.node_to_index(ntk.get_node(unused)) < topo.size());
+    CHECK(topo.node_to_index(ntk.get_node(repeated)) < topo.node_to_index(ntk.get_node(dangling)));
+    topo.foreach_node([&](const auto n, const auto index) { CHECK(topo.index_to_node(index) == n); });
+}
+
+TEST_CASE("BFS indices stay contiguous across dead nodes and copies", "[bfs-topo-view]")
+{
+    mockturtle::aig_network ntk{};
+    const auto              a        = ntk.create_pi();
+    const auto              b        = ntk.create_pi();
+    const auto              removed  = ntk.create_and(a, b);
+    const auto              retained = ntk.create_and(a, !b);
+    ntk.create_po(retained);
+    ntk.take_out_node(ntk.get_node(removed));
+
+    bfs_topo_view topo{ntk};
+    REQUIRE(topo.size() == 4);
+    topo.update_bfs_topo();
+    const auto copy = topo;
+    CHECK(copy.node_to_index(ntk.get_node(removed)) == copy.size());
+    copy.foreach_node(
+        [&](const auto n, const auto index)
+        {
+            CHECK(copy.node_to_index(n) == index);
+            CHECK(copy.index_to_node(index) == n);
+        });
 }
 
 TEST_CASE("Create a bfs_topo_view on an AIG without bfs topo order", "[bfs-topo-view]")

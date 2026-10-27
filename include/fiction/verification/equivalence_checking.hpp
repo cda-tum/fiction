@@ -23,7 +23,6 @@
 #include "fiction/verification/critical_path_length_and_throughput.hpp"
 #include "fiction/verification/design_rule_violations.hpp"
 
-#include <fmt/format.h>
 #include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/algorithms/equivalence_checking.hpp>
 #include <mockturtle/algorithms/miter.hpp>
@@ -267,11 +266,9 @@ class equivalence_checking_impl
     template <typename NtkOrLyt>
     bool has_drvs(const NtkOrLyt& ntk_or_lyt, gate_level_drv_stats* stats) const
     {
-        fiction::verification::gate_level_drv_params drv_ps{};
-
         // suppress DRV output
-        std::ostringstream null_stream{};
-        drv_ps.out = &null_stream;
+        std::ostringstream                                 null_stream{};
+        const fiction::verification::gate_level_drv_params drv_ps{.out = &null_stream};
 
         gate_level_drvs(ntk_or_lyt, drv_ps, stats);
 

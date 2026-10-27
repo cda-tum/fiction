@@ -213,7 +213,12 @@ class sqd_reader
         // tinyXML2 does not support std::istream, so we have to read the whole file into a string first
         std::stringstream buffer{};
         buffer << is.rdbuf();
-        const std::string sqd_content{buffer.str()};
+        const std::string sqd_content{std::move(buffer).str()};
+
+        if (sqd_content.find('\0') != std::string::npos)
+        {
+            throw sqd_parsing_error("Error parsing SQD file: embedded NUL byte");
+        }
 
         tinyxml2::XMLDocument xml_document{};
         xml_document.Parse(sqd_content.c_str());
@@ -228,6 +233,19 @@ class sqd_reader
         if (siqad_root == nullptr)
         {
             throw sqd_parsing_error("Error parsing SQD file: no root element 'siqad'");
+        }
+
+        if (xml_document.RootElement() != siqad_root || siqad_root->NextSiblingElement() != nullptr)
+        {
+            throw sqd_parsing_error("Error parsing SQD file: multiple root elements");
+        }
+
+        for (const auto* node = xml_document.FirstChild(); node != nullptr; node = node->NextSibling())
+        {
+            if (node->ToText() != nullptr)
+            {
+                throw sqd_parsing_error("Error parsing SQD file: text outside root element");
+            }
         }
 
         const auto* const layers_element = siqad_root->FirstChildElement("layers");
@@ -476,7 +494,7 @@ class sqd_reader
             eps_r     = parse_sqd_number(eps_r_string);
             lambda_tf = parse_sqd_number(lambda_tf_string);
 
-            if (!std::isfinite(eps_r) || !std::isfinite(lambda_tf) || eps_r < 0.0 || lambda_tf < 0.0)
+            if (eps_r < 0.0 || lambda_tf < 0.0)
             {
                 throw sqd_parsing_error("Error parsing SQD file: invalid Coulomb material parameters");
             }
@@ -496,6 +514,8 @@ class sqd_reader
  * and surface defects are placed at the `(n, m, l)` lattice coordinates the file names.
  * Explicit geometry must contain finite vectors and two basis sites. Without geometry, the reader accepts the two
  * predefined reconstruction names and defaults to H-Si(100)-2x1 when the name is absent.
+ * The input must have a single `siqad` root, no text outside the root, and no NUL bytes.
+ * Open file streams in binary mode to preserve every input byte.
  *
  * @param is The input stream to read from.
  * @param name The name to give to the layout.
@@ -509,7 +529,8 @@ class sqd_reader
     return p.run();
 }
 /**
- * Reads an SQD file into an `sidb::layout`. See the stream overload for the file's interpretation.
+ * Reads an SQD file into an `sidb::layout` in binary mode. The input must have a single `siqad` root, no text outside
+ * the root, and no NUL bytes. See the stream overload for the lattice interpretation.
  *
  * @param filename The file to read.
  * @param name The name to give to the layout.
@@ -519,17 +540,14 @@ class sqd_reader
  */
 [[nodiscard]] inline layout read_sqd_layout(const std::string_view& filename, const std::string_view& name = "")
 {
-    std::ifstream is{std::string{filename}, std::ifstream::in};
+    std::ifstream is{std::string{filename}, std::ifstream::in | std::ifstream::binary};
 
     if (!is.is_open())
     {
         throw std::ifstream::failure("could not open file");
     }
 
-    auto lyt = read_sqd_layout(is, name);
-    is.close();
-
-    return lyt;
+    return read_sqd_layout(is, name);
 }
 
 }  // namespace fiction::sidb::io

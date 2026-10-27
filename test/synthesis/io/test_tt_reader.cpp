@@ -15,6 +15,7 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include <fiction/synthesis/io/tt_reader.hpp>
 
@@ -22,12 +23,28 @@
 #include <kitty/dynamic_truth_table.hpp>
 #include <kitty/operations.hpp>
 
+#include <fstream>
+#include <ios>
+#include <istream>
 #include <sstream>
+#include <stdexcept>
+#include <streambuf>
 #include <string>
 
 using namespace fiction;
 using namespace fiction::synthesis;
 using namespace fiction::synthesis::io;
+
+/** @brief Stream buffer that reports an I/O failure when read. */
+class failing_truth_table_streambuf : public std::streambuf
+{
+  protected:
+    /** @brief Reports an I/O failure instead of supplying input. */
+    int_type underflow() override
+    {
+        throw std::ios_base::failure("test read failure");
+    }
+};
 
 TEST_CASE("Read truth tables", "[tt-reader]")
 {
@@ -55,4 +72,100 @@ TEST_CASE("Read truth tables", "[tt-reader]")
     check(6u, "0990900906606006");
     check(6u, "0000966996690000");
     check(6u, "6006066090090990");
+    CHECK_FALSE(reader.next().has_value());
+    CHECK_FALSE(reader.next().has_value());
+}
+
+TEST_CASE("Empty truth-table input", "[tt-reader]")
+{
+    std::stringstream stream{GENERATE("", " \t\r\n")};
+    tt_reader<>       reader{stream};
+
+    CHECK_FALSE(reader.next().has_value());
+    CHECK_FALSE(reader.next().has_value());
+}
+
+TEST_CASE("Unreadable truth-table file", "[tt-reader]")
+{
+    CHECK_THROWS_AS(tt_reader<>{std::string{TEST_PATH} + "/missing-tt-reader-directory/input.tt"},
+                    std::ifstream::failure);
+}
+
+TEST_CASE("Read truth table from a file", "[tt-reader]")
+{
+    tt_reader<> reader{std::string{TEST_PATH} + "resources/truth_tables/valid.tt"};
+
+    const auto result = reader.next();
+    REQUIRE(result.has_value());
+    if (result.has_value())
+    {
+        kitty::dynamic_truth_table expected{2u};
+        kitty::create_from_hex_string(expected, "8");
+        CHECK(kitty::equal(*result, expected));
+    }
+    CHECK_FALSE(reader.next().has_value());
+}
+
+TEST_CASE("Empty truth-table file", "[tt-reader]")
+{
+    tt_reader<> reader{std::string{TEST_PATH} + "resources/truth_tables/empty.tt"};
+
+    CHECK_FALSE(reader.next().has_value());
+    CHECK_FALSE(reader.next().has_value());
+}
+
+TEST_CASE("Unreadable truth-table stream", "[tt-reader]")
+{
+    std::stringstream stream{"0x8 (a*b)"};
+    stream.setstate(GENERATE(std::ios::badbit, std::ios::failbit));
+
+    CHECK_THROWS_AS(tt_reader<>{stream}, std::ios_base::failure);
+}
+
+TEST_CASE("Truth-table stream read failure", "[tt-reader]")
+{
+    failing_truth_table_streambuf buffer{};
+    std::istream                  stream{&buffer};
+
+    CHECK_THROWS_AS(tt_reader<>{stream}, std::ios_base::failure);
+}
+
+TEST_CASE("Invalid truth-table records", "[tt-reader]")
+{
+    std::stringstream stream{GENERATE("0x8", "0x expr", "x expr", "xx8 expr", "0xg expr", "0xG expr", "0x/ expr",
+                                      "0x: expr", "0x@ expr", "0x` expr", "0x\xff expr", "0xabc expr")};
+    tt_reader<>       reader{stream};
+
+    CHECK_THROWS_AS(reader.next(), std::invalid_argument);
+    CHECK_THROWS_AS(reader.next(), std::invalid_argument);
+}
+
+TEST_CASE("Truth-table digit counts and hexadecimal case", "[tt-reader]")
+{
+    const auto hex = GENERATE(std::string{"f"}, std::string{"e8"}, std::string{"abCd"}, std::string{"0123456789ABCDEF"},
+                              std::string{"0123456789abcdef0123456789ABCDEF"});
+    const auto* const prefix = GENERATE("0x", "0X");
+    std::stringstream stream{prefix + hex + " expression"};
+    tt_reader<>       reader{stream};
+
+    const auto result = reader.next();
+    REQUIRE(result.has_value());
+    if (result.has_value())
+    {
+        CHECK(result->num_bits() == hex.size() * 4u);
+        kitty::dynamic_truth_table expected{result->num_vars()};
+        kitty::create_from_hex_string(expected, hex);
+        CHECK(kitty::equal(*result, expected));
+    }
+    CHECK_FALSE(reader.next().has_value());
+}
+
+TEST_CASE("Incomplete record after a truth table", "[tt-reader]")
+{
+    std::stringstream stream{"0x8 (a*b)\n0x6"};
+    tt_reader<>       reader{stream};
+
+    REQUIRE(reader.next().has_value());
+    CHECK_THROWS_AS(reader.next(), std::invalid_argument);
+    CHECK_THROWS_AS(reader.next(), std::invalid_argument);
 }
