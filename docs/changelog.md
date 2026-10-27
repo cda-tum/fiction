@@ -170,7 +170,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Gate-layout iteration skips removed objects through a compact live-object bitmap.
   - GOLD reuses built-in objective costs while ranking candidates and accepting solutions.
   - GOLD reduces placement-sequence copies, repeated frontier-cost lookups, and buffer allocations.
-  - A* reduces per-search map overhead and replaces linear frontier lookups with lazy queue entries.
+  - A* reduces per-search map overhead and repeated cost lookups, and replaces linear frontier lookups with lazy queue entries.
     Equal-cost route choices can differ.
   - **Breaking:** A*, path enumeration, and Yen's algorithm route around the gates and wires of every gate-level
     layout and take temporary constraints as a separate `obstructions` argument, leaving the caller's data unchanged.

@@ -215,7 +215,9 @@ class a_star_impl
      */
     void expand(const fiction::layouts::layout_base::coordinate& current)
     {
-        const auto explore_successor = [this, current](const auto& adjacent)
+        /** @brief Fixed path cost of the coordinate being expanded. */
+        const auto current_g         = g(current);
+        const auto explore_successor = [this, current, current_g](const auto& adjacent)
         {
             const auto next = physical_design::detail::routing_successor(layout, current, adjacent, objective.target,
                                                                          params.crossings, search_obstructions);
@@ -232,7 +234,7 @@ class a_star_impl
             }
 
             // compute the g-value of cz. In this implementation, the costs of each 'step' are given by a function
-            const g_f_type tentative_g = g(current) + cost(current, successor);
+            const g_f_type tentative_g = current_g + cost(current, successor);
 
             /** @brief Best cost found for this successor, if any. */
             const auto known = g_values.find(successor);
