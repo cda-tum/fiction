@@ -27,6 +27,7 @@
 
 #include <fmt/format.h>
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -37,6 +38,7 @@
 #include <tuple>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 namespace fiction::qca::io
 {
@@ -363,15 +365,15 @@ class write_qca_layout_svg_impl
     using coord_to_latch_mapping = std::unordered_map<qca::layout::cell, svg_latch>;
 
     /**
-     * Generates and returns a pair of strings representing the description and color of the given cell.
+     * Selects the static SVG description and color of the given cell.
      *
      * @param c The cell for which to generate the description and color.
-     * @return A pair of strings representing the description and color of the given cell `c`.
+     * @return Views of the static description and color of the given cell `c`.
      */
-    std::pair<std::string, std::string> generate_description_color(const qca::layout::cell& c)
+    std::pair<std::string_view, std::string_view> generate_description_color(const qca::layout::cell& c)
     {
-        std::string cell_description{};
-        std::string cell_color{};
+        std::string_view cell_description{};
+        std::string_view cell_color{};
 
         static constexpr const std::array<const char*, 4> cell_colors{
             {svg::CLOCK_ZONE_1_CELL, svg::CLOCK_ZONE_2_CELL, svg::CLOCK_ZONE_3_CELL, svg::CLOCK_ZONE_4_CELL}};
@@ -438,30 +440,35 @@ class write_qca_layout_svg_impl
     }
 
     /**
-     * Generates an SVG string representing the cell-based clocked cell layout and appends it to the output stream.
+     * Generates an SVG string from in-bounds occupied cells in layer, row, and column painting order.
      */
     void generate_cell_based_svg()
     {
         std::stringstream cell_descriptions{};
 
-        utils::progress_reporter progress{ps.on_progress, "rendering cell positions", lyt.area() * lyt.layers()};
-        lyt.foreach_cell_position(
-            [this, &cell_descriptions, &progress](const auto& c)
+        std::vector<qca::layout::cell> cells{};
+        cells.reserve(lyt.num_cells());
+        lyt.foreach_cell(
+            [&](const auto& c)
             {
-                if (!lyt.is_empty_cell(c))
+                if (lyt.is_within_bounds(c))
                 {
-                    // Determines cell type and color
-                    const auto desc_col = generate_description_color(c);
-
-                    cell_descriptions << fmt::format(
-                        fmt::runtime(desc_col.first), desc_col.second,
-                        fcn::io::detail::svg::STARTING_OFFSET_TILE_X + fcn::io::detail::svg::STARTING_OFFSET_CELL_X +
-                            (c.x * svg::CELL_DISTANCE),
-                        fcn::io::detail::svg::STARTING_OFFSET_TILE_Y + fcn::io::detail::svg::STARTING_OFFSET_CELL_Y +
-                            (c.y * svg::CELL_DISTANCE));
+                    cells.push_back(c);
                 }
-                progress.advance();
             });
+        std::ranges::sort(cells);
+        utils::progress_reporter progress{ps.on_progress, "rendering cells", cells.size()};
+        for (const auto& c : cells)
+        {
+            const auto desc_col = generate_description_color(c);
+            cell_descriptions << fmt::format(
+                fmt::runtime(desc_col.first), desc_col.second,
+                fcn::io::detail::svg::STARTING_OFFSET_TILE_X + fcn::io::detail::svg::STARTING_OFFSET_CELL_X +
+                    (c.x * svg::CELL_DISTANCE),
+                fcn::io::detail::svg::STARTING_OFFSET_TILE_Y + fcn::io::detail::svg::STARTING_OFFSET_CELL_Y +
+                    (c.y * svg::CELL_DISTANCE));
+            progress.advance();
+        }
 
         const double viewbox_x =
             (2 * fcn::io::detail::svg::VIEWBOX_DISTANCE) + (static_cast<double>(lyt.width()) * svg::CELL_DISTANCE);
@@ -469,7 +476,7 @@ class write_qca_layout_svg_impl
             (2 * fcn::io::detail::svg::VIEWBOX_DISTANCE) + (static_cast<double>(lyt.height()) * svg::CELL_DISTANCE);
 
         os << fmt::format(fcn::io::detail::svg::HEADER, FICTION_VERSION, FICTION_REPO, viewbox_x, viewbox_y,
-                          cell_descriptions.str());
+                          std::move(cell_descriptions).str());
     }
 
     /**
@@ -536,9 +543,9 @@ class write_qca_layout_svg_impl
                 assembly.advance();
                 continue;
             }
-            const auto [descr, czone] = tdscr;
+            const auto& [descr, czone] = tdscr;
 
-            const auto cell_descriptions = coord_to_cells[coord];
+            const auto& cell_descriptions = coord_to_cells[coord];
 
             const double x_pos = fcn::io::detail::svg::STARTING_OFFSET_TILE_X + (coord.x * svg::TILE_DISTANCE);
             const double y_pos = fcn::io::detail::svg::STARTING_OFFSET_TILE_Y + (coord.y * svg::TILE_DISTANCE);
@@ -554,7 +561,7 @@ class write_qca_layout_svg_impl
         utils::progress_reporter latch_assembly{ps.on_progress, "assembling latch_tile", coord_to_latch_tile.size()};
         for (const auto& [coord, ldscr] : coord_to_latch_tile)
         {
-            const auto [descr, czone_up, latch_delay] = ldscr;
+            const auto& [descr, czone_up, latch_delay] = ldscr;
             const auto czone_lo = static_cast<std::size_t>((czone_up + latch_delay) % lyt.num_clocks());
 
             // Tile templates have different origins; all cells use the ordinary tile's coordinate system.
@@ -583,7 +590,7 @@ class write_qca_layout_svg_impl
             (2 * fcn::io::detail::svg::VIEWBOX_DISTANCE) + (static_cast<double>(height) * svg::TILE_DISTANCE);
 
         os << fmt::format(fcn::io::detail::svg::HEADER, FICTION_VERSION, FICTION_REPO, viewbox_x, viewbox_y,
-                          tile_descriptions.str());
+                          std::move(tile_descriptions).str());
     }
 };
 
@@ -592,6 +599,8 @@ class write_qca_layout_svg_impl
 /**
  * Writes an SVG representation of a QCA layout into an output stream. Both tile- and cell-based layouts are
  * supported. For tile-based layouts, QCA layouts of tile size \f$5 \times 5\f$ are supported exclusively so far.
+ *
+ * Cells outside the layout extent are skipped. Cells at the same position paint lower layers before upper layers.
  *
  * The utilized color scheme is based on the standard scheme used in QCADesigner
  * (https://waluslab.ece.ubc.ca/qcadesigner/).
@@ -611,6 +620,8 @@ inline void write_qca_layout_svg(const qca::layout& lyt, std::ostream& os, const
 /**
  * Writes an SVG representation of a QCA layout into a file. Both tile- and cell-based layouts are supported.
  * For tile-based layouts, QCA layouts of tile size \f$5 \times 5\f$ are supported exclusively so far.
+ *
+ * Cells outside the layout extent are skipped. Cells at the same position paint lower layers before upper layers.
  *
  * The utilized color scheme is based on the standard scheme used in QCADesigner
  * (https://waluslab.ece.ubc.ca/qcadesigner/).
