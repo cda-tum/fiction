@@ -38,6 +38,7 @@
 #include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/synthesis/network_conversion.hpp>
 #include <fiction/types.hpp>
+#include <fiction/verification/equivalence_checking.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
@@ -61,6 +62,7 @@ using namespace fiction::layouts::io;
 using namespace fiction::networks;
 using namespace fiction::physical_design;
 using namespace fiction::synthesis;
+using namespace fiction::verification;
 
 /**
  * @brief Compares serialized placement, functions, ports, and interfaces.
@@ -128,6 +130,7 @@ void check_parsing_equiv(const Ntk& ntk)
 {
     const auto layout = orthogonal<typename Lyt::coordinate_layout>(
         fiction::synthesis::convert_network<named_technology_network>(ntk), {});
+    CAPTURE(layout.width(), layout.height(), layout.size(), layout.num_pis(), layout.num_pos());
 
     std::stringstream layout_stream{};
     write_fgl_layout(layout, layout_stream);
@@ -138,13 +141,14 @@ void check_parsing_equiv(const Ntk& ntk)
 
     check_eq(ntk, layout);
     check_eq(ntk, read_layout);
-    check_eq(layout, read_layout);
+    CHECK(equivalence_checking(layout, read_layout) == eq_type::STRONG);
 }
 
 /** @brief Round-trip a finished layout. */
 template <typename Lyt>
 void check_parsing_equiv_layout(const Lyt& lyt)
 {
+    CAPTURE(lyt.width(), lyt.height(), lyt.size(), lyt.num_pis(), lyt.num_pos());
     std::stringstream layout_stream{};
     write_fgl_layout(lyt, layout_stream);
     const auto read_layout = read_fgl_layout<typename Lyt::coordinate_layout>(layout_stream, lyt.get_layout_name());
@@ -156,8 +160,7 @@ void check_parsing_equiv_layout(const Lyt& lyt)
         CHECK(read_layout.get_arrangement() == lyt.get_arrangement());
     }
 
-    check_eq(lyt, read_layout);
-    CHECK(lyt.get_layout_name() == read_layout.get_layout_name());
+    CHECK(equivalence_checking(lyt, read_layout) == eq_type::STRONG);
 }
 
 /** @brief Check the network round-trip fixtures. */
@@ -263,7 +266,9 @@ TEST_CASE("FGL preserves whitespace-only names", "[write-fgl-layout]")
 TEST_CASE("FGL preserves XML whitespace in layout and object names", "[write-fgl-layout]")
 {
     cartesian_gate_layout layout{{3, 1, 1}, clocking::twoddwave()};
-    const std::string     label{"first\r\nsecond\t<&>"};
+    /** @brief Short or long label containing whitespace, XML markup, and UTF-8. */
+    const auto label = GENERATE(std::string{"first\r\nsecond\t<&>"}, std::string(4096, ' ') + "\r\nsecond\t<&>ä水");
+    CAPTURE(label.size());
     layout.set_layout_name(label);
     const auto input = layout.create_pi(label, {0, 0});
     const auto wire  = layout.create_buf(input, {1, 0});
@@ -273,6 +278,7 @@ TEST_CASE("FGL preserves XML whitespace in layout and object names", "[write-fgl
     write_fgl_layout(layout, stream);
     const auto restored = read_fgl_layout<cartesian_layout>(stream);
     CHECK(restored.get_layout_name() == label);
+    CHECK(restored.size() == 3);
     restored.foreach_object([&](const auto id) { CHECK(restored.get_name(id) == label); });
 }
 
@@ -461,39 +467,50 @@ TEST_CASE("FGL rejects invalid finished placement and metadata", "[write-fgl-lay
 {
     cartesian_gate_layout layout{{3, 1, 1}, clocking::twoddwave()};
     const auto            source = layout.create_pi("a", {0, 0, 0});
+    /** @brief Invalid layouts leave the existing stream contents intact. */
+    const auto check_rejection = [&layout]
+    {
+        std::stringstream stream{};
+        stream << "kept";
+        CHECK_THROWS_AS(write_fgl_layout(layout, stream), std::invalid_argument);
+        CHECK(stream.str() == "kept");
+    };
     SECTION("Nonadjacent connection")
     {
         layout.create_po(source, "f", {2, 0, 0});
+        check_rejection();
     }
     SECTION("Wrong clock")
     {
         layout.create_po(source, "f", {1, 0, 0});
         layout.assign_clock_number({1, 0, 0}, 0);
+        check_rejection();
     }
     SECTION("Outside extent")
     {
         layout.move_object(source, {-1, 0, 0});
+        check_rejection();
     }
     SECTION("Unsupported clocking name")
     {
         layout.replace_clocking_scheme(clocking::scheme{"CUSTOM", {{0}}, 4, 1, 1});
+        check_rejection();
     }
     SECTION("Unsupported base under a known name")
     {
         layout.replace_clocking_scheme(clocking::scheme{clocking::TWODDWAVE_NAME, {{0}}, 4, 3, 3});
+        check_rejection();
     }
     SECTION("Outside clock override")
     {
         layout.assign_clock_number({3, 0, 0}, 0);
+        check_rejection();
     }
     SECTION("Outside synchronization element")
     {
         layout.assign_synchronization_element({3, 0, 0}, 1);
+        check_rejection();
     }
-    std::stringstream stream{};
-    stream << "kept";
-    CHECK_THROWS_AS(write_fgl_layout(layout, stream), std::invalid_argument);
-    CHECK(stream.str() == "kept");
 }
 
 TEST_CASE("FGL rejects illegal XML controls before changing output", "[write-fgl-layout]")
@@ -504,40 +521,49 @@ TEST_CASE("FGL rejects illegal XML controls before changing output", "[write-fgl
     const auto            wire   = layout.create_buf(input, {1, 0});
     const auto            output = layout.create_po(wire, "f", {2, 0});
     const std::string     label  = std::string{"first"} + control + "second";
+    CAPTURE(static_cast<unsigned int>(control));
+    /** @brief Illegal names preserve both output streams and existing files. */
+    const auto check_rejection = [&layout]
+    {
+        std::stringstream stream{};
+        stream << "sentinel";
+        CHECK_THROWS_AS(write_fgl_layout(layout, stream), std::invalid_argument);
+        CHECK(stream.str() == "sentinel");
+
+        const auto filename =
+            std::filesystem::temp_directory_path() / ("fiction-fgl-text-" + std::to_string(std::random_device{}()));
+        {
+            std::ofstream original{filename};
+            original << "sentinel";
+        }
+        CHECK_THROWS_AS(write_fgl_layout(layout, filename.string()), std::invalid_argument);
+        std::ifstream original{filename};
+        std::string   contents{};
+        std::getline(original, contents);
+        CHECK(contents == "sentinel");
+        original.close();
+        std::filesystem::remove(filename);
+    };
     SECTION("Layout name")
     {
         layout.set_layout_name(label);
+        check_rejection();
     }
     SECTION("PI name")
     {
         layout.set_name(input, label);
+        check_rejection();
     }
     SECTION("Wire name")
     {
         layout.set_name(wire, label);
+        check_rejection();
     }
     SECTION("PO name")
     {
         layout.set_name(output, label);
+        check_rejection();
     }
-    std::stringstream stream{};
-    stream << "sentinel";
-    CHECK_THROWS_AS(write_fgl_layout(layout, stream), std::invalid_argument);
-    CHECK(stream.str() == "sentinel");
-
-    const auto filename =
-        std::filesystem::temp_directory_path() / ("fiction-fgl-text-" + std::to_string(std::random_device{}()));
-    {
-        std::ofstream original{filename};
-        original << "sentinel";
-    }
-    CHECK_THROWS_AS(write_fgl_layout(layout, filename.string()), std::invalid_argument);
-    std::ifstream original{filename};
-    std::string   contents{};
-    std::getline(original, contents);
-    CHECK(contents == "sentinel");
-    original.close();
-    std::filesystem::remove(filename);
 }
 
 TEST_CASE("Write and read layouts", "[write-fgl-layout]")
