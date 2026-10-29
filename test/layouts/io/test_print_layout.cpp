@@ -124,29 +124,29 @@ TEST_CASE("Print object and tile assignments with fanins and fanouts", "[print-g
     /** @brief Input and output whose fanout and fanin the printers report. */
     const auto input  = layout.create_pi("x1", {0, 0});
     const auto output = layout.create_po(input, "f1", {1, 0});
-    /** @brief Expected relationship records, independent of object allocation indices. */
-    const auto input_record =
+    /** @brief Expected fanin and fanout records, independent of object allocation indices. */
+    const auto fanin_record =
         fmt::format("with fanins:\n\t   {}:{} @ {}", input.index, input.generation, cartesian_gate_layout::tile{0, 0});
-    const auto output_record = fmt::format("with fanouts:\n\t   {}:{} @ {}", output.index, output.generation,
+    const auto fanout_record = fmt::format("with fanouts:\n\t   {}:{} @ {}", output.index, output.generation,
                                            cartesian_gate_layout::tile{1, 0});
 
-    CAPTURE(input_record, output_record);
+    CAPTURE(fanin_record, fanout_record);
 
     SECTION("Nodes to tiles")
     {
         std::stringstream print_stream{};
         print_object_to_tile_assignments(layout, print_stream);
 
-        CHECK(print_stream.str().find(input_record) != std::string::npos);
-        CHECK(print_stream.str().find(output_record) != std::string::npos);
+        CHECK(print_stream.str().find(fanin_record) != std::string::npos);
+        CHECK(print_stream.str().find(fanout_record) != std::string::npos);
     }
     SECTION("Tiles to nodes")
     {
         std::stringstream print_stream{};
         print_tile_to_object_assignments(layout, print_stream);
 
-        CHECK(print_stream.str().find(input_record) != std::string::npos);
-        CHECK(print_stream.str().find(output_record) != std::string::npos);
+        CHECK(print_stream.str().find(fanin_record) != std::string::npos);
+        CHECK(print_stream.str().find(fanout_record) != std::string::npos);
     }
 }
 

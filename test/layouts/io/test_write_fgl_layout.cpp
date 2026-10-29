@@ -38,6 +38,7 @@
 #include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/synthesis/network_conversion.hpp>
 #include <fiction/types.hpp>
+#include <fiction/verification/equivalence_checking.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
@@ -61,6 +62,7 @@ using namespace fiction::layouts::io;
 using namespace fiction::networks;
 using namespace fiction::physical_design;
 using namespace fiction::synthesis;
+using namespace fiction::verification;
 
 /**
  * @brief Compares serialized placement, functions, ports, and interfaces.
@@ -128,6 +130,7 @@ void check_parsing_equiv(const Ntk& ntk)
 {
     const auto layout = orthogonal<typename Lyt::coordinate_layout>(
         fiction::synthesis::convert_network<named_technology_network>(ntk), {});
+    CAPTURE(layout.width(), layout.height(), layout.size(), layout.num_pis(), layout.num_pos());
 
     std::stringstream layout_stream{};
     write_fgl_layout(layout, layout_stream);
@@ -138,13 +141,14 @@ void check_parsing_equiv(const Ntk& ntk)
 
     check_eq(ntk, layout);
     check_eq(ntk, read_layout);
-    check_eq(layout, read_layout);
+    CHECK(equivalence_checking(layout, read_layout) == eq_type::STRONG);
 }
 
 /** @brief Round-trip a finished layout. */
 template <typename Lyt>
 void check_parsing_equiv_layout(const Lyt& lyt)
 {
+    CAPTURE(lyt.width(), lyt.height(), lyt.size(), lyt.num_pis(), lyt.num_pos());
     std::stringstream layout_stream{};
     write_fgl_layout(lyt, layout_stream);
     const auto read_layout = read_fgl_layout<typename Lyt::coordinate_layout>(layout_stream, lyt.get_layout_name());
@@ -156,7 +160,7 @@ void check_parsing_equiv_layout(const Lyt& lyt)
         CHECK(read_layout.get_arrangement() == lyt.get_arrangement());
     }
 
-    check_eq(lyt, read_layout);
+    CHECK(equivalence_checking(lyt, read_layout) == eq_type::STRONG);
 }
 
 /** @brief Check the network round-trip fixtures. */

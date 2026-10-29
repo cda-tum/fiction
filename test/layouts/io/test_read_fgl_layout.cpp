@@ -1136,32 +1136,48 @@ TEST_CASE("Parsing error: unknown gate type with more than 3 incoming signals", 
 
 TEST_CASE("FGL rejects invalid numeric metadata", "[read-fgl-layout]")
 {
-    /** @brief Malformed field with the remaining numeric fields valid. */
-    const auto [name, x, clock, delay, id] =
-        GENERATE(Catch::Generators::table<const char*, const char*, const char*, const char*, const char*>(
-            {{"Negative gate ID", "0", "0", "0", "-1"},
-             {"Trailing gate ID data", "0", "0", "0", "1oops"},
-             {"Non-numeric gate ID", "0", "0", "0", "gate"},
-             {"Empty gate ID", "0", "0", "0", " "},
-             {"Gate ID storage overflow", "0", "0", "0", "2147483648"},
-             {"Gate ID integer overflow", "0", "0", "0", "18446744073709551616"},
-             {"Negative coordinate", "-1", "0", "0", "0"},
-             {"Trailing coordinate data", "1oops", "0", "0", "0"},
-             {"Empty coordinate", "   ", "0", "0", "0"},
-             {"Coordinate overflow", "4294967296", "0", "0", "0"},
-             {"Integer overflow", "18446744073709551616", "0", "0", "0"},
-             {"Clock exceeds phase count", "0", "4", "0", "0"},
-             {"Synchronization delay overflow", "0", "0", "256", "0"}}));
-    CAPTURE(name, x, clock, delay, id);
-    /** @brief Legacy document with exactly one malformed numeric field. */
-    std::istringstream stream{
-        fmt::format("<fgl><layout><name>invalid</name><topology>cartesian</topology><size><x>{}</x>"
-                    "<y>0</y><z>0</z></size><clocking><name>OPEN4</name><zones><zone><x>0</x><y>0</y><clock>{}</clock>"
-                    "</zone></zones><synchronization_elements><element><x>0</x><y>0</y><z>0</z><delay>{}</delay>"
-                    "</element></synchronization_elements></clocking></layout><gates><gate><id>{}</id>"
-                    "<type>PI</type><name>input</name><loc><x>0</x><y>0</y><z>0</z></loc></gate></gates></fgl>",
-                    x, clock, delay, id)};
-    CHECK_THROWS_AS(read_fgl_layout<cartesian_layout>(stream), fgl_parsing_error);
+    /** @brief Parse numeric fields in an otherwise valid legacy FGL document. */
+    const auto read_numeric_document =
+        [](const char* x_value, const char* clock_value, const char* delay_value, const char* id_value)
+    {
+        std::istringstream stream{fmt::format(
+            "<fgl><layout><name>invalid</name><topology>cartesian</topology><size><x>{}</x>"
+            "<y>0</y><z>0</z></size><clocking><name>OPEN4</name><zones><zone><x>0</x><y>0</y><clock>{}</clock>"
+            "</zone></zones><synchronization_elements><element><x>0</x><y>0</y><z>0</z><delay>{}</delay>"
+            "</element></synchronization_elements></clocking></layout><gates><gate><id>{}</id>"
+            "<type>PI</type><name>input</name><loc><x>0</x><y>0</y><z>0</z></loc></gate></gates></fgl>",
+            x_value, clock_value, delay_value, id_value)};
+        return read_fgl_layout<cartesian_layout>(stream);
+    };
+    SECTION("Valid numeric metadata")
+    {
+        /** @brief All-zero legacy fields describe one placed primary input. */
+        const auto valid = read_numeric_document("0", "0", "0", "0");
+        CHECK(valid.get_extent() == layout_base::extent{1, 1, 1});
+        REQUIRE(valid.num_pis() == 1);
+        CHECK(valid.get_input_name(0) == "input");
+    }
+    SECTION("Invalid numeric metadata")
+    {
+        /** @brief Malformed field with the remaining numeric fields valid. */
+        const auto [name, x, clock, delay, id] =
+            GENERATE(Catch::Generators::table<const char*, const char*, const char*, const char*, const char*>(
+                {{"Negative gate ID", "0", "0", "0", "-1"},
+                 {"Trailing gate ID data", "0", "0", "0", "1oops"},
+                 {"Non-numeric gate ID", "0", "0", "0", "gate"},
+                 {"Empty gate ID", "0", "0", "0", " "},
+                 {"Gate ID storage overflow", "0", "0", "0", "2147483648"},
+                 {"Gate ID integer overflow", "0", "0", "0", "18446744073709551616"},
+                 {"Negative coordinate", "-1", "0", "0", "0"},
+                 {"Trailing coordinate data", "1oops", "0", "0", "0"},
+                 {"Empty coordinate", "   ", "0", "0", "0"},
+                 {"Coordinate overflow", "4294967296", "0", "0", "0"},
+                 {"Integer overflow", "18446744073709551616", "0", "0", "0"},
+                 {"Clock exceeds phase count", "0", "4", "0", "0"},
+                 {"Synchronization delay overflow", "0", "0", "256", "0"}}));
+        CAPTURE(name, x, clock, delay, id);
+        CHECK_THROWS_AS(read_numeric_document(x, clock, delay, id), fgl_parsing_error);
+    }
 }
 
 TEST_CASE("FGL failed connection read leaves target unchanged", "[read-fgl-layout]")
