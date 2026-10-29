@@ -181,6 +181,7 @@ TEST_CASE("Progress is reported for every stage", "[planarization]")
     const auto          result = planarization(ranked, ps, &st);
 
     check_contract(ntk, result);
+    CAPTURE(st.duplication.num_crossing_levels, st.crossing_gates.num_crossings);
     CHECK(started == finished);
     CHECK(started.size() == 3 + (st.crossing_gates.num_crossings > 0 ? 1 : 0));
 }
@@ -216,6 +217,7 @@ TEST_CASE("Statistics report the runtime and progress reaches every stage", "[pl
     const auto          result = planarization(ranked, ps, &st);
 
     check_contract(ntk, result);
+    CAPTURE(st.duplication.num_crossing_levels, st.crossing_gates.num_crossings);
     CHECK_FALSE(pipeline_called);
     CHECK(started == finished);
     CHECK(started.size() == 3 + (st.crossing_gates.num_crossings > 0 ? 1 : 0));
@@ -233,8 +235,23 @@ TEST_CASE("Kept crossings run through the crossing gates for both crossing gate 
     for (const bool xor_gates : {false, true})
     {
         CAPTURE(xor_gates);
+        std::vector<std::string> started{};
+        std::vector<std::string> finished{};
+
         // a prohibitive duplication cost makes the hybrid strategy keep every crossing it may keep
         const planarization_params ps{
+            .on_progress =
+                [&started, &finished](const std::string_view task, const std::size_t done, const std::size_t total)
+            {
+                if (done == 0)
+                {
+                    started.emplace_back(task);
+                }
+                if (done == total)
+                {
+                    finished.emplace_back(task);
+                }
+            },
             .duplication = {.strategy       = node_duplication_planarization_params::planarization_strategy::HYBRID,
                             .crossing_gates = {.xor_gates = xor_gates},
                             .criterion      = node_duplication_planarization_params::decision_criterion::WEIGHTED_CONE,
@@ -245,6 +262,8 @@ TEST_CASE("Kept crossings run through the crossing gates for both crossing gate 
 
         REQUIRE(st.duplication.num_crossing_levels > 0);
         CHECK(st.crossing_gates.num_crossings > 0);
+        CHECK(started.size() == 4);
+        CHECK(started == finished);
         check_contract(ntk, result);
     }
 }

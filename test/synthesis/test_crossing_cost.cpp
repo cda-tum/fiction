@@ -149,7 +149,7 @@ TEST_CASE("Levels with more crossings than allowed are not costed", "[crossing-c
     const auto          upper = ranked.get_ranks(1);
     std::vector<node_t> lower = ranked.get_ranks(0);
 
-    const crossing_gate_planarization_params cg_ps{.max_crossings_per_level = limit};
+    const crossing_gate_planarization_params cg_ps{.xor_gates = true, .max_crossings_per_level = limit};
 
     const auto result = synthesis::detail::crossing_cost(ranked, upper, lower, 32, cg_ps);
 
