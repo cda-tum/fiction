@@ -247,9 +247,7 @@ Ntk delete_virtual_pis(const Ntk& ntk)
 
     detail::delete_virtual_pis_impl<Ntk> p{ntk};
 
-    const auto result = p.run();
-
-    return result;
+    return p.run();
 }
 
 }  // namespace fiction::synthesis
