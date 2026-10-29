@@ -27,7 +27,6 @@
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
-#include <kitty/operators.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
 #include <mockturtle/traits.hpp>
 
@@ -81,22 +80,34 @@ TEMPLATE_TEST_CASE("Balance checks propagate allocation failures and recover", "
     const auto observe = [&source]
     {
         std::vector<std::vector<typename TestType::signal>> edges{};
-        std::vector<std::pair<uint32_t, uint32_t>>          ranks{};
         source.foreach_node(
             [&](const auto node)
             {
                 edges.emplace_back();
                 source.foreach_fanin(node, [&](const auto signal) { edges.back().push_back(signal); });
-                if constexpr (mockturtle::has_rank_position_v<TestType>)
-                {
-                    if (!source.is_constant(node))
-                    {
-                        ranks.emplace_back(source.level(node), source.rank_position(node));
-                    }
-                }
             });
         edges.emplace_back();
         source.foreach_po([&](const auto signal) { edges.back().push_back(signal); });
+        const auto ranks = [&source]
+        {
+            if constexpr (mockturtle::has_rank_position_v<TestType>)
+            {
+                std::vector<std::pair<uint32_t, uint32_t>> result{};
+                source.foreach_node(
+                    [&](const auto node)
+                    {
+                        if (!source.is_constant(node))
+                        {
+                            result.emplace_back(source.level(node), source.rank_position(node));
+                        }
+                    });
+                return result;
+            }
+            else
+            {
+                return std::vector<std::pair<uint32_t, uint32_t>>{};
+            }
+        }();
         return std::tuple{source.num_pis(),
                           source.num_pos(),
                           source.num_gates(),

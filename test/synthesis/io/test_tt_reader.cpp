@@ -133,8 +133,8 @@ TEST_CASE("Truth-table stream read failure", "[tt-reader]")
 
 TEST_CASE("Invalid truth-table records", "[tt-reader]")
 {
-    const auto record = GENERATE("0x8", "0x expr", "x expr", "xx8 expr", "0xg expr", "0xG expr", "0x/ expr", "0x: expr",
-                                 "0x@ expr", "0x` expr", "0x\xff expr", "0xabc expr");
+    const auto* const record = GENERATE("0x8", "0x expr", "x expr", "xx8 expr", "0xg expr", "0xG expr", "0x/ expr",
+                                        "0x: expr", "0x@ expr", "0x` expr", "0x\xff expr", "0xabc expr");
     CAPTURE(record);
     std::stringstream stream{record};
     tt_reader<>       reader{stream};
