@@ -14,8 +14,10 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
@@ -317,11 +319,14 @@ TEST_CASE("Signal name restoration retains used complemented names", "[name-util
     /** Named complemented source signal. */
     const auto inverted = !input;
     source.set_name(inverted, "inverted");
-    SECTION("Gate input")
+    /** @brief Whether the named complement feeds a gate or a primary output. */
+    const auto uses_gate_input = GENERATE(false, true);
+    CAPTURE(uses_gate_input);
+    if (uses_gate_input)
     {
         source.create_po(source.create_and(inverted, source.create_pi()));
     }
-    SECTION("Primary output driver")
+    else
     {
         source.create_po(inverted);
     }

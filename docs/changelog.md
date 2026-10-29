@@ -245,6 +245,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Code quality:
 
   - Parameter configurations now use C++20 designated initializers and `const` where possible.
+  - Modernized network-core contract tests with complete traversal and clone-isolation checks.
 
 - Continuous integration:
   - Read the Docs now builds on Ubuntu 26.04.
