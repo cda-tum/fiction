@@ -36,6 +36,7 @@
 #include <cstdint>
 #include <limits>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
@@ -62,6 +63,13 @@ void check_border_contract(const Lyt& lyt)
             CHECK(lyt.north(c).has_value() == (c.y != 0));
             CHECK(lyt.west(c).has_value() == (c.x != 0));
             CHECK(lyt.below(c).has_value() == (c.z != 0));
+            CHECK(lyt.east(c).has_value() == std::cmp_less(c.x + 1, lyt.width()));
+            CHECK(lyt.south(c).has_value() == std::cmp_less(c.y + 1, lyt.height()));
+            CHECK(lyt.above(c).has_value() == std::cmp_less(c.z + 1, lyt.layers()));
+            CHECK(lyt.is_at_northern_border(c) == (c.y == 0));
+            CHECK(lyt.is_at_eastern_border(c) == std::cmp_equal(c.x + 1, lyt.width()));
+            CHECK(lyt.is_at_southern_border(c) == std::cmp_equal(c.y + 1, lyt.height()));
+            CHECK(lyt.is_at_western_border(c) == (c.x == 0));
 
             for (const auto& n : lyt.adjacent_coordinates(c))
             {
@@ -222,6 +230,7 @@ TEMPLATE_TEST_CASE("Geometry neighbors respect borders", "[coordinate-contracts]
     const auto a =
         GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
 
+    CAPTURE(static_cast<int>(a));
     const auto layout = blueprints::make_layout<TestType>(a, {5, 4, 2});
     check_border_contract(layout);
     if constexpr (!std::same_as<TestType, cartesian_layout>)
@@ -235,6 +244,7 @@ TEST_CASE("Hexagonal diagonals at the borders reject coordinates outside the lay
     const auto a =
         GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
 
+    CAPTURE(static_cast<int>(a));
     const hexagonal_layout lyt{a, {4, 4, 1}};
 
     // the origin has no north or west neighbor in any direction

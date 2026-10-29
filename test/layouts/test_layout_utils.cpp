@@ -33,6 +33,7 @@
 #include <fiction/technology/qca/layout.hpp>
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <future>
 #include <latch>
@@ -70,6 +71,7 @@ TEST_CASE("Gate-level layouts are created with the required arrangement", "[layo
         const auto a =
             GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
 
+        CAPTURE(static_cast<int>(a));
         CHECK_NOTHROW(make_gate_level_layout<cartesian_gate_layout>(std::nullopt, {3, 3}, clocking::twoddwave()));
         CHECK_NOTHROW(make_gate_level_layout<cartesian_gate_layout>(a, {3, 3}, clocking::twoddwave()));
     }
@@ -158,28 +160,39 @@ TEST_CASE("Random coordinates stay inside inclusive corner bounds", "[layout-uti
 
 TEST_CASE("Concurrent random-coordinate calls stay inside their bounds", "[layout-utils]")
 {
+    /** @brief Keeps startup synchronization alive until every worker has finished. */
+    std::latch start{4};
     /** @brief Concurrent samplers report whether every coordinate stayed in bounds. */
     std::array<std::future<bool>, 4> samplers{};
-    /** @brief Starts every sampler after all worker threads are ready. */
-    std::latch start{samplers.size()};
-    for (auto& sampler : samplers)
+    /** @brief Workers whose futures own a launched sampler. */
+    std::size_t launched{};
+    try
     {
-        sampler = std::async(std::launch::async,
-                             [&start]
-                             {
-                                 start.arrive_and_wait();
-                                 for (uint32_t sample = 0; sample < 1000; ++sample)
+        for (auto& sampler : samplers)
+        {
+            sampler = std::async(std::launch::async,
+                                 [&start]
                                  {
-                                     /** @brief Coordinate sampled concurrently with the other workers. */
-                                     const auto c = random_coordinate(layout_base::coordinate{-3, 4, 1},
-                                                                      layout_base::coordinate{2, -5, 0});
-                                     if (c.x < -3 || c.x > 2 || c.y < -5 || c.y > 4 || c.z < 0 || c.z > 1)
+                                     start.arrive_and_wait();
+                                     for (uint32_t sample = 0; sample < 1000; ++sample)
                                      {
-                                         return false;
+                                         /** @brief Coordinate sampled concurrently with the other workers. */
+                                         const auto c = random_coordinate(layout_base::coordinate{-3, 4, 1},
+                                                                          layout_base::coordinate{2, -5, 0});
+                                         if (c.x < -3 || c.x > 2 || c.y < -5 || c.y > 4 || c.z < 0 || c.z > 1)
+                                         {
+                                             return false;
+                                         }
                                      }
-                                 }
-                                 return true;
-                             });
+                                     return true;
+                                 });
+            ++launched;
+        }
+    }
+    catch (...)
+    {
+        start.count_down(static_cast<std::ptrdiff_t>(samplers.size() - launched));
+        throw;
     }
     for (auto& sampler : samplers)
     {
@@ -199,25 +212,24 @@ TEST_CASE("Normalize QCA layout coordinates", "[layout-utils]")
 
     const auto normalized = normalize_layout_coordinates(lyt);
 
-    CHECK(normalized.width() == 4);
-    CHECK(normalized.height() == 4);
-    CHECK(normalized.layers() == 2);
+    /** @brief Complete normalized layout with independently specified metadata and occupied cells. */
+    qca::layout expected{{4, 4, 2}, clocking::use(), "crossing", 2, 2};
+    expected.assign_cell_type({0, 0}, qca::cell_type::INPUT);
+    expected.assign_cell_name({0, 0}, "a");
+    expected.assign_cell_type({1, 1}, qca::cell_type::NORMAL);
+    expected.assign_cell_type({1, 1, 1}, qca::cell_type::NORMAL);
+    expected.assign_cell_mode({1, 1, 1}, qca::cell_mode::VERTICAL);
+    CHECK(normalized == expected);
     CHECK(normalized.num_cells() == 3);
-    CHECK(normalized.get_cell_type({0, 0}) == qca::cell_type::INPUT);
-    CHECK(normalized.get_cell_name({0, 0}) == "a");
-    CHECK(normalized.get_cell_type({1, 1}) == qca::cell_type::NORMAL);
-    CHECK(normalized.get_cell_type({1, 1, 1}) == qca::cell_type::NORMAL);
-    CHECK(normalized.get_cell_mode({1, 1, 1}) == qca::cell_mode::VERTICAL);
-    CHECK(normalized.get_layout_name() == "crossing");
-    CHECK(normalized.is_clocking_scheme(clocking::USE_NAME));
-    CHECK(normalized.get_tile_size_x() == 2);
 
     CHECK(lyt.get_cell_type({3, 2}) == qca::cell_type::INPUT);
 }
+
 TEST_CASE("Normalize occupied cells outside the layout extent", "[layout-utils]")
 {
     /** Frame may be empty or smaller than its occupied coordinates. */
     const auto size = GENERATE(0, 3);
+    CAPTURE(size);
     /** Sparse layout with occupied cells beyond its declared frame. */
     qca::layout lyt{{size, size, size == 0 ? 0 : 1}};
     lyt.assign_cell_type({5, 7}, qca::cell_type::INPUT);

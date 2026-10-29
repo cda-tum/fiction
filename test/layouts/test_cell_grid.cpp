@@ -18,8 +18,7 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
 
-#include "fiction/layouts/cartesian_layout.hpp"
-
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_grid.hpp>
 #include <fiction/layouts/layout_base.hpp>
 
@@ -109,7 +108,7 @@ TEST_CASE("Cell type and name assignment", "[cell-grid]")
     }
 }
 
-TEST_CASE("Cell traversal stops early", "[cell-grid]")
+TEST_CASE("Cell traversal stops early and positions enumerate in order", "[cell-grid]")
 {
     grid g{{3, 3}};
     g.assign_cell_type({0, 0}, test_cell::NORMAL);

@@ -178,12 +178,14 @@ TEMPLATE_TEST_CASE("Geometry copies retain arrangement", "[coordinates]", shifte
     const auto a =
         GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
 
+    CAPTURE(static_cast<int>(a));
     const TestType lyt{a, {3, 3}};
 
     CHECK(lyt.get_arrangement() == a);
     CHECK(lyt.clone().get_arrangement() == a);
     CHECK(TestType{lyt}.get_arrangement() == a);
 }
+
 TEMPLATE_TEST_CASE("Geometry sizes and value copies", "[coordinates][size-contract]", cartesian_layout,
                    shifted_cartesian_layout, hexagonal_layout)
 {

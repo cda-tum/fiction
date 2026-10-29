@@ -34,17 +34,19 @@ using namespace fiction;
 using namespace fiction::layouts;
 
 /**
- * @brief Checks the geometry contract for a layout type.
- * @tparam Lyt Coordinate layout type.
+ * @brief Checks offset-to-cube round trips throughout the ground layer.
  * @param a Arrangement of the shifted rows or columns.
  */
-template <typename Lyt>
 void check_identity_conversion(const arrangement a)
 {
-    Lyt layout{a, typename Lyt::extent{10, 10}};
-
-    layout.foreach_coordinate([&layout](const auto& coord)
-                              { CHECK(layout.to_offset_coordinate(layout.to_cube_coordinate(coord)) == coord); });
+    const hexagonal_layout layout{a, {10, 10}};
+    CAPTURE(static_cast<int>(a));
+    layout.foreach_coordinate(
+        [&layout](const auto& coord)
+        {
+            CAPTURE(coord);
+            CHECK(layout.to_offset_coordinate(layout.to_cube_coordinate(coord)) == coord);
+        });
 }
 
 TEST_CASE("Coordinate creation", "[hexagonal-layout]")
@@ -68,7 +70,7 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
     {
         using layout       = hexagonal_layout;
         constexpr auto arr = arrangement::ODD_ROW;
-        check_identity_conversion<layout>(arr);
+        check_identity_conversion(arr);
 
         const layout lyt{arr, {3, 3}};
 
@@ -83,7 +85,7 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
     {
         using layout       = hexagonal_layout;
         constexpr auto arr = arrangement::EVEN_ROW;
-        check_identity_conversion<layout>(arr);
+        check_identity_conversion(arr);
 
         const layout lyt{arr, {3, 3}};
 
@@ -98,7 +100,7 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
     {
         using layout       = hexagonal_layout;
         constexpr auto arr = arrangement::ODD_COLUMN;
-        check_identity_conversion<layout>(arr);
+        check_identity_conversion(arr);
 
         const layout lyt{arr, {3, 3}};
 
@@ -113,7 +115,7 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
     {
         using layout       = hexagonal_layout;
         constexpr auto arr = arrangement::EVEN_COLUMN;
-        check_identity_conversion<layout>(arr);
+        check_identity_conversion(arr);
 
         const layout lyt{arr, {3, 3}};
 
