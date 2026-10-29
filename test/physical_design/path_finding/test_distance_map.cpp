@@ -164,7 +164,8 @@ TEST_CASE("Smart distance cache computes each directed pair once", "[distance-ma
     const smart_distance_cache_functor<uint64_t> distance{[&](const auto& source, const auto& target)
                                                           {
                                                               ++calls;
-                                                              return static_cast<uint64_t>(10 * source.x + target.x);
+                                                              return (10 * static_cast<uint64_t>(source.x)) +
+                                                                     static_cast<uint64_t>(target.x);
                                                           }};
 
     CHECK(distance({1, 0}, {2, 0}) == 12);
