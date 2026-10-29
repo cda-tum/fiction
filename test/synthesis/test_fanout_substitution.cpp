@@ -15,6 +15,7 @@
  * @author Simon Hofmann (simon1hofmann)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
@@ -29,11 +30,11 @@
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
-#include <mockturtle/views/depth_view.hpp>
 
 #include <cstdint>
 #include <limits>
 #include <stdexcept>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::networks;
@@ -73,7 +74,7 @@ TEST_CASE("Simple fanout substitution", "[fanout-substitution]")
 TEST_CASE("Complex fanout substitution", "[fanout-substitution]")
 {
     const auto tec = blueprints::maj4_network<technology_network>();
-    CHECK(!is_fanout_substituted(tec));
+    CHECK_FALSE(is_fanout_substituted(tec));
 
     const fanout_substitution_params ps_depth{.strategy = fanout_substitution_params::substitution_strategy::DEPTH};
     const fanout_substitution_params ps_breadth{.strategy = fanout_substitution_params::substitution_strategy::BREADTH};
@@ -84,7 +85,7 @@ TEST_CASE("Complex fanout substitution", "[fanout-substitution]")
     substitute(tec, ps_random, tec.size() + 7);
 
     const auto aig = blueprints::maj4_network<mockturtle::aig_network>();
-    CHECK(!is_fanout_substituted(aig));
+    CHECK_FALSE(is_fanout_substituted(aig));
     substitute(aig, ps_depth, aig.size() + 41);
     substitute(aig, ps_breadth, aig.size() + 41);
     substitute(aig, ps_random, aig.size() + 41);
@@ -101,9 +102,10 @@ TEST_CASE("Name conservation after fanout substitution", "[fanout-substitution]"
     CHECK(substituted_maj.get_network_name() == "maj");
 
     // PI names
-    CHECK(substituted_maj.get_name(substituted_maj.make_signal(2)) == "a");
-    CHECK(substituted_maj.get_name(substituted_maj.make_signal(3)) == "b");
-    CHECK(substituted_maj.get_name(substituted_maj.make_signal(4)) == "c");
+    REQUIRE(substituted_maj.num_pis() == 3u);
+    CHECK(substituted_maj.get_name(substituted_maj.make_signal(substituted_maj.pi_at(0))) == "a");
+    CHECK(substituted_maj.get_name(substituted_maj.make_signal(substituted_maj.pi_at(1))) == "b");
+    CHECK(substituted_maj.get_name(substituted_maj.make_signal(substituted_maj.pi_at(2))) == "c");
 
     // PO names
     CHECK(substituted_maj.get_output_name(0) == "f");
@@ -205,39 +207,52 @@ TEST_CASE("Fanout substitution preserves logic when the destination elides buffe
 
 TEST_CASE("Random fanout substitution with fixed vs. varying seeds", "[fanout-substitution]")
 {
-    const auto aig = blueprints::maj4_network<mockturtle::aig_network>();
-
-    SECTION("Fixed seed yields deterministic behavior")
+    const auto aig         = blueprints::maj4_network<mockturtle::aig_network>();
+    const auto connections = [](const technology_network& ntk)
     {
-        const fanout_substitution_params ps{.strategy = fanout_substitution_params::substitution_strategy::RANDOM,
-                                            .seed     = 42};
-
-        // expect no exceptions and consistent substitution
-        substitute(aig, ps, aig.size() + 41);
+        std::vector<std::vector<technology_network::signal>> result{};
+        ntk.foreach_node(
+            [&](const auto node)
+            {
+                result.emplace_back();
+                ntk.foreach_fanin(node, [&](const auto signal) { result.back().push_back(signal); });
+            });
+        result.emplace_back();
+        ntk.foreach_po([&](const auto signal) { result.back().push_back(signal); });
+        return result;
+    };
+    SECTION("Fixed seeds repeat the routing")
+    {
+        const auto seed = GENERATE(1u, 2u, 20u, 42u);
+        CAPTURE(seed);
+        const fanout_substitution_params params{.strategy = fanout_substitution_params::substitution_strategy::RANDOM,
+                                                .seed     = seed};
+        const auto                       substituted = fanout_substitution<technology_network>(aig, params);
+        const auto                       repeated    = fanout_substitution<technology_network>(aig, params);
+        CHECK(connections(substituted) == connections(repeated));
+        CHECK(substituted.size() == aig.size() + 41);
+        CHECK(is_fanout_substituted(substituted, params));
+        CHECK(is_fanout_substituted(repeated, params));
+        check_eq(aig, substituted);
+        check_eq(aig, repeated);
     }
-
-    SECTION("Different seeds produce different results")
+    SECTION("Varying seeds explore different routings")
     {
-        fanout_substitution_params ps{.strategy = fanout_substitution_params::substitution_strategy::RANDOM, .seed = 1};
-
-        // compute baseline depth using seed = 1
-        const auto base_sub   = mockturtle::depth_view{fanout_substitution<technology_network>(aig, ps)};
-        const auto base_depth = base_sub.depth();
-
-        bool found_different = false;
-        // try seeds 2 through 20; break as soon as we see a different depth
-        for (auto s = 2u; s <= 20u; ++s)
+        fanout_substitution_params params{.strategy = fanout_substitution_params::substitution_strategy::RANDOM,
+                                          .seed     = 1};
+        const auto                 baseline        = connections(fanout_substitution<technology_network>(aig, params));
+        bool                       found_different = false;
+        for (auto seed = 2u; seed <= 20u; ++seed)
         {
-            ps.seed        = s;
-            const auto sub = mockturtle::depth_view{fanout_substitution<technology_network>(aig, ps)};
-            if (sub.depth() != base_depth)
+            params.seed            = seed;
+            const auto substituted = fanout_substitution<technology_network>(aig, params);
+            if (connections(substituted) != baseline)
             {
                 found_different = true;
                 break;
             }
         }
-
-        REQUIRE(found_different);
+        CHECK(found_different);
     }
 }
 

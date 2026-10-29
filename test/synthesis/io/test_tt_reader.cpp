@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
@@ -132,8 +133,10 @@ TEST_CASE("Truth-table stream read failure", "[tt-reader]")
 
 TEST_CASE("Invalid truth-table records", "[tt-reader]")
 {
-    std::stringstream stream{GENERATE("0x8", "0x expr", "x expr", "xx8 expr", "0xg expr", "0xG expr", "0x/ expr",
-                                      "0x: expr", "0x@ expr", "0x` expr", "0x\xff expr", "0xabc expr")};
+    const auto record = GENERATE("0x8", "0x expr", "x expr", "xx8 expr", "0xg expr", "0xG expr", "0x/ expr", "0x: expr",
+                                 "0x@ expr", "0x` expr", "0x\xff expr", "0xabc expr");
+    CAPTURE(record);
+    std::stringstream stream{record};
     tt_reader<>       reader{stream};
 
     CHECK_THROWS_AS(reader.next(), std::invalid_argument);
@@ -145,6 +148,7 @@ TEST_CASE("Truth-table digit counts and hexadecimal case", "[tt-reader]")
     const auto hex = GENERATE(std::string{"f"}, std::string{"e8"}, std::string{"abCd"}, std::string{"0123456789ABCDEF"},
                               std::string{"0123456789abcdef0123456789ABCDEF"});
     const auto* const prefix = GENERATE("0x", "0X");
+    CAPTURE(prefix, hex);
     std::stringstream stream{prefix + hex + " expression"};
     tt_reader<>       reader{stream};
 
