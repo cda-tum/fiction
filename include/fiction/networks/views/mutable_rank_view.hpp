@@ -577,9 +577,12 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     /**
      * Add a node to the `mutable_rank_view` and update its rank.
      *
+     * Recompute the ranks with `update_ranks` before querying them after an exception.
+     *
      * @param n Node added to the `mutable_rank_view`.
+     * @throws std::bad_alloc If rank or level storage cannot grow.
      */
-    void on_add(node const& n) noexcept
+    void on_add(node const& n)
     {
         fiction::networks::views::static_depth_view<Ntk>::on_add(n);
 
