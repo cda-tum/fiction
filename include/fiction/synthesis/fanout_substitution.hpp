@@ -126,7 +126,7 @@ class fanout_substitution_impl
     {
         if (ps.strategy == fanout_substitution_params::substitution_strategy::RANDOM)
         {
-            rng.emplace(ps.seed.value_or(std::random_device{}()));
+            rng.emplace(ps.seed.has_value() ? ps.seed.value() : std::random_device{}());
         }
     }
 
