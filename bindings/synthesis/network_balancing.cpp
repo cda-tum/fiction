@@ -90,7 +90,7 @@ Args:
 Set unify_outputs to require every output at the same logic depth.
 
 Args:
-    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_progress: Accepted without emitting progress reports.
     unify_outputs: Flag to indicate that all output nodes should be in the same rank.
     buffer_constant_outputs: Whether outputs driven by a constant receive a buffer chain when unifying outputs;
         set to False for flows that do not place constants, which then also ignore them in the check.

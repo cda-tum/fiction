@@ -114,7 +114,7 @@ Args:
         R"doc(Check whether every network node respects the keyword fanout limits.
 
 Args:
-    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
+    on_progress: Accepted without emitting progress reports.
     strategy: Substitution strategy of high-degree fanout networks (depth-first vs. breadth-first).
     degree: Maximum output degree of each fan-out node. Must be at least two.
     threshold: Maximum number of outputs any gate is allowed to have before substitution applies. Must be at least one.
