@@ -306,3 +306,71 @@ TEST_CASE("Primary outputs driven by virtual PIs are mapped to the real PI", "[d
         CHECK(cec.value_or(false));
     }
 }
+
+/** @brief Ranked virtual-PI network that supports copying and forbids moving. */
+struct copy_only_ranked_network : mutable_rank_view<virtual_pi_network<technology_network>>
+{
+    /** @brief Constructs an empty ranked network. */
+    copy_only_ranked_network() = default;
+    /** @brief Copies a ranked network. */
+    copy_only_ranked_network(const copy_only_ranked_network&) = default;
+    /** @brief Forbids move construction. */
+    copy_only_ranked_network(copy_only_ranked_network&&) = delete;
+    /** @brief Copies a ranked network. */
+    copy_only_ranked_network& operator=(const copy_only_ranked_network&) = default;
+    /** @brief Forbids move assignment. */
+    copy_only_ranked_network& operator=(copy_only_ranked_network&&) = delete;
+    /** @brief Destroys the ranked network. */
+    ~copy_only_ranked_network() = default;
+};
+
+TEMPLATE_TEST_CASE("Virtual-PI deletion results support subsequent rank updates", "[delete-virtual-pis]",
+                   mutable_rank_view<virtual_pi_network<technology_network>>, copy_only_ranked_network)
+{
+    TestType   source{};
+    const auto a     = source.create_pi();
+    const auto b     = source.create_pi();
+    const auto alias = source.create_virtual_pi(a);
+    source.create_po(source.create_or(alias, b));
+    source.update_ranks();
+    source.rearrange_pis();
+    const auto original = source.clone();
+
+    auto result = delete_virtual_pis(source);
+    REQUIRE(result.num_pis() == 2);
+    CHECK(result.num_virtual_pis() == 0);
+    CHECK(result.num_pos() == 1);
+    result.update_ranks();
+    REQUIRE(result.check_validity());
+
+    const auto gates_before = result.num_gates();
+    const auto extra = result.create_and(result.make_signal(result.pi_at(0)), result.make_signal(result.pi_at(1)));
+    REQUIRE(result.num_gates() == gates_before + 1);
+    result.on_add(result.get_node(extra));
+    result.create_po(extra);
+    CHECK(result.level(result.get_node(extra)) == 1);
+    CHECK(result.check_validity());
+
+    technology_network expected{};
+    const auto         x = expected.create_pi();
+    const auto         y = expected.create_pi();
+    expected.create_po(expected.create_or(x, y));
+    expected.create_po(expected.create_and(x, y));
+    const auto result_miter = mockturtle::miter<technology_network>(expected, result);
+    REQUIRE(result_miter.has_value());
+    if (result_miter.has_value())
+    {
+        CHECK(mockturtle::equivalence_checking(*result_miter).value_or(false));
+    }
+
+    CHECK(source.num_pis() == 3);
+    CHECK(source.num_virtual_pis() == 1);
+    CHECK(source.num_pos() == 1);
+    CHECK(source.check_validity());
+    const auto source_miter = mockturtle::miter<technology_network>(original, source);
+    REQUIRE(source_miter.has_value());
+    if (source_miter.has_value())
+    {
+        CHECK(mockturtle::equivalence_checking(*source_miter).value_or(false));
+    }
+}

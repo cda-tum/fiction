@@ -154,6 +154,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Interface matching uses less temporary memory for named interfaces.
   - Crossing-cost estimation omits an unused counter for each swept edge.
+  - Virtual-PI removal avoids copying temporary rank bookkeeping.
   - Combination generation avoids one allocation and copy per result.
   - SiDB domain sampling now stops once every grid point has been collected.
   - **Breaking:** Physical design accepts only named technology networks (`networks::named_technology_network`). Convert other network types

@@ -211,7 +211,7 @@ class delete_virtual_pis_impl
                 });
         }
 
-        return {dest, old2new};
+        return {std::move(dest), std::move(old2new)};
     }
 };
 }  // namespace detail
