@@ -15,8 +15,10 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/static_depth_view.hpp>
@@ -496,12 +498,13 @@ struct throwing_depth_cost : mockturtle::unit_cost<technology_network>
     ~throwing_depth_cost() = default;
 };
 
-TEMPLATE_TEST_CASE("Virtual-PI deletion respects depth-view cost construction", "[static-depth-view]",
+TEMPLATE_TEST_CASE("Depth views support copy-only and throwing cost construction", "[static-depth-view]",
                    copy_only_depth_cost, throwing_depth_cost)
 {
     /** @brief Depth view with the cost policy under test. */
-    using depth_ntk = static_depth_view<virtual_pi_network<technology_network>, TestType>;
-    STATIC_REQUIRE_FALSE(std::is_nothrow_move_constructible_v<depth_ntk>);
+    using depth_ntk         = static_depth_view<virtual_pi_network<technology_network>, TestType>;
+    const auto delete_alias = GENERATE(false, true);
+    CAPTURE(delete_alias);
 
     depth_ntk  source{};
     const auto a     = source.create_pi();
@@ -510,23 +513,34 @@ TEMPLATE_TEST_CASE("Virtual-PI deletion respects depth-view cost construction", 
     source.create_po(source.create_and(alias, b));
     source.update_levels();
 
-    if constexpr (std::is_move_constructible_v<TestType>)
+    try
     {
-        CHECK_THROWS_AS(synthesis::delete_virtual_pis(source), std::runtime_error);
-    }
-    else
-    {
-        auto result = synthesis::delete_virtual_pis(source);
+        /** @brief Constructs a view from an rvalue or removes virtual inputs. */
+        const auto construct_result = [&]
+        {
+            if (delete_alias)
+            {
+                return synthesis::delete_virtual_pis(source);
+            }
+            auto copy = source;
+            return depth_ntk{std::move(copy)};
+        };
+        auto result = construct_result();
         result.update_levels();
-        REQUIRE(result.num_pis() == 2);
-        CHECK(result.num_virtual_pis() == 0);
+        const auto inputs = delete_alias ? 2u : 3u;
+        REQUIRE(result.num_pis() == inputs);
+        CHECK(result.num_virtual_pis() == (delete_alias ? 0u : 1u));
         REQUIRE(result.num_pos() == 1);
         CHECK(result.depth() == 1);
-        kitty::dynamic_truth_table expected{2};
-        kitty::create_from_hex_string(expected, "8");
+        kitty::dynamic_truth_table expected{inputs};
+        kitty::create_from_hex_string(expected, delete_alias ? "8" : "c0");
         CHECK(mockturtle::simulate<kitty::dynamic_truth_table>(
-                  result, mockturtle::default_simulator<kitty::dynamic_truth_table>{2})
+                  result, mockturtle::default_simulator<kitty::dynamic_truth_table>{inputs})
                   .at(0) == expected);
+    }
+    catch (const std::runtime_error&)
+    {
+        CHECK(std::is_same_v<TestType, throwing_depth_cost>);
     }
 
     REQUIRE(source.num_pis() == 3);
