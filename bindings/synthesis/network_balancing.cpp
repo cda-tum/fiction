@@ -94,6 +94,9 @@ Args:
     unify_outputs: Flag to indicate that all output nodes should be in the same rank.
     buffer_constant_outputs: Whether outputs driven by a constant receive a buffer chain when unifying outputs;
         set to False for flows that do not place constants, which then also ignore them in the check.
+
+Raises:
+    MemoryError: If allocating depth information or output levels fails.
 )doc");
 }
 
