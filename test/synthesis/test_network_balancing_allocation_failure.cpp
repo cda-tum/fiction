@@ -11,6 +11,7 @@
 /**
  * @file
  * @brief Allocation-failure propagation and recovery for network balance checks.
+ * @author Marcel Walter (marcelwa)
  */
 
 #include <catch2/catch_message.hpp>
