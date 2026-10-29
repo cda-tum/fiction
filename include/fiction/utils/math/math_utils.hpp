@@ -135,7 +135,7 @@ cartesian_combinations(const std::vector<std::vector<VectorDataType>>& sets) noe
             {
                 std::vector<VectorDataType> new_product = product;
                 new_product.push_back(element);
-                // Copy the row to avoid retaining spare capacity from the appended element.
+                // Keep this copy: moving appended rows can retain excess capacity.
                 expanded_products.push_back(new_product);
             }
         }

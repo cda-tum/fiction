@@ -2367,6 +2367,7 @@ TEST_CASE("Operational domain reports progress", "[operational-domain]")
             active       = running;
         };
 
+        /** @brief Search algorithm under test. */
         const auto method = GENERATE(std::string_view{"grid search"}, std::string_view{"random sampling"});
         CAPTURE(method);
         if (method == "grid search")

@@ -183,7 +183,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Critical-path analysis collapses wire chains to reduce traversal overhead on large layouts.
   - Avoid helper threads for single-worker sampling and contour exploration.
   - Reduce coordinate-vector allocations during operational-domain traversal.
-  - Cartesian products move completed storage between dimensions to avoid copying every combination.
+  - `cartesian_combinations` now moves completed storage between dimensions instead of copying it.
   - Reuse completed three-dimensional contour surfaces across initial samples.
   - Contour tracing explores boundary surfaces in three or more dimensions in parallel. It uses
     `operational_domain_params::number_of_threads`; large contour interiors also use parallel inference.
