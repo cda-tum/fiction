@@ -15,8 +15,11 @@
  * @author Simon Hofmann (simon1hofmann)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
@@ -24,7 +27,8 @@
 
 #include <cstdint>
 #include <limits>
-#include <set>
+#include <tuple>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -45,66 +49,17 @@ void check_identity_conversion(const arrangement a)
 
 TEST_CASE("Coordinate creation", "[hexagonal-layout]")
 {
-    SECTION("odd row")
-    {
-        using layout       = hexagonal_layout;
-        constexpr auto arr = arrangement::ODD_ROW;
-
-        const layout lyt{arr, {3, 3}};
-
-        CHECK(lyt.coord(0, 0, 0) == layout_base::coordinate{0, 0, 0});
-        CHECK(lyt.coord(0, 0, 1) == layout_base::coordinate{0, 0, 1});
-        CHECK(lyt.coord(1, 0) == layout_base::coordinate{1, 0});
-        CHECK(lyt.coord(2, 0) == layout_base::coordinate{2, 0});
-        CHECK(lyt.coord(0, 1) == layout_base::coordinate{0, 1});
-        CHECK(lyt.coord(1, 1) == layout_base::coordinate{1, 1});
-        CHECK(lyt.coord(2, 1) == layout_base::coordinate{2, 1});
-    }
-    SECTION("even row")
-    {
-        using layout       = hexagonal_layout;
-        constexpr auto arr = arrangement::EVEN_ROW;
-
-        const layout lyt{arr, {3, 3}};
-
-        CHECK(lyt.coord(0, 0, 0) == layout_base::coordinate{0, 0, 0});
-        CHECK(lyt.coord(0, 0, 1) == layout_base::coordinate{0, 0, 1});
-        CHECK(lyt.coord(1, 0) == layout_base::coordinate{1, 0});
-        CHECK(lyt.coord(2, 0) == layout_base::coordinate{2, 0});
-        CHECK(lyt.coord(0, 1) == layout_base::coordinate{0, 1});
-        CHECK(lyt.coord(1, 1) == layout_base::coordinate{1, 1});
-        CHECK(lyt.coord(2, 1) == layout_base::coordinate{2, 1});
-    }
-    SECTION("odd column")
-    {
-        using layout       = hexagonal_layout;
-        constexpr auto arr = arrangement::ODD_COLUMN;
-
-        const layout lyt{arr, {3, 3}};
-
-        CHECK(lyt.coord(0, 0, 0) == layout_base::coordinate{0, 0, 0});
-        CHECK(lyt.coord(0, 0, 1) == layout_base::coordinate{0, 0, 1});
-        CHECK(lyt.coord(1, 0) == layout_base::coordinate{1, 0});
-        CHECK(lyt.coord(2, 0) == layout_base::coordinate{2, 0});
-        CHECK(lyt.coord(0, 1) == layout_base::coordinate{0, 1});
-        CHECK(lyt.coord(1, 1) == layout_base::coordinate{1, 1});
-        CHECK(lyt.coord(2, 1) == layout_base::coordinate{2, 1});
-    }
-    SECTION("even column")
-    {
-        using layout       = hexagonal_layout;
-        constexpr auto arr = arrangement::EVEN_COLUMN;
-
-        const layout lyt{arr, {3, 3}};
-
-        CHECK(lyt.coord(0, 0, 0) == layout_base::coordinate{0, 0, 0});
-        CHECK(lyt.coord(0, 0, 1) == layout_base::coordinate{0, 0, 1});
-        CHECK(lyt.coord(1, 0) == layout_base::coordinate{1, 0});
-        CHECK(lyt.coord(2, 0) == layout_base::coordinate{2, 0});
-        CHECK(lyt.coord(0, 1) == layout_base::coordinate{0, 1});
-        CHECK(lyt.coord(1, 1) == layout_base::coordinate{1, 1});
-        CHECK(lyt.coord(2, 1) == layout_base::coordinate{2, 1});
-    }
+    const auto arr =
+        GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
+    CAPTURE(static_cast<int>(arr));
+    const hexagonal_layout lyt{arr, {3, 3}};
+    CHECK(lyt.coord(0, 0, 0) == layout_base::coordinate{0, 0, 0});
+    CHECK(lyt.coord(0, 0, 1) == layout_base::coordinate{0, 0, 1});
+    CHECK(lyt.coord(1, 0) == layout_base::coordinate{1, 0});
+    CHECK(lyt.coord(2, 0) == layout_base::coordinate{2, 0});
+    CHECK(lyt.coord(0, 1) == layout_base::coordinate{0, 1});
+    CHECK(lyt.coord(1, 1) == layout_base::coordinate{1, 1});
+    CHECK(lyt.coord(2, 1) == layout_base::coordinate{2, 1});
 }
 
 TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
@@ -171,10 +126,20 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
     }
 }
 
-TEST_CASE("Cardinal and ordinal operations: odd row", "[hexagonal-layout]")
+TEST_CASE("Cardinal and ordinal operations", "[hexagonal-layout]")
 {
-    using layout       = hexagonal_layout;
-    constexpr auto arr = arrangement::ODD_ROW;
+    using layout = hexagonal_layout;
+    /** @brief Arrangement and its four independently expected diagonal positions. */
+    const auto [arr, nec, sec, swc, nwc] =
+        GENERATE(std::tuple{arrangement::ODD_ROW, layout::coordinate{2, 1}, layout::coordinate{2, 3},
+                            layout::coordinate{1, 3}, layout::coordinate{1, 1}},
+                 std::tuple{arrangement::EVEN_ROW, layout::coordinate{3, 1}, layout::coordinate{3, 3},
+                            layout::coordinate{2, 3}, layout::coordinate{2, 1}},
+                 std::tuple{arrangement::ODD_COLUMN, layout::coordinate{3, 1}, layout::coordinate{3, 2},
+                            layout::coordinate{1, 2}, layout::coordinate{1, 1}},
+                 std::tuple{arrangement::EVEN_COLUMN, layout::coordinate{3, 2}, layout::coordinate{3, 3},
+                            layout::coordinate{1, 3}, layout::coordinate{1, 2}});
+    CAPTURE(static_cast<int>(arr));
 
     const layout lyt{arr, {4, 4, 2}};
 
@@ -182,13 +147,9 @@ TEST_CASE("Cardinal and ordinal operations: odd row", "[hexagonal-layout]")
     const layout::coordinate ac{2, 2, 1};
 
     const layout::coordinate nc{2, 1};
-    const layout::coordinate nec{2, 1};
     const layout::coordinate ec{3, 2};
-    const layout::coordinate sec{2, 3};
     const layout::coordinate sc{2, 3};
-    const layout::coordinate swc{1, 3};
     const layout::coordinate wc{1, 2};
-    const layout::coordinate nwc{1, 1};
 
     const layout::coordinate bnc{2, 0};
     const layout::coordinate bnec{3, 0};
@@ -233,230 +194,14 @@ TEST_CASE("Cardinal and ordinal operations: odd row", "[hexagonal-layout]")
     CHECK(lyt.is_adjacent_of(c, nwc));
 
     // edge cases
-    CHECK(!lyt.north(bnc));
-    CHECK(!lyt.north_east(bnec));
-    CHECK(!lyt.east(bec));
-    CHECK(!lyt.south_east(bsec));
-    CHECK(!lyt.south(bsc));
-    CHECK(!lyt.south_west(bswc));
-    CHECK(!lyt.west(bwc));
-    CHECK(!lyt.north_west(bnwc));
-}
-
-TEST_CASE("Cardinal and ordinal operations: even row", "[hexagonal-layout]")
-{
-    using layout       = hexagonal_layout;
-    constexpr auto arr = arrangement::EVEN_ROW;
-
-    const layout lyt{arr, {4, 4, 2}};
-
-    const layout::coordinate c{2, 2};
-    const layout::coordinate ac{2, 2, 1};
-
-    const layout::coordinate nc{2, 1};
-    const layout::coordinate nec{3, 1};
-    const layout::coordinate ec{3, 2};
-    const layout::coordinate sec{3, 3};
-    const layout::coordinate sc{2, 3};
-    const layout::coordinate swc{2, 3};
-    const layout::coordinate wc{1, 2};
-    const layout::coordinate nwc{2, 1};
-
-    const layout::coordinate bnc{2, 0};
-    const layout::coordinate bnec{3, 0};
-    const layout::coordinate bec{3, 2};
-    const layout::coordinate bsec{3, 3};
-    const layout::coordinate bsc{2, 3};
-    const layout::coordinate bswc{0, 3};
-    const layout::coordinate bwc{0, 2};
-    const layout::coordinate bnwc{0, 0};
-
-    CHECK(lyt.is_above(c, ac));
-    CHECK(lyt.is_below(ac, c));
-
-    CHECK(lyt.north(c) == nc);
-    CHECK(lyt.is_north_of(c, nc));
-    CHECK(lyt.is_northwards_of(c, bnc));
-    CHECK(lyt.northern_border_of(c) == bnc);
-    CHECK(lyt.north_east(c) == nec);
-    CHECK(lyt.east(c) == ec);
-    CHECK(lyt.is_east_of(c, ec));
-    CHECK(lyt.is_eastwards_of(c, bec));
-    CHECK(lyt.eastern_border_of(c) == bec);
-    CHECK(lyt.south_east(c) == sec);
-    CHECK(lyt.south(c) == sc);
-    CHECK(lyt.is_south_of(c, sc));
-    CHECK(lyt.is_southwards_of(c, bsc));
-    CHECK(lyt.southern_border_of(c) == bsc);
-    CHECK(lyt.south_west(c) == swc);
-    CHECK(lyt.west(c) == wc);
-    CHECK(lyt.is_west_of(c, wc));
-    CHECK(lyt.is_westwards_of(c, bwc));
-    CHECK(lyt.western_border_of(c) == bwc);
-    CHECK(lyt.north_west(c) == nwc);
-
-    CHECK(lyt.is_adjacent_of(c, nc));
-    CHECK(lyt.is_adjacent_of(c, nec));
-    CHECK(lyt.is_adjacent_of(c, ec));
-    CHECK(lyt.is_adjacent_of(c, sec));
-    CHECK(lyt.is_adjacent_of(c, sc));
-    CHECK(lyt.is_adjacent_of(c, swc));
-    CHECK(lyt.is_adjacent_of(c, wc));
-    CHECK(lyt.is_adjacent_of(c, nwc));
-
-    // edge cases
-    CHECK(!lyt.north(bnc));
-    CHECK(!lyt.north_east(bnec));
-    CHECK(!lyt.east(bec));
-    CHECK(!lyt.south_east(bsec));
-    CHECK(!lyt.south(bsc));
-    CHECK(!lyt.south_west(bswc));
-    CHECK(!lyt.west(bwc));
-    CHECK(!lyt.north_west(bnwc));
-}
-
-TEST_CASE("Cardinal and ordinal operations: odd column", "[hexagonal-layout]")
-{
-    using layout       = hexagonal_layout;
-    constexpr auto arr = arrangement::ODD_COLUMN;
-
-    const layout lyt{arr, {4, 4, 2}};
-
-    const layout::coordinate c{2, 2};
-    const layout::coordinate ac{2, 2, 1};
-
-    const layout::coordinate nc{2, 1};
-    const layout::coordinate nec{3, 1};
-    const layout::coordinate ec{3, 2};
-    const layout::coordinate sec{3, 2};
-    const layout::coordinate sc{2, 3};
-    const layout::coordinate swc{1, 2};
-    const layout::coordinate wc{1, 2};
-    const layout::coordinate nwc{1, 1};
-
-    const layout::coordinate bnc{2, 0};
-    const layout::coordinate bnec{3, 0};
-    const layout::coordinate bec{3, 2};
-    const layout::coordinate bsec{3, 3};
-    const layout::coordinate bsc{2, 3};
-    const layout::coordinate bswc{0, 3};
-    const layout::coordinate bwc{0, 2};
-    const layout::coordinate bnwc{0, 0};
-
-    CHECK(lyt.is_above(c, ac));
-    CHECK(lyt.is_below(ac, c));
-
-    CHECK(lyt.north(c) == nc);
-    CHECK(lyt.is_north_of(c, nc));
-    CHECK(lyt.is_northwards_of(c, bnc));
-    CHECK(lyt.northern_border_of(c) == bnc);
-    CHECK(lyt.north_east(c) == nec);
-    CHECK(lyt.east(c) == ec);
-    CHECK(lyt.is_east_of(c, ec));
-    CHECK(lyt.is_eastwards_of(c, bec));
-    CHECK(lyt.eastern_border_of(c) == bec);
-    CHECK(lyt.south_east(c) == sec);
-    CHECK(lyt.south(c) == sc);
-    CHECK(lyt.is_south_of(c, sc));
-    CHECK(lyt.is_southwards_of(c, bsc));
-    CHECK(lyt.southern_border_of(c) == bsc);
-    CHECK(lyt.south_west(c) == swc);
-    CHECK(lyt.west(c) == wc);
-    CHECK(lyt.is_west_of(c, wc));
-    CHECK(lyt.is_westwards_of(c, bwc));
-    CHECK(lyt.western_border_of(c) == bwc);
-    CHECK(lyt.north_west(c) == nwc);
-
-    CHECK(lyt.is_adjacent_of(c, nc));
-    CHECK(lyt.is_adjacent_of(c, nec));
-    CHECK(lyt.is_adjacent_of(c, ec));
-    CHECK(lyt.is_adjacent_of(c, sec));
-    CHECK(lyt.is_adjacent_of(c, sc));
-    CHECK(lyt.is_adjacent_of(c, swc));
-    CHECK(lyt.is_adjacent_of(c, wc));
-    CHECK(lyt.is_adjacent_of(c, nwc));
-
-    // edge cases
-    CHECK(!lyt.north(bnc));
-    CHECK(!lyt.north_east(bnec));
-    CHECK(!lyt.east(bec));
-    CHECK(!lyt.south_east(bsec));
-    CHECK(!lyt.south(bsc));
-    CHECK(!lyt.south_west(bswc));
-    CHECK(!lyt.west(bwc));
-    CHECK(!lyt.north_west(bnwc));
-}
-
-TEST_CASE("Cardinal and ordinal operations: even column", "[hexagonal-layout]")
-{
-    using layout       = hexagonal_layout;
-    constexpr auto arr = arrangement::EVEN_COLUMN;
-
-    const layout lyt{arr, {4, 4, 2}};
-
-    const layout::coordinate c{2, 2};
-    const layout::coordinate ac{2, 2, 1};
-
-    const layout::coordinate nc{2, 1};
-    const layout::coordinate nec{3, 2};
-    const layout::coordinate ec{3, 2};
-    const layout::coordinate sec{3, 3};
-    const layout::coordinate sc{2, 3};
-    const layout::coordinate swc{1, 3};
-    const layout::coordinate wc{1, 2};
-    const layout::coordinate nwc{1, 2};
-
-    const layout::coordinate bnc{2, 0};
-    const layout::coordinate bnec{3, 0};
-    const layout::coordinate bec{3, 2};
-    const layout::coordinate bsec{3, 3};
-    const layout::coordinate bsc{2, 3};
-    const layout::coordinate bswc{0, 3};
-    const layout::coordinate bwc{0, 2};
-    const layout::coordinate bnwc{0, 0};
-
-    CHECK(lyt.is_above(c, ac));
-    CHECK(lyt.is_below(ac, c));
-
-    CHECK(lyt.north(c) == nc);
-    CHECK(lyt.is_north_of(c, nc));
-    CHECK(lyt.is_northwards_of(c, bnc));
-    CHECK(lyt.northern_border_of(c) == bnc);
-    CHECK(lyt.north_east(c) == nec);
-    CHECK(lyt.east(c) == ec);
-    CHECK(lyt.is_east_of(c, ec));
-    CHECK(lyt.is_eastwards_of(c, bec));
-    CHECK(lyt.eastern_border_of(c) == bec);
-    CHECK(lyt.south_east(c) == sec);
-    CHECK(lyt.south(c) == sc);
-    CHECK(lyt.is_south_of(c, sc));
-    CHECK(lyt.is_southwards_of(c, bsc));
-    CHECK(lyt.southern_border_of(c) == bsc);
-    CHECK(lyt.south_west(c) == swc);
-    CHECK(lyt.west(c) == wc);
-    CHECK(lyt.is_west_of(c, wc));
-    CHECK(lyt.is_westwards_of(c, bwc));
-    CHECK(lyt.western_border_of(c) == bwc);
-    CHECK(lyt.north_west(c) == nwc);
-
-    CHECK(lyt.is_adjacent_of(c, nc));
-    CHECK(lyt.is_adjacent_of(c, nec));
-    CHECK(lyt.is_adjacent_of(c, ec));
-    CHECK(lyt.is_adjacent_of(c, sec));
-    CHECK(lyt.is_adjacent_of(c, sc));
-    CHECK(lyt.is_adjacent_of(c, swc));
-    CHECK(lyt.is_adjacent_of(c, wc));
-    CHECK(lyt.is_adjacent_of(c, nwc));
-
-    // edge cases
-    CHECK(!lyt.north(bnc));
-    CHECK(!lyt.north_east(bnec));
-    CHECK(!lyt.east(bec));
-    CHECK(!lyt.south_east(bsec));
-    CHECK(!lyt.south(bsc));
-    CHECK(!lyt.south_west(bswc));
-    CHECK(!lyt.west(bwc));
-    CHECK(!lyt.north_west(bnwc));
+    CHECK_FALSE(lyt.north(bnc));
+    CHECK_FALSE(lyt.north_east(bnec));
+    CHECK_FALSE(lyt.east(bec));
+    CHECK_FALSE(lyt.south_east(bsec));
+    CHECK_FALSE(lyt.south(bsc));
+    CHECK_FALSE(lyt.south_west(bswc));
+    CHECK_FALSE(lyt.west(bwc));
+    CHECK_FALSE(lyt.north_west(bnwc));
 }
 
 TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
@@ -469,19 +214,18 @@ TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
         const layout lyt{arr, {3, 3}};
 
         const auto adj00_v = lyt.adjacent_coordinates({0, 0});
-        const auto adj00_s = std::set<layout::coordinate>{adj00_v.cbegin(), adj00_v.cend()};
 
-        CHECK(std::set<layout::coordinate>{{{0, 1}, {1, 0}}} == adj00_s);
+        CHECK_THAT(adj00_v, Catch::Matchers::UnorderedRangeEquals(std::vector<layout::coordinate>{{0, 1}, {1, 0}}));
 
         const auto adj01_v = lyt.adjacent_coordinates({0, 1});
-        const auto adj01_s = std::set<layout::coordinate>{adj01_v.cbegin(), adj01_v.cend()};
 
-        CHECK(std::set<layout::coordinate>{{{0, 0}, {1, 0}, {1, 1}, {0, 2}, {1, 2}}} == adj01_s);
+        CHECK_THAT(adj01_v, Catch::Matchers::UnorderedRangeEquals(
+                                std::vector<layout::coordinate>{{0, 0}, {1, 0}, {1, 1}, {0, 2}, {1, 2}}));
 
         const auto adj22_v = lyt.adjacent_coordinates({2, 2});
-        const auto adj22_s = std::set<layout::coordinate>{adj22_v.cbegin(), adj22_v.cend()};
 
-        CHECK(std::set<layout::coordinate>{{{1, 2}, {1, 1}, {2, 1}}} == adj22_s);
+        CHECK_THAT(adj22_v,
+                   Catch::Matchers::UnorderedRangeEquals(std::vector<layout::coordinate>{{1, 2}, {1, 1}, {2, 1}}));
     }
     SECTION("even row")
     {
@@ -491,19 +235,18 @@ TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
         const layout lyt{arr, {3, 3}};
 
         const auto adj00_v = lyt.adjacent_coordinates({0, 0});
-        const auto adj00_s = std::set<layout::coordinate>{adj00_v.cbegin(), adj00_v.cend()};
 
-        CHECK(std::set<layout::coordinate>{{{0, 1}, {1, 0}, {1, 1}}} == adj00_s);
+        CHECK_THAT(adj00_v,
+                   Catch::Matchers::UnorderedRangeEquals(std::vector<layout::coordinate>{{0, 1}, {1, 0}, {1, 1}}));
 
         const auto adj01_v = lyt.adjacent_coordinates({0, 1});
-        const auto adj01_s = std::set<layout::coordinate>{adj01_v.cbegin(), adj01_v.cend()};
 
-        CHECK(std::set<layout::coordinate>{{{0, 0}, {1, 1}, {0, 2}}} == adj01_s);
+        CHECK_THAT(adj01_v,
+                   Catch::Matchers::UnorderedRangeEquals(std::vector<layout::coordinate>{{0, 0}, {1, 1}, {0, 2}}));
 
         const auto adj22_v = lyt.adjacent_coordinates({2, 2});
-        const auto adj22_s = std::set<layout::coordinate>{adj22_v.cbegin(), adj22_v.cend()};
 
-        CHECK(std::set<layout::coordinate>{{{1, 2}, {2, 1}}} == adj22_s);
+        CHECK_THAT(adj22_v, Catch::Matchers::UnorderedRangeEquals(std::vector<layout::coordinate>{{1, 2}, {2, 1}}));
     }
     SECTION("odd column")
     {
@@ -513,19 +256,18 @@ TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
         const layout lyt{arr, {3, 3}};
 
         const auto adj00_v = lyt.adjacent_coordinates({0, 0});
-        const auto adj00_s = std::set<layout::coordinate>{adj00_v.cbegin(), adj00_v.cend()};
 
-        CHECK(std::set<layout::coordinate>{{{0, 1}, {1, 0}}} == adj00_s);
+        CHECK_THAT(adj00_v, Catch::Matchers::UnorderedRangeEquals(std::vector<layout::coordinate>{{0, 1}, {1, 0}}));
 
         const auto adj01_v = lyt.adjacent_coordinates({0, 1});
-        const auto adj01_s = std::set<layout::coordinate>{adj01_v.cbegin(), adj01_v.cend()};
 
-        CHECK(std::set<layout::coordinate>{{{0, 0}, {1, 0}, {1, 1}, {0, 2}}} == adj01_s);
+        CHECK_THAT(adj01_v, Catch::Matchers::UnorderedRangeEquals(
+                                std::vector<layout::coordinate>{{0, 0}, {1, 0}, {1, 1}, {0, 2}}));
 
         const auto adj22_v = lyt.adjacent_coordinates({2, 2});
-        const auto adj22_s = std::set<layout::coordinate>{adj22_v.cbegin(), adj22_v.cend()};
 
-        CHECK(std::set<layout::coordinate>{{{1, 2}, {1, 1}, {2, 1}}} == adj22_s);
+        CHECK_THAT(adj22_v,
+                   Catch::Matchers::UnorderedRangeEquals(std::vector<layout::coordinate>{{1, 2}, {1, 1}, {2, 1}}));
     }
     SECTION("even column")
     {
@@ -535,19 +277,18 @@ TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
         const layout lyt{arr, {3, 3}};
 
         const auto adj00_v = lyt.adjacent_coordinates({0, 0});
-        const auto adj00_s = std::set<layout::coordinate>{adj00_v.cbegin(), adj00_v.cend()};
 
-        CHECK(std::set<layout::coordinate>{{{0, 1}, {1, 0}, {1, 1}}} == adj00_s);
+        CHECK_THAT(adj00_v,
+                   Catch::Matchers::UnorderedRangeEquals(std::vector<layout::coordinate>{{0, 1}, {1, 0}, {1, 1}}));
 
         const auto adj01_v = lyt.adjacent_coordinates({0, 1});
-        const auto adj01_s = std::set<layout::coordinate>{adj01_v.cbegin(), adj01_v.cend()};
 
-        CHECK(std::set<layout::coordinate>{{{0, 0}, {1, 1}, {0, 2}, {1, 2}}} == adj01_s);
+        CHECK_THAT(adj01_v, Catch::Matchers::UnorderedRangeEquals(
+                                std::vector<layout::coordinate>{{0, 0}, {1, 1}, {0, 2}, {1, 2}}));
 
         const auto adj22_v = lyt.adjacent_coordinates({2, 2});
-        const auto adj22_s = std::set<layout::coordinate>{adj22_v.cbegin(), adj22_v.cend()};
 
-        CHECK(std::set<layout::coordinate>{{{1, 2}, {2, 1}}} == adj22_s);
+        CHECK_THAT(adj22_v, Catch::Matchers::UnorderedRangeEquals(std::vector<layout::coordinate>{{1, 2}, {2, 1}}));
     }
 }
 
@@ -558,15 +299,15 @@ TEST_CASE("Hexagonal empty geometry and signed edge arithmetic", "[hexagonal-lay
     const hexagonal_layout empty{a};
     CHECK(empty.coordinates().empty());
     CHECK(empty.ground_coordinates().empty());
-    CHECK(!empty.last_coordinate());
-    CHECK(!empty.north({0, 0}));
-    CHECK(!empty.north_east({0, 0}));
-    CHECK(!empty.east({0, 0}));
-    CHECK(!empty.south_east({0, 0}));
-    CHECK(!empty.south({0, 0}));
-    CHECK(!empty.south_west({0, 0}));
-    CHECK(!empty.west({0, 0}));
-    CHECK(!empty.north_west({0, 0}));
+    CHECK_FALSE(empty.last_coordinate());
+    CHECK_FALSE(empty.north({0, 0}));
+    CHECK_FALSE(empty.north_east({0, 0}));
+    CHECK_FALSE(empty.east({0, 0}));
+    CHECK_FALSE(empty.south_east({0, 0}));
+    CHECK_FALSE(empty.south({0, 0}));
+    CHECK_FALSE(empty.south_west({0, 0}));
+    CHECK_FALSE(empty.west({0, 0}));
+    CHECK_FALSE(empty.north_west({0, 0}));
     CHECK(empty.adjacent_coordinates({0, 0}).empty());
     CHECK(empty.is_above({-1, -2, 7}, {-1, -2, 8}));
     auto copy = empty;
@@ -579,25 +320,26 @@ TEST_CASE("Hexagonal empty geometry and signed edge arithmetic", "[hexagonal-lay
         for (const auto y : {-2147483648ll, -2147483647ll, -7ll, -6ll, -5ll, -4ll, -3ll, -2ll, -1ll, 0ll, 1ll, 2ll, 3ll,
                              4ll, 5ll, 6ll, 7ll, 2147483647ll})
         {
+            CAPTURE(static_cast<int>(a), x, y);
             const layout_base::coordinate c{x, y};
             const auto                    cube = empty.to_cube_coordinate(c);
             CHECK(cube.x + cube.y + cube.z == 0);
             CHECK(empty.to_offset_coordinate(cube) == c);
-            CHECK(!empty.is_adjacent_of(c, c));
+            CHECK_FALSE(empty.is_adjacent_of(c, c));
         }
     }
     CHECK(empty.is_in_odd_row({0, -3}));
     CHECK(empty.is_in_even_row({0, -2}));
     CHECK(empty.is_in_odd_column({-3, 0}));
     CHECK(empty.is_in_even_column({-2, 0}));
-    CHECK(!empty.to_offset_coordinate({std::numeric_limits<int64_t>::max(), 0, 0}));
-    CHECK(!empty.to_offset_coordinate({0, 0, std::numeric_limits<int64_t>::min()}));
+    CHECK_FALSE(empty.to_offset_coordinate({std::numeric_limits<int64_t>::max(), 0, 0}));
+    CHECK_FALSE(empty.to_offset_coordinate({0, 0, std::numeric_limits<int64_t>::min()}));
     /** @brief Geometry covering every nonnegative signed x- and y-coordinate. */
     const hexagonal_layout wide{a, {2147483648ull, 2147483648ull, 2}};
     CHECK(wide.eastern_border_of({0, 0}) == layout_base::coordinate{2147483647, 0});
     CHECK(wide.southern_border_of({0, 0}) == layout_base::coordinate{0, 2147483647});
-    CHECK(!wide.east({2147483647, 0}));
-    CHECK(!wide.south({0, 2147483647}));
+    CHECK_FALSE(wide.east({2147483647, 0}));
+    CHECK_FALSE(wide.south({0, 2147483647}));
     for (const auto c : {layout_base::coordinate{2147483647, 2147483647}, layout_base::coordinate{0, 0}})
     {
         const auto adjacent = wide.adjacent_coordinates(c);

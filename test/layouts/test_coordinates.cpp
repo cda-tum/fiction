@@ -16,9 +16,12 @@
  * @author Willem Lambooy (wlambooy)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
@@ -53,95 +56,58 @@ using namespace fiction::layouts;
 template <typename Lyt>
 void check_visited_coordinates(const arrangement a)
 {
-    /** @brief Extent whose coordinate iteration is checked. */
-    const typename Lyt::extent ex{10, 10, 2};
-
-    auto layout = blueprints::make_layout<Lyt>(a, ex);
-
-    std::set<typename Lyt::coordinate> visited{};
-
-    const auto check1 = [&visited, &layout](const auto& c)
+    CAPTURE(static_cast<int>(a));
+    const auto layout = blueprints::make_layout<Lyt>(a, {10, 10, 2});
+    /** @brief Expected row-major coordinates, independent of layout iteration. */
+    std::vector<typename Lyt::coordinate> expected{};
+    for (auto z = 0; z < 2; ++z)
     {
-        CHECK(c <= *layout.last_coordinate());
-
-        // all coordinates are within the layout bounds
-        CHECK(layout.is_within_bounds(c));
-
-        // no coordinate is visited twice
-        CHECK(visited.count(c) == 0);
-        visited.insert(c);
-    };
-
-    for (auto&& t : layout.coordinates())
-    {
-        check1(t);
+        for (auto y = 0; y < 10; ++y)
+        {
+            for (auto x = 0; x < 10; ++x)
+            {
+                expected.emplace_back(x, y, z);
+            }
+        }
     }
-    CHECK(visited.size() == 200);
-
-    visited.clear();
-
-    layout.foreach_coordinate(check1);
-    CHECK(visited.size() == 200);
-
-    visited.clear();
-
-    typename Lyt::coordinate ar_ground{9, 9, 0};
-
-    const auto check2 = [&visited, &ar_ground, &layout](const auto& c)
+    /** @brief Callback observations retain both order and repeated coordinates. */
+    std::vector<typename Lyt::coordinate> visited{};
+    SECTION("Coordinate predicates")
     {
-        // iteration stays in ground layer
-        CHECK(c.z == 0);
-        CHECK(c <= ar_ground);
-        CHECK(layout.is_ground_layer(c));
-
-        // all coordinates are within the layout bounds
-        CHECK(layout.is_within_bounds(c));
-
-        // no coordinate is visited twice
-        CHECK(visited.count(c) == 0);
-        visited.insert(c);
-    };
-
-    for (auto&& t : layout.ground_coordinates())
-    {
-        check2(t);
+        for (const auto& c : expected)
+        {
+            CAPTURE(c);
+            CHECK(layout.is_within_bounds(c));
+            CHECK(layout.is_ground_layer(c) == (c.z == 0));
+        }
+        CHECK_FALSE(layout.is_within_bounds({-1, 0}));
+        CHECK_FALSE(layout.is_within_bounds({10, 0}));
+        CHECK_FALSE(layout.is_within_bounds({0, 10}));
+        CHECK_FALSE(layout.is_within_bounds({0, 0, 2}));
     }
-    CHECK(visited.size() == 100);
-
-    visited.clear();
-
-    layout.foreach_ground_coordinate(check2);
-    CHECK(visited.size() == 100);
-
-    visited.clear();
-
-    typename Lyt::coordinate start{2, 2}, stop{5, 4};
-
-    const auto check3 = [&visited, &start, &stop, &layout](const auto& c)
+    SECTION("Every layer")
     {
-        CHECK(c.z == 0);
-        // iteration stays in between the bounds
-        CHECK(c >= start);
-        CHECK(c < stop);
-
-        // all coordinates are within the layout bounds
-        CHECK(layout.is_within_bounds(c));
-
-        // no coordinate is visited twice
-        CHECK(visited.count(c) == 0);
-        visited.insert(c);
-    };
-
-    for (auto&& t : layout.coordinates(start, stop))
-    {
-        check3(t);
+        CHECK_THAT(layout.coordinates(), Catch::Matchers::RangeEquals(expected));
+        layout.foreach_coordinate([&visited](const auto& c) { visited.push_back(c); });
+        CHECK_THAT(visited, Catch::Matchers::RangeEquals(expected));
     }
-    CHECK(visited.size() == 23);
-
-    visited.clear();
-
-    layout.foreach_coordinate(check3, start, stop);
-    CHECK(visited.size() == 23);
+    SECTION("Ground layer")
+    {
+        expected.resize(100);
+        CHECK_THAT(layout.ground_coordinates(), Catch::Matchers::RangeEquals(expected));
+        layout.foreach_ground_coordinate([&visited](const auto& c) { visited.push_back(c); });
+        CHECK_THAT(visited, Catch::Matchers::RangeEquals(expected));
+    }
+    SECTION("Half-open interval across rows")
+    {
+        /** @brief The interval starts in row two and stops before column five of row four. */
+        const std::vector<typename Lyt::coordinate> bounded{
+            {2, 2}, {3, 2}, {4, 2}, {5, 2}, {6, 2}, {7, 2}, {8, 2}, {9, 2}, {0, 3}, {1, 3}, {2, 3}, {3, 3},
+            {4, 3}, {5, 3}, {6, 3}, {7, 3}, {8, 3}, {9, 3}, {0, 4}, {1, 4}, {2, 4}, {3, 4}, {4, 4}};
+        CHECK_THAT(layout.coordinates({{2, 2}}, {{5, 4}}), Catch::Matchers::RangeEquals(bounded));
+        layout.foreach_coordinate([&visited](const auto& c) { visited.push_back(c); }, {{2, 2}}, {{5, 4}});
+        CHECK_THAT(visited, Catch::Matchers::RangeEquals(bounded));
+    }
 }
 
 TEST_CASE("Every signed coordinate is a value", "[coordinates][size-contract]")
@@ -168,7 +134,7 @@ TEST_CASE("Every signed coordinate is a value", "[coordinates][size-contract]")
     CHECK(coord{5, 0, 0} < coord{0, 1, 0});
     CHECK(coord{5, 9, 0} < coord{0, 0, 1});
     CHECK(coord{1, 2, 0} < coord{2, 2, 0});
-    CHECK(!(coord{2, 2, 0} < coord{2, 2, 0}));
+    CHECK_FALSE((coord{2, 2, 0} < coord{2, 2, 0}));
 
     const std::set<coord> ordered{{1, 1, 0}, {0, 0, 1}, {2, 0, 0}, {0, 1, 0}};
 
@@ -225,13 +191,13 @@ TEMPLATE_TEST_CASE("Geometry sizes and value copies", "[coordinates][size-contra
     CHECK(empty.area() == 0);
     CHECK(empty.coordinates().empty());
     CHECK(empty.ground_coordinates().empty());
-    CHECK(!empty.contains_coordinate({0, 0, 0}));
-    CHECK(!empty.last_coordinate());
-    CHECK(!empty.northern_border_of({0, 0}));
-    CHECK(!empty.eastern_border_of({0, 0}));
-    CHECK(!empty.southern_border_of({0, 0}));
-    CHECK(!empty.western_border_of({0, 0}));
-    CHECK(!empty.is_at_any_border({0, 0}));
+    CHECK_FALSE(empty.contains_coordinate({0, 0, 0}));
+    CHECK_FALSE(empty.last_coordinate());
+    CHECK_FALSE(empty.northern_border_of({0, 0}));
+    CHECK_FALSE(empty.eastern_border_of({0, 0}));
+    CHECK_FALSE(empty.southern_border_of({0, 0}));
+    CHECK_FALSE(empty.western_border_of({0, 0}));
+    CHECK_FALSE(empty.is_at_any_border({0, 0}));
     const auto original = blueprints::make_layout<TestType>(arrangement::EVEN_ROW, {5, 4, 2});
     auto       copy     = original;
     copy.resize({10, 9, 1});
@@ -248,14 +214,14 @@ TEMPLATE_TEST_CASE("Geometry sizes and value copies", "[coordinates][size-contra
     CHECK(original.layers() == 2);
     CHECK(original.last_coordinate() == layout_base::coordinate{4, 3, 1});
     CHECK(original.coord(-1, 2, 7) == layout_base::coordinate{-1, 2, 7});
-    CHECK(!original.contains_coordinate({5, 0}));
-    CHECK(!original.contains_coordinate({0, 4}));
-    CHECK(!original.contains_coordinate({0, 0, 3}));
-    CHECK(!original.contains_coordinate({-1, 0}));
+    CHECK_FALSE(original.contains_coordinate({5, 0}));
+    CHECK_FALSE(original.contains_coordinate({0, 4}));
+    CHECK_FALSE(original.contains_coordinate({0, 0, 3}));
+    CHECK_FALSE(original.contains_coordinate({-1, 0}));
     for (const auto sizes : {layout_base::extent{0, 4, 2}, layout_base::extent{5, 0, 2}, layout_base::extent{5, 4, 0}})
     {
         const auto layout = blueprints::make_layout<TestType>(arrangement::EVEN_ROW, sizes);
-        CHECK(!layout.last_coordinate());
+        CHECK_FALSE(layout.last_coordinate());
         CHECK(layout.coordinates().empty());
         CHECK(layout.ground_coordinates().empty());
     }
@@ -285,6 +251,7 @@ TEST_CASE("Coordinate iteration uses an explicit end", "[coordinates][size-contr
     CHECK(last == iterator{});
     const cartesian_layout wide{{2147483648ull, 1, 1}};
     auto                   edge = wide.coordinates(coordinate{2147483647, 0}).begin();
+    REQUIRE(edge != wide.coordinates().end());
     CHECK(*edge == coordinate{2147483647, 0});
     ++edge;
     CHECK(edge == wide.coordinates().end());
@@ -315,17 +282,9 @@ TEMPLATE_TEST_CASE("Geometry invokes temporary and lvalue visitors as lvalues", 
                    cartesian_layout, shifted_cartesian_layout, hexagonal_layout)
 {
     /** @brief Geometry with an interior coordinate. */
-    const auto layout = []
-    {
-        if constexpr (std::same_as<TestType, cartesian_layout>)
-        {
-            return TestType{{3, 3}};
-        }
-        else
-        {
-            return TestType{arrangement::ODD_ROW, {3, 3}};
-        }
-    }();
+    const auto layout = blueprints::make_layout<TestType>(arrangement::ODD_ROW, {3, 3});
+    /** @brief Degree of the interior coordinate for this geometry. */
+    constexpr auto degree = std::same_as<TestType, cartesian_layout> ? 4u : 6u;
     /** @brief Move-only visitor callable only through an lvalue. */
     struct visitor
     {
@@ -353,19 +312,19 @@ TEMPLATE_TEST_CASE("Geometry invokes temporary and lvalue visitors as lvalues", 
     SECTION("Temporary visitor")
     {
         layout.foreach_adjacent_coordinate({1, 1}, visitor{std::make_unique<uint32_t>(0), observed});
-        CHECK(observed == layout.adjacent_coordinates({1, 1}).size());
+        CHECK(observed == degree);
         layout.foreach_adjacent_opposite_coordinates({1, 1}, visitor{std::make_unique<uint32_t>(0), observed});
-        CHECK(observed == layout.adjacent_opposite_coordinates({1, 1}).size());
+        CHECK(observed == degree / 2);
     }
     SECTION("Lvalue visitor")
     {
         /** @brief Visitor for individual coordinates. */
         visitor coordinates{std::make_unique<uint32_t>(0), observed};
         layout.foreach_adjacent_coordinate({1, 1}, coordinates);
-        CHECK(observed == layout.adjacent_coordinates({1, 1}).size());
+        CHECK(observed == degree);
         /** @brief Visitor for coordinate pairs. */
         visitor pairs{std::make_unique<uint32_t>(0), observed};
         layout.foreach_adjacent_opposite_coordinates({1, 1}, pairs);
-        CHECK(observed == layout.adjacent_opposite_coordinates({1, 1}).size());
+        CHECK(observed == degree / 2);
     }
 }

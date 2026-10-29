@@ -16,9 +16,12 @@
  * @author Willem Lambooy (wlambooy)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+
+#include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -30,7 +33,6 @@
 #include <fiction/technology/qca/layout.hpp>
 
 #include <array>
-#include <concepts>
 #include <cstdint>
 #include <future>
 #include <latch>
@@ -63,16 +65,20 @@ static_assert(!relative_position_layout<cartesian_layout>);
 
 TEST_CASE("Gate-level layouts are created with the required arrangement", "[layout-utils]")
 {
-    const auto a =
-        GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
-
     SECTION("Cartesian layouts ignore the arrangement")
     {
+        const auto a =
+            GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
+
         CHECK_NOTHROW(make_gate_level_layout<cartesian_gate_layout>(std::nullopt, {3, 3}, clocking::twoddwave()));
         CHECK_NOTHROW(make_gate_level_layout<cartesian_gate_layout>(a, {3, 3}, clocking::twoddwave()));
     }
     SECTION("shifted Cartesian and hexagonal layouts take the arrangement")
     {
+        const auto a =
+            GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
+
+        CAPTURE(static_cast<int>(a));
         CHECK(
             make_gate_level_layout<shifted_cartesian_gate_layout>(a, {3, 3}, clocking::twoddwave()).get_arrangement() ==
             a);
@@ -93,21 +99,13 @@ TEMPLATE_TEST_CASE("Port directions to coordinates", "[layout-utils]", (cartesia
     const auto a =
         GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
 
-    const auto lyt = []([[maybe_unused]] const arrangement layout_arrangement)
-    {
-        if constexpr (std::derived_from<TestType, fiction::layouts::cartesian_layout>)
-        {
-            return TestType{{5, 5}};
-        }
-        else
-        {
-            return TestType{layout_arrangement, {5, 5}};
-        }
-    }(a);
+    CAPTURE(static_cast<int>(a));
+    const auto lyt = blueprints::make_layout<TestType>(a, {5, 5});
 
     lyt.foreach_coordinate(
         [&lyt](const auto& c)
         {
+            CAPTURE(c);
             CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::NORTH}) ==
                   lyt.north(c));
             CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::NORTH_EAST}) ==
@@ -143,8 +141,10 @@ TEST_CASE("Random coordinates stay inside inclusive corner bounds", "[layout-uti
     /** Both argument orders describe the same region. */
     const auto reverse = GENERATE(false, true);
 
+    CAPTURE(first, second, minimum, maximum, reverse);
     for (uint32_t sample = 0; sample < 32; ++sample)
     {
+        CAPTURE(sample);
         /** Sample from the specified coordinate region. */
         const auto c = reverse ? random_coordinate<coord>(second, first) : random_coordinate<coord>(first, second);
         CHECK(c.x >= minimum.x);
