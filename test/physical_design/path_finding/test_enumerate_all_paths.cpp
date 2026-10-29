@@ -208,7 +208,8 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruc
 
                 const auto collection = enumerate_all_paths(obstr_lyt, {.source = {0, 0}, .target = {3, 3}});
 
-                CHECK(collection.size() == 1);
+                CHECK_THAT(collection, Catch::Matchers::UnorderedRangeEquals(path_collection{layout_coordinate_path{
+                                           {{0, 0}, {1, 0}, {1, 1}, {1, 2}, {2, 2}, {3, 2}, {3, 3}}}}));
             }
         }
     }
@@ -393,7 +394,8 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruc
                 const auto collection =
                     enumerate_all_paths(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, {}, search_obstructions);
 
-                CHECK(collection.size() == 1);
+                CHECK_THAT(collection, Catch::Matchers::UnorderedRangeEquals(path_collection{layout_coordinate_path{
+                                           {{0, 0}, {1, 0}, {1, 1}, {1, 2}, {2, 2}, {3, 2}, {3, 3}}}}));
             }
         }
     }

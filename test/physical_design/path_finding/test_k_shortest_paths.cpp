@@ -103,7 +103,7 @@ TEST_CASE("Yen's algorithm on 2x2 layouts", "[k-shortest-paths]")
         }
         SECTION("k = 2 or 3")
         {
-            /** @brief Requested limits include two paths and exceed every smaller result set. */
+            /** @brief Requested path limits. */
             const auto k = GENERATE(2u, 3u);
             CAPTURE(k);
 
@@ -166,7 +166,7 @@ TEST_CASE("Yen's algorithm on 2x2 layouts", "[k-shortest-paths]")
             }
             SECTION("k = 2 or 3")
             {
-                /** @brief Requested limits include two paths and exceed every smaller result set. */
+                /** @brief Requested path limits. */
                 const auto k = GENERATE(2u, 3u);
                 CAPTURE(k);
 
@@ -218,7 +218,7 @@ TEST_CASE("Yen's algorithm on 2x2 layouts", "[k-shortest-paths]")
             }
             SECTION("k = 2 or 3")
             {
-                /** @brief Requested limits include two paths and exceed every smaller result set. */
+                /** @brief Requested path limits. */
                 const auto k = GENERATE(2u, 3u);
                 CAPTURE(k);
 
@@ -284,6 +284,7 @@ TEST_CASE("Yen's algorithm on 4x4 layouts", "[k-shortest-paths]")
             CAPTURE(path);
             CHECK(all.contains(path));
             CHECK(std::ranges::count(paths, path) == 1);
+            CHECK((path.size() == 7 || path.size() == 11));
         }
     };
 
@@ -681,20 +682,22 @@ TEST_CASE("Path searches preserve persistent and caller-supplied obstructions", 
     REQUIRE_FALSE(all.empty());
     for (auto repetition = 0; repetition < 2; ++repetition)
     {
+        CAPTURE(repetition);
         const auto shortest = a_star(layout, objective, manhattan_distance_functor{}, unit_cost_functor<>{}, {}, extra);
         CHECK(all.contains(shortest));
         const auto paths = yen_k_shortest_paths(layout, objective, 20, {}, extra);
-        CAPTURE(repetition);
         CHECK_THAT(paths, Catch::Matchers::UnorderedRangeEquals(all));
         layout.foreach_coordinate(
             [&](const auto& c)
             {
+                CAPTURE(c);
                 CHECK(layout.is_obstructed_coordinate(c) == (c == fiction::layouts::layout_base::coordinate{1, 0}));
                 CHECK(extra.is_obstructed_coordinate(c) == (c == fiction::layouts::layout_base::coordinate{1, 0} ||
                                                             c == fiction::layouts::layout_base::coordinate{2, 1}));
                 layout.foreach_coordinate(
                     [&](const auto& target)
                     {
+                        CAPTURE(c, target);
                         CHECK(layout.is_obstructed_connection(c, target) ==
                               (c == fiction::layouts::layout_base::coordinate{0, 1} &&
                                target == fiction::layouts::layout_base::coordinate{1, 1}));
