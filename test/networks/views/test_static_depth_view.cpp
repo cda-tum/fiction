@@ -41,12 +41,14 @@
 
 #include <cstdint>
 #include <stdexcept>
+#include <string_view>
 #include <type_traits>
 #include <utility>
 
 using namespace fiction;
 using namespace fiction::networks;
 using namespace fiction::networks::views;
+using namespace fiction::synthesis;
 
 /**
  * @brief Checks whether a network can form a depth view.
@@ -486,6 +488,8 @@ struct throwing_depth_cost : mockturtle::unit_cost<technology_network>
     /** @brief Copies unit costs. */
     throwing_depth_cost(const throwing_depth_cost&) = default;
     /** @brief Reports move failure. @throws std::runtime_error Always. */
+    // The regression requires a throwing move constructor.
+    // NOLINTNEXTLINE(bugprone-exception-escape,cppcoreguidelines-noexcept-move-operations)
     throwing_depth_cost(throwing_depth_cost&&)
     {
         throw std::runtime_error{"cost move"};
@@ -520,7 +524,7 @@ TEMPLATE_TEST_CASE("Depth views support copy-only and throwing cost construction
         {
             if (delete_alias)
             {
-                return synthesis::delete_virtual_pis(source);
+                return delete_virtual_pis(source);
             }
             auto copy = source;
             return depth_ntk{std::move(copy)};
@@ -538,9 +542,10 @@ TEMPLATE_TEST_CASE("Depth views support copy-only and throwing cost construction
                   result, mockturtle::default_simulator<kitty::dynamic_truth_table>{inputs})
                   .at(0) == expected);
     }
-    catch (const std::runtime_error&)
+    catch (const std::runtime_error& error)
     {
         CHECK(std::is_same_v<TestType, throwing_depth_cost>);
+        CHECK(std::string_view{error.what()} == "cost move");
     }
 
     REQUIRE(source.num_pis() == 3);

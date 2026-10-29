@@ -148,7 +148,7 @@ TEST_CASE("Planarized networks keep their virtual inputs and planarity", "[plana
         CHECK(substituted.rank_width(0) == planar.rank_width(0));
         REQUIRE(substituted.num_pis() == planar.num_pis());
 
-        // Compare input identities in rank order without constraining node identifiers.
+        // Compare rank positions at each input creation ordinal without constraining node identifiers.
         for (uint32_t i = 0; i < planar.num_pis(); ++i)
         {
             CAPTURE(i);
