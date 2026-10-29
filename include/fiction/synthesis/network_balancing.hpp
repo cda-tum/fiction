@@ -260,11 +260,7 @@ template <typename NtkDest, typename NtkSrc>
              mockturtle::has_create_buf_v<NtkDest> && mockturtle::has_clone_node_v<NtkDest>
 NtkDest network_balancing(const NtkSrc& ntk_src, network_balancing_params ps = {})
 {
-    detail::network_balancing_impl<NtkDest, NtkSrc> p{ntk_src, ps};
-
-    auto result = p.run();
-
-    return result;
+    return detail::network_balancing_impl<NtkDest, NtkSrc>{ntk_src, ps}.run();
 }
 /**
  * Checks if a logic network is properly path-balanced with regard to the provided parameters.
@@ -280,11 +276,7 @@ template <typename Ntk>
              mockturtle::has_get_node_v<Ntk>
 bool is_balanced(const Ntk& ntk, network_balancing_params ps = {}) noexcept
 {
-    detail::is_balanced_impl<Ntk> p{ntk, ps};
-
-    auto result = p.run();
-
-    return result;
+    return detail::is_balanced_impl<Ntk>{ntk, ps}.run();
 }
 
 }  // namespace fiction::synthesis
