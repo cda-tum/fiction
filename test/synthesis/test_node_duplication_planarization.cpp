@@ -650,6 +650,11 @@ TEST_CASE("The shortest path through the H-graph places the fewest nodes", "[nod
                 best = std::min(best, placed);
                 return;
             }
+            // Every remaining placement adds a nonnegative cost.
+            if (placed >= best)
+            {
+                return;
+            }
 
             auto perm = orders[po];
             bool more = true;
