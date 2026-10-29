@@ -269,12 +269,13 @@ NtkDest network_balancing(const NtkSrc& ntk_src, network_balancing_params ps = {
  * @param ntk The logic network to check.
  * @param ps Parameters.
  * @return `true` iff `ntk` is properly path-balanced with regard to `ps`.
+ * @throws std::bad_alloc If allocating depth information or output levels fails.
  */
 template <typename Ntk>
     requires mockturtle::is_network_type_v<Ntk> && mockturtle::has_foreach_gate_v<Ntk> &&
              mockturtle::has_foreach_fanin_v<Ntk> && mockturtle::has_foreach_po_v<Ntk> &&
              mockturtle::has_get_node_v<Ntk>
-bool is_balanced(const Ntk& ntk, network_balancing_params ps = {}) noexcept
+bool is_balanced(const Ntk& ntk, network_balancing_params ps = {})
 {
     return detail::is_balanced_impl<Ntk>{ntk, ps}.run();
 }
