@@ -126,9 +126,9 @@ TEST_CASE("Print object and tile assignments with fanins and fanouts", "[print-g
     const auto output = layout.create_po(input, "f1", {1, 0});
     /** @brief Expected relationship records, independent of object allocation indices. */
     const auto input_record =
-        fmt::format("\t   {}:{} @ {}", input.index, input.generation, cartesian_gate_layout::tile{0, 0});
-    const auto output_record =
-        fmt::format("\t   {}:{} @ {}", output.index, output.generation, cartesian_gate_layout::tile{1, 0});
+        fmt::format("with fanins:\n\t   {}:{} @ {}", input.index, input.generation, cartesian_gate_layout::tile{0, 0});
+    const auto output_record = fmt::format("with fanouts:\n\t   {}:{} @ {}", output.index, output.generation,
+                                           cartesian_gate_layout::tile{1, 0});
 
     CAPTURE(input_record, output_record);
 
