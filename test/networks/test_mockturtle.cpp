@@ -133,18 +133,23 @@ TEST_CASE("Extracted layout simulation", "[mockturtle]")
     }
 }
 
-template <typename Ntk, typename Lib>
-technology_network map(const Ntk& ntk, const Lib& lib)
-{
-    return mockturtle::map<technology_network>(ntk, lib);
-}
-
+/**
+ * @brief Checks that mapping preserves a network's output functions.
+ * @tparam Ntk Source network type.
+ * @tparam Lib Technology library type.
+ * @param ntk Source network.
+ * @param lib Technology library.
+ */
 template <typename Ntk, typename Lib>
 void check(const Ntk& ntk, const Lib& lib)
 {
-    check_eq(ntk, map(ntk, lib));
+    check_eq(ntk, mockturtle::map(ntk, lib));
 }
-
+/**
+ * @brief Checks majority, n-ary, and full-adder networks against a library.
+ * @tparam Lib Technology library type.
+ * @param lib Technology library.
+ */
 template <typename Lib>
 void check_all(const Lib& lib)
 {
