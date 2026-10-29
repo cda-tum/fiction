@@ -7396,6 +7396,9 @@ static const char *mkd_doc_fiction_networks_technology_network_add_additional_fu
 R"doc(Adds some further Boolean functions to the truth table cache for fixed
 indexing.
 
+Raises:
+    MemoryError: If initializing the truth-table cache fails.
+
 )doc";
 
 static const char *mkd_doc_fiction_networks_technology_network_clone = R"doc(Returns a network with independent storage.)doc";
@@ -25248,6 +25251,9 @@ Template Args:
 
 Returns:
     The resulting network after virtual primary inputs are deleted.
+
+Raises:
+    MemoryError: If copying or rebuilding network storage fails.
 
 )doc";
 
