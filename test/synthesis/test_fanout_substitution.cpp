@@ -289,25 +289,20 @@ TEST_CASE("Fanout checks accept progress callbacks whose copies throw", "[fanout
     /** @brief Injects a copy failure without throwing from progress reports. */
     struct throwing_copy_progress
     {
-        /** @brief Controls whether copying the callback fails. */
-        const bool& fail_copy;
-        /** @brief Stores the copy-failure flag. */
-        explicit throwing_copy_progress(const bool& fail) noexcept : fail_copy{fail} {}
-        /** @brief Throws after copy-failure injection is armed. */
-        throwing_copy_progress(const throwing_copy_progress& other) : fail_copy{other.fail_copy}
+        /** @brief Creates the callback without throwing. */
+        throwing_copy_progress() noexcept = default;
+        /** @brief Throws when the callback is copied. */
+        throwing_copy_progress(const throwing_copy_progress&)
         {
-            if (fail_copy)
-            {
-                throw std::bad_alloc{};
-            }
+            throw std::bad_alloc{};
         }
         /** @brief Moves the callback without throwing. */
         throwing_copy_progress(throwing_copy_progress&&) noexcept = default;
         /** @brief Destroys the callback. */
         ~throwing_copy_progress() = default;
-        /** @brief The copy-failure flag cannot be rebound. */
+        /** @brief Does not support copy assignment. */
         throwing_copy_progress& operator=(const throwing_copy_progress&) = delete;
-        /** @brief The copy-failure flag cannot be rebound. */
+        /** @brief Does not support move assignment. */
         throwing_copy_progress& operator=(throwing_copy_progress&&) = delete;
         /** @brief Accepts progress reports without throwing. */
         void operator()(std::string_view, std::size_t, std::size_t) const noexcept {}
@@ -323,12 +318,11 @@ TEST_CASE("Fanout checks accept progress callbacks whose copies throw", "[fanout
     network.create_po(buffer);
     network.create_po(buffer);
     network.create_po(buffer);
-    bool                       fail_copy{};
     fanout_substitution_params params{.strategy    = fanout_substitution_params::substitution_strategy::RANDOM,
                                       .degree      = degree,
                                       .threshold   = threshold,
                                       .seed        = 42,
-                                      .on_progress = throwing_copy_progress{fail_copy}};
-    fail_copy = true;
-    CHECK(is_fanout_substituted(network, std::move(params)) == expected);
+                                      .on_progress = throwing_copy_progress{}};
+    const auto                 substituted = is_fanout_substituted(network, std::move(params));
+    CHECK(substituted == expected);
 }

@@ -88,7 +88,7 @@ TEMPLATE_TEST_CASE("Balance checks propagate allocation failures and recover", "
             });
         edges.emplace_back();
         source.foreach_po([&](const auto signal) { edges.back().push_back(signal); });
-        const auto ranks = [&source]
+        const auto ranks = [&]
         {
             if constexpr (mockturtle::has_rank_position_v<TestType>)
             {
