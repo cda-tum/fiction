@@ -13,7 +13,6 @@
  * @brief Tests for `fiction/layouts/gate_layout.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
- * @author OpenAI Codex
  */
 
 #include <fiction/layouts/gate_layout.hpp>
