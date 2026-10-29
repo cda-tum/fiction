@@ -12,8 +12,10 @@
  * @file
  * @brief Tests for `fiction/synthesis/node_duplication_planarization.hpp`.
  * @author Benjamin Hien (hibenj)
+ * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
@@ -217,6 +219,7 @@ TEST_CASE("Random primary output order with a fixed seed", "[node-duplication-pl
     const auto planar_b = node_duplication_planarization(ranked, ps);
 
     check_planar_and_equivalent(ntk, planar_a);
+    check_planar_and_equivalent(ntk, planar_b);
     CHECK(planar_a.size() == planar_b.size());
 }
 
@@ -240,6 +243,7 @@ TEST_CASE("Progress is reported once per level", "[node-duplication-planarizatio
     check_planar_and_equivalent(ntk, planar);
     CHECK(total == ranked.depth() + 1);
     REQUIRE(!done_values.empty());
+    CHECK(done_values.front() == 0);
     CHECK(done_values.back() == total);
 }
 
@@ -306,7 +310,7 @@ TEST_CASE("Consecutive consumers share one copy", "[node-duplication-planarizati
     CHECK(planar.size() == ranked.size());
 
     // the result is not fanout-substituted on purpose
-    CHECK(!is_fanout_substituted(planar));
+    CHECK_FALSE(is_fanout_substituted(planar));
 }
 
 TEST_CASE("Networks with virtual primary inputs are rejected", "[node-duplication-planarization]")
@@ -348,6 +352,7 @@ TEST_CASE("Hybrid strategy keeps crossings only where crossing gates are cheaper
 
         for (const bool xor_gates : {false, true})
         {
+            CAPTURE(xor_gates, ntk.num_pis(), ntk.num_pos());
             const node_duplication_planarization_params ps{
                 .strategy       = node_duplication_planarization_params::planarization_strategy::HYBRID,
                 .crossing_gates = {.xor_gates = xor_gates}};
@@ -458,6 +463,7 @@ TEST_CASE("Invalid parameters are rejected", "[node-duplication-planarization]")
         for (const double weight :
              {-1.0, std::numeric_limits<double>::infinity(), std::numeric_limits<double>::quiet_NaN()})
         {
+            CAPTURE(weight);
             node_duplication_planarization_params ps{.duplication_cost = {.node_weight = weight}};
             CHECK_THROWS_AS(node_duplication_planarization(ranked, ps), std::invalid_argument);
 
@@ -566,6 +572,7 @@ TEST_CASE("The shortest path through the H-graph places the fewest nodes", "[nod
 
     for (uint32_t trial = 0; trial < 60; ++trial)
     {
+        CAPTURE(trial);
         technology_network tec{};
 
         const auto                                          num_pis = draw(2, 5);
@@ -712,7 +719,7 @@ TEST_CASE("Balanced networks without unified outputs are rejected", "[node-dupli
 
     const mutable_rank_view ranked{network_balancing<technology_network>(tec)};
     REQUIRE(is_balanced(ranked));
-    REQUIRE(!is_balanced(ranked, {.unify_outputs = true, .buffer_constant_outputs = false}));
+    REQUIRE_FALSE(is_balanced(ranked, {.unify_outputs = true, .buffer_constant_outputs = false}));
 
     CHECK_THROWS_AS(node_duplication_planarization(ranked), std::invalid_argument);
 }
@@ -806,6 +813,7 @@ TEST_CASE("Tie-break among equally short paths copies the lightest cone", "[node
 
     for (const bool inverter_first : {true, false})
     {
+        CAPTURE(inverter_first);
         const auto tec    = build(inverter_first);
         const auto ranked = rank(tec);
 

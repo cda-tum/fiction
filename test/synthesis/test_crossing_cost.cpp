@@ -15,7 +15,9 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "utils/network_ranking_utils.hpp"
 
@@ -37,6 +39,7 @@ using namespace fiction::synthesis;
 namespace
 {
 
+/** @brief Node identifier of the technology network. */
 using node_t = mockturtle::node<technology_network>;
 
 /**
@@ -116,24 +119,23 @@ TEST_CASE("Crossing minimization removes avoidable crossings", "[crossing-cost]"
 TEST_CASE("Unavoidable crossings are charged one crossing gate each plus the padding of the other edges",
           "[crossing-cost]")
 {
+    const auto [xor_gates, expected_cost] = GENERATE(table<bool, uint64_t>({{false, 87}, {true, 18}}));
+    CAPTURE(xor_gates, expected_cost);
+
     const auto ranked = rank(single_crossing_network());
 
     const auto                upper = ranked.get_ranks(1);
     const std::vector<node_t> lower = ranked.get_ranks(0);
 
-    for (const bool xor_gates : {false, true})
-    {
-        const crossing_gate_planarization_params cg_ps{.xor_gates = xor_gates};
+    const crossing_gate_planarization_params cg_ps{.xor_gates = xor_gates};
 
-        auto lower_copy = lower;
+    auto lower_copy = lower;
 
-        const auto result = synthesis::detail::crossing_cost(ranked, upper, lower_copy, 32, cg_ps);
+    const auto result = synthesis::detail::crossing_cost(ranked, upper, lower_copy, 32, cg_ps);
 
-        // two of the four edges cross and carry one crossing gate; the other two are padded by its depth
-        CHECK(result.num_crossings == 1);
-        CHECK(result.cost == synthesis::detail::crossing_gate_nodes(xor_gates) +
-                                 (2 * synthesis::detail::crossing_gate_depth(xor_gates)));
-    }
+    // One crossing gate and two padded edges: 59 + 2*14 nodes, or 10 + 2*4 nodes with XORs.
+    CHECK(result.num_crossings == 1);
+    CHECK(result.cost == expected_cost);
 }
 
 TEST_CASE("Levels with more crossings than allowed are not costed", "[crossing-cost]")

@@ -247,6 +247,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Code quality:
 
   - Geometry tests now compare complete coordinate and visitor results and share arrangement cases.
+  - Planarization tests use correlated cost and degree rows and check progress completion and callback precedence.
   - Parameter configurations now use C++20 designated initializers and `const` where possible.
   - Modernized network-core contract tests with complete traversal and clone-isolation checks.
   - Streamlined clocking tests with explicit period tables and allocation-independent rollback sweeps.
