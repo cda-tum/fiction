@@ -19,6 +19,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
 
+#include "utils/allocation_failure.hpp"
+
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
@@ -33,7 +35,9 @@
 
 #include <kitty/dynamic_truth_table.hpp>
 
+#include <cstddef>
 #include <initializer_list>
+#include <new>
 #include <vector>
 
 using namespace fiction;
@@ -43,6 +47,7 @@ using namespace fiction::physical_design;
 using namespace fiction::sidb;
 using namespace fiction::sidb::model;
 using namespace fiction::synthesis;
+using namespace fiction::test;
 
 /**
  * This is simply a test library, its gates do not represent real entities that would work when fabricated.
@@ -265,4 +270,52 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
                                   create_id_tt(), create_not_tt(), create_and_tt(), create_or_tt(), create_nand_tt(),
                                   create_nor_tt(), create_xor_tt(), create_xnor_tt()}));
     }
+}
+
+TEST_CASE("Surface analysis propagates allocation failure and recovers", "[sidb-surface-analysis]")
+{
+    require_allocation_failure_support();
+    /** @brief Single tile with both dummy-library gates obstructed at their center cell. */
+    const cartesian_gate_layout gates{{1, 1, 1}};
+    /** @brief Defect canary that must survive every failed and successful analysis. */
+    sidb::layout surface{};
+    surface.assign_defect(site_at_row(1, 1), defect{defect_type::SILOXANE});
+    /** @brief Complete independently expected blacklist, including each gate's ports. */
+    const surface_black_list<port_position> expected{
+        {{0, 0},
+         {{create_id_tt(), {{{port_position(0, 1)}, {port_position(2, 1)}}}},
+          {create_and_tt(), {{{port_position(0, 0), port_position(0, 2)}, {port_position(2, 1)}}}}}}};
+    // Initialize the test library's static fixtures before injecting allocation failures.
+    CHECK(surface_analysis<dummy_gate_library>(gates, surface) == expected);
+    for (std::size_t failure{};; ++failure)
+    {
+        CAPTURE(failure);
+        REQUIRE(failure < ALLOCATION_FAILURE_ATTEMPT_LIMIT);
+        try
+        {
+            allocation_budget = failure;
+            const auto result = surface_analysis<dummy_gate_library>(gates, surface);
+            allocation_budget.reset();
+            CHECK(result == expected);
+            break;
+        }
+        catch (const std::bad_alloc&)
+        {
+            allocation_budget.reset();
+            CHECK(surface.num_defects() == 1);
+            CHECK(surface.get_defect(site_at_row(1, 1)).type == defect_type::SILOXANE);
+            CHECK(gates.is_empty());
+            CHECK(gates.get_extent() == layout_base::extent{1, 1, 1});
+        }
+        catch (...)
+        {
+            allocation_budget.reset();
+            throw;
+        }
+    }
+    CHECK(surface_analysis<dummy_gate_library>(gates, surface) == expected);
+    CHECK(surface.num_defects() == 1);
+    CHECK(surface.get_defect(site_at_row(1, 1)).type == defect_type::SILOXANE);
+    CHECK(gates.is_empty());
+    CHECK(gates.get_extent() == layout_base::extent{1, 1, 1});
 }

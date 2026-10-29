@@ -695,6 +695,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - `surface_analysis` now propagates allocation failure while building its blacklist.
   - `virtual_miter` now preserves EXODC output relations for integer-signal destinations.
   - Combination generation now uses full-width position indices.
   - Kinks-rejected energy labels now count each matching charge distribution once, preserving degenerate-state

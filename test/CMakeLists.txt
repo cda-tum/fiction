@@ -51,6 +51,7 @@ set(ALLOCATION_FAILURE_TESTS
     test_gate_layout
     test_routing_utils
     test_determine_clocking
+    test_surface_analysis
     test_cell_writer_allocation_failure
     test_mutable_rank_view_allocation_failure)
 get_target_property(ALLOCATION_FAILURE_LIBRARIES libfiction
