@@ -59,6 +59,7 @@ template <typename T>
  * compiler warning when taking the absolute value of an unsigned number.
  * @tparam T The type of the number to take the absolute value of. Must be integral.
  * @param n The number to take the absolute value of.
+ * @pre The absolute value of `n` is representable in `T`; signed minimum values are excluded.
  * @return |n|.
  */
 template <std::integral T>

@@ -184,6 +184,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Avoid helper threads for single-worker sampling and contour exploration.
   - Reduce coordinate-vector allocations during operational-domain traversal.
   - `cartesian_combinations` now moves completed storage between dimensions instead of copying it.
+  - `integral_abs` documents that signed minimum values are outside its representable-result domain.
   - Reuse completed three-dimensional contour surfaces across initial samples.
   - Contour tracing explores boundary surfaces in three or more dimensions in parallel. It uses
     `operational_domain_params::number_of_threads`; large contour interiors also use parallel inference.

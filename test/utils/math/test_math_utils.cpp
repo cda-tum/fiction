@@ -86,9 +86,12 @@ TEMPLATE_TEST_CASE("integral_abs should compute the absolute value of a number o
 
     CHECK(integral_abs(TestType{0}) == TestType{0});
     CHECK(integral_abs(TestType{42}) == TestType{42});
+    CHECK(integral_abs(std::numeric_limits<TestType>::max()) == std::numeric_limits<TestType>::max());
     if constexpr (std::is_signed_v<TestType>)
     {
         CHECK(integral_abs(x) == TestType{42});
+        CHECK(integral_abs(static_cast<TestType>(-std::numeric_limits<TestType>::max())) ==
+              std::numeric_limits<TestType>::max());
     }
     else
     {
