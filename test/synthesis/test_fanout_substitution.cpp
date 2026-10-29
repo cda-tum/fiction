@@ -33,9 +33,14 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/utils/node_map.hpp>
 
+#include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <new>
 #include <stdexcept>
+#include <string_view>
+#include <tuple>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
@@ -268,4 +273,53 @@ TEST_CASE("Repeated fanout substitution preserves interface and logic", "[fanout
         CAPTURE(pass);
         substituted = substitute(substituted, {});
     }
+}
+
+TEST_CASE("Fanout checks accept progress callbacks whose copies throw", "[fanout-substitution]")
+{
+    /** @brief Injects a copy failure without throwing from progress reports. */
+    struct throwing_copy_progress
+    {
+        /** @brief Controls whether copying the callback fails. */
+        const bool& fail_copy;
+        /** @brief Stores the copy-failure flag. */
+        explicit throwing_copy_progress(const bool& fail) noexcept : fail_copy{fail} {}
+        /** @brief Throws after copy-failure injection is armed. */
+        throwing_copy_progress(const throwing_copy_progress& other) : fail_copy{other.fail_copy}
+        {
+            if (fail_copy)
+            {
+                throw std::bad_alloc{};
+            }
+        }
+        /** @brief Moves the callback without throwing. */
+        throwing_copy_progress(throwing_copy_progress&&) noexcept = default;
+        /** @brief Destroys the callback. */
+        ~throwing_copy_progress() = default;
+        /** @brief The copy-failure flag cannot be rebound. */
+        throwing_copy_progress& operator=(const throwing_copy_progress&) = delete;
+        /** @brief The copy-failure flag cannot be rebound. */
+        throwing_copy_progress& operator=(throwing_copy_progress&&) = delete;
+        /** @brief Accepts progress reports without throwing. */
+        void operator()(std::string_view, std::size_t, std::size_t) const noexcept {}
+    };
+
+    const auto [degree, threshold, expected] =
+        GENERATE(std::tuple{3u, 2u, true}, std::tuple{2u, 2u, false}, std::tuple{3u, 1u, false});
+    CAPTURE(degree, threshold);
+    technology_network network{};
+    const auto         a      = network.create_pi();
+    const auto         buffer = network.create_buf(a);
+    network.create_po(a);
+    network.create_po(buffer);
+    network.create_po(buffer);
+    network.create_po(buffer);
+    bool                       fail_copy{};
+    fanout_substitution_params params{.strategy    = fanout_substitution_params::substitution_strategy::RANDOM,
+                                      .degree      = degree,
+                                      .threshold   = threshold,
+                                      .seed        = 42,
+                                      .on_progress = throwing_copy_progress{fail_copy}};
+    fail_copy = true;
+    CHECK(is_fanout_substituted(network, std::move(params)) == expected);
 }

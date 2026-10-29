@@ -695,6 +695,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Algorithms:
 
   - `is_balanced` now propagates allocation failures instead of terminating.
+  - `is_fanout_substituted` now accepts progress callbacks whose copies can throw.
   - Combination generation now uses full-width position indices.
   - Kinks-rejected energy labels now count each matching charge distribution once, preserving degenerate-state
     occupation probabilities. Both energy-labeling variants document ascending energy order.

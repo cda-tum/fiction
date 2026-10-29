@@ -509,7 +509,7 @@ template <typename Ntk>
              mockturtle::has_fanout_size_v<Ntk>
 bool is_fanout_substituted(const Ntk& ntk, fanout_substitution_params ps = {}) noexcept
 {
-    return detail::is_fanout_substituted_impl<Ntk>{ntk, ps}.run();
+    return detail::is_fanout_substituted_impl<Ntk>{ntk, std::move(ps)}.run();
 }
 
 }  // namespace fiction::synthesis
