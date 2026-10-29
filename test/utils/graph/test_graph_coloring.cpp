@@ -136,18 +136,6 @@ void check_sat_coloring_engine(const Graph& graph, const std::size_t expected_ch
 
             check_sat_search_tactics(graph, expected_chromatic_number, sat_params);
         }
-        /**
-         * NOTE: At the time of writing this code, bsat2 was not able to solve coloring instances properly. It is,
-         * therefore, not recommended using it. If in the future an update to bill and/or bsat2 has been published, feel
-         * free to uncomment this test section.
-         */
-//
-//        SECTION("bsat2")
-//        {
-//            sat_params.sat_engine = bill::solvers::bsat2;
-//
-//            check_sat_search_tactics(graph, expected_chromatic_number, sat_params);
-//        }
 #ifndef BILL_WINDOWS_PLATFORM
         SECTION("maple")
         {

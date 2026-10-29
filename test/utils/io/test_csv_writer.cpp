@@ -20,7 +20,6 @@
 
 #include <sstream>
 #include <string>
-#include <string_view>
 
 using namespace fiction;
 using namespace fiction::utils::io;
