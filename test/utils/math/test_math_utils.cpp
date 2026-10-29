@@ -17,8 +17,10 @@
  * @author Simon Hofmann (simon1hofmann)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include <fiction/utils/execution_timeout.hpp>
 #include <fiction/utils/math/combination_utils.hpp>
@@ -30,6 +32,8 @@
 #include <limits>
 #include <stdexcept>
 #include <string>
+#include <tuple>
+#include <type_traits>
 #include <vector>
 
 using namespace fiction;
@@ -81,7 +85,16 @@ TEMPLATE_TEST_CASE("integral_abs should compute the absolute value of a number o
 {
     const auto x = static_cast<TestType>(-42);
 
-    CHECK(integral_abs(integral_abs(x) - (x < 0 ? -x : x)) == 0);
+    CHECK(integral_abs(TestType{0}) == TestType{0});
+    CHECK(integral_abs(TestType{42}) == TestType{42});
+    if constexpr (std::is_signed_v<TestType>)
+    {
+        CHECK(integral_abs(x) == TestType{42});
+    }
+    else
+    {
+        CHECK(integral_abs(x) == x);
+    }
 }
 
 TEST_CASE("Combination enumeration honors a shared deadline", "[execution-timeout]")
@@ -98,60 +111,21 @@ TEST_CASE("Combination enumeration honors a shared deadline", "[execution-timeou
                     fiction::utils::timeout_error);
 }
 
-TEST_CASE("Binomial Coefficient Tests")
+TEST_CASE("Binomial Coefficient Tests", "[binomial-coefficient]")
 {
-    SECTION("C(5, 2)")
-    {
-        const uint64_t result = binomial_coefficient(5, 2);
-        REQUIRE(result == 10);  // C(5, 2) = 10
-    }
-
-    SECTION("C(10, 3)")
-    {
-        const uint64_t result = binomial_coefficient(10, 3);
-        REQUIRE(result == 120);  // C(10, 3) = 120
-    }
-
-    SECTION("C(0, 0)")
-    {
-        const uint64_t result = binomial_coefficient(0, 0);
-        REQUIRE(result == 1);  // C(0, 0) = 1
-    }
-
-    SECTION("C(8, 8)")
-    {
-        const uint64_t result = binomial_coefficient(8, 8);
-        REQUIRE(result == 1);  // C(8, 8) = 1
-    }
-
-    SECTION("C(7, 10)")
-    {
-        const uint64_t result = binomial_coefficient(7, 10);
-        REQUIRE(result == 0);  // C(7, 10) = 0 (k > n)
-    }
-    SECTION("C(15, 7)")
-    {
-        const uint64_t result = binomial_coefficient(15, 7);
-        REQUIRE(result == 6435);  // C(15, 7) = 6435
-    }
-
-    SECTION("C(20, 10)")
-    {
-        const uint64_t result = binomial_coefficient(20, 10);
-        REQUIRE(result == 184756);  // C(20, 10) = 184,756
-    }
-
-    SECTION("C(30, 15)")
-    {
-        const uint64_t result = binomial_coefficient(30, 15);
-        REQUIRE(result == 155117520);  // C(30, 15) = 155,117,520
-    }
-
-    SECTION("C(50, 25)")
-    {
-        const uint64_t result = binomial_coefficient(50, 25);
-        REQUIRE(result == 126410606437752);  // C(50, 25) = 126,410,606,437,752
-    }
+    /** @brief Population, selection size, and exact coefficient. */
+    const auto [n, k, expected] =
+        GENERATE(Catch::Generators::table<uint64_t, uint64_t, uint64_t>({{5, 2, 10},
+                                                                         {10, 3, 120},
+                                                                         {0, 0, 1},
+                                                                         {8, 8, 1},
+                                                                         {7, 10, 0},
+                                                                         {15, 7, 6435},
+                                                                         {20, 10, 184756},
+                                                                         {30, 15, 155117520},
+                                                                         {50, 25, 126410606437752}}));
+    CAPTURE(n, k);
+    CHECK(binomial_coefficient(n, k) == expected);
 }
 
 TEST_CASE("Test the computation of the cartesian combinations", "[cartesian_combinations]")
@@ -221,83 +195,29 @@ TEST_CASE("Test the computation of the cartesian combinations", "[cartesian_comb
 TEST_CASE("Test the determination of all combinations of distributing k entities on n positions",
           "[determine-all-combinations-of-distributing-k-entities-on-n-positions]")
 {
-    SECTION("k = 0, n = 0")
-    {
-        const std::size_t                           k = 0;
-        const std::size_t                           n = 0;
-        const std::vector<std::vector<std::size_t>> expected{};
-
-        auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
-
-        REQUIRE(result == expected);
-    }
-
-    SECTION("k = 1, n = 1")
-    {
-        const std::size_t                           k = 1;
-        const std::size_t                           n = 1;
-        const std::vector<std::vector<std::size_t>> expected{{0}};
-
-        auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
-
-        REQUIRE(result == expected);
-    }
-
-    SECTION("k = 2, n = 3")
-    {
-        const std::size_t                           k = 2;
-        const std::size_t                           n = 3;
-        const std::vector<std::vector<std::size_t>> expected{{0, 1}, {0, 2}, {1, 2}};
-
-        auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
-
-        REQUIRE(result == expected);
-    }
-
-    SECTION("k = 3, n = 5")
-    {
-        const std::size_t                           k = 3;
-        const std::size_t                           n = 5;
-        const std::vector<std::vector<std::size_t>> expected{{0, 1, 2}, {0, 1, 3}, {0, 1, 4}, {0, 2, 3}, {0, 2, 4},
-                                                             {0, 3, 4}, {1, 2, 3}, {1, 2, 4}, {1, 3, 4}, {2, 3, 4}};
-
-        auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
-
-        REQUIRE(result == expected);
-    }
-
-    SECTION("k = 0, n = 5")
-    {
-        const std::size_t                           k = 0;
-        const std::size_t                           n = 5;
-        const std::vector<std::vector<std::size_t>> expected{};
-
-        auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
-
-        REQUIRE(result == expected);
-    }
-
-    SECTION("k = 5, n = 5")
-    {
-        const std::size_t                           k = 5;
-        const std::size_t                           n = 5;
-        const std::vector<std::vector<std::size_t>> expected{{0, 1, 2, 3, 4}};
-
-        auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
-
-        REQUIRE(result == expected);
-    }
-
-    SECTION("k > n (invalid case)")
-    {
-        const std::size_t                           k = 6;
-        const std::size_t                           n = 5;
-        const std::vector<std::vector<std::size_t>> expected{};
-
-        auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
-
-        REQUIRE(result == expected);
-    }
+    /** @brief Entity count, position count, and complete ordered combinations. */
+    const auto [k, n, expected] =
+        GENERATE(Catch::Generators::table<std::size_t, std::size_t, std::vector<std::vector<std::size_t>>>(
+            {{0, 0, {}},
+             {1, 1, {{0}}},
+             {2, 3, {{0, 1}, {0, 2}, {1, 2}}},
+             {3,
+              5,
+              {{0, 1, 2},
+               {0, 1, 3},
+               {0, 1, 4},
+               {0, 2, 3},
+               {0, 2, 4},
+               {0, 3, 4},
+               {1, 2, 3},
+               {1, 2, 4},
+               {1, 3, 4},
+               {2, 3, 4}}},
+             {0, 5, {}},
+             {5, 5, {{0, 1, 2, 3, 4}}},
+             {6, 5, {}}}));
+    CAPTURE(k, n);
+    CHECK(determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n) == expected);
 }
 
 TEST_CASE("Combination enumeration rejects counts beyond vector capacity",

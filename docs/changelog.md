@@ -244,6 +244,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Modernized utility tests with named data rows, direct result checks, and complete progress observations.
   - Parameter configurations now use C++20 designated initializers and `const` where possible.
 
 - Continuous integration:

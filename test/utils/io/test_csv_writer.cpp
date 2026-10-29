@@ -31,6 +31,12 @@ TEST_CASE("CSV writer", "[csv-writer]")
 
     csv_writer writer(ss);
 
+    SECTION("writing no values")
+    {
+        writer.write_line();
+        CHECK(ss.str() == "\n");
+    }
+
     SECTION("writing single integer value")
     {
         writer.write_line(1);
