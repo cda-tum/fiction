@@ -1136,69 +1136,48 @@ TEST_CASE("Parsing error: unknown gate type with more than 3 incoming signals", 
 
 TEST_CASE("FGL rejects invalid numeric metadata", "[read-fgl-layout]")
 {
-    std::string x{"0"};
-    std::string clock{"0"};
-    std::string delay{"0"};
-    std::string id{"0"};
-    SECTION("Negative gate ID")
+    /** @brief Parse numeric fields in an otherwise valid legacy FGL document. */
+    const auto read_numeric_document =
+        [](const char* x_value, const char* clock_value, const char* delay_value, const char* id_value)
     {
-        id = "-1";
-    }
-    SECTION("Trailing gate ID data")
+        std::istringstream stream{fmt::format(
+            "<fgl><layout><name>invalid</name><topology>cartesian</topology><size><x>{}</x>"
+            "<y>0</y><z>0</z></size><clocking><name>OPEN4</name><zones><zone><x>0</x><y>0</y><clock>{}</clock>"
+            "</zone></zones><synchronization_elements><element><x>0</x><y>0</y><z>0</z><delay>{}</delay>"
+            "</element></synchronization_elements></clocking></layout><gates><gate><id>{}</id>"
+            "<type>PI</type><name>input</name><loc><x>0</x><y>0</y><z>0</z></loc></gate></gates></fgl>",
+            x_value, clock_value, delay_value, id_value)};
+        return read_fgl_layout<cartesian_layout>(stream);
+    };
+    SECTION("Valid numeric metadata")
     {
-        id = "1oops";
+        /** @brief All-zero legacy fields describe one placed primary input. */
+        const auto valid = read_numeric_document("0", "0", "0", "0");
+        CHECK(valid.get_extent() == layout_base::extent{1, 1, 1});
+        REQUIRE(valid.num_pis() == 1);
+        CHECK(valid.get_input_name(0) == "input");
     }
-    SECTION("Non-numeric gate ID")
+    SECTION("Invalid numeric metadata")
     {
-        id = "gate";
+        /** @brief Malformed field with the remaining numeric fields valid. */
+        const auto [name, x, clock, delay, id] =
+            GENERATE(Catch::Generators::table<const char*, const char*, const char*, const char*, const char*>(
+                {{"Negative gate ID", "0", "0", "0", "-1"},
+                 {"Trailing gate ID data", "0", "0", "0", "1oops"},
+                 {"Non-numeric gate ID", "0", "0", "0", "gate"},
+                 {"Empty gate ID", "0", "0", "0", " "},
+                 {"Gate ID storage overflow", "0", "0", "0", "2147483648"},
+                 {"Gate ID integer overflow", "0", "0", "0", "18446744073709551616"},
+                 {"Negative coordinate", "-1", "0", "0", "0"},
+                 {"Trailing coordinate data", "1oops", "0", "0", "0"},
+                 {"Empty coordinate", "   ", "0", "0", "0"},
+                 {"Coordinate overflow", "4294967296", "0", "0", "0"},
+                 {"Integer overflow", "18446744073709551616", "0", "0", "0"},
+                 {"Clock exceeds phase count", "0", "4", "0", "0"},
+                 {"Synchronization delay overflow", "0", "0", "256", "0"}}));
+        CAPTURE(name, x, clock, delay, id);
+        CHECK_THROWS_AS(read_numeric_document(x, clock, delay, id), fgl_parsing_error);
     }
-    SECTION("Empty gate ID")
-    {
-        id = " ";
-    }
-    SECTION("Gate ID storage overflow")
-    {
-        id = "2147483648";
-    }
-    SECTION("Gate ID integer overflow")
-    {
-        id = "18446744073709551616";
-    }
-    SECTION("Negative coordinate")
-    {
-        x = "-1";
-    }
-    SECTION("Trailing coordinate data")
-    {
-        x = "1oops";
-    }
-    SECTION("Empty coordinate")
-    {
-        x = "   ";
-    }
-    SECTION("Coordinate overflow")
-    {
-        x = "4294967296";
-    }
-    SECTION("Integer overflow")
-    {
-        x = "18446744073709551616";
-    }
-    SECTION("Clock exceeds phase count")
-    {
-        clock = "4";
-    }
-    SECTION("Synchronization delay overflow")
-    {
-        delay = "256";
-    }
-    std::istringstream stream{
-        "<fgl><layout><name>invalid</name><topology>cartesian</topology><size><x>" + x +
-        "</x><y>0</y><z>0</z></size><clocking><name>OPEN4</name><zones><zone><x>0</x><y>0</y><clock>" + clock +
-        "</clock></zone></zones><synchronization_elements><element><x>0</x><y>0</y><z>0</z><delay>" + delay +
-        "</delay></element></synchronization_elements></clocking></layout><gates><gate><id>" + id +
-        "</id><type>PI</type><name>input</name><loc><x>0</x><y>0</y><z>0</z></loc></gate></gates></fgl>"};
-    CHECK_THROWS_AS(read_fgl_layout<cartesian_layout>(stream), fgl_parsing_error);
 }
 
 TEST_CASE("FGL failed connection read leaves target unchanged", "[read-fgl-layout]")
@@ -1332,39 +1311,49 @@ TEST_CASE("Version-2 FGL requires a finished layout before assigning the target"
     std::stringstream serialized{};
     write_fgl_layout(original, serialized);
     auto xml = serialized.str();
+    /** @brief Reject the document through both overloads and retain the existing target. */
+    const auto check_rejection = [&xml]
+    {
+        cartesian_gate_layout target{{1, 1, 1}, clocking::twoddwave(), "kept"};
+        const auto            kept = target.create_pi("input", {0, 0});
+        target.obstruct_coordinate({-1, -2, -3});
+        std::stringstream malformed{xml};
+        CHECK_THROWS_AS(read_fgl_layout(target, malformed), fgl_parsing_error);
+        CHECK(target.get_layout_name() == "kept");
+        /** @brief Object retained after the failed read. */
+        const auto retained = target.find_object({0, 0});
+        CHECK((retained.has_value() && *retained == kept));
+        CHECK(target.size() == 1);
+        CHECK(target.is_obstructed_coordinate({-1, -2, -3}));
+        std::stringstream rejected{xml};
+        CHECK_THROWS_AS(read_fgl_layout<cartesian_layout>(rejected), fgl_parsing_error);
+    };
     SECTION("PO self-cycle")
     {
         xml.replace(xml.find("<source>0</source>"), 18, "<source>1</source>");
+        check_rejection();
     }
     SECTION("Dangling cycle")
     {
         xml.replace(xml.rfind("<source>0</source>"), 18, "<source>3</source>");
+        check_rejection();
     }
     SECTION("Outside extent")
     {
         const auto width = xml.find("<x>3</x>", xml.find("<size>"));
         xml.replace(width, 8, "<x>1</x>");
+        check_rejection();
     }
     SECTION("Nonadjacent connection")
     {
         const auto po = xml.find("<type>PO</type>");
         const auto x  = xml.find("<x>1</x>", po);
         xml.replace(x, 8, "<x>2</x>");
+        check_rejection();
     }
     SECTION("Wrong clock")
     {
         xml.insert(xml.find("</zones>"), "<zone><x>1</x><y>0</y><clock>0</clock></zone>");
+        check_rejection();
     }
-    cartesian_gate_layout target{{1, 1, 1}, clocking::twoddwave(), "kept"};
-    const auto            kept = target.create_pi("input", {0, 0});
-    target.obstruct_coordinate({-1, -2, -3});
-    std::stringstream malformed{xml};
-    CHECK_THROWS_AS(read_fgl_layout(target, malformed), fgl_parsing_error);
-    CHECK(target.get_layout_name() == "kept");
-    /** @brief Object retained after the failed read. */
-    const auto retained = target.find_object({0, 0});
-    CHECK((retained.has_value() && *retained == kept));
-    CHECK(target.is_obstructed_coordinate({-1, -2, -3}));
-    std::stringstream rejected{xml};
-    CHECK_THROWS_AS(read_fgl_layout<cartesian_layout>(rejected), fgl_parsing_error);
 }
