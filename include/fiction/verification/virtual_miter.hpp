@@ -109,9 +109,10 @@ leaves_by_creation_order(const Ntk& ntk, const std::vector<mockturtle::signal<Nt
  * virtual primary inputs (PIs). Virtual PIs are removed during miter construction, and all edges connected to them are
  * remapped to their corresponding original PIs, ensuring consistent PI counts when the networks are equivalent.
  *
- * The resulting miter connects two networks with the same number of inputs and produces a single primary output. This
- * output represents the OR of the XORs of all primary output pairs. Thus, the miter outputs 1 for any input assignment
- * where the primary outputs of the two networks differ.
+ * The resulting miter connects two networks with the same number of inputs and produces a single primary output.
+ * Without external observability don't-cares (EXODCs), the output is the OR of the XORs of all primary output pairs.
+ * With EXODCs, the output is 1 when the output pair is not observably equivalent under the source's relation.
+ * If both networks carry EXODC relations, the first network's relation takes precedence.
  *
  * The input networks may have different types. If the two input networks have mismatched numbers of primary inputs or
  * outputs, the method returns `std::nullopt`.
