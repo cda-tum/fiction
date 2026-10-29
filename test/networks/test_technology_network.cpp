@@ -17,6 +17,7 @@
 
 // This file is based on mockturtle/test/networks/klut.cpp
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/networks/technology_network.hpp>

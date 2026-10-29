@@ -23,7 +23,6 @@
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/networks/mockturtle_utils.hpp>
-#include <fiction/networks/technology_network.hpp>
 #include <fiction/synthesis/technology_mapping_library.hpp>
 
 #include <kitty/dynamic_truth_table.hpp>
