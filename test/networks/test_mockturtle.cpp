@@ -112,7 +112,7 @@ TEST_CASE("Extracted layout simulation", "[mockturtle]")
             extract_layout_network(lyt), mockturtle::default_simulator<kitty::dynamic_truth_table>{lyt.num_pis()});
         REQUIRE(tables.size() == 2);
         CHECK(kitty::to_hex(tables[0]) == "e8");
-        CHECK(kitty::to_hex(tables[1]) == "66");
+        CHECK(kitty::to_hex(tables[1]) == "66");  // Two-input XOR in three variables.
     }
     SECTION("Crossing outputs")
     {
@@ -120,8 +120,8 @@ TEST_CASE("Extracted layout simulation", "[mockturtle]")
         const auto tables = mockturtle::simulate<kitty::dynamic_truth_table>(
             extract_layout_network(lyt), mockturtle::default_simulator<kitty::dynamic_truth_table>{lyt.num_pis()});
         REQUIRE(tables.size() == 2);
-        CHECK(kitty::to_hex(tables[0]) == "8888");
-        CHECK(kitty::to_hex(tables[1]) == "f000");
+        CHECK(kitty::to_hex(tables[0]) == "8888");  // AND of the first two inputs.
+        CHECK(kitty::to_hex(tables[1]) == "f000");  // AND of the last two inputs.
     }
     SECTION("Synchronization elements")
     {
@@ -145,6 +145,7 @@ void check(const Ntk& ntk, const Lib& lib)
 {
     check_eq(ntk, mockturtle::map(ntk, lib));
 }
+
 /**
  * @brief Checks majority, n-ary, and full-adder networks against a library.
  * @tparam Lib Technology library type.

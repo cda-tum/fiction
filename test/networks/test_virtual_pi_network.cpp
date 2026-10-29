@@ -48,31 +48,33 @@ TEST_CASE("Real and virtual input visitors report complete collections", "[virtu
     const auto gate = vpi.create_and(b, c);
     vpi.create_po(gate);
 
-    CHECK(vpi.get_real_pi(c) == a);
-    CHECK(vpi.get_real_pi(d) == a);
-    CHECK(vpi.get_real_pi(e) == b);
+    CHECK(vpi.get_real_pi(vpi.get_node(c)) == vpi.get_node(a));
+    CHECK(vpi.get_real_pi(vpi.get_node(d)) == vpi.get_node(a));
+    CHECK(vpi.get_real_pi(vpi.get_node(e)) == vpi.get_node(b));
     CHECK(vpi.num_real_pis() == 2);
     CHECK(vpi.num_real_cis() == 2);
     CHECK(vpi.num_virtual_pis() == 3);
     CHECK(vpi.num_virtual_cis() == 3);
-    for (const auto node : {a, b})
+    for (const auto signal : {a, b})
     {
+        const auto node = vpi.get_node(signal);
         CAPTURE(node);
         CHECK(vpi.is_real_pi(node));
         CHECK(vpi.is_real_ci(node));
         CHECK_FALSE(vpi.is_virtual_pi(node));
         CHECK_FALSE(vpi.is_virtual_ci(node));
     }
-    for (const auto node : {c, d, e})
+    for (const auto signal : {c, d, e})
     {
+        const auto node = vpi.get_node(signal);
         CAPTURE(node);
         CHECK(vpi.is_virtual_pi(node));
         CHECK(vpi.is_virtual_ci(node));
         CHECK_FALSE(vpi.is_real_pi(node));
         CHECK_FALSE(vpi.is_real_ci(node));
     }
-    CHECK_FALSE(vpi.is_real_pi(gate));
-    CHECK_FALSE(vpi.is_virtual_pi(gate));
+    CHECK_FALSE(vpi.is_real_pi(vpi.get_node(gate)));
+    CHECK_FALSE(vpi.is_virtual_pi(vpi.get_node(gate)));
 
     /** @brief Complete traversal observations, including duplicate visits. */
     std::vector<technology_network::node> visited{};

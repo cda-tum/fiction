@@ -30,6 +30,7 @@
 #include <mockturtle/views/depth_view.hpp>
 #include <mockturtle/views/fanout_view.hpp>
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -93,6 +94,7 @@ TEST_CASE("Inverse levels", "[network-utils]")
 
     const auto inv_levels = inverse_levels(tec);
 
+    // Two constants stay at level zero; the input paths contain one and five buffers before the AND.
     CHECK(inv_levels == std::vector<uint32_t>{0, 0, 2, 6, 1, 5, 4, 3, 2, 1, 0});
 }
 
