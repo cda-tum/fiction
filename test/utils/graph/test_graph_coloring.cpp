@@ -50,7 +50,7 @@ void check_coloring(const Graph& graph, const vertex_coloring<Graph, std::size_t
                     const determine_vertex_coloring_stats<>& pst)
 {
     REQUIRE(pst.coloring_verified.has_value());
-    CHECK(*pst.coloring_verified);
+    CHECK(pst.coloring_verified.value_or(false));
     REQUIRE(coloring.size() == graph.size_vertices());
     /** @brief Observed multiplicity of each color, independent of its identifier. */
     std::map<std::size_t, std::size_t> frequencies{};
