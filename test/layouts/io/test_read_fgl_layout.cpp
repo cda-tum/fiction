@@ -1323,6 +1323,7 @@ TEST_CASE("Version-2 FGL requires a finished layout before assigning the target"
         /** @brief Object retained after the failed read. */
         const auto retained = target.find_object({0, 0});
         CHECK((retained.has_value() && *retained == kept));
+        CHECK(target.size() == 1);
         CHECK(target.is_obstructed_coordinate({-1, -2, -3}));
         std::stringstream rejected{xml};
         CHECK_THROWS_AS(read_fgl_layout<cartesian_layout>(rejected), fgl_parsing_error);
