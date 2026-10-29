@@ -43,6 +43,7 @@
 #include <functional>
 #include <optional>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
@@ -339,7 +340,10 @@ TEST_CASE("Check modify ranks", "[mutable-rank-view]")
 
     auto vpi_r = mutable_rank_view(tec_balanced);
 
-    const std::vector<technology_network::node> nodes = {13, 10, 14};
+    auto nodes = vpi_r.get_ranks(2);
+    REQUIRE(nodes.size() == 3);
+    REQUIRE(nodes[0] != nodes[1]);
+    std::swap(nodes[0], nodes[1]);
     vpi_r.set_ranks(2, nodes);
 
     CHECK(vpi_r.get_ranks(2) == nodes);
