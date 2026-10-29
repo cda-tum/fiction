@@ -14,11 +14,15 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/physical_design/aspect_ratio_iterator.hpp>
 
+#include <array>
+#include <cstddef>
+#include <cstdint>
 #include <iterator>
 #include <type_traits>
 
@@ -28,91 +32,31 @@ using namespace fiction::physical_design;
 
 TEST_CASE("Aspect Ratio Iterator Traits", "[aspect-ratio-iterator]")
 {
-    CHECK(std::is_same_v<std::iterator_traits<aspect_ratio_iterator<layout_base::extent>>::iterator_category,
-                         std::forward_iterator_tag>);
+    STATIC_REQUIRE(std::is_same_v<std::iterator_traits<aspect_ratio_iterator<layout_base::extent>>::iterator_category,
+                                  std::forward_iterator_tag>);
 
-    CHECK(std::is_same_v<std::iterator_traits<aspect_ratio_iterator<layout_base::extent>>::value_type,
-                         layout_base::extent>);
+    STATIC_REQUIRE(std::is_same_v<std::iterator_traits<aspect_ratio_iterator<layout_base::extent>>::value_type,
+                                  layout_base::extent>);
 }
 
 TEST_CASE("Aspect ratio iteration", "[aspect-ratio-iterator]")
 {
+    /** @brief Documented factor order through four faces. */
+    constexpr std::array<layout_base::extent, 8> expected{
+        {{1, 1}, {1, 2}, {2, 1}, {1, 3}, {3, 1}, {1, 4}, {4, 1}, {2, 2}}};
+    /** @brief Face count for each expected iterator position. */
+    constexpr std::array<uint64_t, 8> faces{1, 2, 2, 3, 3, 4, 4, 4};
+    /** @brief Iterator whose order and termination are checked against the expected sequence. */
     aspect_ratio_iterator<layout_base::extent> ari{1};
-
-    for (auto i = 0; ari <= 4; ++ari, ++i)
+    for (std::size_t i{}; i < expected.size(); ++i, ++ari)
     {
-        switch (i)
-        {
-            case 0:
-            {
-                CHECK(*ari == layout_base::extent{1, 1});
-                CHECK(ari == 1u);
-                CHECK(ari ==
-                      aspect_ratio_iterator<layout_base::extent>{1});  // equal since both point to the first element
-                break;
-            }
-            case 1:
-            {
-                CHECK(*ari == layout_base::extent{1, 2});
-                CHECK(ari == 2u);
-                CHECK(ari ==
-                      aspect_ratio_iterator<layout_base::extent>{2});  // equal since both point to the first element
-                break;
-            }
-            case 2:
-            {
-                CHECK(*ari == layout_base::extent{2, 1});
-                CHECK(ari == 2u);
-                CHECK(ari != aspect_ratio_iterator<layout_base::extent>{
-                                 2});  // not equal since ari points to the second element
-                break;
-            }
-            case 3:
-            {
-                CHECK(*ari == layout_base::extent{1, 3});
-                CHECK(ari == 3u);
-                CHECK(ari ==
-                      aspect_ratio_iterator<layout_base::extent>{3});  // equal since both point to the first element
-                break;
-            }
-            case 4:
-            {
-                CHECK(*ari == layout_base::extent{3, 1});
-                CHECK(ari == 3u);
-                CHECK(ari != aspect_ratio_iterator<layout_base::extent>{
-                                 3});  // not equal since ari points to the second element
-                break;
-            }
-            case 5:
-            {
-                CHECK(*ari == layout_base::extent{1, 4});
-                CHECK(ari == 4u);
-                CHECK(ari ==
-                      aspect_ratio_iterator<layout_base::extent>{4});  // equal since both point to the first element
-                break;
-            }
-            case 6:
-            {
-                CHECK(*ari == layout_base::extent{4, 1});
-                CHECK(ari == 4u);
-                CHECK(ari != aspect_ratio_iterator<layout_base::extent>{
-                                 4});  // not equal since ari points to the second element
-                break;
-            }
-            case 7:
-            {
-                CHECK(*ari == layout_base::extent{2, 2});
-                CHECK(ari == 4u);
-                CHECK(ari != aspect_ratio_iterator<layout_base::extent>{
-                                 4});  // not equal since ari points to the third element
-                break;
-            }
-            default:
-            {
-                CHECK(false);
-            }
-        }
+        CAPTURE(i);
+        CHECK(ari <= 4u);
+        CHECK(*ari == expected[i]);
+        CHECK(ari == faces[i]);
+        CHECK((ari == aspect_ratio_iterator<layout_base::extent>{faces[i]}) == (i == 0 || faces[i] != faces[i - 1]));
     }
+    CHECK_FALSE(ari <= 4u);
 }
 
 TEST_CASE("Aspect ratio iterator copies own their position", "[aspect-ratio-iterator]")
