@@ -43,6 +43,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Code quality:
 
   - Modernized network-view tests with complete visitor checks, typed trait cases, and copy/move coverage.
+  - Modernized network I/O and verification tests with independent cases and complete interface checks.
   - Added QCA SVG regression tests for colors, detail modes, tile labels, and file output.
   - Layout I/O tests name malformed-input rows, check stream preservation, and verify printed fanins and fanouts.
   - Added a Catch2 contributor guide and gate-layout test examples for fixtures, data tables,
@@ -693,6 +694,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - `virtual_miter` now preserves EXODC output relations for integer-signal destinations.
   - Combination generation now uses full-width position indices.
   - Kinks-rejected energy labels now count each matching charge distribution once, preserving degenerate-state
     occupation probabilities. Both energy-labeling variants document ascending energy order.
@@ -930,6 +932,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - I/O:
 
+  - Colored DOT drawers now use the node-color interface and shared edge palette.
   - Surface-defect import avoids exponential backtracking on malformed digit runs.
   - SQD import now rejects NUL bytes, multiple XML roots, and text outside the root. SiDB filename readers preserve bytes after Ctrl-Z on Windows.
   - BLIF network readers now accept empty and whitespace-only lines without aborting.

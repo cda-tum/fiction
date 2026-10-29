@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
@@ -25,12 +26,14 @@
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/io/layout_drawers.hpp>
 #include <fiction/networks/io/dot_drawers.hpp>
+#include <fiction/networks/views/edge_color_view.hpp>
 
 #include <fmt/format.h>
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/traits.hpp>
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
@@ -47,11 +50,13 @@
 #include <string>
 #include <string_view>
 #include <system_error>
+#include <tuple>
 
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::layouts::io;
 using namespace fiction::networks::io;
+using namespace fiction::networks::views;
 
 namespace
 {
@@ -78,6 +83,13 @@ class failing_dot_drawer : public technology_dot_drawer<mockturtle::aig_network>
     }
 };
 
+/**
+ * @brief Compares serialized layout text with the complete expected DOT document.
+ * @tparam Lyt Layout type.
+ * @tparam Drawer DOT drawer type.
+ * @param lyt Layout to serialize.
+ * @param layout_print Expected DOT text.
+ */
 template <typename Lyt, typename Drawer>
 void compare_dot_layout(const Lyt& lyt, const std::string_view& layout_print)
 {
@@ -1014,6 +1026,7 @@ TEST_CASE("Layout DOT identifiers serialize signed coordinate boundaries", "[dot
           cartesian_gate_layout::tile{-1, 0}, cartesian_gate_layout::tile{0, -1}, cartesian_gate_layout::tile{1, 0},
           cartesian_gate_layout::tile{0, 1}})
     {
+        CAPTURE(coordinate.x, coordinate.y);
         const auto id = drawer.tile_id(coordinate);
         CHECK(std::regex_match(id, identifier));
         CHECK(ids.insert(id).second);
@@ -1068,6 +1081,7 @@ TEST_CASE("Network DOT export preserves files and symbolic links", "[dot-drawers
     }
     auto       destination = target;
     const auto symbolic    = GENERATE(false, true);
+    CAPTURE(symbolic);
     if (symbolic)
     {
         destination = directory / "latest.dot";
@@ -1119,4 +1133,42 @@ TEST_CASE("Network DOT export preserves files and symbolic links", "[dot-drawers
         CHECK_FALSE(std::filesystem::exists(target));
     }
     std::filesystem::remove_all(directory);
+}
+
+TEST_CASE("Colored DOT drawers preserve node and edge palettes", "[dot-drawers]")
+{
+    mockturtle::aig_network network{};
+    const auto              a    = network.create_pi();
+    const auto              b    = network.create_pi();
+    const auto              gate = network.create_and(a, b);
+    network.create_po(gate);
+    /** @brief AIG view with independent node and edge colors. */
+    using colored_network = out_of_place_edge_color_view<mockturtle::aig_network>;
+    const colored_network                               colors{network};
+    const edge_color_view_drawer<colored_network>       drawer{};
+    const edge_color_view_drawer<colored_network, true> indexed_drawer{};
+    for (const auto& [color, node_color, edge_color] :
+         std::array{std::tuple{0u, "ghostwhite", "black"}, std::tuple{1u, "deepskyblue1", "deepskyblue1"},
+                    std::tuple{7u, "gray28", "gray28"}, std::tuple{8u, "black, fontcolor=white", "black"}})
+    {
+        CAPTURE(color);
+        colors.paint(colors.get_node(gate), color);
+        colors.paint_edge({colors.get_node(a), colors.get_node(gate)}, color);
+        CHECK(drawer.node_label(colors, colors.get_node(gate)) == fmt::format("c: {}", color));
+        CHECK(indexed_drawer.node_label(colors, colors.get_node(gate)) ==
+              fmt::format("n: {}, c: {}", colors.node_to_index(colors.get_node(gate)), color));
+        CHECK(drawer.node_fillcolor(colors, colors.get_node(gate)) == node_color);
+        CHECK(indexed_drawer.node_fillcolor(colors, colors.get_node(gate)) == node_color);
+        CHECK(drawer.signal_style(colors, a) == fmt::format("solid, color=\"{}\"", edge_color));
+        CHECK(indexed_drawer.signal_style(colors, a) == fmt::format("solid, color=\"{}\"", edge_color));
+        std::stringstream output{};
+        write_dot_network(colors, output, drawer);
+        CHECK(output.str().find(
+                  fmt::format("{} -> {} [style=solid, color=\"{}\"]", colors.node_to_index(colors.get_node(a)),
+                              colors.node_to_index(colors.get_node(gate)), edge_color)) != std::string::npos);
+        CHECK(output.str().find(fmt::format("{} -> {} [style=solid, color=\"black\"]",
+                                            colors.node_to_index(colors.get_node(b)),
+                                            colors.node_to_index(colors.get_node(gate)))) != std::string::npos);
+        CHECK(output.str().find(fmt::format("label=\"c: {}\"", color)) != std::string::npos);
+    }
 }

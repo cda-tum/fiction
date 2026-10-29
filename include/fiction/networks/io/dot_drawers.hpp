@@ -354,18 +354,18 @@ class color_view_drawer : public mockturtle::default_dot_drawer<Ntk>
     {
         if constexpr (DrawIndexes)
         {
-            return fmt::format("n: {}, c: {}", ntk.node_to_index(n), ntk.edge_color(n));
+            return fmt::format("n: {}, c: {}", ntk.node_to_index(n), ntk.color(n));
         }
         else
         {
-            return fmt::format("c: {}", ntk.edge_color(n));
+            return fmt::format("c: {}", ntk.color(n));
         }
     }
 
     /** @brief Returns the DOT fill color for a network node. */
     [[nodiscard]] std::string node_fillcolor(const Ntk& ntk, const mockturtle::node<Ntk>& n) const override
     {
-        const auto c = ntk.edge_color(n);
+        const auto c = ntk.color(n);
 
         static constexpr const char* undef_color = "black, fontcolor=white";
 
@@ -407,7 +407,7 @@ class edge_color_view_drawer : public color_view_drawer<Ntk, DrawIndexes>
 
         static constexpr const char* undef_color = "black";
 
-        const auto color_str = (c == 0 || c >= base_drawer::colors.size()) ? undef_color : base_drawer::colors[c];
+        const auto color_str = (c == 0 || c >= base_drawer::COLORS.size()) ? undef_color : base_drawer::COLORS[c];
 
         return fmt::format("{}, color=\"{}\"", base_drawer::signal_style(ntk, f), color_str);
     }

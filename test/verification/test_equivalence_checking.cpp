@@ -41,6 +41,13 @@ using namespace fiction::layouts;
 using namespace fiction::networks;
 using namespace fiction::verification;
 
+/**
+ * @brief Checks logical equivalence, matching throughput, and diagnostic statistics.
+ * @tparam Spec Specification type.
+ * @tparam Impl Implementation type.
+ * @param spec Specification.
+ * @param impl Implementation.
+ */
 template <typename Spec, typename Impl>
 void check_for_strong_equiv(const Spec& spec, const Impl& impl)
 {
@@ -56,6 +63,13 @@ void check_for_strong_equiv(const Spec& spec, const Impl& impl)
     CHECK(st.tp_diff == 0);
 }
 
+/**
+ * @brief Checks logical equivalence with different throughput and no design rule violations.
+ * @tparam Spec Specification type.
+ * @tparam Impl Implementation type.
+ * @param spec Specification.
+ * @param impl Implementation.
+ */
 template <typename Spec, typename Impl>
 void check_for_weak_equiv(const Spec& spec, const Impl& impl)
 {
@@ -71,6 +85,13 @@ void check_for_weak_equiv(const Spec& spec, const Impl& impl)
     CHECK(st.tp_diff > 0);
 }
 
+/**
+ * @brief Checks inequivalence and a counterexample or physical defect.
+ * @tparam Spec Specification type.
+ * @tparam Impl Implementation type.
+ * @param spec Specification.
+ * @param impl Implementation.
+ */
 template <typename Spec, typename Impl>
 void check_for_no_equiv(const Spec& spec, const Impl& impl)
 {
@@ -209,14 +230,23 @@ TEST_CASE("Physical equivalence extracts placed objects and rejects physical def
     mockturtle::names_view<mockturtle::klut_network> spec{};
     const auto                                       a = spec.create_pi("a");
     spec.create_po(a, "result");
-    gate_layout<cartesian_layout> lyt{{1, 2}, clocking::twoddwave()};
+    gate_layout<cartesian_layout> lyt{{1, 3}, clocking::twoddwave()};
     const auto                    pi = lyt.create_pi("a", {0, 0});
     const auto                    po = lyt.create_po(pi, "result", {0, 1});
     CHECK(equivalence_checking(spec, lyt) == eq_type::STRONG);
-    lyt.move_object(po, {0, 10});
-    CHECK(equivalence_checking(spec, lyt) == eq_type::NO);
-    lyt.disconnect({po, 0});
-    CHECK(equivalence_checking(spec, lyt) == eq_type::NO);
+    SECTION("Non-adjacent output")
+    {
+        lyt.move_object(po, {0, 2});
+        equivalence_checking_stats stats{};
+        CHECK(equivalence_checking(spec, lyt, &stats) == eq_type::NO);
+        CHECK(stats.impl_drv_stats.report["Non adjacent connections"].size() == 2);
+        CHECK(stats.impl_drv_stats.report["Objects outside extent"].empty());
+    }
+    SECTION("Disconnected output")
+    {
+        lyt.disconnect({po, 0});
+        CHECK(equivalence_checking(spec, lyt) == eq_type::NO);
+    }
 }
 
 TEST_CASE("Physical equivalence retains wire throughput", "[equiv][placed-objects]")
