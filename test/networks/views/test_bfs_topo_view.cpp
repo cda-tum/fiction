@@ -15,10 +15,10 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include "fiction/networks/technology_network.hpp"
-
+#include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/bfs_topo_view.hpp>
 
 #include <kitty/constructors.hpp>
@@ -27,8 +27,8 @@
 #include <mockturtle/networks/klut.hpp>
 #include <mockturtle/traits.hpp>
 
+#include <algorithm>
 #include <cstdint>
-#include <set>
 #include <vector>
 
 using namespace fiction;
@@ -64,28 +64,15 @@ static_assert(bfs_viewable<mockturtle::aig_network>);
 static_assert(!bfs_viewable<int>);
 static_assert(requires(const sorted_pass_through& ntk) { bfs_topo_view{ntk}; });
 
-TEST_CASE("Traits and construction")
+TEMPLATE_TEST_CASE("Breadth-first views provide topological traits", "[bfs-topo-view]", mockturtle::aig_network,
+                   technology_network)
 {
-    SECTION("AIG")
-    {
-        using aig = mockturtle::aig_network;
-        REQUIRE(mockturtle::is_network_type_v<aig>);
-        CHECK(!mockturtle::is_topologically_sorted_v<aig>);
+    STATIC_REQUIRE(mockturtle::is_network_type_v<TestType>);
+    STATIC_REQUIRE_FALSE(mockturtle::is_topologically_sorted_v<TestType>);
 
-        using topo = bfs_topo_view<aig>;
-        REQUIRE(mockturtle::is_network_type_v<topo>);
-        CHECK(mockturtle::is_topologically_sorted_v<topo>);
-    }
-    SECTION("TEC")
-    {
-        using tec = technology_network;
-        REQUIRE(mockturtle::is_network_type_v<tec>);
-        CHECK(!mockturtle::is_topologically_sorted_v<tec>);
-
-        using topo = bfs_topo_view<tec>;
-        REQUIRE(mockturtle::is_network_type_v<topo>);
-        CHECK(mockturtle::is_topologically_sorted_v<topo>);
-    }
+    using topo = bfs_topo_view<TestType>;
+    STATIC_REQUIRE(mockturtle::is_network_type_v<topo>);
+    STATIC_REQUIRE(mockturtle::is_topologically_sorted_v<topo>);
 }
 
 TEST_CASE("Create a topo_view on an AIG", "[bfs-topo-view]")
@@ -97,14 +84,15 @@ TEST_CASE("Create a topo_view on an AIG", "[bfs-topo-view]")
     const auto f  = aig.create_xor(x1, x2);
     aig.create_po(f);
 
-    std::set<mockturtle::node<mockturtle::aig_network>> nodes{};
-    aig.foreach_node([&nodes](auto node) { nodes.insert(node); });
-    CHECK(nodes.size() == 6);
+    std::vector<mockturtle::node<mockturtle::aig_network>> nodes{};
+    aig.foreach_node([&nodes](auto node) { nodes.push_back(node); });
+    CHECK(nodes == std::vector<mockturtle::node<mockturtle::aig_network>>{0, 1, 2, 3, 4, 5});
 
     const bfs_topo_view aig2{aig};
     nodes.clear();
-    aig2.foreach_node([&nodes](auto node) { nodes.insert(node); });
-    CHECK(nodes.size() == 6);
+    aig2.foreach_node([&nodes](auto node) { nodes.push_back(node); });
+    std::ranges::sort(nodes);
+    CHECK(nodes == std::vector<mockturtle::node<mockturtle::aig_network>>{0, 1, 2, 3, 4, 5});
 }
 
 TEST_CASE("Check BFS order", "[bfs-topo-view]")
@@ -124,12 +112,17 @@ TEST_CASE("Check BFS order", "[bfs-topo-view]")
 
     std::vector<mockturtle::node<mockturtle::aig_network>> nodes{};
     aig.foreach_node([&nodes](auto node) { nodes.push_back(node); });
-    CHECK(*nodes.rbegin() == 8);
+    CHECK(nodes == std::vector<mockturtle::node<mockturtle::aig_network>>{0, 1, 2, 3, 4, 5, 6, 7, 8});
 
     const bfs_topo_view aig2{aig};
     nodes.clear();
     aig2.foreach_node([&nodes](auto node) { nodes.push_back(node); });
-    CHECK(*nodes.rbegin() == 7);
+    REQUIRE(nodes.size() == 9);
+    CHECK(nodes.back() == aig.get_node(f2));
+    CHECK(std::vector(nodes.cbegin(), nodes.cbegin() + 6) ==
+          std::vector<mockturtle::node<mockturtle::aig_network>>{0, 1, 2, 3, 4, 5});
+    std::ranges::sort(nodes);
+    CHECK(nodes == std::vector<mockturtle::node<mockturtle::aig_network>>{0, 1, 2, 3, 4, 5, 6, 7, 8});
 }
 
 TEST_CASE("BFS visits repeated fanins and dangling gates", "[bfs-topo-view]")
@@ -149,7 +142,17 @@ TEST_CASE("BFS visits repeated fanins and dangling gates", "[bfs-topo-view]")
     CHECK(topo.num_gates() == ntk.num_gates());
     CHECK(topo.node_to_index(ntk.get_node(unused)) < topo.size());
     CHECK(topo.node_to_index(ntk.get_node(repeated)) < topo.node_to_index(ntk.get_node(dangling)));
-    topo.foreach_node([&](const auto n, const auto index) { CHECK(topo.index_to_node(index) == n); });
+    std::vector<mockturtle::node<mockturtle::klut_network>> visited{};
+    topo.foreach_node(
+        [&](const auto n, const auto index)
+        {
+            CHECK(index == visited.size());
+            CHECK(topo.index_to_node(index) == n);
+            visited.push_back(n);
+        });
+    CHECK(visited == std::vector<mockturtle::node<mockturtle::klut_network>>{
+                         ntk.get_node(ntk.get_constant(false)), ntk.get_node(ntk.get_constant(true)), ntk.get_node(a),
+                         ntk.get_node(unused), ntk.get_node(repeated), ntk.get_node(dangling)});
 }
 
 TEST_CASE("BFS indices stay contiguous across dead nodes and copies", "[bfs-topo-view]")
@@ -167,15 +170,21 @@ TEST_CASE("BFS indices stay contiguous across dead nodes and copies", "[bfs-topo
     topo.update_bfs_topo();
     const auto copy = topo;
     CHECK(copy.node_to_index(ntk.get_node(removed)) == copy.size());
+    std::vector<mockturtle::node<mockturtle::aig_network>> visited{};
     copy.foreach_node(
         [&](const auto n, const auto index)
         {
+            CHECK(index == visited.size());
+            visited.push_back(n);
             CHECK(copy.node_to_index(n) == index);
             CHECK(copy.index_to_node(index) == n);
         });
+    CHECK(visited == std::vector<mockturtle::node<mockturtle::aig_network>>{ntk.get_node(ntk.get_constant(false)),
+                                                                            ntk.get_node(a), ntk.get_node(b),
+                                                                            ntk.get_node(retained)});
 }
 
-TEST_CASE("Create a bfs_topo_view on an AIG without bfs topo order", "[bfs-topo-view]")
+TEST_CASE("BFS traversals reorder a network whose storage is not topological", "[bfs-topo-view]")
 {
     mockturtle::aig_network aig;
 
@@ -198,69 +207,25 @@ TEST_CASE("Create a bfs_topo_view on an AIG without bfs topo order", "[bfs-topo-
 
     aig.create_po(gate1);
 
-    /* test topological order of nodes */
+    const bfs_topo_view                                    aig2{aig};
     std::vector<mockturtle::node<mockturtle::aig_network>> nodes{};
-    aig.foreach_node([&nodes](auto node) { nodes.push_back(node); });
-    CHECK(nodes == std::vector<mockturtle::node<mockturtle::aig_network>>{{0, 1, 2, 3, 4, 5}});
+    std::vector<mockturtle::node<mockturtle::aig_network>> gates{};
+    SECTION("Forward traversal")
+    {
+        aig2.foreach_node([&](const auto node) { nodes.push_back(node); });
+        CHECK(nodes == std::vector<mockturtle::node<mockturtle::aig_network>>{0, 1, 2, 3, 5, 4});
+        aig2.foreach_gate([&](const auto node) { gates.push_back(node); });
+        CHECK(gates == std::vector<mockturtle::node<mockturtle::aig_network>>{5, 4});
+    }
+    SECTION("Reverse traversal")
+    {
+        aig2.foreach_node_reverse([&](const auto node) { nodes.push_back(node); });
+        CHECK(nodes == std::vector<mockturtle::node<mockturtle::aig_network>>{4, 5, 3, 2, 1, 0});
+        aig2.foreach_gate_reverse([&](const auto node) { gates.push_back(node); });
+        CHECK(gates == std::vector<mockturtle::node<mockturtle::aig_network>>{4, 5});
+    }
 
-    const bfs_topo_view aig2{aig};
-    nodes.clear();
-    aig2.foreach_node([&nodes](auto node) { nodes.push_back(node); });
-    CHECK(nodes == std::vector<mockturtle::node<mockturtle::aig_network>>{{0, 1, 2, 3, 5, 4}});
-
-    /* test topological order of gates */
-    std::vector<mockturtle::node<mockturtle::aig_network>> gates;
-    aig.foreach_gate([&gates](auto node) { gates.push_back(node); });
-    CHECK(gates == std::vector<mockturtle::node<mockturtle::aig_network>>{{4, 5}});
-
-    gates.clear();
-    aig2.foreach_gate([&gates](auto node) { gates.push_back(node); });
-    CHECK(gates == std::vector<mockturtle::node<mockturtle::aig_network>>{{5, 4}});
-
-    /* test normalized index order */
-    uint32_t counter = 0;
-    aig2.foreach_node([&aig2, &counter](auto node) { CHECK(aig2.node_to_index(node) == counter++); });
-}
-
-TEST_CASE("Test reverse bfs topo order", "[bfs-topo-view]")
-{
-    mockturtle::aig_network aig;
-
-    const auto x1    = aig.create_pi();
-    const auto x2    = aig.create_pi();
-    const auto x3    = aig.create_pi();
-    const auto gate1 = aig.create_and(x1, x2);
-    const auto gate2 = aig.create_and(x3, gate1);
-
-    /* switch gate order on storage. `node_pointer::index` is a `uint64_t : 63` bitfield, so
-     * assigning a node to it trips -Wconversion and no cast to a nameable type can silence it */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-    aig._storage->nodes[aig.get_node(gate2)].children[0].index = aig.get_node(x1);
-    aig._storage->nodes[aig.get_node(gate2)].children[1].index = aig.get_node(x2);
-
-    aig._storage->nodes[aig.get_node(gate1)].children[0].index = aig.get_node(x3);
-    aig._storage->nodes[aig.get_node(gate1)].children[1].index = aig.get_node(gate2);
-#pragma GCC diagnostic pop
-
-    aig.create_po(gate1);
-
-    /* test topological order of nodes */
-    std::vector<mockturtle::node<mockturtle::aig_network>> nodes{};
-    aig.foreach_node([&nodes](auto node) { nodes.push_back(node); });
-    CHECK(nodes == std::vector<mockturtle::node<mockturtle::aig_network>>{{0, 1, 2, 3, 4, 5}});
-
-    const bfs_topo_view aig2{aig};
-    nodes.clear();
-    aig2.foreach_node_reverse([&nodes](auto node) { nodes.push_back(node); });
-    CHECK(nodes == std::vector<mockturtle::node<mockturtle::aig_network>>{{4, 5, 3, 2, 1, 0}});
-
-    /* test topological order of gates */
-    std::vector<mockturtle::node<mockturtle::aig_network>> gates;
-    aig.foreach_gate([&gates](auto node) { gates.push_back(node); });
-    CHECK(gates == std::vector<mockturtle::node<mockturtle::aig_network>>{{4, 5}});
-
-    gates.clear();
-    aig2.foreach_gate_reverse([&gates](auto node) { gates.push_back(node); });
-    CHECK(gates == std::vector<mockturtle::node<mockturtle::aig_network>>{{4, 5}});
+    uint32_t counter{0};
+    aig2.foreach_node([&](const auto node) { CHECK(aig2.node_to_index(node) == counter++); });
+    CHECK(counter == 6);
 }

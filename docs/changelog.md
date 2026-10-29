@@ -42,6 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Modernized network-view tests with complete visitor checks, typed trait cases, and copy/move coverage.
   - Added QCA SVG regression tests for colors, detail modes, tile labels, and file output.
   - Added a Catch2 contributor guide and gate-layout test examples for fixtures, data tables,
     diagnostics, and contract-focused assertions. Visitor checks now detect missing and duplicate results.
