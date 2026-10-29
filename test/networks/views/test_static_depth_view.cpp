@@ -20,8 +20,13 @@
 
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/static_depth_view.hpp>
+#include <fiction/networks/virtual_pi_network.hpp>
+#include <fiction/synthesis/delete_virtual_pis.hpp>
 #include <fiction/types.hpp>
 
+#include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
+#include <mockturtle/algorithms/simulation.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/klut.hpp>
 #include <mockturtle/networks/mig.hpp>
@@ -33,6 +38,8 @@
 #include <mockturtle/views/depth_view.hpp>
 
 #include <cstdint>
+#include <stdexcept>
+#include <type_traits>
 #include <utility>
 
 using namespace fiction;
@@ -450,4 +457,85 @@ TEST_CASE("Primary inputs without fanout have level 0", "[static-depth-view]")
 
     CHECK(updated.has_level(aig.get_node(unused)));
     CHECK(updated.level(aig.get_node(unused)) == 0);
+}
+
+/** @brief Unit node costs that support copying and forbid moving. */
+struct copy_only_depth_cost : mockturtle::unit_cost<technology_network>
+{
+    /** @brief Constructs unit costs. */
+    copy_only_depth_cost() = default;
+    /** @brief Copies unit costs. */
+    copy_only_depth_cost(const copy_only_depth_cost&) = default;
+    /** @brief Forbids move construction. */
+    copy_only_depth_cost(copy_only_depth_cost&&) = delete;
+    /** @brief Copies unit costs. */
+    copy_only_depth_cost& operator=(const copy_only_depth_cost&) = default;
+    /** @brief Forbids move assignment. */
+    copy_only_depth_cost& operator=(copy_only_depth_cost&&) = delete;
+    /** @brief Destroys unit costs. */
+    ~copy_only_depth_cost() = default;
+};
+
+/** @brief Unit node costs whose move construction throws. */
+struct throwing_depth_cost : mockturtle::unit_cost<technology_network>
+{
+    /** @brief Constructs unit costs. */
+    throwing_depth_cost() = default;
+    /** @brief Copies unit costs. */
+    throwing_depth_cost(const throwing_depth_cost&) = default;
+    /** @brief Reports move failure. @throws std::runtime_error Always. */
+    throwing_depth_cost(throwing_depth_cost&&)
+    {
+        throw std::runtime_error{"cost move"};
+    }
+    /** @brief Copies unit costs. */
+    throwing_depth_cost& operator=(const throwing_depth_cost&) = default;
+    /** @brief Assigns unit costs from an rvalue. */
+    throwing_depth_cost& operator=(throwing_depth_cost&&) = default;
+    /** @brief Destroys unit costs. */
+    ~throwing_depth_cost() = default;
+};
+
+TEMPLATE_TEST_CASE("Virtual-PI deletion respects depth-view cost construction", "[static-depth-view]",
+                   copy_only_depth_cost, throwing_depth_cost)
+{
+    /** @brief Depth view with the cost policy under test. */
+    using depth_ntk = static_depth_view<virtual_pi_network<technology_network>, TestType>;
+    STATIC_REQUIRE_FALSE(std::is_nothrow_move_constructible_v<depth_ntk>);
+
+    depth_ntk  source{};
+    const auto a     = source.create_pi();
+    const auto b     = source.create_pi();
+    const auto alias = source.create_virtual_pi(a);
+    source.create_po(source.create_and(alias, b));
+    source.update_levels();
+
+    if constexpr (std::is_move_constructible_v<TestType>)
+    {
+        CHECK_THROWS_AS(synthesis::delete_virtual_pis(source), std::runtime_error);
+    }
+    else
+    {
+        auto result = synthesis::delete_virtual_pis(source);
+        result.update_levels();
+        REQUIRE(result.num_pis() == 2);
+        CHECK(result.num_virtual_pis() == 0);
+        REQUIRE(result.num_pos() == 1);
+        CHECK(result.depth() == 1);
+        kitty::dynamic_truth_table expected{2};
+        kitty::create_from_hex_string(expected, "8");
+        CHECK(mockturtle::simulate<kitty::dynamic_truth_table>(
+                  result, mockturtle::default_simulator<kitty::dynamic_truth_table>{2})
+                  .at(0) == expected);
+    }
+
+    REQUIRE(source.num_pis() == 3);
+    CHECK(source.num_virtual_pis() == 1);
+    REQUIRE(source.num_pos() == 1);
+    CHECK(source.depth() == 1);
+    kitty::dynamic_truth_table source_function{3};
+    kitty::create_from_hex_string(source_function, "c0");
+    CHECK(mockturtle::simulate<kitty::dynamic_truth_table>(source,
+                                                           mockturtle::default_simulator<kitty::dynamic_truth_table>{3})
+              .at(0) == source_function);
 }

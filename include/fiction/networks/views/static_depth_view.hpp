@@ -209,15 +209,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
      *
      * @param other The other `fiction::static_depth_view` object to be moved.
      */
-    static_depth_view(static_depth_view&& other) noexcept :
-            Ntk(std::move(other)),
-            ps(other.ps),  // trivially copyable
-            levels(std::move(other.levels)),
-            crit_path(std::move(other.crit_path)),
-            crit_path_valid(other.crit_path_valid),
-            ntk_depth(other.ntk_depth),
-            cost_fn(std::move(other.cost_fn))
-    {}
+    static_depth_view(static_depth_view&& other) = default;
 
     /**
      * Move assignment operator for moving `fiction::static_depth_view` content of another
