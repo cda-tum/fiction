@@ -134,7 +134,7 @@ TEST_CASE("A* on 2x2 layouts", "[A*]")
             const auto path = a_star(layout, {.source = {0, 0}, .target = {1, 1}});
             const auto dist = a_star_distance(layout, {0, 0}, {1, 1});
 
-            CHECK(path.size() == 3);
+            REQUIRE(path.size() == 3);
             CHECK(dist == 2);
             CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
             CHECK(path.target() == fiction::layouts::layout_base::coordinate{1, 1});
@@ -147,7 +147,7 @@ TEST_CASE("A* on 2x2 layouts", "[A*]")
             const auto path = a_star(layout, {.source = {1, 1}, .target = {0, 0}});
             const auto dist = a_star_distance(layout, {1, 1}, {0, 0});
 
-            CHECK(path.size() == 3);
+            REQUIRE(path.size() == 3);
             CHECK(dist == 2);
             CHECK(path.source() == fiction::layouts::layout_base::coordinate{1, 1});
             CHECK(path.target() == fiction::layouts::layout_base::coordinate{0, 0});
@@ -177,7 +177,7 @@ TEST_CASE("A* on 2x2 layouts", "[A*]")
                 const auto path = a_star(layout, {.source = {0, 0}, .target = {1, 1}});
                 const auto dist = a_star_distance(layout, {0, 0}, {1, 1});
 
-                CHECK(path.size() == 3);
+                REQUIRE(path.size() == 3);
                 CHECK(dist == 2);
                 CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
                 CHECK(path.target() == fiction::layouts::layout_base::coordinate{1, 1});
@@ -213,12 +213,8 @@ TEST_CASE("A* on 2x2 layouts", "[A*]")
                 const auto path = a_star(layout, {.source = {0, 0}, .target = {0, 1}});
                 const auto dist = a_star_distance(layout, {0, 0}, {0, 1});
 
-                CHECK(path.size() == 4);
+                CHECK(path == layout_coordinate_path{{{0, 0}, {1, 0}, {1, 1}, {0, 1}}});
                 CHECK(dist == 3);
-                CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
-                CHECK(path.target() == fiction::layouts::layout_base::coordinate{0, 1});
-                CHECK(path[1] == fiction::layouts::layout_base::coordinate{1, 0});
-                CHECK(path[2] == fiction::layouts::layout_base::coordinate{1, 1});
             }
             SECTION("(0,0) to (0,0)")  // source and target are identical
             {
@@ -462,15 +458,8 @@ TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
                                      unit_cost_functor<>(), {}, search_obstructions);  // only one path possible
             const auto dist = a_star_distance(obstr_lyt, {0, 0}, {3, 3}, search_obstructions);
 
-            CHECK(path.size() == 7);
+            CHECK(path == layout_coordinate_path{{{0, 0}, {0, 1}, {0, 2}, {0, 3}, {1, 3}, {2, 3}, {3, 3}}});
             CHECK(dist == 6);
-            CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
-            CHECK(path.target() == fiction::layouts::layout_base::coordinate{3, 3});
-            CHECK(path[1] == fiction::layouts::layout_base::coordinate{0, 1});
-            CHECK(path[2] == fiction::layouts::layout_base::coordinate{0, 2});
-            CHECK(path[3] == fiction::layouts::layout_base::coordinate{0, 3});
-            CHECK(path[4] == fiction::layouts::layout_base::coordinate{1, 3});
-            CHECK(path[5] == fiction::layouts::layout_base::coordinate{2, 3});
         }
     }
     SECTION("clocking paths")
@@ -494,15 +483,8 @@ TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
                                          unit_cost_functor<>());  // only one path possible
                 const auto dist = a_star_distance(obstr_lyt, {0, 0}, {3, 3});
 
-                CHECK(path.size() == 7);
+                CHECK(path == layout_coordinate_path{{{0, 0}, {0, 1}, {0, 2}, {0, 3}, {1, 3}, {2, 3}, {3, 3}}});
                 CHECK(dist == 6);
-                CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
-                CHECK(path.target() == fiction::layouts::layout_base::coordinate{3, 3});
-                CHECK(path[1] == fiction::layouts::layout_base::coordinate{0, 1});
-                CHECK(path[2] == fiction::layouts::layout_base::coordinate{0, 2});
-                CHECK(path[3] == fiction::layouts::layout_base::coordinate{0, 3});
-                CHECK(path[4] == fiction::layouts::layout_base::coordinate{1, 3});
-                CHECK(path[5] == fiction::layouts::layout_base::coordinate{2, 3});
             }
         }
         SECTION("USE")
@@ -520,15 +502,8 @@ TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
                                          unit_cost_functor<>());  // only one path possible
                 const auto dist = a_star_distance(obstr_lyt, {0, 0}, {3, 3});
 
-                CHECK(path.size() == 7);
+                CHECK(path == layout_coordinate_path{{{0, 0}, {1, 0}, {1, 1}, {1, 2}, {2, 2}, {3, 2}, {3, 3}}});
                 CHECK(dist == 6);
-                CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
-                CHECK(path.target() == fiction::layouts::layout_base::coordinate{3, 3});
-                CHECK(path[1] == fiction::layouts::layout_base::coordinate{1, 0});
-                CHECK(path[2] == fiction::layouts::layout_base::coordinate{1, 1});
-                CHECK(path[3] == fiction::layouts::layout_base::coordinate{1, 2});
-                CHECK(path[4] == fiction::layouts::layout_base::coordinate{2, 2});
-                CHECK(path[5] == fiction::layouts::layout_base::coordinate{3, 2});
             }
         }
     }
@@ -555,14 +530,7 @@ TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
             const auto path = a_star(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor(),
                                      unit_cost_functor<>(), {}, search_obstructions);  // only one path possible
 
-            CHECK(path.size() == 7);
-            CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
-            CHECK(path.target() == fiction::layouts::layout_base::coordinate{3, 3});
-            CHECK(path[1] == fiction::layouts::layout_base::coordinate{0, 1});
-            CHECK(path[2] == fiction::layouts::layout_base::coordinate{0, 2});
-            CHECK(path[3] == fiction::layouts::layout_base::coordinate{0, 3});
-            CHECK(path[4] == fiction::layouts::layout_base::coordinate{1, 3});
-            CHECK(path[5] == fiction::layouts::layout_base::coordinate{2, 3});
+            CHECK(path == layout_coordinate_path{{{0, 0}, {0, 1}, {0, 2}, {0, 3}, {1, 3}, {2, 3}, {3, 3}}});
         }
     }
     SECTION("clocking paths")
@@ -585,14 +553,7 @@ TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
                 const auto path = a_star(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor(),
                                          unit_cost_functor<>(), {}, search_obstructions);  // only one path possible
 
-                CHECK(path.size() == 7);
-                CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
-                CHECK(path.target() == fiction::layouts::layout_base::coordinate{3, 3});
-                CHECK(path[1] == fiction::layouts::layout_base::coordinate{0, 1});
-                CHECK(path[2] == fiction::layouts::layout_base::coordinate{0, 2});
-                CHECK(path[3] == fiction::layouts::layout_base::coordinate{0, 3});
-                CHECK(path[4] == fiction::layouts::layout_base::coordinate{1, 3});
-                CHECK(path[5] == fiction::layouts::layout_base::coordinate{2, 3});
+                CHECK(path == layout_coordinate_path{{{0, 0}, {0, 1}, {0, 2}, {0, 3}, {1, 3}, {2, 3}, {3, 3}}});
             }
         }
         SECTION("USE")
@@ -610,14 +571,7 @@ TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
                 const auto path = a_star(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor(),
                                          unit_cost_functor<>(), {}, search_obstructions);  // only one path possible
 
-                CHECK(path.size() == 7);
-                CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
-                CHECK(path.target() == fiction::layouts::layout_base::coordinate{3, 3});
-                CHECK(path[1] == fiction::layouts::layout_base::coordinate{1, 0});
-                CHECK(path[2] == fiction::layouts::layout_base::coordinate{1, 1});
-                CHECK(path[3] == fiction::layouts::layout_base::coordinate{1, 2});
-                CHECK(path[4] == fiction::layouts::layout_base::coordinate{2, 2});
-                CHECK(path[5] == fiction::layouts::layout_base::coordinate{3, 2});
+                CHECK(path == layout_coordinate_path{{{0, 0}, {1, 0}, {1, 1}, {1, 2}, {2, 2}, {3, 2}, {3, 3}}});
             }
         }
     }

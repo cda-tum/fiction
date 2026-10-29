@@ -15,6 +15,7 @@
  * @author Jan Drewniok (Drewniok)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
@@ -51,6 +52,7 @@ TEST_CASE("Manhattan distance", "[distance]")
                  std::tuple{layout_base::coordinate{0, 0}, layout_base::coordinate{-1, -1}, uint64_t{2}},
                  std::tuple{layout_base::coordinate{-4, -3}, layout_base::coordinate{1, -1}, uint64_t{7}},
                  std::tuple{layout_base::coordinate{-2, -8}, layout_base::coordinate{-6, -4}, uint64_t{8}});
+    CAPTURE(source, target);
     SECTION("Direct function")
     {
         CHECK(manhattan_distance(source, target) == expected);
@@ -78,6 +80,7 @@ TEST_CASE("Euclidean distance", "[distance]")
                  std::tuple{layout_base::coordinate{0, 0}, layout_base::coordinate{-1, -1}, double{std::sqrt(2)}},
                  std::tuple{layout_base::coordinate{-4, -3}, layout_base::coordinate{1, -1}, double{std::sqrt(29)}},
                  std::tuple{layout_base::coordinate{-2, -8}, layout_base::coordinate{-6, -4}, double{std::sqrt(32)}});
+    CAPTURE(source, target);
     SECTION("Direct function")
     {
         CHECK_THAT(euclidean_distance(source, target), Catch::Matchers::WithinAbs(expected, 0.00001));
@@ -102,6 +105,7 @@ TEST_CASE("Squared Euclidean distance", "[distance]")
                  std::tuple{layout_base::coordinate{6, 2, 1}, layout_base::coordinate{0, 4, 0}, uint64_t{40}},
                  std::tuple{layout_base::coordinate{6, 2, 0}, layout_base::coordinate{0, 4, 1}, uint64_t{40}},
                  std::tuple{layout_base::coordinate{0, 4, 1}, layout_base::coordinate{9, 1, 1}, uint64_t{90}});
+    CAPTURE(source, target);
     SECTION("Direct function")
     {
         CHECK(squared_euclidean_distance(source, target) == expected);
@@ -137,6 +141,7 @@ TEST_CASE("2DDWave distance", "[distance]")
                  std::tuple{layout_base::coordinate{-6, -4}, layout_base::coordinate{-2, -8},
                             uint64_t{std::numeric_limits<uint32_t>::max()}},
                  std::tuple{layout_base::coordinate{-4, -3}, layout_base::coordinate{1, -1}, uint64_t{7}});
+    CAPTURE(source, target);
     SECTION("Direct function")
     {
         CHECK(twoddwave_distance(source, target) == expected);
@@ -162,6 +167,7 @@ TEST_CASE("Chebyshev distance", "[distance]")
                  std::tuple{layout_base::coordinate{1, 0}, layout_base::coordinate{0, 1}, uint64_t{1}},
                  std::tuple{layout_base::coordinate{0, 0, 1}, layout_base::coordinate{8, 9, 0}, uint64_t{9}},
                  std::tuple{layout_base::coordinate{0, 0, 1}, layout_base::coordinate{8, 9, 1}, uint64_t{9}});
+    CAPTURE(source, target);
     SECTION("Direct function")
     {
         CHECK(chebyshev_distance(source, target) == expected);
@@ -173,100 +179,43 @@ TEST_CASE("Chebyshev distance", "[distance]")
     }
 }
 
-TEST_CASE("A* distance", "[distance]")
+TEST_CASE("A* distance and functor", "[distance]")
 {
-    SECTION("Cartesian layout")
+    /** @brief Endpoints and independent coordinate/clocked distance expectations. */
+    const auto [source, target, coordinate_distance, clocked_distance] =
+        GENERATE(std::tuple{layout_base::coordinate{0, 0}, layout_base::coordinate{0, 0}, uint64_t{0}, uint64_t{0}},
+                 std::tuple{layout_base::coordinate{1, 1}, layout_base::coordinate{1, 1}, uint64_t{0}, uint64_t{0}},
+                 std::tuple{layout_base::coordinate{0, 0}, layout_base::coordinate{0, 1}, uint64_t{1}, uint64_t{1}},
+                 std::tuple{layout_base::coordinate{0, 0}, layout_base::coordinate{1, 1}, uint64_t{2}, uint64_t{2}},
+                 std::tuple{layout_base::coordinate{9, 1}, layout_base::coordinate{6, 2}, uint64_t{4},
+                            std::numeric_limits<uint64_t>::max()},
+                 std::tuple{layout_base::coordinate{6, 2}, layout_base::coordinate{0, 4}, uint64_t{8},
+                            std::numeric_limits<uint64_t>::max()},
+                 std::tuple{layout_base::coordinate{0, 4}, layout_base::coordinate{9, 1}, uint64_t{12},
+                            std::numeric_limits<uint64_t>::max()},
+                 std::tuple{layout_base::coordinate{6, 2, 0}, layout_base::coordinate{0, 4, 1},
+                            std::numeric_limits<uint64_t>::max(), std::numeric_limits<uint64_t>::max()},
+                 std::tuple{layout_base::coordinate{0, 4, 1}, layout_base::coordinate{9, 1, 1},
+                            std::numeric_limits<uint64_t>::max(), std::numeric_limits<uint64_t>::max()});
+    CAPTURE(source, target);
+
+    SECTION("coordinate path distance")
     {
-        using lyt = cartesian_layout;
-
-        SECTION("coordinate path distance")
-        {
-            const lyt layout{lyt::extent{10, 5, 2}};
-
-            CHECK(a_star_distance<lyt>(layout, {0, 0}, {0, 0}) == 0);
-            CHECK(a_star_distance<lyt>(layout, {1, 1}, {1, 1}) == 0);
-            CHECK(a_star_distance<lyt>(layout, {0, 0}, {0, 1}) == 1);
-            CHECK(a_star_distance<lyt>(layout, {0, 0}, {1, 1}) == 2);
-            CHECK(a_star_distance<lyt>(layout, {9, 1}, {6, 2}) == 4);
-            CHECK(a_star_distance<lyt>(layout, {6, 2}, {0, 4}) == 8);
-            CHECK(a_star_distance<lyt>(layout, {0, 4}, {9, 1}) == 12);
-
-            // A* is not meant for routing to the z-layer
-            CHECK(a_star_distance<lyt>(layout, {6, 2, 0}, {0, 4, 1}) == std::numeric_limits<uint64_t>::max());
-            CHECK(a_star_distance<lyt>(layout, {0, 4, 1}, {9, 1, 1}) == std::numeric_limits<uint64_t>::max());
-        }
-        SECTION("clocking path distance")
-        {
-            SECTION("2DDWave")
-            {
-                const gate_layout<lyt> layout{gate_layout<lyt>::extent{10, 5, 2}, clocking::twoddwave()};
-
-                CHECK(a_star_distance<gate_layout<lyt>>(layout, {0, 0}, {0, 0}) == 0);
-                CHECK(a_star_distance<gate_layout<lyt>>(layout, {1, 1}, {1, 1}) == 0);
-                CHECK(a_star_distance<gate_layout<lyt>>(layout, {0, 0}, {0, 1}) == 1);
-                CHECK(a_star_distance<gate_layout<lyt>>(layout, {0, 0}, {1, 1}) == 2);
-                CHECK(a_star_distance<gate_layout<lyt>>(layout, {9, 1}, {6, 2}) ==
-                      std::numeric_limits<uint64_t>::max());
-                CHECK(a_star_distance<gate_layout<lyt>>(layout, {6, 2}, {0, 4}) ==
-                      std::numeric_limits<uint64_t>::max());
-                CHECK(a_star_distance<gate_layout<lyt>>(layout, {0, 4}, {9, 1}) ==
-                      std::numeric_limits<uint64_t>::max());
-
-                // A* is not meant for routing to the z-layer
-                CHECK(a_star_distance<gate_layout<lyt>>(layout, {6, 2, 0}, {0, 4, 1}) ==
-                      std::numeric_limits<uint64_t>::max());
-                CHECK(a_star_distance<gate_layout<lyt>>(layout, {0, 4, 1}, {9, 1, 1}) ==
-                      std::numeric_limits<uint64_t>::max());
-            }
-        }
+        /** @brief Coordinate geometry with disconnected crossing layers. */
+        const cartesian_layout layout{{10, 5, 2}};
+        /** @brief Borrowed-layout wrapper for the same distance contract. */
+        const a_star_distance_functor<cartesian_layout> distance{layout};
+        CHECK(a_star_distance(layout, source, target) == coordinate_distance);
+        CHECK(distance(source, target) == coordinate_distance);
     }
-}
-
-TEST_CASE("A* distance functor", "[distance]")
-{
-    SECTION("Cartesian layout")
+    SECTION("2DDWave path distance")
     {
-        using lyt = cartesian_layout;
-
-        SECTION("coordinate path distance")
-        {
-            const lyt layout{lyt::extent{10, 5, 2}};
-
-            const a_star_distance_functor<lyt> distance{layout};
-
-            CHECK(distance({0, 0}, {0, 0}) == 0);
-            CHECK(distance({1, 1}, {1, 1}) == 0);
-            CHECK(distance({0, 0}, {0, 1}) == 1);
-            CHECK(distance({0, 0}, {1, 1}) == 2);
-            CHECK(distance({9, 1}, {6, 2}) == 4);
-            CHECK(distance({6, 2}, {0, 4}) == 8);
-            CHECK(distance({0, 4}, {9, 1}) == 12);
-
-            // A* is not meant for routing to the z-layer
-            CHECK(distance({6, 2, 0}, {0, 4, 1}) == std::numeric_limits<uint64_t>::max());
-            CHECK(distance({0, 4, 1}, {9, 1, 1}) == std::numeric_limits<uint64_t>::max());
-        }
-        SECTION("clocking path distance")
-        {
-            SECTION("2DDWave")
-            {
-                const gate_layout<lyt> layout{gate_layout<lyt>::extent{10, 5, 2}, clocking::twoddwave()};
-
-                const a_star_distance_functor<gate_layout<lyt>> distance{layout};
-
-                CHECK(distance({0, 0}, {0, 0}) == 0);
-                CHECK(distance({1, 1}, {1, 1}) == 0);
-                CHECK(distance({0, 0}, {0, 1}) == 1);
-                CHECK(distance({0, 0}, {1, 1}) == 2);
-                CHECK(distance({9, 1}, {6, 2}) == std::numeric_limits<uint64_t>::max());
-                CHECK(distance({6, 2}, {0, 4}) == std::numeric_limits<uint64_t>::max());
-                CHECK(distance({0, 4}, {9, 1}) == std::numeric_limits<uint64_t>::max());
-
-                // A* is not meant for routing to the z-layer
-                CHECK(distance({6, 2, 0}, {0, 4, 1}) == std::numeric_limits<uint64_t>::max());
-                CHECK(distance({0, 4, 1}, {9, 1, 1}) == std::numeric_limits<uint64_t>::max());
-            }
-        }
+        /** @brief Directed clocking forbids westbound and northbound routes. */
+        const cartesian_gate_layout layout{{10, 5, 2}, clocking::twoddwave()};
+        /** @brief Borrowed-layout wrapper for clocked distances. */
+        const a_star_distance_functor<cartesian_gate_layout> distance{layout};
+        CHECK(a_star_distance(layout, source, target) == clocked_distance);
+        CHECK(distance(source, target) == clocked_distance);
     }
 }
 

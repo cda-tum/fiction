@@ -15,11 +15,12 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
-#include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/obstructions.hpp>
 #include <fiction/physical_design/path_finding/enumerate_all_paths.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
@@ -43,26 +44,24 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
         {
             const auto collection = enumerate_all_paths(layout, {.source = {0, 0}, .target = {1, 1}});
 
-            CHECK(collection.size() == 2);
-            CHECK(collection.contains({{{0, 0}, {0, 1}, {1, 1}}}));
-            CHECK(collection.contains({{{0, 0}, {1, 0}, {1, 1}}}));
+            CHECK_THAT(collection, Catch::Matchers::UnorderedRangeEquals(
+                                       path_collection{layout_coordinate_path{{{0, 0}, {0, 1}, {1, 1}}},
+                                                       layout_coordinate_path{{{0, 0}, {1, 0}, {1, 1}}}}));
         }
         SECTION("(1,1) to (0,0)")  // two valid paths
         {
             const auto collection = enumerate_all_paths(layout, {.source = {1, 1}, .target = {0, 0}});
 
-            CHECK(collection.size() == 2);
-            CHECK(collection.contains({{{1, 1}, {0, 1}, {0, 0}}}));
-            CHECK(collection.contains({{{1, 1}, {1, 0}, {0, 0}}}));
+            CHECK_THAT(collection, Catch::Matchers::UnorderedRangeEquals(
+                                       path_collection{layout_coordinate_path{{{1, 1}, {0, 1}, {0, 0}}},
+                                                       layout_coordinate_path{{{1, 1}, {1, 0}, {0, 0}}}}));
         }
         SECTION("(0,0) to (0,0)")  // source and target are identical
         {
             const auto collection = enumerate_all_paths(layout, {.source = {0, 0}, .target = {0, 0}});
 
-            CHECK(collection.size() == 1);
-            CHECK(collection.contains({{{0, 0}}}));
-            CHECK(collection[0].source() == fiction::layouts::layout_base::coordinate{0, 0});
-            CHECK(collection[0].target() == fiction::layouts::layout_base::coordinate{0, 0});
+            CHECK_THAT(collection,
+                       Catch::Matchers::UnorderedRangeEquals(path_collection{layout_coordinate_path{{{0, 0}}}}));
         }
     }
     SECTION("clocking paths")
@@ -75,26 +74,22 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
             {
                 const auto collection = enumerate_all_paths(layout, {.source = {0, 0}, .target = {1, 1}});
 
-                CHECK(collection.size() == 2);
-                CHECK(collection.contains({{{0, 0}, {0, 1}, {1, 1}}}));
-                CHECK(collection.contains({{{0, 0}, {1, 0}, {1, 1}}}));
+                CHECK_THAT(collection, Catch::Matchers::UnorderedRangeEquals(
+                                           path_collection{layout_coordinate_path{{{0, 0}, {0, 1}, {1, 1}}},
+                                                           layout_coordinate_path{{{0, 0}, {1, 0}, {1, 1}}}}));
             }
             SECTION("(1,1) to (0,0)")  // no valid paths
             {
                 const auto collection = enumerate_all_paths(layout, {.source = {1, 1}, .target = {0, 0}});
 
                 CHECK(collection.empty());
-                CHECK(!collection.contains({{{0, 0}, {0, 1}, {1, 1}}}));
-                CHECK(!collection.contains({{{0, 0}, {1, 0}, {1, 1}}}));
             }
             SECTION("(0,0) to (0,0)")  // source and target are identical
             {
                 const auto collection = enumerate_all_paths(layout, {.source = {0, 0}, .target = {0, 0}});
 
-                CHECK(collection.size() == 1);
-                CHECK(collection.contains({{{0, 0}}}));
-                CHECK(collection[0].source() == fiction::layouts::layout_base::coordinate{0, 0});
-                CHECK(collection[0].target() == fiction::layouts::layout_base::coordinate{0, 0});
+                CHECK_THAT(collection,
+                           Catch::Matchers::UnorderedRangeEquals(path_collection{layout_coordinate_path{{{0, 0}}}}));
             }
         }
         SECTION("USE")
@@ -105,19 +100,15 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
             {
                 const auto collection = enumerate_all_paths(layout, {.source = {0, 0}, .target = {0, 1}});
 
-                CHECK(collection.size() == 1);
-                CHECK(collection.contains({{{0, 0}, {1, 0}, {1, 1}, {0, 1}}}));
-                CHECK(collection[0].source() == fiction::layouts::layout_base::coordinate{0, 0});
-                CHECK(collection[0].target() == fiction::layouts::layout_base::coordinate{0, 1});
+                CHECK_THAT(collection, Catch::Matchers::UnorderedRangeEquals(
+                                           path_collection{layout_coordinate_path{{{0, 0}, {1, 0}, {1, 1}, {0, 1}}}}));
             }
             SECTION("(0,0) to (0,0)")  // source and target are identical
             {
                 const auto collection = enumerate_all_paths(layout, {.source = {0, 0}, .target = {0, 0}});
 
-                CHECK(collection.size() == 1);
-                CHECK(collection.contains({{{0, 0}}}));
-                CHECK(collection[0].source() == fiction::layouts::layout_base::coordinate{0, 0});
-                CHECK(collection[0].target() == fiction::layouts::layout_base::coordinate{0, 0});
+                CHECK_THAT(collection,
+                           Catch::Matchers::UnorderedRangeEquals(path_collection{layout_coordinate_path{{{0, 0}}}}));
             }
         }
     }
@@ -250,8 +241,8 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
                     const auto collection =
                         enumerate_all_paths(obstr_lyt, {.source = {0, 0}, .target = {2, 2}}, params);
 
-                    CHECK(collection.size() == 1);
-                    CHECK(collection.contains({{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1}, {2, 2}}}));
+                    CHECK_THAT(collection, Catch::Matchers::UnorderedRangeEquals(path_collection{
+                                               layout_coordinate_path{{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1}, {2, 2}}}}));
                 }
             }
             SECTION("USE")
@@ -271,8 +262,8 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
                     const auto collection =
                         enumerate_all_paths(obstr_lyt, {.source = {0, 0}, .target = {2, 2}}, params);
 
-                    CHECK(collection.size() == 1);
-                    CHECK(collection.contains({{{0, 0}, {1, 0}, {1, 1, 1}, {1, 2}, {2, 2}}}));
+                    CHECK_THAT(collection, Catch::Matchers::UnorderedRangeEquals(path_collection{
+                                               layout_coordinate_path{{{0, 0}, {1, 0}, {1, 1, 1}, {1, 2}, {2, 2}}}}));
                 }
             }
         }
@@ -304,9 +295,11 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
                     const auto collection =
                         enumerate_all_paths(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, params);
 
-                    CHECK(collection.size() == 2);
-                    CHECK(collection.contains({{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1, 1}, {3, 1}, {3, 2}, {3, 3}}}));
-                    CHECK(collection.contains({{{0, 0}, {0, 1}, {0, 2}, {1, 2, 1}, {2, 2, 1}, {3, 2}, {3, 3}}}));
+                    CHECK_THAT(
+                        collection,
+                        Catch::Matchers::UnorderedRangeEquals(path_collection{
+                            layout_coordinate_path{{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1, 1}, {3, 1}, {3, 2}, {3, 3}}},
+                            layout_coordinate_path{{{0, 0}, {0, 1}, {0, 2}, {1, 2, 1}, {2, 2, 1}, {3, 2}, {3, 3}}}}));
                 }
             }
         }
@@ -336,8 +329,8 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
                     const auto collection =
                         enumerate_all_paths(obstr_lyt, {.source = {0, 0}, .target = {3, 2}}, params);
 
-                    CHECK(collection.size() == 1);
-                    CHECK(collection.contains({{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1, 1}, {2, 2}, {3, 2}}}));
+                    CHECK_THAT(collection, Catch::Matchers::UnorderedRangeEquals(path_collection{layout_coordinate_path{
+                                               {{0, 0}, {0, 1}, {1, 1, 1}, {2, 1, 1}, {2, 2}, {3, 2}}}}));
                 }
             }
         }

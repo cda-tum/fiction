@@ -247,6 +247,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Modernized path-finding tests with shared data rows, complete path comparisons, and cache reuse checks.
   - Geometry tests now compare complete coordinate and visitor results and share arrangement cases.
   - Parameter configurations now use C++20 designated initializers and `const` where possible.
   - Modernized network-core contract tests with complete traversal and clone-isolation checks.
