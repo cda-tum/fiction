@@ -17,6 +17,7 @@
  * @author Benjamin Hien (hibenj)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "fiction/layouts/clocking_scheme.hpp"
@@ -27,6 +28,8 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/io/print_layout.hpp>
+
+#include <fmt/format.h>
 
 #include <sstream>
 #include <string>
@@ -118,22 +121,32 @@ TEST_CASE("Print object and tile assignments with fanins and fanouts", "[print-g
 {
     cartesian_gate_layout layout{cartesian_gate_layout::extent{2, 1, 1}, clocking::open(clocking::num_clks::FOUR)};
 
-    const auto x1 = layout.create_pi("x1", {0, 0});
-    layout.create_po(x1, "f1", {1, 0});
+    /** @brief Input and output whose fanout and fanin the printers report. */
+    const auto input  = layout.create_pi("x1", {0, 0});
+    const auto output = layout.create_po(input, "f1", {1, 0});
+    /** @brief Expected relationship records, independent of object allocation indices. */
+    const auto input_record =
+        fmt::format("\t   {}:{} @ {}", input.index, input.generation, cartesian_gate_layout::tile{0, 0});
+    const auto output_record =
+        fmt::format("\t   {}:{} @ {}", output.index, output.generation, cartesian_gate_layout::tile{1, 0});
+
+    CAPTURE(input_record, output_record);
 
     SECTION("Nodes to tiles")
     {
         std::stringstream print_stream{};
         print_object_to_tile_assignments(layout, print_stream);
 
-        CHECK(print_stream.str().find("	   0:1 @ ") != std::string::npos);
+        CHECK(print_stream.str().find(input_record) != std::string::npos);
+        CHECK(print_stream.str().find(output_record) != std::string::npos);
     }
     SECTION("Tiles to nodes")
     {
         std::stringstream print_stream{};
         print_tile_to_object_assignments(layout, print_stream);
 
-        CHECK(print_stream.str().find("	   0:1 @ ") != std::string::npos);
+        CHECK(print_stream.str().find(input_record) != std::string::npos);
+        CHECK(print_stream.str().find(output_record) != std::string::npos);
     }
 }
 
