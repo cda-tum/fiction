@@ -79,7 +79,7 @@ TEST_CASE("Occupied cell bounds span signed coordinates and ignore elevation", "
     qca::layout lyt{};
     lyt.assign_cell_type({std::numeric_limits<int32_t>::min(), 3, 1}, qca::cell_type::INPUT);
     lyt.assign_cell_type({std::numeric_limits<int32_t>::max(), -7}, qca::cell_type::OUTPUT);
-    bounding_box bounds{lyt};
+    const bounding_box bounds{lyt};
     CHECK(bounds.get_min() == layout_base::coordinate{std::numeric_limits<int32_t>::min(), -7});
     CHECK(bounds.get_max() == layout_base::coordinate{std::numeric_limits<int32_t>::max(), 3});
     CHECK(bounds.get_x_size() == 4294967296ull);
