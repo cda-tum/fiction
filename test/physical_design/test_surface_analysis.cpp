@@ -204,6 +204,17 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
 
     layout defect_layout{cell_lyt};
 
+    /** @brief Collects all blocked functions without imposing map iteration order. */
+    const auto blocked_functions = [](const auto& functions)
+    {
+        std::vector<kitty::dynamic_truth_table> keys{};
+        for (const auto& [function, ports] : functions)
+        {
+            keys.push_back(function);
+        }
+        return keys;
+    };
+
     SECTION("defect-free")
     {
         const auto black_list = surface_analysis<bestagon_library>(gate_lyt, defect_layout);
@@ -219,15 +230,10 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
         CHECK(black_list.size() == 1);
 
         REQUIRE(black_list.contains({0, 0}));
-        /** @brief Observed blocked functions, with no iteration-order requirement. */
-        std::vector<kitty::dynamic_truth_table> functions{};
-        for (const auto& [function, ports] : black_list.at({0, 0}))
-        {
-            functions.push_back(function);
-        }
-        CHECK_THAT(functions, Catch::Matchers::UnorderedRangeEquals(std::vector<kitty::dynamic_truth_table>{
-                                  create_id_tt(), create_not_tt(), create_and_tt(), create_or_tt(), create_nand_tt(),
-                                  create_nor_tt(), create_xor_tt(), create_xnor_tt()}));
+        CHECK_THAT(blocked_functions(black_list.at({0, 0})),
+                   Catch::Matchers::UnorderedRangeEquals(std::vector<kitty::dynamic_truth_table>{
+                       create_id_tt(), create_not_tt(), create_and_tt(), create_or_tt(), create_nand_tt(),
+                       create_nor_tt(), create_xor_tt(), create_xnor_tt()}));
     }
     SECTION("single uncharged defect")
     {
@@ -238,14 +244,9 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
         CHECK(black_list.size() == 1);
 
         REQUIRE(black_list.contains({0, 0}));
-        /** @brief Observed blocked functions, with no iteration-order requirement. */
-        std::vector<kitty::dynamic_truth_table> functions{};
-        for (const auto& [function, ports] : black_list.at({0, 0}))
-        {
-            functions.push_back(function);
-        }
-        CHECK_THAT(functions, Catch::Matchers::UnorderedRangeEquals(
-                                  std::vector<kitty::dynamic_truth_table>{create_id_tt(), create_not_tt()}));
+        CHECK_THAT(blocked_functions(black_list.at({0, 0})),
+                   Catch::Matchers::UnorderedRangeEquals(
+                       std::vector<kitty::dynamic_truth_table>{create_id_tt(), create_not_tt()}));
     }
     SECTION("multi-defect")
     {
@@ -260,15 +261,10 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
         CHECK(black_list.size() == 1);
 
         REQUIRE(black_list.contains({0, 0}));
-        /** @brief Observed blocked functions, with no iteration-order requirement. */
-        std::vector<kitty::dynamic_truth_table> functions{};
-        for (const auto& [function, ports] : black_list.at({0, 0}))
-        {
-            functions.push_back(function);
-        }
-        CHECK_THAT(functions, Catch::Matchers::UnorderedRangeEquals(std::vector<kitty::dynamic_truth_table>{
-                                  create_id_tt(), create_not_tt(), create_and_tt(), create_or_tt(), create_nand_tt(),
-                                  create_nor_tt(), create_xor_tt(), create_xnor_tt()}));
+        CHECK_THAT(blocked_functions(black_list.at({0, 0})),
+                   Catch::Matchers::UnorderedRangeEquals(std::vector<kitty::dynamic_truth_table>{
+                       create_id_tt(), create_not_tt(), create_and_tt(), create_or_tt(), create_nand_tt(),
+                       create_nor_tt(), create_xor_tt(), create_xnor_tt()}));
     }
 }
 
