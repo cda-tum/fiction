@@ -21,6 +21,7 @@
 #include "fiction/layouts/layout_base.hpp"
 #include "utils/allocation_failure.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
+#include "utils/routing_objective_string_maker.hpp"
 
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
