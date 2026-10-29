@@ -28,6 +28,7 @@
 #include <numeric>
 #include <stdexcept>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 namespace fiction::utils::math
@@ -134,10 +135,10 @@ cartesian_combinations(const std::vector<std::vector<VectorDataType>>& sets) noe
             {
                 std::vector<VectorDataType> new_product = product;
                 new_product.push_back(element);
-                expanded_products.push_back(new_product);
+                expanded_products.push_back(std::move(new_product));
             }
         }
-        all_combinations = expanded_products;
+        all_combinations = std::move(expanded_products);
     }
 
     return all_combinations;  // Return the final list of combinations
