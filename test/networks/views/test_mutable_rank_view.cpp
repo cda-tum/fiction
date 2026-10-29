@@ -111,9 +111,7 @@ std::optional<bool> virtual_miter_equivalent(const Spec& spec, const Impl& impl)
         return std::nullopt;
     }
 
-    mockturtle::equivalence_checking_stats st{};
-
-    return mockturtle::equivalence_checking(*miter, {}, &st);
+    return mockturtle::equivalence_checking(*miter);
 }
 
 }  // namespace
