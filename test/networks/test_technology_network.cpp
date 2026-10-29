@@ -30,7 +30,9 @@
 #include <mockturtle/networks/sequential.hpp>
 #include <mockturtle/traits.hpp>
 
+#include <algorithm>
 #include <cstdint>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
@@ -40,13 +42,12 @@ TEST_CASE("create and use constants in a technology network", "[technology-netwo
 {
     const technology_network tec{};
 
-    CHECK(mockturtle::has_size_v<technology_network>);
-    CHECK(mockturtle::has_get_constant_v<technology_network>);
-    CHECK(mockturtle::has_is_constant_v<technology_network>);
-    CHECK(mockturtle::has_is_pi_v<technology_network>);
-    CHECK(mockturtle::has_is_constant_v<technology_network>);
-    CHECK(mockturtle::has_get_node_v<technology_network>);
-    CHECK(mockturtle::has_is_complemented_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_size_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_get_constant_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_is_constant_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_is_pi_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_get_node_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_is_complemented_v<technology_network>);
 
     CHECK(tec.size() == 2);
 
@@ -57,22 +58,22 @@ TEST_CASE("create and use constants in a technology network", "[technology-netwo
     CHECK(c0 != c1);
     CHECK(tec.get_node(c0) == 0);
     CHECK(tec.get_node(c1) == 1);
-    CHECK(!tec.is_complemented(c0));
-    CHECK(!tec.is_complemented(c1));
+    CHECK_FALSE(tec.is_complemented(c0));
+    CHECK_FALSE(tec.is_complemented(c1));
     CHECK(tec.is_constant(c0));
     CHECK(tec.is_constant(c1));
-    CHECK(!tec.is_pi(c0));
-    CHECK(!tec.is_pi(c1));
+    CHECK_FALSE(tec.is_pi(c0));
+    CHECK_FALSE(tec.is_pi(c1));
 }
 
 TEST_CASE("create and use primary inputs in a technology network", "[technology-network]")
 {
     technology_network tec{};
 
-    CHECK(mockturtle::has_create_pi_v<technology_network>);
-    CHECK(mockturtle::has_is_constant_v<technology_network>);
-    CHECK(mockturtle::has_is_pi_v<technology_network>);
-    CHECK(mockturtle::has_num_pis_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_create_pi_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_is_constant_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_is_pi_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_num_pis_v<technology_network>);
 
     CHECK(tec.num_pis() == 0);
 
@@ -107,13 +108,13 @@ TEST_CASE("recognize primary inputs among gates, buffers, and constants in a tec
 
     for (const auto n : {tec.get_node(tec.get_constant(false)), tec.get_node(tec.get_constant(true)), buf, fo1, fo2, g})
     {
-        CHECK(!tec.is_pi(n));
-        CHECK(!tec.is_ci(n));
+        CHECK_FALSE(tec.is_pi(n));
+        CHECK_FALSE(tec.is_ci(n));
     }
 
     // a node beyond the network is no input
-    CHECK(!tec.is_pi(tec.size()));
-    CHECK(!tec.is_ci(tec.size()));
+    CHECK_FALSE(tec.is_pi(tec.size()));
+    CHECK_FALSE(tec.is_ci(tec.size()));
 }
 
 TEST_CASE("gate and fanin iteration agree with the klut network", "[technology-network]")
@@ -143,9 +144,11 @@ TEST_CASE("gate and fanin iteration agree with the klut network", "[technology-n
     base.foreach_gate([&base_gates](const auto& n) { base_gates.push_back(n); });
 
     CHECK(gates == base_gates);
+    std::ranges::sort(gates);
+    CHECK(gates == std::vector<uint64_t>(pool.begin() + 40, pool.end()));
 
     tec.foreach_node(
-        [&tec, &base](const auto& n)
+        [&tec, &base, &pool](const auto& n)
         {
             std::vector<uint64_t> fanins{};
             std::vector<uint64_t> base_fanins{};
@@ -153,7 +156,16 @@ TEST_CASE("gate and fanin iteration agree with the klut network", "[technology-n
             tec.foreach_fanin(n, [&fanins, &tec](const auto& f) { fanins.push_back(tec.get_node(f)); });
             base.foreach_fanin(n, [&base_fanins, &base](const auto& f) { base_fanins.push_back(base.get_node(f)); });
 
+            CAPTURE(n);
             CHECK(fanins == base_fanins);
+            if (n < 42)
+            {
+                CHECK(fanins.empty());
+            }
+            else
+            {
+                CHECK(fanins == std::vector<uint64_t>{pool[n - 42], pool[n - 41]});
+            }
         });
 }
 
@@ -161,8 +173,8 @@ TEST_CASE("create and use primary outputs in a technology network", "[technology
 {
     technology_network tec{};
 
-    CHECK(mockturtle::has_create_po_v<technology_network>);
-    CHECK(mockturtle::has_num_pos_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_create_po_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_num_pos_v<technology_network>);
 
     auto c0 = tec.get_constant(false);
     auto c1 = tec.get_constant(true);
@@ -183,12 +195,12 @@ TEST_CASE("create and use register in a technology network", "[technology-networ
 
     sequential_technology_network tec{};
 
-    REQUIRE(mockturtle::has_foreach_po_v<sequential_technology_network>);
-    REQUIRE(mockturtle::has_create_po_v<sequential_technology_network>);
-    REQUIRE(mockturtle::has_create_pi_v<sequential_technology_network>);
-    REQUIRE(mockturtle::has_create_ro_v<sequential_technology_network>);
-    REQUIRE(mockturtle::has_create_ri_v<sequential_technology_network>);
-    REQUIRE(mockturtle::has_create_maj_v<sequential_technology_network>);
+    STATIC_REQUIRE(mockturtle::has_foreach_po_v<sequential_technology_network>);
+    STATIC_REQUIRE(mockturtle::has_create_po_v<sequential_technology_network>);
+    STATIC_REQUIRE(mockturtle::has_create_pi_v<sequential_technology_network>);
+    STATIC_REQUIRE(mockturtle::has_create_ro_v<sequential_technology_network>);
+    STATIC_REQUIRE(mockturtle::has_create_ri_v<sequential_technology_network>);
+    STATIC_REQUIRE(mockturtle::has_create_maj_v<sequential_technology_network>);
 
     const auto c0 = tec.get_constant(false);
     const auto x1 = tec.create_pi();
@@ -216,95 +228,45 @@ TEST_CASE("create and use register in a technology network", "[technology-networ
     CHECK(tec.num_cis() == 4 + 1);
     CHECK(tec.num_cos() == 2 + 1);
 
+    /** @brief Primary inputs paired with their declared indices. */
+    std::vector<std::pair<technology_network::node, uint32_t>> pis{};
     tec.foreach_pi(
-        [&](auto const& node, auto index)
+        [&](const auto node, const auto index)
         {
             CHECK(tec.is_pi(node));
-            switch (index)
-            {
-                case 0:
-                    CHECK(node == x1); /* first pi */
-                    break;
-                case 1:
-                    CHECK(node == x2); /* second pi */
-                    break;
-                case 2:
-                    CHECK(node == x3); /* third pi */
-                    break;
-                case 3:
-                    CHECK(node == x4); /* fourth pi */
-                    break;
-                default: CHECK(false);
-            }
+            pis.emplace_back(node, index);
         });
+    CHECK(pis == std::vector<std::pair<technology_network::node, uint32_t>>{{x1, 0}, {x2, 1}, {x3, 2}, {x4, 3}});
 
+    /** @brief Combinational inputs include the register output after the primary inputs. */
+    std::vector<std::pair<technology_network::node, uint32_t>> cis{};
     tec.foreach_ci(
-        [&](auto const& node, auto index)
+        [&](const auto node, const auto index)
         {
             CHECK(tec.is_ci(node));
-            switch (index)
-            {
-                case 0:
-                    CHECK(node == x1); /* first pi */
-                    break;
-                case 1:
-                    CHECK(node == x2); /* second pi */
-                    break;
-                case 2:
-                    CHECK(node == x3); /* third pi */
-                    break;
-                case 3:
-                    CHECK(node == x4); /* fourth pi */
-                    break;
-                case 4:
-                    CHECK(node == s1); /* first state-bit */
-                    CHECK(tec.is_ci(node));
-                    CHECK(!tec.is_pi(node));
-                    break;
-                default: CHECK(false);
-            }
+            cis.emplace_back(node, index);
         });
+    CHECK(cis ==
+          std::vector<std::pair<technology_network::node, uint32_t>>{{x1, 0}, {x2, 1}, {x3, 2}, {x4, 3}, {s1, 4}});
+    CHECK_FALSE(tec.is_pi(s1));
 
-    tec.foreach_po(
-        [&](auto const& node, auto index)
-        {
-            switch (index)
-            {
-                case 0:
-                    CHECK(node == f1); /* first po */
-                    break;
-                case 1:
-                    CHECK(node == s1); /* second po */
-                    break;
-                default: CHECK(false);
-            }
-        });
+    /** @brief Primary outputs paired with their declared indices. */
+    std::vector<std::pair<technology_network::signal, uint32_t>> pos{};
+    tec.foreach_po([&](const auto signal, const auto index) { pos.emplace_back(signal, index); });
+    CHECK(pos == std::vector<std::pair<technology_network::signal, uint32_t>>{{f1, 0}, {s1, 1}});
 
-    tec.foreach_co(
-        [&](auto const& node, auto index)
-        {
-            switch (index)
-            {
-                case 0:
-                    CHECK(node == f1); /* first po */
-                    break;
-                case 1:
-                    CHECK(node == s1); /* second po */
-                    break;
-                case 2:
-                    CHECK(node == f2); /* first next-state bit */
-                    break;
-                default: CHECK(false);
-            }
-        });
+    /** @brief Combinational outputs include the register input after the primary outputs. */
+    std::vector<std::pair<technology_network::signal, uint32_t>> cos{};
+    tec.foreach_co([&](const auto signal, const auto index) { cos.emplace_back(signal, index); });
+    CHECK(cos == std::vector<std::pair<technology_network::signal, uint32_t>>{{f1, 0}, {s1, 1}, {f2, 2}});
 }
 
 TEST_CASE("create unary operations in a technology network", "[technology-network]")
 {
     technology_network tec{};
 
-    CHECK(mockturtle::has_create_buf_v<technology_network>);
-    CHECK(mockturtle::has_create_not_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_create_buf_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_create_not_v<technology_network>);
 
     auto x1 = tec.create_pi();
 
@@ -322,7 +284,7 @@ TEST_CASE("create binary operations in a technology network", "[technology-netwo
 {
     technology_network tec{};
 
-    CHECK(mockturtle::has_create_and_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_create_and_v<technology_network>);
 
     const auto x1 = tec.create_pi();
     const auto x2 = tec.create_pi();
@@ -343,8 +305,8 @@ TEST_CASE("create ternary operations in a technology network", "[technology-netw
 {
     technology_network tec{};
 
-    REQUIRE(mockturtle::has_create_maj_v<technology_network>);
-    REQUIRE(has_create_dot_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_create_maj_v<technology_network>);
+    STATIC_REQUIRE(has_create_dot_v<technology_network>);
 
     const auto x1 = tec.create_pi();
     const auto x2 = tec.create_pi();
@@ -379,7 +341,7 @@ TEST_CASE("create n-ary operations in a technology network", "[technology-networ
 {
     technology_network tec{};
 
-    CHECK(mockturtle::has_create_and_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_create_and_v<technology_network>);
 
     const auto x1 = tec.create_pi();
     const auto x2 = tec.create_pi();
@@ -403,7 +365,7 @@ TEST_CASE("clone a node in a technology network", "[technology-network]")
 {
     technology_network tec1, tec2;
 
-    CHECK(mockturtle::has_clone_node_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_clone_node_v<technology_network>);
 
     auto a1 = tec1.create_pi();
     auto b1 = tec1.create_pi();
@@ -417,7 +379,7 @@ TEST_CASE("clone a node in a technology network", "[technology-network]")
     auto f2 = tec2.clone_node(tec1, tec1.get_node(f1), {a2, b2});
     CHECK(tec2.size() == 5);
 
-    tec2.foreach_fanin(tec2.get_node(f2), [&](auto const& s) { CHECK(!tec2.is_complemented(s)); });
+    tec2.foreach_fanin(tec2.get_node(f2), [&](auto const& s) { CHECK_FALSE(tec2.is_complemented(s)); });
 }
 
 TEST_CASE("compute functions from AND and NOT gates in technology networks", "[technology-network]")
@@ -447,8 +409,8 @@ TEST_CASE("create nodes and compute a function in a technology network", "[techn
 {
     technology_network tec{};
 
-    CHECK(mockturtle::has_create_node_v<technology_network>);
-    CHECK(mockturtle::has_compute_v<technology_network, kitty::dynamic_truth_table>);
+    STATIC_REQUIRE(mockturtle::has_create_node_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_compute_v<technology_network, kitty::dynamic_truth_table>);
 
     const auto a = tec.create_pi();
     const auto b = tec.create_pi();
@@ -489,8 +451,8 @@ TEST_CASE("create fanouts and nodes and compute a function in a technology netwo
 {
     technology_network tec{};
 
-    CHECK(mockturtle::has_create_node_v<technology_network>);
-    CHECK(mockturtle::has_compute_v<technology_network, kitty::dynamic_truth_table>);
+    STATIC_REQUIRE(mockturtle::has_create_node_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_compute_v<technology_network, kitty::dynamic_truth_table>);
 
     const auto a = tec.create_pi();
     const auto b = tec.create_pi();
@@ -606,12 +568,12 @@ TEST_CASE("structural properties of a technology network", "[technology-network]
 {
     technology_network tec{};
 
-    CHECK(mockturtle::has_size_v<technology_network>);
-    CHECK(mockturtle::has_num_pis_v<technology_network>);
-    CHECK(mockturtle::has_num_pos_v<technology_network>);
-    CHECK(mockturtle::has_num_gates_v<technology_network>);
-    CHECK(mockturtle::has_fanin_size_v<technology_network>);
-    CHECK(mockturtle::has_fanout_size_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_size_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_num_pis_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_num_pos_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_num_gates_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_fanin_size_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_fanout_size_v<technology_network>);
 
     const auto x1 = tec.create_pi();
     const auto x2 = tec.create_pi();
@@ -640,33 +602,33 @@ TEST_CASE("Node functions of a technology network", "[technology-network]")
 {
     technology_network tec{};
 
-    CHECK(mockturtle::has_create_and_v<technology_network>);
-    CHECK(mockturtle::has_create_nand_v<technology_network>);
-    CHECK(mockturtle::has_create_or_v<technology_network>);
-    CHECK(mockturtle::has_create_nor_v<technology_network>);
-    CHECK(mockturtle::has_create_xor_v<technology_network>);
-    CHECK(mockturtle::has_create_xnor_v<technology_network>);
-    CHECK(mockturtle::has_create_lt_v<technology_network>);
-    CHECK(mockturtle::has_create_le_v<technology_network>);
-    CHECK(mockturtle::has_create_gt_v<technology_network>);
-    CHECK(mockturtle::has_create_ge_v<technology_network>);
-    CHECK(mockturtle::has_create_maj_v<technology_network>);
-    CHECK(mockturtle::has_create_ite_v<technology_network>);
-    CHECK(mockturtle::has_create_xor3_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_create_and_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_create_nand_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_create_or_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_create_nor_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_create_xor_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_create_xnor_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_create_lt_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_create_le_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_create_gt_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_create_ge_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_create_maj_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_create_ite_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_create_xor3_v<technology_network>);
 
-    CHECK(mockturtle::has_is_and_v<technology_network>);
-    CHECK(has_is_nand_v<technology_network>);
-    CHECK(mockturtle::has_is_or_v<technology_network>);
-    CHECK(has_is_nor_v<technology_network>);
-    CHECK(mockturtle::has_is_xor_v<technology_network>);
-    CHECK(has_is_xnor_v<technology_network>);
-    CHECK(has_is_lt_v<technology_network>);
-    CHECK(has_is_le_v<technology_network>);
-    CHECK(has_is_gt_v<technology_network>);
-    CHECK(has_is_ge_v<technology_network>);
-    CHECK(mockturtle::has_is_maj_v<technology_network>);
-    CHECK(mockturtle::has_is_ite_v<technology_network>);
-    CHECK(mockturtle::has_is_xor3_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_is_and_v<technology_network>);
+    STATIC_REQUIRE(has_is_nand_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_is_or_v<technology_network>);
+    STATIC_REQUIRE(has_is_nor_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_is_xor_v<technology_network>);
+    STATIC_REQUIRE(has_is_xnor_v<technology_network>);
+    STATIC_REQUIRE(has_is_lt_v<technology_network>);
+    STATIC_REQUIRE(has_is_le_v<technology_network>);
+    STATIC_REQUIRE(has_is_gt_v<technology_network>);
+    STATIC_REQUIRE(has_is_ge_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_is_maj_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_is_ite_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_is_xor3_v<technology_network>);
 
     const auto x1 = tec.create_pi();
     const auto x2 = tec.create_pi();
@@ -718,10 +680,10 @@ TEST_CASE("node and signal iteration in a technology network", "[technology-netw
 {
     technology_network tec{};
 
-    CHECK(mockturtle::has_foreach_node_v<technology_network>);
-    CHECK(mockturtle::has_foreach_pi_v<technology_network>);
-    CHECK(mockturtle::has_foreach_po_v<technology_network>);
-    CHECK(mockturtle::has_foreach_fanin_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_foreach_node_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_foreach_pi_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_foreach_po_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_foreach_fanin_v<technology_network>);
 
     const auto x1 = tec.create_pi();
     const auto x2 = tec.create_pi();
@@ -729,124 +691,140 @@ TEST_CASE("node and signal iteration in a technology network", "[technology-netw
     const auto f2 = tec.create_and(x2, x1);
     tec.create_po(f1);
     tec.create_po(f2);
+    tec.create_po(f1);
 
     CHECK(tec.size() == 6);
 
-    /* iterate over nodes */
-    uint32_t mask{0}, counter{0};
-    tec.foreach_node(
-        [&](auto n, auto i)
-        {
-            mask |= (1u << n);
-            counter += i;
-        });
-    CHECK(mask == 63);
-    CHECK(counter == 15);
+    /** @brief Visited values, retaining omissions and duplicate callbacks. */
+    std::vector<technology_network::node> visited{};
+    /** @brief Reported callback indices in traversal order. */
+    std::vector<uint32_t> indices{};
+    SECTION("node visitors preserve values, indices, and early termination")
+    {
+        tec.foreach_node(
+            [&](const auto value, const auto index)
+            {
+                visited.push_back(value);
+                indices.push_back(index);
+            });
+        REQUIRE(visited.size() == 6);
+        /** @brief First value of the full traversal, without imposing a node order. */
+        const auto first = visited.front();
+        std::ranges::sort(visited);
+        CHECK(visited == std::vector<technology_network::node>{tec.get_node(tec.get_constant(false)),
+                                                               tec.get_node(tec.get_constant(true)), x1, x2, f1, f2});
+        CHECK(indices == std::vector<uint32_t>{0, 1, 2, 3, 4, 5});
 
-    mask = 0;
-    tec.foreach_node([&](auto n) { mask |= (1u << n); });
-    CHECK(mask == 63);
+        visited.clear();
+        tec.foreach_node([&](const auto value) { visited.push_back(value); });
+        std::ranges::sort(visited);
+        CHECK(visited == std::vector<technology_network::node>{tec.get_node(tec.get_constant(false)),
+                                                               tec.get_node(tec.get_constant(true)), x1, x2, f1, f2});
 
-    mask = counter = 0;
-    tec.foreach_node(
-        [&](auto n, auto i)
-        {
-            mask |= (1u << n);
-            counter += i;
-            return false;
-        });
-    CHECK(mask == 1);
-    CHECK(counter == 0);
+        visited.clear();
+        indices.clear();
+        tec.foreach_node(
+            [&](const auto value, const auto index)
+            {
+                visited.push_back(value);
+                indices.push_back(index);
+                return false;
+            });
+        CHECK(visited == std::vector<technology_network::node>{first});
+        CHECK(indices == std::vector<uint32_t>{0});
 
-    mask = 0;
-    tec.foreach_node(
-        [&](auto n)
-        {
-            mask |= (1u << n);
-            return false;
-        });
-    CHECK(mask == 1);
+        visited.clear();
+        tec.foreach_node(
+            [&](const auto value)
+            {
+                visited.push_back(value);
+                return false;
+            });
+        CHECK(visited == std::vector<technology_network::node>{first});
+    }
+    SECTION("pi visitors preserve values, indices, and early termination")
+    {
+        tec.foreach_pi(
+            [&](const auto value, const auto index)
+            {
+                visited.push_back(value);
+                indices.push_back(index);
+            });
+        CHECK(visited == std::vector<technology_network::node>{x1, x2});
+        CHECK(indices == std::vector<uint32_t>{0, 1});
 
-    /* iterate over PIs */
-    mask = counter = 0;
-    tec.foreach_pi(
-        [&](auto n, auto i)
-        {
-            mask |= (1u << n);
-            counter += i;
-        });
-    CHECK(mask == 12);
-    CHECK(counter == 1);
+        visited.clear();
+        tec.foreach_pi([&](const auto value) { visited.push_back(value); });
+        CHECK(visited == std::vector<technology_network::node>{x1, x2});
 
-    mask = 0;
-    tec.foreach_pi([&](auto n) { mask |= (1u << n); });
-    CHECK(mask == 12);
+        visited.clear();
+        indices.clear();
+        tec.foreach_pi(
+            [&](const auto value, const auto index)
+            {
+                visited.push_back(value);
+                indices.push_back(index);
+                return false;
+            });
+        CHECK(visited == std::vector<technology_network::node>{x1});
+        CHECK(indices == std::vector<uint32_t>{0});
 
-    mask = counter = 0;
-    tec.foreach_pi(
-        [&](auto n, auto i)
-        {
-            mask |= (1u << n);
-            counter += i;
-            return false;
-        });
-    CHECK(mask == 4);
-    CHECK(counter == 0);
+        visited.clear();
+        tec.foreach_pi(
+            [&](const auto value)
+            {
+                visited.push_back(value);
+                return false;
+            });
+        CHECK(visited == std::vector<technology_network::node>{x1});
+    }
+    SECTION("po visitors preserve values, indices, and early termination")
+    {
+        tec.foreach_po(
+            [&](const auto value, const auto index)
+            {
+                visited.push_back(value);
+                indices.push_back(index);
+            });
+        CHECK(visited == std::vector<technology_network::node>{f1, f2, f1});
+        CHECK(indices == std::vector<uint32_t>{0, 1, 2});
 
-    mask = 0;
-    tec.foreach_pi(
-        [&](auto n)
-        {
-            mask |= (1u << n);
-            return false;
-        });
-    CHECK(mask == 4);
+        visited.clear();
+        tec.foreach_po([&](const auto value) { visited.push_back(value); });
+        CHECK(visited == std::vector<technology_network::node>{f1, f2, f1});
 
-    /* iterate over POs */
-    mask = counter = 0;
-    tec.foreach_po(
-        [&](auto s, auto i)
-        {
-            mask |= (1u << tec.get_node(s));
-            counter += i;
-        });
-    CHECK(mask == 48);
-    CHECK(counter == 1);
+        visited.clear();
+        indices.clear();
+        tec.foreach_po(
+            [&](const auto value, const auto index)
+            {
+                visited.push_back(value);
+                indices.push_back(index);
+                return false;
+            });
+        CHECK(visited == std::vector<technology_network::node>{f1});
+        CHECK(indices == std::vector<uint32_t>{0});
 
-    mask = 0;
-    tec.foreach_po([&](auto s) { mask |= (1u << tec.get_node(s)); });
-    CHECK(mask == 48);
-
-    mask = counter = 0;
-    tec.foreach_po(
-        [&](auto s, auto i)
-        {
-            mask |= (1u << tec.get_node(s));
-            counter += i;
-            return false;
-        });
-    CHECK(mask == 16);
-    CHECK(counter == 0);
-
-    mask = 0;
-    tec.foreach_po(
-        [&](auto s)
-        {
-            mask |= (1u << tec.get_node(s));
-            return false;
-        });
-    CHECK(mask == 16);
+        visited.clear();
+        tec.foreach_po(
+            [&](const auto value)
+            {
+                visited.push_back(value);
+                return false;
+            });
+        CHECK(visited == std::vector<technology_network::node>{f1});
+    }
 }
 
 TEST_CASE("custom node values in technology networks", "[technology-network]")
 {
     technology_network tec{};
 
-    CHECK(mockturtle::has_clear_values_v<technology_network>);
-    CHECK(mockturtle::has_value_v<technology_network>);
-    CHECK(mockturtle::has_set_value_v<technology_network>);
-    CHECK(mockturtle::has_incr_value_v<technology_network>);
-    CHECK(mockturtle::has_decr_value_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_clear_values_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_value_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_set_value_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_incr_value_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_decr_value_v<technology_network>);
 
     const auto x1 = tec.create_pi();
     const auto x2 = tec.create_pi();
@@ -877,9 +855,9 @@ TEST_CASE("visited values in technology networks", "[technology-network]")
 {
     technology_network tec{};
 
-    CHECK(mockturtle::has_clear_visited_v<technology_network>);
-    CHECK(mockturtle::has_visited_v<technology_network>);
-    CHECK(mockturtle::has_set_visited_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_clear_visited_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_visited_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_set_visited_v<technology_network>);
 
     const auto x1 = tec.create_pi();
     const auto x2 = tec.create_pi();
@@ -931,8 +909,8 @@ TEST_CASE("substitute PO signals", "[technology-network]")
     tec.substitute_po_signals();
 
     CHECK(tec.size() == 10);
-    CHECK(!tec.is_po(a));
-    CHECK(!tec.is_po(i));
+    CHECK_FALSE(tec.is_po(a));
+    CHECK_FALSE(tec.is_po(i));
     CHECK(tec.is_po(b));  // b pointed to a buf already and, thus, wasn't substituted
 
     CHECK(tec.fanout_size(a) == 1);

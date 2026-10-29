@@ -80,6 +80,7 @@ TEMPLATE_TEST_CASE("Extraction preserves interface order and truth-table argumen
     CHECK(ntk.get_output_name(1) == "result");
     const auto tables = mockturtle::simulate<kitty::dynamic_truth_table>(
         ntk, mockturtle::default_simulator<kitty::dynamic_truth_table>{ntk.num_pis()});
+    REQUIRE(tables.size() == 2);
     CHECK(kitty::to_hex(tables[0]) == "cc");
     CHECK(kitty::to_hex(tables[1]) == "22");
 }
@@ -103,6 +104,7 @@ TEMPLATE_TEST_CASE("Extraction follows connections across allocation order and r
     REQUIRE(ntk.num_pis() == 2);
     const auto tables = mockturtle::simulate<kitty::dynamic_truth_table>(
         ntk, mockturtle::default_simulator<kitty::dynamic_truth_table>{ntk.num_pis()});
+    REQUIRE(tables.size() == 1);
     CHECK(kitty::to_hex(tables[0]) == "2");
 }
 
