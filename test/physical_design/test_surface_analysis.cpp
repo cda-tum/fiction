@@ -17,6 +17,7 @@
 
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include "utils/allocation_failure.hpp"
@@ -208,6 +209,7 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
     const auto blocked_functions = [](const auto& functions)
     {
         std::vector<kitty::dynamic_truth_table> keys{};
+        keys.reserve(functions.size());
         for (const auto& [function, ports] : functions)
         {
             keys.push_back(function);

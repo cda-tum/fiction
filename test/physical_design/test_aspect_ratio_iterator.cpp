@@ -52,9 +52,10 @@ TEST_CASE("Aspect ratio iteration", "[aspect-ratio-iterator]")
     {
         CAPTURE(i);
         CHECK(ari <= 4u);
-        CHECK(*ari == expected[i]);
-        CHECK(ari == faces[i]);
-        CHECK((ari == aspect_ratio_iterator<layout_base::extent>{faces[i]}) == (i == 0 || faces[i] != faces[i - 1]));
+        CHECK(*ari == expected.at(i));
+        CHECK(ari == faces.at(i));
+        CHECK((ari == aspect_ratio_iterator<layout_base::extent>{faces.at(i)}) ==
+              (i == 0 || faces.at(i) != faces.at(i - 1)));
     }
     CHECK_FALSE(ari <= 4u);
 }

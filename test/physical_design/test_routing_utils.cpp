@@ -14,14 +14,15 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include "fiction/layouts/layout_base.hpp"
 #include "utils/allocation_failure.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
-#include "utils/routing_objective_string_maker.hpp"
+// Catch2 selects this specialization through its diagnostic templates.
+#include "utils/routing_objective_string_maker.hpp"  // IWYU pragma: keep
 
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
@@ -199,8 +200,11 @@ TEST_CASE("Rerouting distinct sources preserves noncommutative input order", "[r
     const auto second_source = layout.source({gate, 1});
     REQUIRE(first_source.has_value());
     REQUIRE(second_source.has_value());
-    CHECK(layout.source({first_source.value(), 0}) == a);
-    CHECK(layout.source({second_source.value(), 0}) == b);
+    if (first_source && second_source)  // The optional-access check does not model REQUIRE.
+    {
+        CHECK(layout.source({*first_source, 0}) == a);
+        CHECK(layout.source({*second_source, 0}) == b);
+    }
     CHECK(layout.is_lt(gate));
     const auto objectives = extract_routing_objectives(layout);
     check_objectives(objectives, {{{0, 0}, {4, 1}, 0}, {{0, 1}, {4, 1}, 1}});
