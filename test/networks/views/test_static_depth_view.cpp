@@ -364,15 +364,19 @@ TEST_CASE("Assigned depth views support construction after the source dies", "[s
     static_depth_view<mockturtle::xag_network> dxag{};
     {
         static_depth_view<mockturtle::xag_network> source{mockturtle::xag_network{}};
+        const auto                                 input = source.create_pi();
+        source.create_po(input);
         SECTION("Copy assignment")
         {
             dxag = source;
-            CHECK(dxag.size() == source.size());
+            CHECK(dxag.num_pis() == 1);
+            CHECK(dxag.num_pos() == 1);
         }
         SECTION("Move assignment")
         {
             dxag = std::move(source);
-            CHECK(dxag.num_gates() == 0);
+            CHECK(dxag.num_pis() == 1);
+            CHECK(dxag.num_pos() == 1);
         }
     }
 
