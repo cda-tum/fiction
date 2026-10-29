@@ -321,8 +321,9 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      *
      * @param level Level at which to return the nodes.
      * @return The node order at the given level.
+     * @throws std::bad_alloc If copying the rank fails.
      */
-    [[nodiscard]] std::vector<node> get_ranks(const uint32_t level) const noexcept
+    [[nodiscard]] std::vector<node> get_ranks(const uint32_t level) const
     {
         assert(level < ranks.size() && "level must be less than the number of ranks");
 
@@ -333,8 +334,9 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      * Gets all associated nodes in rank order across all levels.
      *
      * @return A vector of vectors containing the node order for each level.
+     * @throws std::bad_alloc If copying the ranks fails.
      */
-    [[nodiscard]] std::vector<std::vector<node>> get_all_ranks() const noexcept
+    [[nodiscard]] std::vector<std::vector<node>> get_all_ranks() const
     {
         return ranks;
     }
