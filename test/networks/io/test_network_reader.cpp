@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
@@ -37,6 +38,7 @@
 #include <random>
 #include <sstream>
 #include <string>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::networks;
@@ -55,12 +57,13 @@ TEMPLATE_TEST_CASE("Read Verilog", "[network-reader]", named_aig_network, named_
     // no error messages
     REQUIRE(os.str().empty());
 
-    const auto nets = reader.get_networks();
+    const auto& nets = reader.get_networks();
 
     // exactly one net should have been created
     REQUIRE(nets.size() == 1);
 
-    const auto mux21 = *nets.front();
+    REQUIRE(nets.front());
+    const auto& mux21 = *nets.front();
 
     SECTION("Equality")
     {
@@ -85,8 +88,9 @@ TEMPLATE_TEST_CASE("Read Verilog", "[network-reader]", named_aig_network, named_
 TEST_CASE("BLIF readers accept empty lines without changing logic", "[network-reader]")
 {
     const auto whitespace = GENERATE(std::string{}, std::string{" \t\r"});
-    const auto path       = std::filesystem::temp_directory_path() /
-                            ("fiction-blif-whitespace-" + std::to_string(std::random_device{}()) + ".blif");
+    CAPTURE(whitespace);
+    const auto path = std::filesystem::temp_directory_path() /
+                      ("fiction-blif-whitespace-" + std::to_string(std::random_device{}()) + ".blif");
     {
         std::ofstream file{path};
         file << whitespace << "\n# before model\n.model whitespace\n"
@@ -104,18 +108,28 @@ TEST_CASE("BLIF readers accept empty lines without changing logic", "[network-re
     std::filesystem::remove(path);
     REQUIRE(diagnostics.str().empty());
     REQUIRE(reader.get_networks().size() == 1);
+    REQUIRE(reader.get_networks().front());
     const auto& network = *reader.get_networks().front();
     CHECK(network.num_pis() == 3);
     REQUIRE(network.num_pos() == 6);
+    std::vector<std::string> input_names{};
+    std::vector<uint32_t>    input_indices{};
     network.foreach_pi(
         [&](const auto pi, const auto index)
-        { CHECK(network.get_name(network.make_signal(pi)) == std::array{"a", "b", "unused"}.at(index)); });
+        {
+            input_names.push_back(network.get_name(network.make_signal(pi)));
+            input_indices.push_back(index);
+        });
+    CHECK(input_names == std::vector<std::string>{"a", "b", "unused"});
+    CHECK(input_indices == std::vector<uint32_t>{0, 1, 2});
     const auto actual = mockturtle::simulate<kitty::dynamic_truth_table>(
         network, mockturtle::default_simulator<kitty::dynamic_truth_table>{3});
+    REQUIRE(actual.size() == 6);
     const std::array functions{"00", "ff", "55", "66", "44", "aa"};
     const std::array names{"zero", "one", "inverted", "xor", "lut", "copy"};
     for (std::size_t index{}; index < functions.size(); ++index)
     {
+        CAPTURE(index, names.at(index));
         kitty::dynamic_truth_table expected{3};
         kitty::create_from_hex_string(expected, functions.at(index));
         CHECK(actual.at(index) == expected);
