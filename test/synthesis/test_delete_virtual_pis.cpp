@@ -81,8 +81,6 @@ TEST_CASE("Check name conservation", "[delete-virtual-pis]")
     vpi.create_po(f2);
     vpi.create_po(f3);
 
-    vpi.set_network_name("vpi");
-
     CHECK(vpi.get_real_pi(c) == a);
 
     const auto non_vpi = delete_virtual_pis(vpi);

@@ -215,7 +215,16 @@ TEST_CASE("Fanout substitution preserves uint32 parameter bounds", "[fanout-subs
     {
         params.degree = std::numeric_limits<uint32_t>::max();
     }
-    substitute(original, params);
+    const auto substituted = substitute(original, params);
+    if (params.threshold == std::numeric_limits<uint32_t>::max())
+    {
+        substituted.foreach_node(
+            [&](const auto node)
+            {
+                CAPTURE(node);
+                CHECK_FALSE(substituted.is_fanout(node));
+            });
+    }
 }
 
 TEST_CASE("Fanout substitution preserves logic when the destination elides buffers", "[fanout-substitution]")
