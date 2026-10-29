@@ -662,6 +662,7 @@ TEST_CASE("Linear schemes", "[clocking-scheme]")
     check_linear_scheme(clocking::ROW_NAME, true);
     check_linear_scheme(clocking::TWODDWAVE_NAME, true);
     check_linear_scheme(clocking::TWODDWAVE_HEX_NAME, true);
+    CHECK(clocking::is_linear(clocking::twoddwave_hex(arrangement::ODD_ROW)));
 
     // Non-linear clocking schemes
     check_linear_scheme(clocking::OPEN_NAME, false);
