@@ -15,6 +15,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/networks/technology_network.hpp>
@@ -32,7 +33,6 @@
 #include <mockturtle/views/depth_view.hpp>
 
 #include <cstdint>
-#include <memory>
 #include <utility>
 
 using namespace fiction;
@@ -81,48 +81,41 @@ TEST_CASE("Depth view assignment preserves network names", "[static-depth-view]"
     SECTION("Copy assignment")
     {
         dest = source;
+        CHECK(dest.num_pis() == 1);
     }
     SECTION("Move assignment")
     {
         dest = std::move(source);
+        CHECK(dest.num_pis() == 1);
     }
 
+    REQUIRE(dest.num_pis() == 1);
+    REQUIRE(dest.num_pos() == 1);
     CHECK(dest.get_network_name() == "source");
     CHECK(dest.get_name(dest.pi_at(0)) == "input");
     CHECK(dest.get_output_name(0) == "output");
-    CHECK(dest.num_pis() == 1);
-    CHECK(dest.num_pos() == 1);
     CHECK(dest.depth() == 0);
 }
 
-template <typename Ntk>
-void test_depth_view()
+TEMPLATE_TEST_CASE("Depth views preserve network traits", "[static-depth-view]", mockturtle::aig_network,
+                   mockturtle::xag_network, mockturtle::mig_network, mockturtle::xmg_network, mockturtle::klut_network,
+                   technology_network)
 {
-    CHECK(mockturtle::is_network_type_v<Ntk>);
-    CHECK(!mockturtle::has_depth_v<Ntk>);
-    CHECK(!mockturtle::has_level_v<Ntk>);
+    STATIC_REQUIRE(mockturtle::is_network_type_v<TestType>);
+    STATIC_REQUIRE_FALSE(mockturtle::has_depth_v<TestType>);
+    STATIC_REQUIRE_FALSE(mockturtle::has_level_v<TestType>);
 
-    using depth_ntk = static_depth_view<Ntk>;
+    using depth_ntk = static_depth_view<TestType>;
 
-    CHECK(mockturtle::is_network_type_v<depth_ntk>);
-    CHECK(mockturtle::has_depth_v<depth_ntk>);
-    CHECK(mockturtle::has_level_v<depth_ntk>);
+    STATIC_REQUIRE(mockturtle::is_network_type_v<depth_ntk>);
+    STATIC_REQUIRE(mockturtle::has_depth_v<depth_ntk>);
+    STATIC_REQUIRE(mockturtle::has_level_v<depth_ntk>);
 
     using depth_depth_ntk = static_depth_view<depth_ntk>;
 
-    CHECK(mockturtle::is_network_type_v<depth_depth_ntk>);
-    CHECK(mockturtle::has_depth_v<depth_depth_ntk>);
-    CHECK(mockturtle::has_level_v<depth_depth_ntk>);
-};
-
-TEST_CASE("Create different depth views", "[static-depth-view]")
-{
-    test_depth_view<mockturtle::aig_network>();
-    test_depth_view<mockturtle::xag_network>();
-    test_depth_view<mockturtle::mig_network>();
-    test_depth_view<mockturtle::xmg_network>();
-    test_depth_view<mockturtle::klut_network>();
-    test_depth_view<technology_network>();
+    STATIC_REQUIRE(mockturtle::is_network_type_v<depth_depth_ntk>);
+    STATIC_REQUIRE(mockturtle::has_depth_v<depth_depth_ntk>);
+    STATIC_REQUIRE(mockturtle::has_level_v<depth_depth_ntk>);
 }
 
 TEST_CASE("Update Levels Technology Network", "[static-depth-view]")
@@ -152,36 +145,28 @@ TEST_CASE("Compute depth and levels for AIG", "[static-depth-view]")
     const auto              f4 = aig.create_nand(f2, f3);
     aig.create_po(f4);
 
-    const static_depth_view depth_aig{aig};
-    CHECK(depth_aig.depth() == 3);
-    CHECK(depth_aig.level(aig.get_node(a)) == 0);
-    CHECK(depth_aig.level(aig.get_node(b)) == 0);
-    CHECK(depth_aig.level(aig.get_node(f1)) == 1);
-    CHECK(depth_aig.level(aig.get_node(f2)) == 2);
-    CHECK(depth_aig.level(aig.get_node(f3)) == 2);
-    CHECK(depth_aig.level(aig.get_node(f4)) == 3);
-}
-
-TEST_CASE("Compute depth and levels for AIG with inverter costs", "[static-depth-view]")
-{
-    mockturtle::aig_network aig;
-    const auto              a  = aig.create_pi();
-    const auto              b  = aig.create_pi();
-    const auto              f1 = aig.create_nand(a, b);
-    const auto              f2 = aig.create_nand(a, f1);
-    const auto              f3 = aig.create_nand(b, f1);
-    const auto              f4 = aig.create_nand(f2, f3);
-    aig.create_po(f4);
-
-    const depth_view_params ps{.count_complements = true};
-    const static_depth_view depth_aig{aig, {}, ps};
-    CHECK(depth_aig.depth() == 6);
-    CHECK(depth_aig.level(aig.get_node(a)) == 0);
-    CHECK(depth_aig.level(aig.get_node(b)) == 0);
-    CHECK(depth_aig.level(aig.get_node(f1)) == 1);
-    CHECK(depth_aig.level(aig.get_node(f2)) == 3);
-    CHECK(depth_aig.level(aig.get_node(f3)) == 3);
-    CHECK(depth_aig.level(aig.get_node(f4)) == 5);
+    SECTION("Unit gate costs")
+    {
+        const static_depth_view depth_aig{aig};
+        CHECK(depth_aig.depth() == 3);
+        CHECK(depth_aig.level(aig.get_node(a)) == 0);
+        CHECK(depth_aig.level(aig.get_node(b)) == 0);
+        CHECK(depth_aig.level(aig.get_node(f1)) == 1);
+        CHECK(depth_aig.level(aig.get_node(f2)) == 2);
+        CHECK(depth_aig.level(aig.get_node(f3)) == 2);
+        CHECK(depth_aig.level(aig.get_node(f4)) == 3);
+    }
+    SECTION("Complemented edges add cost")
+    {
+        const static_depth_view depth_aig{aig, {}, depth_view_params{.count_complements = true}};
+        CHECK(depth_aig.depth() == 6);
+        CHECK(depth_aig.level(aig.get_node(a)) == 0);
+        CHECK(depth_aig.level(aig.get_node(b)) == 0);
+        CHECK(depth_aig.level(aig.get_node(f1)) == 1);
+        CHECK(depth_aig.level(aig.get_node(f2)) == 3);
+        CHECK(depth_aig.level(aig.get_node(f3)) == 3);
+        CHECK(depth_aig.level(aig.get_node(f4)) == 5);
+    }
 }
 
 TEST_CASE("Compute critical path information", "[static-depth-view]")
@@ -200,16 +185,16 @@ TEST_CASE("Compute critical path information", "[static-depth-view]")
     aig.create_po(f);
 
     const static_depth_view depth_aig{aig};
-    CHECK(!mockturtle::has_is_on_critical_path_v<decltype(aig)>);
-    CHECK(mockturtle::has_is_on_critical_path_v<decltype(depth_aig)>);
+    STATIC_REQUIRE_FALSE(mockturtle::has_is_on_critical_path_v<decltype(aig)>);
+    STATIC_REQUIRE(mockturtle::has_is_on_critical_path_v<decltype(depth_aig)>);
     CHECK(depth_aig.is_on_critical_path(aig.get_node(a)));
     CHECK(depth_aig.is_on_critical_path(aig.get_node(b)));
-    CHECK(!depth_aig.is_on_critical_path(aig.get_node(c)));
-    CHECK(!depth_aig.is_on_critical_path(aig.get_node(d)));
-    CHECK(!depth_aig.is_on_critical_path(aig.get_node(e)));
+    CHECK_FALSE(depth_aig.is_on_critical_path(aig.get_node(c)));
+    CHECK_FALSE(depth_aig.is_on_critical_path(aig.get_node(d)));
+    CHECK_FALSE(depth_aig.is_on_critical_path(aig.get_node(e)));
     CHECK(depth_aig.is_on_critical_path(aig.get_node(f1)));
     CHECK(depth_aig.is_on_critical_path(aig.get_node(f2)));
-    CHECK(!depth_aig.is_on_critical_path(aig.get_node(f3)));
+    CHECK_FALSE(depth_aig.is_on_critical_path(aig.get_node(f3)));
     CHECK(depth_aig.is_on_critical_path(aig.get_node(f)));
 }
 
@@ -290,11 +275,13 @@ TEST_CASE("Added nodes include existing complemented output edges in depth", "[s
     SECTION("Primary output")
     {
         depth_ntk.create_po(!gate);
+        CHECK(depth_ntk.num_pos() == 2);
     }
     SECTION("Register input")
     {
         depth_ntk.create_ro();
         depth_ntk.create_ri(!gate);
+        CHECK(depth_ntk.num_registers() == 1);
     }
     depth_ntk.on_add(depth_ntk.get_node(gate));
     CHECK(depth_ntk.depth() == 2);
@@ -314,7 +301,7 @@ TEST_CASE("The critical path follows the levels after an update and survives a c
 
     CHECK(tec_d.is_on_critical_path(tec_d.get_node(g1)));
     CHECK(tec_d.is_on_critical_path(tec_d.get_node(x1)));
-    CHECK(!tec_d.is_on_critical_path(tec_d.get_node(x3)));
+    CHECK_FALSE(tec_d.is_on_critical_path(tec_d.get_node(x3)));
 
     // a deeper output extends the critical path; the input that joins late stays off it
     const auto g2 = tec_d.create_not(tec_d.create_and(g1, x3));
@@ -324,7 +311,7 @@ TEST_CASE("The critical path follows the levels after an update and survives a c
     CHECK(tec_d.is_on_critical_path(tec_d.get_node(g2)));
     CHECK(tec_d.is_on_critical_path(tec_d.get_node(g1)));
     CHECK(tec_d.is_on_critical_path(tec_d.get_node(x1)));
-    CHECK(!tec_d.is_on_critical_path(tec_d.get_node(x3)));
+    CHECK_FALSE(tec_d.is_on_critical_path(tec_d.get_node(x3)));
 
     // a copy keeps the answers, whether the path was computed before the copy or not
     const auto computed_copy = tec_d;
@@ -337,7 +324,7 @@ TEST_CASE("The critical path follows the levels after an update and survives a c
     {
         CHECK(copy.is_on_critical_path(copy.get_node(g2)));
         CHECK(copy.is_on_critical_path(copy.get_node(x1)));
-        CHECK(!copy.is_on_critical_path(copy.get_node(x3)));
+        CHECK_FALSE(copy.is_on_critical_path(copy.get_node(x3)));
     }
 }
 
@@ -372,43 +359,32 @@ TEST_CASE("Compute levels during node construction with cost function", "[static
     CHECK(dxag.depth() == 1u);
 }
 
-TEST_CASE("Compute levels during node construction after copy assignment", "[static-depth-view]")
+TEST_CASE("Assigned depth views support construction after the source dies", "[static-depth-view]")
 {
-    const mockturtle::xag_network              xag{};
-    static_depth_view<mockturtle::xag_network> dxag;
+    static_depth_view<mockturtle::xag_network> dxag{};
     {
-        auto tmp = std::make_unique<static_depth_view<mockturtle::xag_network>>(xag);
-        dxag     = *tmp;  // copy assignment
-    }
-
-    auto const a = dxag.create_pi();
-    auto const b = dxag.create_pi();
-    auto const c = dxag.create_pi();
-    dxag.create_po(dxag.create_xor(b, dxag.create_and(dxag.create_xor(a, b), dxag.create_xor(b, c))));
-
-    dxag.update_levels();
-
-    CHECK(dxag.depth() == 3u);
-}
-
-TEST_CASE("Compute levels during node construction after move assignment", "[static-depth-view]")
-{
-    const mockturtle::xag_network              xag{};
-    static_depth_view<mockturtle::xag_network> dxag;
-    {
-        const std::unique_ptr<static_depth_view<mockturtle::xag_network>> tmp =
-            std::make_unique<static_depth_view<mockturtle::xag_network>>(xag);
-        dxag = *tmp;  // copy assignment
+        static_depth_view<mockturtle::xag_network> source{mockturtle::xag_network{}};
+        const auto                                 input = source.create_pi();
+        source.create_po(input);
+        SECTION("Copy assignment")
+        {
+            dxag = source;
+            CHECK(dxag.num_pis() == 1);
+            CHECK(dxag.num_pos() == 1);
+        }
+        SECTION("Move assignment")
+        {
+            dxag = std::move(source);
+            CHECK(dxag.num_pis() == 1);
+            CHECK(dxag.num_pos() == 1);
+        }
     }
 
     const auto a = dxag.create_pi();
     const auto b = dxag.create_pi();
     const auto c = dxag.create_pi();
-
     dxag.create_po(dxag.create_xor(b, dxag.create_and(dxag.create_xor(a, b), dxag.create_xor(b, c))));
-
     dxag.update_levels();
-
     CHECK(dxag.depth() == 3u);
 }
 
@@ -434,7 +410,7 @@ TEST_CASE("Dangling nodes have no level", "[static-depth-view]")
     const static_depth_view depth_dangling{dangling_aig};
 
     CHECK(depth_dangling.has_level(dangling_aig.get_node(f2)));
-    CHECK(!depth_dangling.has_level(dangling_aig.get_node(f3)));
+    CHECK_FALSE(depth_dangling.has_level(dangling_aig.get_node(f3)));
     CHECK(depth_dangling.depth() == 2);
 
     // a depth view over a depth view passes the question through instead of claiming a level for every node
@@ -442,7 +418,7 @@ TEST_CASE("Dangling nodes have no level", "[static-depth-view]")
     const static_depth_view<static_depth_view<mockturtle::aig_network>> nested{depth_dangling};
 
     CHECK(nested.has_level(dangling_aig.get_node(f2)));
-    CHECK(!nested.has_level(dangling_aig.get_node(f3)));
+    CHECK_FALSE(nested.has_level(dangling_aig.get_node(f3)));
 
     // a depth view over mockturtle's depth view answers true, since that view keeps levels for every node
     const static_depth_view over_mockturtle{mockturtle::depth_view{aig}};
@@ -466,7 +442,7 @@ TEST_CASE("Primary inputs without fanout have level 0", "[static-depth-view]")
     CHECK(depth_aig.level(aig.get_node(unused)) == 0);
     CHECK(depth_aig.level(aig.get_node(f)) == 1);
     CHECK(depth_aig.depth() == 1);
-    CHECK(!depth_aig.is_on_critical_path(aig.get_node(unused)));
+    CHECK_FALSE(depth_aig.is_on_critical_path(aig.get_node(unused)));
 
     // the same holds after recomputing the levels
     static_depth_view updated{aig};
