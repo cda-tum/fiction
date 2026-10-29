@@ -122,31 +122,31 @@ TEMPLATE_TEST_CASE("Virtual miter with supported networks", "[virtual-miter]", t
     {
         const auto equivalent = virtual_miter_equivalent(test_ntk, test_dc);
         REQUIRE(equivalent.has_value());
-        CHECK(*equivalent);
+        CHECK(equivalent.value_or(false));
     }
     SECTION("EXODC in the implementation")
     {
         const auto equivalent = virtual_miter_equivalent(test_dc, test_ntk);
         REQUIRE(equivalent.has_value());
-        CHECK(*equivalent);
+        CHECK(equivalent.value_or(false));
     }
     SECTION("Virtual PIs in the specification")
     {
         const auto equivalent = virtual_miter_equivalent(vpi_ntk_1, test_ntk);
         REQUIRE(equivalent.has_value());
-        CHECK(*equivalent);
+        CHECK(equivalent.value_or(false));
     }
     SECTION("Virtual PIs in the implementation")
     {
         const auto equivalent = virtual_miter_equivalent(test_ntk, vpi_ntk_2);
         REQUIRE(equivalent.has_value());
-        CHECK(*equivalent);
+        CHECK(equivalent.value_or(false));
     }
     SECTION("Virtual PIs in both networks")
     {
         const auto equivalent = virtual_miter_equivalent(vpi_ntk_1, vpi_ntk_2);
         REQUIRE(equivalent.has_value());
-        CHECK(*equivalent);
+        CHECK(equivalent.value_or(false));
     }
 }
 
@@ -174,7 +174,7 @@ TEST_CASE("Virtual miter pairs the inputs of a rank view by creation order", "[v
 
     const auto cec = virtual_miter_equivalent(tec, ranked);
     REQUIRE(cec.has_value());
-    CHECK(*cec);
+    CHECK(cec.value_or(false));
 }
 
 TEST_CASE("Virtual miter rejects different output counts", "[virtual-miter]")
@@ -196,7 +196,7 @@ TEST_CASE("Virtual miter detects different output functions", "[virtual-miter]")
     right.create_po(right.create_or(x, y));
     const auto equivalent = virtual_miter_equivalent(left, right);
     REQUIRE(equivalent.has_value());
-    CHECK_FALSE(*equivalent);
+    CHECK_FALSE(equivalent.value_or(true));
 }
 
 TEMPLATE_TEST_CASE("Virtual miter respects EXODC output relations", "[virtual-miter]", technology_network,
@@ -218,20 +218,28 @@ TEMPLATE_TEST_CASE("Virtual miter respects EXODC output relations", "[virtual-mi
     { return specification_has_exodc ? virtual_miter<TestType>(dc, right) : virtual_miter<TestType>(left, dc); };
     const auto before = build_miter();
     REQUIRE(before.has_value());
+    if (!before)  // The optional-access check does not model REQUIRE.
+    {
+        return;
+    }
     CHECK(before->num_pis() == 2);
     CHECK(before->num_pos() == 1);
     const auto inequivalent = mockturtle::equivalence_checking(*before);
     REQUIRE(inequivalent.has_value());
-    CHECK_FALSE(*inequivalent);
+    CHECK_FALSE(inequivalent.value_or(true));
 
     dc.add_EXOEC_pair({false, true}, {true, true});
     const auto after = build_miter();
     REQUIRE(after.has_value());
+    if (!after)
+    {
+        return;
+    }
     CHECK(after->num_pis() == 2);
     CHECK(after->num_pos() == 1);
     const auto equivalent = mockturtle::equivalence_checking(*after);
     REQUIRE(equivalent.has_value());
-    CHECK(*equivalent);
+    CHECK(equivalent.value_or(false));
 }
 
 TEMPLATE_TEST_CASE("Virtual miter handles empty EXODC interfaces", "[virtual-miter]", technology_network,
@@ -243,6 +251,10 @@ TEMPLATE_TEST_CASE("Virtual miter handles empty EXODC interfaces", "[virtual-mit
     {
         const auto miter = virtual_miter<TestType>(dc, empty);
         REQUIRE(miter.has_value());
+        if (!miter)  // The optional-access check does not model REQUIRE.
+        {
+            return;
+        }
         REQUIRE(miter->num_pis() == 0);
         REQUIRE(miter->num_pos() == 1);
         const auto outputs =
