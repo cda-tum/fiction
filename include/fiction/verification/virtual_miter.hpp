@@ -23,6 +23,7 @@
 
 // NOLINTNEXTLINE(misc-include-cleaner): Provides cleanup_dangling for argument-dependent lookup.
 #include <mockturtle/algorithms/cleanup.hpp>
+#include <mockturtle/networks/aig.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 
@@ -30,6 +31,7 @@
 #include <cstddef>
 #include <iterator>
 #include <optional>
+#include <type_traits>
 #include <vector>
 
 namespace fiction::verification
@@ -159,14 +161,38 @@ template <typename NtkDest, typename NtkSrc1, typename NtkSrc2>
     const auto pos1 = cleanup_dangling(ntk1, dest, leaves1.cbegin(), leaves1.cend());
     const auto pos2 = cleanup_dangling(ntk2, dest, leaves2.cbegin(), leaves2.cend());
 
-    if constexpr (mockturtle::has_EXODC_interface_v<decltype(ntk1)>)
+    if constexpr (mockturtle::has_EXODC_interface_v<decltype(ntk1)> ||
+                  mockturtle::has_EXODC_interface_v<decltype(ntk2)>)
     {
-        ntk1.build_oe_miter(dest, pos1, pos2);
-        return dest;
-    }
-    if constexpr (mockturtle::has_EXODC_interface_v<decltype(ntk2)>)
-    {
-        ntk2.build_oe_miter(dest, pos1, pos2);
+        /** @brief Builds the output relation without applying Boolean negation to integer signals. */
+        const auto build_oe_miter = [&](const auto& ntk)
+        {
+            if constexpr (std::is_integral_v<mockturtle::signal<NtkDest>>)
+            {
+                mockturtle::aig_network                      oe{};
+                std::vector<mockturtle::aig_network::signal> inputs1(pos1.size()), inputs2(pos2.size());
+                std::ranges::generate(inputs1, [&] { return oe.create_pi(); });
+                std::ranges::generate(inputs2, [&] { return oe.create_pi(); });
+                ntk.build_oe_miter(oe, inputs1, inputs2);
+                auto leaves = pos1;
+                leaves.insert(leaves.end(), pos2.begin(), pos2.end());
+                const auto outputs = cleanup_dangling(oe, dest, leaves.cbegin(), leaves.cend());
+                dest.create_po(outputs.front());
+            }
+            else
+            {
+                ntk.build_oe_miter(dest, pos1, pos2);
+            }
+        };
+
+        if constexpr (mockturtle::has_EXODC_interface_v<decltype(ntk1)>)
+        {
+            build_oe_miter(ntk1);
+        }
+        else
+        {
+            build_oe_miter(ntk2);
+        }
         return dest;
     }
 
