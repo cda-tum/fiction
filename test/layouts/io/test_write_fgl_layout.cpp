@@ -262,7 +262,9 @@ TEST_CASE("FGL preserves whitespace-only names", "[write-fgl-layout]")
 TEST_CASE("FGL preserves XML whitespace in layout and object names", "[write-fgl-layout]")
 {
     cartesian_gate_layout layout{{3, 1, 1}, clocking::twoddwave()};
-    const std::string     label{"first\r\nsecond\t<&>"};
+    /** @brief Short or long label containing whitespace, XML markup, and UTF-8. */
+    const auto label = GENERATE(std::string{"first\r\nsecond\t<&>"}, std::string(4096, ' ') + "\r\nsecond\t<&>ä水");
+    CAPTURE(label.size());
     layout.set_layout_name(label);
     const auto input = layout.create_pi(label, {0, 0});
     const auto wire  = layout.create_buf(input, {1, 0});
@@ -272,6 +274,7 @@ TEST_CASE("FGL preserves XML whitespace in layout and object names", "[write-fgl
     write_fgl_layout(layout, stream);
     const auto restored = read_fgl_layout<cartesian_layout>(stream);
     CHECK(restored.get_layout_name() == label);
+    CHECK(restored.size() == 3);
     restored.foreach_object([&](const auto id) { CHECK(restored.get_name(id) == label); });
 }
 
