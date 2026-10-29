@@ -26873,6 +26873,10 @@ Template Args:
 Returns:
     `true` iff `ntk` is properly path-balanced with regard to `ps`.
 
+Raises:
+    MemoryError: If allocating depth information or output levels
+                 fails.
+
 )doc";
 
 static const char *mkd_doc_fiction_synthesis_is_fanout_substituted =
