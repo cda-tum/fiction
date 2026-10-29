@@ -33,7 +33,6 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <utility>
 #include <vector>
 
 using namespace fiction;
@@ -229,37 +228,60 @@ TEST_CASE("create and use register in a technology network", "[technology-networ
     CHECK(tec.num_cis() == 4 + 1);
     CHECK(tec.num_cos() == 2 + 1);
 
-    /** @brief Primary inputs paired with their declared indices. */
-    std::vector<std::pair<technology_network::node, uint32_t>> pis{};
+    /** @brief Primary inputs in declared order. */
+    std::vector<technology_network::node> pis{};
+    /** @brief Reported PI callback indices. */
+    std::vector<uint32_t> pi_indices{};
     tec.foreach_pi(
-        [&](const auto node, const auto index)
+        [&](const auto value, const auto index)
         {
-            CHECK(tec.is_pi(node));
-            pis.emplace_back(node, index);
+            CHECK(tec.is_pi(value));
+            pis.push_back(value);
+            pi_indices.push_back(index);
         });
-    CHECK(pis == std::vector<std::pair<technology_network::node, uint32_t>>{{x1, 0}, {x2, 1}, {x3, 2}, {x4, 3}});
+    CHECK(pis == std::vector<technology_network::node>{x1, x2, x3, x4});
+    CHECK(pi_indices == std::vector<uint32_t>{0, 1, 2, 3});
 
     /** @brief Combinational inputs include the register output after the primary inputs. */
-    std::vector<std::pair<technology_network::node, uint32_t>> cis{};
+    std::vector<technology_network::node> cis{};
+    /** @brief Reported CI callback indices. */
+    std::vector<uint32_t> ci_indices{};
     tec.foreach_ci(
-        [&](const auto node, const auto index)
+        [&](const auto value, const auto index)
         {
-            CHECK(tec.is_ci(node));
-            cis.emplace_back(node, index);
+            CHECK(tec.is_ci(value));
+            cis.push_back(value);
+            ci_indices.push_back(index);
         });
-    CHECK(cis ==
-          std::vector<std::pair<technology_network::node, uint32_t>>{{x1, 0}, {x2, 1}, {x3, 2}, {x4, 3}, {s1, 4}});
+    CHECK(cis == std::vector<technology_network::node>{x1, x2, x3, x4, s1});
+    CHECK(ci_indices == std::vector<uint32_t>{0, 1, 2, 3, 4});
     CHECK_FALSE(tec.is_pi(s1));
 
-    /** @brief Primary outputs paired with their declared indices. */
-    std::vector<std::pair<technology_network::signal, uint32_t>> pos{};
-    tec.foreach_po([&](const auto signal, const auto index) { pos.emplace_back(signal, index); });
-    CHECK(pos == std::vector<std::pair<technology_network::signal, uint32_t>>{{f1, 0}, {s1, 1}});
+    /** @brief Primary outputs in declared order. */
+    std::vector<technology_network::signal> pos{};
+    /** @brief Reported PO callback indices. */
+    std::vector<uint32_t> po_indices{};
+    tec.foreach_po(
+        [&](const auto value, const auto index)
+        {
+            pos.push_back(value);
+            po_indices.push_back(index);
+        });
+    CHECK(pos == std::vector<technology_network::signal>{f1, s1});
+    CHECK(po_indices == std::vector<uint32_t>{0, 1});
 
     /** @brief Combinational outputs include the register input after the primary outputs. */
-    std::vector<std::pair<technology_network::signal, uint32_t>> cos{};
-    tec.foreach_co([&](const auto signal, const auto index) { cos.emplace_back(signal, index); });
-    CHECK(cos == std::vector<std::pair<technology_network::signal, uint32_t>>{{f1, 0}, {s1, 1}, {f2, 2}});
+    std::vector<technology_network::signal> cos{};
+    /** @brief Reported CO callback indices. */
+    std::vector<uint32_t> co_indices{};
+    tec.foreach_co(
+        [&](const auto value, const auto index)
+        {
+            cos.push_back(value);
+            co_indices.push_back(index);
+        });
+    CHECK(cos == std::vector<technology_network::signal>{f1, s1, f2});
+    CHECK(co_indices == std::vector<uint32_t>{0, 1, 2});
 }
 
 TEST_CASE("create unary operations in a technology network", "[technology-network]")
