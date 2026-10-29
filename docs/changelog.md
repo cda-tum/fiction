@@ -44,6 +44,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Modernized network-view tests with complete visitor checks, typed trait cases, and copy/move coverage.
   - Added QCA SVG regression tests for colors, detail modes, tile labels, and file output.
+  - Layout I/O tests name malformed-input rows, check stream preservation, and verify printed fanins and fanouts.
   - Added a Catch2 contributor guide and gate-layout test examples for fixtures, data tables,
     diagnostics, and contract-focused assertions. Visitor checks now detect missing and duplicate results.
 
@@ -374,6 +375,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - The ToPoliNano library and CLI reject row-shifted Cartesian layouts.
 
 - I/O:
+
+  - FGL name escaping appends text in one pass to avoid repeated suffix copies for long whitespace-heavy names.
   - `write_sidb_layout_svg` and `print_sidb_layout` color an `sidb::layout` from an optional
     `charge_distribution`
   - **Breaking:** FGL writers now emit version 2 with size counts, declared interface order, and numbered input connections. Readers also accept legacy maximum-coordinate sizes; writers reject incomplete or physically invalid layouts before writing.

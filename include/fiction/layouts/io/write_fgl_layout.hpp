@@ -61,12 +61,18 @@ inline std::string xml_text(const std::string& value)
     tinyxml2::XMLPrinter printer{};
     printer.PushText(value.c_str());
     /** Escaped name with explicit whitespace references. */
-    std::string text{printer.CStr()};
-    for (auto position = text.find_first_of(" \t\r\n"); position != std::string::npos;
-         position      = text.find_first_of(" \t\r\n", position + 1))
+    std::string text{};
+    /** @brief Unprocessed XML-escaped name borrowed from the printer. */
+    std::string_view remaining{printer.CStr()};
+    text.reserve(remaining.size());
+    for (auto position = remaining.find_first_of(" \t\r\n"); position != std::string_view::npos;
+         position      = remaining.find_first_of(" \t\r\n"))
     {
-        text.replace(position, 1, fmt::format("&#{};", static_cast<unsigned int>(text[position])));
+        text.append(remaining.substr(0, position));
+        text.append(fmt::format("&#{};", static_cast<unsigned int>(remaining[position])));
+        remaining.remove_prefix(position + 1);
     }
+    text.append(remaining);
     return text;
 }
 
