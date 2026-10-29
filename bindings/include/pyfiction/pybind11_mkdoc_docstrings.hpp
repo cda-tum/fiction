@@ -12018,10 +12018,11 @@ flow imposed by `layout`'s clocking scheme.
 A* is an extension of Dijkstra's algorithm for shortest paths but
 offers better average complexity. It uses a heuristic distance
 function that estimates the remaining costs towards the target in
-every step. Thus, this heuristic function should neither be complex to
-calculate nor overestimating the remaining costs. Common heuristics to
-be used are the Manhattan and the Euclidean distance functions. See
-`distance_functor` for implementations.
+every step. The heuristic must be consistent with the step costs:
+`h(u) <= cost(u, v) + h(v)` for every traversable step, with
+`h(target) = 0`. Step costs must be nonnegative. Manhattan and
+Euclidean distance satisfy this condition for unit-cost Cartesian
+steps. See `distance_functor` for implementations.
 
 Paths do not pass obstructed coordinates or connections, except that
 the target is never obstructed. A coordinate or connection is
@@ -12222,18 +12223,6 @@ static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_im
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_coordinate_f_f = R"doc(f-value of the coordinate.)doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_coordinate_f_operator_eq =
-R"doc(Equality operator that only compares the stored coordinates. This
-allows for a convenient lookup in the priority queue.
-
-Args:
-    other: Other coordinate_f to compare with.
-
-Returns:
-    `true` iff this coord value is equal to the other's.
-
-)doc";
-
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_coordinate_f_operator_gt =
 R"doc(Comparator for the priority queue. Compares only the f-values.
 
@@ -12300,26 +12289,11 @@ static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_im
 R"doc(The layout in which the shortest path between `source` and `target` is
 to be found.)doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_no_improvement =
-R"doc(Checks if the given g-value is greater or equal than the stored
-g-value of the given coordinate. If that is the case, the new g-value
-does not improve the path.
-
-Args:
-    c: Coordinate to whose g-value is to be checked.
-    g_val: g-value to compare to c's.
-
-Returns:
-    `true` iff the given g-value does not mean an improvement for the
-    given coordinate.
-
-)doc";
-
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_objective = R"doc(The source-target coordinate pair.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_open_list =
-R"doc(Open list that contains all coordinates to process next sorted by
-their f-value.)doc";
+R"doc(Queued improvements sorted by f-value. Superseded entries are skipped
+after their coordinate is processed.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_params = R"doc(Routing parameters.)doc";
 
@@ -13466,23 +13440,54 @@ static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_os = R"do
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_ps = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_run = R"doc(Writes the QCA layout to the output stream in QCADesigner format.)doc";
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_run =
+R"doc(Validates serialized names and writes the QCA layout in QCADesigner
+format.
+
+Raises:
+    ValueError: If a serialized name contains CR, LF, or a null byte.
+
+)doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_via_counter = R"doc()doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_via_layer_cells = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_cell = R"doc()doc";
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_cell =
+R"doc(Writes a cell and its quantum dots in QCADesigner coordinates.
+
+Args:
+    c: Cell to serialize.
+    save_via_cells: Whether to collect vertical cells for the next
+                    inter-layer via layer.
+
+)doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_cell_colors = R"doc()doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_cell_function = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_cell_layers = R"doc()doc";
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_cell_layers =
+R"doc(Writes occupied cells in layer, row, and column order, retaining empty
+layers and inter-layer vias.
+
+Args:
+    cells: In-bounds cells sorted by layer, row, and column.
+
+)doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_cell_mode = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_cell_name = R"doc()doc";
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_cell_name =
+R"doc(Writes the stored cell name or the fixed polarization label of a
+constant cell.
+
+Args:
+    c: Cell whose label is serialized.
+    pos: Cell center in QCADesigner coordinates.
+    color: Label color.
+
+)doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_header = R"doc()doc";
 
@@ -13496,28 +13501,34 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_quantum_dots = R"doc()doc";
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_quantum_dots =
+R"doc(Writes the four quantum dots and their charge values around a cell
+center.
+
+Args:
+    c: Cell whose quantum dots are serialized.
+    pos: Cell center in QCADesigner coordinates.
+
+)doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_via_cells = R"doc()doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl = R"doc(Draws a QCA layout as SVG.)doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl_generate_cell_based_svg =
-R"doc(Generates an SVG string representing the cell-based clocked cell
-layout and appends it to the output stream.
+R"doc(Generates an SVG string from in-bounds occupied cells in layer, row,
+and column painting order.
 
 )doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl_generate_description_color =
-R"doc(Generates and returns a pair of strings representing the description
-and color of the given cell.
+R"doc(Selects the static SVG description and color of the given cell.
 
 Args:
     c: The cell for which to generate the description and color.
 
 Returns:
-    A pair of strings representing the description and color of the
-    given cell `c`.
+    Views of the static description and color of the given cell `c`.
 
 )doc";
 
@@ -13548,7 +13559,8 @@ Args:
 static const char *mkd_doc_fiction_qca_io_write_qca_layout =
 R"doc(Writes a QCA layout to a qca file that is used by QCADesigner
 (https://waluslab.ece.ubc.ca/qcadesigner/), a physical simulator for
-the QCA technology platform.
+the QCA technology platform. Cells outside the layout extent are
+skipped. Cells within each layer are written in row and column order.
 
 This overload uses an output stream to write into.
 
@@ -13557,12 +13569,18 @@ Args:
     os: The output stream to write into.
     ps: Parameters.
 
+Raises:
+    ValueError: If the layout name or a serialized cell name contains
+                CR, LF, or a null byte. Names are validated before
+                writing to the stream.
+
 )doc";
 
 static const char *mkd_doc_fiction_qca_io_write_qca_layout_2 =
 R"doc(Writes a QCA layout to a qca file that is used by QCADesigner
 (https://waluslab.ece.ubc.ca/qcadesigner/), a physical simulator for
-the QCA technology platform.
+the QCA technology platform. Cells outside the layout extent are
+skipped. Cells within each layer are written in row and column order.
 
 This overload uses a file name to create and write into.
 
@@ -13575,6 +13593,8 @@ Args:
 Raises:
     RuntimeError: If creating, writing, closing, or replacing the
                   output file fails.
+    ValueError: If the layout name or a serialized cell name contains
+                CR, LF, or a null byte.
 
 )doc";
 
@@ -13589,6 +13609,9 @@ R"doc(Writes an SVG representation of a QCA layout into an output stream.
 Both tile- and cell-based layouts are supported. For tile-based
 layouts, QCA layouts of tile size :math:`5 \times 5` are supported
 exclusively so far.
+
+Cells outside the layout extent are skipped. Cells at the same
+position paint lower layers before upper layers.
 
 The utilized color scheme is based on the standard scheme used in
 QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
@@ -13608,6 +13631,9 @@ R"doc(Writes an SVG representation of a QCA layout into a file. Both tile-
 and cell-based layouts are supported. For tile-based layouts, QCA
 layouts of tile size :math:`5 \times 5` are supported exclusively so
 far.
+
+Cells outside the layout extent are skipped. Cells at the same
+position paint lower layers before upper layers.
 
 The utilized color scheme is based on the standard scheme used in
 QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
@@ -15088,7 +15114,9 @@ comes from the file's lattice definition; SiDBs and surface defects
 are placed at the `(n, m, l)` lattice coordinates the file names.
 Explicit geometry must contain finite vectors and two basis sites.
 Without geometry, the reader accepts the two predefined reconstruction
-names and defaults to H-Si(100)-2x1 when the name is absent.
+names and defaults to H-Si(100)-2x1 when the name is absent. The input
+must have a single `siqad` root, no text outside the root, and no NUL
+bytes. Open file streams in binary mode to preserve every input byte.
 
 Args:
     is: The input stream to read from.
@@ -15104,8 +15132,9 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_io_read_sqd_layout_2 =
-R"doc(Reads an SQD file into an `sidb::layout`. See the stream overload for
-the file's interpretation.
+R"doc(Reads an SQD file into an `sidb::layout` in binary mode. The input
+must have a single `siqad` root, no text outside the root, and no NUL
+bytes. See the stream overload for the lattice interpretation.
 
 Args:
     filename: The file to read.
@@ -15125,7 +15154,8 @@ static const char *mkd_doc_fiction_sidb_io_read_surface_defects =
 R"doc(Reads a defect matrix from a stream into a defects-only `sidb::layout`
 on the H-Si(100)-2x1 lattice. Each `[...]` row lists one defect index
 per column; entry `x` of row `y` becomes the defect at column `x` of
-single-SiDB row `y`.
+single-SiDB row `y`. Open file streams in binary mode to preserve
+every input byte.
 
 Args:
     is: The input stream to read from.
@@ -15143,8 +15173,8 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_io_read_surface_defects_2 =
-R"doc(Reads a defect matrix from a file into a defects-only `sidb::layout`.
-See the stream overload for the format.
+R"doc(Reads a defect matrix from a file in binary mode into a defects-only
+`sidb::layout`. See the stream overload for the format.
 
 Args:
     filename: The file to read.
@@ -26766,10 +26796,11 @@ R"doc(Maximum number of outputs any gate is allowed to have before
 substitution applies. Must be at least one.)doc";
 
 static const char *mkd_doc_fiction_synthesis_io_tt_reader =
-R"doc(Simple reader to parse truth tables from files. The files must be
-organized as follows: Each line consists of a truth table in
-hexadecimal form plus its corresponding Boolean expression. The two
-are separated by a space.
+R"doc(Reads whitespace-separated pairs of a hexadecimal truth table and its
+corresponding Boolean expression. Truth tables use a `0x` or `0X`
+prefix and a power-of-two number of hexadecimal digits. A single digit
+represents two variables. Expressions must be single tokens; the
+reader does not parse them.
 
 This format is used by, e.g., Alan Mishchenko for his DSD functions:
 https://people.eecs.berkeley.edu/~alanmi/temp5/)doc";
@@ -26779,11 +26810,16 @@ R"doc(Contains the hexadecimal truth tables and their Boolean expressions in
 string representation. The two are alternating.)doc";
 
 static const char *mkd_doc_fiction_synthesis_io_tt_reader_next =
-R"doc(Returns the next truth table parsed from the file or std::nullopt if
-no further truth tables are available.
+R"doc(Returns the next truth table, or `std::nullopt` when all records have
+been read. A parsing error leaves the current record unchanged.
 
 Returns:
     Next truth table from the file.
+
+Raises:
+    ValueError: If a record is incomplete, has an invalid prefix,
+                digit count, or character, or requires 38 or more
+                variables.
 
 )doc";
 
@@ -26796,21 +26832,30 @@ expressions from the given stream.
 Args:
     in_stream: Stream of truth table representations.
 
+Raises:
+    RuntimeError: If reading fails before normal end of input.
+
 )doc";
 
 static const char *mkd_doc_fiction_synthesis_io_tt_reader_tt_reader =
-R"doc(Standard constructor. Reads the given stream into a vector of lines.
+R"doc(Standard constructor. Reads the given stream into a vector of tokens.
 
 Args:
     stream: Stream to parse.
 
+Raises:
+    RuntimeError: If reading fails before normal end of input.
+
 )doc";
 
 static const char *mkd_doc_fiction_synthesis_io_tt_reader_tt_reader_2 =
-R"doc(Standard constructor. Reads the given file into a vector of lines.
+R"doc(Standard constructor. Reads the given file into a vector of tokens.
 
 Args:
     filename: File to parse.
+
+Raises:
+    RuntimeError: If the file cannot be opened or read.
 
 )doc";
 

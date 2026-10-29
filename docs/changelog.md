@@ -149,6 +149,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Interface matching uses less temporary memory for named interfaces.
   - Combination generation avoids one allocation and copy per result.
   - SiDB domain sampling now stops once every grid point has been collected.
   - **Breaking:** Physical design accepts only named technology networks (`networks::named_technology_network`). Convert other network types
@@ -172,6 +173,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Gate-layout iteration skips removed objects through a compact live-object bitmap.
   - GOLD reuses built-in objective costs while ranking candidates and accepting solutions.
   - GOLD reduces placement-sequence copies, repeated frontier-cost lookups, and buffer allocations.
+  - A* reduces per-search map overhead and repeated cost lookups, and replaces linear frontier lookups with lazy queue entries.
+    Equal-cost route choices can differ.
   - **Breaking:** A*, path enumeration, and Yen's algorithm route around the gates and wires of every gate-level
     layout and take temporary constraints as a separate `obstructions` argument, leaving the caller's data unchanged.
     `&a_star_distance<Lyt>` no longer converts to a `distance_functor`; use `a_star_distance_functor`.
@@ -327,6 +330,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
   - Documented all three gate-layout geometries and MSVC Release builds for Python.
+  - A* documents the consistency requirement for custom heuristics and nonnegative step costs.
   - Python layout docstrings use `extent` for the extent argument.
   - Clarified that custom clocking scheme names do not register schemes for catalog lookup.
   - Corrected the coordinate page's `last_coordinate()` accessor reference.
@@ -917,10 +921,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - I/O:
 
+  - Surface-defect import avoids exponential backtracking on malformed digit runs.
+  - SQD import now rejects NUL bytes, multiple XML roots, and text outside the root. SiDB filename readers preserve bytes after Ctrl-Z on Windows.
   - BLIF network readers now accept empty and whitespace-only lines without aborting.
   - QCC and QLL writers now propagate allocation failures while sorting terminal cells.
+  - QCADesigner output now rejects names containing CR, LF, or null bytes before changing output.
+  - QCADesigner and cell-based QCA SVG output now avoid scanning empty cell positions in sparse layouts.
+  - QCADesigner output now preserves quantum-dot offsets and avoids integer overflow at large coordinates, and retains label widths for long names.
   - Gate-layout DOT output now preserves signed coordinate IDs and quoted terminal names.
   - FGL round trips now preserve whitespace-only layout and port names.
+  - `tt_reader` now handles empty input, rejects incomplete or malformed hexadecimal records, and reports file-open and read failures.
   - FGL version 2 now preserves manual obstructions and XML whitespace in names. Readers reject unfinished or physically invalid layouts; writers reject illegal XML control characters before changing output.
   - FGL gate IDs now reject malformed, negative, and out-of-range integers with a parsing error.
   - QCA SVG output now includes synchronized cells in tiled layouts and wraps latch clock labels within the clock cycle.

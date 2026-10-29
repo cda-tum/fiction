@@ -223,3 +223,37 @@ TEST_CASE("QCA SVG includes partial boundary tiles", "[write-qca-layout-svg]")
     CHECK(std::string{partial_document.FirstChildElement("svg")->Attribute("viewBox")} ==
           full_document.FirstChildElement("svg")->Attribute("viewBox"));
 }
+
+TEST_CASE("QCA SVG clips cells to the frame in both render modes", "[write-qca-layout-svg]")
+{
+    const auto  simple    = GENERATE(false, true);
+    const auto  tile_size = GENERATE(uint16_t{1}, uint16_t{5});
+    qca::layout layout{{3, 3, 2}, "Crossing", tile_size, tile_size};
+    layout.assign_cell_type({1, 1}, qca::cell_type::NORMAL);
+    layout.assign_cell_type({1, 1, 1}, qca::cell_type::NORMAL);
+    layout.assign_cell_mode({1, 1, 1}, qca::cell_mode::VERTICAL);
+    std::ostringstream expected{};
+    write_qca_layout_svg(layout, expected, {.simple = simple});
+
+    layout.assign_cell_type({-1, 1}, qca::cell_type::INPUT);
+    layout.assign_cell_type({3, 1}, qca::cell_type::OUTPUT);
+    layout.assign_cell_type({1, 1, 2}, qca::cell_type::NORMAL);
+    std::ostringstream actual{};
+    write_qca_layout_svg(layout, actual, {.simple = simple});
+    CHECK(actual.str() == expected.str());
+}
+
+TEST_CASE("QCA SVG paints lower layers before upper layers", "[write-qca-layout-svg]")
+{
+    const auto  simple    = GENERATE(false, true);
+    const auto  tile_size = GENERATE(uint16_t{1}, uint16_t{5});
+    qca::layout layout{{10, 5, 2}, "Layers", tile_size, tile_size};
+    layout.assign_cell_type({1, 1, 1}, qca::cell_type::OUTPUT);
+    layout.assign_cell_type({1, 1, 0}, qca::cell_type::INPUT);
+    std::ostringstream stream{};
+    write_qca_layout_svg(layout, stream, {.simple = simple});
+    const auto svg = stream.str();
+    REQUIRE(svg.find("fill:#008dc8") != std::string::npos);
+    REQUIRE(svg.find("fill:#e28686") != std::string::npos);
+    CHECK(svg.find("fill:#008dc8") < svg.find("fill:#e28686"));
+}
