@@ -85,14 +85,14 @@ TEST_CASE("Crossings require physical wires on both layers", "[drv]")
     {
         lyt.create_pi("a", {0, 0, 0});
         lyt.create_buf({0, 0, 1});
+        CHECK(get_drvs(lyt).report.at("Wires crossing gates").size() == 1);
     }
     SECTION("Output above a wire")
     {
         const auto wire = lyt.create_buf({0, 0, 0});
         lyt.create_po(wire, "f", {0, 0, 1});
+        CHECK(get_drvs(lyt).report.at("Wires crossing gates").size() == 1);
     }
-    const auto st = get_drvs(lyt);
-    CHECK(st.report.at("Wires crossing gates").size() == 1);
 }
 
 TEST_CASE("Warnings", "[drv]")
