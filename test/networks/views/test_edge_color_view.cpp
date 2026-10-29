@@ -131,7 +131,7 @@ TEST_CASE("Out-of-place edge color view", "[edge-color-view]")
         /* the fanins of f5 are yellow */
         CHECK(aig_ecv.eval_fanins_color(aig_ecv.get_node(f5), [&](auto color) { return color == yellow; }));
 
-        /* at least one fanin of f5 is not red */
+        /* every fanin of f5 is not red */
         CHECK(aig_ecv.eval_fanins_color(aig_ecv.get_node(f5), [&](auto color) { return color != red; }));
 
         /* visited flags have not been affected by assigning colors */

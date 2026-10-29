@@ -10,7 +10,8 @@
 
 /**
  * @file
- * @brief Allocation-failure recovery tests for mutable network ranks.
+ * @brief Allocation-failure tests for network ranks and virtual-PI removal.
+ * @author Marcel Walter (marcelwa)
  */
 
 #include <catch2/catch_message.hpp>

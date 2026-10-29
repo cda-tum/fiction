@@ -105,8 +105,8 @@ TEST_CASE("Check BFS order", "[bfs-topo-view]")
     const auto x4 = aig.create_pi();
     const auto x5 = aig.create_pi();
     const auto f1 = aig.create_and(x1, x2);
-    const auto f2 = aig.create_and(f1, x3);  // Node 7 = last element in BFS
-    const auto f3 = aig.create_and(x4, x5);  // Node 8 = last element created
+    const auto f2 = aig.create_and(f1, x3);
+    const auto f3 = aig.create_and(x4, x5);
     aig.create_po(f2);
     aig.create_po(f3);
 
@@ -118,6 +118,7 @@ TEST_CASE("Check BFS order", "[bfs-topo-view]")
     nodes.clear();
     aig2.foreach_node([&nodes](auto node) { nodes.push_back(node); });
     REQUIRE(nodes.size() == 9);
+    // Breadth-first traversal visits the depth-2 gate after both depth-1 gates.
     CHECK(nodes.back() == aig.get_node(f2));
     aig2.foreach_gate(
         [&](const auto n)

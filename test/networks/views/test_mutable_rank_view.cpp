@@ -344,6 +344,7 @@ TEST_CASE("Check modify ranks", "[mutable-rank-view]")
     const std::vector<technology_network::node> nodes = {13, 10, 14};
     vpi_r.set_ranks(2, nodes);
 
+    CHECK(vpi_r.get_ranks(2) == nodes);
     CHECK(vpi_r.check_validity());
 }
 
@@ -445,7 +446,7 @@ TEMPLATE_TEST_CASE("Check equivalence checking", "[mutable-rank-view]", mockturt
 
     const auto maybe_cec_m = virtual_miter_equivalent(ntk, ntk_r);
     REQUIRE(maybe_cec_m.has_value());
-    CHECK(*maybe_cec_m);
+    CHECK(maybe_cec_m.value_or(false));
     CHECK(ntk_r.check_validity());
 }
 
@@ -483,7 +484,7 @@ TEST_CASE("Check equivalence checking for virtual PIs", "[mutable-rank-view]")
 
     const auto maybe_cec_m = virtual_miter_equivalent(tec, vpi_r);
     REQUIRE(maybe_cec_m.has_value());
-    CHECK(*maybe_cec_m);
+    CHECK(maybe_cec_m.value_or(false));
     CHECK(vpi_r.check_validity());
 }
 
@@ -509,7 +510,7 @@ TEST_CASE("Check PI order for equivalence checking", "[mutable-rank-view]")
 
     auto maybe_cec_m = virtual_miter_equivalent(tec, vpi_r);
     REQUIRE(maybe_cec_m.has_value());
-    CHECK(*maybe_cec_m);
+    CHECK(maybe_cec_m.value_or(false));
 
     // this rearranges the order of the PI as stored in the underlying static_depth_view (corresponds to the order in
     // _storage)
@@ -517,7 +518,7 @@ TEST_CASE("Check PI order for equivalence checking", "[mutable-rank-view]")
 
     maybe_cec_m = virtual_miter_equivalent(tec, vpi_r);
     REQUIRE(maybe_cec_m.has_value());
-    CHECK(*maybe_cec_m);
+    CHECK(maybe_cec_m.value_or(false));
 }
 
 TEST_CASE("Dangling gates are rejected", "[mutable-rank-view]")
