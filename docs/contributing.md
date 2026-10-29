@@ -21,7 +21,7 @@ You can contribute in several ways:
 - ✨ Implement New Features
   : Look through the [GitHub Issues](https://github.com/cda-tum/fiction/issues) for features. Anything tagged with "enhancement" is open to whoever wants to implement it. We highly appreciate external contributions to the project.
 - ✔️ Write Tests
-  : We can always use more tests to ensure that the code base is robust and stable. If you want to help out, you can start by looking through the [CodeCov report](https://app.codecov.io/gh/cda-tum/fiction) to find out where we missed covering lines.
+  : Add tests for uncovered contracts and simplify redundant checks. The [CodeCov report](https://app.codecov.io/gh/cda-tum/fiction) helps locate unexercised code; inspect its requirements and callers before choosing a test.
 - 📝 Write Documentation
   : _fiction_ could always use some more [documentation](https://fiction.readthedocs.io/en/latest/), and we appreciate any help with that.
 
@@ -164,6 +164,84 @@ Contributions written with the help of an AI agent are welcome, under two condit
 - **Take responsibility for it.** Review and understand the content before you post it. If you cannot explain it, do not submit it. A contribution should be worth more than the effort it costs to review.
 
 Agent instructions live in `AGENTS.md` at the repository root, with additional files in the subdirectories they apply to. If your tool expects a different file name, create a local symlink — for example `ln -s AGENTS.md CLAUDE.md`. Those names are gitignored, so the repository itself stays tool-neutral.
+
+## Writing Catch2 tests
+
+Test observable contracts with the smallest inputs that distinguish correct behavior from a plausible defect.
+Keep boundary, invalid-input, ownership, and regression cases even when their setup looks similar.
+Repeated checks before and after an operation can protect different state transitions.
+Before deleting a test, identify the surviving oracle and explain which inputs and failures it covers.
+Equal line coverage or one detected mutation does not establish redundancy; use the contract audit below.
+
+### Choose the test structure
+
+- Use `TEST_CASE` for one concrete behavior and `TEMPLATE_TEST_CASE` when the same contract applies to several
+  types. Every type must represent a useful implementation or compatibility path.
+- Use `SECTION` for independent operations with common setup. Catch2 re-enters the test case for each section
+  path, so local setup is fresh. Put an assertion inside each leaf section: a check after the section does not
+  satisfy `--warn NoAssertions`. Keep sequential operations together when their interaction is the contract.
+- Use `TEST_CASE_METHOD` or `TEMPLATE_TEST_CASE_METHOD` when several cases need the same nontrivial setup or
+  resource lifetime. Prefer an existing blueprint or a local setup expression for simple construction.
+  Fixtures own per-test state; avoid shared mutable state and configurable fixture hierarchies.
+  Catch2's typed fixture macros expand to C arrays flagged by clang-tidy; use `TEMPLATE_TEST_CASE` with
+  a local fixture object for typed setup.
+- Use `GENERATE` and table generators for independent input/expected-output rows. Keep related values in one
+  row: separate generators create a Cartesian product. Place generators inside the section that needs them.
+  Keep loops for state transitions and bounded failure sweeps whose next step depends on the previous result.
+- Name cases and sections after behavior. Use `DYNAMIC_SECTION` for readable generated case names, `CAPTURE`
+  for input values, and `INFO` for context that an assertion cannot show. Diagnostics must identify a failing
+  row without requiring successful-assertion output.
+
+See Catch2's [sections](https://catch2-temp.readthedocs.io/en/latest/test-cases-and-sections.html),
+[fixtures](https://catch2-temp.readthedocs.io/en/latest/test-fixtures.html),
+[generators](https://catch2-temp.readthedocs.io/en/latest/generators.html), and
+[diagnostics](https://catch2-temp.readthedocs.io/en/latest/logging.html).
+
+### Choose the assertion
+
+- Use `REQUIRE` before dereferencing, indexing, or querying an object whose existence is a prerequisite.
+  Use `CHECK` for independent observations so one failure does not hide other useful diagnostics.
+- Use direct expressions and `CHECK_FALSE`/`REQUIRE_FALSE` for negative predicates. Separate independent
+  conditions instead of hiding them inside a parenthesized `&&` expression.
+- Use `CHECK_THROWS_AS` or `REQUIRE_THROWS_AS` for an exception-type contract. Check the state after a rejected
+  mutation. Match exception text only when callers rely on that text.
+- Compare complete collections. `RangeEquals` checks order; `UnorderedRangeEquals` ignores order but preserves
+  multiplicity. Converting observations to a set hides duplicate visits; membership-only callbacks can miss
+  omissions. For larger comparable collections, sort observations and expectations and use `RangeEquals` to
+  avoid quadratic permutation matching. Keep direct equality when it already expresses the contract clearly.
+- Use `STATIC_REQUIRE`, `STATIC_REQUIRE_FALSE`, or `static_assert` for compile-time contracts. Runtime cases
+  should still exercise observable behavior. Do not weaken an exact result into approximate equality.
+- Keep assertions, diagnostics, fixture construction, and generators outside active allocation-failure
+  injection. Reset the budget before checking results, including on unexpected exceptions. Preserve the
+  existing platform-specific `SKIP` and test the operation's rollback and recovery.
+
+See Catch2's [assertions](https://catch2-temp.readthedocs.io/en/latest/assertions.html) and
+[generic range matchers](https://catch2-temp.readthedocs.io/en/latest/matchers.html#generic-range-matchers).
+
+### Examples and verification
+
+The [gate-layout tests](https://github.com/cda-tum/fiction/blob/main/test/layouts/test_gate_layout.cpp)
+demonstrate these choices using real contracts:
+
+| Technique | Example |
+| --- | --- |
+| Typed local setup and independent sections | Object identity; copies isolating geometry, terminals, and connectivity |
+| Named table rows and diagnostics | Elementary truth tables; clocked neighbor degrees |
+| Complete unordered collections | Iteration over clocking zones; five-input objects and their sinks |
+| Ordered collections | Five-input source ports; sorted observations of sparse object iteration |
+| Compile-time assertions | Canonical layout aliases; borrowed clocking references; move exception specifications |
+| Fatal prerequisites and exception checks | Geometry clone and assignment failures |
+| Bounded fault sweeps and platform skips | Failed creation and name assignment |
+
+Run the affected executable with `--order rand --rng-seed 17 --warn NoAssertions`, repeat with other recorded
+seeds, and confirm that the intended cases ran. Use CTest for normal integration. Compare runtime and compilation
+cost when adding type/value combinations, fixtures, or matchers. More assertions are not a quality target.
+See Catch2's [execution guidance](https://catch2-temp.readthedocs.io/en/latest/usage-tips.html).
+
+These examples do not cover every testing domain. Numerical tests need justified absolute, relative, or ULP
+tolerances using [floating-point matchers](https://catch2-temp.readthedocs.io/en/latest/comparing-floating-point-numbers.html).
+Parser tests need independent valid and malformed inputs; constructing every input with the matching writer
+can conceal shared errors. Adopt these techniques through a separate contract audit of the relevant module.
 
 ## Contract Audits
 
