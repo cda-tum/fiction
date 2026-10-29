@@ -230,14 +230,17 @@ TEST_CASE("Physical equivalence extracts placed objects and rejects physical def
     mockturtle::names_view<mockturtle::klut_network> spec{};
     const auto                                       a = spec.create_pi("a");
     spec.create_po(a, "result");
-    gate_layout<cartesian_layout> lyt{{1, 2}, clocking::twoddwave()};
+    gate_layout<cartesian_layout> lyt{{1, 3}, clocking::twoddwave()};
     const auto                    pi = lyt.create_pi("a", {0, 0});
     const auto                    po = lyt.create_po(pi, "result", {0, 1});
     CHECK(equivalence_checking(spec, lyt) == eq_type::STRONG);
     SECTION("Non-adjacent output")
     {
-        lyt.move_object(po, {0, 10});
-        CHECK(equivalence_checking(spec, lyt) == eq_type::NO);
+        lyt.move_object(po, {0, 2});
+        equivalence_checking_stats stats{};
+        CHECK(equivalence_checking(spec, lyt, &stats) == eq_type::NO);
+        CHECK(stats.impl_drv_stats.report["Non adjacent connections"].size() == 2);
+        CHECK(stats.impl_drv_stats.report["Objects outside extent"].empty());
     }
     SECTION("Disconnected output")
     {

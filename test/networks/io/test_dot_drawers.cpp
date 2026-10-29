@@ -1166,6 +1166,9 @@ TEST_CASE("Colored DOT drawers preserve node and edge palettes", "[dot-drawers]"
         CHECK(output.str().find(
                   fmt::format("{} -> {} [style=solid, color=\"{}\"]", colors.node_to_index(colors.get_node(a)),
                               colors.node_to_index(colors.get_node(gate)), edge_color)) != std::string::npos);
+        CHECK(output.str().find(fmt::format("{} -> {} [style=solid, color=\"black\"]",
+                                            colors.node_to_index(colors.get_node(b)),
+                                            colors.node_to_index(colors.get_node(gate)))) != std::string::npos);
         CHECK(output.str().find(fmt::format("label=\"c: {}\"", color)) != std::string::npos);
     }
 }

@@ -130,5 +130,6 @@ TEST_CASE("DRVs visit objects outside the zero-origin extent", "[drv][placed-obj
     lyt.create_po(pi, "result", {10, -2});
     const auto stats = get_drvs(lyt);
     CHECK(stats.report["Non adjacent connections"].size() == 2);
+    CHECK(stats.report["Objects outside extent"].size() == 2);
     CHECK(stats.drvs >= 1);
 }
