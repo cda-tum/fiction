@@ -87,13 +87,12 @@ Args:
         nb::arg("unify_outputs")           = fiction::synthesis::network_balancing_params{}.unify_outputs,
         nb::arg("buffer_constant_outputs") = fiction::synthesis::network_balancing_params{}.buffer_constant_outputs,
         R"doc(Check whether network paths are balanced.
-Set unify_outputs to require every output at the same logic depth.
+Set unify_outputs to compare output depths.
 
 Args:
     on_progress: Accepted without emitting progress reports.
-    unify_outputs: Flag to indicate that all output nodes should be in the same rank.
-    buffer_constant_outputs: Whether outputs driven by a constant receive a buffer chain when unifying outputs;
-        set to False for flows that do not place constants, which then also ignore them in the check.
+    unify_outputs: Require the selected outputs to have equal logic depth.
+    buffer_constant_outputs: Include constant-driven outputs when unify_outputs is True.
 
 Raises:
     MemoryError: If allocating depth information or output levels fails.

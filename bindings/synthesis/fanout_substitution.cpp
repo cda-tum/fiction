@@ -111,14 +111,14 @@ Args:
         nb::arg("degree")    = fiction::synthesis::fanout_substitution_params{}.degree,
         nb::arg("threshold") = fiction::synthesis::fanout_substitution_params{}.threshold,
         nb::arg("seed")      = fiction::synthesis::fanout_substitution_params{}.seed,
-        R"doc(Check whether every network node respects the keyword fanout limits.
+        R"doc(Check whether nonconstant network nodes respect the keyword fanout limits.
 
 Args:
     on_progress: Accepted without emitting progress reports.
-    strategy: Substitution strategy of high-degree fanout networks (depth-first vs. breadth-first).
-    degree: Maximum output degree of each fan-out node. Must be at least two.
-    threshold: Maximum number of outputs any gate is allowed to have before substitution applies. Must be at least one.
-    seed: Random seed; None selects a fresh random seed.
+    strategy: Accepted without affecting this check.
+    degree: Maximum output degree of each fanout node.
+    threshold: Maximum output degree of each non-fanout node.
+    seed: Accepted without affecting this check.
 )doc");
 }
 
