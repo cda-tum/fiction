@@ -140,15 +140,19 @@ TEST_CASE("Unavoidable crossings are charged one crossing gate each plus the pad
 
 TEST_CASE("Levels with more crossings than allowed are not costed", "[crossing-cost]")
 {
+    const auto [limit, expected_cost] =
+        GENERATE(table<uint32_t, uint64_t>({{0, std::numeric_limits<uint64_t>::max()}, {1, 18}}));
+    CAPTURE(limit, expected_cost);
+
     const auto ranked = rank(single_crossing_network());
 
     const auto          upper = ranked.get_ranks(1);
     std::vector<node_t> lower = ranked.get_ranks(0);
 
-    const crossing_gate_planarization_params cg_ps{.max_crossings_per_level = 0};
+    const crossing_gate_planarization_params cg_ps{.max_crossings_per_level = limit};
 
     const auto result = synthesis::detail::crossing_cost(ranked, upper, lower, 32, cg_ps);
 
-    CHECK(result.cost == std::numeric_limits<uint64_t>::max());
+    CHECK(result.cost == expected_cost);
     CHECK(result.num_crossings == 1);
 }
