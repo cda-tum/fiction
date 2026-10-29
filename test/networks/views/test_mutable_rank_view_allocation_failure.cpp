@@ -28,7 +28,6 @@
 #include <kitty/bit_operations.hpp>
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
-#include <kitty/operators.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
 
 #include <cstddef>
@@ -170,12 +169,10 @@ TEST_CASE("Rank copies propagate allocation failure and preserve the source", "[
             if (all_ranks)
             {
                 CHECK(ranks == expected);
-                ranks.clear();
             }
             else
             {
                 CHECK(rank == expected[1]);
-                rank.clear();
             }
         }
         CHECK(ranked.check_validity());
@@ -205,11 +202,11 @@ TEST_CASE("Ranked virtual-PI removal propagates allocation failure and preserves
         const auto                             alias = ntk.create_virtual_pi(a);
         const auto                             gate  = ntk.create_and(alias, b);
         ntk.create_po(gate);
-        mutable_rank_view                                        ranked{ntk};
+        const mutable_rank_view                                  ranked{ntk};
         const std::vector<std::vector<technology_network::node>> expected{
             {ntk.get_node(a), ntk.get_node(b), ntk.get_node(alias)},
             {ntk.get_node(gate)}};
-        std::optional<decltype(ranked)> result{};
+        std::optional<decltype(delete_virtual_pis(ranked))> result{};
         allocation_budget = failure;
         try
         {
