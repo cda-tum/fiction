@@ -488,9 +488,7 @@ struct throwing_depth_cost : mockturtle::unit_cost<technology_network>
     /** @brief Copies unit costs. */
     throwing_depth_cost(const throwing_depth_cost&) = default;
     /** @brief Reports move failure. @throws std::runtime_error Always. */
-    // The regression requires a throwing move constructor.
-    // NOLINTNEXTLINE(bugprone-exception-escape,cppcoreguidelines-noexcept-move-operations)
-    throwing_depth_cost(throwing_depth_cost&&)
+    throwing_depth_cost(throwing_depth_cost&&) noexcept(false)
     {
         throw std::runtime_error{"cost move"};
     }

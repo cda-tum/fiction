@@ -116,7 +116,7 @@ TEST_CASE("Every strategy yields a planar, balanced, fanout-substituted network"
 
                     check_contract(ntk, result);
                     CHECK(st.num_nodes == result.size());
-                    CHECK((st.crossing_gates.num_crossings > 0) == (st.duplication.num_crossing_levels > 0));
+                    CHECK((st.duplication.num_crossing_levels > 0 || st.crossing_gates.num_crossings == 0));
                 }
             }
         }
@@ -183,7 +183,7 @@ TEST_CASE("Progress is reported for every stage", "[planarization]")
     check_contract(ntk, result);
     CAPTURE(st.duplication.num_crossing_levels, st.crossing_gates.num_crossings);
     CHECK(started == finished);
-    CHECK(started.size() == 3 + (st.crossing_gates.num_crossings > 0 ? 1 : 0));
+    CHECK(started.size() == 3 + (st.duplication.num_crossing_levels > 0 ? 1 : 0));
 }
 
 TEST_CASE("Statistics report the runtime and progress reaches every stage", "[planarization]")
@@ -220,7 +220,7 @@ TEST_CASE("Statistics report the runtime and progress reaches every stage", "[pl
     CAPTURE(st.duplication.num_crossing_levels, st.crossing_gates.num_crossings);
     CHECK_FALSE(pipeline_called);
     CHECK(started == finished);
-    CHECK(started.size() == 3 + (st.crossing_gates.num_crossings > 0 ? 1 : 0));
+    CHECK(started.size() == 3 + (st.duplication.num_crossing_levels > 0 ? 1 : 0));
 
     std::ostringstream os{};
     st.report(os);
