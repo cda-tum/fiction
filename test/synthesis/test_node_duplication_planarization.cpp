@@ -17,6 +17,7 @@
 
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
@@ -225,8 +226,22 @@ TEST_CASE("Random primary output order with a fixed seed", "[node-duplication-pl
 
 TEST_CASE("Progress is reported once per level", "[node-duplication-planarization]")
 {
-    const auto ntk    = blueprints::full_adder_network<mockturtle::aig_network>();
+    const auto direct_outputs = GENERATE(false, true);
+    CAPTURE(direct_outputs);
+    auto ntk = blueprints::full_adder_network<mockturtle::aig_network>();
+    if (direct_outputs)
+    {
+        ntk          = {};
+        const auto a = ntk.create_pi();
+        const auto b = ntk.create_pi();
+        ntk.create_po(a);
+        ntk.create_po(b);
+    }
     const auto ranked = prepare(ntk);
+    if (direct_outputs)
+    {
+        REQUIRE(ranked.depth() == 0);
+    }
 
     std::vector<std::size_t> done_values{};
     std::size_t              total = 0;

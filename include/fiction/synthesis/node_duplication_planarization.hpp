@@ -522,7 +522,7 @@ class node_duplication_planarization_impl
         const auto pos = output_level();
 
         levels.push_back(pos);
-        progress.advance();
+        progress.advance(ntk.depth() == 0 ? 0 : 1);
 
         // outputs that inputs drive directly form the only level; there is nothing below them to order
         if (!is_final_level(pos))

@@ -699,6 +699,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Node-duplication planarization reports bounded progress for outputs driven directly by inputs.
   - `is_balanced` now propagates allocation failures instead of terminating.
   - `is_fanout_substituted` now accepts progress callbacks whose copies can throw.
   - `virtual_miter` now preserves EXODC output relations for integer-signal destinations.
