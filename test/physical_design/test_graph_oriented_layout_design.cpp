@@ -234,6 +234,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
              {blueprints::mux21_network<technology_network>(), blueprints::inverter_network<technology_network>(),
               blueprints::parity_network<technology_network>()})
         {
+            CAPTURE(network.num_pis());
             const auto layout = graph_oriented_layout_design(network, params, &stats);
             REQUIRE(layout.has_value());
             const auto& checked_layout = required_value(layout);
