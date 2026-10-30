@@ -279,15 +279,27 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
         post_layout_optimization(layout, params, &stats);
         /** @brief Object at the position whose inverter has been moved. */
         const auto planar_object = layout.find_object({1, 0});
-        REQUIRE(planar_object.has_value());
-        CHECK_FALSE(layout.is_inv(planar_object.value()));
+        if (planar_object.has_value())
+        {
+            CHECK_FALSE(layout.is_inv(planar_object.value()));
+        }
+        else
+        {
+            FAIL("Expected an object at (1, 0) after planar optimization");
+        }
 
         params.planar_optimization = false;
         post_layout_optimization(layout, params, &stats);
         /** @brief Object at the position whose inverter has been restored. */
         const auto crossing_object = layout.find_object({1, 0});
-        REQUIRE(crossing_object.has_value());
-        CHECK(layout.is_inv(crossing_object.value()));
+        if (crossing_object.has_value())
+        {
+            CHECK(layout.is_inv(crossing_object.value()));
+        }
+        else
+        {
+            FAIL("Expected an object at (1, 0) after crossing optimization");
+        }
     }
 }
 
