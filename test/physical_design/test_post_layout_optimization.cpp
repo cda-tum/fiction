@@ -16,7 +16,11 @@
  * @author Jan Drewniok (Drewniok)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
@@ -35,32 +39,43 @@
 #include <fiction/types.hpp>
 
 #include <mockturtle/networks/aig.hpp>
-#include <mockturtle/utils/stopwatch.hpp>
 
-#include <algorithm>
 #include <cstdint>
 #include <limits>
 #include <stdexcept>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::networks;
 using namespace fiction::physical_design;
 
+/**
+ * @brief Checks optimization equivalence and statistics for a placed network.
+ * @tparam Lyt Layout type.
+ * @tparam Ntk Logic network type.
+ * @param ntk Network to place and optimize.
+ */
 template <typename Lyt, typename Ntk>
 static void check_layout_equiv(const Ntk& ntk)
 {
     auto layout = orthogonal<typename Lyt::coordinate_layout>(
         fiction::synthesis::convert_network<named_technology_network>(ntk), {});
 
+    const auto                     width_before  = layout.width();
+    const auto                     height_before = layout.height();
     post_layout_optimization_stats stats{};
     post_layout_optimization(layout, {}, &stats);
 
     check_eq(ntk, layout);
 
-    CHECK(mockturtle::to_seconds(stats.time_total) > 0);
+    CHECK(stats.x_size_before == width_before);
+    CHECK(stats.y_size_before == height_before);
+    CHECK(stats.x_size_after == layout.width());
+    CHECK(stats.y_size_after == layout.height());
 }
 
+/** @brief Checks distinct network topologies independently. @tparam Lyt Layout type. */
 template <typename Lyt>
 static void check_layout_equiv_all()
 {
@@ -194,16 +209,16 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
 
     SECTION("Maximum gate relocations")
     {
-        for (int64_t max_gate_relocations = 0; max_gate_relocations < 10; max_gate_relocations++)
-        {
-            auto layout = orthogonal<cartesian_layout>(blueprints::mux21_network<technology_network>(), {});
+        const auto max_gate_relocations = GENERATE(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u, 8u, 9u);
+        CAPTURE(max_gate_relocations);
+        const auto ntk    = blueprints::mux21_network<technology_network>();
+        auto       layout = orthogonal<cartesian_layout>(ntk);
 
-            post_layout_optimization_stats        stats{};
-            const post_layout_optimization_params params{.max_gate_relocations = max_gate_relocations};
-            post_layout_optimization(layout, params, &stats);
+        post_layout_optimization_stats        stats{};
+        const post_layout_optimization_params params{.max_gate_relocations = max_gate_relocations};
+        post_layout_optimization(layout, params, &stats);
 
-            check_eq(blueprints::mux21_network<technology_network>(), layout);
-        }
+        check_eq(ntk, layout);
     }
 
     SECTION("Optimize POs only")
@@ -261,57 +276,60 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
         post_layout_optimization(layout, params, &stats);
         /** @brief Object at the position whose inverter has been moved. */
         const auto planar_object = layout.find_object({1, 0});
-        CHECK((planar_object.has_value() && !layout.is_inv(*planar_object)));
+        REQUIRE(planar_object.has_value());
+        CHECK_FALSE(layout.is_inv(planar_object.value()));
 
         params.planar_optimization = false;
         post_layout_optimization(layout, params, &stats);
         /** @brief Object at the position whose inverter has been restored. */
         const auto crossing_object = layout.find_object({1, 0});
-        CHECK((crossing_object.has_value() && layout.is_inv(*crossing_object)));
+        REQUIRE(crossing_object.has_value());
+        CHECK(layout.is_inv(crossing_object.value()));
     }
 }
 
 TEST_CASE("Wrong clocking scheme", "[post-layout-optimization]")
 {
-    auto layout    = blueprints::use_and_gate_layout<cartesian_gate_layout>();
-    auto obstr_lyt = cartesian_gate_layout(layout);
-
-    SECTION("Call functions")
-    {
-        post_layout_optimization_stats stats_wrong_clocking_scheme{};
-
-        CHECK_THROWS_AS(post_layout_optimization(obstr_lyt, {}, &stats_wrong_clocking_scheme), std::invalid_argument);
-    }
+    auto layout = blueprints::use_and_gate_layout<cartesian_gate_layout>();
+    CHECK_THROWS_AS(post_layout_optimization(layout), std::invalid_argument);
 }
 
 TEST_CASE("Optimization accepts interior terminals", "[post-layout-optimization]")
 {
     SECTION("Interior primary input")
     {
-        auto layout = blueprints::pi_not_in_border_optimization_layout<cartesian_gate_layout>();
-        CHECK_NOTHROW(post_layout_optimization(layout));
+        auto       layout   = blueprints::pi_not_in_border_optimization_layout<cartesian_gate_layout>();
+        const auto original = layout;
+        post_layout_optimization(layout);
+        check_eq(original, layout);
     }
 
     SECTION("Interior primary output")
     {
-        auto layout = blueprints::po_not_in_border_optimization_layout<cartesian_gate_layout>();
-        CHECK_NOTHROW(post_layout_optimization(layout));
+        auto       layout   = blueprints::po_not_in_border_optimization_layout<cartesian_gate_layout>();
+        const auto original = layout;
+        post_layout_optimization(layout);
+        check_eq(original, layout);
     }
 
     SECTION("PO have to be moved to borders during optimization")
     {
-        auto layout = blueprints::po_have_to_be_moved_to_border_optimization_layout<cartesian_gate_layout>();
+        auto       layout   = blueprints::po_have_to_be_moved_to_border_optimization_layout<cartesian_gate_layout>();
+        const auto original = layout;
         post_layout_optimization(layout);
 
+        check_eq(original, layout);
+        REQUIRE(layout.num_pis() == original.num_pis());
+        REQUIRE(layout.num_pos() == original.num_pos());
         layout.foreach_pi(
-            [&layout](const auto& pi) noexcept
+            [&layout](const auto& pi)
             {
                 const auto tile = layout.get_tile(pi);
                 CHECK((layout.is_at_northern_border(tile) || layout.is_at_western_border(tile)));
             });
 
         layout.foreach_po(
-            [&layout](const auto& po) noexcept
+            [&layout](const auto& po)
             {
                 const auto tile = layout.get_tile(po);
                 CHECK((layout.is_at_eastern_border(tile) || layout.is_at_southern_border(tile)));
@@ -384,14 +402,14 @@ TEST_CASE("Post-layout rerouting preserves noncommutative input order", "[post-l
     const auto                            po    = layout.create_po(gate, "f", {3, 3});
     const post_layout_optimization_params params{.max_gate_relocations = 20};
     post_layout_optimization(layout, params);
-    CHECK(layout.contains(gate));
-    CHECK(layout.contains(po));
+    REQUIRE(layout.contains(gate));
+    REQUIRE(layout.contains(po));
     CHECK(layout.is_lt(gate));
-    const auto objectives = extract_routing_objectives(layout);
-    CHECK(std::ranges::find(objectives, routing_objective{layout.get_tile(a), layout.get_tile(gate), 0}) !=
-          objectives.end());
-    CHECK(std::ranges::find(objectives, routing_objective{layout.get_tile(b), layout.get_tile(gate), 1}) !=
-          objectives.end());
+    const auto                           objectives = extract_routing_objectives(layout);
+    const std::vector<routing_objective> expected{{layout.get_tile(a), layout.get_tile(gate), 0},
+                                                  {layout.get_tile(b), layout.get_tile(gate), 1},
+                                                  {layout.get_tile(gate), layout.get_tile(po), 0}};
+    CHECK_THAT(objectives, Catch::Matchers::UnorderedRangeEquals(expected));
     CHECK(layout.area() <= 16);
 }
 
