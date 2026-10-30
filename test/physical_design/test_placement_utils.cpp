@@ -11,8 +11,10 @@
 /**
  * @file
  * @brief Tests for placement functions, ordered input ports, and constant reduction.
+ * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
@@ -30,6 +32,7 @@
 #include <mockturtle/views/topo_view.hpp>
 
 #include <stdexcept>
+#include <tuple>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -60,8 +63,10 @@ TEST_CASE("Placement reduces a constant input without changing variable order", 
 TEST_CASE("Placement maps retain named-view node IDs", "[placement-utils]")
 {
     /** @brief Gate constructor selected before each independent network fixture. */
-    const auto create_comparison = GENERATE(&technology_network::create_lt, &technology_network::create_le,
-                                            &technology_network::create_gt, &technology_network::create_ge);
+    const auto [comparison, create_comparison] = GENERATE(
+        std::make_tuple("lt", &technology_network::create_lt), std::make_tuple("le", &technology_network::create_le),
+        std::make_tuple("gt", &technology_network::create_gt), std::make_tuple("ge", &technology_network::create_ge));
+    CAPTURE(comparison);
     named_technology_network ntk{};
     ntk.set_network_name("named_spec");
     const auto a = ntk.create_pi("left");

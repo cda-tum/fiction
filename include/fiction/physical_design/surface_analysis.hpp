@@ -62,6 +62,7 @@ using surface_black_list =
  * @param charged_defect_spacing_overwrite Overrides the spacing charged defects keep SiDBs at.
  * @param neutral_defect_spacing_overwrite Overrides the spacing neutral defects keep SiDBs at.
  * @return The black list.
+ * @throws std::bad_alloc If allocation fails while preparing or building the black list.
  */
 template <typename GateLibrary, typename Geometry>
     requires std::same_as<typename GateLibrary::layout, sidb::layout> &&
@@ -130,7 +131,7 @@ surface_analysis(const fiction::layouts::gate_layout<Geometry>& gate_lyt, const 
     };
 
     gate_lyt.foreach_tile(
-        [&](const auto& t) noexcept
+        [&](const auto& t)
         {
             for (const auto& impl : gate_implementations)
             {

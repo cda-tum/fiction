@@ -15,10 +15,16 @@
  * @author Jan Drewniok (Drewniok)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
+
+#include "utils/allocation_failure.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/gate_layout.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/physical_design/surface_analysis.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/fcn/cell_ports.hpp>
@@ -30,6 +36,11 @@
 
 #include <kitty/dynamic_truth_table.hpp>
 
+#include <cstddef>
+#include <initializer_list>
+#include <new>
+#include <vector>
+
 using namespace fiction;
 using namespace fiction::fcn;
 using namespace fiction::layouts;
@@ -37,6 +48,7 @@ using namespace fiction::physical_design;
 using namespace fiction::sidb;
 using namespace fiction::sidb::model;
 using namespace fiction::synthesis;
+using namespace fiction::test;
 
 /**
  * This is simply a test library, its gates do not represent real entities that would work when fabricated.
@@ -84,12 +96,6 @@ class dummy_gate_library : public gate_library<sidb::layout, 3, 3>
     }})};
 };
 
-template <typename TTMap>
-static bool contains_tt(const TTMap& m, const kitty::dynamic_truth_table& elem) noexcept
-{
-    return m.count(elem) > 0;
-}
-
 /** @brief SiDB gate library without implementation or port lookup. */
 struct empty_gate_library : gate_library<sidb::layout, 3, 3>
 {};
@@ -132,11 +138,25 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
     static const port_list<port_position> line_ports{{port_position(0, 1)}, {port_position(2, 1)}};
     static const port_list<port_position> y_ports{{port_position(0, 0), port_position(0, 2)}, {port_position(2, 1)}};
 
+    /** @brief Complete function and port lists for each checked dummy-library tile. */
+    const surface_black_list<port_position>::mapped_type expected{{create_id_tt(), {line_ports}},
+                                                                  {create_and_tt(), {y_ports}}};
+    /** @brief Checks the original tile samples without discarding repeated port lists. */
+    const auto check_tiles = [&](const auto& black_list, const std::initializer_list<layout_base::coordinate> tiles)
+    {
+        for (const auto& tile : tiles)
+        {
+            CAPTURE(tile);
+            REQUIRE(black_list.contains(tile));
+            CHECK(black_list.at(tile) == expected);
+        }
+    };
+
     layout defect_layout{cell_lyt};
 
     SECTION("defect-free")
     {
-        static const auto black_list = surface_analysis<dummy_gate_library>(gate_lyt, defect_layout);
+        const auto black_list = surface_analysis<dummy_gate_library>(gate_lyt, defect_layout);
 
         CHECK(black_list.empty());
     }
@@ -144,51 +164,21 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
     {
         defect_layout.assign_defect(site_at_row(6, 3), defect{defect_type::SI_VACANCY});
 
-        static const auto black_list = surface_analysis<dummy_gate_library>(gate_lyt, defect_layout);
+        const auto black_list = surface_analysis<dummy_gate_library>(gate_lyt, defect_layout);
 
         CHECK(black_list.size() == 12);
 
-        REQUIRE(black_list.at({1, 0}).size() == 2);
-        CHECK(contains_tt(black_list.at({1, 0}), create_id_tt()));
-        CHECK(contains_tt(black_list.at({1, 0}), create_and_tt()));
-        CHECK(black_list.at({1, 0}).at(create_id_tt()).front() == line_ports);
-        CHECK(black_list.at({1, 0}).at(create_and_tt()).front() == y_ports);
-
-        REQUIRE(black_list.at({2, 0}).size() == 2);
-        CHECK(contains_tt(black_list.at({2, 0}), create_id_tt()));
-        CHECK(contains_tt(black_list.at({2, 0}), create_and_tt()));
-        CHECK(black_list.at({2, 0}).at(create_id_tt()).front() == line_ports);
-        CHECK(black_list.at({2, 0}).at(create_and_tt()).front() == y_ports);
-
-        REQUIRE(black_list.at({1, 1}).size() == 2);
-        CHECK(contains_tt(black_list.at({1, 1}), create_id_tt()));
-        CHECK(contains_tt(black_list.at({1, 1}), create_and_tt()));
-        CHECK(black_list.at({1, 1}).at(create_id_tt()).front() == line_ports);
-        CHECK(black_list.at({1, 1}).at(create_and_tt()).front() == y_ports);
-
-        REQUIRE(black_list.at({2, 1}).size() == 2);
-        CHECK(contains_tt(black_list.at({2, 1}), create_id_tt()));
-        CHECK(contains_tt(black_list.at({2, 1}), create_and_tt()));
-        CHECK(black_list.at({2, 1}).at(create_id_tt()).front() == line_ports);
-        CHECK(black_list.at({2, 1}).at(create_and_tt()).front() == y_ports);
-
-        REQUIRE(black_list.at({3, 1}).size() == 2);
-        CHECK(contains_tt(black_list.at({3, 1}), create_and_tt()));
-        CHECK(black_list.at({3, 1}).at(create_and_tt()).front() == y_ports);
+        check_tiles(black_list, {{1, 0}, {2, 0}, {1, 1}, {2, 1}, {3, 1}});
     }
     SECTION("single uncharged defect")
     {
         defect_layout.assign_defect(site_at_row(1, 1), defect{defect_type::SILOXANE});
 
-        static const auto black_list = surface_analysis<dummy_gate_library>(gate_lyt, defect_layout);
+        const auto black_list = surface_analysis<dummy_gate_library>(gate_lyt, defect_layout);
 
         CHECK(black_list.size() == 1);
 
-        REQUIRE(black_list.at({0, 0}).size() == 2);
-        CHECK(contains_tt(black_list.at({0, 0}), create_id_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_and_tt()));
-        CHECK(black_list.at({0, 0}).at(create_id_tt()).front() == line_ports);
-        CHECK(black_list.at({0, 0}).at(create_and_tt()).front() == y_ports);
+        check_tiles(black_list, {{0, 0}});
     }
     SECTION("multi-defect")
     {
@@ -198,57 +188,11 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
         defect_layout.assign_defect(site_at_row(7, 5), defect{defect_type::RAISED_SI});
         defect_layout.assign_defect(site_at_row(7, 6), defect{defect_type::RAISED_SI});
 
-        static const auto black_list = surface_analysis<dummy_gate_library>(gate_lyt, defect_layout);
+        const auto black_list = surface_analysis<dummy_gate_library>(gate_lyt, defect_layout);
 
         CHECK(black_list.size() == 12);
 
-        REQUIRE(black_list.at({1, 0}).size() == 2);
-        CHECK(contains_tt(black_list.at({1, 0}), create_id_tt()));
-        CHECK(contains_tt(black_list.at({1, 0}), create_and_tt()));
-        CHECK(black_list.at({1, 0}).at(create_id_tt()).front() == line_ports);
-        CHECK(black_list.at({1, 0}).at(create_and_tt()).front() == y_ports);
-
-        REQUIRE(black_list.at({2, 0}).size() == 2);
-        CHECK(contains_tt(black_list.at({2, 0}), create_id_tt()));
-        CHECK(contains_tt(black_list.at({2, 0}), create_and_tt()));
-        CHECK(black_list.at({2, 0}).at(create_id_tt()).front() == line_ports);
-        CHECK(black_list.at({2, 0}).at(create_and_tt()).front() == y_ports);
-
-        REQUIRE(black_list.at({3, 0}).size() == 2);
-        CHECK(contains_tt(black_list.at({3, 0}), create_and_tt()));
-        CHECK(black_list.at({3, 0}).at(create_and_tt()).front() == y_ports);
-
-        REQUIRE(black_list.at({1, 1}).size() == 2);
-        CHECK(contains_tt(black_list.at({1, 1}), create_id_tt()));
-        CHECK(contains_tt(black_list.at({1, 1}), create_and_tt()));
-        CHECK(black_list.at({1, 1}).at(create_id_tt()).front() == line_ports);
-        CHECK(black_list.at({1, 1}).at(create_and_tt()).front() == y_ports);
-
-        REQUIRE(black_list.at({2, 1}).size() == 2);
-        CHECK(contains_tt(black_list.at({2, 1}), create_id_tt()));
-        CHECK(contains_tt(black_list.at({2, 1}), create_and_tt()));
-        CHECK(black_list.at({2, 1}).at(create_id_tt()).front() == line_ports);
-        CHECK(black_list.at({2, 1}).at(create_and_tt()).front() == y_ports);
-
-        REQUIRE(black_list.at({3, 1}).size() == 2);
-        CHECK(contains_tt(black_list.at({3, 1}), create_and_tt()));
-        CHECK(black_list.at({3, 1}).at(create_and_tt()).front() == y_ports);
-
-        REQUIRE(black_list.at({0, 2}).size() == 2);
-        CHECK(contains_tt(black_list.at({0, 2}), create_and_tt()));
-        CHECK(black_list.at({0, 2}).at(create_and_tt()).front() == y_ports);
-
-        REQUIRE(black_list.at({1, 2}).size() == 2);
-        CHECK(contains_tt(black_list.at({1, 2}), create_id_tt()));
-        CHECK(contains_tt(black_list.at({1, 2}), create_and_tt()));
-        CHECK(black_list.at({1, 2}).at(create_id_tt()).front() == line_ports);
-        CHECK(black_list.at({1, 2}).at(create_and_tt()).front() == y_ports);
-
-        REQUIRE(black_list.at({2, 2}).size() == 2);
-        CHECK(contains_tt(black_list.at({2, 2}), create_id_tt()));
-        CHECK(contains_tt(black_list.at({2, 2}), create_and_tt()));
-        CHECK(black_list.at({2, 2}).at(create_id_tt()).front() == line_ports);
-        CHECK(black_list.at({2, 2}).at(create_and_tt()).front() == y_ports);
+        check_tiles(black_list, {{1, 0}, {2, 0}, {3, 0}, {1, 1}, {2, 1}, {3, 1}, {0, 2}, {1, 2}, {2, 2}});
     }
 }
 
@@ -261,9 +205,21 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
 
     layout defect_layout{cell_lyt};
 
+    /** @brief Collects all blocked functions without imposing map iteration order. */
+    const auto blocked_functions = [](const auto& functions)
+    {
+        std::vector<kitty::dynamic_truth_table> keys{};
+        keys.reserve(functions.size());
+        for (const auto& [function, ports] : functions)
+        {
+            keys.push_back(function);
+        }
+        return keys;
+    };
+
     SECTION("defect-free")
     {
-        static const auto black_list = surface_analysis<bestagon_library>(gate_lyt, defect_layout);
+        const auto black_list = surface_analysis<bestagon_library>(gate_lyt, defect_layout);
 
         CHECK(black_list.empty());
     }
@@ -271,31 +227,28 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
     {
         defect_layout.assign_defect(site_at_row(30, 45), defect{defect_type::SI_VACANCY});
 
-        static const auto black_list = surface_analysis<bestagon_library>(gate_lyt, defect_layout);
+        const auto black_list = surface_analysis<bestagon_library>(gate_lyt, defect_layout);
 
         CHECK(black_list.size() == 1);
 
-        REQUIRE(black_list.at({0, 0}).size() == 8);
-        CHECK(contains_tt(black_list.at({0, 0}), create_id_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_not_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_and_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_or_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_nand_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_nor_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_xor_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_xnor_tt()));
+        REQUIRE(black_list.contains({0, 0}));
+        CHECK_THAT(blocked_functions(black_list.at({0, 0})),
+                   Catch::Matchers::UnorderedRangeEquals(std::vector<kitty::dynamic_truth_table>{
+                       create_id_tt(), create_not_tt(), create_and_tt(), create_or_tt(), create_nand_tt(),
+                       create_nor_tt(), create_xor_tt(), create_xnor_tt()}));
     }
     SECTION("single uncharged defect")
     {
         defect_layout.assign_defect(site_at_row(30, 45), defect{defect_type::SILOXANE});
 
-        static const auto black_list = surface_analysis<bestagon_library>(gate_lyt, defect_layout);
+        const auto black_list = surface_analysis<bestagon_library>(gate_lyt, defect_layout);
 
         CHECK(black_list.size() == 1);
 
-        REQUIRE(black_list.at({0, 0}).size() == 2);
-        CHECK(contains_tt(black_list.at({0, 0}), create_not_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_id_tt()));
+        REQUIRE(black_list.contains({0, 0}));
+        CHECK_THAT(blocked_functions(black_list.at({0, 0})),
+                   Catch::Matchers::UnorderedRangeEquals(
+                       std::vector<kitty::dynamic_truth_table>{create_id_tt(), create_not_tt()}));
     }
     SECTION("multi-defect")
     {
@@ -305,15 +258,62 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
         defect_layout.assign_defect(site_at_row(45, 33), defect{defect_type::RAISED_SI});
         defect_layout.assign_defect(site_at_row(45, 34), defect{defect_type::RAISED_SI});
 
-        static const auto black_list = surface_analysis<bestagon_library>(gate_lyt, defect_layout);
+        const auto black_list = surface_analysis<bestagon_library>(gate_lyt, defect_layout);
 
         CHECK(black_list.size() == 1);
 
-        REQUIRE(black_list.at({0, 0}).size() == 8);
-        CHECK(contains_tt(black_list.at({0, 0}), create_id_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_not_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_or_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_xor_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_xnor_tt()));
+        REQUIRE(black_list.contains({0, 0}));
+        CHECK_THAT(blocked_functions(black_list.at({0, 0})),
+                   Catch::Matchers::UnorderedRangeEquals(std::vector<kitty::dynamic_truth_table>{
+                       create_id_tt(), create_not_tt(), create_and_tt(), create_or_tt(), create_nand_tt(),
+                       create_nor_tt(), create_xor_tt(), create_xnor_tt()}));
     }
+}
+
+TEST_CASE("Surface analysis propagates allocation failure and recovers", "[sidb-surface-analysis]")
+{
+    require_allocation_failure_support();
+    /** @brief Single tile with both dummy-library gates obstructed at their center cell. */
+    const cartesian_gate_layout gates{{1, 1, 1}};
+    /** @brief Defect canary that must survive every failed and successful analysis. */
+    sidb::layout surface{};
+    surface.assign_defect(site_at_row(1, 1), defect{defect_type::SILOXANE});
+    /** @brief Complete independently expected blacklist, including each gate's ports. */
+    const surface_black_list<port_position> expected{
+        {{0, 0},
+         {{create_id_tt(), {{{port_position(0, 1)}, {port_position(2, 1)}}}},
+          {create_and_tt(), {{{port_position(0, 0), port_position(0, 2)}, {port_position(2, 1)}}}}}}};
+    // Initialize the test library's static fixtures before injecting allocation failures.
+    CHECK(surface_analysis<dummy_gate_library>(gates, surface) == expected);
+    for (std::size_t failure{};; ++failure)
+    {
+        CAPTURE(failure);
+        REQUIRE(failure < ALLOCATION_FAILURE_ATTEMPT_LIMIT);
+        try
+        {
+            allocation_budget = failure;
+            const auto result = surface_analysis<dummy_gate_library>(gates, surface);
+            allocation_budget.reset();
+            CHECK(result == expected);
+            break;
+        }
+        catch (const std::bad_alloc&)
+        {
+            allocation_budget.reset();
+            CHECK(surface.num_defects() == 1);
+            CHECK(surface.get_defect(site_at_row(1, 1)).type == defect_type::SILOXANE);
+            CHECK(gates.is_empty());
+            CHECK(gates.get_extent() == layout_base::extent{1, 1, 1});
+        }
+        catch (...)
+        {
+            allocation_budget.reset();
+            throw;
+        }
+    }
+    CHECK(surface_analysis<dummy_gate_library>(gates, surface) == expected);
+    CHECK(surface.num_defects() == 1);
+    CHECK(surface.get_defect(site_at_row(1, 1)).type == defect_type::SILOXANE);
+    CHECK(gates.is_empty());
+    CHECK(gates.get_extent() == layout_base::extent{1, 1, 1});
 }

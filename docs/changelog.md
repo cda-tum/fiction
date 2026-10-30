@@ -249,6 +249,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Modernized physical-design helper tests with complete routing collections and independent solver rows.
   - Streamlined synthesis tests and strengthened clone, conversion, and gate-library checks.
   - Modernized path-finding tests with shared data rows, complete path comparisons, and cache reuse checks.
   - Geometry tests now compare complete coordinate and visitor results and share arrangement cases.
@@ -700,6 +701,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Algorithms:
 
   - Node-duplication planarization reports bounded progress for outputs driven directly by inputs.
+  - `surface_analysis` now propagates allocation failure while building its blacklist.
   - `is_balanced` now propagates allocation failures instead of terminating.
   - `is_fanout_substituted` now accepts progress callbacks whose copies can throw.
   - `virtual_miter` now preserves EXODC output relations for integer-signal destinations.
