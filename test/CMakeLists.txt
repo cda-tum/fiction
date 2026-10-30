@@ -52,7 +52,8 @@ set(ALLOCATION_FAILURE_TESTS
     test_routing_utils
     test_determine_clocking
     test_cell_writer_allocation_failure
-    test_mutable_rank_view_allocation_failure)
+    test_mutable_rank_view_allocation_failure
+    test_network_balancing_allocation_failure)
 get_target_property(ALLOCATION_FAILURE_LIBRARIES libfiction
                     INTERFACE_LINK_LIBRARIES)
 list(FILTER ALLOCATION_FAILURE_LIBRARIES EXCLUDE REGEX "jemalloc")
