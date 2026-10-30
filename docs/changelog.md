@@ -836,7 +836,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Network initialization, rank insertion and copying, and virtual-PI removal now propagate allocation failure.
     Recompute ranks after a failed insertion.
-  - Depth views support copy-only node costs and propagate move-construction failures.
+  - Depth-view construction supports copy-only node costs and propagates move-construction failures.
   - Gray-code iterators now index from their current position, compare positions, support copy assignment,
     and preserve 64-bit offsets and distances across the signed boundary.
   - Edge-color views now support clearing only node colors and clearing both node and edge colors.
