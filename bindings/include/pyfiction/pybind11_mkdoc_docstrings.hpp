@@ -13291,6 +13291,10 @@ Template Args:
 Returns:
     The black list.
 
+Raises:
+    MemoryError: If allocation fails while preparing or building the
+                 black list.
+
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_technology_constraints = R"doc(Target technologies.)doc";
