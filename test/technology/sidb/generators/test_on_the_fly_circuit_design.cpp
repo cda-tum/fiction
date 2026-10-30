@@ -15,8 +15,10 @@
  * @author Simon Hofmann (simon1hofmann)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "fiction/layouts/layout_base.hpp"
 
@@ -91,18 +93,19 @@ TEST_CASE("Circuit design honors both circuit and gate timeouts", "[on-the-fly-c
     CHECK(params.timeout == std::numeric_limits<uint64_t>::max());
     CHECK(gates.operational_params.timeout == std::numeric_limits<uint64_t>::max());
 
-    SECTION("Zero circuit budget expires with unlimited gate budgets")
+    /** @brief Correlated time budgets and whether progress includes the controlled delay. */
+    const auto [scenario, circuit_budget, gate_budget, delayed_progress] =
+        GENERATE(Catch::Generators::table<const char*, uint64_t, uint64_t, bool>(
+            {{"Zero circuit budget expires with unlimited gate budgets", 0, std::numeric_limits<uint64_t>::max(),
+              false},
+             {"Zero gate budget expires within a positive circuit budget", 10'000, 0, false},
+             {"Unlimited gate budgets cannot override a finite circuit budget", 20,
+              std::numeric_limits<uint64_t>::max(), true}}));
+    CAPTURE(scenario, circuit_budget, gate_budget, delayed_progress);
+    params.timeout                   = circuit_budget;
+    gates.operational_params.timeout = gate_budget;
+    if (delayed_progress)
     {
-        params.timeout = 0;
-    }
-    SECTION("Zero gate budget expires within a positive circuit budget")
-    {
-        params.timeout                   = 10'000;
-        gates.operational_params.timeout = 0;
-    }
-    SECTION("Unlimited gate budgets cannot override a finite circuit budget")
-    {
-        params.timeout    = 20;
         gates.on_progress = [](auto, auto, auto) { std::this_thread::sleep_for(std::chrono::milliseconds{25}); };
     }
 
