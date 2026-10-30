@@ -42,6 +42,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Crossing-cost sweeps avoid repeated edge-counter lookups.
+  - Physical-design solver tests check layout statistics and report failing parameter rows.
   - Modernized network-view tests with complete visitor checks, typed trait cases, and copy/move coverage.
   - Modernized network I/O and verification tests with independent cases and complete interface checks.
   - Added QCA SVG regression tests for colors, detail modes, tile labels, and file output.
