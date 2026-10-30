@@ -29,6 +29,8 @@
 
 #include <fmt/format.h>
 
+#include <ios>
+#include <ostream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -361,10 +363,11 @@ TEST_CASE("Abort on non-pin iNML layouts", "[qll]")
 /** @brief QLL propagates output-stream failures when the caller enables exceptions. */
 TEST_CASE("QLL propagates output-stream failures", "[qll]")
 {
-    /** @brief Bad output stream whose next insertion sets failbit. */
-    std::ostringstream stream{};
-    stream.exceptions(std::ios::failbit);
-    stream.clear(std::ios::badbit);
+    /** @brief Read-only buffer that rejects output. */
+    std::stringbuf buffer{std::ios::in};
+    /** @brief Stream that reports rejected writes as exceptions. */
+    std::ostream stream{&buffer};
+    stream.exceptions(std::ios::badbit);
 
     CHECK_THROWS_AS(write_qll_layout(qca::layout{}, stream), std::ios::failure);
 }
