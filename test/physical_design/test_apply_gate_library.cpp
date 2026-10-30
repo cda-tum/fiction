@@ -96,7 +96,7 @@ static_assert(!defective_on_the_fly_mappable<cartesian_gate_layout>);
 namespace
 {
 /**
- * @brief Checks dot counts and fixed dot tags while allowing designed LOGIC dots to move.
+ * @brief Checks dot counts and fixed dot tags, allowing LOGIC dots to move among defect-free sites.
  * @param layout_designed Mapped SiDB layout.
  * @param path_layout_correct SQD reference with the expected fixed interface and dot counts.
  */
@@ -112,10 +112,14 @@ void check_sidb_interface(const sidb::layout& layout_designed, const std::string
     layout_designed.foreach_dot(
         [&layout_correct, &layout_designed](const auto& c)
         {
+            CAPTURE(c.x, c.y, c.z);
             // Gates designed on-the-fly are not necessarily identical each time.
-            if (layout_designed.get_dot_tag(c) != dot_tag::LOGIC)
+            if (layout_designed.get_dot_tag(c) == dot_tag::LOGIC)
             {
-                CAPTURE(c.x, c.y, c.z);
+                CHECK(layout_designed.get_defect(c).type == defect_type::NONE);
+            }
+            else
+            {
                 CHECK(layout_designed.get_dot_tag(c) == layout_correct.get_dot_tag(c));
             }
         });
