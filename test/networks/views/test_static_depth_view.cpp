@@ -528,11 +528,17 @@ TEMPLATE_TEST_CASE("Depth views support copy-only and throwing cost construction
             return depth_ntk{std::move(copy)};
         };
         auto result = construct_result();
+        REQUIRE(result.num_pos() == 1);
+        if (!delete_alias)
+        {
+            CHECK(result.depth() == 1);
+            CHECK(result.level(result.get_node(result.po_at(0))) == 1);
+            CHECK(result.is_on_critical_path(result.get_node(result.po_at(0))));
+        }
         result.update_levels();
         const auto inputs = delete_alias ? 2u : 3u;
         REQUIRE(result.num_pis() == inputs);
         CHECK(result.num_virtual_pis() == (delete_alias ? 0u : 1u));
-        REQUIRE(result.num_pos() == 1);
         CHECK(result.depth() == 1);
         kitty::dynamic_truth_table expected{inputs};
         kitty::create_from_hex_string(expected, delete_alias ? "8" : "c0");
