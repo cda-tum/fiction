@@ -152,6 +152,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - `fanout_substitution` uses entropy only when no random seed is supplied.
   - Interface matching uses less temporary memory for named interfaces.
   - Combination generation avoids one allocation and copy per result.
   - SiDB domain sampling now stops once every grid point has been collected.
@@ -248,6 +249,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Code quality:
 
   - Modernized physical-design helper tests with complete routing collections and independent solver rows.
+  - Streamlined synthesis tests and strengthened clone, conversion, and gate-library checks.
   - Modernized path-finding tests with shared data rows, complete path comparisons, and cache reuse checks.
   - Geometry tests now compare complete coordinate and visitor results and share arrangement cases.
   - Parameter configurations now use C++20 designated initializers and `const` where possible.
@@ -697,6 +699,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Algorithms:
 
   - `surface_analysis` now propagates allocation failure while building its blacklist.
+  - `is_balanced` now propagates allocation failures instead of terminating.
+  - `is_fanout_substituted` now accepts progress callbacks whose copies can throw.
   - `virtual_miter` now preserves EXODC output relations for integer-signal destinations.
   - Combination generation now uses full-width position indices.
   - Kinks-rejected energy labels now count each matching charge distribution once, preserving degenerate-state

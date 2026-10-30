@@ -237,11 +237,7 @@ NtkDest convert_network(const NtkSrc& ntk)
 
     assert(ntk.is_combinational() && "Network has to be combinational");
 
-    detail::convert_network_impl<NtkDest, NtkSrc> p{ntk};
-
-    auto result = p.run();
-
-    return result;
+    return detail::convert_network_impl<NtkDest, NtkSrc>{ntk}.run();
 }
 
 }  // namespace fiction::synthesis
