@@ -95,7 +95,7 @@ TEST_CASE("Buffer chains are removed and only the needed buffers are re-inserted
 
     // the input is not balanced: x2 enters the gate directly
     const mutable_rank_view ranked{tec};
-    REQUIRE(!is_balanced(ranked));
+    REQUIRE_FALSE(is_balanced(ranked));
 
     const auto rebalanced = planar_rebalancing(ranked);
 
@@ -262,6 +262,7 @@ TEST_CASE("Progress is reported", "[planar-rebalancing]")
     check_contract(ntk, rebalanced);
     CHECK(total == 3);
     REQUIRE(!done.empty());
+    CHECK(done.front() == 0);
     CHECK(done.back() == total);
 }
 

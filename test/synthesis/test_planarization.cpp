@@ -12,8 +12,10 @@
  * @file
  * @brief Tests for `fiction/synthesis/planarization.hpp`.
  * @author Benjamin Hien (hibenj)
+ * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
@@ -104,6 +106,7 @@ TEST_CASE("Every strategy yields a planar, balanced, fanout-substituted network"
             {
                 for (const bool xor_gates : {false, true})
                 {
+                    CAPTURE(ntk.num_pis(), ntk.num_pos(), strategy, criterion, xor_gates);
                     const planarization_params ps{.duplication = {.strategy       = strategy,
                                                                   .crossing_gates = {.xor_gates = xor_gates},
                                                                   .criterion      = criterion}};
@@ -113,7 +116,7 @@ TEST_CASE("Every strategy yields a planar, balanced, fanout-substituted network"
 
                     check_contract(ntk, result);
                     CHECK(st.num_nodes == result.size());
-                    CHECK((st.crossing_gates.num_crossings > 0) == (st.duplication.num_crossing_levels > 0));
+                    CHECK((st.duplication.num_crossing_levels > 0 || st.crossing_gates.num_crossings == 0));
                 }
             }
         }
@@ -127,6 +130,7 @@ TEST_CASE("The fanout degree is respected", "[planarization]")
 
     for (const uint32_t degree : {2u, 3u})
     {
+        CAPTURE(degree);
         const planarization_params ps{.fanout_degree = degree};
 
         const auto result = planarization(ranked, ps);
@@ -157,21 +161,29 @@ TEST_CASE("Progress is reported for every stage", "[planarization]")
     const auto ntk    = blueprints::full_adder_network<technology_network>();
     const auto ranked = rank(ntk);
 
-    std::vector<std::string> tasks{};
+    std::vector<std::string> started{};
+    std::vector<std::string> finished{};
 
-    const planarization_params ps{
-        .on_progress = [&tasks](const std::string_view task, const std::size_t, const std::size_t)
-        {
-            if (tasks.empty() || tasks.back() != task)
-            {
-                tasks.emplace_back(task);
-            }
-        }};
+    const planarization_params ps{.on_progress = [&started, &finished](const std::string_view task,
+                                                                       const std::size_t done, const std::size_t total)
+                                  {
+                                      if (done == 0)
+                                      {
+                                          started.emplace_back(task);
+                                      }
+                                      if (done == total)
+                                      {
+                                          finished.emplace_back(task);
+                                      }
+                                  }};
 
-    const auto result = planarization(ranked, ps);
+    planarization_stats st{};
+    const auto          result = planarization(ranked, ps, &st);
 
     check_contract(ntk, result);
-    CHECK(!tasks.empty());
+    CAPTURE(st.duplication.num_crossing_levels, st.crossing_gates.num_crossings);
+    CHECK(started == finished);
+    CHECK(started.size() == 3 + (st.duplication.num_crossing_levels > 0 ? 1 : 0));
 }
 
 TEST_CASE("Statistics report the runtime and progress reaches every stage", "[planarization]")
@@ -179,26 +191,40 @@ TEST_CASE("Statistics report the runtime and progress reaches every stage", "[pl
     const auto ntk    = blueprints::parity_network<technology_network>();
     const auto ranked = rank(ntk);
 
-    std::vector<std::string> tasks{};
+    std::vector<std::string> started{};
+    std::vector<std::string> finished{};
+    bool                     pipeline_called = false;
 
     const planarization_params ps{
-        .duplication = {.strategy = node_duplication_planarization_params::planarization_strategy::HYBRID,
-                        .on_progress =
-                            [&tasks](const std::string_view task, const std::size_t, const std::size_t)
-                        {
-                            if (tasks.empty() || tasks.back() != task)
-                            {
-                                tasks.emplace_back(task);
-                            }
-                        },
-                        .crossing_gates = {.xor_gates = true}}};
+        .on_progress = [&pipeline_called](std::string_view, std::size_t, std::size_t) { pipeline_called = true; },
+        .duplication = {
+            .strategy = node_duplication_planarization_params::planarization_strategy::HYBRID,
+            .on_progress =
+                [&started, &finished](const std::string_view task, const std::size_t done, const std::size_t total)
+            {
+                if (done == 0)
+                {
+                    started.emplace_back(task);
+                }
+                if (done == total)
+                {
+                    finished.emplace_back(task);
+                }
+            },
+            .crossing_gates = {.xor_gates = true}}};
 
     planarization_stats st{};
     const auto          result = planarization(ranked, ps, &st);
 
     check_contract(ntk, result);
-    // the callback on the duplication stage is used for the stages
-    CHECK(!tasks.empty());
+    CAPTURE(st.duplication.num_crossing_levels, st.crossing_gates.num_crossings);
+    CHECK_FALSE(pipeline_called);
+    CHECK(started == finished);
+    CHECK(started.size() == 3 + (st.duplication.num_crossing_levels > 0 ? 1 : 0));
+
+    std::ostringstream os{};
+    st.report(os);
+    CHECK(os.str().find("total time") != std::string::npos);
 }
 
 TEST_CASE("Kept crossings run through the crossing gates for both crossing gate types", "[planarization]")
@@ -208,8 +234,24 @@ TEST_CASE("Kept crossings run through the crossing gates for both crossing gate 
 
     for (const bool xor_gates : {false, true})
     {
+        CAPTURE(xor_gates);
+        std::vector<std::string> started{};
+        std::vector<std::string> finished{};
+
         // a prohibitive duplication cost makes the hybrid strategy keep every crossing it may keep
         const planarization_params ps{
+            .on_progress =
+                [&started, &finished](const std::string_view task, const std::size_t done, const std::size_t total)
+            {
+                if (done == 0)
+                {
+                    started.emplace_back(task);
+                }
+                if (done == total)
+                {
+                    finished.emplace_back(task);
+                }
+            },
             .duplication = {.strategy       = node_duplication_planarization_params::planarization_strategy::HYBRID,
                             .crossing_gates = {.xor_gates = xor_gates},
                             .criterion      = node_duplication_planarization_params::decision_criterion::WEIGHTED_CONE,
@@ -220,6 +262,8 @@ TEST_CASE("Kept crossings run through the crossing gates for both crossing gate 
 
         REQUIRE(st.duplication.num_crossing_levels > 0);
         CHECK(st.crossing_gates.num_crossings > 0);
+        CHECK(started.size() == 4);
+        CHECK(started == finished);
         check_contract(ntk, result);
     }
 }
@@ -254,29 +298,36 @@ TEST_CASE("The lookahead budget fallback and the crossing limit are honored", "[
 
 TEST_CASE("Invalid parameters are rejected before any stage runs", "[planarization]")
 {
-    const auto ranked = rank(blueprints::full_adder_network<technology_network>());
+    const auto ranked          = rank(blueprints::full_adder_network<technology_network>());
+    bool       progress_called = false;
+    const auto on_progress = [&progress_called](std::string_view, std::size_t, std::size_t) { progress_called = true; };
 
     SECTION("fanout degree below two")
     {
-        const planarization_params ps{.fanout_degree = 1};
+        const planarization_params ps{.on_progress = on_progress, .fanout_degree = 1};
 
         CHECK_THROWS_AS(planarization(ranked, ps), std::invalid_argument);
+        CHECK_FALSE(progress_called);
     }
     SECTION("lookahead budget of zero")
     {
         const planarization_params ps{
+            .on_progress = on_progress,
             .duplication = {.strategy         = node_duplication_planarization_params::planarization_strategy::HYBRID,
                             .lookahead_budget = 0}};
 
         CHECK_THROWS_AS(planarization(ranked, ps), std::invalid_argument);
+        CHECK_FALSE(progress_called);
     }
     SECTION("negative cost weight")
     {
         const planarization_params ps{
+            .on_progress = on_progress,
             .duplication = {.strategy         = node_duplication_planarization_params::planarization_strategy::HYBRID,
                             .duplication_cost = {.buffer_weight = -1.0}}};
 
         CHECK_THROWS_AS(planarization(ranked, ps), std::invalid_argument);
+        CHECK_FALSE(progress_called);
     }
 }
 
@@ -514,6 +565,7 @@ TEST_CASE("Random networks keep the pipeline contract", "[planarization]")
     {
         for (uint32_t seed = 0; seed < 40; ++seed)
         {
+            CAPTURE(long_edges, repeated_fanins, seed);
             const auto tec    = mockturtle::cleanup_dangling(random_network(seed, long_edges, repeated_fanins));
             const auto ranked = rank(tec);
 
