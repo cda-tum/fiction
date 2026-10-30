@@ -26,14 +26,16 @@ using namespace fiction;
 using namespace fiction::fcn;
 using namespace fiction::qca;
 
+/** @brief Gate libraries expose their layout type and compile-time tile dimensions. */
 TEST_CASE("Construction & traits", "[fcn-gate-library]")
 {
+    /** @brief Rectangular QCA gate library. */
     using lib_t = gate_library<qca::layout, 2, 3>;
 
-    CHECK(std::is_same_v<lib_t::layout, qca::layout>);
-    CHECK(std::is_same_v<lib_t::cell_type, qca::cell_type>);
-    CHECK(lib_t::gate_x_size() == 2);
-    CHECK(lib_t::gate_y_size() == 3);
+    STATIC_REQUIRE(std::is_same_v<lib_t::layout, qca::layout>);
+    STATIC_REQUIRE(std::is_same_v<lib_t::cell_type, qca::cell_type>);
+    STATIC_REQUIRE(lib_t::gate_x_size() == 2);
+    STATIC_REQUIRE(lib_t::gate_y_size() == 3);
 }
 
 TEST_CASE("Gate rotation", "[fcn-gate-library]")
