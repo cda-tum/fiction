@@ -169,3 +169,40 @@ TEST_CASE("Cell marking", "[fcn-gate-library]")
                                             port_position(1, 1), cell_type::EMPTY),
                            port_position(1, 2), cell_type::EMPTY) == empty);
 }
+
+/** @brief Merging rectangular gates preserves every row and column. */
+TEST_CASE("Rectangular gate merging", "[fcn-gate-library]")
+{
+    SECTION("Two columns and three rows")
+    {
+        /** @brief QCA gates with two cells per row. */
+        using lib_t = gate_library<qca::layout, 2, 3>;
+        /** @brief First nonoverlapping gate. */
+        constexpr auto first = lib_t::cell_list_to_gate<char>({{{'i', ' '}, {' ', 'x'}, {' ', ' '}}});
+        /** @brief Second nonoverlapping gate. */
+        constexpr auto second = lib_t::cell_list_to_gate<char>({{{' ', ' '}, {'o', ' '}, {'x', 'x'}}});
+        /** @brief Independent complete merged gate. */
+        constexpr auto expected = lib_t::cell_list_to_gate<char>({{{'i', ' '}, {'o', 'x'}, {'x', 'x'}}});
+        /** @brief Empty rectangular gate. */
+        constexpr auto empty = lib_t::cell_list_to_gate<char>({{{' ', ' '}, {' ', ' '}, {' ', ' '}}});
+
+        STATIC_REQUIRE(lib_t::merge({first, second}) == expected);
+        STATIC_REQUIRE(lib_t::merge({}) == empty);
+    }
+    SECTION("Three columns and two rows")
+    {
+        /** @brief QCA gates with three cells per row. */
+        using lib_t = gate_library<qca::layout, 3, 2>;
+        /** @brief First nonoverlapping gate. */
+        constexpr auto first = lib_t::cell_list_to_gate<char>({{{'i', ' ', 'x'}, {' ', ' ', ' '}}});
+        /** @brief Second nonoverlapping gate. */
+        constexpr auto second = lib_t::cell_list_to_gate<char>({{{' ', 'o', ' '}, {'x', ' ', 'x'}}});
+        /** @brief Independent complete merged gate. */
+        constexpr auto expected = lib_t::cell_list_to_gate<char>({{{'i', 'o', 'x'}, {'x', ' ', 'x'}}});
+        /** @brief Empty rectangular gate. */
+        constexpr auto empty = lib_t::cell_list_to_gate<char>({{{' ', ' ', ' '}, {' ', ' ', ' '}}});
+
+        STATIC_REQUIRE(lib_t::merge({first, second}) == expected);
+        STATIC_REQUIRE(lib_t::merge({}) == empty);
+    }
+}
