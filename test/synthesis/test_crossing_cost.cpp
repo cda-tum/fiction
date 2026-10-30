@@ -193,12 +193,12 @@ TEST_CASE("Crossing padding follows the busiest current or swept edge", "[crossi
     const auto         c  = tec.create_pi();
     const auto         ga = tec.get_node(tec.create_buf(a));
     const auto         gb = tec.get_node(tec.create_buf(b));
-    const auto         gc = tec.get_node(tec.create_and(c, c));
+    const auto         gc = tec.get_node(tec.create_buf(c));
 
     const auto [row, upper, expected_crossings, and_or_cost, xor_cost] =
         GENERATE_COPY(table<const char*, std::vector<node_t>, uint64_t, uint64_t, uint64_t>(
             {{"current edge maximum", {ga, ga, gb, gb, gb, ga}, 3, 345, 78},
-             {"swept edge across duplicate fanins", {ga, gc, gb, ga, ga, gb, gc, gc}, 10, 1206, 276}}));
+             {"swept edge across lower positions", {ga, ga, gb, gc, ga, ga, gb, gc}, 5, 491, 106}}));
     const auto xor_gates = GENERATE(false, true);
     CAPTURE(row, xor_gates);
 
