@@ -20,6 +20,8 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
@@ -146,7 +148,7 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
 
         CHECK(placed.num_dots() == 18);
         CHECK(placed.get_lattice() == surface.get_lattice());
-        CHECK(placed.get_defect(site_at_row(-2, -3)).type == defect_type::DB);
+        CHECK_THAT(placed.defects(), Catch::Matchers::UnorderedRangeEquals(surface.defects()));
     }
     SECTION("Design SiDB circuit on-the-fly")
     {
@@ -183,9 +185,8 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
                     apply_parameterized_gate_library_to_defective_surface<on_the_fly_gate_library>(layout, params,
                                                                                                    surface);
 
-                CHECK(bestagon_and_with_defects.num_defects() == 2);
-                CHECK(bestagon_and_with_defects.get_defect(site_at_row(30, 20)).type == defect_type::DB);
-                CHECK(bestagon_and_with_defects.get_defect(site_at_row(45, 55)).type == defect_type::DB);
+                CHECK_THAT(bestagon_and_with_defects.defects(),
+                           Catch::Matchers::UnorderedRangeEquals(surface.defects()));
 
                 CHECK(is_operational(bestagon_and_with_defects,
                                      std::vector<kitty::dynamic_truth_table>{create_and_tt()},
@@ -284,9 +285,8 @@ TEST_CASE("Gate-level layout with two input wires, one double wire, and two outp
                     apply_parameterized_gate_library_to_defective_surface<on_the_fly_gate_library>(layout, params,
                                                                                                    surface);
 
-                CHECK(bestagon_double_wire_with_defects.num_defects() == 2);
-                CHECK(bestagon_double_wire_with_defects.get_defect(site_at_row(30, 20)).type == defect_type::DB);
-                CHECK(bestagon_double_wire_with_defects.get_defect(site_at_row(45, 55)).type == defect_type::DB);
+                CHECK_THAT(bestagon_double_wire_with_defects.defects(),
+                           Catch::Matchers::UnorderedRangeEquals(surface.defects()));
 
                 check_sidb_interface(
                     bestagon_double_wire_with_defects,
@@ -342,7 +342,8 @@ TEST_CASE("Gate-level layout with different gates", "[apply-gate-library]")
                     apply_parameterized_gate_library_to_defective_surface<on_the_fly_gate_library>(layout, params,
                                                                                                    defect_layout);
 
-                CHECK(inverter_with_defects.num_defects() == 1);
+                CHECK_THAT(inverter_with_defects.defects(),
+                           Catch::Matchers::UnorderedRangeEquals(defect_layout.defects()));
 
                 check_sidb_interface(
                     inverter_with_defects,
@@ -396,7 +397,8 @@ TEST_CASE("Gate-level layout with different gates", "[apply-gate-library]")
                     apply_parameterized_gate_library_to_defective_surface<on_the_fly_gate_library>(layout, params,
                                                                                                    defect_layout);
 
-                CHECK(or_layout_with_defects.num_defects() == 1);
+                CHECK_THAT(or_layout_with_defects.defects(),
+                           Catch::Matchers::UnorderedRangeEquals(defect_layout.defects()));
 
                 check_sidb_interface(
                     or_layout_with_defects,
@@ -455,7 +457,8 @@ TEST_CASE("Gate-level layout with different gates", "[apply-gate-library]")
                     apply_parameterized_gate_library_to_defective_surface<on_the_fly_gate_library>(layout, params,
                                                                                                    defect_layout);
 
-                CHECK(nand_layout_with_defects.num_defects() == 2);
+                CHECK_THAT(nand_layout_with_defects.defects(),
+                           Catch::Matchers::UnorderedRangeEquals(defect_layout.defects()));
 
                 check_sidb_interface(
                     nand_layout_with_defects,
