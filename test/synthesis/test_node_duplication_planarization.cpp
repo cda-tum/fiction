@@ -209,19 +209,54 @@ TEST_CASE("Planarize blueprint networks", "[node-duplication-planarization]")
 
 TEST_CASE("Random primary output order with a fixed seed", "[node-duplication-planarization]")
 {
-    const auto ntk    = blueprints::full_adder_network<mockturtle::aig_network>();
-    const auto ranked = prepare(ntk);
+    /** @brief Records ordered fanins and outputs, retaining signal complement flags. */
+    const auto connections = [](const auto& network)
+    {
+        std::vector<std::vector<technology_network::signal>> result{};
+        network.foreach_node(
+            [&](const auto node)
+            {
+                result.emplace_back();
+                network.foreach_fanin(node, [&](const auto signal) { result.back().push_back(signal); });
+            });
+        result.emplace_back();
+        network.foreach_po([&](const auto signal) { result.back().push_back(signal); });
+        return result;
+    };
 
-    const node_duplication_planarization_params ps{
-        .po_order = node_duplication_planarization_params::output_order::RANDOM_PO_ORDER,
-        .seed     = 42};
+    /** @brief Checks seeded routing and the planarization contract for both results. */
+    const auto check_repeat = [&connections](const auto& ntk)
+    {
+        const auto                                  ranked = prepare(ntk);
+        const node_duplication_planarization_params ps{
+            .po_order = node_duplication_planarization_params::output_order::RANDOM_PO_ORDER,
+            .seed     = 42};
 
-    const auto planar_a = node_duplication_planarization(ranked, ps);
-    const auto planar_b = node_duplication_planarization(ranked, ps);
+        const auto planar_a = node_duplication_planarization(ranked, ps);
+        const auto planar_b = node_duplication_planarization(ranked, ps);
 
-    check_planar_and_equivalent(ntk, planar_a);
-    check_planar_and_equivalent(ntk, planar_b);
-    CHECK(planar_a.size() == planar_b.size());
+        check_planar_and_equivalent(ntk, planar_a);
+        check_planar_and_equivalent(ntk, planar_b);
+        CHECK(planar_a.size() == planar_b.size());
+        CHECK(connections(planar_a) == connections(planar_b));
+    };
+
+    SECTION("Full adder")
+    {
+        check_repeat(blueprints::full_adder_network<mockturtle::aig_network>());
+    }
+    SECTION("Five outputs")
+    {
+        technology_network ntk{};
+        const auto         a = ntk.create_pi();
+        const auto         b = ntk.create_pi();
+        ntk.create_po(ntk.create_not(a));
+        ntk.create_po(ntk.create_buf(a));
+        ntk.create_po(ntk.create_not(a));
+        ntk.create_po(ntk.create_buf(a));
+        ntk.create_po(ntk.create_not(b));
+        check_repeat(ntk);
+    }
 }
 
 TEST_CASE("Progress is reported once per level", "[node-duplication-planarization]")

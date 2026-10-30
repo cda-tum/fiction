@@ -138,6 +138,34 @@ TEST_CASE("Unavoidable crossings are charged one crossing gate each plus the pad
     CHECK(result.cost == expected_cost);
 }
 
+TEST_CASE("Multiple crossings pad edges to the busiest edge and respect the crossing limit", "[crossing-cost]")
+{
+    const auto [xor_gates, limit, expected_cost] =
+        GENERATE(table<bool, uint32_t, uint64_t>({{false, 2, std::numeric_limits<uint64_t>::max()},
+                                                  {false, 3, 261},
+                                                  {true, 2, std::numeric_limits<uint64_t>::max()},
+                                                  {true, 3, 54}}));
+    CAPTURE(xor_gates, limit, expected_cost);
+
+    technology_network tec{};
+    const auto         a = tec.create_pi();
+    const auto         b = tec.create_pi();
+    tec.create_po(tec.create_and(a, b));
+    tec.create_po(tec.create_or(a, b));
+    tec.create_po(tec.create_xor(a, b));
+    const auto ranked = rank(tec);
+    const auto upper  = ranked.get_ranks(1);
+    auto       lower  = ranked.get_ranks(0);
+
+    // Three edge pairs cross; the busiest edge crosses twice. The six edges need six padding levels in total.
+    // The cost is 3*59 + 6*14 nodes, or 3*10 + 6*4 with XORs.
+    const auto result = synthesis::detail::crossing_cost(ranked, upper, lower, 32,
+                                                         {.xor_gates = xor_gates, .max_crossings_per_level = limit});
+
+    CHECK(result.num_crossings == 3);
+    CHECK(result.cost == expected_cost);
+}
+
 TEST_CASE("Levels with more crossings than allowed are not costed", "[crossing-cost]")
 {
     const auto [limit, expected_cost] =
