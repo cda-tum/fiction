@@ -58,7 +58,6 @@
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/views/names_view.hpp>
 
-#include <chrono>
 #include <concepts>
 #include <cstdint>
 #include <optional>
@@ -315,11 +314,12 @@ exact_physical_design_params&& minimize_crossings(exact_physical_design_params&&
 template <typename Lyt>
 void check_stats(const exact_physical_design_stats& st, const Lyt& lyt)
 {
-    CHECK(std::chrono::duration_cast<std::chrono::milliseconds>(st.time_total).count() > 0);
-    CHECK(st.x_size > 0);
-    CHECK(st.y_size > 0);
-    CHECK(st.num_gates > 0);
+    CHECK(st.time_total >= decltype(st.time_total)::zero());
+    CHECK(st.x_size == lyt.width());
+    CHECK(st.y_size == lyt.height());
+    CHECK(st.num_gates == lyt.num_gates());
     CHECK(st.num_wires == lyt.num_wires());
+    CHECK(st.num_crossings == lyt.num_crossings());
 }
 
 template <typename Lyt>
@@ -858,15 +858,9 @@ TEST_CASE("Name conservation after exact physical design", "[exact]")
     auto maj = blueprints::maj1_network<named_mig_network>();
     maj.set_network_name("maj");
 
-    auto params = res(configuration());
-    SECTION("single-threaded")
-    {
-        params.num_threads = 1;
-    }
-    SECTION("multi-threaded")
-    {
-        params.num_threads = 2;
-    }
+    auto params        = res(configuration());
+    params.num_threads = GENERATE(1u, 2u);
+    CAPTURE(params.num_threads);
     const auto layout = exact<cartesian_layout>(convert_network<named_technology_network>(maj), params);
 
     REQUIRE(layout.has_value());
@@ -894,14 +888,8 @@ TEST_CASE("Exact physical design reports progress", "[exact]")
 
     auto params = twoddwave(configuration());
 
-    SECTION("single-threaded")
-    {
-        params.num_threads = 1;
-    }
-    SECTION("multi-threaded")
-    {
-        params.num_threads = 2;
-    }
+    params.num_threads = GENERATE(1u, 2u);
+    CAPTURE(with_blacklist, params.num_threads);
 
     // Repeated starts cover workers finding a layout while another worker initializes its context.
     for (unsigned trial = 0; trial < (params.num_threads > 1 ? 8u : 1u); ++trial)

@@ -15,6 +15,7 @@
  * @author Simon Hofmann (simon1hofmann)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
@@ -62,14 +63,30 @@ static_assert(std::same_as<decltype(&orthogonal<cartesian_layout>),
                            cartesian_gate_layout (*)(const named_technology_network&, orthogonal_physical_design_params,
                                                      orthogonal_physical_design_stats*)>);
 
-void check_stats(const orthogonal_physical_design_stats& st) noexcept
+/**
+ * @brief Checks the reported statistics against the returned layout.
+ * @tparam Lyt Gate-level layout type.
+ * @param st Reported physical-design statistics.
+ * @param lyt Returned layout.
+ */
+template <typename Lyt>
+void check_stats(const orthogonal_physical_design_stats& st, const Lyt& lyt)
 {
-    CHECK(st.x_size > 0);
-    CHECK(st.y_size > 0);
-    CHECK(st.num_gates > 0);
-    CHECK(st.num_wires > 0);
+    CHECK(st.time_total >= decltype(st.time_total)::zero());
+    CHECK(st.x_size == lyt.width());
+    CHECK(st.y_size == lyt.height());
+    CHECK(st.num_gates == lyt.num_gates());
+    CHECK(st.num_wires == lyt.num_wires());
+    CHECK(st.num_crossings == lyt.num_crossings());
 }
 
+/**
+ * @brief Checks layout equivalence and reported physical-design statistics.
+ * @tparam Lyt Gate-level layout type.
+ * @tparam Ntk Network type.
+ * @param ntk Network to place and route.
+ * @param a Layout arrangement.
+ */
 template <typename Lyt, typename Ntk>
 void check_ortho_equiv(const Ntk& ntk, const std::optional<arrangement> a = std::nullopt)
 {
@@ -79,7 +96,7 @@ void check_ortho_equiv(const Ntk& ntk, const std::optional<arrangement> a = std:
     auto layout =
         orthogonal<typename Lyt::coordinate_layout>(convert_network<named_technology_network>(ntk), ps, &stats);
 
-    check_stats(stats);
+    check_stats(stats, layout);
     check_eq(ntk, layout);
 }
 
@@ -190,6 +207,7 @@ TEST_CASE("Repeated gate inputs have valid physical routing", "[orthogonal]")
     named_technology_network ntk{};
     const auto               a        = ntk.create_pi();
     const auto               function = GENERATE(0, 1, 2);
+    CAPTURE(function);
     /** @brief Gate with repeated input ports for the selected Boolean function. */
     const auto output = [&ntk, a, function]()
     {
@@ -203,7 +221,10 @@ TEST_CASE("Repeated gate inputs have valid physical routing", "[orthogonal]")
         }
         return ntk.create_xor(a, a);
     }();
-    if (GENERATE(false, true))
+    /** @brief Whether the repeated input also drives a primary output. */
+    const auto direct_output = GENERATE(false, true);
+    CAPTURE(direct_output);
+    if (direct_output)
     {
         ntk.create_po(a);
     }
