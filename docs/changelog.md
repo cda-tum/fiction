@@ -700,6 +700,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - `on_the_fly_gate_library` now honors `DESIGN_ON_THE_FLY` for crossings and double wires on defective surfaces.
   - `surface_analysis` now propagates allocation failure while building its blacklist.
   - `is_balanced` now propagates allocation failures instead of terminating.
   - `is_fanout_substituted` now accepts progress callbacks whose copies can throw.

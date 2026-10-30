@@ -48,6 +48,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -729,6 +730,43 @@ TEST_CASE("On-the-fly SiDB crossing gate", "[apply-gate-library]")
     surface.assign_defect(site_at_row(0, 0), defect{defect_type::DB, -1, 2, 5});
 
     CHECK(on_the_fly_gate_library::set_up_gate(layout, {1, 1, 0}, params, surface) == crossing_gate);
+}
+
+TEST_CASE("On-the-fly complex SiDB gates honor the design policy", "[apply-gate-library]")
+{
+    const auto [crossing, surface_kind] = GENERATE(
+        (Catch::Generators::table<bool, int>({{false, 0}, {false, 1}, {false, 2}, {true, 0}, {true, 1}, {true, 2}})));
+    CAPTURE(crossing, surface_kind);
+
+    hexagonal_gate_layout layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
+    const auto            input1 = layout.create_pi("input1", {0, 0});
+    const auto            input2 = layout.create_pi("input2", {1, 0});
+    const auto            wire1  = layout.create_buf(input1, {1, 1, 0});
+    const auto            wire2  = layout.create_buf(input2, {1, 1, 1});
+    layout.create_po(wire1, "output1", {crossing ? 1 : 0, 2, 0});
+    layout.create_po(wire2, "output2", {crossing ? 0 : 1, 2, 0});
+
+    std::optional<sidb::layout> surface{};
+    if (surface_kind != 0)
+    {
+        surface.emplace();
+        if (surface_kind == 2)
+        {
+            surface->assign_defect(site_at_row(0, 0), defect{defect_type::DB, -1, 2, 5});
+        }
+    }
+
+    on_the_fly_gate_library_params params{
+        .design_gate_params        = {.operational_params     = {.sim_params = simulation_parameters{2, -0.32}},
+                                      .canvas                 = {site_at_row(24, 17), site_at_row(24, 17)},
+                                      .number_of_canvas_sidbs = 2},
+        .canvas_sidb_complex_gates = 2};
+    const auto predefined = on_the_fly_gate_library::set_up_gate(layout, {1, 1, 0}, params);
+    CHECK(on_the_fly_gate_library::set_up_gate(layout, {1, 1, 0}, params, surface) == predefined);
+
+    params.using_predefined_crossing_and_double_wire_if_possible =
+        on_the_fly_gate_library_params::complex_gate_design_policy::DESIGN_ON_THE_FLY;
+    CHECK_THROWS_AS(on_the_fly_gate_library::set_up_gate(layout, {1, 1, 0}, params, surface), gate_design_exception);
 }
 
 TEST_CASE("Gate-library progress counts completed mappings", "[apply-gate-library]")
