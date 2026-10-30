@@ -14,7 +14,9 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
@@ -56,13 +58,22 @@ TEST_CASE("Color routing validates endpoints before changing the layout", "[colo
     CHECK(layout.get_tile(output) == layout_base::coordinate{1, 1});
 }
 
+/**
+ * @brief Requires routing success before checking functional equivalence.
+ * @tparam Spec Specification layout type.
+ * @tparam Impl Implementation layout type.
+ * @param spec Specification layout.
+ * @param impl Layout to route.
+ * @param objectives Connections to route.
+ * @param ps Routing parameters.
+ */
 template <typename Spec, typename Impl>
 void check_color_routing(const Spec& spec, Impl& impl, const std::vector<routing_objective>& objectives,
                          color_routing_params ps = {})
 {
     const auto success = color_routing(impl, objectives, ps);
 
-    CHECK(success);
+    REQUIRE(success);
 
     check_eq(spec, impl);
 }
@@ -77,16 +88,11 @@ TEST_CASE("Simple wire connection", "[color-routing]")
     // remove the wire routing from the implementation
     clear_routing(impl_layout);
 
-    SECTION("MCS")
-    {
-        const color_routing_params ps{.engine = graph_coloring_engine::MCS};
-        check_color_routing(spec_layout, impl_layout, objectives, ps);
-    }
-    SECTION("SAT")
-    {
-        const color_routing_params ps{.engine = graph_coloring_engine::SAT};
-        check_color_routing(spec_layout, impl_layout, objectives, ps);
-    }
+    /** @brief Independent graph-coloring backend. */
+    const auto engine = GENERATE(graph_coloring_engine::MCS, graph_coloring_engine::SAT);
+    CAPTURE(engine);
+    const color_routing_params ps{.engine = engine};
+    check_color_routing(spec_layout, impl_layout, objectives, ps);
 }
 
 TEST_CASE("Color routing preserves destination input indices", "[color-routing]")
@@ -113,15 +119,10 @@ TEST_CASE("Color routing connects repeated sources to distinct inputs", "[color-
     const auto            objectives = extract_routing_objectives(layout);
     clear_routing(layout);
 
-    color_routing_params ps{};
-    SECTION("Without crossings")
-    {
-        ps.crossings = false;
-    }
-    SECTION("With crossings")
-    {
-        ps.crossings = true;
-    }
+    /** @brief Crossing mode for this independent route. */
+    const auto crossings = GENERATE(false, true);
+    CAPTURE(crossings);
+    const color_routing_params ps{.crossings = crossings};
 
     REQUIRE(color_routing(layout, objectives, ps));
     const auto first_source  = layout.source({gate, 0});
@@ -147,16 +148,11 @@ TEST_CASE("Two paths wire connections", "[color-routing]")
     // remove the wire routing from the implementation
     clear_routing(impl_layout);
 
-    SECTION("MCS")
-    {
-        const color_routing_params ps{.engine = graph_coloring_engine::MCS};
-        check_color_routing(spec_layout, impl_layout, objectives, ps);
-    }
-    SECTION("SAT")
-    {
-        const color_routing_params ps{.engine = graph_coloring_engine::SAT};
-        check_color_routing(spec_layout, impl_layout, objectives, ps);
-    }
+    /** @brief Independent graph-coloring backend. */
+    const auto engine = GENERATE(graph_coloring_engine::MCS, graph_coloring_engine::SAT);
+    CAPTURE(engine);
+    const color_routing_params ps{.engine = engine};
+    check_color_routing(spec_layout, impl_layout, objectives, ps);
 }
 
 TEST_CASE("Three paths wire connections", "[color-routing]")
@@ -169,16 +165,11 @@ TEST_CASE("Three paths wire connections", "[color-routing]")
     // remove the wire routing from the implementation
     clear_routing(impl_layout);
 
-    SECTION("MCS")
-    {
-        const color_routing_params ps{.engine = graph_coloring_engine::MCS};
-        check_color_routing(spec_layout, impl_layout, objectives, ps);
-    }
-    SECTION("SAT")
-    {
-        const color_routing_params ps{.engine = graph_coloring_engine::SAT};
-        check_color_routing(spec_layout, impl_layout, objectives, ps);
-    }
+    /** @brief Independent graph-coloring backend. */
+    const auto engine = GENERATE(graph_coloring_engine::MCS, graph_coloring_engine::SAT);
+    CAPTURE(engine);
+    const color_routing_params ps{.engine = engine};
+    check_color_routing(spec_layout, impl_layout, objectives, ps);
 }
 
 TEST_CASE("Direct gate connections", "[color-routing]")
@@ -191,16 +182,11 @@ TEST_CASE("Direct gate connections", "[color-routing]")
     // remove the wire routing from the implementation
     clear_routing(impl_layout);
 
-    SECTION("MCS")
-    {
-        const color_routing_params ps{.engine = graph_coloring_engine::MCS};
-        check_color_routing(spec_layout, impl_layout, objectives, ps);
-    }
-    SECTION("SAT")
-    {
-        const color_routing_params ps{.engine = graph_coloring_engine::SAT};
-        check_color_routing(spec_layout, impl_layout, objectives, ps);
-    }
+    /** @brief Independent graph-coloring backend. */
+    const auto engine = GENERATE(graph_coloring_engine::MCS, graph_coloring_engine::SAT);
+    CAPTURE(engine);
+    const color_routing_params ps{.engine = engine};
+    check_color_routing(spec_layout, impl_layout, objectives, ps);
 }
 
 TEST_CASE("Partial routing", "[color-routing]")
@@ -214,16 +200,11 @@ TEST_CASE("Partial routing", "[color-routing]")
     // remove the wire routing from the implementation
     clear_routing(impl_layout);
 
-    SECTION("MCS")
-    {
-        const color_routing_params ps{.conduct_partial_routing = true, .engine = graph_coloring_engine::MCS};
-        check_color_routing(spec_layout, impl_layout, objectives, ps);
-    }
-    SECTION("SAT")
-    {
-        const color_routing_params ps{.conduct_partial_routing = true, .engine = graph_coloring_engine::SAT};
-        check_color_routing(spec_layout, impl_layout, objectives, ps);
-    }
+    /** @brief Independent graph-coloring backend. */
+    const auto engine = GENERATE(graph_coloring_engine::MCS, graph_coloring_engine::SAT);
+    CAPTURE(engine);
+    const color_routing_params ps{.conduct_partial_routing = true, .engine = engine};
+    check_color_routing(spec_layout, impl_layout, objectives, ps);
 }
 
 TEST_CASE("Routing with crossings", "[color-routing]")
@@ -284,13 +265,13 @@ TEST_CASE("Routing failure", "[color-routing]")
     {
         const color_routing_params ps{.crossings = true, .engine = graph_coloring_engine::MCS};
         // routing should fail
-        CHECK(!color_routing(layout, objectives, ps));
+        CHECK_FALSE(color_routing(layout, objectives, ps));
     }
     SECTION("SAT")
     {
         const color_routing_params ps{.crossings = true, .engine = graph_coloring_engine::SAT};
         // routing should fail
-        CHECK(!color_routing(layout, objectives, ps));
+        CHECK_FALSE(color_routing(layout, objectives, ps));
     }
 }
 
@@ -311,13 +292,13 @@ TEST_CASE("Routing failure 2", "[color-routing]")
     {
         const color_routing_params ps{.crossings = true, .engine = graph_coloring_engine::MCS};
         // routing should fail
-        CHECK(!color_routing(layout, objectives, ps));
+        CHECK_FALSE(color_routing(layout, objectives, ps));
     }
     SECTION("SAT")
     {
         const color_routing_params ps{.crossings = true, .engine = graph_coloring_engine::SAT};
         // routing should fail
-        CHECK(!color_routing(layout, objectives, ps));
+        CHECK_FALSE(color_routing(layout, objectives, ps));
     }
 }
 
@@ -343,11 +324,11 @@ TEST_CASE("Routing failure 3", "[color-routing]")
         SECTION("k = 3")
         {
             ps.path_limit = 3;
-            CHECK(!color_routing(layout, objectives, ps));
+            CHECK_FALSE(color_routing(layout, objectives, ps));
         }
         SECTION("no path limit")
         {
-            CHECK(!color_routing(layout, objectives, ps));
+            CHECK_FALSE(color_routing(layout, objectives, ps));
         }
     }
     SECTION("Goal node behind wire crossing")
@@ -361,11 +342,11 @@ TEST_CASE("Routing failure 3", "[color-routing]")
         SECTION("k = 3")
         {
             ps.path_limit = 3;
-            CHECK(!color_routing(layout, objectives, ps));
+            CHECK_FALSE(color_routing(layout, objectives, ps));
         }
         SECTION("no path limit")
         {
-            CHECK(!color_routing(layout, objectives, ps));
+            CHECK_FALSE(color_routing(layout, objectives, ps));
         }
     }
 }
