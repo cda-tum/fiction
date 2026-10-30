@@ -283,12 +283,10 @@ to_hex(fiction::layouts::layout_base::coordinate cartesian_tile, const int32_t c
 }
 
 /**
- * Utility function to calculate the shift that has to be added to any x-coordinate on the hexagonal layout.
+ * @brief Calculates the horizontal shift for the hexagonal layout from placed objects and terminal extensions.
  *
- * This function iterates through diagonals starting from the bottom left corner until it finds a non-empty tile or
- * until it has traversed all diagonals. In each iteration, it checks tiles along the diagonal line. If it finds a
- * non-empty tile, it calculates an offset value, which is the number of columns on the left side of the hexagonal
- * layout that will be empty. This offset is based on the leftmost tile that will appear in the hexagonal layout.
+ * Finds the first occupied ground-layer diagonal from placed objects, then adjusts the horizontal offset for
+ * extended terminals.
  *
  * @param lyt 2DDWave-clocked Cartesian gate-level layout to hexagonalize.
  * @param cartesian_layout_width Width of the Cartesian layout.
