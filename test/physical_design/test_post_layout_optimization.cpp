@@ -26,6 +26,8 @@
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 #include "utils/progress_recorder.hpp"
+// Catch2 selects this specialization through its diagnostic templates.
+#include "utils/routing_objective_string_maker.hpp"  // IWYU pragma: keep
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
@@ -40,6 +42,7 @@
 
 #include <mockturtle/networks/aig.hpp>
 
+#include <algorithm>
 #include <cstdint>
 #include <limits>
 #include <stdexcept>
@@ -411,6 +414,48 @@ TEST_CASE("Post-layout rerouting preserves noncommutative input order", "[post-l
                                                   {layout.get_tile(gate), layout.get_tile(po), 0}};
     CHECK_THAT(objectives, Catch::Matchers::UnorderedRangeEquals(expected));
     CHECK(layout.area() <= 16);
+}
+
+TEST_CASE("Post-layout optimization preserves rectangular layouts", "[post-layout-optimization]")
+{
+    const auto [width, height] =
+        GENERATE((Catch::Generators::table<int32_t, int32_t>({{32, 32}, {1024, 4}, {4, 1024}})));
+    CAPTURE(width, height);
+    /** @brief Rotates the same circuit into the longer frame direction. */
+    const auto tile = [width, height](const int32_t x, const int32_t y)
+    { return width >= height ? layout_base::coordinate{x, y} : layout_base::coordinate{y, x}; };
+    const auto                            edge = std::max(width, height);
+    cartesian_gate_layout                 layout{{width, height, 2}, clocking::twoddwave()};
+    const auto                            a        = layout.create_pi("a", tile(edge - 3, 0));
+    const auto                            b        = layout.create_pi("b", tile(edge - 4, 1));
+    const auto                            left     = layout.create_buf(a, tile(edge - 2, 0));
+    const auto                            right    = layout.create_buf(b, tile(edge - 3, 1));
+    const auto                            gate     = layout.create_lt(left, right, tile(edge - 2, 1));
+    const auto                            wire     = layout.create_buf(gate, tile(edge - 1, 1));
+    const auto                            output   = layout.create_po(wire, "f", tile(edge - 1, 2));
+    const auto                            original = layout;
+    const post_layout_optimization_params params{.max_gate_relocations = 1, .optimize_pos_only = true};
+    post_layout_optimization_stats        stats{};
+
+    post_layout_optimization(layout, params, &stats);
+
+    check_eq(original, layout);
+    REQUIRE(layout.contains(a));
+    REQUIRE(layout.contains(b));
+    REQUIRE(layout.contains(gate));
+    REQUIRE(layout.contains(output));
+    const std::vector<routing_objective> expected{{layout.get_tile(a), layout.get_tile(gate), 0},
+                                                  {layout.get_tile(b), layout.get_tile(gate), 1},
+                                                  {layout.get_tile(gate), layout.get_tile(output), 0}};
+    CHECK_THAT(extract_routing_objectives(layout), Catch::Matchers::UnorderedRangeEquals(expected));
+    CHECK(layout.get_input_name(0) == "a");
+    CHECK(layout.get_input_name(1) == "b");
+    CHECK(layout.get_output_name(0) == "f");
+    CHECK(stats.x_size_before == static_cast<uint64_t>(width));
+    CHECK(stats.y_size_before == static_cast<uint64_t>(height));
+    CHECK(stats.x_size_after == layout.width());
+    CHECK(stats.y_size_after == layout.height());
+    layout.foreach_object([&](const auto id) { CHECK(layout.is_within_bounds(layout.get_tile(id))); });
 }
 
 TEST_CASE("Output border extension handles the full signed coordinate domain", "[post-layout-optimization]")

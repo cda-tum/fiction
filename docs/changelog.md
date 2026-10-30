@@ -153,6 +153,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - `post_layout_optimization` avoids enumerating out-of-frame relocation coordinates.
   - `fanout_substitution` uses entropy only when no random seed is supplied.
   - Interface matching uses less temporary memory for named interfaces.
   - Combination generation avoids one allocation and copy per result.
