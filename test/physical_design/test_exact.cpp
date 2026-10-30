@@ -375,12 +375,6 @@ Lyt generate_layout_with_black_list(const Ntk& ntk, const surface_black_list<por
     return layout.value();  // NOLINT(bugprone-unchecked-optional-access)
 }
 
-template <typename Lib, typename GateLyt>
-void check_apply_lib(const GateLyt& lyt)
-{
-    CHECK_NOTHROW(apply_gate_library<Lib>(lyt));
-}
-
 template <typename Ntk, typename Lyt>
 void check_io_names(const Ntk& ntk, const Lyt& lyt)
 {
@@ -400,6 +394,15 @@ void check_io_names(const Ntk& ntk, const Lyt& lyt)
     }
 }
 
+/**
+ * @brief Checks the physical layout, logic, gate library, and terminal names.
+ * @tparam Lib Gate library type.
+ * @tparam GateLyt Gate-level layout type.
+ * @tparam Ntk Network type.
+ * @param ntk Network to place and route.
+ * @param ps Physical-design parameters.
+ * @param a Layout arrangement.
+ */
 template <typename Lib, typename GateLyt, typename Ntk>
 void check_with_gate_library(const Ntk& ntk, const exact_physical_design_params& ps,
                              const std::optional<arrangement> a = std::nullopt)
@@ -408,7 +411,7 @@ void check_with_gate_library(const Ntk& ntk, const exact_physical_design_params&
 
     check_eq(ntk, layout);
     check_tp(layout, 1);
-    check_apply_lib<Lib>(layout);
+    CHECK_NOTHROW(apply_gate_library<Lib>(layout));
     check_io_names(ntk, layout);
 }
 
@@ -590,18 +593,8 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
                    !(lyt.has_northern_incoming_signal({2, 2}) && lyt.has_southern_outgoing_signal({2, 2}))));
         }
     }
-    //    SECTION("Asynchronicity")
-    //    {
-    //        check_with_gate_library<qca_one_library, cartesian_gate_layout>(
-    //            blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
-    //            twoddwave(crossings(border_io(async(2, configuration())))));
-    //    }
     SECTION("Synchronization elements")
     {
-        //            CHECK(generate_layout<cartesian_gate_layout>(blueprints::one_to_five_path_difference_network<technology_network>(),
-        //                                                     twoddwave(border_io(sync_elems(configuration()))))
-        //                      .num_se() > 0);
-
         check_with_gate_library<qca_one_library, cartesian_gate_layout>(
             blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
             use(border_io(sync_elems(configuration()))));
