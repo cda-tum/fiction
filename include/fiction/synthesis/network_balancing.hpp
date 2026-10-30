@@ -260,11 +260,7 @@ template <typename NtkDest, typename NtkSrc>
              mockturtle::has_create_buf_v<NtkDest> && mockturtle::has_clone_node_v<NtkDest>
 NtkDest network_balancing(const NtkSrc& ntk_src, network_balancing_params ps = {})
 {
-    detail::network_balancing_impl<NtkDest, NtkSrc> p{ntk_src, ps};
-
-    auto result = p.run();
-
-    return result;
+    return detail::network_balancing_impl<NtkDest, NtkSrc>{ntk_src, ps}.run();
 }
 /**
  * Checks if a logic network is properly path-balanced with regard to the provided parameters.
@@ -273,18 +269,15 @@ NtkDest network_balancing(const NtkSrc& ntk_src, network_balancing_params ps = {
  * @param ntk The logic network to check.
  * @param ps Parameters.
  * @return `true` iff `ntk` is properly path-balanced with regard to `ps`.
+ * @throws std::bad_alloc If allocating depth information or output levels fails.
  */
 template <typename Ntk>
     requires mockturtle::is_network_type_v<Ntk> && mockturtle::has_foreach_gate_v<Ntk> &&
              mockturtle::has_foreach_fanin_v<Ntk> && mockturtle::has_foreach_po_v<Ntk> &&
              mockturtle::has_get_node_v<Ntk>
-bool is_balanced(const Ntk& ntk, network_balancing_params ps = {}) noexcept
+bool is_balanced(const Ntk& ntk, network_balancing_params ps = {})
 {
-    detail::is_balanced_impl<Ntk> p{ntk, ps};
-
-    auto result = p.run();
-
-    return result;
+    return detail::is_balanced_impl<Ntk>{ntk, ps}.run();
 }
 
 }  // namespace fiction::synthesis
