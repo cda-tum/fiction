@@ -140,10 +140,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
     {}
 
     /**
-     * Constructs an `fiction::static_depth_view` from an existing network.
-     * Invokes the base class constructor with the provided network, initializes class-specific members,
-     * and registers necessary network events. Ensures that the network type (Ntk) satisfies required
-     * interface methods.
+     * @brief Copies a network and computes its node levels.
      *
      * @param ntk The network on which to construct the depth view.
      * @param node_cost_fn Optional function to compute node costs.
@@ -159,8 +156,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
     }
 
     /**
-     * Copy constructor creates a new `fiction::static_depth_view` by copying the content of another
-     * `fiction::static_depth_view`.
+     * @brief Copies the network, cached depth state, and node cost.
      *
      * @param other The other `fiction::static_depth_view` object to be copied.
      */
@@ -204,8 +200,8 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
     }
 
     /**
-     * Move constructor creates a new `fiction::static_depth_view` by moving the content of another
-     * `fiction::static_depth_view`.
+     * @brief Constructs the network, cached depth state, and node cost from an rvalue view.
+     * Construction exceptions propagate.
      *
      * @param other The other `fiction::static_depth_view` object to be moved.
      */
