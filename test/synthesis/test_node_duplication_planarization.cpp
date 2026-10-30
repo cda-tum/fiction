@@ -295,6 +295,7 @@ TEST_CASE("Progress is reported once per level", "[node-duplication-planarizatio
     REQUIRE(!done_values.empty());
     CHECK(done_values.front() == 0);
     CHECK(done_values.back() == total);
+    CHECK(std::ranges::all_of(done_values, [total](const auto done) { return done <= total; }));
 }
 
 TEST_CASE("Asymmetric gates keep their fanin order", "[node-duplication-planarization]")

@@ -12,6 +12,7 @@
  * @file
  * @brief Planarizes a ranked logic network by duplicating nodes level by level.
  * @author Benjamin Hien (hibenj)
+ * @author Marcel Walter (marcelwa)
  */
 
 #pragma once
