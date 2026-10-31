@@ -1688,6 +1688,52 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
 
     operational_domain_stats op_domain_stats{};
 
+    SECTION("one-dimensional sweeps")
+    {
+        /** @brief A single known operational point in one sweep dimension. */
+        const operational_domain_params one_dimensional_params{
+            .operational_params = {.sim_params = sim_params},
+            .sweep_dimensions   = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6, .step = 0.1}},
+            .number_of_threads  = 1};
+
+        SECTION("grid search")
+        {
+            /** @brief Computed one-dimensional operational domain. */
+            const auto op_domain =
+                operational_domain_grid_search(lat, std::vector{create_and_tt()}, one_dimensional_params);
+            CHECK(op_domain.size() == 1);
+            check_op_domain_params_and_operational_status(op_domain, one_dimensional_params,
+                                                          operational_status::OPERATIONAL);
+        }
+        SECTION("random sampling")
+        {
+            /** @brief Sampled one-dimensional operational domain. */
+            const auto op_domain =
+                operational_domain_random_sampling(lat, std::vector{create_and_tt()}, 1, one_dimensional_params);
+            CHECK(op_domain.size() == 1);
+            check_op_domain_params_and_operational_status(op_domain, one_dimensional_params,
+                                                          operational_status::OPERATIONAL);
+        }
+        SECTION("critical temperature grid search")
+        {
+            /** @brief Computed one-dimensional critical temperature domain. */
+            const auto op_domain =
+                critical_temperature_domain_grid_search(lat, std::vector{create_and_tt()}, one_dimensional_params);
+            CHECK(op_domain.size() == 1);
+            check_op_domain_params_and_operational_status(op_domain, one_dimensional_params,
+                                                          operational_status::OPERATIONAL);
+        }
+        SECTION("critical temperature random sampling")
+        {
+            /** @brief Sampled one-dimensional critical temperature domain. */
+            const auto op_domain = critical_temperature_domain_random_sampling(lat, std::vector{create_and_tt()}, 1,
+                                                                               one_dimensional_params);
+            CHECK(op_domain.size() == 1);
+            check_op_domain_params_and_operational_status(op_domain, one_dimensional_params,
+                                                          operational_status::OPERATIONAL);
+        }
+    }
+
     SECTION("grid_search")
     {
         const auto op_domain =
