@@ -20,6 +20,7 @@
 
 #include "fiction/utils/version_info.hpp"
 
+#include <fiction/technology/fcn/io/cell_layout_svg.hpp>
 #include <fiction/technology/mol_qca/io/write_mol_qca_layout_svg.hpp>
 #include <fiction/technology/mol_qca/layout.hpp>
 
@@ -325,6 +326,45 @@ TEST_CASE("Reject invalid MolQCA SVG output files", "[write-mol-qca-layout-svg]"
     REQUIRE_FALSE(std::filesystem::exists(missing_parent));
 
     CHECK_THROWS_AS(write_mol_qca_layout_svg(layout, (missing_parent / "layout.svg").string()), std::ofstream::failure);
+    CHECK_FALSE(std::filesystem::exists(missing_parent));
     CHECK_THROWS_AS(write_mol_qca_layout_svg(layout, std::filesystem::temp_directory_path().string()),
                     std::ofstream::failure);
+}
+
+/** @brief Unsupported molecular QCA cells leave streams and existing files unchanged. */
+TEST_CASE("MolQCA SVG reports unsupported cell types and preserves output", "[write-mol-qca-layout-svg]")
+{
+    const auto simple = GENERATE(false, true);
+    CAPTURE(simple);
+    const write_mol_qca_layout_svg_params params{.simple = simple};
+    mol_qca::layout                       layout{{1, 1}, "Unsupported cell"};
+    // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange): tests rejection of an unnamed uint8_t enum value.
+    layout.assign_cell_type({0, 0}, static_cast<cell_type>('z'));
+
+    SECTION("stream")
+    {
+        std::ostringstream stream{};
+        CHECK_THROWS_AS(write_mol_qca_layout_svg(layout, stream, params),
+                        fcn::io::unsupported_cell_type_exception<mol_qca::layout::cell>);
+        CHECK(stream.str().empty());
+    }
+
+    SECTION("file")
+    {
+        const auto filename = std::filesystem::temp_directory_path() /
+                              ("fiction-mol-qca-svg-error-" + std::to_string(std::random_device{}()) + ".svg");
+        {
+            std::ofstream original{filename};
+            REQUIRE(original.is_open());
+            original << "sentinel";
+        }
+        CHECK_THROWS_AS(write_mol_qca_layout_svg(layout, filename.string(), params),
+                        fcn::io::unsupported_cell_type_exception<mol_qca::layout::cell>);
+        std::ifstream original{filename};
+        REQUIRE(original.is_open());
+        const std::string contents{std::istreambuf_iterator<char>{original}, std::istreambuf_iterator<char>{}};
+        original.close();
+        std::filesystem::remove(filename);
+        CHECK(contents == "sentinel");
+    }
 }
