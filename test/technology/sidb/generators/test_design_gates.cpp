@@ -390,8 +390,12 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
         CHECK(!found_gate_layouts_exhaustive.empty());
         params.design_mode = design_gates_params::design_gates_mode::QUICKCELL;
         const auto found_gate_layouts_quickcell =
-            design_gates(lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, params);
-        CHECK(!found_gate_layouts_quickcell.empty());
+            design_gates(defect_layout, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, params);
+        REQUIRE(!found_gate_layouts_quickcell.empty());
+        for (const auto& gate : found_gate_layouts_quickcell)
+        {
+            CHECK(gate.defects() == defect_layout.defects());
+        }
     }
 }
 

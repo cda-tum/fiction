@@ -827,6 +827,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     and leave the shell usable. Status text accounts for Unicode display widths.
 
 - Code quality:
+  - QuickCell's defect test now passes the defective skeleton and checks complete result metadata.
   - `find_first_two_of` now returns the end iterator when either range has fewer than two elements.
 
 - Continuous integration:
