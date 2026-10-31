@@ -55,7 +55,7 @@ void register_exhaustive_ground_state_simulation(nb::module_& m)
         nb::arg("lyt"), nb::kw_only(), nb::arg("base") = simulation_model{}.base,
         nb::arg("mu_minus") = simulation_model{}.mu_minus, nb::arg("epsilon_r") = simulation_model{}.epsilon_r,
         nb::arg("lambda_tf") = simulation_model{}.lambda_tf, nb::arg("on_progress").none() = nb::none(),
-        R"doc(Find all minimum-energy charge distributions by exhaustive simulation.
+        R"doc(Find all physically valid charge distributions by exhaustive simulation.
 The physical model is supplied by the scalar keyword values.
 
 Args:
