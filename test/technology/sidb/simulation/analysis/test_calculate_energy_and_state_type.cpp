@@ -146,10 +146,11 @@ TEST_CASE("Kinks-rejected labels count each matching charge distribution once", 
     kinked.assign_charge_state(internal_pair->upper, accepted.get_charge_state(internal_pair->lower));
 
     const std::vector<kitty::dynamic_truth_table> spec{create_and_tt()};
-    CHECK(calculate_energy_and_state_type_with_kinks_accepted(calculate_energy_distribution({kinked}), {kinked},
-                                                              output_pairs, spec, 1)
-              .front()
-              .second == state_type::ACCEPTED);
+    /** @brief Labels for the isolated charge distribution with an accepted output. */
+    const auto kinks_accepted = calculate_energy_and_state_type_with_kinks_accepted(
+        calculate_energy_distribution({kinked}), {kinked}, output_pairs, spec, 1);
+    REQUIRE_FALSE(kinks_accepted.empty());
+    CHECK(kinks_accepted.front().second == state_type::ACCEPTED);
 
     accepted.assign_energy(3.0);
     wrong_output.assign_energy(1.0);

@@ -154,9 +154,9 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
         REQUIRE(p2.has_value());
         CHECK(std::get<0>(*p2) == 0);
 
-        const auto p4 = valid_parameters.contains(parameter_point{{6.0, 6.0}});
-        REQUIRE(p4.has_value());
-        CHECK(std::get<0>(*p4) == 1);
+        const auto p3 = valid_parameters.contains(parameter_point{{6.0, 6.0}});
+        REQUIRE(p3.has_value());
+        CHECK(std::get<0>(*p3) == 1);
     }
 }
 

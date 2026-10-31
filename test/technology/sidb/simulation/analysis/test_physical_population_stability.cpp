@@ -267,7 +267,7 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
             Catch::Matchers::WithinAbs(4.32, 1e-5));
     }
 
-    SECTION("input 01")
+    SECTION("input 10")
     {
         lyt.assign_sidb({36, 1, 0}, dot_tag::EMPTY);
         lyt.assign_sidb({0, 0, 0}, dot_tag::EMPTY);
@@ -283,7 +283,7 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
             Catch::Matchers::WithinAbs(3.3, 1e-5));
     }
 
-    SECTION("input 10")
+    SECTION("input 11")
     {
         lyt.assign_sidb({38, 0, 0}, dot_tag::EMPTY);
         lyt.assign_sidb({0, 0, 0}, dot_tag::EMPTY);

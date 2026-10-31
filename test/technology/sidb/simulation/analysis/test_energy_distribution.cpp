@@ -120,10 +120,12 @@ TEST_CASE("Test calculate_energy_distribution function", "[energy-distribution]"
         const auto ground_state = result.get_nth_state(0);
         REQUIRE(ground_state.has_value());
         CHECK(ground_state->degeneracy == 2);
+        CHECK(ground_state->electrostatic_potential_energy == 0.0);
 
         const auto excited_state = result.get_nth_state(1);
         REQUIRE(excited_state.has_value());
         CHECK(excited_state->degeneracy == 1);
+        CHECK(excited_state->electrostatic_potential_energy > 0.0);
         CHECK(result.size() == 2);
         CHECK_FALSE(result.get_nth_state(2).has_value());
     }
