@@ -945,6 +945,8 @@ TEST_CASE("3 DBs next to each other (positively charged DBs occur)", "[quickexac
 
     const auto simulation_results = quickexact(lyt, params);
 
+    REQUIRE_FALSE(simulation_results.charge_distributions.empty());
+
     for (const auto& layout : simulation_results.charge_distributions)
     {
         CHECK(round_to_n_decimal_places(layout.energy(), 1) <= 0);

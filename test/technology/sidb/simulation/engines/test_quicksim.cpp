@@ -124,7 +124,9 @@ TEST_CASE("Single SiDB QuickSim simulation", "[quicksim]")
     CHECK_FALSE(checked_result(simulation_results).charge_distributions.empty());
 }
 
-/** @brief Checks that every returned distribution uses negative and neutral charges. @param simulation_results Result.
+/**
+ * @brief Checks that the result is nonempty and contains no positive charges.
+ * @param simulation_results Simulation result.
  */
 static void check_for_absence_of_positive_charges(const result& simulation_results)
 {
@@ -136,7 +138,10 @@ static void check_for_absence_of_positive_charges(const result& simulation_resul
     }
 }
 
-/** @brief Checks that QuickSim records its simulation runtime. @param simulation_results Result. */
+/**
+ * @brief Checks that QuickSim records a positive simulation runtime.
+ * @param simulation_results Simulation result.
+ */
 static void check_for_runtime_measurement(const result& simulation_results) noexcept
 {
     CHECK(simulation_results.simulation_runtime.count() > 0);
