@@ -470,7 +470,7 @@ concept qll_layout =
  * @param lyt The layout to be written.
  * @param os The output stream to write into.
  * @param on_progress Receives completed serialization work.
- * @throws std::invalid_argument if an iNML layout has no I/O pins or they are not routed to the layout's borders.
+ * @throws std::invalid_argument If an iNML input or output cell is not at its designated horizontal border.
  */
 template <qll_layout Lyt>
 void write_qll_layout(const Lyt& lyt, std::ostream& os, utils::progress_callback on_progress = {})
@@ -491,7 +491,7 @@ void write_qll_layout(const Lyt& lyt, std::ostream& os, utils::progress_callback
  * @param lyt The layout to be written.
  * @param filename The file name to create and write into. Should preferably use the `.qll` extension.
  * @param on_progress Receives completed serialization work.
- * @throws std::invalid_argument if an iNML layout has no I/O pins or they are not routed to the layout's borders.
+ * @throws std::invalid_argument If an iNML input or output cell is not at its designated horizontal border.
  * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
  */
 template <qll_layout Lyt>
