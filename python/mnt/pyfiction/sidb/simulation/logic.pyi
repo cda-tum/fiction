@@ -11,8 +11,10 @@
 import datetime as dt
 import enum
 from collections.abc import Callable, Iterator, Sequence
-from typing import overload
+from typing import Annotated, overload
 
+import numpy as np
+from numpy.typing import NDArray
 from typing_extensions import Self
 
 import mnt.pyfiction.sidb
@@ -1190,6 +1192,18 @@ class operational_domain:
     def keys(self) -> list[parameter_point]: ...
     def values(self) -> list[operational_status]: ...
     def items(self) -> list[tuple[parameter_point, operational_status]]: ...
+    def to_numpy(
+        self,
+    ) -> tuple[
+        Annotated[NDArray[np.float64], {"shape": (None, None)}], Annotated[NDArray[np.bool_], {"shape": (None,)}]
+    ]:
+        """
+        Returns the domain as NumPy arrays: a float64 array of shape (points, dimensions) holding the sampled parameter values in dimension order, and a boolean array of length points that is True where the point is operational. Point order is unspecified. Requires NumPy; install it with uv pip install 'mnt-pyfiction[plot]'.
+
+        Raises:
+            ImportError: NumPy is not installed or cannot be imported.
+            ValueError: A point does not match the domain dimension count.
+        """
 
 class operational_domain_value_range:
     """

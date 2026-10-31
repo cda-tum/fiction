@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import importlib
 import io
 from typing import TYPE_CHECKING
 
@@ -21,6 +22,10 @@ from mnt.fiction.cli import Session
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
     from pathlib import Path
+
+
+# Parser tests need registration even when they do not construct a shell session.
+importlib.import_module("mnt.fiction.cli.commands")
 
 
 class Shell:
@@ -143,4 +148,15 @@ def mux21_shell(shell: Shell, resource: Callable[[str], str]) -> Shell:
         The shell after ``read mux21.v``.
     """
     shell.ok(f'read "{resource("mux21.v")}"')
+    return shell
+
+
+@pytest.fixture
+def xor_gate(shell: Shell, resource: Callable[[str], str]) -> Shell:
+    """A shell holding a Bestagon XOR gate and the XOR truth table.
+
+    Returns:
+        The shell.
+    """
+    shell.ok(f'read "{resource("hex_21_inputsdbp_xor_v1.sqd")}"; tt -t 0110')
     return shell

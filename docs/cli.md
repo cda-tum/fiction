@@ -11,12 +11,19 @@ Every command also accepts `-h` for its full list of options.
 The shell ships with the Python package:
 
 ```console
-$ pip install mnt.pyfiction
+$ uv tool install mnt.pyfiction
 $ fiction
 ```
 
-`python -m mnt.fiction.cli` starts the same shell. The `mnt.pyfiction` distribution contains both the
-bindings and the `mnt.fiction.cli` module; the executable is named `fiction`.
+`fiction repl` starts the same shell explicitly. `fiction opdom INPUT.sqd --gate xor --csv domain.csv`
+runs a dedicated operational-domain computation. `fiction --help` lists these routes; each route accepts
+`--help` for its own options. Put the route before its options.
+
+Bare `fiction` retains the shell's `-c`, `-f`, `-i`, logging, and quiet options. Piped input executes shell
+commands without an interactive prompt. `fiction repl` accepts the same options and input sources.
+`python -m mnt.fiction.cli` provides the same routes when the package is installed in that Python environment.
+The `mnt.pyfiction` distribution contains both the bindings and the `mnt.fiction.cli` module;
+the executable is named `fiction`.
 
 From a local checkout, `uv run fiction` builds and installs the project as needed, then starts the shell.
 After installation, `uv run --no-sync fiction` reuses the environment. To build and run an isolated copy,
@@ -418,10 +425,15 @@ The x and y axes sweep `epsilon_r` from 1 to 10 and `lambda_tf` from 1 to 10 in 
 `-z` names a parameter; its default range is -0.5 to -0.1 in steps of 0.025, made for `mu_minus`. Every axis
 needs its own parameter; sweeping one on two axes would produce a degenerate domain and is refused.
 
-Grid search evaluates every point. `-r N`, `-f N`, and `-c N` start random sampling, flood fill, and contour
-tracing from `N` random samples instead. Grid search and random sampling accept any number of dimensions; flood
-fill and contour tracing follow the operational region and need at least two, and in three dimensions contour
-tracing collects the boundary surface. `-s` computes the _operational domain sketch_, which judges every point by
+Both entry points accept `--algorithm grid_search|random_sampling|flood_fill|contour_tracing`.
+Help groups the logic specification, reconstruction, sweeps, plotting, and advanced operational analysis.
+Examples use the named algorithm selector; the legacy algorithm flags remain accepted but are omitted from help.
+Grid search is the default and evaluates every point. Random sampling, flood fill, and contour tracing require
+`--samples N`. Add `--sketch` to any reconstruction method for filter-only analysis. The named selector and
+the existing `-g`, `-r N`, `-f N`, and `-c N` flags are mutually exclusive. The short flags keep their sample
+counts. Grid search and random sampling accept any number of dimensions; flood fill and contour tracing
+follow the operational region and need at least two, and in three dimensions contour tracing collects the
+boundary surface. `-s` computes the _operational domain sketch_, which judges every point by
 filtering alone instead of by simulation: dramatically faster, never rejecting an operational point, but
 reporting some non-operational points as operational. The sketch implies kink rejection and needs a layout with
 `LOGIC` dots for the filters to enumerate; it pairs best with grid search and random sampling. `-o` writes only
@@ -434,7 +446,7 @@ status is `1` when a command fails, which stops the string at that command. `fic
 of a file, one line per line, in the same way; a missing file exits with `2`. `quit` ends either without failing,
 leaving the commands after it unrun. `-i` continues into the interactive shell once the commands are done, and
 `-q` suppresses notices and keeps requested results, including `version`, `print`, `store`, `simulate`, `equiv`,
-and `area`.
+`area`, and `opdom` statistics.
 
 Piped standard input runs as a batch stream without constructing an interactive prompt, for example
 `printf 'version\nquit\n' | fiction --quiet` on a POSIX shell. Scripts must use UTF-8; decoding failures identify
@@ -451,6 +463,63 @@ for filepath in benchmarks/TOY/*.v; do
     fiction -c "read $filepath; ortho; cell; write_qca ${f%.*}.qca"
 done
 ```
+
+### Dedicated command and plots
+
+Install plotting support once with `uv tool install 'mnt-pyfiction[plot]'`, then run `fiction opdom`.
+For scripts or notebooks, use `uv pip install 'mnt-pyfiction[plot]'` in an active virtual environment;
+`python -m mnt.fiction.opdom` runs the command in that environment:
+
+```console
+fiction opdom gate.sqd --gate xor --plot domain.png --plot domain.html
+fiction opdom gate.sqd --table 0110 --algorithm flood_fill --samples 100 --plot domain.html
+fiction opdom gate.sqd --gate xor --algorithm grid_search --sketch --plot sketch.png --plot sketch.html
+fiction -c 'read gate.sqd; tt -t 0110; opdom domain.csv --plot domain.html'
+```
+
+The dedicated command requires an SQD file and an explicit specification: `--gate` selects `id`, `not`,
+`and`, `nand`, `or`, `nor`, `xor`, `xnor`, or `maj`; repeated `--table` or `--expression` options specify
+one function per output. The shell's `opdom` command and `fiction opdom` share argument definitions,
+parameter validation, reconstruction, statistics, and CSV/plot export. The shell uses its active SiDB layout
+and falls back to its active truth table; the dedicated command loads an SQD file and requires an explicit
+specification. Tables use the same binary and hexadecimal conventions as `tt`. Expressions
+use the detected input count, so an expression can leave inputs unused. The shell accepts these options
+as overrides of its active truth table. Every specification must match the detected BDL ports.
+
+The positional arguments differ by context: terminal `fiction opdom INPUT.sqd` reads a layout, while
+shell `opdom OUTPUT.csv` writes a domain for the active layout. Use `--csv FILE` for the dedicated route's CSV output.
+
+Each invocation computes one reconstruction method. Repeat `--plot FILE` to export the same domain
+as PNG, SVG, PDF, or HTML. The dedicated command requires `--csv FILE` or `--plot FILE`, or both.
+Omitting outputs reports an example without computing or writing files. A CSV-only invocation needs no plotting packages.
+`--show` opens plots after all exports and statistics are written. Viewer failures report an error
+and preserve the exports and statistics. HTML files embed Plotly and work offline, with hover information,
+zoom, pan, 3D rotation, and legend toggles. Both backends draw the returned samples and leave missing
+samples blank. Sketch positives are labeled "Potentially operational". Each output is written atomically;
+if a later output fails, earlier outputs remain. The dedicated command rejects outputs or logs that would
+replace its input SQD file. The shell stores layouts without source paths; choose output paths that differ
+from files read into the shell. Statistics logs accept devices such as `/dev/null`; CSV and plot outputs
+require regular files. The dedicated command writes no log when argument or output validation fails.
+
+Both commands expose `--threads`, `--timeout-ms`, `--condition tolerate_kinks|reject_kinks`,
+`--strategy simulation_only|filter_only|filter_then_simulation`, and `--input-encoding distance|absence`.
+BDL detection uses `--bdl-pair-min`, `--bdl-pair-max`, and `--bdl-wire-distance`, all in nm.
+Advanced defaults follow the bindings. `--sketch` or `--strategy filter_only` enables Sketch, which
+requires kink rejection and `LOGIC` dots. QuickSim requires base 2 and cannot simulate charged defects. A finite timeout
+bounds the complete computation and is unsupported with ClusterComplete; expiration produces no partial domain.
+
+Plots show a legend and non-operational samples by default. `--no-legend`, `--no-non-operational`, and
+`--no-title` hide them. `--title TEXT` supplies a title. `--operational-color`, `--non-operational-color`,
+`--operational-size`, and `--non-operational-size` control markers; sizes are diameters in points for static
+plots and pixels for HTML. `--width` and `--height` set figure dimensions in inches; HTML uses 96 pixels
+per inch. `--dpi` sets static-image resolution. Defaults are 7×6 inches, 300 DPI, purple operational
+samples, yellow Sketch positives, and gray non-operational samples. Use hex colors or names accepted by
+both backends when exporting static plots and HTML together.
+
+The results table prints computation runtime, evaluated samples, operational/non-operational counts,
+total parameter points, and simulator calls. `--log FILE` records statistics and native parameters as JSON.
+`--quiet` suppresses progress and notices while retaining statistics and errors. Progress uses percentages
+only when the algorithm reports a total.
 
 ### Statistics log
 
