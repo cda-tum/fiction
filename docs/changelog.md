@@ -251,6 +251,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Modernized iNML and molecular QCA tests with complete SVG file checks, cell-type rows, and independent
+    gate-orientation cases.
   - Modernized physical-design helper tests with complete routing collections and independent solver rows.
   - Streamlined synthesis tests and strengthened clone, conversion, and gate-library checks.
   - Modernized path-finding tests with shared data rows, complete path comparisons, and cache reuse checks.
