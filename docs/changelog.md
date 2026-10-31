@@ -252,6 +252,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Modernized QCA tests with shared format expectations and SVG detail multiplicity checks.
   - FCN tests share port-list and constant-cell cases and check writer failure recovery.
     Writer docs describe border validation.
   - Modernized utility tests with named data rows, direct result checks, and complete progress observations.
@@ -389,6 +390,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - I/O:
 
+  - QCA SVG rendering now reuses static tile and latch templates without per-tile text copies.
   - FGL name escaping appends text in one pass to avoid repeated suffix copies for long whitespace-heavy names.
   - `write_sidb_layout_svg` and `print_sidb_layout` color an `sidb::layout` from an optional
     `charge_distribution`
