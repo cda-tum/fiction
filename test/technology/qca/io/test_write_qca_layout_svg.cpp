@@ -272,6 +272,7 @@ TEST_CASE("QCA SVG reports unsupported cell types and preserves files", "[write-
     const auto tile_size = GENERATE(uint16_t{1}, uint16_t{5});
     CAPTURE(tile_size);
     qca::layout layout{{1, 1}, "Unsupported cell", tile_size, tile_size};
+    // NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange): tests rejection of an unnamed uint8_t enum value.
     layout.assign_cell_type({0, 0}, static_cast<qca::cell_type>('z'));
 
     SECTION("stream")
