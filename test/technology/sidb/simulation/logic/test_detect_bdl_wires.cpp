@@ -170,6 +170,9 @@ TEST_CASE("BDL wire from west to east", "[detect-bdl-wires]")
     REQUIRE(input_bdl_wires.size() == 1);
     const auto& input_bdl_wire = input_bdl_wires.front();
     CHECK(input_bdl_wire.port.dir == port_direction::cardinal::EAST);
+    CHECK(input_bdl_wire.pairs == std::vector<bdl_pair>{{dot_tag::INPUT, {0, 0, 0}, {2, 0, 0}},
+                                                        {dot_tag::NORMAL, {6, 0, 0}, {8, 0, 0}},
+                                                        {dot_tag::NORMAL, {12, 0, 0}, {14, 0, 0}}});
     REQUIRE(input_bdl_wire.first_bdl_pair.has_value());
     REQUIRE(input_bdl_wire.last_bdl_pair.has_value());
     CHECK(input_bdl_wire.first_bdl_pair == bdl_pair{dot_tag::INPUT, lattice_site{0, 0, 0}, lattice_site{2, 0, 0}});
@@ -179,6 +182,9 @@ TEST_CASE("BDL wire from west to east", "[detect-bdl-wires]")
     REQUIRE(output_bdl_wires.size() == 1);
     const auto& output_bdl_wire = output_bdl_wires.front();
     CHECK(output_bdl_wire.port.dir == port_direction::cardinal::EAST);
+    CHECK(output_bdl_wire.pairs == std::vector<bdl_pair>{{dot_tag::NORMAL, {6, 0, 0}, {8, 0, 0}},
+                                                         {dot_tag::NORMAL, {12, 0, 0}, {14, 0, 0}},
+                                                         {dot_tag::OUTPUT, {18, 0, 0}, {20, 0, 0}}});
     REQUIRE(output_bdl_wire.first_bdl_pair.has_value());
     REQUIRE(output_bdl_wire.last_bdl_pair.has_value());
     CHECK(output_bdl_wire.first_bdl_pair == bdl_pair{dot_tag::INPUT, lattice_site{0, 0, 0}, lattice_site{2, 0, 0}});

@@ -42,6 +42,21 @@ TEST_CASE("Empty layout BDL detection", "[detect-bdl-pairs]")
     CHECK(result.empty());
 }
 
+TEST_CASE("BDL pair distance bounds are inclusive", "[detect-bdl-pairs]")
+{
+    /** @brief A single pair whose physical distance defines both bounds. */
+    layout lyt{};
+    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+    lyt.assign_sidb({2, 0, 0}, dot_tag::INPUT);
+
+    /** @brief Exact distance used by the public pair-detection contract. */
+    const auto distance = lyt.get_lattice().nm_distance({0, 0, 0}, {2, 0, 0});
+
+    CHECK(detect_bdl_pairs(lyt, dot_tag::INPUT,
+                           detect_bdl_pairs_params{.minimum_distance = distance, .maximum_distance = distance}) ==
+          std::vector<bdl_pair>{{dot_tag::INPUT, {0, 0, 0}, {2, 0, 0}}});
+}
+
 TEST_CASE("BDL wire", "[detect-bdl-pairs]")
 {
     layout lyt{lattice::si_100_2x1(), "Atomic wire"};
@@ -138,13 +153,10 @@ TEST_CASE("Atomic wire BDL detection", "[detect-bdl-pairs]")
         CHECK(output_pair.upper == lattice_site{6, 0, 0});
         CHECK(output_pair.lower == lattice_site{7, 0, 0});
 
-        CHECK(normal_pair1.type == dot_tag::NORMAL);
-        CHECK((normal_pair1.upper == lattice_site{2, 0, 0} || normal_pair1.upper == lattice_site{4, 0, 0}));
-        CHECK((normal_pair1.lower == lattice_site{3, 0, 0} || normal_pair1.lower == lattice_site{5, 0, 0}));
-
-        CHECK(normal_pair2.type == dot_tag::NORMAL);
-        CHECK((normal_pair2.upper == lattice_site{2, 0, 0} || normal_pair2.upper == lattice_site{4, 0, 0}));
-        CHECK((normal_pair2.lower == lattice_site{3, 0, 0} || normal_pair2.lower == lattice_site{5, 0, 0}));
+        CHECK((normal_bdl_pairs == std::vector<bdl_pair>{{dot_tag::NORMAL, {2, 0, 0}, {3, 0, 0}},
+                                                         {dot_tag::NORMAL, {4, 0, 0}, {5, 0, 0}}} ||
+               normal_bdl_pairs == std::vector<bdl_pair>{{dot_tag::NORMAL, {2, 0, 0}, {5, 0, 0}},
+                                                         {dot_tag::NORMAL, {3, 0, 0}, {4, 0, 0}}}));
 
         /** @brief All normal dots, retaining multiplicity to detect reused endpoints. */
         std::vector<lattice_site> paired_sites{normal_pair1.upper, normal_pair1.lower, normal_pair2.upper,

@@ -131,6 +131,7 @@ TEST_CASE("AND gate mirrored on the x-axis on the H-Si 111 surface", "[verify-lo
 
         CHECK(verify_logic_match(*bii, gs.front(), op_params, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
                                  1, input_wires, output_wires) == operational_status::OPERATIONAL);
+        // Both patterns have output 0; the wrong input pattern must fail the kink check.
         CHECK(verify_logic_match(*bii, gs.front(), op_params, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
                                  2, input_wires, output_wires) == operational_status::NON_OPERATIONAL);
     }
