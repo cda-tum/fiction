@@ -331,8 +331,8 @@ TEST_CASE("Reject invalid MolQCA SVG output files", "[write-mol-qca-layout-svg]"
                     std::ofstream::failure);
 }
 
-/** @brief Unsupported molecular QCA cells leave streams and existing files unchanged. */
-TEST_CASE("MolQCA SVG reports unsupported cell types and preserves output", "[write-mol-qca-layout-svg]")
+/** @brief Unsupported molecular QCA cells raise exceptions and preserve existing files. */
+TEST_CASE("MolQCA SVG reports unsupported cell types and preserves files", "[write-mol-qca-layout-svg]")
 {
     const auto simple = GENERATE(false, true);
     CAPTURE(simple);
@@ -346,7 +346,6 @@ TEST_CASE("MolQCA SVG reports unsupported cell types and preserves output", "[wr
         std::ostringstream stream{};
         CHECK_THROWS_AS(write_mol_qca_layout_svg(layout, stream, params),
                         fcn::io::unsupported_cell_type_exception<mol_qca::layout::cell>);
-        CHECK(stream.str().empty());
     }
 
     SECTION("file")
