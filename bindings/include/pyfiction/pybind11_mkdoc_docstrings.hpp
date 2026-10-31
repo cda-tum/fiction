@@ -22184,7 +22184,7 @@ Raises:
                 rejecting kinks or on a layout without `LOGIC` dots.
                 Flood fill and contour tracing additionally require at
                 least two sweep dimensions; grid search and random
-                sampling accept any number.
+                sampling require at least one.
 
 )doc";
 
@@ -22244,7 +22244,7 @@ Raises:
                 rejecting kinks or on a layout without `LOGIC` dots.
                 Flood fill and contour tracing additionally require at
                 least two sweep dimensions; grid search and random
-                sampling accept any number.
+                sampling require at least one.
 
 )doc";
 
@@ -22302,7 +22302,7 @@ Raises:
     ValueError: if the given sweep parameters are invalid, or if the
                 operational domain sketch is requested without
                 rejecting kinks or on a layout without `LOGIC` dots.
-                Any number of sweep dimensions is accepted.
+                At least one sweep dimension is required.
 
 )doc";
 
@@ -22353,7 +22353,7 @@ Raises:
     ValueError: if the given sweep parameters are invalid, or if the
                 operational domain sketch is requested without
                 rejecting kinks or on a layout without `LOGIC` dots.
-                Any number of sweep dimensions is accepted.
+                At least one sweep dimension is required.
 
 )doc";
 
@@ -23427,7 +23427,7 @@ Args:
     params: The operational domain parameters to validate.
     min_sweep_dimensions: The number of sweep dimensions the calling
                           algorithm requires at least. Grid search and
-                          random sampling accept any number; flood
+                          random sampling require at least one; flood
                           fill and contour tracing need at least two.
     algorithm_name: The name of the calling algorithm, used to phrase
                     the sweep dimension count error.
@@ -23858,7 +23858,7 @@ Raises:
                 rejecting kinks or on a layout without `LOGIC` dots.
                 Flood fill and contour tracing additionally require at
                 least two sweep dimensions; grid search and random
-                sampling accept any number.
+                sampling require at least one.
 
 )doc";
 
@@ -23915,7 +23915,7 @@ Raises:
                 rejecting kinks or on a layout without `LOGIC` dots.
                 Flood fill and contour tracing additionally require at
                 least two sweep dimensions; grid search and random
-                sampling accept any number.
+                sampling require at least one.
 
 )doc";
 
@@ -23975,7 +23975,7 @@ Raises:
     ValueError: if the given sweep parameters are invalid, or if the
                 operational domain sketch is requested without
                 rejecting kinks or on a layout without `LOGIC` dots.
-                Any number of sweep dimensions is accepted.
+                At least one sweep dimension is required.
 
 )doc";
 
@@ -24057,7 +24057,7 @@ Raises:
     ValueError: if the given sweep parameters are invalid, or if the
                 operational domain sketch is requested without
                 rejecting kinks or on a layout without `LOGIC` dots.
-                Any number of sweep dimensions is accepted.
+                At least one sweep dimension is required.
 
 )doc";
 
