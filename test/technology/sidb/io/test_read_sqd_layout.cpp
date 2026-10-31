@@ -817,7 +817,7 @@ TEST_CASE("SQD parsing error: missing <latcoord> element in <incl_coords> elemen
     CHECK_THROWS_AS(read_sqd_layout(layout_stream), sqd_parsing_error);
 }
 
-TEST_CASE("SQD parsing error: missing <type> element in <dbdot> element", "[sqd]")
+TEST_CASE("SQD parsing error: empty <type> text in <dbdot> element", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
