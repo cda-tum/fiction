@@ -15,7 +15,9 @@
  * @author Jan Drewniok (Drewniok)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
@@ -24,6 +26,7 @@
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 
+#include <array>
 #include <cstdint>
 #include <iterator>
 #include <stdexcept>
@@ -59,11 +62,12 @@ TEST_CASE("BDL Input Iterator input pair limit", "[bdl-input-iterator]")
 TEST_CASE("BDL Input Iterator Traits", "[bdl-input-iterator]")
 {
 
-    CHECK(std::is_same_v<std::iterator_traits<bdl_input_iterator>::iterator_category, std::random_access_iterator_tag>);
+    STATIC_REQUIRE(
+        std::is_same_v<std::iterator_traits<bdl_input_iterator>::iterator_category, std::random_access_iterator_tag>);
 
-    CHECK(std::is_same_v<std::iterator_traits<bdl_input_iterator>::value_type, layout>);
+    STATIC_REQUIRE(std::is_same_v<std::iterator_traits<bdl_input_iterator>::value_type, layout>);
 
-    CHECK(std::is_same_v<std::iterator_traits<bdl_input_iterator>::difference_type, int64_t>);
+    STATIC_REQUIRE(std::is_same_v<std::iterator_traits<bdl_input_iterator>::difference_type, int64_t>);
 }
 
 TEST_CASE("Operators", "[bdl-input-iterator]")
@@ -310,142 +314,38 @@ TEST_CASE("Mirrored BDL wire iteration", "[bdl-input-iterator]")
 
 TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
 {
+    /** @brief Input encoding selected for the AND gate. */
+    using input_configuration = bdl_input_iterator_params::input_bdl_configuration;
+    /** @brief Active input sites for patterns 00, 01, 10, and 11, in raster order. */
+    using input_patterns = std::array<std::vector<lattice_site>, 4>;
+    /** @brief Independent physical input expectations for both encodings. */
+    const auto [encoding, configuration, expected_inputs] =
+        GENERATE(Catch::Generators::table<const char*, input_configuration, input_patterns>(
+            {{"distance",
+              input_configuration::PERTURBER_DISTANCE_ENCODED,
+              {{{{0, 0, 1}, {20, 0, 1}}, {{0, 0, 1}, {18, 1, 1}}, {{20, 0, 1}, {2, 1, 1}}, {{2, 1, 1}, {18, 1, 1}}}}},
+             {"absence",
+              input_configuration::PERTURBER_ABSENCE_ENCODED,
+              {{{}, {{18, 1, 1}}, {{2, 1, 1}}, {{2, 1, 1}, {18, 1, 1}}}}}}));
+
+    /** @brief AND gate with both input pairs present. */
     const auto lyt = blueprints::siqad_and_gate();
+    /** @brief Iterator advanced through all four input patterns in order. */
+    bdl_input_iterator bii{
+        lyt, bdl_input_iterator_params{.bdl_wire_params  = detect_bdl_wires_params{.threshold_bdl_interdistance = 2.0},
+                                       .input_bdl_config = configuration}};
 
-    const auto& lat = lyt;
+    REQUIRE(bii.is_valid());
+    REQUIRE(bii.num_input_pairs() == 2);
 
-    const detect_bdl_wires_params params{.threshold_bdl_interdistance = 2.0};
-
-    SECTION("SiQAD coordinates, encode input 0 with the absence of perturbers")
+    /** @brief Index of the next expected input pattern. */
+    for (uint64_t pattern = 0; pattern < expected_inputs.size(); ++pattern, ++bii)
     {
-        bdl_input_iterator bii{
-            lat,
-            bdl_input_iterator_params{
-                .bdl_wire_params  = params,
-                .input_bdl_config = bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED}};
-
-        for (auto i = 0; bii < 4; ++bii, ++i)
-        {
-            switch (i)
-            {
-                case 0:
-                {
-                    const auto& lyt_0 = *bii;
-
-                    CHECK(lyt_0.get_dot_tag({0, 0, 1}) == dot_tag::EMPTY);
-                    CHECK(lyt_0.get_dot_tag({2, 1, 1}) == dot_tag::EMPTY);
-
-                    CHECK(lyt_0.get_dot_tag({20, 0, 1}) == dot_tag::EMPTY);
-                    CHECK(lyt_0.get_dot_tag({18, 1, 1}) == dot_tag::EMPTY);
-
-                    break;
-                }
-                case 1:
-                {
-                    const auto& lyt_1 = *bii;
-
-                    CHECK(lyt_1.get_dot_tag({0, 0, 1}) == dot_tag::EMPTY);
-                    CHECK(lyt_1.get_dot_tag({2, 1, 1}) == dot_tag::EMPTY);
-
-                    CHECK(lyt_1.get_dot_tag({20, 0, 1}) == dot_tag::EMPTY);
-                    CHECK(lyt_1.get_dot_tag({18, 1, 1}) == dot_tag::INPUT);
-
-                    break;
-                }
-                case 2:
-                {
-                    const auto& lyt_2 = *bii;
-
-                    CHECK(lyt_2.get_dot_tag({0, 0, 1}) == dot_tag::EMPTY);
-                    CHECK(lyt_2.get_dot_tag({2, 1, 1}) == dot_tag::INPUT);
-
-                    CHECK(lyt_2.get_dot_tag({20, 0, 1}) == dot_tag::EMPTY);
-                    CHECK(lyt_2.get_dot_tag({18, 1, 1}) == dot_tag::EMPTY);
-
-                    break;
-                }
-                case 3:
-                {
-                    const auto& lyt_3 = *bii;
-
-                    CHECK(lyt_3.get_dot_tag({0, 0, 1}) == dot_tag::EMPTY);
-                    CHECK(lyt_3.get_dot_tag({2, 1, 1}) == dot_tag::INPUT);
-
-                    CHECK(lyt_3.get_dot_tag({20, 0, 1}) == dot_tag::EMPTY);
-                    CHECK(lyt_3.get_dot_tag({18, 1, 1}) == dot_tag::INPUT);
-
-                    break;
-                }
-                default:
-                {
-                    CHECK(false);
-                }
-            }
-        }
-    }
-
-    SECTION("SiQAD coordinates")
-    {
-        bdl_input_iterator bii{lat, bdl_input_iterator_params{.bdl_wire_params = params}};
-
-        for (auto i = 0; bii < 4; ++bii, ++i)
-        {
-            switch (i)
-            {
-                case 0:
-                {
-                    const auto& lyt_0 = *bii;
-
-                    CHECK(lyt_0.get_dot_tag({0, 0, 1}) == dot_tag::INPUT);
-                    CHECK(lyt_0.get_dot_tag({2, 1, 1}) == dot_tag::EMPTY);
-
-                    CHECK(lyt_0.get_dot_tag({20, 0, 1}) == dot_tag::INPUT);
-                    CHECK(lyt_0.get_dot_tag({18, 1, 1}) == dot_tag::EMPTY);
-
-                    break;
-                }
-                case 1:
-                {
-                    const auto& lyt_1 = *bii;
-
-                    CHECK(lyt_1.get_dot_tag({0, 0, 1}) == dot_tag::INPUT);
-                    CHECK(lyt_1.get_dot_tag({2, 1, 1}) == dot_tag::EMPTY);
-
-                    CHECK(lyt_1.get_dot_tag({20, 0, 1}) == dot_tag::EMPTY);
-                    CHECK(lyt_1.get_dot_tag({18, 1, 1}) == dot_tag::INPUT);
-
-                    break;
-                }
-                case 2:
-                {
-                    const auto& lyt_2 = *bii;
-
-                    CHECK(lyt_2.get_dot_tag({0, 0, 1}) == dot_tag::EMPTY);
-                    CHECK(lyt_2.get_dot_tag({2, 1, 1}) == dot_tag::INPUT);
-
-                    CHECK(lyt_2.get_dot_tag({20, 0, 1}) == dot_tag::INPUT);
-                    CHECK(lyt_2.get_dot_tag({18, 1, 1}) == dot_tag::EMPTY);
-
-                    break;
-                }
-                case 3:
-                {
-                    const auto& lyt_3 = *bii;
-
-                    CHECK(lyt_3.get_dot_tag({0, 0, 1}) == dot_tag::EMPTY);
-                    CHECK(lyt_3.get_dot_tag({2, 1, 1}) == dot_tag::INPUT);
-
-                    CHECK(lyt_3.get_dot_tag({20, 0, 1}) == dot_tag::EMPTY);
-                    CHECK(lyt_3.get_dot_tag({18, 1, 1}) == dot_tag::INPUT);
-
-                    break;
-                }
-                default:
-                {
-                    CHECK(false);
-                }
-            }
-        }
+        CAPTURE(encoding, pattern);
+        CHECK(bii == pattern);
+        CHECK((*bii).dots_with_tag(dot_tag::INPUT) == expected_inputs[pattern]);
+        CHECK((*bii).dots_with_tag(dot_tag::NORMAL) == lyt.dots_with_tag(dot_tag::NORMAL));
+        CHECK((*bii).dots_with_tag(dot_tag::OUTPUT) == lyt.dots_with_tag(dot_tag::OUTPUT));
     }
 }
 
@@ -468,12 +368,8 @@ TEST_CASE("Generate BDL input pattern layouts", "[bdl-input-iterator]")
 
         for (uint64_t i = 0; i < layouts.size(); ++i, ++bii)
         {
-            const auto& expected = *bii;
-
-            CHECK(layouts[i].num_dots() == expected.num_dots());
-
-            expected.foreach_dot([&layouts, &expected, i](const auto& c)
-                                 { CHECK(layouts[i].get_dot_tag(c) == expected.get_dot_tag(c)); });
+            CAPTURE(i);
+            CHECK(layouts[i] == *bii);
         }
     }
 
@@ -484,13 +380,7 @@ TEST_CASE("Generate BDL input pattern layouts", "[bdl-input-iterator]")
         const auto layouts            = generate_bdl_input_pattern_layouts(lat, params);
         const auto layouts_with_wires = generate_bdl_input_pattern_layouts(lat, params, input_wires);
 
-        REQUIRE(layouts.size() == layouts_with_wires.size());
-
-        for (uint64_t i = 0; i < layouts.size(); ++i)
-        {
-            layouts[i].foreach_dot([&layouts, &layouts_with_wires, i](const auto& c)
-                                   { CHECK(layouts_with_wires[i].get_dot_tag(c) == layouts[i].get_dot_tag(c)); });
-        }
+        CHECK(layouts == layouts_with_wires);
     }
 
     SECTION("The layouts are independent deep copies")
