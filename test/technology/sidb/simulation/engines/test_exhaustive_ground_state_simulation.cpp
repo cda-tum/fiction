@@ -221,7 +221,7 @@ TEST_CASE("ExGS simulation of a Y-shaped SiDB OR gate with input 01", "[exhausti
 
     const auto simulation_results = exhaustive_ground_state_simulation(lyt, params);
 
-    REQUIRE_FALSE(simulation_results.charge_distributions.empty());
+    REQUIRE(simulation_results.charge_distributions.size() == 1);
     const auto&                       charges = simulation_results.charge_distributions.front();
     const std::array<lattice_site, 8> sites{
         {{6, 2, 0}, {12, 3, 0}, {10, 8, 1}, {10, 6, 1}, {16, 1, 0}, {10, 5, 0}, {14, 2, 0}, {8, 3, 0}}};
