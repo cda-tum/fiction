@@ -41,9 +41,6 @@ void register_qca_io(nb::module_& m);
 
 }  // namespace pyfiction
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
-
 NB_MODULE(qca, m)
 {
     m.doc() = "Quantum-dot Cellular Automata (QCA) cell-level layouts.";
@@ -55,5 +52,3 @@ NB_MODULE(qca, m)
     auto io = pyfiction::def_submodule(m, "io", "Readers and writers of QCA cell-level layouts.");
     pyfiction::register_qca_io(io);
 }
-
-#pragma GCC diagnostic pop
