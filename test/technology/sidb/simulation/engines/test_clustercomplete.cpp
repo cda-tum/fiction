@@ -404,6 +404,8 @@ TEST_CASE("3 DBs next to each other (positively charged DBs occur)", "[clusterco
     const auto simulation_results = clustercomplete(lyt, params);
 
     REQUIRE(!simulation_results.charge_distributions.empty());
+    CHECK(std::ranges::any_of(simulation_results.charge_distributions,
+                              [](const auto& cd) { return cd.num_positive_sidbs() > 0; }));
     for (const auto& layout : simulation_results.charge_distributions)
     {
         CHECK(round_to_n_decimal_places(layout.energy(), 1) <= 0);
@@ -1801,7 +1803,7 @@ TEST_CASE("ClusterComplete reports progress", "[clustercomplete]")
 
     clustercomplete_params params{.sim_params = simulation_parameters{2}, .on_progress = rec.callback()};
 
-    params.available_threads = GENERATE(1, 2);
+    params.available_threads = GENERATE(uint64_t{1}, uint64_t{2});
     CAPTURE(params.available_threads);
 
     const auto simulation_results = clustercomplete(lyt, params);

@@ -84,7 +84,7 @@ TEST_CASE("SiDB cluster hierarchy of a Y-shape SiDB OR gate with input 01", "[si
     // check for spooky non-determinism in alglib
     for (int8_t i = 0; i < 100; ++i)
     {
-        CAPTURE(i);
+        CAPTURE(int{i});
         const sidb::simulation::engines::detail::binary_cluster_hierarchy_node& h =
             sidb::simulation::engines::detail::cluster_hierarchy(lyt);
 
