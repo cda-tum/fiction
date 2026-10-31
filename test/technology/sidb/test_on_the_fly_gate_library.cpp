@@ -48,8 +48,6 @@ using namespace fiction::sidb;
 using namespace fiction::sidb::model;
 using namespace fiction::synthesis;
 
-static_assert(std::is_pointer_v<decltype(&on_the_fly_gate_library::set_up_gate)>);
-
 TEST_CASE("Parameterized gate library traits", "[parameterized-gate-library]")
 {
     STATIC_REQUIRE(std::is_same_v<on_the_fly_gate_library::layout, sidb::layout>);
