@@ -63,10 +63,8 @@ struct time_to_solution_params
      */
     uint64_t repetitions = 100;
     /**
-     * The confidence level represents the probability that the confidence interval calculated from the simulation
-     * contains the true value. For example, a 99.7 % (0.997) confidence level means that if the simulation were
-     * repeated many times, approximately 997 out of 1000 of the calculated confidence intervals would contain the true
-     * value.
+     * Target probability of finding the ground state at least once across repeated heuristic attempts.
+     * For example, 0.997 requests a 99.7 % probability of at least one success.
      */
     double confidence_level = 0.997;
     /**
