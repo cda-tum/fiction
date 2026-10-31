@@ -23,6 +23,7 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/technology/fcn/io/write_qll_layout.hpp>
+#include <fiction/technology/inml/io/write_qcc_layout.hpp>
 #include <fiction/technology/inml/layout.hpp>
 #include <fiction/technology/mol_qca/layout.hpp>
 #include <fiction/technology/qca/layout.hpp>
@@ -38,6 +39,7 @@
 using namespace fiction;
 using namespace fiction::fcn::io;
 using namespace fiction::inml;
+using namespace fiction::inml::io;
 using namespace fiction::qca;
 
 TEST_CASE("Write empty iNML layout", "[qll]")
@@ -340,7 +342,7 @@ TEST_CASE("Write single-layer iNML crosswire", "[qll]")
     CHECK(layout_stream.str() == qll_layout);
 }
 
-/** @brief QLL rejects either terminal away from its designated iNML border before writing. */
+/** @brief QLL and QCC reject either terminal away from its designated iNML border before writing. */
 TEST_CASE("Abort on non-pin iNML layouts", "[qll]")
 {
     /** @brief Independently invalid input or output terminal. */
@@ -357,6 +359,8 @@ TEST_CASE("Abort on non-pin iNML layouts", "[qll]")
     layout.assign_cell_type({invalid_input ? 4 : 2, 2}, inml::magnet_type::OUTPUT);
 
     CHECK_THROWS_AS(write_qll_layout(layout, layout_stream), std::invalid_argument);
+    CHECK(layout_stream.str() == "preserved");
+    CHECK_THROWS_AS(write_qcc_layout(layout, layout_stream), std::invalid_argument);
     CHECK(layout_stream.str() == "preserved");
 }
 
