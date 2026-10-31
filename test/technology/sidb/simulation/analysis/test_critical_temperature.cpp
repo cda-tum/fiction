@@ -40,6 +40,8 @@
 
 #include <chrono>
 #include <cmath>
+#include <cstdint>
+#include <limits>
 #include <stdexcept>
 #include <thread>
 #include <vector>
@@ -1069,5 +1071,76 @@ TEST_CASE("Gate-based critical temperature rejects invalid specifications", "[cr
         CHECK_THROWS_AS(critical_temperature_gate_based(layouts, spec, {}, std::vector<bdl_pair>(spec.size()),
                                                         input_wires, output_wires),
                         std::invalid_argument);
+    }
+}
+
+TEST_CASE("Critical temperature validates centikelvin bounds", "[critical-temperature]")
+{
+    /** @brief Exclusive upper bound of the centikelvin iteration range. */
+    const auto limit = static_cast<double>(std::numeric_limits<uint64_t>::max()) / 100;
+    /** @brief Two-input AND specification shared by the gate-based entry points. */
+    const std::vector spec{create_and_tt()};
+
+    SECTION("Invalid limits reject empty and populated layouts")
+    {
+        /** @brief Empty and physical layouts exercise validation before either simulation path. */
+        for (const auto& lyt : {layout{}, blueprints::siqad_and_gate()})
+        {
+            /** @brief Input wires used to construct the pre-generated overload's inputs. */
+            const auto input_wires = detect_bdl_wires(lyt, {}, bdl_wire_selection::INPUT);
+            /** @brief Output wires used by the pre-generated overload. */
+            const auto output_wires = detect_bdl_wires(lyt, {}, bdl_wire_selection::OUTPUT);
+            /** @brief Empty layouts retain the public overload's required input-pattern count. */
+            const auto layouts =
+                lyt.is_empty() ? std::vector<layout>(4) : generate_bdl_input_pattern_layouts(lyt, {}, input_wires);
+            /** @brief One output pair satisfies the pre-generated overload's shape prerequisite. */
+            const auto output_pairs =
+                lyt.is_empty() ? std::vector<bdl_pair>(1) : detect_bdl_pairs(lyt, dot_tag::OUTPUT);
+            /** @brief Values excluded by the native centikelvin range. */
+            for (const auto maximum :
+                 {-1.0, -std::numeric_limits<double>::denorm_min(), -std::numeric_limits<double>::infinity(),
+                  std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::infinity(),
+                  std::numeric_limits<double>::max(), limit,
+                  std::nextafter(limit, std::numeric_limits<double>::infinity())})
+            {
+                CAPTURE(lyt.num_dots(), maximum);
+                /** @brief Invalid temperature without an enclosing timeout. */
+                const critical_temperature_params params{.max_temperature = maximum};
+                /** @brief Caller statistics must remain unpublished on validation errors. */
+                critical_temperature_stats stats{.num_valid_lyt = 42};
+                CHECK_THROWS_AS(critical_temperature_gate_based(lyt, spec, params, &stats), std::invalid_argument);
+                CHECK(stats.num_valid_lyt == 42);
+                CHECK_THROWS_AS(critical_temperature_gate_based(layouts, spec, params, output_pairs, input_wires,
+                                                                output_wires, &stats),
+                                std::invalid_argument);
+                CHECK(stats.num_valid_lyt == 42);
+                CHECK_THROWS_AS(critical_temperature_non_gate_based(lyt, params, &stats), std::invalid_argument);
+                CHECK(stats.num_valid_lyt == 42);
+            }
+        }
+    }
+
+    SECTION("Valid limits include zero and the last representable value below the bound")
+    {
+        /** @brief Empty gate layouts return before traversing the temperature range. */
+        const layout empty{};
+        /** @brief Shape-valid empty input-pattern layouts. */
+        const std::vector<layout> layouts(4);
+        /** @brief One output pair matches the two-input specification. */
+        const std::vector<bdl_pair> output_pairs(1);
+        /** @brief Valid boundary values preserve the empty-layout return value. */
+        for (const auto maximum : {0.0, std::numeric_limits<double>::denorm_min(), 0.005, 400.0})
+        {
+            CAPTURE(maximum);
+            /** @brief Finite valid temperature with the default operational parameters. */
+            const critical_temperature_params params{.max_temperature = maximum};
+            CHECK(critical_temperature_gate_based(empty, spec, params) == 0.0);
+            CHECK(critical_temperature_gate_based(layouts, spec, params, output_pairs, {}, {}) == 0.0);
+            CHECK(critical_temperature_non_gate_based(empty, params) == maximum);
+        }
+        /** @brief The shared range validator accepts the last representable valid limit. */
+        const critical_temperature_params upper_params{.max_temperature = std::nextafter(limit, 0.0)};
+        CHECK(critical_temperature_gate_based(empty, spec, upper_params) == 0.0);
+        CHECK(critical_temperature_gate_based(layouts, spec, upper_params, output_pairs, {}, {}) == 0.0);
     }
 }

@@ -707,6 +707,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - C++ critical-temperature analysis now rejects negative, non-finite, and out-of-range temperature limits before simulation.
   - Node-duplication planarization reports bounded progress for outputs driven directly by inputs.
   - `surface_analysis` now propagates allocation failure while building its blacklist.
   - `is_balanced` now propagates allocation failures instead of terminating.
