@@ -1670,24 +1670,6 @@ TEST_CASE("Special test cases", "[quickexact]")
         }
     }
 
-    // Test case disabled for now until a small bug in QuickExact is fixed.
-    // SECTION("Test case 3")
-    // {
-    //     layout lyt{};
-    //
-    //     lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({0, 1, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({9, 3, 0}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({2, 4, 0}, dot_tag::NORMAL);
-    //
-    //     const quickexact_params params{
-    //         sidb_simulation_parameters{3, -0.32},
-    //         quickexact_params::automatic_base_number_detection::ON};
-    //
-    //     const auto simulation_results = quickexact(lyt, params);
-    //     CHECK(simulation_results.charge_distributions.size() == 2);
-    // }
-
     SECTION("Test case 4")
     {
         layout lyt{};
@@ -1787,49 +1769,6 @@ TEST_CASE("Special test cases", "[quickexact]")
         CHECK(excitedstate.get_charge_state({13, 12, 0}) == charge_state::NEGATIVE);
         CHECK(excitedstate.get_charge_state({24, 12, 0}) == charge_state::NEGATIVE);
     }
-
-    // Test case disabled for now until a small bug in QuickExact is fixed.
-    // SECTION("Test case 6")
-    // {
-    //     layout lyt{};
-    //
-    //     lyt.assign_sidb({11, 1, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({15, 1, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({5, 2, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({17, 2, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({20, 3, 0}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({13, 3, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({9, 4, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({2, 5, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({17, 5, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({2, 6, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({9, 6, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({10, 7, 0}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({8, 7, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({17, 9, 0}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({11, 9, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({12, 9, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({5, 10, 0}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({5, 10, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({7, 11, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({13, 11, 1}, dot_tag::NORMAL);
-    //
-    //     const sidb_simulation_parameters params{2, -0.32};
-    //
-    //     sidb_simulation_result qe_res = quickexact(
-    //         lyt,
-    //         quickexact_params{params,
-    //                                           quickexact_params::automatic_base_number_detection::OFF,
-    //                                           {},
-    //                                           0});
-    //
-    //     std::sort(qe_res.charge_distributions.begin(), qe_res.charge_distributions.end(),
-    //               [](const auto& lhs, const auto& rhs) { return lhs.energy() <
-    //               rhs.energy();
-    //               });
-    //
-    //     CHECK(qe_res.charge_distributions.size() == 2);
-    // }
 }
 
 TEST_CASE("QuickExact gate simulation of Si-111 surface", "[quickexact]")
