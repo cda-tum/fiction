@@ -525,8 +525,10 @@ class technology_network : public mockturtle::klut_network
   protected:
     /**
      * Adds some further Boolean functions to the truth table cache for fixed indexing.
+     *
+     * @throws std::bad_alloc If initializing the truth-table cache fails.
      */
-    void add_additional_functions() noexcept
+    void add_additional_functions()
     {
         // NOLINTBEGIN(*-pointer-arithmetic): mockturtle requirement
 

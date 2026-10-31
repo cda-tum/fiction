@@ -12,9 +12,12 @@
  * @file
  * @brief Tests for `fiction/synthesis/node_duplication_planarization.hpp`.
  * @author Benjamin Hien (hibenj)
+ * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
@@ -206,24 +209,74 @@ TEST_CASE("Planarize blueprint networks", "[node-duplication-planarization]")
 
 TEST_CASE("Random primary output order with a fixed seed", "[node-duplication-planarization]")
 {
-    const auto ntk    = blueprints::full_adder_network<mockturtle::aig_network>();
-    const auto ranked = prepare(ntk);
+    /** @brief Records ordered fanins and outputs, retaining signal complement flags. */
+    const auto connections = [](const auto& network)
+    {
+        std::vector<std::vector<technology_network::signal>> result{};
+        network.foreach_node(
+            [&](const auto node)
+            {
+                result.emplace_back();
+                network.foreach_fanin(node, [&](const auto signal) { result.back().push_back(signal); });
+            });
+        result.emplace_back();
+        network.foreach_po([&](const auto signal) { result.back().push_back(signal); });
+        return result;
+    };
 
-    const node_duplication_planarization_params ps{
-        .po_order = node_duplication_planarization_params::output_order::RANDOM_PO_ORDER,
-        .seed     = 42};
+    /** @brief Checks seeded routing and the planarization contract for both results. */
+    const auto check_repeat = [&connections](const auto& ntk)
+    {
+        const auto                                  ranked = prepare(ntk);
+        const node_duplication_planarization_params ps{
+            .po_order = node_duplication_planarization_params::output_order::RANDOM_PO_ORDER,
+            .seed     = 42};
 
-    const auto planar_a = node_duplication_planarization(ranked, ps);
-    const auto planar_b = node_duplication_planarization(ranked, ps);
+        const auto planar_a = node_duplication_planarization(ranked, ps);
+        const auto planar_b = node_duplication_planarization(ranked, ps);
 
-    check_planar_and_equivalent(ntk, planar_a);
-    CHECK(planar_a.size() == planar_b.size());
+        check_planar_and_equivalent(ntk, planar_a);
+        check_planar_and_equivalent(ntk, planar_b);
+        CHECK(planar_a.size() == planar_b.size());
+        CHECK(connections(planar_a) == connections(planar_b));
+    };
+
+    SECTION("Full adder")
+    {
+        check_repeat(blueprints::full_adder_network<mockturtle::aig_network>());
+    }
+    SECTION("Five outputs")
+    {
+        technology_network ntk{};
+        const auto         a = ntk.create_pi();
+        const auto         b = ntk.create_pi();
+        ntk.create_po(ntk.create_not(a));
+        ntk.create_po(ntk.create_buf(a));
+        ntk.create_po(ntk.create_not(a));
+        ntk.create_po(ntk.create_buf(a));
+        ntk.create_po(ntk.create_not(b));
+        check_repeat(ntk);
+    }
 }
 
 TEST_CASE("Progress is reported once per level", "[node-duplication-planarization]")
 {
-    const auto ntk    = blueprints::full_adder_network<mockturtle::aig_network>();
+    const auto direct_outputs = GENERATE(false, true);
+    CAPTURE(direct_outputs);
+    auto ntk = blueprints::full_adder_network<mockturtle::aig_network>();
+    if (direct_outputs)
+    {
+        ntk          = {};
+        const auto a = ntk.create_pi();
+        const auto b = ntk.create_pi();
+        ntk.create_po(a);
+        ntk.create_po(b);
+    }
     const auto ranked = prepare(ntk);
+    if (direct_outputs)
+    {
+        REQUIRE(ranked.depth() == 0);
+    }
 
     std::vector<std::size_t> done_values{};
     std::size_t              total = 0;
@@ -240,7 +293,9 @@ TEST_CASE("Progress is reported once per level", "[node-duplication-planarizatio
     check_planar_and_equivalent(ntk, planar);
     CHECK(total == ranked.depth() + 1);
     REQUIRE(!done_values.empty());
+    CHECK(done_values.front() == 0);
     CHECK(done_values.back() == total);
+    CHECK(std::ranges::all_of(done_values, [total](const auto done) { return done <= total; }));
 }
 
 TEST_CASE("Asymmetric gates keep their fanin order", "[node-duplication-planarization]")
@@ -306,7 +361,7 @@ TEST_CASE("Consecutive consumers share one copy", "[node-duplication-planarizati
     CHECK(planar.size() == ranked.size());
 
     // the result is not fanout-substituted on purpose
-    CHECK(!is_fanout_substituted(planar));
+    CHECK_FALSE(is_fanout_substituted(planar));
 }
 
 TEST_CASE("Networks with virtual primary inputs are rejected", "[node-duplication-planarization]")
@@ -348,6 +403,7 @@ TEST_CASE("Hybrid strategy keeps crossings only where crossing gates are cheaper
 
         for (const bool xor_gates : {false, true})
         {
+            CAPTURE(xor_gates, ntk.num_pis(), ntk.num_pos());
             const node_duplication_planarization_params ps{
                 .strategy       = node_duplication_planarization_params::planarization_strategy::HYBRID,
                 .crossing_gates = {.xor_gates = xor_gates}};
@@ -458,6 +514,7 @@ TEST_CASE("Invalid parameters are rejected", "[node-duplication-planarization]")
         for (const double weight :
              {-1.0, std::numeric_limits<double>::infinity(), std::numeric_limits<double>::quiet_NaN()})
         {
+            CAPTURE(weight);
             node_duplication_planarization_params ps{.duplication_cost = {.node_weight = weight}};
             CHECK_THROWS_AS(node_duplication_planarization(ranked, ps), std::invalid_argument);
 
@@ -566,6 +623,7 @@ TEST_CASE("The shortest path through the H-graph places the fewest nodes", "[nod
 
     for (uint32_t trial = 0; trial < 60; ++trial)
     {
+        CAPTURE(trial);
         technology_network tec{};
 
         const auto                                          num_pis = draw(2, 5);
@@ -643,6 +701,11 @@ TEST_CASE("The shortest path through the H-graph places the fewest nodes", "[nod
                 best = std::min(best, placed);
                 return;
             }
+            // Every remaining placement adds a nonnegative cost.
+            if (placed >= best)
+            {
+                return;
+            }
 
             auto perm = orders[po];
             bool more = true;
@@ -712,7 +775,7 @@ TEST_CASE("Balanced networks without unified outputs are rejected", "[node-dupli
 
     const mutable_rank_view ranked{network_balancing<technology_network>(tec)};
     REQUIRE(is_balanced(ranked));
-    REQUIRE(!is_balanced(ranked, {.unify_outputs = true, .buffer_constant_outputs = false}));
+    REQUIRE_FALSE(is_balanced(ranked, {.unify_outputs = true, .buffer_constant_outputs = false}));
 
     CHECK_THROWS_AS(node_duplication_planarization(ranked), std::invalid_argument);
 }
@@ -806,6 +869,7 @@ TEST_CASE("Tie-break among equally short paths copies the lightest cone", "[node
 
     for (const bool inverter_first : {true, false})
     {
+        CAPTURE(inverter_first);
         const auto tec    = build(inverter_first);
         const auto ranked = rank(tec);
 

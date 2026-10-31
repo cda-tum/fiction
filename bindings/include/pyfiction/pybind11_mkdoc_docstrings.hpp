@@ -7396,6 +7396,9 @@ static const char *mkd_doc_fiction_networks_technology_network_add_additional_fu
 R"doc(Adds some further Boolean functions to the truth table cache for fixed
 indexing.
 
+Raises:
+    MemoryError: If initializing the truth-table cache fails.
+
 )doc";
 
 static const char *mkd_doc_fiction_networks_technology_network_clone = R"doc(Returns a network with independent storage.)doc";
@@ -13287,6 +13290,10 @@ Template Args:
 
 Returns:
     The black list.
+
+Raises:
+    MemoryError: If allocation fails while preparing or building the
+                 black list.
 
 )doc";
 
@@ -25249,6 +25256,9 @@ Template Args:
 Returns:
     The resulting network after virtual primary inputs are deleted.
 
+Raises:
+    MemoryError: If copying or rebuilding network storage fails.
+
 )doc";
 
 static const char *mkd_doc_fiction_synthesis_detail_convert_network_impl = R"doc()doc";
@@ -26872,6 +26882,10 @@ Template Args:
 
 Returns:
     `true` iff `ntk` is properly path-balanced with regard to `ps`.
+
+Raises:
+    MemoryError: If allocating depth information or output levels
+                 fails.
 
 )doc";
 
@@ -29619,10 +29633,12 @@ original PIs, ensuring consistent PI counts when the networks are
 equivalent.
 
 The resulting miter connects two networks with the same number of
-inputs and produces a single primary output. This output represents
-the OR of the XORs of all primary output pairs. Thus, the miter
-outputs 1 for any input assignment where the primary outputs of the
-two networks differ.
+inputs and produces a single primary output. Without external
+observability don't-cares (EXODCs), the output is the OR of the XORs
+of all primary output pairs. With EXODCs, the output is 1 when the
+output pair is not observably equivalent under the source's relation.
+If both networks carry EXODC relations, the first network's relation
+takes precedence.
 
 The input networks may have different types. If the two input networks
 have mismatched numbers of primary inputs or outputs, the method

@@ -16,10 +16,11 @@
 
 // This file is based on mockturtle/test/views/color_view.cpp
 
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include "fiction/networks/technology_network.hpp"
-#include "fiction/networks/views/edge_color_view.hpp"
+#include <fiction/networks/technology_network.hpp>
+#include <fiction/networks/views/edge_color_view.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/klut.hpp>
@@ -32,59 +33,46 @@ using namespace fiction;
 using namespace fiction::networks;
 using namespace fiction::networks::views;
 
-/**
- * @brief Checks network and nested color view traits.
- * @tparam Ntk Logic network type.
- */
-template <typename Ntk>
-void test_color_view()
+TEMPLATE_TEST_CASE("Edge color views preserve network traits", "[edge-color-view]", mockturtle::aig_network,
+                   mockturtle::mig_network, mockturtle::xag_network, mockturtle::xmg_network, mockturtle::klut_network,
+                   technology_network)
 {
-    CHECK(mockturtle::is_network_type_v<Ntk>);
-    CHECK(!mockturtle::has_new_color_v<Ntk>);
-    CHECK(!mockturtle::has_current_color_v<Ntk>);
-    CHECK(!mockturtle::has_clear_colors_v<Ntk>);
-    CHECK(!mockturtle::has_color_v<Ntk>);
-    CHECK(!mockturtle::has_paint_v<Ntk>);
-    CHECK(!mockturtle::has_eval_color_v<Ntk>);
-    CHECK(!mockturtle::has_eval_fanins_color_v<Ntk>);
+    STATIC_REQUIRE(mockturtle::is_network_type_v<TestType>);
+    STATIC_REQUIRE_FALSE(mockturtle::has_new_color_v<TestType>);
+    STATIC_REQUIRE_FALSE(mockturtle::has_current_color_v<TestType>);
+    STATIC_REQUIRE_FALSE(mockturtle::has_clear_colors_v<TestType>);
+    STATIC_REQUIRE_FALSE(mockturtle::has_color_v<TestType>);
+    STATIC_REQUIRE_FALSE(mockturtle::has_paint_v<TestType>);
+    STATIC_REQUIRE_FALSE(mockturtle::has_eval_color_v<TestType>);
+    STATIC_REQUIRE_FALSE(mockturtle::has_eval_fanins_color_v<TestType>);
 
-    Ntk ntk{};
+    TestType ntk{};
 
-    using color_ntk = out_of_place_edge_color_view<Ntk>;
-    CHECK(mockturtle::is_network_type_v<color_ntk>);
-    CHECK(mockturtle::has_new_color_v<color_ntk>);
-    CHECK(mockturtle::has_current_color_v<color_ntk>);
-    CHECK(mockturtle::has_clear_colors_v<color_ntk>);
-    CHECK(mockturtle::has_color_v<color_ntk>);
-    CHECK(mockturtle::has_paint_v<color_ntk>);
-    CHECK(mockturtle::has_eval_color_v<color_ntk>);
-    CHECK(mockturtle::has_eval_fanins_color_v<color_ntk>);
+    using color_ntk = out_of_place_edge_color_view<TestType>;
+    STATIC_REQUIRE(mockturtle::is_network_type_v<color_ntk>);
+    STATIC_REQUIRE(mockturtle::has_new_color_v<color_ntk>);
+    STATIC_REQUIRE(mockturtle::has_current_color_v<color_ntk>);
+    STATIC_REQUIRE(mockturtle::has_clear_colors_v<color_ntk>);
+    STATIC_REQUIRE(mockturtle::has_color_v<color_ntk>);
+    STATIC_REQUIRE(mockturtle::has_paint_v<color_ntk>);
+    STATIC_REQUIRE(mockturtle::has_eval_color_v<color_ntk>);
+    STATIC_REQUIRE(mockturtle::has_eval_fanins_color_v<color_ntk>);
 
     /** @brief Node and edge color view for the network. */
     const color_ntk color_view{ntk};
 
     using color_color_ntk = out_of_place_edge_color_view<color_ntk>;
-    CHECK(mockturtle::is_network_type_v<color_color_ntk>);
-    CHECK(mockturtle::has_new_color_v<color_color_ntk>);
-    CHECK(mockturtle::has_current_color_v<color_color_ntk>);
-    CHECK(mockturtle::has_clear_colors_v<color_color_ntk>);
-    CHECK(mockturtle::has_color_v<color_color_ntk>);
-    CHECK(mockturtle::has_paint_v<color_color_ntk>);
-    CHECK(mockturtle::has_eval_color_v<color_color_ntk>);
-    CHECK(mockturtle::has_eval_fanins_color_v<color_color_ntk>);
+    STATIC_REQUIRE(mockturtle::is_network_type_v<color_color_ntk>);
+    STATIC_REQUIRE(mockturtle::has_new_color_v<color_color_ntk>);
+    STATIC_REQUIRE(mockturtle::has_current_color_v<color_color_ntk>);
+    STATIC_REQUIRE(mockturtle::has_clear_colors_v<color_color_ntk>);
+    STATIC_REQUIRE(mockturtle::has_color_v<color_color_ntk>);
+    STATIC_REQUIRE(mockturtle::has_paint_v<color_color_ntk>);
+    STATIC_REQUIRE(mockturtle::has_eval_color_v<color_color_ntk>);
+    STATIC_REQUIRE(mockturtle::has_eval_fanins_color_v<color_color_ntk>);
 
     /** @brief Nested node and edge color view. */
     [[maybe_unused]] const color_color_ntk color_color_view{color_view};
-}
-
-TEST_CASE("Create edge color views", "[edge-color-view]")
-{
-    test_color_view<mockturtle::aig_network>();
-    test_color_view<mockturtle::mig_network>();
-    test_color_view<mockturtle::xag_network>();
-    test_color_view<mockturtle::xmg_network>();
-    test_color_view<mockturtle::klut_network>();
-    test_color_view<technology_network>();
 }
 
 TEST_CASE("Out-of-place edge color view", "[edge-color-view]")
@@ -143,7 +131,7 @@ TEST_CASE("Out-of-place edge color view", "[edge-color-view]")
         /* the fanins of f5 are yellow */
         CHECK(aig_ecv.eval_fanins_color(aig_ecv.get_node(f5), [&](auto color) { return color == yellow; }));
 
-        /* at least one fanin of f5 is not red */
+        /* every fanin of f5 is not red */
         CHECK(aig_ecv.eval_fanins_color(aig_ecv.get_node(f5), [&](auto color) { return color != red; }));
 
         /* visited flags have not been affected by assigning colors */

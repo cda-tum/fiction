@@ -58,7 +58,6 @@
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/views/names_view.hpp>
 
-#include <chrono>
 #include <concepts>
 #include <cstdint>
 #include <optional>
@@ -315,11 +314,12 @@ exact_physical_design_params&& minimize_crossings(exact_physical_design_params&&
 template <typename Lyt>
 void check_stats(const exact_physical_design_stats& st, const Lyt& lyt)
 {
-    CHECK(std::chrono::duration_cast<std::chrono::milliseconds>(st.time_total).count() > 0);
-    CHECK(st.x_size > 0);
-    CHECK(st.y_size > 0);
-    CHECK(st.num_gates > 0);
+    CHECK(st.time_total >= decltype(st.time_total)::zero());
+    CHECK(st.x_size == lyt.width());
+    CHECK(st.y_size == lyt.height());
+    CHECK(st.num_gates == lyt.num_gates());
     CHECK(st.num_wires == lyt.num_wires());
+    CHECK(st.num_crossings == lyt.num_crossings());
 }
 
 template <typename Lyt>
@@ -375,12 +375,6 @@ Lyt generate_layout_with_black_list(const Ntk& ntk, const surface_black_list<por
     return layout.value();  // NOLINT(bugprone-unchecked-optional-access)
 }
 
-template <typename Lib, typename GateLyt>
-void check_apply_lib(const GateLyt& lyt)
-{
-    CHECK_NOTHROW(apply_gate_library<Lib>(lyt));
-}
-
 template <typename Ntk, typename Lyt>
 void check_io_names(const Ntk& ntk, const Lyt& lyt)
 {
@@ -400,6 +394,15 @@ void check_io_names(const Ntk& ntk, const Lyt& lyt)
     }
 }
 
+/**
+ * @brief Checks the physical layout, logic, gate library, and terminal names.
+ * @tparam Lib Gate library type.
+ * @tparam GateLyt Gate-level layout type.
+ * @tparam Ntk Network type.
+ * @param ntk Network to place and route.
+ * @param ps Physical-design parameters.
+ * @param a Layout arrangement.
+ */
 template <typename Lib, typename GateLyt, typename Ntk>
 void check_with_gate_library(const Ntk& ntk, const exact_physical_design_params& ps,
                              const std::optional<arrangement> a = std::nullopt)
@@ -408,7 +411,7 @@ void check_with_gate_library(const Ntk& ntk, const exact_physical_design_params&
 
     check_eq(ntk, layout);
     check_tp(layout, 1);
-    check_apply_lib<Lib>(layout);
+    CHECK_NOTHROW(apply_gate_library<Lib>(layout));
     check_io_names(ntk, layout);
 }
 
@@ -590,18 +593,8 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
                    !(lyt.has_northern_incoming_signal({2, 2}) && lyt.has_southern_outgoing_signal({2, 2}))));
         }
     }
-    //    SECTION("Asynchronicity")
-    //    {
-    //        check_with_gate_library<qca_one_library, cartesian_gate_layout>(
-    //            blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
-    //            twoddwave(crossings(border_io(async(2, configuration())))));
-    //    }
     SECTION("Synchronization elements")
     {
-        //            CHECK(generate_layout<cartesian_gate_layout>(blueprints::one_to_five_path_difference_network<technology_network>(),
-        //                                                     twoddwave(border_io(sync_elems(configuration()))))
-        //                      .num_se() > 0);
-
         check_with_gate_library<qca_one_library, cartesian_gate_layout>(
             blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
             use(border_io(sync_elems(configuration()))));
@@ -858,15 +851,9 @@ TEST_CASE("Name conservation after exact physical design", "[exact]")
     auto maj = blueprints::maj1_network<named_mig_network>();
     maj.set_network_name("maj");
 
-    auto params = res(configuration());
-    SECTION("single-threaded")
-    {
-        params.num_threads = 1;
-    }
-    SECTION("multi-threaded")
-    {
-        params.num_threads = 2;
-    }
+    auto params        = res(configuration());
+    params.num_threads = GENERATE(1u, 2u);
+    CAPTURE(params.num_threads);
     const auto layout = exact<cartesian_layout>(convert_network<named_technology_network>(maj), params);
 
     REQUIRE(layout.has_value());
@@ -894,14 +881,8 @@ TEST_CASE("Exact physical design reports progress", "[exact]")
 
     auto params = twoddwave(configuration());
 
-    SECTION("single-threaded")
-    {
-        params.num_threads = 1;
-    }
-    SECTION("multi-threaded")
-    {
-        params.num_threads = 2;
-    }
+    params.num_threads = GENERATE(1u, 2u);
+    CAPTURE(with_blacklist, params.num_threads);
 
     // Repeated starts cover workers finding a layout while another worker initializes its context.
     for (unsigned trial = 0; trial < (params.num_threads > 1 ? 8u : 1u); ++trial)

@@ -42,7 +42,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Crossing-cost sweeps avoid repeated edge-counter lookups.
+  - Physical-design solver tests check layout statistics and report failing parameter rows.
+  - Modernized network-view tests with complete visitor checks, typed trait cases, and copy/move coverage.
+  - Modernized network I/O and verification tests with independent cases and complete interface checks.
   - Added QCA SVG regression tests for colors, detail modes, tile labels, and file output.
+  - Layout I/O tests name malformed-input rows, check stream preservation, and verify printed fanins and fanouts.
   - Added a Catch2 contributor guide and gate-layout test examples for fixtures, data tables,
     diagnostics, and contract-focused assertions. Visitor checks now detect missing and duplicate results.
 
@@ -149,7 +154,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - `fanout_substitution` uses entropy only when no random seed is supplied.
   - Interface matching uses less temporary memory for named interfaces.
+  - Crossing-cost estimation omits an unused counter for each swept edge.
   - Combination generation avoids one allocation and copy per result.
   - SiDB domain sampling now stops once every grid point has been collected.
   - **Breaking:** Physical design accepts only named technology networks (`networks::named_technology_network`). Convert other network types
@@ -184,7 +191,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Avoid helper threads for single-worker sampling and contour exploration.
   - Reduce coordinate-vector allocations during operational-domain traversal.
   - `cartesian_combinations` now moves completed storage between dimensions instead of copying it.
-  - `integral_abs` documents that signed minimum values are outside its representable-result domain.
   - Reuse completed three-dimensional contour surfaces across initial samples.
   - Contour tracing explores boundary surfaces in three or more dimensions in parallel. It uses
     `operational_domain_params::number_of_threads`; large contour interiors also use parallel inference.
@@ -247,7 +253,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Code quality:
 
   - Modernized utility tests with named data rows, direct result checks, and complete progress observations.
+  - Modernized physical-design helper tests with complete routing collections and independent solver rows.
+  - Streamlined synthesis tests and strengthened clone, conversion, and gate-library checks.
+  - Modernized path-finding tests with shared data rows, complete path comparisons, and cache reuse checks.
   - Geometry tests now compare complete coordinate and visitor results and share arrangement cases.
+  - Planarization tests use correlated cost and degree rows and check progress completion and callback precedence.
   - Parameter configurations now use C++20 designated initializers and `const` where possible.
   - Modernized network-core contract tests with complete traversal and clone-isolation checks.
   - Streamlined clocking tests with explicit period tables and allocation-independent rollback sweeps.
@@ -376,6 +386,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - The ToPoliNano library and CLI reject row-shifted Cartesian layouts.
 
 - I/O:
+
+  - FGL name escaping appends text in one pass to avoid repeated suffix copies for long whitespace-heavy names.
   - `write_sidb_layout_svg` and `print_sidb_layout` color an `sidb::layout` from an optional
     `charge_distribution`
   - **Breaking:** FGL writers now emit version 2 with size counts, declared interface order, and numbered input connections. Readers also accept legacy maximum-coordinate sizes; writers reject incomplete or physically invalid layouts before writing.
@@ -692,6 +704,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Node-duplication planarization reports bounded progress for outputs driven directly by inputs.
+  - `surface_analysis` now propagates allocation failure while building its blacklist.
+  - `is_balanced` now propagates allocation failures instead of terminating.
+  - `is_fanout_substituted` now accepts progress callbacks whose copies can throw.
+  - `virtual_miter` now preserves EXODC output relations for integer-signal destinations.
   - Combination generation now uses full-width position indices.
   - Kinks-rejected energy labels now count each matching charge distribution once, preserving degenerate-state
     occupation probabilities. Both energy-labeling variants document ascending energy order.
@@ -823,6 +840,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - Network initialization, rank insertion and copying, and virtual-PI removal now propagate allocation failure.
+    Recompute ranks after a failed insertion.
+  - Depth-view construction supports copy-only node costs and propagates move-construction failures.
   - Gray-code iterators now index from their current position, compare positions, support copy assignment,
     and preserve 64-bit offsets and distances across the signed boundary.
   - Edge-color views now support clearing only node colors and clearing both node and edge colors.
@@ -876,6 +896,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
 
+  - `integral_abs` documents that signed minimum values are outside its representable-result domain.
   - Timing documentation now states the throughput formula and input hold time in clock cycles.
   - Binding docstring instructions now use the generator wrapper that CI runs.
   - Hexagonal layout documentation now names the eastern border and `is_adjacent_of` correctly.
@@ -927,6 +948,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - I/O:
 
+  - Colored DOT drawers now use the node-color interface and shared edge palette.
   - Surface-defect import avoids exponential backtracking on malformed digit runs.
   - SQD import now rejects NUL bytes, multiple XML roots, and text outside the root. SiDB filename readers preserve bytes after Ctrl-Z on Windows.
   - BLIF network readers now accept empty and whitespace-only lines without aborting.
