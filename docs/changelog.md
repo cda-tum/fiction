@@ -386,6 +386,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - I/O:
 
+  - QCA SVG rendering now reuses static tile and latch templates without per-tile text copies.
   - FGL name escaping appends text in one pass to avoid repeated suffix copies for long whitespace-heavy names.
   - `write_sidb_layout_svg` and `print_sidb_layout` color an `sidb::layout` from an optional
     `charge_distribution`
