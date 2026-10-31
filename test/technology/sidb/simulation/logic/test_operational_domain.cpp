@@ -15,7 +15,9 @@
  * @author Jan Drewniok (Drewniok)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
@@ -52,6 +54,7 @@
 #include <string_view>
 #include <thread>
 #include <tuple>
+#include <type_traits>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -87,13 +90,16 @@ static void check_op_domain_params_and_operational_status(const OpDomain&       
 
     for (auto d = 0u; d < params.sweep_dimensions.size(); ++d)
     {
+        CAPTURE(d);
         CHECK(op_domain.get_dimension(d) == params.sweep_dimensions[d].dimension);
+        CHECK(params.sweep_dimensions[d].step > 0.0);
     }
 
     op_domain.for_each(
-        [&](const auto& coord,
-            const auto& op_value)  // NOLINT(misc-unused-parameters)
+        [&](const auto& coord, const auto& op_value)
         {
+            CAPTURE(coord.get_parameters());
+            REQUIRE(coord.get_parameters().size() == params.sweep_dimensions.size());
             for (auto d = 0u; d < params.sweep_dimensions.size(); ++d)
             {
                 const auto& sweep_param = params.sweep_dimensions[d];
@@ -101,34 +107,23 @@ static void check_op_domain_params_and_operational_status(const OpDomain&       
 
                 CHECK(sweep_param.min <= (coord_value + ERROR_MARGIN));
                 CHECK(sweep_param.max >= (coord_value - ERROR_MARGIN));
-                CHECK(sweep_param.step > 0.0);
             }
 
             if (status.has_value())
             {
-                if (status.value() == operational_status::OPERATIONAL)
+                CHECK(std::get<0>(op_value) == *status);
+                if constexpr (std::is_same_v<OpDomain, critical_temperature_domain>)
                 {
-                    if constexpr (std::is_same_v<OpDomain, critical_temperature_domain>)
+                    /** @brief Classification and temperature retrieved at the visited point. */
+                    const auto value = op_domain.contains(coord);
+                    REQUIRE(value.has_value());
+                    if (*status == operational_status::OPERATIONAL)
                     {
-                        REQUIRE(op_domain.contains(coord).has_value());
-                        CHECK(std::get<1>(op_domain.contains(coord).value()) > 0.0);
+                        CHECK(std::get<1>(value.value()) > 0.0);
                     }
                     else
                     {
-                        CHECK(std::get<0>(op_value) == *status);
-                    }
-                }
-                else
-                {
-                    if constexpr (std::is_same_v<OpDomain, critical_temperature_domain>)
-                    {
-                        REQUIRE(op_domain.contains(coord).has_value());
-                        CHECK_THAT(std::get<1>(op_domain.contains(coord).value()),
-                                   Catch::Matchers::WithinAbs(0.0, 0.00001));
-                    }
-                    else
-                    {
-                        CHECK(std::get<0>(op_value) == *status);
+                        CHECK_THAT(std::get<1>(value.value()), Catch::Matchers::WithinAbs(0.0, 0.00001));
                     }
                 }
             }
@@ -198,7 +193,7 @@ TEST_CASE("Test parameter point", "[operational-domain]")
         const std::hash<parameter_point> hash{};
 
         CHECK(hash(negative) == hash(parameter_point{{-0.32, -0.5, -1.0}}));
-        CHECK(hash(negative) != hash(parameter_point{{0.32, 0.5, 1.0}}));
+        CHECK(negative != parameter_point{{0.32, 0.5, 1.0}});
 
         // and they must survive a round trip through a hash-based container
         const std::unordered_set<parameter_point> points{negative, parameter_point{{-0.28, -0.5, -1.0}}};
@@ -358,28 +353,29 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
                                      {.dimension = sweep_parameter::LAMBDA_TF},
                                      {.dimension = sweep_parameter::MU_MINUS, .min = -0.4, .max = -0.5, .step = 0.01}}};
 
-            for (const auto& params : {invalid_params_1, invalid_params_2, invalid_params_3})
+            /** @brief Invalid sweep and the dimension containing the invalid range. */
+            const auto [dimensions, params] = GENERATE_COPY(
+                std::pair{1u, invalid_params_1}, std::pair{2u, invalid_params_2}, std::pair{3u, invalid_params_3});
+            CAPTURE(dimensions);
+            SECTION("grid_search")
             {
-                SECTION("grid_search")
-                {
-                    CHECK_THROWS_AS(operational_domain_grid_search(lat, std::vector{create_id_tt()}, params),
-                                    std::invalid_argument);
-                }
-                SECTION("random_sampling")
-                {
-                    CHECK_THROWS_AS(operational_domain_random_sampling(lat, std::vector{create_id_tt()}, 100, params),
-                                    std::invalid_argument);
-                }
-                SECTION("flood_fill")
-                {
-                    CHECK_THROWS_AS(operational_domain_flood_fill(lat, std::vector{create_id_tt()}, 1, params),
-                                    std::invalid_argument);
-                }
-                SECTION("contour_tracing")
-                {
-                    CHECK_THROWS_AS(operational_domain_contour_tracing(lat, std::vector{create_id_tt()}, 1, params),
-                                    std::invalid_argument);
-                }
+                CHECK_THROWS_AS(operational_domain_grid_search(lat, std::vector{create_id_tt()}, params),
+                                std::invalid_argument);
+            }
+            SECTION("random_sampling")
+            {
+                CHECK_THROWS_AS(operational_domain_random_sampling(lat, std::vector{create_id_tt()}, 100, params),
+                                std::invalid_argument);
+            }
+            SECTION("flood_fill")
+            {
+                CHECK_THROWS_AS(operational_domain_flood_fill(lat, std::vector{create_id_tt()}, 1, params),
+                                std::invalid_argument);
+            }
+            SECTION("contour_tracing")
+            {
+                CHECK_THROWS_AS(operational_domain_contour_tracing(lat, std::vector{create_id_tt()}, 1, params),
+                                std::invalid_argument);
             }
         }
 
@@ -401,28 +397,29 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
                     {.dimension = sweep_parameter::LAMBDA_TF},
                     {.dimension = sweep_parameter::MU_MINUS, .min = -0.4, .max = -0.5, .step = -0.01}}};
 
-            for (const auto& params : {invalid_params_1, invalid_params_2, invalid_params_3})
+            /** @brief Invalid sweep and the dimension containing the invalid range. */
+            const auto [dimensions, params] = GENERATE_COPY(
+                std::pair{1u, invalid_params_1}, std::pair{2u, invalid_params_2}, std::pair{3u, invalid_params_3});
+            CAPTURE(dimensions);
+            SECTION("grid_search")
             {
-                SECTION("grid_search")
-                {
-                    CHECK_THROWS_AS(operational_domain_grid_search(lat, std::vector{create_id_tt()}, params),
-                                    std::invalid_argument);
-                }
-                SECTION("random_sampling")
-                {
-                    CHECK_THROWS_AS(operational_domain_random_sampling(lat, std::vector{create_id_tt()}, 100, params),
-                                    std::invalid_argument);
-                }
-                SECTION("flood_fill")
-                {
-                    CHECK_THROWS_AS(operational_domain_flood_fill(lat, std::vector{create_id_tt()}, 1, params),
-                                    std::invalid_argument);
-                }
-                SECTION("contour_tracing")
-                {
-                    CHECK_THROWS_AS(operational_domain_contour_tracing(lat, std::vector{create_id_tt()}, 1, params),
-                                    std::invalid_argument);
-                }
+                CHECK_THROWS_AS(operational_domain_grid_search(lat, std::vector{create_id_tt()}, params),
+                                std::invalid_argument);
+            }
+            SECTION("random_sampling")
+            {
+                CHECK_THROWS_AS(operational_domain_random_sampling(lat, std::vector{create_id_tt()}, 100, params),
+                                std::invalid_argument);
+            }
+            SECTION("flood_fill")
+            {
+                CHECK_THROWS_AS(operational_domain_flood_fill(lat, std::vector{create_id_tt()}, 1, params),
+                                std::invalid_argument);
+            }
+            SECTION("contour_tracing")
+            {
+                CHECK_THROWS_AS(operational_domain_contour_tracing(lat, std::vector{create_id_tt()}, 1, params),
+                                std::invalid_argument);
             }
         }
     }
@@ -451,24 +448,8 @@ TEST_CASE("SiQAD OR gate", "[operational-domain]")
 TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 {
 
-    layout lyt{lattice::si_100_2x1(), "BDL wire"};
-
-    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_sidb({3, 0, 0}, dot_tag::INPUT);
-
-    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({14, 0, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({18, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_sidb({20, 0, 0}, dot_tag::OUTPUT);
-
-    // output perturber
-    lyt.assign_sidb({24, 0, 0}, dot_tag::NORMAL);
-
-    const auto& lat = lyt;
+    /** @brief BDL wire with three pairs and an output perturber. */
+    const auto lat = blueprints::bdl_wire();
 
     simulation_parameters sim_params{};
     sim_params.base = 2;
@@ -476,9 +457,6 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
     operational_domain_params op_domain_params{
         .operational_params = {.sim_params = sim_params},
         .sweep_dimensions   = {{.dimension = sweep_parameter::EPSILON_R}, {.dimension = sweep_parameter::LAMBDA_TF}}};
-
-    CHECK(op_domain_params.sweep_dimensions[0].dimension == sweep_parameter::EPSILON_R);
-    CHECK(op_domain_params.sweep_dimensions[1].dimension == sweep_parameter::LAMBDA_TF);
 
     operational_domain_stats op_domain_stats{};
 
@@ -489,18 +467,10 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         op_domain_params.sweep_dimensions[0].max  = 5.5;
         op_domain_params.sweep_dimensions[0].step = 0.1;
 
-        CHECK(op_domain_params.sweep_dimensions[0].min == 5.5);
-        CHECK(op_domain_params.sweep_dimensions[0].max == 5.5);
-        CHECK(op_domain_params.sweep_dimensions[0].step == 0.1);
-
         // set y-dimension
         op_domain_params.sweep_dimensions[1].min  = 5.0;
         op_domain_params.sweep_dimensions[1].max  = 5.0;
         op_domain_params.sweep_dimensions[1].step = 0.1;
-
-        CHECK(op_domain_params.sweep_dimensions[1].min == 5.0);
-        CHECK(op_domain_params.sweep_dimensions[1].max == 5.0);
-        CHECK(op_domain_params.sweep_dimensions[1].step == 0.1);
 
         SECTION("grid_search")
         {
@@ -1456,6 +1426,18 @@ TEST_CASE("Sampling zero points does not divide by zero", "[operational-domain]"
 
 TEST_CASE("Pinning the thread count does not change the operational domain", "[operational-domain]")
 {
+    /** @brief Collects every point and classification without imposing map iteration order. */
+    const auto collect = [](const operational_domain& domain)
+    {
+        /** @brief Complete observations, including repeated visits. */
+        std::vector<std::pair<parameter_point, operational_status>> values{};
+        domain.for_each([&values](const auto& point, const auto& value)
+                        { values.emplace_back(point, std::get<0>(value)); });
+        std::ranges::sort(values, std::ranges::less{},
+                          [](const auto& entry) -> const auto& { return entry.first.get_parameters(); });
+        return values;
+    };
+
     const layout lat{blueprints::siqad_and_gate()};
 
     operational_domain_params op_domain_params{
@@ -1467,6 +1449,9 @@ TEST_CASE("Pinning the thread count does not change the operational domain", "[o
 
     const auto default_domain =
         operational_domain_grid_search(lat, std::vector{create_and_tt()}, op_domain_params, &default_stats);
+    /** @brief Complete classifications from the default worker configuration. */
+    const auto expected = collect(default_domain);
+    REQUIRE(expected.size() == 9);
 
     // one worker thread must produce exactly the same domain as the hardware-thread default
     op_domain_params.number_of_threads = 1;
@@ -1477,6 +1462,7 @@ TEST_CASE("Pinning the thread count does not change the operational domain", "[o
         operational_domain_grid_search(lat, std::vector{create_and_tt()}, op_domain_params, &single_threaded_stats);
 
     CHECK(single_threaded_domain.size() == default_domain.size());
+    CHECK(collect(single_threaded_domain) == expected);
     CHECK(single_threaded_stats.num_simulator_invocations == default_stats.num_simulator_invocations);
     CHECK(single_threaded_stats.num_evaluated_parameter_combinations ==
           default_stats.num_evaluated_parameter_combinations);
@@ -1494,30 +1480,15 @@ TEST_CASE("Pinning the thread count does not change the operational domain", "[o
         operational_domain_grid_search(lat, std::vector{create_and_tt()}, op_domain_params, &zero_stats);
 
     CHECK(zero_domain.size() == default_domain.size());
+    CHECK(collect(zero_domain) == expected);
     CHECK(zero_stats.num_evaluated_parameter_combinations == default_stats.num_evaluated_parameter_combinations);
 }
 
 TEST_CASE("Contour tracing does not retrace an already enclosed area", "[operational-domain]")
 {
 
-    layout lyt{lattice::si_100_2x1(), "BDL wire"};
-
-    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_sidb({3, 0, 0}, dot_tag::INPUT);
-
-    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({14, 0, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({18, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_sidb({20, 0, 0}, dot_tag::OUTPUT);
-
-    // output perturber
-    lyt.assign_sidb({24, 0, 0}, dot_tag::NORMAL);
-
-    const auto& lat = lyt;
+    /** @brief BDL wire with three pairs and an output perturber. */
+    const auto lat = blueprints::bdl_wire();
 
     simulation_parameters sim_params{};
     sim_params.base = 2;
@@ -1581,24 +1552,8 @@ TEST_CASE("Contour tracing does not retrace an already enclosed area", "[operati
 TEST_CASE("Parallel flood fill yields deterministic results", "[operational-domain]")
 {
 
-    layout lyt{lattice::si_100_2x1(), "BDL wire"};
-
-    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_sidb({3, 0, 0}, dot_tag::INPUT);
-
-    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({14, 0, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({18, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_sidb({20, 0, 0}, dot_tag::OUTPUT);
-
-    // output perturber
-    lyt.assign_sidb({24, 0, 0}, dot_tag::NORMAL);
-
-    const auto& lat = lyt;
+    /** @brief BDL wire with three pairs and an output perturber. */
+    const auto lat = blueprints::bdl_wire();
 
     simulation_parameters sim_params{};
     sim_params.base = 2;
@@ -2365,11 +2320,14 @@ TEST_CASE("Operational domain reports progress", "[operational-domain]")
             active       = running;
         };
 
-        SECTION("grid search")
+        /** @brief Search algorithm under test. */
+        const auto method = GENERATE(std::string_view{"grid search"}, std::string_view{"random sampling"});
+        CAPTURE(method);
+        if (method == "grid search")
         {
             static_cast<void>(operational_domain_grid_search(lyt, std::vector{create_or_tt()}, params, &stats));
         }
-        SECTION("random sampling")
+        else
         {
             static_cast<void>(operational_domain_random_sampling(lyt, std::vector{create_or_tt()}, 5, params, &stats));
         }
@@ -2501,6 +2459,7 @@ TEST_CASE("Contour surfaces infer unsimulated interiors without crossing non-ope
         const auto domain   = impl.trace_boundary_surface(0, {interior_seed, surface_seed, interior_seed});
         const auto inferred = impl.inferred_operational_parameter_points();
         const std::unordered_set<parameter_point> inferred_set{inferred.cbegin(), inferred.cend()};
+        CHECK(inferred.size() == inferred_set.size());
 
         CHECK(stats.num_evaluated_parameter_combinations == domain.size());
         CHECK(inferred_set.contains(interior_seed));
@@ -2556,6 +2515,7 @@ TEST_CASE("Parallel contour interiors preserve coverage and propagate worker fai
             const auto                                domain   = impl.trace_boundary_surface(0, {seed});
             const auto                                inferred = impl.inferred_operational_parameter_points();
             const std::unordered_set<parameter_point> inferred_set{inferred.cbegin(), inferred.cend()};
+            CHECK(inferred.size() == inferred_set.size());
             CHECK(domain.size() < reference.size());
             CHECK(stats.num_evaluated_parameter_combinations == domain.size());
             reference.for_each(
