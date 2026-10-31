@@ -664,7 +664,7 @@ class cartesian_layout:
             c: Coordinate to check for border location.
 
         Returns:
-            `true` iff `c` is located at the layout's northern border.
+            `true` iff `c` is located at the layout's eastern border.
         """
 
     def is_at_southern_border(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:
@@ -1303,7 +1303,7 @@ class shifted_cartesian_layout:
             c: Coordinate to check for border location.
 
         Returns:
-            `true` iff `c` is located at the layout's northern border.
+            `true` iff `c` is located at the layout's eastern border.
         """
 
     def is_at_southern_border(self, c: coordinate | tuple[int, int] | tuple[int, int, int]) -> bool:

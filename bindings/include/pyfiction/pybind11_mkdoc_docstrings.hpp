@@ -1508,7 +1508,7 @@ Args:
     c: Coordinate to check for border location.
 
 Returns:
-    `true` iff `c` is located at the layout's northern border.
+    `true` iff `c` is located at the layout's eastern border.
 
 )doc";
 

@@ -234,6 +234,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
              {blueprints::mux21_network<technology_network>(), blueprints::inverter_network<technology_network>(),
               blueprints::parity_network<technology_network>()})
         {
+            CAPTURE(network.num_pis());
             const auto layout = graph_oriented_layout_design(network, params, &stats);
             REQUIRE(layout.has_value());
             const auto& checked_layout = required_value(layout);
@@ -245,15 +246,8 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
                     if (checked_layout.is_inv(gate))
                     {
                         const auto layout_tile = checked_layout.get_tile(gate);
-                        const auto fanin       = checked_layout.incoming_data_flow(layout_tile).front();
-                        const auto fanout      = checked_layout.outgoing_data_flow(layout_tile).front();
-
-                        const bool vertical_straight_inverter = (fanin.x == layout_tile.x && layout_tile.x == fanout.x);
-                        const bool horizontal_straight_inverter =
-                            (fanin.y == layout_tile.y && layout_tile.y == fanout.y);
-                        const bool straight_inverter = vertical_straight_inverter || horizontal_straight_inverter;
-
-                        CHECK(straight_inverter);
+                        CAPTURE(layout_tile);
+                        CHECK(checked_layout.has_opposite_incoming_and_outgoing_signals(layout_tile));
                     }
                 });
         }
@@ -373,6 +367,7 @@ TEST_CASE("Different cost objectives", "[graph-oriented-layout-design]")
     // loop over each cost objective
     for (const auto& cost : cost_objectives)
     {
+        CAPTURE(cost);
         params.cost       = cost;
         const auto layout = graph_oriented_layout_design(ntk, params, &stats);
 
@@ -548,6 +543,7 @@ TEST_CASE("PI spacing outside of its range is rejected", "[graph-oriented-layout
 
     for (const int32_t skip : {-1, 1'048'577, 2147483647})
     {
+        CAPTURE(skip);
         params.tiles_to_skip_between_pis = skip;
 
         CHECK_THROWS_AS(graph_oriented_layout_design(ntk, params), std::invalid_argument);
@@ -610,14 +606,8 @@ TEST_CASE("Graph-oriented layout design reports progress", "[graph-oriented-layo
                                                .return_first = true,
                                                .on_progress  = rec.callback()};
 
-    SECTION("single-threaded")
-    {
-        params.enable_multithreading = false;
-    }
-    SECTION("multi-threaded")
-    {
-        params.enable_multithreading = true;
-    }
+    params.enable_multithreading = GENERATE(false, true);
+    CAPTURE(params.enable_multithreading);
 
     const auto layout = graph_oriented_layout_design(ntk, params);
 
