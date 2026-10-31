@@ -28,10 +28,12 @@ using namespace fiction::qca;
 
 TEST_CASE("QCA cell types", "[qca-layout]")
 {
-    CHECK(is_constant(cell_type::CONST_0));
-    CHECK(is_constant(cell_type::CONST_1));
-    CHECK(!is_constant(cell_type::NORMAL));
-    CHECK(!is_constant(cell_type::INPUT));
+    STATIC_REQUIRE(is_constant(cell_type::CONST_0));
+    STATIC_REQUIRE(is_constant(cell_type::CONST_1));
+    STATIC_REQUIRE_FALSE(is_constant(cell_type::EMPTY));
+    STATIC_REQUIRE_FALSE(is_constant(cell_type::NORMAL));
+    STATIC_REQUIRE_FALSE(is_constant(cell_type::INPUT));
+    STATIC_REQUIRE_FALSE(is_constant(cell_type::OUTPUT));
 }
 
 TEST_CASE("QCA layout construction", "[qca-layout]")
@@ -90,7 +92,7 @@ TEST_CASE("QCA synchronization elements belong to clock zones", "[qca-layout]")
     CHECK(original.get_synchronization_element({3, 3}) == 2);
     CHECK(original.is_synchronization_element({3, 2, 1}));
     CHECK(original.get_synchronization_element({4, 4}) == 0);
-    CHECK(!original.is_synchronization_element({1, 1}));
+    CHECK_FALSE(original.is_synchronization_element({1, 1}));
 
     SECTION("copies are independent")
     {

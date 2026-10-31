@@ -248,15 +248,15 @@ class gate_library
     {
         auto merged = EMPTY_GATE;
 
-        for (auto x = 0ul; x < GateSizeX; ++x)
+        for (auto y = 0ul; y < GateSizeY; ++y)
         {
-            for (auto y = 0ul; y < GateSizeY; ++y)
+            for (auto x = 0ul; x < GateSizeX; ++x)
             {
                 for (const auto& g : gates)
                 {
-                    if (g[x][y] != cell_type::EMPTY)
+                    if (g[y][x] != cell_type::EMPTY)
                     {
-                        merged[x][y] = g[x][y];
+                        merged[y][x] = g[y][x];
                     }
                 }
             }
