@@ -39,8 +39,6 @@
 
 #include <algorithm>
 #include <cstddef>
-#include <limits>
-#include <set>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -67,7 +65,7 @@ TEST_CASE("Single SiDB", "[calculate-energy-and-state-type]")
 
     const auto simulated_charge_distributions = simulation_results.charge_distributions;
 
-    REQUIRE(!simulated_charge_distributions.empty());
+    REQUIRE_FALSE(simulated_charge_distributions.empty());
 
     const auto energy_distribution = calculate_energy_distribution(simulated_charge_distributions);
 
@@ -75,42 +73,23 @@ TEST_CASE("Single SiDB", "[calculate-energy-and-state-type]")
         energy_distribution, simulated_charge_distributions, output_bdls,
         std::vector<kitty::dynamic_truth_table>{create_and_tt()}, 1);
 
-    REQUIRE(energy_state_with_state_info.size() == 5);
-
-    std::set<double> energy_values{};
-
-    double energy_value = std::numeric_limits<double>::min();
-
-    for (const auto& [energy, state] : energy_state_with_state_info)
+    /** @brief Energies in eV and labels for the five charge distributions of input 01. */
+    const energy_and_state_type expected{{0.9915, state_type::ACCEPTED},
+                                         {0.9966, state_type::ACCEPTED},
+                                         {1.2827, state_type::REJECTED},
+                                         {1.2917, state_type::REJECTED},
+                                         {1.2976, state_type::REJECTED}};
+    REQUIRE(energy_state_with_state_info.size() == expected.size());
+    for (std::size_t i = 0; i < expected.size(); ++i)
     {
-        // test if energy values are sorted
-        CHECK(energy > energy_value);
-        energy_value = energy;
-        energy_values.insert(energy);
+        CAPTURE(i);
+        CHECK_THAT(energy_state_with_state_info[i].first, Catch::Matchers::WithinAbs(expected[i].first, 0.0001));
+        CHECK(energy_state_with_state_info[i].second == expected[i].second);
+        if (i > 0)
+        {
+            CHECK(energy_state_with_state_info[i - 1].first < energy_state_with_state_info[i].first);
+        }
     }
-
-    CHECK(energy_values.size() == 5);
-
-    const auto ground_state   = energy_state_with_state_info.front();
-    const auto first_excited  = energy_state_with_state_info[1];
-    const auto second_excited = energy_state_with_state_info[2];
-    const auto third_excited  = energy_state_with_state_info[3];
-    const auto fourth_excited = energy_state_with_state_info[4];
-
-    CHECK_THAT(ground_state.first, Catch::Matchers::WithinAbs(0.9915, 0.0001));
-    CHECK(ground_state.second == state_type::ACCEPTED);
-
-    CHECK_THAT(first_excited.first, Catch::Matchers::WithinAbs(0.9966, 0.0001));
-    CHECK(first_excited.second == state_type::ACCEPTED);
-
-    CHECK_THAT(second_excited.first, Catch::Matchers::WithinAbs(1.2827, 0.0001));
-    CHECK(second_excited.second == state_type::REJECTED);
-
-    CHECK_THAT(third_excited.first, Catch::Matchers::WithinAbs(1.2917, 0.0001));
-    CHECK(third_excited.second == state_type::REJECTED);
-
-    CHECK_THAT(fourth_excited.first, Catch::Matchers::WithinAbs(1.2976, 0.0001));
-    CHECK(fourth_excited.second == state_type::REJECTED);
 
     const auto kinks_rejected = calculate_energy_and_state_type_with_kinks_rejected(
         *bii, energy_distribution, simulated_charge_distributions, {create_and_tt()}, 1,

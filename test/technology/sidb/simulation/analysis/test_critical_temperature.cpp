@@ -16,6 +16,7 @@
  * @author Willem Lambooy (wlambooy)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
@@ -350,7 +351,7 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
             CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
                        Catch::Matchers::WithinAbs(26.02, 0.01));
-            CHECK_THAT(std::abs(ct_qe - 57.24), Catch::Matchers::WithinAbs(0.00, 0.01));
+            CHECK_THAT(ct_qe, Catch::Matchers::WithinAbs(57.24, 0.01));
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -361,7 +362,7 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
             CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
                        Catch::Matchers::WithinAbs(26.02, 0.01));
-            CHECK_THAT(std::abs(ct_cc - 57.24), Catch::Matchers::WithinAbs(0.00, 0.01));
+            CHECK_THAT(ct_cc, Catch::Matchers::WithinAbs(57.24, 0.01));
 
 #endif  // FICTION_ALGLIB_ENABLED
         }
@@ -486,8 +487,8 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
             const auto ct_qe =
                 critical_temperature_gate_based(lyt, std::vector{create_fan_out_tt()}, params, &critical_stats);
 
-            CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.56),
-                       Catch::Matchers::WithinAbs(0.00, 0.01));
+            CHECK_THAT(critical_stats.energy_between_ground_state_and_first_erroneous,
+                       Catch::Matchers::WithinAbs(0.56, 0.01));
             CHECK_THAT(ct_qe, Catch::Matchers::WithinAbs(1.41, 0.01));
 
 #if (FICTION_ALGLIB_ENABLED)
@@ -497,9 +498,9 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
             const auto ct_cc =
                 critical_temperature_gate_based(lyt, std::vector{create_fan_out_tt()}, params, &critical_stats);
 
-            CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.56),
-                       Catch::Matchers::WithinAbs(0.00, 0.01));
-            CHECK_THAT(std::abs(ct_cc - 1.41), Catch::Matchers::WithinAbs(0.00, 0.01));
+            CHECK_THAT(critical_stats.energy_between_ground_state_and_first_erroneous,
+                       Catch::Matchers::WithinAbs(0.56, 0.01));
+            CHECK_THAT(ct_cc, Catch::Matchers::WithinAbs(1.41, 0.01));
 
 #endif  // FICTION_ALGLIB_ENABLED
         }
@@ -509,8 +510,8 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
             const auto ct_qe =
                 critical_temperature_gate_based(lyt, std::vector{create_fan_out_tt()}, params, &critical_stats);
 
-            CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.56),
-                       Catch::Matchers::WithinAbs(0.00, 0.01));
+            CHECK_THAT(critical_stats.energy_between_ground_state_and_first_erroneous,
+                       Catch::Matchers::WithinAbs(0.56, 0.01));
             CHECK_THAT(ct_qe, Catch::Matchers::WithinAbs(1.41, 0.01));
 
 #if (FICTION_ALGLIB_ENABLED)
@@ -520,8 +521,8 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
             const auto ct_cc =
                 critical_temperature_gate_based(lyt, std::vector{create_fan_out_tt()}, params, &critical_stats);
 
-            CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.56),
-                       Catch::Matchers::WithinAbs(0.00, 0.01));
+            CHECK_THAT(critical_stats.energy_between_ground_state_and_first_erroneous,
+                       Catch::Matchers::WithinAbs(0.56, 0.01));
             CHECK_THAT(ct_cc, Catch::Matchers::WithinAbs(1.41, 0.01));
 
 #endif  // FICTION_ALGLIB_ENABLED
@@ -541,9 +542,9 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
         const auto ct_qe = critical_temperature_gate_based(crossing_lyt, std::vector{create_crossing_wire_tt()}, params,
                                                            &critical_stats);
 
-        CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.32),
-                   Catch::Matchers::WithinAbs(0.00, 0.01));
-        CHECK_THAT(std::abs(ct_qe - 0.8199), Catch::Matchers::WithinAbs(0.000000, 0.001));
+        CHECK_THAT(critical_stats.energy_between_ground_state_and_first_erroneous,
+                   Catch::Matchers::WithinAbs(0.32, 0.01));
+        CHECK_THAT(ct_qe, Catch::Matchers::WithinAbs(0.8199, 0.001));
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -552,9 +553,9 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
         const auto ct_cc = critical_temperature_gate_based(crossing_lyt, std::vector{create_crossing_wire_tt()}, params,
                                                            &critical_stats);
 
-        CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.32),
-                   Catch::Matchers::WithinAbs(0.00, 0.01));
-        CHECK_THAT(std::abs(ct_cc - 0.81999), Catch::Matchers::WithinAbs(0.000000, 0.0001));
+        CHECK_THAT(critical_stats.energy_between_ground_state_and_first_erroneous,
+                   Catch::Matchers::WithinAbs(0.32, 0.01));
+        CHECK_THAT(ct_cc, Catch::Matchers::WithinAbs(0.81999, 0.0001));
 
 #endif  // FICTION_ALGLIB_ENABLED
     }
@@ -738,6 +739,7 @@ TEST_CASE("Pre-generated input pattern layouts match the layout-based overload",
                                        .input_bdl_iterator_params = {.input_bdl_config = input_config},
                                        .op_condition              = condition}};
 
+            CAPTURE(input_config, condition);
             critical_temperature_stats expected_stats{};
 
             const auto expected_ct = critical_temperature_gate_based(
@@ -870,10 +872,9 @@ TEST_CASE("Critical temperature of Bestagon CX, QuickExact", "[critical-temperat
 
     const auto ct_qe = critical_temperature_gate_based(lyt, create_crossing_wire_tt(), params, &critical_stats);
 
-    CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.32),
-               Catch::Matchers::WithinAbs(0.00, 0.01));
+    CHECK_THAT(critical_stats.energy_between_ground_state_and_first_erroneous, Catch::Matchers::WithinAbs(0.32, 0.01));
 
-    CHECK_THAT(std::abs(ct_qe - 0.82), Catch::Matchers::WithinAbs(0.00, 0.01));
+    CHECK_THAT(ct_qe, Catch::Matchers::WithinAbs(0.82, 0.01));
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -881,9 +882,8 @@ TEST_CASE("Critical temperature of Bestagon CX, QuickExact", "[critical-temperat
 
     const auto ct_cc = critical_temperature_gate_based(lyt, create_crossing_wire_tt(), params, &critical_stats);
 
-    CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.32),
-               Catch::Matchers::WithinAbs(0.00, 0.01));
-    CHECK_THAT(std::abs(ct_cc - 0.82), Catch::Matchers::WithinAbs(0.00, 0.01));
+    CHECK_THAT(critical_stats.energy_between_ground_state_and_first_erroneous, Catch::Matchers::WithinAbs(0.32, 0.01));
+    CHECK_THAT(ct_cc, Catch::Matchers::WithinAbs(0.82, 0.01));
 
 #endif  // FICTION_ALGLIB_ENABLED
 }
@@ -906,9 +906,9 @@ TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "[critical
         const auto ct_qe =
             critical_temperature_gate_based(lyt_double_wire_gate, create_double_wire_tt(), params, &critical_stats);
 
-        CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 10.717),
-                   Catch::Matchers::WithinAbs(0.00, 0.01));
-        CHECK_THAT(std::abs(ct_qe - 23.38), Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(critical_stats.energy_between_ground_state_and_first_erroneous,
+                   Catch::Matchers::WithinAbs(10.717, 0.01));
+        CHECK_THAT(ct_qe, Catch::Matchers::WithinAbs(23.38, 0.01));
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -917,9 +917,9 @@ TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "[critical
         const auto ct_cc =
             critical_temperature_gate_based(lyt_double_wire_gate, create_double_wire_tt(), params, &critical_stats);
 
-        CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 10.717),
-                   Catch::Matchers::WithinAbs(0.00, 0.01));
-        CHECK_THAT(std::abs(ct_cc - 23.38), Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(critical_stats.energy_between_ground_state_and_first_erroneous,
+                   Catch::Matchers::WithinAbs(10.717, 0.01));
+        CHECK_THAT(ct_cc, Catch::Matchers::WithinAbs(23.38, 0.01));
 
 #endif  // FICTION_ALGLIB_ENABLED
     }
@@ -929,8 +929,8 @@ TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "[critical
         const auto ct_qe =
             critical_temperature_gate_based(lyt_double_wire_gate, create_double_wire_tt(), params, &critical_stats);
 
-        CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 10.717),
-                   Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(critical_stats.energy_between_ground_state_and_first_erroneous,
+                   Catch::Matchers::WithinAbs(10.717, 0.01));
         CHECK_THAT(ct_qe, Catch::Matchers::WithinAbs(22.99, 0.01));
 
 #if (FICTION_ALGLIB_ENABLED)
@@ -940,8 +940,8 @@ TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "[critical
         const auto ct_cc =
             critical_temperature_gate_based(lyt_double_wire_gate, create_double_wire_tt(), params, &critical_stats);
 
-        CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 10.717),
-                   Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(critical_stats.energy_between_ground_state_and_first_erroneous,
+                   Catch::Matchers::WithinAbs(10.717, 0.01));
         CHECK_THAT(ct_cc, Catch::Matchers::WithinAbs(22.99, 0.01));
 
 #endif  // FICTION_ALGLIB_ENABLED
@@ -966,9 +966,9 @@ TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact", "[crit
         const auto ct_qe =
             critical_temperature_gate_based(lyt_half_adder_gate, create_half_adder_tt(), params, &critical_stats);
 
-        CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.15),
-                   Catch::Matchers::WithinAbs(0.00, 0.01));
-        CHECK_THAT(std::abs(ct_qe - 0.39), Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(critical_stats.energy_between_ground_state_and_first_erroneous,
+                   Catch::Matchers::WithinAbs(0.15, 0.01));
+        CHECK_THAT(ct_qe, Catch::Matchers::WithinAbs(0.39, 0.01));
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -977,9 +977,9 @@ TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact", "[crit
         const auto ct_cc =
             critical_temperature_gate_based(lyt_half_adder_gate, create_half_adder_tt(), params, &critical_stats);
 
-        CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.15),
-                   Catch::Matchers::WithinAbs(0.00, 0.01));
-        CHECK_THAT(std::abs(ct_cc - 0.39), Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(critical_stats.energy_between_ground_state_and_first_erroneous,
+                   Catch::Matchers::WithinAbs(0.15, 0.01));
+        CHECK_THAT(ct_cc, Catch::Matchers::WithinAbs(0.39, 0.01));
 
 #endif  // FICTION_ALGLIB_ENABLED
     }
@@ -989,9 +989,9 @@ TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact", "[crit
         const auto ct_qe =
             critical_temperature_gate_based(lyt_half_adder_gate, create_half_adder_tt(), params, &critical_stats);
 
-        CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.15),
-                   Catch::Matchers::WithinAbs(0.00, 0.01));
-        CHECK_THAT(std::abs(ct_qe - 0.39), Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(critical_stats.energy_between_ground_state_and_first_erroneous,
+                   Catch::Matchers::WithinAbs(0.15, 0.01));
+        CHECK_THAT(ct_qe, Catch::Matchers::WithinAbs(0.39, 0.01));
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -1000,9 +1000,9 @@ TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact", "[crit
         const auto ct_cc =
             critical_temperature_gate_based(lyt_half_adder_gate, create_half_adder_tt(), params, &critical_stats);
 
-        CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.15),
-                   Catch::Matchers::WithinAbs(0.00, 0.01));
-        CHECK_THAT(std::abs(ct_cc - 0.39), Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(critical_stats.energy_between_ground_state_and_first_erroneous,
+                   Catch::Matchers::WithinAbs(0.15, 0.01));
+        CHECK_THAT(ct_cc, Catch::Matchers::WithinAbs(0.39, 0.01));
 
 #endif  // FICTION_ALGLIB_ENABLED
     }

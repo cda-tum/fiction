@@ -252,6 +252,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Code quality:
 
   - Modernized physical-design helper tests with complete routing collections and independent solver rows.
+  - Streamlined SiDB analysis tests while preserving energy, degeneracy, parameter-sweep, and timeout checks.
   - Streamlined synthesis tests and strengthened clone, conversion, and gate-library checks.
   - Modernized path-finding tests with shared data rows, complete path comparisons, and cache reuse checks.
   - Geometry tests now compare complete coordinate and visitor results and share arrangement cases.
