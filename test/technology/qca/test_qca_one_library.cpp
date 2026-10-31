@@ -18,11 +18,11 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include "fiction/layouts/layout_base.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_layout.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/qca/layout.hpp>
@@ -39,11 +39,31 @@ using namespace fiction::physical_design;
 using namespace fiction::verification;
 using namespace fiction::qca;
 
+// clang-format off
+
+/** @brief Expected input port with its connector on the north edge. */
+static constexpr const qca_one_library::gate PRIMARY_INPUT_PORT{
+    qca_one_library::cell_list_to_gate<char>({{{' ', ' ', 'x', ' ', ' '},
+                                               {' ', ' ', 'x', ' ', ' '},
+                                               {' ', ' ', 'i', ' ', ' '},
+                                               {' ', ' ', ' ', ' ', ' '},
+                                               {' ', ' ', ' ', ' ', ' '}}})};
+
+/** @brief Expected output port with its connector on the north edge. */
+static constexpr const qca_one_library::gate PRIMARY_OUTPUT_PORT{
+    qca_one_library::cell_list_to_gate<char>({{{' ', ' ', 'x', ' ', ' '},
+                                               {' ', ' ', 'x', ' ', ' '},
+                                               {' ', ' ', 'o', ' ', ' '},
+                                               {' ', ' ', ' ', ' ', ' '},
+                                               {' ', ' ', ' ', ' ', ' '}}})};
+
+// clang-format on
+
 static_assert(std::is_pointer_v<decltype(&qca_one_library::set_up_gate<cartesian_layout>)>);
 
 TEST_CASE("QCA ONE library traits", "[qca-one-library]")
 {
-    CHECK(std::is_same_v<qca_one_library::layout, qca::layout>);
+    STATIC_REQUIRE(std::is_same_v<qca_one_library::layout, qca::layout>);
 }
 
 TEST_CASE("Setting up input ports and gates", "[qca-one-library]")
@@ -51,20 +71,6 @@ TEST_CASE("Setting up input ports and gates", "[qca-one-library]")
     auto layout = blueprints::or_not_gate_layout<cartesian_gate_layout>();
 
     // clang-format off
-
-    static constexpr const qca_one_library::gate primary_input_port{
-        qca_one_library::cell_list_to_gate<char>({{{' ', ' ', 'x', ' ', ' '},
-                                                   {' ', ' ', 'x', ' ', ' '},
-                                                   {' ', ' ', 'i', ' ', ' '},
-                                                   {' ', ' ', ' ', ' ', ' '},
-                                                   {' ', ' ', ' ', ' ', ' '}}})};
-
-    static constexpr const qca_one_library::gate primary_output_port{
-        qca_one_library::cell_list_to_gate<char>({{{' ', ' ', 'x', ' ', ' '},
-                                                   {' ', ' ', 'x', ' ', ' '},
-                                                   {' ', ' ', 'o', ' ', ' '},
-                                                   {' ', ' ', ' ', ' ', ' '},
-                                                   {' ', ' ', ' ', ' ', ' '}}})};
 
     static constexpr const qca_one_library::gate disjunction{
         qca_one_library::cell_list_to_gate<char>({{{' ', ' ', '1', ' ', ' '},
@@ -82,11 +88,11 @@ TEST_CASE("Setting up input ports and gates", "[qca-one-library]")
 
     // clang-format on
 
-    CHECK(qca_one_library::set_up_gate(layout, {0, 1}) == qca_one_library::rotate_90(primary_input_port));
-    CHECK(qca_one_library::set_up_gate(layout, {1, 0}) == qca_one_library::rotate_180(primary_input_port));
+    CHECK(qca_one_library::set_up_gate(layout, {0, 1}) == qca_one_library::rotate_90(PRIMARY_INPUT_PORT));
+    CHECK(qca_one_library::set_up_gate(layout, {1, 0}) == qca_one_library::rotate_180(PRIMARY_INPUT_PORT));
     CHECK(qca_one_library::set_up_gate(layout, {1, 1}) == qca_one_library::rotate_90(disjunction));
     CHECK(qca_one_library::set_up_gate(layout, {1, 2}) == bent_inverter);
-    CHECK(qca_one_library::set_up_gate(layout, {2, 2}) == qca_one_library::rotate_270(primary_output_port));
+    CHECK(qca_one_library::set_up_gate(layout, {2, 2}) == qca_one_library::rotate_270(PRIMARY_OUTPUT_PORT));
 }
 
 TEST_CASE("Setting up wires", "[qca-one-library]")
@@ -94,20 +100,6 @@ TEST_CASE("Setting up wires", "[qca-one-library]")
     auto layout = blueprints::crossing_layout<cartesian_gate_layout>();
 
     // clang-format off
-
-    static constexpr const qca_one_library::gate primary_input_port{
-        qca_one_library::cell_list_to_gate<char>({{{' ', ' ', 'x', ' ', ' '},
-                                                   {' ', ' ', 'x', ' ', ' '},
-                                                   {' ', ' ', 'i', ' ', ' '},
-                                                   {' ', ' ', ' ', ' ', ' '},
-                                                   {' ', ' ', ' ', ' ', ' '}}})};
-
-    static constexpr const qca_one_library::gate primary_output_port{
-        qca_one_library::cell_list_to_gate<char>({{{' ', ' ', 'x', ' ', ' '},
-                                                   {' ', ' ', 'x', ' ', ' '},
-                                                   {' ', ' ', 'o', ' ', ' '},
-                                                   {' ', ' ', ' ', ' ', ' '},
-                                                   {' ', ' ', ' ', ' ', ' '}}})};
 
     static constexpr const qca_one_library::gate conjunction{
         qca_one_library::cell_list_to_gate<char>({{{' ', ' ', '0', ' ', ' '},
@@ -125,17 +117,17 @@ TEST_CASE("Setting up wires", "[qca-one-library]")
 
     // clang-format on
 
-    CHECK(qca_one_library::set_up_gate(layout, {0, 1}) == qca_one_library::rotate_90(primary_input_port));
-    CHECK(qca_one_library::set_up_gate(layout, {0, 2}) == qca_one_library::rotate_90(primary_input_port));
-    CHECK(qca_one_library::set_up_gate(layout, {1, 0}) == qca_one_library::rotate_180(primary_input_port));
-    CHECK(qca_one_library::set_up_gate(layout, {2, 0}) == qca_one_library::rotate_180(primary_input_port));
+    CHECK(qca_one_library::set_up_gate(layout, {0, 1}) == qca_one_library::rotate_90(PRIMARY_INPUT_PORT));
+    CHECK(qca_one_library::set_up_gate(layout, {0, 2}) == qca_one_library::rotate_90(PRIMARY_INPUT_PORT));
+    CHECK(qca_one_library::set_up_gate(layout, {1, 0}) == qca_one_library::rotate_180(PRIMARY_INPUT_PORT));
+    CHECK(qca_one_library::set_up_gate(layout, {2, 0}) == qca_one_library::rotate_180(PRIMARY_INPUT_PORT));
     CHECK(qca_one_library::set_up_gate(layout, {1, 1}) == qca_one_library::rotate_180(conjunction));
     CHECK(qca_one_library::set_up_gate(layout, {2, 2}) == qca_one_library::rotate_180(conjunction));
     CHECK(qca_one_library::set_up_gate(layout, {2, 1}) == wire);
     CHECK(qca_one_library::set_up_gate(layout, {1, 2}) == qca_one_library::rotate_90(wire));
     CHECK(qca_one_library::set_up_gate(layout, {2, 1, 1}) == qca_one_library::rotate_90(wire));
-    CHECK(qca_one_library::set_up_gate(layout, {3, 1}) == qca_one_library::rotate_270(primary_output_port));
-    CHECK(qca_one_library::set_up_gate(layout, {3, 2}) == qca_one_library::rotate_270(primary_output_port));
+    CHECK(qca_one_library::set_up_gate(layout, {3, 1}) == qca_one_library::rotate_270(PRIMARY_OUTPUT_PORT));
+    CHECK(qca_one_library::set_up_gate(layout, {3, 2}) == qca_one_library::rotate_270(PRIMARY_OUTPUT_PORT));
 }
 
 TEST_CASE("Setting up fanouts", "[qca-one-library]")
@@ -143,20 +135,6 @@ TEST_CASE("Setting up fanouts", "[qca-one-library]")
     auto layout = blueprints::fanout_layout<cartesian_gate_layout>();
 
     // clang-format off
-
-    static constexpr const qca_one_library::gate primary_input_port{
-        qca_one_library::cell_list_to_gate<char>({{{' ', ' ', 'x', ' ', ' '},
-                                                   {' ', ' ', 'x', ' ', ' '},
-                                                   {' ', ' ', 'i', ' ', ' '},
-                                                   {' ', ' ', ' ', ' ', ' '},
-                                                   {' ', ' ', ' ', ' ', ' '}}})};
-
-    static constexpr const qca_one_library::gate primary_output_port{
-        qca_one_library::cell_list_to_gate<char>({{{' ', ' ', 'x', ' ', ' '},
-                                                   {' ', ' ', 'x', ' ', ' '},
-                                                   {' ', ' ', 'o', ' ', ' '},
-                                                   {' ', ' ', ' ', ' ', ' '},
-                                                   {' ', ' ', ' ', ' ', ' '}}})};
 
     static constexpr const qca_one_library::gate fanout{
         qca_one_library::cell_list_to_gate<char>({{{' ', ' ', ' ', ' ', ' '},
@@ -174,10 +152,10 @@ TEST_CASE("Setting up fanouts", "[qca-one-library]")
 
     // clang-format on
 
-    CHECK(qca_one_library::set_up_gate(layout, {0, 1}) == qca_one_library::rotate_90(primary_input_port));
-    CHECK(qca_one_library::set_up_gate(layout, {1, 0}) == qca_one_library::rotate_180(primary_output_port));
-    CHECK(qca_one_library::set_up_gate(layout, {2, 0}) == qca_one_library::rotate_180(primary_output_port));
-    CHECK(qca_one_library::set_up_gate(layout, {1, 2}) == qca_one_library::rotate_90(primary_output_port));
+    CHECK(qca_one_library::set_up_gate(layout, {0, 1}) == qca_one_library::rotate_90(PRIMARY_INPUT_PORT));
+    CHECK(qca_one_library::set_up_gate(layout, {1, 0}) == qca_one_library::rotate_180(PRIMARY_OUTPUT_PORT));
+    CHECK(qca_one_library::set_up_gate(layout, {2, 0}) == qca_one_library::rotate_180(PRIMARY_OUTPUT_PORT));
+    CHECK(qca_one_library::set_up_gate(layout, {1, 2}) == qca_one_library::rotate_90(PRIMARY_OUTPUT_PORT));
     CHECK(qca_one_library::set_up_gate(layout, {1, 1}) == qca_one_library::rotate_180(fanout));
     CHECK(qca_one_library::set_up_gate(layout, {2, 1}) == qca_one_library::rotate_90(fanout));
     CHECK(qca_one_library::set_up_gate(layout, {2, 2}) == qca_one_library::rotate_270(bent_wire));
@@ -248,6 +226,7 @@ TEST_CASE("QCA ONE vias in a sparse frame", "[qca-one-library]")
     CHECK(layout.get_cell_type({4, 2, 0}) == cell_type::EMPTY);
     for (int32_t x = 16; x < 136; x += 3)
     {
+        CAPTURE(x);
         CHECK(layout.get_cell_mode({x, 5, 1}) == cell_mode::VERTICAL);
         CHECK(layout.get_cell_type({x, 5, 0}) == cell_type::NORMAL);
         CHECK(layout.get_cell_mode({x, 5, 0}) == cell_mode::VERTICAL);

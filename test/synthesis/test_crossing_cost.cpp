@@ -184,3 +184,28 @@ TEST_CASE("Levels with more crossings than allowed are not costed", "[crossing-c
     CHECK(result.cost == expected_cost);
     CHECK(result.num_crossings == 1);
 }
+
+TEST_CASE("Crossing padding follows the busiest current or swept edge", "[crossing-cost]")
+{
+    technology_network tec{};
+    const auto         a  = tec.create_pi();
+    const auto         b  = tec.create_pi();
+    const auto         c  = tec.create_pi();
+    const auto         ga = tec.get_node(tec.create_buf(a));
+    const auto         gb = tec.get_node(tec.create_buf(b));
+    const auto         gc = tec.get_node(tec.create_buf(c));
+
+    const auto [row, upper, expected_crossings, and_or_cost, xor_cost] =
+        GENERATE_COPY(table<const char*, std::vector<node_t>, uint64_t, uint64_t, uint64_t>(
+            {{"current edge maximum", {ga, ga, gb, gb, gb, ga}, 3, 345, 78},
+             {"swept edge across lower positions", {ga, ga, gb, gc, ga, ga, gb, gc}, 5, 491, 106}}));
+    const auto xor_gates = GENERATE(false, true);
+    CAPTURE(row, xor_gates);
+
+    std::vector<node_t> lower{tec.get_node(a), tec.get_node(b), tec.get_node(c)};
+    // Zero swaps keeps the barycenter order. The second row crosses two occupied lower positions.
+    const auto result = synthesis::detail::crossing_cost(tec, upper, lower, 0, {.xor_gates = xor_gates});
+
+    CHECK(result.num_crossings == expected_crossings);
+    CHECK(result.cost == (xor_gates ? xor_cost : and_or_cost));
+}

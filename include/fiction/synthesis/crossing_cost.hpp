@@ -258,7 +258,8 @@ template <typename Ntk>
         for (const auto p : targets)
         {
             const auto key = edge_key(t, p);
-            per_edge.try_emplace(key, 0);
+            /** @brief Crossing count of the current edge. */
+            auto& count = per_edge.try_emplace(key, 0).first->second;
 
             for (auto k = max_pos; k > p; --k)
             {
@@ -272,9 +273,11 @@ template <typename Ntk>
                         return {.cost = std::numeric_limits<uint64_t>::max(), .num_crossings = num_crossings};
                     }
 
-                    ++per_edge[prev_key];
-                    ++per_edge[key];
-                    max_per_edge = std::max({max_per_edge, per_edge[prev_key], per_edge[key]});
+                    /** @brief Crossing count of the swept edge. */
+                    auto& prev_count = per_edge[prev_key];
+                    ++prev_count;
+                    ++count;
+                    max_per_edge = std::max({max_per_edge, prev_count, count});
                 }
             }
         }
