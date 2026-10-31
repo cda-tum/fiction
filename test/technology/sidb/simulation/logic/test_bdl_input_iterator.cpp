@@ -385,8 +385,7 @@ TEST_CASE("Generate BDL input pattern layouts", "[bdl-input-iterator]")
 
     SECTION("The layouts are independent deep copies")
     {
-        // a shallow copy would make all entries share cell storage, which passes every other check here but
-        // corrupts the layouts as soon as they are read concurrently
+        // Mutating one generated layout must not change the others.
         auto layouts = generate_bdl_input_pattern_layouts(lat, params);
 
         REQUIRE(layouts.size() == 4);
