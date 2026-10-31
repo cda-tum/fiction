@@ -896,6 +896,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Documentation:
 
   - Timing documentation now states the throughput formula and input hold time in clock cycles.
+  - Operational-domain documentation now states that grid search and random sampling require at least one sweep dimension.
   - Binding docstring instructions now use the generator wrapper that CI runs.
   - Hexagonal layout documentation now names the eastern border and `is_adjacent_of` correctly.
   - `gate_layout::incoming_data_flow` now documents required adjacency and optional clocking.

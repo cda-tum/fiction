@@ -263,6 +263,21 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
         const operational_domain_params one_dimensional_params{
             .sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R}}};
 
+        SECTION("grid search and random sampling require one dimension")
+        {
+            CHECK_THROWS_AS(operational_domain_grid_search(lat, std::vector{create_id_tt()}, zero_dimensional_params),
+                            std::invalid_argument);
+            CHECK_THROWS_AS(
+                operational_domain_random_sampling(lat, std::vector{create_id_tt()}, 0, zero_dimensional_params),
+                std::invalid_argument);
+            CHECK_THROWS_AS(
+                critical_temperature_domain_grid_search(lat, std::vector{create_id_tt()}, zero_dimensional_params),
+                std::invalid_argument);
+            CHECK_THROWS_AS(critical_temperature_domain_random_sampling(lat, std::vector{create_id_tt()}, 0,
+                                                                        zero_dimensional_params),
+                            std::invalid_argument);
+        }
+
         SECTION("flood_fill")
         {
             // flood fill needs a neighborhood to expand over, so it requires at least two dimensions. Three and more
