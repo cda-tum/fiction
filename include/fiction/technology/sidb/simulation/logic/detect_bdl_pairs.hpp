@@ -186,7 +186,7 @@ struct detect_bdl_pairs_params
  * The closest unpaired dots within `[params.minimum_distance, params.maximum_distance]` (defaults of 0.75 nm
  * and 1.5 nm) form a pair. The lower bound
  * keeps, e.g., the SiDBs of an atomic wire from being paired; the upper bound prevents unlikely pairings.
- * Distances follow the layout's lattice. The pairs are returned sorted.
+ * Distances follow the layout's lattice. Pairs are sorted within each dot-tag group.
  *
  * @param lyt The layout to detect BDL pairs in.
  * @param type Optional dot tag to restrict the detection to (`INPUT`, `OUTPUT`, `NORMAL`, ...). If omitted, the
