@@ -71,7 +71,7 @@ Args:
     use_filename_as_component_name: Use the output filename as the component name inside the QCC file.
 
 Raises:
-    ValueError: The layout has no designated I/O pins or the pins are not routed to its borders.
+    ValueError: An input or output cell is not at its designated horizontal border.
     RuntimeError: The file cannot be created, written, closed, or replaced.
 )doc");
 }
