@@ -14,13 +14,18 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
+
+#include "utils/progress_recorder.hpp"
 
 #include <fiction/utils/progress.hpp>
 
 #include <algorithm>
 #include <chrono>
 #include <cstddef>
+#include <iterator>
 #include <mutex>
 #include <stdexcept>
 #include <string>
@@ -335,4 +340,35 @@ TEST_CASE("Worker progress clears unfinished work during unwinding", "[progress]
     };
     CHECK_THROWS_AS(unwind(), std::runtime_error);
     CHECK_FALSE(active);
+}
+
+TEST_CASE("Progress recorder checks task histories", "[progress]")
+{
+    /** @brief Independent histories with expected consistency and final counts. */
+    const auto [name, reports, consistent, final] =
+        GENERATE(table<const char*, std::vector<progress_record>, bool, std::size_t>(
+            {{"missing", {}, false, 0},
+             {"other task", {{"other", 1, 1}}, false, 0},
+             {"nonzero start", {{"items", 1, 1}}, false, 1},
+             {"backwards", {{"items", 0, 3}, {"items", 2, 3}, {"items", 1, 3}}, false, 1},
+             {"incomplete", {{"items", 0, 3}, {"items", 2, 3}}, false, 2},
+             {"unknown total", {{"items", 0, 0}, {"items", 2, 0}}, true, 2},
+             {"restart", {{"items", 0, 3}, {"items", 2, 3}, {"items", 0, 4}, {"items", 4, 4}}, true, 4},
+             {"interleaved", {{"items", 0, 0}, {"other", 8, 8}, {"items", 0, 3}, {"items", 3, 3}}, true, 3},
+             {"duplicates", {{"items", 0, 0}, {"items", 0, 0}}, true, 0},
+             {"last match", {{"items", 0, 9}, {"items", 8, 9}, {"other", 10, 10}, {"items", 0, 0}}, true, 0}}));
+    CAPTURE(name);
+
+    /** @brief Recorder populated before inspecting the complete history. */
+    progress_recorder rec{};
+    /** @brief Callback whose recorder outlives each invocation. */
+    const auto callback = rec.callback();
+    for (const auto& report : reports)
+    {
+        callback(report.task, report.done, report.total);
+    }
+
+    CHECK(rec.is_consistent("items") == consistent);
+    CHECK(rec.final_count("items") == final);
+    CHECK(std::ssize(rec.reports_of("items")) == std::ranges::count(reports, "items", &progress_record::task));
 }
