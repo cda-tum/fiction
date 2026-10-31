@@ -15,6 +15,7 @@
  * @author Jan Drewniok (Drewniok)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
@@ -41,8 +42,10 @@ using namespace fiction::qca::io;
 
 TEST_CASE("QCAD names must fit one text record", "[qcad]")
 {
-    const auto  name        = GENERATE(std::string("a\nb"), std::string("a\rb"), std::string("a\0b", 3));
-    const auto  layout_name = GENERATE(false, true);
+    const auto [name_kind, name] = GENERATE(Catch::Generators::table<const char*, std::string>(
+        {{"line feed", "a\nb"}, {"carriage return", "a\rb"}, {"null byte", std::string("a\0b", 3)}}));
+    const auto layout_name       = GENERATE(false, true);
+    CAPTURE(name_kind, layout_name);
     qca::layout layout{{1, 1}, layout_name ? name : "valid"};
     layout.assign_cell_type({0, 0}, qca::cell_type::INPUT);
     layout.assign_cell_name({0, 0}, layout_name ? "valid" : name);
@@ -56,6 +59,7 @@ TEST_CASE("QCAD names must fit one text record", "[qcad]")
         std::filesystem::temp_directory_path() / ("fiction-qca-name-" + std::to_string(std::random_device{}()));
     {
         std::ofstream original{filename};
+        REQUIRE(original.is_open());
         original << "sentinel";
     }
     CHECK_THROWS_AS(write_qca_layout(layout, filename.string()), std::invalid_argument);
@@ -94,120 +98,61 @@ TEST_CASE("Write empty QCAD layout", "[qcad]")
 
     const qca_layout layout{{3, 3, 2}, "empty layout"};
 
-    SECTION("with vias")
-    {
-        static const std::string qcad_layout = fmt::format("[VERSION]\n"
-                                                           "qcadesigner_version=2.000000\n"
-                                                           "[#VERSION]\n"
-                                                           "[LAYOUT]\n"
-                                                           "name=empty layout\n"
-                                                           "generated_by={}\n"
-                                                           "repo={}\n"
-                                                           "[#LAYOUT]\n"
-                                                           "[TYPE:DESIGN]\n"
-                                                           "[TYPE:QCADLayer]\n"
-                                                           "type=3\n"
-                                                           "status=1\n"
-                                                           "pszDescription=Drawing Layer\n"
-                                                           "[#TYPE:QCADLayer]\n"
-                                                           "[TYPE:QCADLayer]\n"
-                                                           "type=0\n"
-                                                           "status=1\n"
-                                                           "pszDescription=Substrate\n"
-                                                           "[TYPE:QCADSubstrate]\n"
-                                                           "[TYPE:QCADStretchyObject]\n"
-                                                           "[TYPE:QCADDesignObject]\n"
-                                                           "x=3000.000000\n"
-                                                           "y=1500.000000\n"
-                                                           "bSelected=FALSE\n"
-                                                           "clr.red=65535\n"
-                                                           "clr.green=65535\n"
-                                                           "clr.blue=65535\n"
-                                                           "bounding_box.xWorld=0.000000\n"
-                                                           "bounding_box.yWorld=0.000000\n"
-                                                           "bounding_box.cxWorld=6000.000000\n"
-                                                           "bounding_box.cyWorld=3000.000000\n"
-                                                           "[#TYPE:QCADDesignObject]\n"
-                                                           "[#TYPE:QCADStretchyObject]\n"
-                                                           "grid_spacing=20.000000\n"
-                                                           "[#TYPE:QCADSubstrate]\n"
-                                                           "[#TYPE:QCADLayer]\n"
-                                                           "[TYPE:QCADLayer]\n"
-                                                           "type=1\n"
-                                                           "status=0\n"
-                                                           "pszDescription=Ground Layer\n"
-                                                           "[#TYPE:QCADLayer]\n"
-                                                           "[TYPE:QCADLayer]\n"
-                                                           "type=1\n"
-                                                           "status=0\n"
-                                                           "pszDescription=Crossing Layer 1\n"
-                                                           "[#TYPE:QCADLayer]\n"
-                                                           "[#TYPE:DESIGN]\n",
-                                                           FICTION_VERSION, FICTION_REPO);
+    const auto create_vias = GENERATE(false, true);
+    CAPTURE(create_vias);
 
-        std::ostringstream layout_stream{};
+    static const std::string qcad_layout = fmt::format("[VERSION]\n"
+                                                       "qcadesigner_version=2.000000\n"
+                                                       "[#VERSION]\n"
+                                                       "[LAYOUT]\n"
+                                                       "name=empty layout\n"
+                                                       "generated_by={}\n"
+                                                       "repo={}\n"
+                                                       "[#LAYOUT]\n"
+                                                       "[TYPE:DESIGN]\n"
+                                                       "[TYPE:QCADLayer]\n"
+                                                       "type=3\n"
+                                                       "status=1\n"
+                                                       "pszDescription=Drawing Layer\n"
+                                                       "[#TYPE:QCADLayer]\n"
+                                                       "[TYPE:QCADLayer]\n"
+                                                       "type=0\n"
+                                                       "status=1\n"
+                                                       "pszDescription=Substrate\n"
+                                                       "[TYPE:QCADSubstrate]\n"
+                                                       "[TYPE:QCADStretchyObject]\n"
+                                                       "[TYPE:QCADDesignObject]\n"
+                                                       "x=3000.000000\n"
+                                                       "y=1500.000000\n"
+                                                       "bSelected=FALSE\n"
+                                                       "clr.red=65535\n"
+                                                       "clr.green=65535\n"
+                                                       "clr.blue=65535\n"
+                                                       "bounding_box.xWorld=0.000000\n"
+                                                       "bounding_box.yWorld=0.000000\n"
+                                                       "bounding_box.cxWorld=6000.000000\n"
+                                                       "bounding_box.cyWorld=3000.000000\n"
+                                                       "[#TYPE:QCADDesignObject]\n"
+                                                       "[#TYPE:QCADStretchyObject]\n"
+                                                       "grid_spacing=20.000000\n"
+                                                       "[#TYPE:QCADSubstrate]\n"
+                                                       "[#TYPE:QCADLayer]\n"
+                                                       "[TYPE:QCADLayer]\n"
+                                                       "type=1\n"
+                                                       "status=0\n"
+                                                       "pszDescription=Ground Layer\n"
+                                                       "[#TYPE:QCADLayer]\n"
+                                                       "[TYPE:QCADLayer]\n"
+                                                       "type=1\n"
+                                                       "status=0\n"
+                                                       "pszDescription=Crossing Layer 1\n"
+                                                       "[#TYPE:QCADLayer]\n"
+                                                       "[#TYPE:DESIGN]\n",
+                                                       FICTION_VERSION, FICTION_REPO);
 
-        write_qca_layout(layout, layout_stream, {.create_inter_layer_via_cells = true});
-
-        CHECK(layout_stream.str() == qcad_layout);
-    }
-    SECTION("without vias")
-    {
-        static const std::string qcad_layout = fmt::format("[VERSION]\n"
-                                                           "qcadesigner_version=2.000000\n"
-                                                           "[#VERSION]\n"
-                                                           "[LAYOUT]\n"
-                                                           "name=empty layout\n"
-                                                           "generated_by={}\n"
-                                                           "repo={}\n"
-                                                           "[#LAYOUT]\n"
-                                                           "[TYPE:DESIGN]\n"
-                                                           "[TYPE:QCADLayer]\n"
-                                                           "type=3\n"
-                                                           "status=1\n"
-                                                           "pszDescription=Drawing Layer\n"
-                                                           "[#TYPE:QCADLayer]\n"
-                                                           "[TYPE:QCADLayer]\n"
-                                                           "type=0\n"
-                                                           "status=1\n"
-                                                           "pszDescription=Substrate\n"
-                                                           "[TYPE:QCADSubstrate]\n"
-                                                           "[TYPE:QCADStretchyObject]\n"
-                                                           "[TYPE:QCADDesignObject]\n"
-                                                           "x=3000.000000\n"
-                                                           "y=1500.000000\n"
-                                                           "bSelected=FALSE\n"
-                                                           "clr.red=65535\n"
-                                                           "clr.green=65535\n"
-                                                           "clr.blue=65535\n"
-                                                           "bounding_box.xWorld=0.000000\n"
-                                                           "bounding_box.yWorld=0.000000\n"
-                                                           "bounding_box.cxWorld=6000.000000\n"
-                                                           "bounding_box.cyWorld=3000.000000\n"
-                                                           "[#TYPE:QCADDesignObject]\n"
-                                                           "[#TYPE:QCADStretchyObject]\n"
-                                                           "grid_spacing=20.000000\n"
-                                                           "[#TYPE:QCADSubstrate]\n"
-                                                           "[#TYPE:QCADLayer]\n"
-                                                           "[TYPE:QCADLayer]\n"
-                                                           "type=1\n"
-                                                           "status=0\n"
-                                                           "pszDescription=Ground Layer\n"
-                                                           "[#TYPE:QCADLayer]\n"
-                                                           "[TYPE:QCADLayer]\n"
-                                                           "type=1\n"
-                                                           "status=0\n"
-                                                           "pszDescription=Crossing Layer 1\n"
-                                                           "[#TYPE:QCADLayer]\n"
-                                                           "[#TYPE:DESIGN]\n",
-                                                           FICTION_VERSION, FICTION_REPO);
-
-        std::ostringstream layout_stream{};
-
-        write_qca_layout(layout, layout_stream, {.create_inter_layer_via_cells = false});
-
-        CHECK(layout_stream.str() == qcad_layout);
-    }
+    std::ostringstream layout_stream{};
+    write_qca_layout(layout, layout_stream, {.create_inter_layer_via_cells = create_vias});
+    CHECK(layout_stream.str() == qcad_layout);
 }
 
 TEST_CASE("Write single-layer QCAD AND gate", "[qcad]")
@@ -1525,8 +1470,9 @@ TEST_CASE("QCAD retains quantum-dot offsets at large coordinates", "[qcad]")
             {{1000000, "20000100.000000", "20000104.500000", "20000095.500000"},
              {107374183, "2147483760.000000", "2147483764.500000", "2147483755.500000"},
              {2147483647, "42949673040.000000", "42949673044.500000", "42949673035.500000"}}));
-    const auto  along_y = GENERATE(false, true);
-    const auto  size    = static_cast<uint64_t>(x) + 1;
+    const auto along_y = GENERATE(false, true);
+    CAPTURE(x, along_y);
+    const auto  size = static_cast<uint64_t>(x) + 1;
     qca::layout layout{{along_y ? 1 : size, along_y ? size : 1}};
     layout.assign_cell_type({along_y ? 0 : x, along_y ? x : 0}, qca::cell_type::NORMAL);
     std::ostringstream stream{};
@@ -1549,7 +1495,8 @@ TEST_CASE("QCAD retains label widths for long names", "[qcad]")
 
 TEST_CASE("QCAD preserves optional via layers before empty crossing layers", "[qcad]")
 {
-    const auto  create_vias = GENERATE(false, true);
+    const auto create_vias = GENERATE(false, true);
+    CAPTURE(create_vias);
     qca::layout layout{{3, 3, 2}};
     for (const auto& cell : {qca::layout::cell{0, 2}, qca::layout::cell{2, 0}})
     {
