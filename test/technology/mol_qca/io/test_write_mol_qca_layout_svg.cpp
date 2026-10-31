@@ -313,6 +313,11 @@ TEST_CASE("Generate MolQCA layout in SVG", "[write-mol-qca-layout-svg]")
         file.close();
         std::filesystem::remove(filename);
 
+        if (!simple)
+        {
+            CHECK(svg.find("C0") != std::string::npos);
+        }
+
         CHECK(normalize_svg(svg) ==
               normalize_svg(simple ? EXPECTED_SVG_MOL_QCA_SIMPLE : EXPECTED_SVG_MOL_QCA_DETAILED));
     }
