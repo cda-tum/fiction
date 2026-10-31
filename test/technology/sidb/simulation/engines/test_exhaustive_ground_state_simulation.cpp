@@ -47,11 +47,10 @@ using namespace fiction::utils::math;
 TEST_CASE("ExGS rejects incomplete simulations after the caller deadline", "[exhaustive-ground-state-simulation]")
 {
     layout lyt{};
-    auto   deadline = std::chrono::steady_clock::time_point::max();
 
     SECTION("Already expired")
     {
-        deadline = std::chrono::steady_clock::now();
+        const auto deadline = std::chrono::steady_clock::now();
         CHECK_THROWS_AS(exhaustive_ground_state_simulation(lyt, simulation_parameters{2, -0.32}, {}, deadline),
                         utils::timeout_error);
     }
@@ -61,7 +60,7 @@ TEST_CASE("ExGS rejects incomplete simulations after the caller deadline", "[exh
         {
             lyt.assign_sidb({i, 0, 0}, dot_tag::NORMAL);
         }
-        deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds{1};
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds{1};
         CHECK_THROWS_AS(exhaustive_ground_state_simulation(lyt, simulation_parameters{2, -0.32}, {}, deadline),
                         utils::timeout_error);
     }
