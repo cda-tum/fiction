@@ -124,7 +124,7 @@ struct time_to_solution_stats
 };
 /**
  * Computes the time-to-solution (TTS) of *QuickSim* from an exact result and a series of heuristic results: the
- * accuracy is the share of heuristic runs that found the ground state, and TTS is the mean heuristic runtime
+ * accuracy `acc` is the fraction of heuristic runs that found the ground state, and TTS is the mean heuristic runtime
  * scaled to reach the given confidence level, `t · log(1 - c) / log(1 - acc)`. An empty sample yields zero accuracy,
  * zero mean heuristic runtime, and infinite time-to-solution.
  *
