@@ -237,9 +237,26 @@ TEST_CASE("Defects", "[layout]")
         CHECK(lyt.num_positively_charged_defects() == 1);
         CHECK(lyt.num_neutral_defects() == 1);
 
-        std::vector<lattice_site> visited{};
-        lyt.foreach_defect([&visited](const auto& sd) { visited.push_back(sd.first); });
-        CHECK(visited == std::vector<lattice_site>{{0, 0, 0}, {1, 0, 1}, {5, 2, 0}});
+        /** @brief Complete ordered defects observed by the callback. */
+        std::vector<std::pair<lattice_site, defect>> visited{};
+        /** @brief The canonical defects, independent of either callback overload. */
+        const std::vector<std::pair<lattice_site, defect>> expected{{{0, 0, 0}, positive},
+                                                                    {{1, 0, 1}, neutral},
+                                                                    {{5, 2, 0}, charged}};
+        lyt.foreach_defect([&visited](const auto& sd) { visited.push_back(sd); });
+        CHECK(visited == expected);
+        visited.clear();
+
+        /** @brief Indices reported for the ordered defect visits. */
+        std::vector<std::size_t> indices{};
+        lyt.foreach_defect(
+            [&](const auto& sd, const auto i)
+            {
+                visited.push_back(sd);
+                indices.push_back(i);
+            });
+        CHECK(visited == expected);
+        CHECK(indices == std::vector<std::size_t>{0, 1, 2});
     }
     SECTION("erase and move")
     {
@@ -293,12 +310,26 @@ TEST_CASE("Defects", "[layout]")
         CHECK(around_charged.contains({5 + 26, 2 + 13, 0}));
         CHECK(!around_charged.contains({5, 2, 1}));
 
-        const auto narrow = lyt.affected_sidbs({5, 2, 0}, std::pair<uint16_t, uint16_t>{1, 1});
-        CHECK(narrow.size() == 9);
+        /** @brief The complete one-unit-cell rectangle retains the defect's basis index. */
+        const std::unordered_set<lattice_site> expected_narrow{{4, 1, 0}, {5, 1, 0}, {6, 1, 0}, {4, 2, 0}, {5, 2, 0},
+                                                               {6, 2, 0}, {4, 3, 0}, {5, 3, 0}, {6, 3, 0}};
+        CHECK(lyt.affected_sidbs({5, 2, 0}, std::pair<uint16_t, uint16_t>{1, 1}) == expected_narrow);
 
+        /** @brief Union of both charged rectangles and the neutral defect's site. */
+        auto expected_all = expected_narrow;
+        expected_all.insert({{-1, -1, 0},
+                             {0, -1, 0},
+                             {1, -1, 0},
+                             {-1, 0, 0},
+                             {0, 0, 0},
+                             {1, 0, 0},
+                             {-1, 1, 0},
+                             {0, 1, 0},
+                             {1, 1, 0},
+                             {1, 0, 1}});
         const auto all =
             lyt.all_affected_sidbs(std::pair<uint16_t, uint16_t>{1, 1}, std::pair<uint16_t, uint16_t>{0, 0});
-        CHECK(all.size() == 9 + 1 + 9);
+        CHECK(all == expected_all);
     }
     SECTION("bounding box covers defects")
     {
@@ -318,13 +349,15 @@ TEST_CASE("Defects", "[layout]")
         CHECK(lyt.bounding_box() == std::pair{first, last});
 
         const auto lower = lyt.affected_sidbs(first, std::pair<uint16_t, uint16_t>{1, 1});
-        CHECK(lower.size() == 4);
-        CHECK(lower.contains(first));
-        CHECK(lower.contains({min_coordinate + 1, min_coordinate + 1, 0}));
+        CHECK(lower == std::unordered_set<lattice_site>{first,
+                                                        {min_coordinate + 1, min_coordinate, 0},
+                                                        {min_coordinate, min_coordinate + 1, 0},
+                                                        {min_coordinate + 1, min_coordinate + 1, 0}});
         const auto upper = lyt.affected_sidbs(last, std::pair<uint16_t, uint16_t>{1, 1});
-        CHECK(upper.size() == 4);
-        CHECK(upper.contains(last));
-        CHECK(upper.contains({max_coordinate - 1, max_coordinate - 1, 1}));
+        CHECK(upper == std::unordered_set<lattice_site>{last,
+                                                        {max_coordinate - 1, max_coordinate, 1},
+                                                        {max_coordinate, max_coordinate - 1, 1},
+                                                        {max_coordinate - 1, max_coordinate - 1, 1}});
     }
 }
 

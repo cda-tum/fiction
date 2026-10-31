@@ -251,6 +251,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - SiDB model, layout, and gate-library tests now share data rows and check complete defect regions and exception ports.
   - Modernized physical-design helper tests with complete routing collections and independent solver rows.
   - Streamlined synthesis tests and strengthened clone, conversion, and gate-library checks.
   - Modernized path-finding tests with shared data rows, complete path comparisons, and cache reuse checks.

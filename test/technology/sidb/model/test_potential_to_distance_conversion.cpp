@@ -15,8 +15,9 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
-#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/generators/catch_generators.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/technology/sidb/model/physical_constants.hpp>
@@ -35,64 +36,22 @@ TEST_CASE("Conversion of potential to distance", "[potential_to_distance_convers
 {
     auto params = simulation_parameters{};
 
-    SECTION("Valid conversion with default parameters")
+    SECTION("Conversions round upward at the requested precision")
     {
-        constexpr uint64_t precision         = 1;
-        constexpr double   potential_value   = 5.0;
-        constexpr double   expected_distance = 0.1;
-        REQUIRE_THAT(potential_to_distance_conversion(potential_value, params, precision),
-                     Catch::Matchers::WithinAbs(expected_distance, 1e-5));
-    }
-
-    SECTION("Valid conversion with custom parameters, precision is 1")
-    {
-        params.epsilon_r                     = 2.0;
-        params.lambda_tf                     = 1.0;
-        constexpr uint64_t precision         = 1;
-        constexpr double   potential_value   = 0.01;
-        constexpr double   expected_distance = 3.2;
-        REQUIRE_THAT(potential_to_distance_conversion(potential_value, params, precision),
-                     Catch::Matchers::WithinAbs(expected_distance, 1e-5));
-    }
-
-    SECTION("Valid conversion with custom parameters, precision is 2")
-    {
-        params.epsilon_r                     = 2.0;
-        params.lambda_tf                     = 1.0;
-        constexpr uint64_t precision         = 2;
-        constexpr double   potential_value   = 0.01;
-        constexpr double   expected_distance = 3.14;
-        REQUIRE_THAT(potential_to_distance_conversion(potential_value, params, precision),
-                     Catch::Matchers::WithinAbs(expected_distance, 1e-5));
-    }
-
-    SECTION("Valid conversion with custom parameters, precision is 3")
-    {
-        params.epsilon_r                     = 2.0;
-        params.lambda_tf                     = 1.0;
-        constexpr uint64_t precision         = 3;
-        constexpr double   potential_value   = 0.01;
-        constexpr double   expected_distance = 3.135;
-        REQUIRE_THAT(potential_to_distance_conversion(potential_value, params, precision),
-                     Catch::Matchers::WithinAbs(expected_distance, 1e-5));
-    }
-
-    SECTION("Valid conversion with custom parameters, precision is 0")
-    {
-        constexpr uint64_t precision         = 0;
-        constexpr double   potential_value   = 0.03;
-        constexpr double   expected_distance = 4;
-        REQUIRE_THAT(potential_to_distance_conversion(potential_value, params, precision),
-                     Catch::Matchers::WithinAbs(expected_distance, 1e-5));
-    }
-
-    SECTION("Conversion with infinite potential")
-    {
-        constexpr uint64_t precision         = 3;
-        constexpr double   potential_value   = std::numeric_limits<double>::infinity();
-        constexpr double   expected_distance = 0.001;
-        REQUIRE_THAT(potential_to_distance_conversion(potential_value, params, precision),
-                     Catch::Matchers::WithinAbs(expected_distance, 1e-5));
+        /** @brief Default and custom physical parameters with each original decimal precision. */
+        const auto [potential, permittivity, screening_distance, precision, expected] =
+            GENERATE(table<double, double, double, uint64_t, double>(
+                {{5.0, 5.6, 5.0, 1, 0.1},
+                 {0.01, 2.0, 1.0, 1, 3.2},
+                 {0.01, 2.0, 1.0, 2, 3.14},
+                 {0.01, 2.0, 1.0, 3, 3.135},
+                 {0.03, 5.6, 5.0, 0, 4.0},
+                 {std::numeric_limits<double>::infinity(), 5.6, 5.0, 3, 0.001}}));
+        CAPTURE(potential, permittivity, screening_distance, precision);
+        params.epsilon_r = permittivity;
+        params.lambda_tf = screening_distance;
+        CHECK_THAT(potential_to_distance_conversion(potential, params, precision),
+                   Catch::Matchers::WithinAbs(expected, 1e-5));
     }
 
     SECTION("High precision converges")
@@ -126,6 +85,7 @@ TEST_CASE("Potential-to-distance conversion validates inputs", "[potential_to_di
         std::invalid_argument);
     for (const auto value : {0.0, -1.0, infinity, std::numeric_limits<double>::quiet_NaN()})
     {
+        CAPTURE(value);
         auto params      = simulation_parameters{};
         params.epsilon_r = value;
         REQUIRE_THROWS_AS(potential_to_distance_conversion(0.1, params), std::invalid_argument);
@@ -174,6 +134,7 @@ TEST_CASE("Potential-to-distance conversion rounds decimal boundaries", "[potent
     const auto params = simulation_parameters{};
     for (const auto distance : {0.01, 0.07, 0.1, 1.0, 2.0, 3.14, 10.0})
     {
+        CAPTURE(distance);
         const auto potential =
             params.k() * ELEMENTARY_CHARGE / (distance * 1e-9) * std::exp(-distance / params.lambda_tf);
         REQUIRE_THAT(potential_to_distance_conversion(potential, params), Catch::Matchers::WithinAbs(distance, 1e-14));
