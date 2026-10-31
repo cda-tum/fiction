@@ -24366,8 +24366,8 @@ static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_energy =
 R"doc(The electrostatic potential energy of a charge distribution given its
 local internal potentials, i.e., the energy of the SiDB charges in the
 potential of the other SiDBs, the defects, and the external sources,
-plus the energy of the defect charges. O(N + D·N) for D charged
-defects.
+plus the energy of the defect charges. O(N + D·N + D²) for N SiDBs and
+D charged defects.
 
 Args:
     cd: Charge distribution over this landscape's SiDBs.
@@ -24385,7 +24385,8 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_energy_2 =
-R"doc(The electrostatic potential energy of a charge distribution. O(N²).
+R"doc(The electrostatic potential energy of a charge distribution. O(N² +
+D·N + D²) for N SiDBs and D charged defects.
 
 Args:
     cd: Charge distribution over this landscape's SiDBs.
@@ -24400,7 +24401,7 @@ Raises:
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_evaluate =
 R"doc(Evaluates a charge distribution: returns a copy with its energy set.
-O(N²).
+O(N² + D·N + D²) for N SiDBs and D charged defects.
 
 Args:
     cd: Charge distribution over this landscape's SiDBs.
