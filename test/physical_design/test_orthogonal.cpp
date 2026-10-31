@@ -15,6 +15,7 @@
  * @author Simon Hofmann (simon1hofmann)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
@@ -62,43 +63,72 @@ static_assert(std::same_as<decltype(&orthogonal<cartesian_layout>),
                            cartesian_gate_layout (*)(const named_technology_network&, orthogonal_physical_design_params,
                                                      orthogonal_physical_design_stats*)>);
 
-void check_stats(const orthogonal_physical_design_stats& st) noexcept
+/**
+ * @brief Checks the reported statistics against the returned layout.
+ * @tparam Lyt Gate-level layout type.
+ * @param st Reported physical-design statistics.
+ * @param lyt Returned layout.
+ */
+template <typename Lyt>
+void check_stats(const orthogonal_physical_design_stats& st, const Lyt& lyt)
 {
-    CHECK(st.x_size > 0);
-    CHECK(st.y_size > 0);
-    CHECK(st.num_gates > 0);
-    CHECK(st.num_wires > 0);
+    CHECK(st.time_total >= decltype(st.time_total)::zero());
+    CHECK(st.x_size == lyt.width());
+    CHECK(st.y_size == lyt.height());
+    CHECK(st.num_gates == lyt.num_gates());
+    CHECK(st.num_wires == lyt.num_wires());
+    CHECK(st.num_crossings == lyt.num_crossings());
 }
 
+/**
+ * @brief Checks layout equivalence and reported physical-design statistics.
+ * @tparam Lyt Gate-level layout type.
+ * @tparam Ntk Network type.
+ * @param ntk Network to place and route.
+ * @param blueprint Blueprint name reported on failure.
+ * @param a Layout arrangement.
+ */
 template <typename Lyt, typename Ntk>
-void check_ortho_equiv(const Ntk& ntk, const std::optional<arrangement> a = std::nullopt)
+void check_ortho_equiv(const Ntk& ntk, const char* blueprint, const std::optional<arrangement> a = std::nullopt)
 {
+    CAPTURE(blueprint);
     orthogonal_physical_design_stats        stats{};
     const orthogonal_physical_design_params ps{.layout_arrangement = a};
 
     auto layout =
         orthogonal<typename Lyt::coordinate_layout>(convert_network<named_technology_network>(ntk), ps, &stats);
 
-    check_stats(stats);
+    check_stats(stats, layout);
     check_eq(ntk, layout);
 }
 
+/**
+ * @brief Checks every orthogonal-equivalence blueprint in order.
+ * @tparam Lyt Gate-level layout type.
+ * @param a Layout arrangement.
+ */
 template <typename Lyt>
 void check_ortho_equiv_all(const std::optional<arrangement> a = std::nullopt)
 {
-    check_ortho_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(), a);
-    check_ortho_equiv<Lyt>(blueprints::maj1_network<mockturtle::aig_network>(), a);
-    check_ortho_equiv<Lyt>(blueprints::maj4_network<mockturtle::aig_network>(), a);
-    check_ortho_equiv<Lyt>(blueprints::se_coloring_corner_case_network<technology_network>(), a);
-    check_ortho_equiv<Lyt>(blueprints::fanout_substitution_corner_case_network<technology_network>(), a);
-    check_ortho_equiv<Lyt>(blueprints::nary_operation_network<technology_network>(), a);
-    check_ortho_equiv<Lyt>(blueprints::clpl<technology_network>(), a);
+    check_ortho_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
+                           "unbalanced_and_inv_network<aig_network>", a);
+    check_ortho_equiv<Lyt>(blueprints::maj1_network<mockturtle::aig_network>(), "maj1_network<aig_network>", a);
+    check_ortho_equiv<Lyt>(blueprints::maj4_network<mockturtle::aig_network>(), "maj4_network<aig_network>", a);
+    check_ortho_equiv<Lyt>(blueprints::se_coloring_corner_case_network<technology_network>(),
+                           "se_coloring_corner_case_network<technology_network>", a);
+    check_ortho_equiv<Lyt>(blueprints::fanout_substitution_corner_case_network<technology_network>(),
+                           "fanout_substitution_corner_case_network<technology_network>", a);
+    check_ortho_equiv<Lyt>(blueprints::nary_operation_network<technology_network>(),
+                           "nary_operation_network<technology_network>", a);
+    check_ortho_equiv<Lyt>(blueprints::clpl<technology_network>(), "clpl<technology_network>", a);
 
     // constant input network
-    check_ortho_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>(), a);
+    check_ortho_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>(),
+                           "unbalanced_and_inv_network<mig_network>", a);
 
     // multi-output network
-    check_ortho_equiv<Lyt>(blueprints::multi_output_network<technology_network>(), a);
+    check_ortho_equiv<Lyt>(blueprints::multi_output_network<technology_network>(),
+                           "multi_output_network<technology_network>", a);
 }
 
 TEST_CASE("East-south coloring", "[orthogonal]")
@@ -181,6 +211,7 @@ TEST_CASE("Layout equivalence", "[orthogonal]")
         const auto a =
             GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
 
+        CAPTURE(a);
         check_ortho_equiv_all<hexagonal_gate_layout>(a);
     }
 }
@@ -190,6 +221,7 @@ TEST_CASE("Repeated gate inputs have valid physical routing", "[orthogonal]")
     named_technology_network ntk{};
     const auto               a        = ntk.create_pi();
     const auto               function = GENERATE(0, 1, 2);
+    CAPTURE(function);
     /** @brief Gate with repeated input ports for the selected Boolean function. */
     const auto output = [&ntk, a, function]()
     {
@@ -203,7 +235,10 @@ TEST_CASE("Repeated gate inputs have valid physical routing", "[orthogonal]")
         }
         return ntk.create_xor(a, a);
     }();
-    if (GENERATE(false, true))
+    /** @brief Whether the repeated input also drives a primary output. */
+    const auto direct_output = GENERATE(false, true);
+    CAPTURE(direct_output);
+    if (direct_output)
     {
         ntk.create_po(a);
     }
@@ -261,8 +296,14 @@ TEST_CASE("Orthogonal physical design requires an arrangement for hexagonal layo
 
 TEST_CASE("Gate library application", "[orthogonal]")
 {
-    const auto check = [](const auto& ntk)
+    /**
+     * @brief Checks QCA gate-library application for one blueprint.
+     * @param ntk Network to place and route.
+     * @param blueprint Blueprint name reported on failure.
+     */
+    const auto check = [](const auto& ntk, const char* blueprint)
     {
+        CAPTURE(blueprint);
         orthogonal_physical_design_stats stats{};
 
         auto layout = orthogonal<cartesian_layout>(convert_network<named_technology_network>(ntk), {}, &stats);
@@ -270,16 +311,18 @@ TEST_CASE("Gate library application", "[orthogonal]")
         CHECK_NOTHROW(apply_gate_library<qca_one_library>(layout));
     };
 
-    check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
-    check(blueprints::maj1_network<mockturtle::aig_network>());
-    check(blueprints::maj4_network<mockturtle::aig_network>());
-    check(blueprints::se_coloring_corner_case_network<technology_network>());
-    check(blueprints::fanout_substitution_corner_case_network<technology_network>());
-    check(blueprints::clpl<technology_network>());
-    check(blueprints::half_adder_network<mockturtle::mig_network>());
+    check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(), "unbalanced_and_inv_network<aig_network>");
+    check(blueprints::maj1_network<mockturtle::aig_network>(), "maj1_network<aig_network>");
+    check(blueprints::maj4_network<mockturtle::aig_network>(), "maj4_network<aig_network>");
+    check(blueprints::se_coloring_corner_case_network<technology_network>(),
+          "se_coloring_corner_case_network<technology_network>");
+    check(blueprints::fanout_substitution_corner_case_network<technology_network>(),
+          "fanout_substitution_corner_case_network<technology_network>");
+    check(blueprints::clpl<technology_network>(), "clpl<technology_network>");
+    check(blueprints::half_adder_network<mockturtle::mig_network>(), "half_adder_network<mig_network>");
 
     // constant input network
-    check(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());
+    check(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>(), "unbalanced_and_inv_network<mig_network>");
 }
 
 TEST_CASE("Orthogonal physical design reports progress", "[orthogonal]")
