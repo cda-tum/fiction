@@ -20,6 +20,7 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
 
+#include <fiction/technology/fcn/io/cell_layout_svg.hpp>
 #include <fiction/technology/qca/io/write_qca_layout_svg.hpp>
 #include <fiction/technology/qca/layout.hpp>
 
@@ -128,14 +129,22 @@ TEST_CASE("Render QCA tile clock labels in detailed SVG mode", "[write-qca-layou
 
     tinyxml2::XMLDocument document{};
     REQUIRE(document.Parse(svg.c_str()) == tinyxml2::XML_SUCCESS);
-    CHECK((svg.find(fmt::format(">{}</tspan>", clock + 1)) != std::string::npos) == !simple);
+    if (simple)
+    {
+        CHECK_THAT(svg, !Catch::Matchers::ContainsSubstring(fmt::format(">{}</tspan>", clock + 1)));
+    }
+    else
+    {
+        CHECK_THAT(svg, Catch::Matchers::ContainsSubstring(fmt::format(">{}</tspan>", clock + 1)));
+    }
     CHECK(count_svg_elements(document, "circle") == (simple ? 0 : 4));
     CHECK_THAT(svg, !Catch::Matchers::ContainsSubstring("fill:#;"));
 }
 
 TEST_CASE("Write QCA SVG files with the selected detail level", "[write-qca-layout-svg]")
 {
-    const auto  simple = GENERATE(false, true);
+    const auto simple = GENERATE(false, true);
+    CAPTURE(simple);
     qca::layout layout{{1, 1}, "QCA SVG file"};
     layout.assign_cell_type({0, 0}, qca::cell_type::INPUT);
 
@@ -159,8 +168,10 @@ TEST_CASE("Write QCA SVG files with the selected detail level", "[write-qca-layo
 
 TEST_CASE("Render synchronized QCA cells in tiled SVG", "[write-qca-layout-svg]")
 {
-    const auto  simple = GENERATE(false, true);
-    const auto  clock  = GENERATE(uint8_t{0}, uint8_t{3});
+    const auto simple = GENERATE(false, true);
+    const auto [clock, lower_clock] =
+        GENERATE(Catch::Generators::table<uint8_t, uint8_t>({{uint8_t{0}, uint8_t{1}}, {uint8_t{3}, uint8_t{0}}}));
+    CAPTURE(simple, clock);
     qca::layout layout{{5, 5}, "Synchronized QCA tile", 5, 5};
     layout.assign_cell_type({2, 2}, qca::cell_type::NORMAL);
     layout.assign_cell_type({1, 2}, qca::cell_type::INPUT);
@@ -174,14 +185,25 @@ TEST_CASE("Render synchronized QCA cells in tiled SVG", "[write-qca-layout-svg]"
     REQUIRE(document.Parse(svg.c_str()) == tinyxml2::XML_SUCCESS);
     CHECK_THAT(svg, Catch::Matchers::ContainsSubstring("fill:#ffe33a;"));
     CHECK_THAT(svg, Catch::Matchers::ContainsSubstring("fill:#008dc8;"));
+    CHECK(count_svg_elements(document, "rect") == 3);
     CHECK(count_svg_elements(document, "circle") == (simple ? 0 : 8));
-    CHECK((svg.find(fmt::format(">{}</tspan>", clock + 1)) != std::string::npos) == !simple);
+    if (simple)
+    {
+        CHECK_THAT(svg, !Catch::Matchers::ContainsSubstring(fmt::format(">{}</tspan>", clock + 1)));
+        CHECK_THAT(svg, !Catch::Matchers::ContainsSubstring(fmt::format(">{}</tspan>", lower_clock + 1)));
+    }
+    else
+    {
+        CHECK_THAT(svg, Catch::Matchers::ContainsSubstring(fmt::format(">{}</tspan>", clock + 1)));
+        CHECK_THAT(svg, Catch::Matchers::ContainsSubstring(fmt::format(">{}</tspan>", lower_clock + 1)));
+    }
     CHECK_THAT(svg, !Catch::Matchers::ContainsSubstring(">5</tspan>"));
 }
 
 TEST_CASE("QCA SVG synchronization preserves cell positions", "[write-qca-layout-svg]")
 {
-    const auto  simple = GENERATE(false, true);
+    const auto simple = GENERATE(false, true);
+    CAPTURE(simple);
     qca::layout layout{{1, 1}, "Synchronized cell"};
     layout.assign_cell_type({0, 0}, qca::cell_type::NORMAL);
     std::ostringstream before{};
@@ -212,12 +234,19 @@ TEST_CASE("QCA SVG synchronization preserves cell positions", "[write-qca-layout
 
 TEST_CASE("QCA SVG includes partial boundary tiles", "[write-qca-layout-svg]")
 {
-    const auto  simple = GENERATE(false, true);
-    qca::layout layout{{1, 1}, "Partial tile", 5, 5};
+    const auto simple = GENERATE(false, true);
+    const auto [width, full_width, rectangles, dots] =
+        GENERATE(Catch::Generators::table<uint64_t, uint64_t, std::size_t, std::size_t>({{1, 5, 2, 4}, {6, 10, 4, 8}}));
+    CAPTURE(simple, width);
+    qca::layout layout{{width, 1}, "Partial tile", 5, 5};
     layout.assign_cell_type({0, 0}, qca::cell_type::NORMAL);
+    if (width == 6)
+    {
+        layout.assign_cell_type({5, 0}, qca::cell_type::NORMAL);
+    }
     std::ostringstream partial{};
     write_qca_layout_svg(layout, partial, {.simple = simple});
-    layout.resize({5, 5});
+    layout.resize({full_width, 5});
     std::ostringstream full{};
     write_qca_layout_svg(layout, full, {.simple = simple});
 
@@ -231,12 +260,52 @@ TEST_CASE("QCA SVG includes partial boundary tiles", "[write-qca-layout-svg]")
     REQUIRE(partial_svg->Attribute("viewBox") != nullptr);
     REQUIRE(full_svg->Attribute("viewBox") != nullptr);
     CHECK(std::string{partial_svg->Attribute("viewBox")} == full_svg->Attribute("viewBox"));
+    CHECK(count_svg_elements(partial_document, "rect") == rectangles);
+    CHECK(count_svg_elements(full_document, "rect") == rectangles);
+    CHECK(count_svg_elements(partial_document, "circle") == (simple ? 0 : dots));
+    CHECK(count_svg_elements(full_document, "circle") == (simple ? 0 : dots));
+}
+
+TEST_CASE("QCA SVG rejects unsupported cell types without changing output", "[write-qca-layout-svg]")
+{
+    const auto tile_size = GENERATE(uint16_t{1}, uint16_t{5});
+    CAPTURE(tile_size);
+    qca::layout layout{{1, 1}, "Unsupported cell", tile_size, tile_size};
+    layout.assign_cell_type({0, 0}, static_cast<qca::cell_type>('z'));
+
+    SECTION("stream")
+    {
+        std::ostringstream stream{};
+        stream << "sentinel";
+        CHECK_THROWS_AS(write_qca_layout_svg(layout, stream),
+                        fcn::io::unsupported_cell_type_exception<qca::layout::cell>);
+        CHECK(stream.str() == "sentinel");
+    }
+    SECTION("file")
+    {
+        const auto filename = std::filesystem::temp_directory_path() /
+                              ("fiction-qca-svg-error-" + std::to_string(std::random_device{}()) + ".svg");
+        {
+            std::ofstream original{filename};
+            REQUIRE(original.is_open());
+            original << "sentinel";
+        }
+        CHECK_THROWS_AS(write_qca_layout_svg(layout, filename.string()),
+                        fcn::io::unsupported_cell_type_exception<qca::layout::cell>);
+        std::ifstream original{filename};
+        REQUIRE(original.is_open());
+        const std::string contents{std::istreambuf_iterator<char>{original}, std::istreambuf_iterator<char>{}};
+        CHECK(contents == "sentinel");
+        original.close();
+        std::filesystem::remove(filename);
+    }
 }
 
 TEST_CASE("QCA SVG clips cells to the frame in both render modes", "[write-qca-layout-svg]")
 {
-    const auto  simple    = GENERATE(false, true);
-    const auto  tile_size = GENERATE(uint16_t{1}, uint16_t{5});
+    const auto simple    = GENERATE(false, true);
+    const auto tile_size = GENERATE(uint16_t{1}, uint16_t{5});
+    CAPTURE(simple, tile_size);
     qca::layout layout{{3, 3, 2}, "Crossing", tile_size, tile_size};
     layout.assign_cell_type({1, 1}, qca::cell_type::NORMAL);
     layout.assign_cell_type({1, 1, 1}, qca::cell_type::NORMAL);
@@ -254,8 +323,9 @@ TEST_CASE("QCA SVG clips cells to the frame in both render modes", "[write-qca-l
 
 TEST_CASE("QCA SVG paints lower layers before upper layers", "[write-qca-layout-svg]")
 {
-    const auto  simple    = GENERATE(false, true);
-    const auto  tile_size = GENERATE(uint16_t{1}, uint16_t{5});
+    const auto simple    = GENERATE(false, true);
+    const auto tile_size = GENERATE(uint16_t{1}, uint16_t{5});
+    CAPTURE(simple, tile_size);
     qca::layout layout{{10, 5, 2}, "Layers", tile_size, tile_size};
     layout.assign_cell_type({1, 1, 1}, qca::cell_type::OUTPUT);
     layout.assign_cell_type({1, 1, 0}, qca::cell_type::INPUT);
