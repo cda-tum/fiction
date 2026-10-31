@@ -343,9 +343,9 @@ class write_qca_layout_svg_impl
     const write_qca_layout_svg_params ps;
 
     /**
-     * Alias for an SVG description of a tile containing also its clock zone.
+     * @brief Borrows the static SVG tile template and stores its clock zone.
      */
-    using tile_description = std::pair<std::string, qca::layout::clock_number_t>;
+    using tile_description = std::pair<std::string_view, qca::layout::clock_number_t>;
     /**
      * Maps coordinates of tiles to their string representation and their clock zone.
      */
@@ -355,9 +355,9 @@ class write_qca_layout_svg_impl
      */
     using coord_to_cell_list_mapping = std::unordered_map<qca::layout::cell, std::string>;
     /**
-     * Alias for an SVG description of a latch tile containing also its clock zone and its offset.
+     * @brief Borrows the static SVG latch template and stores its clock zone and offset.
      */
-    using svg_latch = std::tuple<std::string, qca::layout::clock_number_t, qca::layout::sync_elem_t>;
+    using svg_latch = std::tuple<std::string_view, qca::layout::clock_number_t, qca::layout::sync_elem_t>;
     /**
      * Maps coordinates of latch tiles to tuples containing their string representation, their clock zone,
      * and their latch offset.
