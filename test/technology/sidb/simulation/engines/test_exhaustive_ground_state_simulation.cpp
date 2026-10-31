@@ -227,7 +227,7 @@ TEST_CASE("ExGS simulation of a Y-shaped SiDB OR gate with input 01", "[exhausti
     for (std::size_t i = 0; i < sites.size(); ++i)
     {
         CAPTURE(i);
-        CHECK(static_cast<int>(charge_state_to_sign(charges.get_charge_state(sites[i]))) == expected_charges[i]);
+        CHECK(static_cast<int>(charge_state_to_sign(charges.get_charge_state(sites.at(i)))) == expected_charges.at(i));
     }
     CHECK_THAT(charges.energy(), Catch::Matchers::WithinAbs(expected_energy, ERROR_MARGIN));
 }
