@@ -104,7 +104,8 @@ void check_sat_search_tactics(const Graph& graph, const std::size_t expected_chr
                                                              .verify_coloring_after_computation = true},
                                                             &pst);
             check_coloring(graph, coloring, pst);
-            CHECK(pst.chromatic_number == expected_chromatic_number);
+            CAPTURE(pst.chromatic_number, expected_chromatic_number);
+            CHECK((pst.chromatic_number == expected_chromatic_number));
         }
     }
 }
