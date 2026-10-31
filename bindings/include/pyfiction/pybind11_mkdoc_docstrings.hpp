@@ -475,8 +475,8 @@ Template Args:
     Lyt: `qca::layout`, `mol_qca::layout`, or `inml::layout`.
 
 Raises:
-    ValueError: if an iNML layout has no I/O pins or they are not
-                routed to the layout's borders.
+    ValueError: If an iNML input or output cell is not at its
+                designated horizontal border.
 
 )doc";
 
@@ -499,8 +499,8 @@ Template Args:
     Lyt: `qca::layout`, `mol_qca::layout`, or `inml::layout`.
 
 Raises:
-    ValueError: if an iNML layout has no I/O pins or they are not
-                routed to the layout's borders.
+    ValueError: If an iNML input or output cell is not at its
+                designated horizontal border.
     RuntimeError: If creating, writing, closing, or replacing the
                   output file fails.
 
@@ -858,8 +858,8 @@ Args:
     ps: Parameters.
 
 Raises:
-    ValueError: If the layout has no designated I/O pins or the pins
-                are not routed to its borders.
+    ValueError: If an input or output cell is not at its designated
+                horizontal border.
 
 )doc";
 
@@ -877,8 +877,8 @@ Args:
     ps: Parameters.
 
 Raises:
-    ValueError: If the layout has no designated I/O pins or the pins
-                are not routed to its borders.
+    ValueError: If an input or output cell is not at its designated
+                horizontal border.
     RuntimeError: If creating, writing, closing, or replacing the
                   output file fails.
 

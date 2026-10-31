@@ -252,6 +252,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - FCN tests share port-list and constant-cell cases and check writer failure recovery.
+    Writer docs describe border validation.
   - Modernized utility tests with named data rows, direct result checks, and complete progress observations.
   - Modernized physical-design helper tests with complete routing collections and independent solver rows.
   - Streamlined synthesis tests and strengthened clone, conversion, and gate-library checks.
@@ -940,6 +942,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Gate libraries:
 
+  - `fcn::gate_library::merge` now handles rectangular gates without out-of-bounds access.
   - On-the-fly SiDB gate mapping now rejects column arrangements instead of dropping north/south wires.
   - QCA ONE and ToPoliNano now reject terminal fanouts instead of losing their I/O markers.
     Connect terminals to separate fanout wires for mapping.
