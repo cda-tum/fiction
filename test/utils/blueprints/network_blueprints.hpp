@@ -152,6 +152,11 @@ mockturtle::names_view<Ntk> constant_gate_input_maj_network()
     return ntk;
 }
 
+/**
+ * @brief Creates a half-adder network with named sum and carry outputs.
+ * @tparam Ntk Network type.
+ * @return The named half-adder network.
+ */
 template <typename Ntk>
 mockturtle::names_view<Ntk> half_adder_network()
 {
@@ -160,11 +165,11 @@ mockturtle::names_view<Ntk> half_adder_network()
     const auto x1 = ntk.create_pi("a");
     const auto x2 = ntk.create_pi("b");
 
-    const auto sum = ntk.create_and(x1, x2);
-    const auto c   = ntk.create_xor(x1, x2);
+    const auto c   = ntk.create_and(x1, x2);
+    const auto sum = ntk.create_xor(x1, x2);
 
-    ntk.create_po(sum, "sum");
     ntk.create_po(c, "carry");
+    ntk.create_po(sum, "sum");
 
     return ntk;
 }
