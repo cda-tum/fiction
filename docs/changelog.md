@@ -251,7 +251,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
-  - SiDB generator tests share timeout and backend rows and check complete layouts and defect metadata.
+  - SiDB generator tests share timeout and backend rows and check complete layouts, defects, and timeout statistics.
   - Modernized QCA tests with shared format expectations and SVG detail multiplicity checks.
   - FCN tests share port-list and constant-cell cases and check writer failure recovery.
     Writer docs describe border validation.

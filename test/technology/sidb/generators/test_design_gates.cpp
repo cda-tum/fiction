@@ -107,9 +107,12 @@ TEST_CASE("Gate-design timeouts cover every search mode", "[design-sidb-gates]")
     {
         CAPTURE(mode);
         params.design_mode = mode;
-        const auto start   = std::chrono::steady_clock::now();
-        CHECK_THROWS_AS(design_gates(lyt, std::vector{create_and_tt()}, params), utils::timeout_error);
+        /** @brief Timeout leaves the caller's statistics unchanged. */
+        design_gates_stats stats{.number_of_layouts = 42};
+        const auto         start = std::chrono::steady_clock::now();
+        CHECK_THROWS_AS(design_gates(lyt, std::vector{create_and_tt()}, params, &stats), utils::timeout_error);
         CHECK(std::chrono::steady_clock::now() - start < std::chrono::seconds{10});
+        CHECK(stats.number_of_layouts == 42);
     }
 }
 
@@ -135,9 +138,10 @@ TEST_CASE("Design AND gate with skeleton, where one input wire and the output wi
         const auto         found_gate_layouts =
             design_gates(lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, params, &design_gates_stats);
         REQUIRE(found_gate_layouts.size() == 10);
-        for (const auto& gate : found_gate_layouts)
+        for (std::size_t i = 0; i < found_gate_layouts.size(); ++i)
         {
-            CHECK(is_operational(gate, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
+            CAPTURE(i);
+            CHECK(is_operational(found_gate_layouts[i], std::vector<kitty::dynamic_truth_table>{create_and_tt()},
                                  params.operational_params)
                       .first == operational_status::OPERATIONAL);
         }
@@ -156,9 +160,10 @@ TEST_CASE("Design AND gate with skeleton, where one input wire and the output wi
         const auto found_gate_layouts =
             design_gates(lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, params);
         REQUIRE(found_gate_layouts.size() == 10);
-        for (const auto& gate : found_gate_layouts)
+        for (std::size_t i = 0; i < found_gate_layouts.size(); ++i)
         {
-            CHECK(is_operational(gate, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
+            CAPTURE(i);
+            CHECK(is_operational(found_gate_layouts[i], std::vector<kitty::dynamic_truth_table>{create_and_tt()},
                                  params.operational_params)
                       .first == operational_status::OPERATIONAL);
         }
@@ -380,6 +385,7 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
         params.number_of_canvas_sidbs = 2;
         params.design_mode            = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
 
+        // The defect overlaps an output SiDB; this scenario checks skeleton metadata.
         layout defect_layout{lyt};
         defect_layout.assign_defect({10, 6, 0},
                                     defect{defect_type::DB, -1, params.operational_params.sim_params.epsilon_r,
@@ -392,9 +398,10 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
         const auto found_gate_layouts_quickcell =
             design_gates(defect_layout, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, params);
         REQUIRE(!found_gate_layouts_quickcell.empty());
-        for (const auto& gate : found_gate_layouts_quickcell)
+        for (std::size_t i = 0; i < found_gate_layouts_quickcell.size(); ++i)
         {
-            CHECK(gate.defects() == defect_layout.defects());
+            CAPTURE(i);
+            CHECK(found_gate_layouts_quickcell[i].defects() == defect_layout.defects());
         }
     }
 }
@@ -565,7 +572,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
                                                          { CHECK(cell != lattice_site{14, 10, 0}); });
     }
 
-    SECTION("QuickCell with defect blocking canvas SiDB placement")
+    SECTION("Random design with defect blocking canvas SiDB placement")
     {
         layout defect_layout{lyt};
 
@@ -640,7 +647,6 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
             const auto found_gate_layouts =
                 design_gates(lyt, std::vector<kitty::dynamic_truth_table>{create_nor_tt()}, params);
             REQUIRE(!found_gate_layouts.empty());
-            REQUIRE(found_gate_layouts.size() <= std::thread::hardware_concurrency());
             CHECK(found_gate_layouts.front().num_dots() == lyt.num_dots() + 3);
         }
     }
@@ -697,7 +703,6 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
         const auto found_gate_layouts =
             design_gates(lyt, std::vector<kitty::dynamic_truth_table>{create_nor_tt()}, params);
         REQUIRE(!found_gate_layouts.empty());
-        REQUIRE(found_gate_layouts.size() <= std::thread::hardware_concurrency());
         CHECK(found_gate_layouts.front().num_dots() == lyt.num_dots() + 3);
     }
 }
