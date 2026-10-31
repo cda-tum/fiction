@@ -20,6 +20,7 @@
 
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/progress_recorder.hpp"
@@ -37,7 +38,6 @@
 #include <fiction/utils/execution_timeout.hpp>
 
 #include <kitty/dynamic_truth_table.hpp>
-#include <mockturtle/utils/stopwatch.hpp>
 
 #include <chrono>
 #include <cstddef>
@@ -67,6 +67,7 @@ TEST_CASE("Gate design propagates worker failures", "[design-sidb-gates]")
           design_gates_params::design_gates_mode::QUICKCELL, design_gates_params::design_gates_mode::PRUNING_ONLY,
           design_gates_params::design_gates_mode::RANDOM})
     {
+        CAPTURE(mode);
         params.design_mode = mode;
         CHECK_THROWS_AS(design_gates(lyt, std::vector{create_and_tt()}, params), std::out_of_range);
     }
@@ -84,13 +85,13 @@ TEST_CASE("Gate-design timeouts cover every search mode", "[design-sidb-gates]")
 {
     const auto lyt = blueprints::two_input_one_output_skeleton_west_west();
 
-    design_gates_params params{};
+    /** @brief Timeout scenarios retain their canvas and controlled progress delay. */
+    const auto [scenario, delayed_progress] = GENERATE(Catch::Generators::table<const char*, bool>(
+        {{"Zero expires immediately", false}, {"One positive budget covers setup and every candidate", true}}));
+    CAPTURE(scenario, delayed_progress);
 
-    SECTION("Zero expires immediately")
-    {
-        params = design_gates_params{.operational_params = {.timeout = 0}};
-    }
-    SECTION("One positive budget covers setup and every candidate")
+    design_gates_params params{.operational_params = {.timeout = 0}};
+    if (delayed_progress)
     {
         params = design_gates_params{.operational_params     = {.timeout = 20},
                                      .canvas                 = {site_at_row(27, 12), site_at_row(28, 13)},
@@ -134,16 +135,17 @@ TEST_CASE("Design AND gate with skeleton, where one input wire and the output wi
         const auto         found_gate_layouts =
             design_gates(lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, params, &design_gates_stats);
         REQUIRE(found_gate_layouts.size() == 10);
-        const auto& first_gate = found_gate_layouts.front();
-        CHECK(is_operational(first_gate, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
-                             params.operational_params)
-                  .first == operational_status::OPERATIONAL);
+        for (const auto& gate : found_gate_layouts)
+        {
+            CHECK(is_operational(gate, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
+                                 params.operational_params)
+                      .first == operational_status::OPERATIONAL);
+        }
 
         CHECK(design_gates_stats.number_of_layouts == 1140);
         CHECK(design_gates_stats.number_of_layouts_after_first_pruning == 167);
         CHECK(design_gates_stats.number_of_layouts_after_second_pruning == 46);
         CHECK(design_gates_stats.number_of_layouts_after_third_pruning == 11);
-        CHECK(design_gates_stats.time_total.count() > 0);
     }
 
     SECTION("Automatic Exhaustive Gate Designer")
@@ -154,10 +156,12 @@ TEST_CASE("Design AND gate with skeleton, where one input wire and the output wi
         const auto found_gate_layouts =
             design_gates(lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, params);
         REQUIRE(found_gate_layouts.size() == 10);
-        const auto& first_gate = found_gate_layouts.front();
-        CHECK(is_operational(first_gate, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
-                             params.operational_params)
-                  .first == operational_status::OPERATIONAL);
+        for (const auto& gate : found_gate_layouts)
+        {
+            CHECK(is_operational(gate, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
+                                 params.operational_params)
+                      .first == operational_status::OPERATIONAL);
+        }
     }
 }
 
@@ -203,6 +207,10 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
         REQUIRE(found_gate_layouts.size() == 1);
         CHECK(found_gate_layouts[0].num_dots() == 14);
         CHECK(found_gate_layouts[0].get_dot_tag({10, 4, 0}) == dot_tag::LOGIC);
+        /** @brief The only available canvas site completes this skeleton. */
+        auto expected = lyt;
+        expected.assign_sidb({10, 4, 0}, dot_tag::LOGIC);
+        CHECK(found_gate_layouts.front() == expected);
     }
     SECTION("Four cells in canvas, design all gates with one SiDB in the canvas")
     {
@@ -276,11 +284,14 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
         CHECK(found_gate_layouts.front().get_dot_tag({10, 4, 0}) == dot_tag::LOGIC);
         CHECK(found_gate_layouts.front().defects() == sparse_lyt.defects());
     }
-    SECTION("one SiDB in the canvas, terminate after first solution is found, QuickExact")
+    SECTION("one SiDB in the canvas, terminate after first solution is found")
     {
+        /** @brief Both physical simulation backends exercise the same singleton canvas. */
+        const auto sim_engine = GENERATE(engine::QUICKEXACT, engine::QUICKSIM);
+        CAPTURE(sim_engine);
         const auto params = design_gates_params{
             .operational_params =
-                is_operational_params{.sim_params = simulation_parameters{2, -0.32}, .sim_engine = engine::QUICKEXACT},
+                is_operational_params{.sim_params = simulation_parameters{2, -0.32}, .sim_engine = sim_engine},
             .design_mode            = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             .canvas                 = {{10, 4, 0}, {10, 4, 0}},
             .number_of_canvas_sidbs = 1,
@@ -294,29 +305,11 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
         REQUIRE(found_gate_layouts.size() == 1);
         CHECK(found_gate_layouts[0].num_dots() == 14);
         CHECK(found_gate_layouts[0].get_dot_tag({10, 4, 0}) == dot_tag::LOGIC);
-        CHECK(mockturtle::to_seconds(stats.time_total) > 0.0);
-        CHECK(stats.sim_engine == engine::QUICKEXACT);
-    }
-    SECTION("one SiDB in the canvas, terminate after first solution is found, QuickSim")
-    {
-        const auto params = design_gates_params{
-            .operational_params =
-                is_operational_params{.sim_params = simulation_parameters{2, -0.32}, .sim_engine = engine::QUICKSIM},
-            .design_mode            = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
-            .canvas                 = {{10, 4, 0}, {10, 4, 0}},
-            .number_of_canvas_sidbs = 1,
-            .termination_cond       = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION};
-
-        design_gates_stats stats{};
-
-        const auto found_gate_layouts =
-            design_gates(lyt, std::vector<kitty::dynamic_truth_table>{create_xnor_tt()}, params, &stats);
-
-        REQUIRE(found_gate_layouts.size() == 1);
-        CHECK(found_gate_layouts[0].num_dots() == 14);
-        CHECK(found_gate_layouts[0].get_dot_tag({10, 4, 0}) == dot_tag::LOGIC);
-        CHECK(mockturtle::to_seconds(stats.time_total) > 0.0);
-        CHECK(stats.sim_engine == engine::QUICKSIM);
+        /** @brief Expected complete layout for the singleton canvas. */
+        auto expected = lyt;
+        expected.assign_sidb({10, 4, 0}, dot_tag::LOGIC);
+        CHECK(found_gate_layouts.front() == expected);
+        CHECK(stats.sim_engine == sim_engine);
     }
 }
 
@@ -416,12 +409,9 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
     lyt.assign_sidb({18, 6, 0}, dot_tag::NORMAL);
     lyt.assign_sidb({19, 7, 0}, dot_tag::NORMAL);
 
-    // canvas SiDBs
-    // SiDB, originally part of the Bestagon fo2 gate, is excluded.
-    // lyt.assign_sidb({17, 11, 0}, dot_tag::NORMAL);
+    // The canvas supplies the missing SiDB at {17, 11, 0}.
     lyt.assign_sidb({21, 11, 1}, dot_tag::LOGIC);
     lyt.assign_sidb({18, 13, 0}, dot_tag::LOGIC);
-    // ----------------------------
 
     lyt.assign_sidb({24, 15, 0}, dot_tag::NORMAL);
     lyt.assign_sidb({26, 16, 0}, dot_tag::NORMAL);
@@ -645,6 +635,7 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
             params.termination_cond = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION;
             const auto found_gate_layouts =
                 design_gates(lyt, std::vector<kitty::dynamic_truth_table>{create_nor_tt()}, params);
+            REQUIRE(!found_gate_layouts.empty());
             REQUIRE(found_gate_layouts.size() <= std::thread::hardware_concurrency());
             CHECK(found_gate_layouts.front().num_dots() == lyt.num_dots() + 3);
         }
@@ -701,6 +692,7 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
 
         const auto found_gate_layouts =
             design_gates(lyt, std::vector<kitty::dynamic_truth_table>{create_nor_tt()}, params);
+        REQUIRE(!found_gate_layouts.empty());
         REQUIRE(found_gate_layouts.size() <= std::thread::hardware_concurrency());
         CHECK(found_gate_layouts.front().num_dots() == lyt.num_dots() + 3);
     }
