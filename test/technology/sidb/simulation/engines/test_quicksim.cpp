@@ -418,8 +418,6 @@ TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs", "[quicksim]
 
     const simulation_parameters params{2, -0.32};
 
-    // check QuickSim parameters
-    // lambda function to check charge configurations
     const auto check_charge_configuration = [](const result& sim_results)
     {
         REQUIRE_FALSE(sim_results.charge_distributions.empty());
