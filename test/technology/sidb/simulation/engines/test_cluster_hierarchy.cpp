@@ -35,7 +35,7 @@ using namespace fiction;
 using namespace fiction::sidb;
 
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
-using set_container = std::set<uint64>;
+using set_container = std::set<uint64_t>;
 #else
 using set_container = phmap::flat_hash_set<uint64_t>;
 #endif
