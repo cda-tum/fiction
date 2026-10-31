@@ -309,6 +309,7 @@ TEST_CASE("ClusterComplete simulation of a BDL pair", "[clustercomplete]")
 
     REQUIRE(simulation_results.charge_distributions.size() == 2);
     std::vector<std::array<int, 2>> observed{};
+    observed.reserve(simulation_results.charge_distributions.size());
     for (const auto& cd : simulation_results.charge_distributions)
     {
         observed.push_back(
