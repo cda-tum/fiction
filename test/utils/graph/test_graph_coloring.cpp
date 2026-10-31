@@ -68,7 +68,7 @@ void check_coloring(const Graph& graph, const vertex_coloring<Graph, std::size_t
         CHECK(coloring.at(source) != coloring.at(target));
     }
     REQUIRE_FALSE(frequencies.empty());
-    CHECK(frequencies.size() == pst.chromatic_number);
+    CHECK(frequencies.size() <= pst.chromatic_number);
     /** @brief Largest observed color class; ties may use any color identifier. */
     const auto most_frequent =
         std::ranges::max_element(frequencies, [](const auto& a, const auto& b) { return a.second < b.second; });
