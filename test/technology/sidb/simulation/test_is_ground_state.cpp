@@ -58,7 +58,7 @@ TEST_CASE("check if ground state is found", "[is-ground-state]")
             result simulation_result_heuristic{};
             simulation_result_heuristic.lyt                  = lyt;
             simulation_result_heuristic.charge_distributions = {first};
-            CHECK(!is_ground_state(simulation_result_heuristic, simulation_result_exhaustive));
+            CHECK_FALSE(is_ground_state(simulation_result_heuristic, simulation_result_exhaustive));
         }
 
         SECTION("two identical ground states are stored in the simulation results")
@@ -80,7 +80,7 @@ TEST_CASE("check if ground state is found", "[is-ground-state]")
 
         SECTION("no exact result")
         {
-            CHECK(!is_ground_state(simulation_result_exhaustive, result{}));
+            CHECK_FALSE(is_ground_state(simulation_result_exhaustive, result{}));
         }
     }
 
@@ -119,9 +119,6 @@ TEST_CASE("check if ground state is found", "[is-ground-state]")
 
         REQUIRE(simulation_results_quicksim.has_value());
 
-        if (simulation_results_quicksim.has_value())
-        {
-            CHECK(is_ground_state(*simulation_results_quicksim, simulation_results_exgs));
-        }
+        CHECK(is_ground_state(*simulation_results_quicksim, simulation_results_exgs));
     }
 }
