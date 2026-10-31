@@ -40,7 +40,7 @@ using namespace fiction::mol_qca;
 // clang-format off
 
 /** @brief Expected primary input cells before orientation. */
-static constexpr const sim7_mol_library::gate primary_input_port{
+static constexpr const sim7_mol_library::gate PRIMARY_INPUT_PORT{
 sim7_mol_library::cell_list_to_gate<char>(
 {{
     {' ', ' ', ' ', ' ', 'i', 'i', ' ', ' ', ' ', ' '},
@@ -56,7 +56,7 @@ sim7_mol_library::cell_list_to_gate<char>(
 }})};
 
 /** @brief Expected primary output cells before orientation. */
-static constexpr const sim7_mol_library::gate primary_output_port{
+static constexpr const sim7_mol_library::gate PRIMARY_OUTPUT_PORT{
 sim7_mol_library::cell_list_to_gate<char>(
 {{
     {' ', ' ', ' ', ' ', 'o', 'o', ' ', ' ', ' ', ' '},
@@ -116,11 +116,11 @@ TEST_CASE("Setting up input ports and gates", "[molecular-qca-library]")
 
     // clang-format on
 
-    CHECK(sim7_mol_library::set_up_gate(layout, {0, 1}) == sim7_mol_library::rotate_90(primary_input_port));
-    CHECK(sim7_mol_library::set_up_gate(layout, {1, 0}) == sim7_mol_library::rotate_180(primary_input_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {0, 1}) == sim7_mol_library::rotate_90(PRIMARY_INPUT_PORT));
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 0}) == sim7_mol_library::rotate_180(PRIMARY_INPUT_PORT));
     CHECK(sim7_mol_library::set_up_gate(layout, {1, 1}) == sim7_mol_library::rotate_90(disjunction));
     CHECK(sim7_mol_library::set_up_gate(layout, {1, 2}) == bent_inverter);
-    CHECK(sim7_mol_library::set_up_gate(layout, {2, 2}) == sim7_mol_library::rotate_270(primary_output_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {2, 2}) == sim7_mol_library::rotate_270(PRIMARY_OUTPUT_PORT));
 }
 
 TEST_CASE("Setting up wires", "[molecular-qca-library]")
@@ -146,9 +146,9 @@ TEST_CASE("Setting up wires", "[molecular-qca-library]")
 
     // clang-format on
 
-    CHECK(sim7_mol_library::set_up_gate(layout, {0, 0}) == sim7_mol_library::rotate_90(primary_input_port));
-    CHECK(sim7_mol_library::set_up_gate(layout, {0, 2}) == sim7_mol_library::rotate_90(primary_input_port));
-    CHECK(sim7_mol_library::set_up_gate(layout, {0, 4}) == sim7_mol_library::rotate_90(primary_input_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {0, 0}) == sim7_mol_library::rotate_90(PRIMARY_INPUT_PORT));
+    CHECK(sim7_mol_library::set_up_gate(layout, {0, 2}) == sim7_mol_library::rotate_90(PRIMARY_INPUT_PORT));
+    CHECK(sim7_mol_library::set_up_gate(layout, {0, 4}) == sim7_mol_library::rotate_90(PRIMARY_INPUT_PORT));
     CHECK(sim7_mol_library::set_up_gate(layout, {1, 0}) == sim7_mol_library::rotate_270(wire));
     CHECK(sim7_mol_library::set_up_gate(layout, {1, 2}) == sim7_mol_library::rotate_270(wire));
     CHECK(sim7_mol_library::set_up_gate(layout, {1, 4}) == sim7_mol_library::rotate_270(wire));
@@ -158,9 +158,9 @@ TEST_CASE("Setting up wires", "[molecular-qca-library]")
     CHECK(sim7_mol_library::set_up_gate(layout, {3, 0}) == sim7_mol_library::rotate_270(wire));
     CHECK(sim7_mol_library::set_up_gate(layout, {3, 2}) == sim7_mol_library::rotate_270(wire));
     CHECK(sim7_mol_library::set_up_gate(layout, {3, 4}) == sim7_mol_library::rotate_270(wire));
-    CHECK(sim7_mol_library::set_up_gate(layout, {4, 0}) == sim7_mol_library::rotate_270(primary_output_port));
-    CHECK(sim7_mol_library::set_up_gate(layout, {4, 2}) == sim7_mol_library::rotate_270(primary_output_port));
-    CHECK(sim7_mol_library::set_up_gate(layout, {4, 4}) == sim7_mol_library::rotate_270(primary_output_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {4, 0}) == sim7_mol_library::rotate_270(PRIMARY_OUTPUT_PORT));
+    CHECK(sim7_mol_library::set_up_gate(layout, {4, 2}) == sim7_mol_library::rotate_270(PRIMARY_OUTPUT_PORT));
+    CHECK(sim7_mol_library::set_up_gate(layout, {4, 4}) == sim7_mol_library::rotate_270(PRIMARY_OUTPUT_PORT));
 }
 
 TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
@@ -216,10 +216,10 @@ TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
 
     // clang-format on
 
-    CHECK(sim7_mol_library::set_up_gate(layout, {0, 1}) == sim7_mol_library::rotate_90(primary_input_port));
-    CHECK(sim7_mol_library::set_up_gate(layout, {1, 0}) == sim7_mol_library::rotate_180(primary_output_port));
-    CHECK(sim7_mol_library::set_up_gate(layout, {2, 0}) == sim7_mol_library::rotate_180(primary_output_port));
-    CHECK(sim7_mol_library::set_up_gate(layout, {1, 2}) == sim7_mol_library::rotate_90(primary_output_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {0, 1}) == sim7_mol_library::rotate_90(PRIMARY_INPUT_PORT));
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 0}) == sim7_mol_library::rotate_180(PRIMARY_OUTPUT_PORT));
+    CHECK(sim7_mol_library::set_up_gate(layout, {2, 0}) == sim7_mol_library::rotate_180(PRIMARY_OUTPUT_PORT));
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 2}) == sim7_mol_library::rotate_90(PRIMARY_OUTPUT_PORT));
     CHECK(sim7_mol_library::set_up_gate(layout, {1, 1}) == sim7_mol_library::rotate_180(fanout));
     CHECK(sim7_mol_library::set_up_gate(layout, {2, 1}) == sim7_mol_library::rotate_90(fanout_d));
     CHECK(sim7_mol_library::set_up_gate(layout, {2, 2}) == sim7_mol_library::rotate_270(bent_wire));
@@ -328,11 +328,11 @@ TEST_CASE("Setting up majority gate", "[molecular-qca-library]")
 
     // clang-format on
 
-    CHECK(sim7_mol_library::set_up_gate(layout, {0, 1}) == sim7_mol_library::rotate_90(primary_input_port));
-    CHECK(sim7_mol_library::set_up_gate(layout, {1, 0}) == sim7_mol_library::rotate_180(primary_input_port));
-    CHECK(sim7_mol_library::set_up_gate(layout, {2, 1}) == sim7_mol_library::rotate_270(primary_input_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {0, 1}) == sim7_mol_library::rotate_90(PRIMARY_INPUT_PORT));
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 0}) == sim7_mol_library::rotate_180(PRIMARY_INPUT_PORT));
+    CHECK(sim7_mol_library::set_up_gate(layout, {2, 1}) == sim7_mol_library::rotate_270(PRIMARY_INPUT_PORT));
     CHECK(sim7_mol_library::set_up_gate(layout, {1, 1}) == majority);
-    CHECK(sim7_mol_library::set_up_gate(layout, {1, 2}) == primary_output_port);
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 2}) == PRIMARY_OUTPUT_PORT);
 }
 
 TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
@@ -453,9 +453,9 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
     // clang-format on
 
     // Primary I/O ports are matched with the rotation implied by their border orientation.
-    CHECK(sim7_mol_library::set_up_gate(layout, {0, 2}) == sim7_mol_library::rotate_90(primary_input_port));
-    CHECK(sim7_mol_library::set_up_gate(layout, {1, 0}) == sim7_mol_library::rotate_180(primary_input_port));
-    CHECK(sim7_mol_library::set_up_gate(layout, {2, 0}) == sim7_mol_library::rotate_90(primary_input_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {0, 2}) == sim7_mol_library::rotate_90(PRIMARY_INPUT_PORT));
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 0}) == sim7_mol_library::rotate_180(PRIMARY_INPUT_PORT));
+    CHECK(sim7_mol_library::set_up_gate(layout, {2, 0}) == sim7_mol_library::rotate_90(PRIMARY_INPUT_PORT));
 
     // Internal tiles must resolve to the exact gate template and rotation dictated by their port routing.
     CHECK(sim7_mol_library::set_up_gate(layout, {1, 2}) == sim7_mol_library::rotate_270(straight_inverter));
@@ -465,7 +465,7 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
     CHECK(sim7_mol_library::set_up_gate(layout, {2, 2}) == sim7_mol_library::rotate_180(disjunction));
     CHECK(sim7_mol_library::set_up_gate(layout, {3, 1}) == sim7_mol_library::rotate_90(conjunction_r));
     CHECK(sim7_mol_library::set_up_gate(layout, {3, 2}) == sim7_mol_library::rotate_180(conjunction));
-    CHECK(sim7_mol_library::set_up_gate(layout, {4, 2}) == sim7_mol_library::rotate_270(primary_output_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {4, 2}) == sim7_mol_library::rotate_270(PRIMARY_OUTPUT_PORT));
 }
 
 TEST_CASE("Check unsupported gate type", "[molecular-qca-library]")
