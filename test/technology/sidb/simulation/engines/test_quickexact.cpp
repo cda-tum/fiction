@@ -947,6 +947,9 @@ TEST_CASE("3 DBs next to each other (positively charged DBs occur)", "[quickexac
 
     REQUIRE_FALSE(simulation_results.charge_distributions.empty());
 
+    CHECK(std::ranges::any_of(simulation_results.charge_distributions,
+                              [](const auto& distribution) { return distribution.num_positive_sidbs() > 0; }));
+
     for (const auto& layout : simulation_results.charge_distributions)
     {
         CHECK(round_to_n_decimal_places(layout.energy(), 1) <= 0);
