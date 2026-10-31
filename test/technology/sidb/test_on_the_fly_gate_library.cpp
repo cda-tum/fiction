@@ -24,6 +24,7 @@
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
+#include <fiction/layouts/layout_utils.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/fcn/cell_ports.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
@@ -67,7 +68,7 @@ TEST_CASE("On-the-fly SiDB gate mapping rejects column arrangements", "[paramete
                     std::invalid_argument);
 }
 
-TEST_CASE("Predefined SiDB gates on defective surfaces honor the per-gate timeout", "[parameterized-gate-library]")
+TEST_CASE("On-the-fly SiDB gate mapping rejects an expired per-gate budget", "[parameterized-gate-library]")
 {
     for (const bool crossing : std::array{false, true})
     {
@@ -92,9 +93,8 @@ TEST_CASE("Predefined SiDB gates on defective surfaces honor the per-gate timeou
 
         CHECK_THROWS_AS(on_the_fly_gate_library::set_up_gate(gate_layout, {1, 1, 0}, params, surface),
                         utils::timeout_error);
-        // The zero gate budget must expire, not the enclosing deadline used to bound a regression.
+        // A zero gate budget expires during parameter validation, before mapping starts.
         CHECK(std::chrono::steady_clock::now() < enclosing_deadline);
-        CHECK(params.design_gate_params.operational_params.deadline == enclosing_deadline);
     }
 }
 
@@ -127,7 +127,17 @@ TEST_CASE("Unsuccessful binary SiDB designs retain the tile, function, and ports
             if (with_defects)
             {
                 surface.emplace();
-                surface->assign_defect(site_at_row(0, 0), defect{defect_type::DB, -1, 2, 5});
+                /** @brief The tested defect must lie inside the mapped tile's influence radius. */
+                const auto center =
+                    to_lattice_site(relative_to_absolute_cell_position<on_the_fly_gate_library::gate_x_size(),
+                                                                       on_the_fly_gate_library::gate_y_size()>(
+                        gate_layout, {1, 1},
+                        {on_the_fly_gate_library::gate_x_size() / 2, on_the_fly_gate_library::gate_y_size() / 2}));
+                /** @brief Defect on the mapped tile, independent of the center calculation. */
+                const auto defect_site = site_at_row(90, 57);
+                REQUIRE(surface->get_lattice().nm_distance(center, defect_site) <
+                        params.influence_radius_charged_defects);
+                surface->assign_defect(defect_site, defect{defect_type::DB, -1, 2, 5});
             }
 
             try

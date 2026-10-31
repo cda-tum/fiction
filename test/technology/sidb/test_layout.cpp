@@ -22,6 +22,7 @@
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -309,6 +310,8 @@ TEST_CASE("Defects", "[layout]")
         CHECK(around_charged.contains({5 - 26, 2 - 13, 0}));
         CHECK(around_charged.contains({5 + 26, 2 + 13, 0}));
         CHECK(!around_charged.contains({5, 2, 1}));
+        CHECK(std::ranges::all_of(around_charged, [](const auto& s)
+                                  { return s.z == 0 && s.x >= -21 && s.x <= 31 && s.y >= -11 && s.y <= 15; }));
 
         /** @brief The complete one-unit-cell rectangle retains the defect's basis index. */
         const std::unordered_set<lattice_site> expected_narrow{{4, 1, 0}, {5, 1, 0}, {6, 1, 0}, {4, 2, 0}, {5, 2, 0},
