@@ -249,6 +249,7 @@ TEST_CASE("Petersen graph", "[graph-coloring]")
     petersen_graph.insert_edge(6, 8, {});
     petersen_graph.insert_edge(7, 9, {});
     petersen_graph.insert_edge(8, 5, {});
+    petersen_graph.insert_edge(9, 6, {});
 
     check_coloring_engines(petersen_graph, 3, {0, 1});
 }
