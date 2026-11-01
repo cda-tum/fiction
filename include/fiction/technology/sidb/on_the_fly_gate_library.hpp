@@ -269,7 +269,9 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
                                     defect_surface.value(), skeleton, params.influence_radius_charged_defects,
                                     center_cell, absolute_cell);
 
-                                if (is_predefined_bestagon_gate_applicable(cell_list_to_layout(DOUBLE_WIRE),
+                                if (params.using_predefined_crossing_and_double_wire_if_possible ==
+                                        on_the_fly_gate_library_params::complex_gate_design_policy::USING_PREDEFINED &&
+                                    is_predefined_bestagon_gate_applicable(cell_list_to_layout(DOUBLE_WIRE),
                                                                            skeleton_with_defects,
                                                                            synthesis::create_double_wire_tt(), params))
                                 {
@@ -295,7 +297,9 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
                                 defect_surface.value(), skeleton, params.influence_radius_charged_defects, center_cell,
                                 absolute_cell);
 
-                            if (is_predefined_bestagon_gate_applicable(cell_list_to_layout(CROSSING),
+                            if (params.using_predefined_crossing_and_double_wire_if_possible ==
+                                    on_the_fly_gate_library_params::complex_gate_design_policy::USING_PREDEFINED &&
+                                is_predefined_bestagon_gate_applicable(cell_list_to_layout(CROSSING),
                                                                        skeleton_with_defects,
                                                                        synthesis::create_crossing_wire_tt(), params))
                             {

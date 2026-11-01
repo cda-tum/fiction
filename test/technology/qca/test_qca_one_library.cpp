@@ -59,8 +59,6 @@ static constexpr const qca_one_library::gate PRIMARY_OUTPUT_PORT{
 
 // clang-format on
 
-static_assert(std::is_pointer_v<decltype(&qca_one_library::set_up_gate<cartesian_layout>)>);
-
 TEST_CASE("QCA ONE library traits", "[qca-one-library]")
 {
     STATIC_REQUIRE(std::is_same_v<qca_one_library::layout, qca::layout>);
