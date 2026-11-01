@@ -59,12 +59,16 @@ class location_and_ground_state_writer
      */
     void run()
     {
+        /** @brief Last validated site vector; shared site storage is immutable. */
+        const std::vector<lattice_site>* previous_sites{nullptr};
         for (const auto& cd : sim_result.charge_distributions)
         {
-            if (cd.sites() != sim_result.lyt.sidbs())
+            const auto* sites = &cd.sites();
+            if (sites != previous_sites && *sites != sim_result.lyt.sidbs())
             {
                 throw std::invalid_argument("Charge distribution sites do not match the result layout");
             }
+            previous_sites = sites;
         }
         const auto min_energy = fiction::utils::math::round_to_n_decimal_places(
             simulation::analysis::minimum_energy(sim_result.charge_distributions.cbegin(),
