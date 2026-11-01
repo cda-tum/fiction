@@ -215,10 +215,10 @@ TEST_CASE("Print gate symbols and terminal colors", "[print-gate-level-layout]")
     /** @brief Uncolored picture with the public gate symbols. */
     std::stringstream plain{};
     print_gate_level_layout(plain, layout, false, false);
-    CHECK(plain.str().find("|") != std::string::npos);
-    CHECK(plain.str().find("M") != std::string::npos);
-    CHECK(plain.str().find("X") != std::string::npos);
-    CHECK(plain.str().find("F") != std::string::npos);
+    CHECK(plain.str().find('|') != std::string::npos);
+    CHECK(plain.str().find('M') != std::string::npos);
+    CHECK(plain.str().find('X') != std::string::npos);
+    CHECK(plain.str().find('F') != std::string::npos);
 
     /** @brief Terminal colors use ANSI escape sequences. */
     std::stringstream colored{};

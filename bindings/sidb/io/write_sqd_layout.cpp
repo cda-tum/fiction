@@ -49,7 +49,7 @@ void register_write_sqd_layout(nb::module_& m)
             if (on_progress)
             {
                 /** @brief Layout snapshot taken while the GIL is held. */
-                const auto snapshot = lyt;
+                const auto snapshot = lyt;  // NOLINT(performance-unnecessary-copy-initialization): Callback isolation.
                 /** @brief Releases the GIL while the snapshot is written. */
                 const nb::gil_scoped_release release{};
                 fiction::sidb::io::write_sqd_layout(snapshot, filename, on_progress);
