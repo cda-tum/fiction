@@ -643,7 +643,7 @@ TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive charge", 
     lyt.assign_sidb({2, 1, 0}, dot_tag::NORMAL);
     lyt.assign_sidb({3, 1, 1}, dot_tag::NORMAL);
 
-    const auto [base, expected_count] = GENERATE(table<uint8_t, uint64_t>({{2, 1}, {3, 2}}));
+    const auto [base, expected_count] = GENERATE(table<uint8_t, uint64_t>({{uint8_t{2}, 1}, {uint8_t{3}, 2}}));
     CAPTURE(base);
 
     const auto qe_res = quickexact(
