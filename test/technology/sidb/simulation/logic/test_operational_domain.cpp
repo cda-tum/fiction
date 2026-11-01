@@ -15,7 +15,9 @@
  * @author Jan Drewniok (Drewniok)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
@@ -2365,11 +2367,14 @@ TEST_CASE("Operational domain reports progress", "[operational-domain]")
             active       = running;
         };
 
-        SECTION("grid search")
+        /** @brief Search algorithm under test. */
+        const auto method = GENERATE(std::string_view{"grid search"}, std::string_view{"random sampling"});
+        CAPTURE(method);
+        if (method == "grid search")
         {
             static_cast<void>(operational_domain_grid_search(lyt, std::vector{create_or_tt()}, params, &stats));
         }
-        SECTION("random sampling")
+        else
         {
             static_cast<void>(operational_domain_random_sampling(lyt, std::vector{create_or_tt()}, 5, params, &stats));
         }
