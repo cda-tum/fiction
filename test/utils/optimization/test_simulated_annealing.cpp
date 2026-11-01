@@ -152,30 +152,32 @@ TEST_CASE("Annealing accepts signed floating-point costs and actual callable for
     const auto schedule  = [](double) { return 1.0; };
     const auto next      = [](const auto& state) { return state; };
     const auto generator = [] { return 0; };
-    CHECK((annealable<decltype(cost), decltype(schedule), decltype(next)>));
-    CHECK((annealable<decltype(cost), reference_annealing_schedule, decltype(next)>));
-    CHECK((annealable<lvalue_annealing_cost&, decltype(schedule), decltype(next)>));
-    CHECK_FALSE((annealable<rvalue_annealing_cost, decltype(schedule), decltype(next)>));
-    CHECK_FALSE((annealable<invalid_annealing_cost<void>, decltype(schedule), decltype(next)>));
-    CHECK_FALSE((annealable<invalid_annealing_cost<unsigned>, decltype(schedule), decltype(next)>));
-    CHECK_FALSE((annealable<decltype(cost), decltype(schedule),
-                            decltype([](const auto&) { return std::make_unique<int>(0); }), std::unique_ptr<int>>));
-    CHECK_FALSE((annealable<int, decltype(schedule), decltype(next)>));
-    CHECK_FALSE((annealable<decltype([](int) { return 0u; }), decltype(schedule), decltype(next)>));
-    CHECK_FALSE((annealable<decltype(cost), decltype([](double) { return 1.0f; }), decltype(next)>));
-    CHECK_FALSE((annealable<decltype(cost), decltype(schedule), decltype([](int) { return 0.0; })>));
-    CHECK((multi_annealable<decltype(generator), decltype(cost), decltype(schedule), decltype(next)>));
-    CHECK((multi_annealable<decltype(generator), lvalue_annealing_cost&, decltype(schedule), decltype(next)>));
-    CHECK_FALSE((multi_annealable<decltype(generator), rvalue_annealing_cost, decltype(schedule), decltype(next)>));
-    CHECK_FALSE(
+    STATIC_REQUIRE((annealable<decltype(cost), decltype(schedule), decltype(next)>));
+    STATIC_REQUIRE((annealable<decltype(cost), reference_annealing_schedule, decltype(next)>));
+    STATIC_REQUIRE((annealable<lvalue_annealing_cost&, decltype(schedule), decltype(next)>));
+    STATIC_REQUIRE_FALSE((annealable<rvalue_annealing_cost, decltype(schedule), decltype(next)>));
+    STATIC_REQUIRE_FALSE((annealable<invalid_annealing_cost<void>, decltype(schedule), decltype(next)>));
+    STATIC_REQUIRE_FALSE((annealable<invalid_annealing_cost<unsigned>, decltype(schedule), decltype(next)>));
+    STATIC_REQUIRE_FALSE(
+        (annealable<decltype(cost), decltype(schedule), decltype([](const auto&) { return std::make_unique<int>(0); }),
+                    std::unique_ptr<int>>));
+    STATIC_REQUIRE_FALSE((annealable<int, decltype(schedule), decltype(next)>));
+    STATIC_REQUIRE_FALSE((annealable<decltype([](int) { return 0u; }), decltype(schedule), decltype(next)>));
+    STATIC_REQUIRE_FALSE((annealable<decltype(cost), decltype([](double) { return 1.0f; }), decltype(next)>));
+    STATIC_REQUIRE_FALSE((annealable<decltype(cost), decltype(schedule), decltype([](int) { return 0.0; })>));
+    STATIC_REQUIRE((multi_annealable<decltype(generator), decltype(cost), decltype(schedule), decltype(next)>));
+    STATIC_REQUIRE((multi_annealable<decltype(generator), lvalue_annealing_cost&, decltype(schedule), decltype(next)>));
+    STATIC_REQUIRE_FALSE(
+        (multi_annealable<decltype(generator), rvalue_annealing_cost, decltype(schedule), decltype(next)>));
+    STATIC_REQUIRE_FALSE(
         (multi_annealable<decltype(generator), decltype([](int) { return 0u; }), decltype(schedule), decltype(next)>));
-    CHECK_FALSE(
+    STATIC_REQUIRE_FALSE(
         (multi_annealable<decltype(generator), decltype(cost), decltype([](double) { return 1.0f; }), decltype(next)>));
-    CHECK_FALSE(
+    STATIC_REQUIRE_FALSE(
         (multi_annealable<decltype(generator), decltype(cost), decltype(schedule), decltype([](int) { return 0.0; })>));
-    CHECK_FALSE((multi_annealable<int, decltype(cost), decltype(schedule), decltype(next)>));
-    CHECK_FALSE((multi_annealable<decltype([] { return nondefault_annealing_state{0}; }), decltype(cost),
-                                  decltype(schedule), decltype(next)>));
+    STATIC_REQUIRE_FALSE((multi_annealable<int, decltype(cost), decltype(schedule), decltype(next)>));
+    STATIC_REQUIRE_FALSE((multi_annealable<decltype([] { return nondefault_annealing_state{0}; }), decltype(cost),
+                                           decltype(schedule), decltype(next)>));
 
     /** Cost callable passed as a named lvalue. */
     lvalue_annealing_cost lvalue_cost{};
@@ -201,8 +203,8 @@ TEST_CASE("Annealing preserves the declared cost type with overloaded costs", "[
     /** Multi-state result retains the same declared cost type. */
     const auto multi =
         multi_simulated_annealing(2.0, 1.0, 1, 2, generator, overloaded_annealing_cost{}, schedule, next);
-    CHECK((std::same_as<typename decltype(single)::second_type, double>));
-    CHECK((std::same_as<typename decltype(multi)::second_type, double>));
+    STATIC_REQUIRE((std::same_as<typename decltype(single)::second_type, double>));
+    STATIC_REQUIRE((std::same_as<typename decltype(multi)::second_type, double>));
     CHECK(single.first == -1);
     CHECK(single.second == -0.75);
     CHECK(multi.first == -1);
