@@ -55,8 +55,9 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
      * @param t Tile to be realized as a ToPoliNano gate.
      * @return ToPoliNano gate representation of `t` including I/Os, rotation, etc.
      * @throws std::invalid_argument If `lyt` shifts rows instead of columns.
-     * @throws fcn::unsupported_gate_type_exception If a terminal also acts as a fanout. Connect the terminal to a
-     * separate fanout wire instead.
+     * @throws fcn::unsupported_gate_type_exception If `t` has no gate, its gate type is unsupported, or a terminal also
+     * acts as a fanout. Connect the terminal to a separate fanout wire instead.
+     * @throws fcn::unsupported_gate_orientation_exception If the gate's physical port orientation is unsupported.
      */
     [[nodiscard]] static gate set_up_gate(const layouts::shifted_cartesian_gate_layout&    lyt,
                                           const fiction::layouts::layout_base::coordinate& t)
