@@ -256,6 +256,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - SiDB model, layout, and gate-library tests now share data rows and check complete defect regions and exception ports.
   - Modernized iNML and molecular QCA tests with complete SVG file checks, cell-type rows, and independent
     gate-orientation cases.
+  - Streamlined QuickExact and QuickSim tests while preserving physical inputs, charge configurations, and timeout coverage.
   - Progress-recorder queries now inspect report histories without copying them.
   - Modernized QCA tests with shared format expectations and SVG detail multiplicity checks.
   - Modernized layout-transformation tests with named cases, defect-aware interface checks, and complete routing checks.
