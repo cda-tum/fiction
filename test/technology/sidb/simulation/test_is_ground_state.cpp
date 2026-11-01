@@ -94,6 +94,7 @@ TEST_CASE("check if ground state is found", "[is-ground-state]")
 
         REQUIRE(!simulation_results_quicksim.has_value());
         CHECK(simulation_results_exgs.charge_distributions.empty());
+        CHECK_FALSE(is_ground_state(result{}, simulation_results_exgs));
     }
 
     SECTION("Layout with seven SiDBs placed")

@@ -130,6 +130,25 @@ TEST_CASE("Defect influence grid-search edge cases", "[defect-influence]")
         CHECK(domain.size() == 4);
     }
 
+    SECTION("QuickTrace exhausts a non-influential row")
+    {
+        layout lyt{};
+        lyt.assign_sidb(site_at_row(0, 0), dot_tag::NORMAL);
+
+        const defect_influence_params contour_params{.operational_params       = {.timeout = 5000},
+                                                     .additional_scanning_area = {2, 0},
+                                                     .number_of_threads        = 1};
+        const auto                    domain = defect_influence_quicktrace(lyt, 1, contour_params);
+        const auto non_influential           = std::optional{std::tuple{defect_influence_status::NON_INFLUENTIAL}};
+
+        CHECK(domain.size() == 5);
+        CHECK(domain.contains(site_at_row(-2, 0)) == non_influential);
+        CHECK(domain.contains(site_at_row(-1, 0)) == non_influential);
+        CHECK(domain.contains(site_at_row(0, 0)) == non_influential);
+        CHECK(domain.contains(site_at_row(1, 0)) == non_influential);
+        CHECK(domain.contains(site_at_row(2, 0)) == non_influential);
+    }
+
     SECTION("QuickTrace at the maximum lattice column")
     {
         auto lyt = layout{};
