@@ -154,6 +154,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - `post_layout_optimization` avoids enumerating out-of-frame relocation coordinates.
   - `fanout_substitution` uses entropy only when no random seed is supplied.
   - Interface matching uses less temporary memory for named interfaces.
   - Crossing-cost estimation omits an unused counter for each swept edge.
@@ -252,8 +253,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - SiDB model, layout, and gate-library tests now share data rows and check complete defect regions and exception ports.
+  - Modernized iNML and molecular QCA tests with complete SVG file checks, cell-type rows, and independent
+    gate-orientation cases.
   - Streamlined SiDB operational tests and clarified ratio and parameter-row diagnostics.
   - Modernized QCA tests with shared format expectations and SVG detail multiplicity checks.
+  - Modernized layout-transformation tests with named cases, defect-aware interface checks, and complete routing checks.
   - FCN tests share port-list and constant-cell cases and check writer failure recovery.
     Writer docs describe border validation.
   - Modernized utility tests with named data rows, direct result checks, and complete progress observations.
@@ -709,6 +714,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - `on_the_fly_gate_library` now honors `DESIGN_ON_THE_FLY` for crossings and double wires on defective surfaces.
   - Node-duplication planarization reports bounded progress for outputs driven directly by inputs.
   - `surface_analysis` now propagates allocation failure while building its blacklist.
   - `is_balanced` now propagates allocation failures instead of terminating.

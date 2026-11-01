@@ -14,12 +14,16 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include <fiction/technology/sidb/model/charge_state.hpp>
 
 #include <cstdint>
 #include <limits>
+#include <string>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::sidb::model;
@@ -34,85 +38,50 @@ TEST_CASE("charge_state_to_sign returns the correct sign for each charge state",
 
 TEST_CASE("charge_state_to_sign is noexcept", "[sidb-charge-state]")
 {
-    CHECK(noexcept(charge_state_to_sign(charge_state::NEUTRAL)));
+    STATIC_REQUIRE(noexcept(charge_state_to_sign(charge_state::NEUTRAL)));
 }
 
 TEST_CASE("sign_to_charge_state returns the correct charge state for each sign", "[sidb-charge-state]")
 {
-    SECTION("sg is -1")
-    {
-        CHECK(sign_to_charge_state(-1) == charge_state::NEGATIVE);
-    }
-
-    SECTION("sg is 0")
-    {
-        CHECK(sign_to_charge_state(0) == charge_state::NEUTRAL);
-    }
-
-    SECTION("sg is +1")
-    {
-        CHECK(sign_to_charge_state(1) == charge_state::POSITIVE);
-    }
-
-    SECTION("sg is invalid")
-    {
-        CHECK(sign_to_charge_state(2) == charge_state::NONE);
-        CHECK(sign_to_charge_state(3) == charge_state::NONE);
-        CHECK(sign_to_charge_state(4) == charge_state::NONE);
-        CHECK(sign_to_charge_state(std::numeric_limits<int8_t>::max()) == charge_state::NONE);
-
-        CHECK(sign_to_charge_state(-2) == charge_state::NONE);
-        CHECK(sign_to_charge_state(-3) == charge_state::NONE);
-        CHECK(sign_to_charge_state(-4) == charge_state::NONE);
-        CHECK(sign_to_charge_state(std::numeric_limits<int8_t>::min()) == charge_state::NONE);
-    }
+    /** @brief Valid signs and invalid values on both sides of the valid range. */
+    const auto [sign, expected] =
+        GENERATE(table<int8_t, charge_state>({{-1, charge_state::NEGATIVE},
+                                              {0, charge_state::NEUTRAL},
+                                              {1, charge_state::POSITIVE},
+                                              {2, charge_state::NONE},
+                                              {3, charge_state::NONE},
+                                              {4, charge_state::NONE},
+                                              {std::numeric_limits<int8_t>::max(), charge_state::NONE},
+                                              {-2, charge_state::NONE},
+                                              {-3, charge_state::NONE},
+                                              {-4, charge_state::NONE},
+                                              {std::numeric_limits<int8_t>::min(), charge_state::NONE}}));
+    CAPTURE(static_cast<int>(sign));
+    CHECK(sign_to_charge_state(sign) == expected);
 }
 
 TEST_CASE("sign_to_charge_state is noexcept", "[sidb-charge-state]")
 {
-    CHECK(noexcept(sign_to_charge_state(0)));
+    STATIC_REQUIRE(noexcept(sign_to_charge_state(0)));
 }
 
 TEST_CASE("charge_configuration_to_string builds correct strings", "[sidb-charge-state]")
 {
-    SECTION("empty charge configuration")
-    {
-        const std::vector<charge_state> charge_distribution{};
-
-        CHECK(charge_configuration_to_string(charge_distribution).empty());
-    }
-
-    SECTION("charge configuration with one negative charge")
-    {
-        const std::vector<charge_state> charge_distribution{charge_state::NEGATIVE};
-
-        CHECK(charge_configuration_to_string(charge_distribution) == "-");
-    }
-
-    SECTION("charge configuration with one neutral charge")
-    {
-        const std::vector<charge_state> charge_distribution{charge_state::NEUTRAL};
-
-        CHECK(charge_configuration_to_string(charge_distribution) == "0");
-    }
-
-    SECTION("charge configuration with one positive charge")
-    {
-        const std::vector<charge_state> charge_distribution{charge_state::POSITIVE};
-
-        CHECK(charge_configuration_to_string(charge_distribution) == "+");
-    }
-
-    SECTION("charge configuration with multiple charges")
-    {
-        const std::vector<charge_state> charge_distribution{charge_state::POSITIVE, charge_state::NEGATIVE,
-                                                            charge_state::NEUTRAL};
-
-        CHECK(charge_configuration_to_string(charge_distribution) == "+-0");
-    }
+    /** @brief Independent configurations and their exact serialized charge order. */
+    const auto [name, states, expected] = GENERATE(table<const char*, std::vector<charge_state>, std::string>(
+        {{"empty", {}, ""},
+         {"negative", {charge_state::NEGATIVE}, "-"},
+         {"neutral", {charge_state::NEUTRAL}, "0"},
+         {"positive", {charge_state::POSITIVE}, "+"},
+         {"mixed", {charge_state::POSITIVE, charge_state::NEGATIVE, charge_state::NEUTRAL}, "+-0"},
+         {"empty sites",
+          {charge_state::NONE, charge_state::NEUTRAL, charge_state::NONE, charge_state::NEGATIVE, charge_state::NONE},
+          "0-"}}));
+    CAPTURE(name);
+    CHECK(charge_configuration_to_string(states) == expected);
 }
 
 TEST_CASE("charge_configuration_to_string is noexcept", "[sidb-charge-state]")
 {
-    CHECK(noexcept(charge_configuration_to_string({})));
+    STATIC_REQUIRE(noexcept(charge_configuration_to_string({})));
 }
