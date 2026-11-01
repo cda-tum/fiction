@@ -878,7 +878,7 @@ TEST_CASE("Both is_operational entry points apply the same canvas rule", "[is-op
             CHECK(status_with_wires == status_without_wires);
             CHECK(calls_with_wires == calls_without_wires);
 
-            // Filtering alone accepts this wire; simulation rejects it.
+            // FILTER_ONLY accepts this wire when kinks are rejected; every other row simulates and rejects it.
             const auto expected_status =
                 (strategy == is_operational_params::operational_analysis_strategy::FILTER_ONLY &&
                  condition == is_operational_params::operational_condition::REJECT_KINKS) ?
@@ -905,6 +905,8 @@ TEST_CASE("Operational checks reject invalid specifications", "[is-operational][
     for (const auto& spec : {std::vector<kitty::dynamic_truth_table>{},
                              std::vector<kitty::dynamic_truth_table>{create_and_tt(), create_id_tt()}})
     {
+        CAPTURE(spec.size());
+
         CHECK_THROWS_AS(is_operational(lyt, spec), std::invalid_argument);
         CHECK_THROWS_AS(is_operational(lyt, spec, {}, input_wires, output_wires), std::invalid_argument);
         CHECK_THROWS_AS(is_operational(layouts, spec, {}, input_wires, output_wires), std::invalid_argument);
