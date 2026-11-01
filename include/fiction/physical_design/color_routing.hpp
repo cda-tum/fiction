@@ -28,6 +28,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <optional>
+#include <stdexcept>
 #include <vector>
 
 namespace fiction::physical_design
@@ -52,7 +53,7 @@ struct color_routing_params
      */
     std::optional<uint32_t> path_limit = std::nullopt;
     /**
-     * The engine to use.
+     * The engine to use: MCS, DSATUR, LMXRLF, or SAT. TabuCol requires a color bound that this API does not accept.
      */
     utils::graph::graph_coloring_engine engine = utils::graph::graph_coloring_engine::SAT;
     /**
@@ -229,14 +230,19 @@ class color_routing_impl
  * @param ps Parameters.
  * @param pst Statistics.
  * @return `true` iff all objectives are satisfied or partial routing is enabled.
- * @throws std::invalid_argument If an objective endpoint lies outside the layout extent when ps.path_limit is absent
- * or nonzero.
+ * @throws std::invalid_argument If TABUCOL is selected, or an objective endpoint lies outside the layout extent when
+ * ps.path_limit is absent or nonzero.
  */
 template <typename Geometry>
 bool color_routing(layouts::gate_layout<Geometry>& lyt, const std::vector<routing_objective>& objectives,
                    color_routing_params ps = {}, color_routing_stats* pst = nullptr)
 {
-    color_routing_stats st{};
+    if (ps.engine == utils::graph::graph_coloring_engine::TABUCOL)
+    {
+        throw std::invalid_argument("TabuCol requires a color bound and is not supported by color_routing");
+    }
+
+    color_routing_stats st{.number_of_unsatisfied_objectives = objectives.size()};
 
     detail::color_routing_impl<layouts::gate_layout<Geometry>> p{lyt, objectives, ps, st};
 

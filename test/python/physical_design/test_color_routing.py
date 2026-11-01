@@ -17,7 +17,25 @@ from mnt.pyfiction.layouts import (
     hexagonal_gate_layout,
     layout_input_port,
 )
-from mnt.pyfiction.physical_design import color_routing
+from mnt.pyfiction.physical_design import color_routing, graph_coloring_engine
+
+
+@pytest.mark.parametrize("conduct_partial_routing", [False, True])
+def test_tabucol_rejection_preserves_layout(*, conduct_partial_routing: bool) -> None:
+    """Reject an engine requiring an unavailable color bound before routing."""
+    layout = cartesian_gate_layout((2, 2), "2DDWave")
+    input_node = layout.create_pi("input", (0, 0))
+    output = layout.create_buf(input_node, (1, 1))
+    with pytest.raises(ValueError, match="TabuCol"):
+        color_routing(
+            layout,
+            [((0, 0), (1, 1), 0)],
+            engine=graph_coloring_engine.TABUCOL,
+            conduct_partial_routing=conduct_partial_routing,
+        )
+    assert layout.source(layout_input_port(output, 0)) == input_node
+    assert layout.num_wires() == 1
+    assert layout.get_tile(output) == coordinate(1, 1)
 
 
 def test_endpoint_validation_preserves_layout() -> None:

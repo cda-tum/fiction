@@ -717,6 +717,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Graph coloring now preserves the selected color type and reports zero colors for empty results.
+    Color frequencies use vertex-sized counts.
+  - Graph coloring now propagates allocation failures from graph and identifier translation.
+  - Graph coloring now rejects integral output color types that cannot hold the computed labels.
+    SAT search keeps its internal color indices wide and returns an empty coloring for an empty graph.
+  - `color_routing` now rejects TabuCol, which requires an unavailable color bound, and counts all objectives
+    when routing fails.
   - Graph coloring now preserves wide integral vertex IDs and caps TabuCol color bounds before conversion.
     TabuCol rejects effective color counts above `INT_MAX`.
   - `on_the_fly_gate_library` now honors `DESIGN_ON_THE_FLY` for crossings and double wires on defective surfaces.

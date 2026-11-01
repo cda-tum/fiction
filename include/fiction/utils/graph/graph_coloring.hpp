@@ -40,6 +40,7 @@
 #include <string>
 #include <system_error>
 #include <tuple>
+#include <type_traits>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -153,7 +154,7 @@ struct determine_vertex_coloring_sat_params
 struct determine_vertex_coloring_heuristic_params
 {
     /**
-     * \f$k\f$-color bound for TABUCOL, capped to the number of graph vertices.
+     * \f$k\f$-color bound for TABUCOL, capped to the number of graph vertices. Zero permits no colors.
      */
     std::size_t k_color_value = 0;
 };
@@ -192,7 +193,7 @@ struct determine_vertex_coloring_stats
      */
     mockturtle::stopwatch<>::duration time_total{0};
     /**
-     * The determined chromatic number (could be non-optimal depending on the applied engine).
+     * The determined chromatic number (could be non-optimal depending on the applied engine). Zero for an empty result.
      */
     std::size_t chromatic_number{0};
     /**
@@ -407,7 +408,7 @@ class sat_coloring_handler
     /**
      * Alias for a vertex-color pair.
      */
-    using vertex_color = std::pair<typename Graph::vertex_id_type, Color>;
+    using vertex_color = std::pair<typename Graph::vertex_id_type, std::size_t>;
 
     struct solver_instance
     {
@@ -696,9 +697,11 @@ class sat_coloring_handler
                                       if (model.at(instance->variables.at({v, c})) == bill::lbool_type::true_)
                                       {
                                           // paint the vertex
-                                          coloring[v] = c;
+                                          /** @brief Output label checked against the type's capacity before return. */
+                                          const auto color = static_cast<Color>(c);
+                                          coloring[v]      = color;
                                           // increment the color frequency
-                                          color_frequency[c]++;
+                                          color_frequency[color]++;
                                       }
                                   }
                               });
@@ -733,6 +736,15 @@ class graph_coloring_impl
     {
         // measure runtime
         mockturtle::stopwatch stop{pst.time_total};
+
+        if (graph.size_vertices() == 0)
+        {
+            if (ps.verify_coloring_after_computation)
+            {
+                pst.coloring_verified = true;
+            }
+            return {};
+        }
 
         std::optional<vertex_coloring<Graph, Color>> coloring = std::nullopt;
 
@@ -858,7 +870,7 @@ class graph_coloring_impl
             /** @brief Vertex identifier parsed without a narrower integer intermediate. */
             parsed_id value{};
             /** @brief End of the serialized identifier. */
-            const auto* const end = node.data() + node.size();
+            const auto* const end = std::to_address(node.cend());
             /** @brief Parse status and first unconsumed character. */
             const auto result = std::from_chars(node.data(), end, value);
             if (result.ec != std::errc{} || result.ptr != end)
@@ -876,10 +888,11 @@ class graph_coloring_impl
      * @tparam GraphProxy Graph type used to distinguish the vertex ID overload.
      * @param node Node ID to convert between graph structures.
      * @return Corresponding node ID in the Brian Crites graph.
+     * @throws std::bad_alloc If decimal conversion cannot allocate storage.
      */
     template <typename GraphProxy = Graph>
         requires(!std::same_as<typename GraphProxy::vertex_id_type, std::string>)
-    [[nodiscard]] static std::string convert_node_index(const typename Graph::vertex_id_type& node) noexcept
+    [[nodiscard]] static std::string convert_node_index(const typename Graph::vertex_id_type& node)
     {
         return std::to_string(node);
     }
@@ -888,8 +901,9 @@ class graph_coloring_impl
      *
      * @param g Graph to translate.
      * @return Translated graph.
+     * @throws std::bad_alloc If the translated graph or its identifiers cannot allocate storage.
      */
-    [[nodiscard]] brian_crites_graph translate_to_brian_crites_graph(const Graph& g) const noexcept
+    [[nodiscard]] brian_crites_graph translate_to_brian_crites_graph(const Graph& g) const
     {
         brian_crites_graph translated_graph{};
 
@@ -936,7 +950,7 @@ class graph_coloring_impl
         vertex_coloring<Graph, Color> v_coloring{};
 
         // determine the color frequency alongside; index represents the color, value its frequency
-        std::vector<Color> color_frequency(pst.chromatic_number, Color{0});
+        std::vector<std::size_t> color_frequency(pst.chromatic_number, std::size_t{0});
 
         std::ranges::for_each(bc_coloring,
                               [&v_coloring, &color_frequency](const auto& c_pair)
@@ -947,11 +961,7 @@ class graph_coloring_impl
                                   color_frequency[static_cast<std::size_t>(c_pair.second)]++;
                               });
 
-        // the explicit comparator keeps the `Color` requirements at `operator<` instead of `std::ranges::less`'s
-        // stricter `std::totally_ordered_with`
-        if (const auto it =
-                std::ranges::max_element(color_frequency, [](const Color& c1, const Color& c2) { return c1 < c2; });
-            it != color_frequency.cend())
+        if (const auto it = std::ranges::max_element(color_frequency); it != color_frequency.cend())
         {
             // get index from iterator; index represents the color
             pst.most_frequent_color = static_cast<Color>(it - color_frequency.cbegin());
@@ -1004,7 +1014,8 @@ class graph_coloring_impl
         if (coloring_engine_ptr != nullptr)
         {
             const auto brian_crites_clr = coloring_engine_ptr->color();
-            pst.chromatic_number        = static_cast<std::size_t>(coloring_engine_ptr->get_num_colors());
+            pst.chromatic_number =
+                brian_crites_clr.empty() ? 0 : static_cast<std::size_t>(coloring_engine_ptr->get_num_colors());
 
             return translate_to_vertex_coloring(brian_crites_clr);
         }
@@ -1061,7 +1072,10 @@ class graph_coloring_impl
  * @param ps Parameters.
  * @param pst Statistics.
  * @throws std::invalid_argument If the TabuCol color bound capped to the vertex count exceeds the int range.
+ * @throws std::bad_alloc If heuristic graph or identifier translation cannot allocate storage.
+ * @throws std::overflow_error If the coloring needs an integral color label outside the Color type's range.
  * @return An assignment of graph vertices to colors such that no two adjacent vertices share the same color.
+ * The assignment is empty for an empty graph or when the selected engine finds no coloring within its bounds.
  */
 template <typename Graph, typename Color = std::size_t>
 vertex_coloring<Graph, Color> determine_vertex_coloring(const Graph&                            graph,
@@ -1075,11 +1089,19 @@ vertex_coloring<Graph, Color> determine_vertex_coloring(const Graph&            
         throw std::invalid_argument("TabuCol color count exceeds the int range");
     }
 
-    determine_vertex_coloring_stats st{};
+    determine_vertex_coloring_stats<Color> st{};
 
     detail::graph_coloring_impl<Graph, Color> p{graph, ps, st};
 
     const auto result = p.run();
+
+    if constexpr (std::is_integral_v<Color>)
+    {
+        if (st.chromatic_number != 0 && std::cmp_greater(st.chromatic_number - 1, +std::numeric_limits<Color>::max()))
+        {
+            throw std::overflow_error("Graph color exceeds the output type's range");
+        }
+    }
 
     if (pst)
     {
