@@ -358,6 +358,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     11.0.2 does not compile with clang 20.
 
 - Documentation:
+  - Progress callback docs state the input-mutation precondition and the thread on which exceptions propagate.
   - Documented all three gate-layout geometries and MSVC Release builds for Python.
   - A* documents the consistency requirement for custom heuristics and nonnegative step costs.
   - Python layout docstrings use `extent` for the extent argument.

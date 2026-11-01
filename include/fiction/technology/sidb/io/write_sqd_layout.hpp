@@ -353,7 +353,8 @@ class sqd_writer
  *
  * @param lyt Layout to write.
  * @param os Output stream to write into.
- * @param on_progress Receives completed dot and defect records.
+ * @param on_progress Receives completed dot and defect records. The callback must not modify the layout being
+ * traversed.
  * @throws std::invalid_argument If a lattice component is non-finite or a charged-defect material parameter is
  * non-finite or negative; the stream remains unchanged.
  */
@@ -368,7 +369,8 @@ inline void write_sqd_layout(const layout& lyt, std::ostream& os, utils::progres
  *
  * @param lyt Layout to write.
  * @param filename File to write into.
- * @param on_progress Receives completed dot and defect records.
+ * @param on_progress Receives completed dot and defect records. The callback must not modify the layout being
+ * traversed.
  * @throws std::invalid_argument If a lattice component is non-finite or a charged-defect material parameter is
  * non-finite or negative; the destination remains unchanged.
  * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
