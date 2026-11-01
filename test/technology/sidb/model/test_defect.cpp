@@ -30,7 +30,7 @@ using namespace fiction::sidb::model;
 TEST_CASE("Defect types determine charge classification and default extent", "[sidb-defects]")
 {
     /** @brief No extent for an uncharged NONE defect. */
-    constexpr std::pair<uint16_t, uint16_t> none{0, 0};
+    constexpr std::pair none{uint16_t{0}, uint16_t{0}};
     /** @brief Default extent for neutral defect types. */
     constexpr std::pair<uint16_t, uint16_t> neutral{NEUTRAL_DEFECT_HORIZONTAL_SPACING, NEUTRAL_DEFECT_VERTICAL_SPACING};
     /** @brief Default extent for charged defect types. */
@@ -62,9 +62,9 @@ TEST_CASE("Defect types determine charge classification and default extent", "[s
 TEST_CASE("Explicit defect charges determine overridden extent", "[sidb-defects]")
 {
     /** @brief Override for neutral defects. */
-    constexpr std::pair<uint16_t, uint16_t> neutral{1, 0};
+    constexpr std::pair neutral{uint16_t{1}, uint16_t{0}};
     /** @brief Override for charged defects. */
-    constexpr std::pair<uint16_t, uint16_t> charged{1, 1};
+    constexpr std::pair charged{uint16_t{1}, uint16_t{1}};
 
     CHECK(defect_extent(defect{defect_type::UNKNOWN, 0}, charged, neutral) == neutral);
     CHECK(defect_extent(defect{defect_type::UNKNOWN, -1}, charged, neutral) == charged);
