@@ -32,14 +32,9 @@ void register_version_info(nb::module_& m);
 
 }  // namespace pyfiction
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
-
 NB_MODULE(utils, m)
 {
     m.doc() = "Version information and shared utilities.";
 
     pyfiction::register_version_info(m);
 }
-
-#pragma GCC diagnostic pop
