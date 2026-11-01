@@ -25,9 +25,7 @@
 using namespace fiction;
 using namespace fiction::sidb;
 
-static_assert(std::is_pointer_v<decltype(&skeleton_bestagon_library::determine_port_routing)>);
-
 TEST_CASE("Bestagon traits", "[sidb-dynamic-gate-library]")
 {
-    CHECK(std::is_same_v<skeleton_bestagon_library::layout, sidb::layout>);
+    STATIC_REQUIRE(std::is_same_v<skeleton_bestagon_library::layout, sidb::layout>);
 }

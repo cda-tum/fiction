@@ -15,7 +15,9 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
@@ -27,6 +29,7 @@
 #include <fiction/technology/mol_qca/layout.hpp>
 #include <fiction/technology/mol_qca/sim7_mol_library.hpp>
 
+#include <array>
 #include <type_traits>
 
 using namespace fiction;
@@ -34,11 +37,45 @@ using namespace fiction::fcn;
 using namespace fiction::layouts;
 using namespace fiction::mol_qca;
 
-static_assert(std::is_pointer_v<decltype(&sim7_mol_library::set_up_gate)>);
+// clang-format off
+
+/** @brief Expected primary input cells before orientation. */
+static constexpr const sim7_mol_library::gate PRIMARY_INPUT_PORT{
+sim7_mol_library::cell_list_to_gate<char>(
+{{
+    {' ', ' ', ' ', ' ', 'i', 'i', ' ', ' ', ' ', ' '},
+    {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+    {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+    {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+    {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+    {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+    {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+    {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+    {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+    {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
+}})};
+
+/** @brief Expected primary output cells before orientation. */
+static constexpr const sim7_mol_library::gate PRIMARY_OUTPUT_PORT{
+sim7_mol_library::cell_list_to_gate<char>(
+{{
+    {' ', ' ', ' ', ' ', 'o', 'o', ' ', ' ', ' ', ' '},
+    {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+    {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+    {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+    {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+    {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+    {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+    {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+    {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+    {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
+}})};
+
+// clang-format on
 
 TEST_CASE("Molecular QCA library traits", "[molecular-qca-library]")
 {
-    CHECK(std::is_same_v<sim7_mol_library::layout, mol_qca::layout>);
+    STATIC_REQUIRE(std::is_same_v<sim7_mol_library::layout, mol_qca::layout>);
 }
 
 TEST_CASE("Setting up input ports and gates", "[molecular-qca-library]")
@@ -46,36 +83,6 @@ TEST_CASE("Setting up input ports and gates", "[molecular-qca-library]")
     auto layout = blueprints::or_not_gate_layout<cartesian_gate_layout>();
 
     // clang-format off
-
-    static constexpr const sim7_mol_library::gate primary_input_port{
-    sim7_mol_library::cell_list_to_gate<char>(
-    {{
-        {' ', ' ', ' ', ' ', 'i', 'i', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
-    }})};
-
-    static constexpr const sim7_mol_library::gate primary_output_port{
-    sim7_mol_library::cell_list_to_gate<char>(
-    {{
-        {' ', ' ', ' ', ' ', 'o', 'o', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
-    }})};
 
     static constexpr const sim7_mol_library::gate disjunction{
     sim7_mol_library::cell_list_to_gate<char>(
@@ -109,11 +116,11 @@ TEST_CASE("Setting up input ports and gates", "[molecular-qca-library]")
 
     // clang-format on
 
-    CHECK(sim7_mol_library::set_up_gate(layout, {0, 1}) == sim7_mol_library::rotate_90(primary_input_port));
-    CHECK(sim7_mol_library::set_up_gate(layout, {1, 0}) == sim7_mol_library::rotate_180(primary_input_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {0, 1}) == sim7_mol_library::rotate_90(PRIMARY_INPUT_PORT));
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 0}) == sim7_mol_library::rotate_180(PRIMARY_INPUT_PORT));
     CHECK(sim7_mol_library::set_up_gate(layout, {1, 1}) == sim7_mol_library::rotate_90(disjunction));
     CHECK(sim7_mol_library::set_up_gate(layout, {1, 2}) == bent_inverter);
-    CHECK(sim7_mol_library::set_up_gate(layout, {2, 2}) == sim7_mol_library::rotate_270(primary_output_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {2, 2}) == sim7_mol_library::rotate_270(PRIMARY_OUTPUT_PORT));
 }
 
 TEST_CASE("Setting up wires", "[molecular-qca-library]")
@@ -121,36 +128,6 @@ TEST_CASE("Setting up wires", "[molecular-qca-library]")
     auto layout = blueprints::three_wire_paths_gate_layout<cartesian_gate_layout>();
 
     // clang-format off
-
-    static constexpr const sim7_mol_library::gate primary_input_port{
-    sim7_mol_library::cell_list_to_gate<char>(
-    {{
-        {' ', ' ', ' ', ' ', 'i', 'i', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
-    }})};
-
-    static constexpr const sim7_mol_library::gate primary_output_port{
-    sim7_mol_library::cell_list_to_gate<char>(
-    {{
-        {' ', ' ', ' ', ' ', 'o', 'o', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
-    }})};
 
     static constexpr const sim7_mol_library::gate wire{
     sim7_mol_library::cell_list_to_gate<char>(
@@ -169,9 +146,9 @@ TEST_CASE("Setting up wires", "[molecular-qca-library]")
 
     // clang-format on
 
-    CHECK(sim7_mol_library::set_up_gate(layout, {0, 0}) == sim7_mol_library::rotate_90(primary_input_port));
-    CHECK(sim7_mol_library::set_up_gate(layout, {0, 2}) == sim7_mol_library::rotate_90(primary_input_port));
-    CHECK(sim7_mol_library::set_up_gate(layout, {0, 4}) == sim7_mol_library::rotate_90(primary_input_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {0, 0}) == sim7_mol_library::rotate_90(PRIMARY_INPUT_PORT));
+    CHECK(sim7_mol_library::set_up_gate(layout, {0, 2}) == sim7_mol_library::rotate_90(PRIMARY_INPUT_PORT));
+    CHECK(sim7_mol_library::set_up_gate(layout, {0, 4}) == sim7_mol_library::rotate_90(PRIMARY_INPUT_PORT));
     CHECK(sim7_mol_library::set_up_gate(layout, {1, 0}) == sim7_mol_library::rotate_270(wire));
     CHECK(sim7_mol_library::set_up_gate(layout, {1, 2}) == sim7_mol_library::rotate_270(wire));
     CHECK(sim7_mol_library::set_up_gate(layout, {1, 4}) == sim7_mol_library::rotate_270(wire));
@@ -181,9 +158,9 @@ TEST_CASE("Setting up wires", "[molecular-qca-library]")
     CHECK(sim7_mol_library::set_up_gate(layout, {3, 0}) == sim7_mol_library::rotate_270(wire));
     CHECK(sim7_mol_library::set_up_gate(layout, {3, 2}) == sim7_mol_library::rotate_270(wire));
     CHECK(sim7_mol_library::set_up_gate(layout, {3, 4}) == sim7_mol_library::rotate_270(wire));
-    CHECK(sim7_mol_library::set_up_gate(layout, {4, 0}) == sim7_mol_library::rotate_270(primary_output_port));
-    CHECK(sim7_mol_library::set_up_gate(layout, {4, 2}) == sim7_mol_library::rotate_270(primary_output_port));
-    CHECK(sim7_mol_library::set_up_gate(layout, {4, 4}) == sim7_mol_library::rotate_270(primary_output_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {4, 0}) == sim7_mol_library::rotate_270(PRIMARY_OUTPUT_PORT));
+    CHECK(sim7_mol_library::set_up_gate(layout, {4, 2}) == sim7_mol_library::rotate_270(PRIMARY_OUTPUT_PORT));
+    CHECK(sim7_mol_library::set_up_gate(layout, {4, 4}) == sim7_mol_library::rotate_270(PRIMARY_OUTPUT_PORT));
 }
 
 TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
@@ -191,36 +168,6 @@ TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
     auto layout = blueprints::fanout_layout<cartesian_gate_layout>();
 
     // clang-format off
-
-    static constexpr const sim7_mol_library::gate primary_input_port{
-    sim7_mol_library::cell_list_to_gate<char>(
-    {{
-        {' ', ' ', ' ', ' ', 'i', 'i', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
-    }})};
-
-    static constexpr const sim7_mol_library::gate primary_output_port{
-    sim7_mol_library::cell_list_to_gate<char>(
-    {{
-        {' ', ' ', ' ', ' ', 'o', 'o', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
-    }})};
 
     static constexpr const sim7_mol_library::gate fanout{
     sim7_mol_library::cell_list_to_gate<char>(
@@ -269,10 +216,10 @@ TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
 
     // clang-format on
 
-    CHECK(sim7_mol_library::set_up_gate(layout, {0, 1}) == sim7_mol_library::rotate_90(primary_input_port));
-    CHECK(sim7_mol_library::set_up_gate(layout, {1, 0}) == sim7_mol_library::rotate_180(primary_output_port));
-    CHECK(sim7_mol_library::set_up_gate(layout, {2, 0}) == sim7_mol_library::rotate_180(primary_output_port));
-    CHECK(sim7_mol_library::set_up_gate(layout, {1, 2}) == sim7_mol_library::rotate_90(primary_output_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {0, 1}) == sim7_mol_library::rotate_90(PRIMARY_INPUT_PORT));
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 0}) == sim7_mol_library::rotate_180(PRIMARY_OUTPUT_PORT));
+    CHECK(sim7_mol_library::set_up_gate(layout, {2, 0}) == sim7_mol_library::rotate_180(PRIMARY_OUTPUT_PORT));
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 2}) == sim7_mol_library::rotate_90(PRIMARY_OUTPUT_PORT));
     CHECK(sim7_mol_library::set_up_gate(layout, {1, 1}) == sim7_mol_library::rotate_180(fanout));
     CHECK(sim7_mol_library::set_up_gate(layout, {2, 1}) == sim7_mol_library::rotate_90(fanout_d));
     CHECK(sim7_mol_library::set_up_gate(layout, {2, 2}) == sim7_mol_library::rotate_270(bent_wire));
@@ -280,12 +227,7 @@ TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
 
 TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
 {
-    using clock_number_t        = cartesian_gate_layout::clock_number_t;
     using orientation_exception = unsupported_gate_orientation_exception<layout_base::coordinate, port_position>;
-
-    static constexpr auto input_clock  = static_cast<clock_number_t>(0);
-    static constexpr auto fanout_clock = static_cast<clock_number_t>(1);
-    static constexpr auto output_clock = static_cast<clock_number_t>(2);
 
     // clang-format off
 
@@ -306,81 +248,61 @@ TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
 
     // clang-format on
 
-    auto northern_input_layout = cartesian_gate_layout{cartesian_gate_layout::extent{3, 3, 1}};
-    northern_input_layout.assign_clock_number({1, 0}, input_clock);
-    northern_input_layout.assign_clock_number({1, 1}, fanout_clock);
-    northern_input_layout.assign_clock_number({2, 1}, output_clock);
-    northern_input_layout.assign_clock_number({1, 2}, output_clock);
-    northern_input_layout.assign_clock_number({0, 1}, output_clock);
-    const auto north_pi     = northern_input_layout.create_pi("x", {1, 0});
-    const auto north_fanout = northern_input_layout.create_buf(north_pi, {1, 1});
-    northern_input_layout.create_po(north_fanout, "e", {2, 1});
-    northern_input_layout.create_po(north_fanout, "s", {1, 2});
-    northern_input_layout.create_po(north_fanout, "w", {0, 1});
+    SECTION("all input directions")
+    {
+        const auto [direction, input, expected] =
+            GENERATE_COPY(Catch::Generators::table<const char*, layout_base::coordinate, sim7_mol_library::gate>({
+                {"north", {1, 0}, fanout_1_3},
+                {"east", {2, 1}, sim7_mol_library::rotate_90(fanout_1_3)},
+                {"south", {1, 2}, sim7_mol_library::rotate_180(fanout_1_3)},
+                {"west", {0, 1}, sim7_mol_library::rotate_270(fanout_1_3)},
+            }));
+        CAPTURE(direction);
+        cartesian_gate_layout lyt{{3, 3, 1}};
+        lyt.assign_clock_number(input, 0);
+        lyt.assign_clock_number({1, 1}, 1);
+        const auto pi     = lyt.create_pi("x", input);
+        const auto fanout = lyt.create_buf(pi, {1, 1});
+        for (const auto output : std::array<layout_base::coordinate, 4>{{{1, 0}, {2, 1}, {1, 2}, {0, 1}}})
+        {
+            if (output != input)
+            {
+                lyt.assign_clock_number(output, 2);
+                lyt.create_po(fanout, "branch", output);
+            }
+        }
+        CHECK(sim7_mol_library::set_up_gate(lyt, {1, 1}) == expected);
+    }
 
-    auto eastern_input_layout = cartesian_gate_layout{cartesian_gate_layout::extent{3, 3, 1}};
-    eastern_input_layout.assign_clock_number({2, 1}, input_clock);
-    eastern_input_layout.assign_clock_number({1, 1}, fanout_clock);
-    eastern_input_layout.assign_clock_number({1, 2}, output_clock);
-    eastern_input_layout.assign_clock_number({0, 1}, output_clock);
-    eastern_input_layout.assign_clock_number({1, 0}, output_clock);
-    const auto east_pi     = eastern_input_layout.create_pi("x", {2, 1});
-    const auto east_fanout = eastern_input_layout.create_buf(east_pi, {1, 1});
-    eastern_input_layout.create_po(east_fanout, "s", {1, 2});
-    eastern_input_layout.create_po(east_fanout, "w", {0, 1});
-    eastern_input_layout.create_po(east_fanout, "n", {1, 0});
+    SECTION("clocking does not hide a physical branch")
+    {
+        auto clocked_layout   = cartesian_gate_layout{cartesian_gate_layout::extent{3, 3, 1}, clocking::twoddwave()};
+        const auto clocked_pi = clocked_layout.create_pi("x", {1, 0});
+        const auto clocked_fanout = clocked_layout.create_buf(clocked_pi, {1, 1});
+        clocked_layout.create_po(clocked_fanout, "e", {2, 1});
+        clocked_layout.create_po(clocked_fanout, "s", {1, 2});
+        clocked_layout.create_po(clocked_fanout, "w", {0, 1});
 
-    auto southern_input_layout = cartesian_gate_layout{cartesian_gate_layout::extent{3, 3, 1}};
-    southern_input_layout.assign_clock_number({1, 2}, input_clock);
-    southern_input_layout.assign_clock_number({1, 1}, fanout_clock);
-    southern_input_layout.assign_clock_number({0, 1}, output_clock);
-    southern_input_layout.assign_clock_number({1, 0}, output_clock);
-    southern_input_layout.assign_clock_number({2, 1}, output_clock);
-    const auto south_pi     = southern_input_layout.create_pi("x", {1, 2});
-    const auto south_fanout = southern_input_layout.create_buf(south_pi, {1, 1});
-    southern_input_layout.create_po(south_fanout, "w", {0, 1});
-    southern_input_layout.create_po(south_fanout, "n", {1, 0});
-    southern_input_layout.create_po(south_fanout, "e", {2, 1});
+        CHECK(clocked_layout.is_fanout(clocked_fanout));
+        CHECK(clocked_layout.outgoing_data_flow({1, 1}).size() == 2u);
+        CHECK(clocked_layout.fanout_size(clocked_fanout) == 3u);
+        CHECK(sim7_mol_library::set_up_gate(clocked_layout, {1, 1}) == fanout_1_3);
+    }
 
-    auto western_input_layout = cartesian_gate_layout{cartesian_gate_layout::extent{3, 3, 1}};
-    western_input_layout.assign_clock_number({0, 1}, input_clock);
-    western_input_layout.assign_clock_number({1, 1}, fanout_clock);
-    western_input_layout.assign_clock_number({1, 0}, output_clock);
-    western_input_layout.assign_clock_number({2, 1}, output_clock);
-    western_input_layout.assign_clock_number({1, 2}, output_clock);
-    const auto west_pi     = western_input_layout.create_pi("x", {0, 1});
-    const auto west_fanout = western_input_layout.create_buf(west_pi, {1, 1});
-    western_input_layout.create_po(west_fanout, "n", {1, 0});
-    western_input_layout.create_po(west_fanout, "e", {2, 1});
-    western_input_layout.create_po(west_fanout, "s", {1, 2});
+    SECTION("missing adjacent input")
+    {
+        auto missing_input_layout =
+            cartesian_gate_layout{cartesian_gate_layout::extent{3, 3, 1}, clocking::twoddwave()};
+        const auto non_adjacent_pi      = missing_input_layout.create_pi("x", {0, 0});
+        const auto missing_input_fanout = missing_input_layout.create_buf(non_adjacent_pi, {1, 1});
+        missing_input_layout.create_po(missing_input_fanout, "e", {2, 1});
+        missing_input_layout.create_po(missing_input_fanout, "s", {1, 2});
+        missing_input_layout.create_po(missing_input_fanout, "w", {0, 1});
 
-    CHECK(sim7_mol_library::set_up_gate(northern_input_layout, {1, 1}) == fanout_1_3);
-    CHECK(sim7_mol_library::set_up_gate(eastern_input_layout, {1, 1}) == sim7_mol_library::rotate_90(fanout_1_3));
-    CHECK(sim7_mol_library::set_up_gate(southern_input_layout, {1, 1}) == sim7_mol_library::rotate_180(fanout_1_3));
-    CHECK(sim7_mol_library::set_up_gate(western_input_layout, {1, 1}) == sim7_mol_library::rotate_270(fanout_1_3));
-
-    auto       clocked_layout = cartesian_gate_layout{cartesian_gate_layout::extent{3, 3, 1}, clocking::twoddwave()};
-    const auto clocked_pi     = clocked_layout.create_pi("x", {1, 0});
-    const auto clocked_fanout = clocked_layout.create_buf(clocked_pi, {1, 1});
-    clocked_layout.create_po(clocked_fanout, "e", {2, 1});
-    clocked_layout.create_po(clocked_fanout, "s", {1, 2});
-    clocked_layout.create_po(clocked_fanout, "w", {0, 1});
-
-    CHECK(clocked_layout.is_fanout(clocked_fanout));
-    CHECK(clocked_layout.outgoing_data_flow({1, 1}).size() == 2u);
-    CHECK(clocked_layout.fanout_size(clocked_fanout) == 3u);
-    CHECK(sim7_mol_library::set_up_gate(clocked_layout, {1, 1}) == fanout_1_3);
-
-    auto missing_input_layout  = cartesian_gate_layout{cartesian_gate_layout::extent{3, 3, 1}, clocking::twoddwave()};
-    const auto non_adjacent_pi = missing_input_layout.create_pi("x", {0, 0});
-    const auto missing_input_fanout = missing_input_layout.create_buf(non_adjacent_pi, {1, 1});
-    missing_input_layout.create_po(missing_input_fanout, "e", {2, 1});
-    missing_input_layout.create_po(missing_input_fanout, "s", {1, 2});
-    missing_input_layout.create_po(missing_input_fanout, "w", {0, 1});
-
-    CHECK(missing_input_layout.is_fanout(missing_input_fanout));
-    CHECK(missing_input_layout.fanout_size(missing_input_fanout) == 3u);
-    CHECK_THROWS_AS((sim7_mol_library::set_up_gate(missing_input_layout, {1, 1})), orientation_exception);
+        CHECK(missing_input_layout.is_fanout(missing_input_fanout));
+        CHECK(missing_input_layout.fanout_size(missing_input_fanout) == 3u);
+        CHECK_THROWS_AS((sim7_mol_library::set_up_gate(missing_input_layout, {1, 1})), orientation_exception);
+    }
 }
 
 TEST_CASE("Setting up majority gate", "[molecular-qca-library]")
@@ -388,36 +310,6 @@ TEST_CASE("Setting up majority gate", "[molecular-qca-library]")
     auto layout = blueprints::res_maj_gate_layout<cartesian_gate_layout>();
 
     // clang-format off
-
-    static constexpr const sim7_mol_library::gate primary_input_port{
-    sim7_mol_library::cell_list_to_gate<char>(
-    {{
-        {' ', ' ', ' ', ' ', 'i', 'i', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
-    }})};
-
-    static constexpr const sim7_mol_library::gate primary_output_port{
-    sim7_mol_library::cell_list_to_gate<char>(
-    {{
-        {' ', ' ', ' ', ' ', 'o', 'o', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
-    }})};
 
     static constexpr const sim7_mol_library::gate majority{
     sim7_mol_library::cell_list_to_gate<char>(
@@ -436,11 +328,11 @@ TEST_CASE("Setting up majority gate", "[molecular-qca-library]")
 
     // clang-format on
 
-    CHECK(sim7_mol_library::set_up_gate(layout, {0, 1}) == sim7_mol_library::rotate_90(primary_input_port));
-    CHECK(sim7_mol_library::set_up_gate(layout, {1, 0}) == sim7_mol_library::rotate_180(primary_input_port));
-    CHECK(sim7_mol_library::set_up_gate(layout, {2, 1}) == sim7_mol_library::rotate_270(primary_input_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {0, 1}) == sim7_mol_library::rotate_90(PRIMARY_INPUT_PORT));
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 0}) == sim7_mol_library::rotate_180(PRIMARY_INPUT_PORT));
+    CHECK(sim7_mol_library::set_up_gate(layout, {2, 1}) == sim7_mol_library::rotate_270(PRIMARY_INPUT_PORT));
     CHECK(sim7_mol_library::set_up_gate(layout, {1, 1}) == majority);
-    CHECK(sim7_mol_library::set_up_gate(layout, {1, 2}) == primary_output_port);
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 2}) == PRIMARY_OUTPUT_PORT);
 }
 
 TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
@@ -449,37 +341,6 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
 
     // Expected 10x10 MolQCA gate patterns for each logical tile type used by the blueprint.
     // clang-format off
-
-    // Boundary tiles are represented by dedicated primary input and output port templates.
-    static constexpr const sim7_mol_library::gate primary_input_port{
-    sim7_mol_library::cell_list_to_gate<char>(
-    {{
-        {' ', ' ', ' ', ' ', 'i', 'i', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
-    }})};
-
-    static constexpr const sim7_mol_library::gate primary_output_port{
-    sim7_mol_library::cell_list_to_gate<char>(
-    {{
-        {' ', ' ', ' ', ' ', 'o', 'o', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
-    }})};
 
     // Inverters can appear in straight and bent forms depending on the local tile neighborhood.
     static constexpr const sim7_mol_library::gate straight_inverter{
@@ -592,9 +453,9 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
     // clang-format on
 
     // Primary I/O ports are matched with the rotation implied by their border orientation.
-    CHECK(sim7_mol_library::set_up_gate(layout, {0, 2}) == sim7_mol_library::rotate_90(primary_input_port));
-    CHECK(sim7_mol_library::set_up_gate(layout, {1, 0}) == sim7_mol_library::rotate_180(primary_input_port));
-    CHECK(sim7_mol_library::set_up_gate(layout, {2, 0}) == sim7_mol_library::rotate_90(primary_input_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {0, 2}) == sim7_mol_library::rotate_90(PRIMARY_INPUT_PORT));
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 0}) == sim7_mol_library::rotate_180(PRIMARY_INPUT_PORT));
+    CHECK(sim7_mol_library::set_up_gate(layout, {2, 0}) == sim7_mol_library::rotate_90(PRIMARY_INPUT_PORT));
 
     // Internal tiles must resolve to the exact gate template and rotation dictated by their port routing.
     CHECK(sim7_mol_library::set_up_gate(layout, {1, 2}) == sim7_mol_library::rotate_270(straight_inverter));
@@ -604,7 +465,7 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
     CHECK(sim7_mol_library::set_up_gate(layout, {2, 2}) == sim7_mol_library::rotate_180(disjunction));
     CHECK(sim7_mol_library::set_up_gate(layout, {3, 1}) == sim7_mol_library::rotate_90(conjunction_r));
     CHECK(sim7_mol_library::set_up_gate(layout, {3, 2}) == sim7_mol_library::rotate_180(conjunction));
-    CHECK(sim7_mol_library::set_up_gate(layout, {4, 2}) == sim7_mol_library::rotate_270(primary_output_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {4, 2}) == sim7_mol_library::rotate_270(PRIMARY_OUTPUT_PORT));
 }
 
 TEST_CASE("Check unsupported gate type", "[molecular-qca-library]")
