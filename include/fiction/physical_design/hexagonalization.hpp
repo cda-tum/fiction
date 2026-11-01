@@ -43,8 +43,10 @@
 #include <utility>
 #include <vector>
 
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
+#endif
 
 namespace fiction::physical_design
 {
@@ -863,4 +865,6 @@ class hexagonalization_impl
 }
 
 }  // namespace fiction::physical_design
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
+#endif
