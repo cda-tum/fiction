@@ -119,6 +119,10 @@ TEST_CASE("check if ground state is found", "[is-ground-state]")
 
         REQUIRE(simulation_results_quicksim.has_value());
 
-        CHECK(is_ground_state(*simulation_results_quicksim, simulation_results_exgs));
+        // Clang-Tidy does not infer optional presence from Catch2's fatal REQUIRE.
+        if (simulation_results_quicksim.has_value())
+        {
+            CHECK(is_ground_state(*simulation_results_quicksim, simulation_results_exgs));
+        }
     }
 }
