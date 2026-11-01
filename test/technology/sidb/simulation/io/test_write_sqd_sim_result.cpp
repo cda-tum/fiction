@@ -35,6 +35,8 @@
 #include <chrono>
 #include <cstdint>
 #include <ctime>
+#include <initializer_list>
+#include <iomanip>
 #include <numbers>
 #include <sstream>
 #include <stdexcept>
@@ -49,6 +51,87 @@ using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::engines;
 using namespace fiction::sidb::simulation::io;
 using namespace fiction::utils::stl;
+
+namespace
+{
+
+/**
+ * @brief Check that a canonical local timestamp denotes a second within an inclusive epoch interval.
+ * @param timestamp Local timestamp to validate.
+ * @param before First permitted epoch second.
+ * @param after Last permitted epoch second.
+ * @return Whether the timestamp denotes a second in the interval.
+ */
+bool timestamp_in_window(const std::string& timestamp, const std::time_t before, const std::time_t after)
+{
+    std::tm            parsed{};
+    std::istringstream input{timestamp};
+    input >> std::get_time(&parsed, "%Y-%m-%d %H:%M:%S");
+    if (input.fail() || input.peek() != std::char_traits<char>::eof())
+    {
+        return false;
+    }
+    // Both DST interpretations can denote a valid local time during a fall-back transition.
+    for (const auto daylight_saving : {-1, 0, 1})
+    {
+        auto candidate     = parsed;
+        candidate.tm_isdst = daylight_saving;
+        const auto epoch   = std::mktime(&candidate);
+        if (epoch >= before && epoch <= after &&
+            fmt::format("{:%Y-%m-%d %H:%M:%S}", safe_localtime(epoch)) == timestamp)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * @brief Write a simulation result and validate the timestamp independently of the document oracle.
+ * @param res Simulation result to write.
+ * @param os Destination stream.
+ * @return Validated timestamp text.
+ */
+std::string write_timestamped_result(const result& res, std::stringstream& os)
+{
+    const auto before = std::time(nullptr);
+    write_sqd_sim_result(res, os);
+    const auto            after = std::time(nullptr);
+    tinyxml2::XMLDocument document{};
+    REQUIRE(document.Parse(os.str().c_str()) == tinyxml2::XML_SUCCESS);
+    const auto* root = document.FirstChildElement("sim_out");
+    REQUIRE(root != nullptr);
+    const auto* engine_info = root->FirstChildElement("eng_info");
+    REQUIRE(engine_info != nullptr);
+    const auto* timestamp = engine_info->FirstChildElement("timestamp");
+    REQUIRE(timestamp != nullptr);
+    REQUIRE(timestamp->GetText() != nullptr);
+    const std::string text{timestamp->GetText()};
+    CHECK(timestamp_in_window(text, before, after));
+    return text;
+}
+
+}  // namespace
+
+TEST_CASE("SQD timestamp oracle accepts calendar boundaries and rejects invalid times", "[sqd-sim-result]")
+{
+    std::tm boundary{};
+    boundary.tm_year  = 126;
+    boundary.tm_mon   = 0;
+    boundary.tm_mday  = 1;
+    boundary.tm_hour  = 23;
+    boundary.tm_min   = 59;
+    boundary.tm_sec   = 59;
+    boundary.tm_isdst = -1;
+    const auto before = std::mktime(&boundary);
+    REQUIRE(before != std::time_t{-1});
+    CHECK(timestamp_in_window("2026-01-01 23:59:59", before, before));
+    CHECK(timestamp_in_window("2026-01-02 00:00:00", before, before + 2));
+    CHECK_FALSE(timestamp_in_window("2026-01-02 00:00:02", before, before + 2));
+    CHECK_FALSE(timestamp_in_window("2026-02-30 00:00:00", before, before + 90 * 86400));
+    CHECK_FALSE(timestamp_in_window("2026-01-02", before, before + 2));
+    CHECK_FALSE(timestamp_in_window("2026-1-2 00:00:00", before, before + 2));
+}
 
 TEST_CASE("Utility function: any_to_string", "[sqd-sim-result]")
 {
@@ -193,101 +276,93 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
 
     SECTION("without additional parameters")
     {
-        const auto        current_time   = std::time(nullptr);
-        const std::string sim_result_str = fmt::format(
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            "<sim_out>\n"
-            "    <eng_info>\n"
-            "        <engine>TestSim</engine>\n"
-            "        <version>{}</version>\n"
-            "        <repo>{}</repo>\n"
-            "        <return_code>0</return_code>\n"
-            "        <timestamp>{}</timestamp>\n"
-            "        <time_elapsed_s>42</time_elapsed_s>\n"
-            "    </eng_info>\n"
-            "    <sim_params>\n"
-            "        <debye_length>{}</debye_length>\n"
-            "        <eps_r>{}</eps_r>\n"
-            "        <muzm>{}</muzm>\n"
-            "    </sim_params>\n"
-            "    <physloc>\n"
-            "    </physloc>\n"
-            "    <elec_dist>\n"
-            "    </elec_dist>\n"
-            "</sim_out>\n",
-            FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", safe_localtime(current_time)),
-            sim_result.sim_params.lambda_tf, sim_result.sim_params.epsilon_r, sim_result.sim_params.mu_minus);
-
-        write_sqd_sim_result(sim_result, simulation_stream);
+        const auto        timestamp = write_timestamped_result(sim_result, simulation_stream);
+        const std::string sim_result_str =
+            fmt::format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                        "<sim_out>\n"
+                        "    <eng_info>\n"
+                        "        <engine>TestSim</engine>\n"
+                        "        <version>{}</version>\n"
+                        "        <repo>{}</repo>\n"
+                        "        <return_code>0</return_code>\n"
+                        "        <timestamp>{}</timestamp>\n"
+                        "        <time_elapsed_s>42</time_elapsed_s>\n"
+                        "    </eng_info>\n"
+                        "    <sim_params>\n"
+                        "        <debye_length>{}</debye_length>\n"
+                        "        <eps_r>{}</eps_r>\n"
+                        "        <muzm>{}</muzm>\n"
+                        "    </sim_params>\n"
+                        "    <physloc>\n"
+                        "    </physloc>\n"
+                        "    <elec_dist>\n"
+                        "    </elec_dist>\n"
+                        "</sim_out>\n",
+                        FICTION_VERSION, FICTION_REPO, timestamp, sim_result.sim_params.lambda_tf,
+                        sim_result.sim_params.epsilon_r, sim_result.sim_params.mu_minus);
 
         CHECK(simulation_stream.str() == sim_result_str);
     }
     SECTION("with additional parameter (string)")
     {
-        const auto        current_time   = std::time(nullptr);
-        const std::string sim_result_str = fmt::format(
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            "<sim_out>\n"
-            "    <eng_info>\n"
-            "        <engine>TestSim</engine>\n"
-            "        <version>{}</version>\n"
-            "        <repo>{}</repo>\n"
-            "        <return_code>0</return_code>\n"
-            "        <timestamp>{}</timestamp>\n"
-            "        <time_elapsed_s>42</time_elapsed_s>\n"
-            "    </eng_info>\n"
-            "    <sim_params>\n"
-            "        <debye_length>{}</debye_length>\n"
-            "        <eps_r>{}</eps_r>\n"
-            "        <muzm>{}</muzm>\n"
-            "        <param1>value1</param1>\n"
-            "    </sim_params>\n"
-            "    <physloc>\n"
-            "    </physloc>\n"
-            "    <elec_dist>\n"
-            "    </elec_dist>\n"
-            "</sim_out>\n",
-            FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", safe_localtime(current_time)),
-            sim_result.sim_params.lambda_tf, sim_result.sim_params.epsilon_r, sim_result.sim_params.mu_minus);
-
         sim_result.additional_simulation_parameters.emplace("param1", "value1");
-
-        write_sqd_sim_result(sim_result, simulation_stream);
+        const auto        timestamp = write_timestamped_result(sim_result, simulation_stream);
+        const std::string sim_result_str =
+            fmt::format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                        "<sim_out>\n"
+                        "    <eng_info>\n"
+                        "        <engine>TestSim</engine>\n"
+                        "        <version>{}</version>\n"
+                        "        <repo>{}</repo>\n"
+                        "        <return_code>0</return_code>\n"
+                        "        <timestamp>{}</timestamp>\n"
+                        "        <time_elapsed_s>42</time_elapsed_s>\n"
+                        "    </eng_info>\n"
+                        "    <sim_params>\n"
+                        "        <debye_length>{}</debye_length>\n"
+                        "        <eps_r>{}</eps_r>\n"
+                        "        <muzm>{}</muzm>\n"
+                        "        <param1>value1</param1>\n"
+                        "    </sim_params>\n"
+                        "    <physloc>\n"
+                        "    </physloc>\n"
+                        "    <elec_dist>\n"
+                        "    </elec_dist>\n"
+                        "</sim_out>\n",
+                        FICTION_VERSION, FICTION_REPO, timestamp, sim_result.sim_params.lambda_tf,
+                        sim_result.sim_params.epsilon_r, sim_result.sim_params.mu_minus);
 
         CHECK(simulation_stream.str() == sim_result_str);
     }
 
     SECTION("with additional parameters (double)")
     {
-        const auto        current_time   = std::time(nullptr);
-        const std::string sim_result_str = fmt::format(
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            "<sim_out>\n"
-            "    <eng_info>\n"
-            "        <engine>TestSim</engine>\n"
-            "        <version>{}</version>\n"
-            "        <repo>{}</repo>\n"
-            "        <return_code>0</return_code>\n"
-            "        <timestamp>{}</timestamp>\n"
-            "        <time_elapsed_s>42</time_elapsed_s>\n"
-            "    </eng_info>\n"
-            "    <sim_params>\n"
-            "        <debye_length>{}</debye_length>\n"
-            "        <eps_r>{}</eps_r>\n"
-            "        <muzm>{}</muzm>\n"
-            "        <param3>3.140000</param3>\n"
-            "    </sim_params>\n"
-            "    <physloc>\n"
-            "    </physloc>\n"
-            "    <elec_dist>\n"
-            "    </elec_dist>\n"
-            "</sim_out>\n",
-            FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", safe_localtime(current_time)),
-            sim_result.sim_params.lambda_tf, sim_result.sim_params.epsilon_r, sim_result.sim_params.mu_minus);
-
         sim_result.additional_simulation_parameters.emplace("param3", 3.14);
-
-        write_sqd_sim_result(sim_result, simulation_stream);
+        const auto        timestamp = write_timestamped_result(sim_result, simulation_stream);
+        const std::string sim_result_str =
+            fmt::format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                        "<sim_out>\n"
+                        "    <eng_info>\n"
+                        "        <engine>TestSim</engine>\n"
+                        "        <version>{}</version>\n"
+                        "        <repo>{}</repo>\n"
+                        "        <return_code>0</return_code>\n"
+                        "        <timestamp>{}</timestamp>\n"
+                        "        <time_elapsed_s>42</time_elapsed_s>\n"
+                        "    </eng_info>\n"
+                        "    <sim_params>\n"
+                        "        <debye_length>{}</debye_length>\n"
+                        "        <eps_r>{}</eps_r>\n"
+                        "        <muzm>{}</muzm>\n"
+                        "        <param3>3.140000</param3>\n"
+                        "    </sim_params>\n"
+                        "    <physloc>\n"
+                        "    </physloc>\n"
+                        "    <elec_dist>\n"
+                        "    </elec_dist>\n"
+                        "</sim_out>\n",
+                        FICTION_VERSION, FICTION_REPO, timestamp, sim_result.sim_params.lambda_tf,
+                        sim_result.sim_params.epsilon_r, sim_result.sim_params.mu_minus);
 
         CHECK(simulation_stream.str() == sim_result_str);
     }
@@ -317,7 +392,7 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
 
     std::stringstream simulation_stream{};
 
-    const auto        current_time = std::time(nullptr);
+    const auto        timestamp = write_timestamped_result(sim_result, simulation_stream);
     const std::string sim_result_str =
         fmt::format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                     "<sim_out>\n"
@@ -348,11 +423,8 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
                     "state_count=\"3\">-0-0-0-</dist>\n"
                     "    </elec_dist>\n"
                     "</sim_out>\n",
-                    FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", safe_localtime(current_time)),
-                    sim_result.simulation_runtime.count(), sim_result.sim_params.lambda_tf,
-                    sim_result.sim_params.epsilon_r, sim_result.sim_params.mu_minus);
-
-    write_sqd_sim_result(sim_result, simulation_stream);
+                    FICTION_VERSION, FICTION_REPO, timestamp, sim_result.simulation_runtime.count(),
+                    sim_result.sim_params.lambda_tf, sim_result.sim_params.epsilon_r, sim_result.sim_params.mu_minus);
 
     CHECK(simulation_stream.str() == sim_result_str);
 }
@@ -374,7 +446,7 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
     sim_result.algorithm_name = "ExGS";
     std::stringstream simulation_stream{};
 
-    const auto        current_time   = std::time(nullptr);
+    const auto        timestamp      = write_timestamped_result(sim_result, simulation_stream);
     const std::string sim_result_str = fmt::format(
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<sim_out>\n"
@@ -401,11 +473,8 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
         "        <dist energy=\"0.000000\" count=\"1\" physically_valid=\"1\" state_count=\"3\">0-0</dist>\n"
         "    </elec_dist>\n"
         "</sim_out>\n",
-        FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", safe_localtime(current_time)),
-        sim_result.simulation_runtime.count(), sim_result.sim_params.lambda_tf, sim_result.sim_params.epsilon_r,
-        sim_result.sim_params.mu_minus);
-
-    write_sqd_sim_result(sim_result, simulation_stream);
+        FICTION_VERSION, FICTION_REPO, timestamp, sim_result.simulation_runtime.count(),
+        sim_result.sim_params.lambda_tf, sim_result.sim_params.epsilon_r, sim_result.sim_params.mu_minus);
 
     CHECK(simulation_stream.str() == sim_result_str);
 }
