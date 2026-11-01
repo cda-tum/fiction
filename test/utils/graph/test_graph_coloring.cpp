@@ -15,6 +15,7 @@
  */
 
 #include <catch2/catch_message.hpp>
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
@@ -25,8 +26,10 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <map>
 #include <numeric>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -374,4 +377,72 @@ TEST_CASE("String IDs (mostly a compile test)", "[graph-coloring]")
     c5.insert_edge("4", "0", {});
 
     check_coloring_engines(c5, 3, {"0", "1"});
+}
+
+TEST_CASE("TabuCol caps oversized color bounds to the vertex count", "[graph-coloring]")
+{
+    /** @brief Graph with integral identifiers and unused vertex and edge data. */
+    using graph = undirected_graph<std::size_t, uint8_t, undirected_pair<std::size_t>, uint8_t>;
+    /** @brief Bounds include a value whose low 32 bits are zero. */
+    const auto bound = GENERATE(std::uint64_t{2}, std::uint64_t{1} << 32);
+    CAPTURE(bound);
+    if (bound > std::numeric_limits<std::size_t>::max())
+    {
+        SKIP("The color bound exceeds the platform's size_t range");
+    }
+    /** @brief Isolated vertices require no randomized conflict repair. */
+    graph isolated{};
+    isolated.insert_vertex(0, {});
+    isolated.insert_vertex(1, {});
+    /** @brief Statistics checked against the returned assignment. */
+    determine_vertex_coloring_stats stats{};
+    /** @brief Assignment for the requested representable upper bound. */
+    const auto coloring =
+        determine_vertex_coloring(isolated,
+                                  {.engine           = graph_coloring_engine::TABUCOL,
+                                   .heuristic_params = {.k_color_value = static_cast<std::size_t>(bound)},
+                                   .verify_coloring_after_computation = true},
+                                  &stats);
+    check_coloring(isolated, coloring, stats);
+}
+
+TEMPLATE_TEST_CASE("Heuristic colorings preserve the full integral vertex ID range", "[graph-coloring]", std::int64_t,
+                   std::uint64_t, bool)
+{
+    /** @brief Graph whose vertex identifiers retain the test type's full range. */
+    using graph = undirected_graph<TestType, uint8_t, undirected_pair<TestType>, uint8_t>;
+    /** @brief Sparse identifiers exercise the smallest and largest representable values. */
+    graph isolated{};
+    isolated.insert_vertex(std::numeric_limits<TestType>::min(), {});
+    isolated.insert_vertex(std::numeric_limits<TestType>::max(), {});
+    CAPTURE(std::numeric_limits<TestType>::min(), std::numeric_limits<TestType>::max());
+    /** @brief Statistics checked against the returned assignment. */
+    determine_vertex_coloring_stats stats{};
+    /** @brief MCS assignment with no color-count narrowing or randomized search. */
+    const auto coloring = determine_vertex_coloring(
+        isolated, {.engine = graph_coloring_engine::MCS, .verify_coloring_after_computation = true}, &stats);
+    check_coloring(isolated, coloring, stats);
+}
+
+TEST_CASE("TabuCol rejects an unrepresentable effective color count", "[graph-coloring]")
+{
+    /** @brief Graph storage for the count-boundary check. */
+    using graph = undirected_graph<std::size_t, uint8_t, undirected_pair<std::size_t>, uint8_t>;
+    /** @brief Graph-count boundary without allocating billions of vertices. */
+    struct oversized_graph : graph
+    {
+        /** @brief Reports the first count outside the vendor's integer range. */
+        [[nodiscard]] unsigned int size_vertices() const noexcept
+        {
+            return static_cast<unsigned int>(std::numeric_limits<int>::max()) + 1u;
+        }
+    };
+    /** @brief Small storage with an intentionally oversized reported count. */
+    oversized_graph isolated{};
+    isolated.insert_vertex(0, {});
+    isolated.insert_vertex(1, {});
+    CHECK_THROWS_AS(determine_vertex_coloring(
+                        isolated, {.engine           = graph_coloring_engine::TABUCOL,
+                                   .heuristic_params = {.k_color_value = std::numeric_limits<std::size_t>::max()}}),
+                    std::invalid_argument);
 }
