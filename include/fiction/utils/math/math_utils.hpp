@@ -28,6 +28,7 @@
 #include <numeric>
 #include <stdexcept>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 namespace fiction::utils::math
@@ -58,6 +59,7 @@ template <typename T>
  * compiler warning when taking the absolute value of an unsigned number.
  * @tparam T The type of the number to take the absolute value of. Must be integral.
  * @param n The number to take the absolute value of.
+ * @pre The absolute value of `n` is representable in `T`; signed minimum values are excluded.
  * @return |n|.
  */
 template <std::integral T>
@@ -134,10 +136,11 @@ cartesian_combinations(const std::vector<std::vector<VectorDataType>>& sets) noe
             {
                 std::vector<VectorDataType> new_product = product;
                 new_product.push_back(element);
+                // Keep this copy: moving appended rows can retain excess capacity.
                 expanded_products.push_back(new_product);
             }
         }
-        all_combinations = expanded_products;
+        all_combinations = std::move(expanded_products);
     }
 
     return all_combinations;  // Return the final list of combinations
