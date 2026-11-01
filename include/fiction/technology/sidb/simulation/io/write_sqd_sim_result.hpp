@@ -31,6 +31,7 @@
 
 #include <algorithm>
 #include <any>
+#include <compare>
 #include <cstdint>
 #include <ctime>
 #include <functional>
@@ -321,7 +322,9 @@ class sqd_sim_result_writer
             ordered.push_back(&cd);
         }
 
-        std::ranges::sort(ordered, [](const auto* a, const auto* b) { return a->energy() < b->energy(); });
+        // Floating-point < does not order NaN energies.
+        std::ranges::sort(ordered,
+                          [](const auto* a, const auto* b) { return std::weak_order(a->energy(), b->energy()) < 0; });
 
         for (const auto* cd : ordered)
         {

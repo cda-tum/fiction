@@ -33,10 +33,12 @@
 
 #include <any>
 #include <chrono>
+#include <cmath>
 #include <cstdint>
 #include <ctime>
 #include <initializer_list>
 #include <iomanip>
+#include <limits>
 #include <numbers>
 #include <sstream>
 #include <stdexcept>
@@ -477,6 +479,68 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
         sim_result.sim_params.lambda_tf, sim_result.sim_params.epsilon_r, sim_result.sim_params.mu_minus);
 
     CHECK(simulation_stream.str() == sim_result_str);
+}
+
+TEST_CASE("SQD simulation orders mixed finite and non-finite energies", "[sqd-sim-result]")
+{
+    /** @brief Result with two sites that identify each distribution by its charge states. */
+    result res{};
+    res.lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+    res.lyt.assign_sidb({2, 0, 0}, dot_tag::NORMAL);
+    /** @brief Shared sites for the five distinct configurations. */
+    const charge_distribution prototype{res.lyt};
+    /** @brief Positive NaN, ordered after positive infinity. */
+    const auto nan = std::copysign(std::numeric_limits<double>::quiet_NaN(), 1.0);
+    /** @brief Infinite energy bound. */
+    const auto infinity      = std::numeric_limits<double>::infinity();
+    res.charge_distributions = {{prototype.shared_sites(), {charge_state::NEGATIVE, charge_state::NEGATIVE}, nan},
+                                {prototype.shared_sites(), {charge_state::NEGATIVE, charge_state::NEUTRAL}, 2.0},
+                                {prototype.shared_sites(), {charge_state::NEUTRAL, charge_state::NEUTRAL}, -infinity},
+                                {prototype.shared_sites(), {charge_state::NEUTRAL, charge_state::POSITIVE}, infinity},
+                                {prototype.shared_sites(), {charge_state::POSITIVE, charge_state::POSITIVE}, -3.0}};
+    /** @brief Serialized result. */
+    std::stringstream stream{};
+    write_sqd_sim_result(res, stream);
+    /** @brief Parsed output, independent of its formatting. */
+    tinyxml2::XMLDocument document{};
+    REQUIRE(document.Parse(stream.str().c_str()) == tinyxml2::XML_SUCCESS);
+    /** @brief Simulation output root. */
+    const auto* root = document.FirstChildElement("sim_out");
+    REQUIRE(root != nullptr);
+    /** @brief Complete distribution block. */
+    const auto* distributions = root->FirstChildElement("elec_dist");
+    REQUIRE(distributions != nullptr);
+    /** @brief Hand-derived configuration order and retained energies. */
+    const std::vector<std::pair<std::string, double>> expected{{"00", -infinity},
+                                                               {"++", -3.0},
+                                                               {"-0", 2.0},
+                                                               {"0+", infinity},
+                                                               {"--", nan}};
+    /** @brief Next emitted distribution. */
+    auto* distribution = distributions->FirstChildElement("dist");
+    for (const auto& [configuration, energy] : expected)
+    {
+        CAPTURE(configuration);
+        REQUIRE(distribution != nullptr);
+        REQUIRE(distribution->GetText() != nullptr);
+        CHECK(std::string{distribution->GetText()} == configuration);
+        /** @brief Parsed numeric energy without depending on a NaN or infinity spelling. */
+        double actual{};
+        REQUIRE(distribution->QueryDoubleAttribute("energy", &actual) == tinyxml2::XML_SUCCESS);
+        if (std::isnan(energy))
+        {
+            CHECK(std::isnan(actual));
+        }
+        else
+        {
+            CHECK(actual == energy);
+        }
+        CHECK(distribution->IntAttribute("count") == 1);
+        CHECK(distribution->IntAttribute("physically_valid") == 1);
+        CHECK(distribution->IntAttribute("state_count") == 3);
+        distribution = distribution->NextSiblingElement("dist");
+    }
+    CHECK(distribution == nullptr);
 }
 
 TEST_CASE("test_write_sqd_sim_result rejects mismatched distribution sites", "[sqd-sim-result]")
