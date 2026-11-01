@@ -21599,8 +21599,8 @@ Args:
     exact_results: Result of an exact simulation of the same layout.
 
 Returns:
-    `true` iff the heuristic result contains every ground state of the
-    exact one.
+    `true` iff the exact result has charge distributions and both
+    results contain the same ground states.
 
 )doc";
 
