@@ -27,14 +27,18 @@
 
 #include <algorithm>
 #include <cassert>
+#include <charconv>
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <map>
 #include <memory>
 #include <numeric>
 #include <optional>
+#include <stdexcept>
 #include <string>
+#include <system_error>
 #include <tuple>
 #include <unordered_map>
 #include <utility>
@@ -149,7 +153,7 @@ struct determine_vertex_coloring_sat_params
 struct determine_vertex_coloring_heuristic_params
 {
     /**
-     * \f$k\f$-color value for \f$k\f$-coloring algorithms, e.g., TABUCOL.
+     * \f$k\f$-color bound for TABUCOL, capped to the number of graph vertices.
      */
     std::size_t k_color_value = 0;
 };
@@ -841,7 +845,7 @@ class graph_coloring_impl
      * @param node Node ID to convert between graph structures.
      * @return Corresponding node ID in Graph.
      */
-    [[nodiscard]] static typename Graph::vertex_id_type convert_node_index(const std::string& node) noexcept
+    [[nodiscard]] static typename Graph::vertex_id_type convert_node_index(const std::string& node)
     {
         if constexpr (std::is_same_v<typename Graph::vertex_id_type, std::string>)
         {
@@ -849,7 +853,19 @@ class graph_coloring_impl
         }
         else
         {
-            return static_cast<typename Graph::vertex_id_type>(std::stoi(node));
+            /** @brief Integer promotion preserves bool, enum, and narrow integral ID conversions. */
+            using parsed_id = decltype(+typename Graph::vertex_id_type{});
+            /** @brief Vertex identifier parsed without a narrower integer intermediate. */
+            parsed_id value{};
+            /** @brief End of the serialized identifier. */
+            const auto* const end = node.data() + node.size();
+            /** @brief Parse status and first unconsumed character. */
+            const auto result = std::from_chars(node.data(), end, value);
+            if (result.ec != std::errc{} || result.ptr != end)
+            {
+                throw std::invalid_argument("Invalid graph vertex ID");
+            }
+            return static_cast<typename Graph::vertex_id_type>(value);
         }
     }
     /**
@@ -915,7 +931,7 @@ class graph_coloring_impl
      * @return Translated vertex coloring.
      */
     [[nodiscard]] vertex_coloring<Graph, Color>
-    translate_to_vertex_coloring(const brian_crites_coloring& bc_coloring) const noexcept
+    translate_to_vertex_coloring(const brian_crites_coloring& bc_coloring) const
     {
         vertex_coloring<Graph, Color> v_coloring{};
 
@@ -946,7 +962,8 @@ class graph_coloring_impl
         return v_coloring;
     }
 
-    [[nodiscard]] vertex_coloring<Graph, Color> run_brian_crites_engine() const noexcept
+    /** @brief Runs the selected external heuristic with checked vertex ID restoration. */
+    [[nodiscard]] vertex_coloring<Graph, Color> run_brian_crites_engine() const
     {
         const auto translated_graph = translate_to_brian_crites_graph(graph);
 
@@ -972,8 +989,9 @@ class graph_coloring_impl
             }
             case graph_coloring_engine::TABUCOL:
             {
-                coloring_engine_ptr =
-                    std::make_unique<GraphColoring::Tabucol>(translated_graph, ps.heuristic_params.k_color_value);
+                coloring_engine_ptr = std::make_unique<GraphColoring::Tabucol>(
+                    translated_graph,
+                    static_cast<int>(std::min(ps.heuristic_params.k_color_value, translated_graph.size())));
                 break;
             }
             default:
@@ -1042,6 +1060,7 @@ class graph_coloring_impl
  * @param graph The graph whose vertices are to be colored.
  * @param ps Parameters.
  * @param pst Statistics.
+ * @throws std::invalid_argument If the TabuCol color bound capped to the vertex count exceeds the int range.
  * @return An assignment of graph vertices to colors such that no two adjacent vertices share the same color.
  */
 template <typename Graph, typename Color = std::size_t>
@@ -1049,6 +1068,13 @@ vertex_coloring<Graph, Color> determine_vertex_coloring(const Graph&            
                                                         determine_vertex_coloring_params<Graph> ps  = {},
                                                         determine_vertex_coloring_stats<Color>* pst = nullptr)
 {
+    if (ps.engine == graph_coloring_engine::TABUCOL &&
+        std::cmp_greater(ps.heuristic_params.k_color_value, std::numeric_limits<int>::max()) &&
+        std::cmp_greater(graph.size_vertices(), std::numeric_limits<int>::max()))
+    {
+        throw std::invalid_argument("TabuCol color count exceeds the int range");
+    }
+
     determine_vertex_coloring_stats st{};
 
     detail::graph_coloring_impl<Graph, Color> p{graph, ps, st};

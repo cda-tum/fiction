@@ -716,6 +716,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Graph coloring now preserves wide integral vertex IDs and caps TabuCol color bounds before conversion.
+    TabuCol rejects effective color counts above `INT_MAX`.
   - `on_the_fly_gate_library` now honors `DESIGN_ON_THE_FLY` for crossings and double wires on defective surfaces.
   - Node-duplication planarization reports bounded progress for outputs driven directly by inputs.
   - `surface_analysis` now propagates allocation failure while building its blacklist.
