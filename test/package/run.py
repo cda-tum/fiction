@@ -6,7 +6,7 @@
 #
 # Licensed under the MIT License
 
-"""Build and run a consumer of a relocated fiction installation."""
+"""Build and run consumers of a relocated fiction installation."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ from pathlib import Path
 
 
 def main() -> None:
-    """Install fiction, remove its producer tree, and check SAT equivalence."""
+    """Install fiction, remove its producer tree, and check equivalence and SQD output."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cmake-option", action="append", default=[])
     args = parser.parse_args()
@@ -63,11 +63,15 @@ def main() -> None:
         # TemporaryDirectory handles Git's read-only pack files on Windows.
         producer_workspace.cleanup()
 
-        # Default package locations must not override the co-installed mockturtle.
+        # Default package locations must not override co-installed dependencies.
         shadow = work / "shadow"
         shadow.mkdir()
         (shadow / "mockturtleConfig.cmake").write_text(
             'message(FATAL_ERROR "Selected unrelated mockturtle")\n',
+            encoding="utf-8",
+        )
+        (shadow / "tinyxml2-config.cmake").write_text(
+            'message(FATAL_ERROR "Selected unrelated tinyxml2")\n',
             encoding="utf-8",
         )
         build = work / "consumer-build"
@@ -83,8 +87,10 @@ def main() -> None:
             f"-Dfiction_DIR={relocated.as_posix()}/lib/cmake/fiction",
             f"-DCMAKE_PREFIX_PATH={shadow.as_posix()}",
             f"-Dmockturtle_DIR={shadow.as_posix()}",
+            f"-Dtinyxml2_DIR={shadow.as_posix()}",
+            "-Dtinyxml2_SHARED_LIBS=ON",
         )
-        run("cmake", "--build", build, "--parallel", "2")
+        run("cmake", "--build", build, "--parallel", "2", "--verbose")
         run("ctest", "--test-dir", build, "--output-on-failure")
         config_only = work / "missing-mockturtle/lib/cmake/fiction"
         config_only.mkdir(parents=True)
