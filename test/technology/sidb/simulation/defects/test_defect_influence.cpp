@@ -135,9 +135,9 @@ TEST_CASE("Defect influence grid-search edge cases", "[defect-influence]")
         layout lyt{};
         lyt.assign_sidb(site_at_row(0, 0), dot_tag::NORMAL);
 
+        // Bound a broken contour traversal.
         const defect_influence_params contour_params{.operational_params       = {.timeout = 5000},
-                                                     .additional_scanning_area = {2, 0},
-                                                     .number_of_threads        = 1};
+                                                     .additional_scanning_area = {2, 0}};
         const auto                    domain = defect_influence_quicktrace(lyt, 1, contour_params);
         const auto non_influential           = std::optional{std::tuple{defect_influence_status::NON_INFLUENTIAL}};
 

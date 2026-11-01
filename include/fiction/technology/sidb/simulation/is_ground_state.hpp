@@ -31,7 +31,7 @@ namespace fiction::sidb::simulation
  *
  * @param heuristic_results Result of a heuristic simulation.
  * @param exact_results Result of an exact simulation of the same layout.
- * @return `true` iff the heuristic result contains every ground state of the exact one.
+ * @return `true` iff the exact result has charge distributions and both results contain the same ground states.
  */
 [[nodiscard]] inline bool is_ground_state(const result& heuristic_results, const result& exact_results) noexcept
 {
