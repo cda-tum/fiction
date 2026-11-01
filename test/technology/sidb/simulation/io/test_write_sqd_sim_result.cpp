@@ -16,6 +16,7 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
@@ -28,6 +29,7 @@
 #include <fiction/utils/version_info.hpp>
 
 #include <fmt/format.h>
+#include <tinyxml2.h>
 
 #include <any>
 #include <chrono>
@@ -37,6 +39,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
@@ -420,4 +423,165 @@ TEST_CASE("test_write_sqd_sim_result rejects mismatched distribution sites", "[s
     std::stringstream os{};
     CHECK_THROWS_AS(write_sqd_sim_result(res, os), std::invalid_argument);
     CHECK(os.str().empty());
+}
+
+TEST_CASE("SQD simulation metadata preserves XML text", "[sqd-sim-result]")
+{
+    result res{};
+    res.algorithm_name = "a & <simulation> \"quoted\" 'name'\t\n\rend \xc3\xa9 \xe4\xb8\xad \xf0\x90\x80\x80";
+    const std::string text{
+        "a & <value> \"quoted\" 'text'\t\n\rend \xed\x9f\xbf \xee\x80\x80 \xef\xbf\xbd \xf4\x8f\xbf\xbf"};
+    res.additional_simulation_parameters.emplace("string_parameter", text);
+    res.additional_simulation_parameters.emplace("cstring_parameter", text.c_str());
+    res.additional_simulation_parameters.emplace("char_parameter", '<');
+    res.additional_simulation_parameters.emplace("unused invalid name", std::any{});
+    std::stringstream os{};
+    write_sqd_sim_result(res, os);
+
+    tinyxml2::XMLDocument document{};
+    REQUIRE(document.Parse(os.str().c_str()) == tinyxml2::XML_SUCCESS);
+    const auto* root = document.FirstChildElement("sim_out");
+    REQUIRE(root != nullptr);
+    const auto* engine_info = root->FirstChildElement("eng_info");
+    REQUIRE(engine_info != nullptr);
+    const auto* engine = engine_info->FirstChildElement("engine");
+    REQUIRE(engine != nullptr);
+    REQUIRE(engine->GetText() != nullptr);
+    CHECK(std::string{engine->GetText()} == res.algorithm_name);
+    const auto* parameters = root->FirstChildElement("sim_params");
+    REQUIRE(parameters != nullptr);
+    for (const auto* name : {"string_parameter", "cstring_parameter", "char_parameter"})
+    {
+        CAPTURE(name);
+        const auto* parameter = parameters->FirstChildElement(name);
+        REQUIRE(parameter != nullptr);
+        REQUIRE(parameter->GetText() != nullptr);
+        CHECK(std::string{parameter->GetText()} == (std::string{name} == "char_parameter" ? "<" : text));
+    }
+}
+
+TEST_CASE("SQD simulation metadata rejects invalid XML names before output", "[sqd-sim-result]")
+{
+    for (const std::string name : {"", "1bad", "bad name", "bad<name", "bad&name", "\xc2\xb7name", "\xcc\x80name",
+                                   "\xcd\xbe", "\xe3\x80\x80", "\xef\xb7\x90", "\xf3\xb0\x80\x80"})
+    {
+        CAPTURE(name);
+        result res{};
+        res.additional_simulation_parameters.emplace(name, "value");
+        std::stringstream os{};
+        os << "original";
+        CHECK_THROWS_AS(write_sqd_sim_result(res, os), std::invalid_argument);
+        CHECK(os.str() == "original");
+    }
+}
+
+TEST_CASE("SQD simulation metadata accepts XML Unicode names", "[sqd-sim-result]")
+{
+    for (const std::string name : {"\xc3\xa9", "\xe4\xb8\xad", "\xf0\x90\x80\x80", "\xf3\xaf\xbf\xbf",
+                                   "a\xc2\xb7\xcc\x80\xe2\x80\xbf", "_name-1.value"})
+    {
+        CAPTURE(name);
+        result res{};
+        res.additional_simulation_parameters.emplace(name, "value");
+        std::stringstream os{};
+        write_sqd_sim_result(res, os);
+        tinyxml2::XMLDocument document{};
+        REQUIRE(document.Parse(os.str().c_str()) == tinyxml2::XML_SUCCESS);
+        const auto* root = document.FirstChildElement("sim_out");
+        REQUIRE(root != nullptr);
+        const auto* parameters = root->FirstChildElement("sim_params");
+        REQUIRE(parameters != nullptr);
+        const auto* parameter = parameters->FirstChildElement(name.c_str());
+        REQUIRE(parameter != nullptr);
+        REQUIRE(parameter->GetText() != nullptr);
+        CHECK(std::string{parameter->GetText()} == "value");
+    }
+}
+
+TEST_CASE("SQD simulation metadata rejects invalid Unicode before output", "[sqd-sim-result]")
+{
+    const auto [label, invalid] = GENERATE(std::pair{"lone continuation", std::string{"\x80"}},
+                                           std::pair{"invalid leading byte", std::string{"\xff"}},
+                                           std::pair{"truncated two-byte sequence", std::string{"\xc2"}},
+                                           std::pair{"invalid continuation", std::string{"\xc2 "}},
+                                           std::pair{"overlong two-byte sequence", std::string{"\xc0\xaf"}},
+                                           std::pair{"truncated three-byte sequence", std::string{"\xe0\xa0"}},
+                                           std::pair{"overlong three-byte sequence", std::string{"\xe0\x80\xaf"}},
+                                           std::pair{"surrogate", std::string{"\xed\xa0\x80"}},
+                                           std::pair{"XML noncharacter FFFE", std::string{"\xef\xbf\xbe"}},
+                                           std::pair{"XML noncharacter FFFF", std::string{"\xef\xbf\xbf"}},
+                                           std::pair{"truncated four-byte sequence", std::string{"\xf0\x90\x80"}},
+                                           std::pair{"overlong four-byte sequence", std::string{"\xf0\x80\x80\xaf"}},
+                                           std::pair{"above Unicode range", std::string{"\xf4\x90\x80\x80"}});
+    CAPTURE(label);
+    result res{};
+    /** @brief Check rejection without modifying the destination stream. */
+    const auto check_rejected = [&res]
+    {
+        std::stringstream os{};
+        os << "original";
+        CHECK_THROWS_AS(write_sqd_sim_result(res, os), std::invalid_argument);
+        CHECK(os.str() == "original");
+    };
+    SECTION("engine name")
+    {
+        res.algorithm_name = invalid;
+        check_rejected();
+    }
+    SECTION("parameter value")
+    {
+        res.additional_simulation_parameters.emplace("parameter", invalid);
+        check_rejected();
+    }
+    SECTION("parameter name")
+    {
+        res.additional_simulation_parameters.emplace("parameter" + invalid, "value");
+        check_rejected();
+    }
+}
+
+TEST_CASE("SQD simulation metadata rejects null strings before output", "[sqd-sim-result]")
+{
+    result res{};
+    res.additional_simulation_parameters.emplace("parameter", static_cast<const char*>(nullptr));
+    std::stringstream os{};
+    os << "original";
+    CHECK_THROWS_AS(write_sqd_sim_result(res, os), std::invalid_argument);
+    CHECK(os.str() == "original");
+}
+
+TEST_CASE("SQD simulation metadata rejects illegal XML controls before output", "[sqd-sim-result]")
+{
+    const auto control = GENERATE('\0', '\x01', '\x1f');
+    CAPTURE(static_cast<unsigned int>(control));
+    result            res{};
+    const std::string text(1, control);
+    /** @brief Check rejection without modifying the destination stream. */
+    const auto check_rejected = [&res]
+    {
+        std::stringstream os{};
+        os << "original";
+        CHECK_THROWS_AS(write_sqd_sim_result(res, os), std::invalid_argument);
+        CHECK(os.str() == "original");
+    };
+    SECTION("engine name")
+    {
+        res.algorithm_name = text;
+        check_rejected();
+    }
+    SECTION("string parameter")
+    {
+        res.additional_simulation_parameters.emplace("parameter", text);
+        check_rejected();
+    }
+    SECTION("character parameter")
+    {
+        res.additional_simulation_parameters.emplace("parameter", control);
+        check_rejected();
+    }
+    SECTION("parameter name")
+    {
+        res.additional_simulation_parameters.emplace("parameter" + text, "value");
+        check_rejected();
+    }
 }

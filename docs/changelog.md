@@ -964,6 +964,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - I/O:
 
   - Colored DOT drawers now use the node-color interface and shared edge palette.
+  - SiDB simulation writers now reject mismatched distribution sites before writing. SiQAD results escape metadata and reject invalid UTF-8, XML characters, parameter names, and null C strings without replacing existing files.
   - Surface-defect import avoids exponential backtracking on malformed digit runs.
   - SQD import now rejects NUL bytes, multiple XML roots, and text outside the root. SiDB filename readers preserve bytes after Ctrl-Z on Windows.
   - BLIF network readers now accept empty and whitespace-only lines without aborting.
