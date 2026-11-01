@@ -14,7 +14,9 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include <fiction/technology/mol_qca/layout.hpp>
 
@@ -23,16 +25,22 @@ using namespace fiction::mol_qca;
 
 TEST_CASE("molQCA cell types carry their clock phase", "[mol-qca-layout]")
 {
-    CHECK(clock_number(cell_type::NORMAL1) == 0);
-    CHECK(clock_number(cell_type::NORMAL2) == 1);
-    CHECK(clock_number(cell_type::NORMAL3) == 2);
-    CHECK(clock_number(cell_type::NORMAL4) == 3);
-    CHECK(clock_number(cell_type::INPUT) == 0);
+    const auto [type, phase, normal, constant] = GENERATE(Catch::Generators::table<cell_type, unsigned, bool, bool>({
+        {cell_type::EMPTY, 0, false, false},
+        {cell_type::NORMAL1, 0, true, false},
+        {cell_type::NORMAL2, 1, true, false},
+        {cell_type::NORMAL3, 2, true, false},
+        {cell_type::NORMAL4, 3, true, false},
+        {cell_type::INPUT, 0, false, false},
+        {cell_type::OUTPUT, 0, false, false},
+        {cell_type::CONST_0, 0, false, true},
+        {cell_type::CONST_1, 0, false, true},
+    }));
+    CAPTURE(static_cast<char>(type));
 
-    CHECK(is_normal(cell_type::NORMAL3));
-    CHECK(!is_normal(cell_type::OUTPUT));
-    CHECK(is_constant(cell_type::CONST_1));
-    CHECK(!is_constant(cell_type::NORMAL1));
+    CHECK(clock_number(type) == phase);
+    CHECK(is_normal(type) == normal);
+    CHECK(is_constant(type) == constant);
 }
 
 TEST_CASE("molQCA layouts are planar", "[mol-qca-layout]")
