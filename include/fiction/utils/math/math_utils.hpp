@@ -69,8 +69,10 @@ template <std::integral T>
     {
         return n;
     }
-
-    return static_cast<T>(std::abs(static_cast<int64_t>(n)));  // needed to solve ambiguity of std::abs
+    else
+    {
+        return static_cast<T>(std::abs(static_cast<int64_t>(n)));  // needed to solve ambiguity of std::abs
+    }
 }
 /**
  * Calculates the binomial coefficient \f$\binom{n}{k}\f$.
