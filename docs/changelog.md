@@ -258,6 +258,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     gate-orientation cases.
   - SiDB generator tests share timeout and backend rows and check complete layouts, defects, and timeout statistics.
   - Name lookup and on-the-fly circuit design avoid MSVC warnings about unreachable code and integer conversions.
+  - Gate-library connector construction avoids implicit integer conversions.
   - Modernized QCA tests with shared format expectations and SVG detail multiplicity checks.
   - Modernized layout-transformation tests with named cases, defect-aware interface checks, and complete routing checks.
   - FCN tests share port-list and constant-cell cases and check writer failure recovery.
