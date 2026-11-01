@@ -15,7 +15,9 @@
  * @author Jan Drewniok (Drewniok)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include <fiction/technology/sidb/model/defect.hpp>
 
@@ -25,71 +27,47 @@
 using namespace fiction;
 using namespace fiction::sidb::model;
 
-TEST_CASE("Charged and uncharged defect types", "[sidb-defects]")
+TEST_CASE("Defect types determine charge classification and default extent", "[sidb-defects]")
 {
-    CHECK(!is_charged_defect_type(defect{defect_type::NONE}));
-    CHECK(is_charged_defect_type(defect{defect_type::DB}));
-    CHECK(is_charged_defect_type(defect{defect_type::SI_VACANCY}));
-    CHECK(is_charged_defect_type(defect{defect_type::ARSENIC}));
-    CHECK(!is_charged_defect_type(defect{defect_type::SINGLE_DIHYDRIDE}));
-    CHECK(!is_charged_defect_type(defect{defect_type::DIHYDRIDE_PAIR}));
-    CHECK(!is_charged_defect_type(defect{defect_type::ONE_BY_ONE}));
-    CHECK(!is_charged_defect_type(defect{defect_type::THREE_BY_ONE}));
-    CHECK(!is_charged_defect_type(defect{defect_type::SILOXANE}));
-    CHECK(!is_charged_defect_type(defect{defect_type::RAISED_SI}));
-    CHECK(!is_charged_defect_type(defect{defect_type::MISSING_DIMER}));
-    CHECK(!is_charged_defect_type(defect{defect_type::ETCH_PIT}));
-    CHECK(!is_charged_defect_type(defect{defect_type::STEP_EDGE}));
-    CHECK(!is_charged_defect_type(defect{defect_type::GUNK}));
-    CHECK(!is_charged_defect_type(defect{defect_type::UNKNOWN}));
-
-    CHECK(!is_neutral_defect_type(defect{defect_type::NONE}));
-    CHECK(!is_neutral_defect_type(defect{defect_type::DB}));
-    CHECK(!is_neutral_defect_type(defect{defect_type::SI_VACANCY}));
-    CHECK(is_neutral_defect_type(defect{defect_type::SINGLE_DIHYDRIDE}));
-    CHECK(is_neutral_defect_type(defect{defect_type::DIHYDRIDE_PAIR}));
-    CHECK(is_neutral_defect_type(defect{defect_type::ONE_BY_ONE}));
-    CHECK(is_neutral_defect_type(defect{defect_type::THREE_BY_ONE}));
-    CHECK(is_neutral_defect_type(defect{defect_type::SILOXANE}));
-    CHECK(is_neutral_defect_type(defect{defect_type::RAISED_SI}));
-    CHECK(is_neutral_defect_type(defect{defect_type::MISSING_DIMER}));
-    CHECK(is_neutral_defect_type(defect{defect_type::ETCH_PIT}));
-    CHECK(is_neutral_defect_type(defect{defect_type::STEP_EDGE}));
-    CHECK(is_neutral_defect_type(defect{defect_type::GUNK}));
-    CHECK(is_neutral_defect_type(defect{defect_type::UNKNOWN}));
+    /** @brief No extent for an uncharged NONE defect. */
+    constexpr std::pair<uint16_t, uint16_t> none{0, 0};
+    /** @brief Default extent for neutral defect types. */
+    constexpr std::pair<uint16_t, uint16_t> neutral{NEUTRAL_DEFECT_HORIZONTAL_SPACING, NEUTRAL_DEFECT_VERTICAL_SPACING};
+    /** @brief Default extent for charged defect types. */
+    constexpr std::pair<uint16_t, uint16_t> charged{CHARGED_DEFECT_HORIZONTAL_SPACING, CHARGED_DEFECT_VERTICAL_SPACING};
+    /** @brief Each defect type has independent classification and extent expectations. */
+    const auto [type, is_charged, is_neutral, extent] =
+        GENERATE_COPY(table<defect_type, bool, bool, std::pair<uint16_t, uint16_t>>(
+            {{defect_type::NONE, false, false, none},
+             {defect_type::DB, true, false, charged},
+             {defect_type::SI_VACANCY, true, false, charged},
+             {defect_type::ARSENIC, true, false, charged},
+             {defect_type::SINGLE_DIHYDRIDE, false, true, neutral},
+             {defect_type::DIHYDRIDE_PAIR, false, true, neutral},
+             {defect_type::ONE_BY_ONE, false, true, neutral},
+             {defect_type::THREE_BY_ONE, false, true, neutral},
+             {defect_type::SILOXANE, false, true, neutral},
+             {defect_type::RAISED_SI, false, true, neutral},
+             {defect_type::MISSING_DIMER, false, true, neutral},
+             {defect_type::ETCH_PIT, false, true, neutral},
+             {defect_type::STEP_EDGE, false, true, neutral},
+             {defect_type::GUNK, false, true, neutral},
+             {defect_type::UNKNOWN, false, true, neutral}}));
+    CAPTURE(static_cast<unsigned>(type));
+    CHECK(is_charged_defect_type(defect{type}) == is_charged);
+    CHECK(is_neutral_defect_type(defect{type}) == is_neutral);
+    CHECK(defect_extent(defect{type}) == extent);
 }
 
-TEST_CASE("Defect extent", "[sidb-defects]")
+TEST_CASE("Explicit defect charges determine overridden extent", "[sidb-defects]")
 {
-    static constexpr std::pair<uint16_t, uint16_t> no_spacing{0, 0};
-    static constexpr std::pair<uint16_t, uint16_t> neutral_spacing{NEUTRAL_DEFECT_HORIZONTAL_SPACING,
-                                                                   NEUTRAL_DEFECT_VERTICAL_SPACING};
-    static constexpr std::pair<uint16_t, uint16_t> charged_spacing{CHARGED_DEFECT_HORIZONTAL_SPACING,
-                                                                   CHARGED_DEFECT_VERTICAL_SPACING};
+    /** @brief Override for neutral defects. */
+    constexpr std::pair<uint16_t, uint16_t> neutral{1, 0};
+    /** @brief Override for charged defects. */
+    constexpr std::pair<uint16_t, uint16_t> charged{1, 1};
 
-    static constexpr std::pair<uint16_t, uint16_t> neutral_spacing_overwrite{1, 0};
-    static constexpr std::pair<uint16_t, uint16_t> charged_spacing_overwrite{1, 1};
-
-    CHECK(defect_extent(defect{defect_type::NONE}) == no_spacing);
-    CHECK(defect_extent(defect{defect_type::DB}) == charged_spacing);
-    CHECK(defect_extent(defect{defect_type::SI_VACANCY}) == charged_spacing);
-    CHECK(defect_extent(defect{defect_type::ARSENIC}) == charged_spacing);
-    CHECK(defect_extent(defect{defect_type::SINGLE_DIHYDRIDE}) == neutral_spacing);
-    CHECK(defect_extent(defect{defect_type::DIHYDRIDE_PAIR}) == neutral_spacing);
-    CHECK(defect_extent(defect{defect_type::ONE_BY_ONE}) == neutral_spacing);
-    CHECK(defect_extent(defect{defect_type::THREE_BY_ONE}) == neutral_spacing);
-    CHECK(defect_extent(defect{defect_type::SILOXANE}) == neutral_spacing);
-    CHECK(defect_extent(defect{defect_type::RAISED_SI}) == neutral_spacing);
-    CHECK(defect_extent(defect{defect_type::MISSING_DIMER}) == neutral_spacing);
-    CHECK(defect_extent(defect{defect_type::ETCH_PIT}) == neutral_spacing);
-    CHECK(defect_extent(defect{defect_type::STEP_EDGE}) == neutral_spacing);
-    CHECK(defect_extent(defect{defect_type::GUNK}) == neutral_spacing);
-    CHECK(defect_extent(defect{defect_type::UNKNOWN}) == neutral_spacing);
-
-    CHECK(defect_extent(defect{defect_type::UNKNOWN, 0}, charged_spacing_overwrite, neutral_spacing_overwrite) ==
-          neutral_spacing_overwrite);
-    CHECK(defect_extent(defect{defect_type::UNKNOWN, -1}, charged_spacing_overwrite, neutral_spacing_overwrite) ==
-          charged_spacing_overwrite);
+    CHECK(defect_extent(defect{defect_type::UNKNOWN, 0}, charged, neutral) == neutral);
+    CHECK(defect_extent(defect{defect_type::UNKNOWN, -1}, charged, neutral) == charged);
 }
 
 TEST_CASE("Test for units", "[sidb-defects]")
