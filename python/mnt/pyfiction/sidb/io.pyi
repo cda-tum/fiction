@@ -27,6 +27,8 @@ def write_sqd_layout(
         on_progress: Receives completed dot and defect records.
 
     Raises:
+        ValueError: If a lattice vector or basis component is non-finite;
+                    the destination remains unchanged.
         RuntimeError: If creating, writing, closing, or replacing the
                       output file fails.
     """
