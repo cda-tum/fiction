@@ -33,8 +33,7 @@ TEST_CASE("Test find_first_two_of with vector input", "[find_first_two_of]")
     static const std::vector<int> v2{1, 2, 3, 3};
 
     auto it = find_first_two_of(v1.begin(), v1.end(), v2.begin(), v2.end());
-    CHECK(*it == 1);
-    CHECK(*(it + 1) == 2);
+    CHECK(it == std::next(v1.begin(), 2));
 
     static const std::vector<int> v3{1, 2, 4, 3};
     it = find_first_two_of(v1.begin(), v1.end(), v3.begin(), v3.end());
@@ -49,8 +48,7 @@ TEST_CASE("Test find_first_two_of with array input", "[find_first_two_of]")
     /** @brief First matching adjacent pair in the array. */
     // NOLINTNEXTLINE(readability-qualified-auto): MSVC Debug uses checked array iterators instead of pointers.
     auto it = find_first_two_of(std::begin(a1), std::end(a1), std::begin(a2), std::end(a2));
-    CHECK(*it == 1);
-    CHECK(*(std::next(it, 1)) == 2);
+    CHECK(it == std::next(std::begin(a1), 2));
 
     static constexpr const std::array a3{1, 2, 4, 3};
     it = find_first_two_of(std::begin(a1), std::end(a1), std::begin(a3), std::end(a3));
@@ -63,8 +61,7 @@ TEST_CASE("Test find_first_two_of with different iterator types", "[find_first_t
     static constexpr const std::array a2{1, 2, 3, 3};
 
     auto it = find_first_two_of(v1.begin(), v1.end(), std::begin(a2), std::end(a2));
-    CHECK(*it == 1);
-    CHECK(*(it + 1) == 2);
+    CHECK(it == std::next(v1.begin(), 2));
 
     static constexpr const std::array a3{1, 2, 4, 3};
     it = find_first_two_of(v1.begin(), v1.end(), std::begin(a3), std::end(a3));
