@@ -166,6 +166,26 @@ TEST_CASE("SQD export preserves output when charged-defect parameters are invali
     }
 }
 
+/** @brief Neutral-defect material parameters are omitted from SQD records. */
+TEST_CASE("SQD export ignores unused neutral-defect material parameters", "[sqd]")
+{
+    /** @brief Valid constructed neutral defect with publicly mutable unused metadata. */
+    defect neutral{defect_type::UNKNOWN};
+    neutral.epsilon_r = std::numeric_limits<double>::quiet_NaN();
+    neutral.lambda_tf = -1.0;
+    /** @brief Layout containing the neutral defect to serialize. */
+    sidb::layout lyt{};
+    lyt.assign_defect({1, 2, 0}, neutral);
+    /** @brief Complete SQD output whose reader must not encounter unused invalid numbers. */
+    std::stringstream stream{};
+    REQUIRE_NOTHROW(write_sqd_layout(lyt, stream));
+
+    /** @brief Expected neutral defect retains its type and site with default material parameters. */
+    sidb::layout expected{};
+    expected.assign_defect({1, 2, 0}, defect{defect_type::UNKNOWN});
+    CHECK(read_sqd_layout(stream) == expected);
+}
+
 TEST_CASE("Write empty SQD layout", "[sqd]")
 {
     const sidb::layout lyt{sidb::lattice::si_100_2x1(), "empty"};
