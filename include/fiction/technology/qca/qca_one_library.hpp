@@ -172,37 +172,37 @@ class qca_one_library : public fcn::gate_library<qca::layout, 5, 5>
         // determine incoming connector ports
         if (lyt.has_northern_incoming_signal(t))
         {
-            p.inp.emplace(fcn::port_position{2u, 0u});
+            p.inp.insert(fcn::port_position{2u, 0u});
         }
         if (lyt.has_eastern_incoming_signal(t))
         {
-            p.inp.emplace(fcn::port_position{4u, 2u});
+            p.inp.insert(fcn::port_position{4u, 2u});
         }
         if (lyt.has_southern_incoming_signal(t))
         {
-            p.inp.emplace(fcn::port_position{2u, 4u});
+            p.inp.insert(fcn::port_position{2u, 4u});
         }
         if (lyt.has_western_incoming_signal(t))
         {
-            p.inp.emplace(fcn::port_position{0u, 2u});
+            p.inp.insert(fcn::port_position{0u, 2u});
         }
 
         // determine outgoing connector ports
         if (lyt.has_northern_outgoing_signal(t))
         {
-            p.out.emplace(fcn::port_position{2u, 0u});
+            p.out.insert(fcn::port_position{2u, 0u});
         }
         if (lyt.has_eastern_outgoing_signal(t))
         {
-            p.out.emplace(fcn::port_position{4u, 2u});
+            p.out.insert(fcn::port_position{4u, 2u});
         }
         if (lyt.has_southern_outgoing_signal(t))
         {
-            p.out.emplace(fcn::port_position{2u, 4u});
+            p.out.insert(fcn::port_position{2u, 4u});
         }
         if (lyt.has_western_outgoing_signal(t))
         {
-            p.out.emplace(fcn::port_position{0u, 2u});
+            p.out.insert(fcn::port_position{0u, 2u});
         }
 
         // has no connector ports
@@ -210,12 +210,12 @@ class qca_one_library : public fcn::gate_library<qca::layout, 5, 5>
         {
             if (lyt.has_no_incoming_signal(t))
             {
-                p.inp.emplace(fcn::port_position{0u, 2u});
+                p.inp.insert(fcn::port_position{0u, 2u});
             }
 
             if (lyt.has_no_outgoing_signal(t))
             {
-                p.out.emplace(fcn::port_position{4u, 2u});
+                p.out.insert(fcn::port_position{4u, 2u});
             }
         }
 

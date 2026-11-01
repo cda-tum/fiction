@@ -223,3 +223,24 @@ TEST_CASE("ToPoliNano preserves wire segments without a neighboring row", "[inml
     CHECK(lyt.get_cell_type({1, 0}) == magnet_type::NORMAL);
     CHECK(lyt.get_cell_type({2, 0}) == magnet_type::OUTPUT);
 }
+
+/** @brief A disconnected wire maps to its complete default physical tile. */
+TEST_CASE("ToPoliNano maps a disconnected wire", "[inml-topolinano-library]")
+{
+    /** @brief Column-shifted layout containing one disconnected wire. */
+    shifted_cartesian_gate_layout lyt{arrangement::ODD_COLUMN, {4, 4}};
+    lyt.create_buf({2, 2});
+
+    // clang-format off
+
+    /** @brief Complete wire between the default upper-left and lower-right connectors. */
+    static constexpr const topolinano_library::gate expected{
+        topolinano_library::cell_list_to_gate<char>({{{'x', ' ', ' ', ' '},
+                                                    {'x', 'x', 'x', ' '},
+                                                    {' ', ' ', 'x', 'x'},
+                                                    {' ', ' ', ' ', ' '}}})};
+
+    // clang-format on
+
+    CHECK(topolinano_library::set_up_gate(lyt, {2, 2}) == expected);
+}
