@@ -554,15 +554,7 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
             // determine outgoing connector ports
             if (lyt.has_north_eastern_outgoing_signal(t))
             {
-                // special case: output port of AND, OR, MAJ is fixed at pos (3,1)
-                if (lyt.is_and(n) || lyt.is_or(n) || lyt.is_maj(n))
-                {
-                    p.out.insert({3u, 1u});
-                }
-                else
-                {
-                    p.out.insert({3u, 0u});
-                }
+                p.out.insert({3u, 0u});
             }
             if (lyt.has_south_eastern_outgoing_signal(t))
             {
