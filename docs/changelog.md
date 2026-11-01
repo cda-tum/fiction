@@ -253,6 +253,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Template dispatch and compiler-specific diagnostics avoid MSVC warnings.
   - Technology tests, gate libraries, and exporters avoid MSVC diagnostics.
   - SiDB layout I/O tests compare complete defect visits and simplify SVG checks.
   - Gate-layout visitors avoid unreachable returns, and gate-library mapping guards GNU diagnostics.

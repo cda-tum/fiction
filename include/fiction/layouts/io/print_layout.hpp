@@ -85,167 +85,167 @@ void print_gate_level_layout(std::ostream& os, const fiction::layouts::gate_layo
         os << "[e] shifted cartesian layout printing is not supported\n";
         return;
     }
-
-    const auto num_cols = static_cast<std::size_t>(layout.width());
-    const auto num_rows = static_cast<std::size_t>(layout.height());
-
-    // cache operations and directions in a 2d-matrix-like object
-    using s_matrix = std::vector<std::vector<std::string>>;
-    s_matrix reprs(num_rows, std::vector<std::string>(num_cols));
-    s_matrix x_dirs(num_rows, std::vector<std::string>(num_cols + 1u, " "));
-    s_matrix y_dirs(num_rows + 1u, std::vector<std::string>(num_cols, " "));
-
-    const auto gate_repr = [&layout](const auto& t)
+    else
     {
-        /** @brief Occupant at the tile position. */
-        const auto occupant = layout.find_object(t);
-        if (!occupant)
-        {
-            return "▢";
-        }
+        const auto num_cols = static_cast<std::size_t>(layout.width());
+        const auto num_rows = static_cast<std::size_t>(layout.height());
 
-        // NOLINTBEGIN(*-else-after-return)
+        // cache operations and directions in a 2d-matrix-like object
+        using s_matrix = std::vector<std::vector<std::string>>;
+        s_matrix reprs(num_rows, std::vector<std::string>(num_cols));
+        s_matrix x_dirs(num_rows, std::vector<std::string>(num_cols + 1u, " "));
+        s_matrix y_dirs(num_rows + 1u, std::vector<std::string>(num_cols, " "));
 
-        if (const auto n = *occupant; layout.is_and(n))
+        const auto gate_repr = [&layout](const auto& t)
         {
-            return "&";
-        }
-        else if (layout.is_or(n))
-        {
-            return "|";
-        }
-        else if (layout.is_inv(n))
-        {
-            return "¬";
-        }
-        else if (layout.is_maj(n))
-        {
-            return "M";
-        }
-        else if (layout.is_xor(n))
-        {
-            return "X";
-        }
-        else if (layout.is_pi(n))
-        {
-            return "I";
-        }
-        else if (layout.is_po(n))
-        {
-            return "O";
-        }
-        else if (layout.is_fanout(n))
-        {
-            return "F";
-        }
-        else if (layout.is_wire(n))
-        {
-            // second-layer wire indicates a crossing
-            if (const auto at = layout.above(t); at && layout.is_wire_tile(*at))
+            /** @brief Occupant at the tile position. */
+            const auto occupant = layout.find_object(t);
+            if (!occupant)
             {
-                return "+";
+                return "▢";
             }
-            return "=";
-        }
 
-        // NOLINTEND(*-else-after-return)
-
-        return "?";
-    };
-
-    for (auto i = std::size_t{0}; i < num_rows; ++i)
-    {
-        for (auto j = std::size_t{0}; j < num_cols; ++j)
-        {
-            auto t1     = fiction::layouts::layout_base::coordinate{j, i};
-            auto t2     = layout.above(t1);
-            reprs[i][j] = gate_repr(t1);
-
-            const auto east_west_connections = [&layout, &x_dirs, &t1, &t2, i, j](const auto& ft)
+            /** @brief Object occupying the tile. */
+            const auto n = *occupant;
+            if (layout.is_and(n))
             {
-                if (layout.is_east_of(t1, ft) || (t2 && layout.is_east_of(*t2, ft)))
-                {
-                    x_dirs[i][j] = "→";
-                }
-                if (j > 0 && (layout.is_west_of(t1, ft) || (t2 && layout.is_west_of(*t2, ft))))
-                {
-                    x_dirs[i][j - 1] = "←";
-                }
-            };
-
-            const auto north_south_connections = [&layout, &y_dirs, &t1, &t2, i, j](const auto& ft)
-            {
-                if (layout.is_north_of(t1, ft) || (t2 && layout.is_north_of(*t2, ft)))
-                {
-                    y_dirs[i][j] = "↑";
-                }
-                if (layout.is_south_of(t1, ft) || (t2 && layout.is_south_of(*t2, ft)))
-                {
-                    y_dirs[i + 1u][j] = "↓";
-                }
-            };
-
-            for (const auto& target : layout.outgoing_data_flow(t1))
-            {
-                east_west_connections(target);
-                north_south_connections(target);
+                return "&";
             }
-            if (t2)
+            if (layout.is_or(n))
             {
-                for (const auto& target : layout.outgoing_data_flow(*t2))
+                return "|";
+            }
+            if (layout.is_inv(n))
+            {
+                return "¬";
+            }
+            if (layout.is_maj(n))
+            {
+                return "M";
+            }
+            if (layout.is_xor(n))
+            {
+                return "X";
+            }
+            if (layout.is_pi(n))
+            {
+                return "I";
+            }
+            if (layout.is_po(n))
+            {
+                return "O";
+            }
+            if (layout.is_fanout(n))
+            {
+                return "F";
+            }
+            if (layout.is_wire(n))
+            {
+                // second-layer wire indicates a crossing
+                if (const auto at = layout.above(t); at && layout.is_wire_tile(*at))
+                {
+                    return "+";
+                }
+                return "=";
+            }
+
+            return "?";
+        };
+
+        for (auto i = std::size_t{0}; i < num_rows; ++i)
+        {
+            for (auto j = std::size_t{0}; j < num_cols; ++j)
+            {
+                auto t1     = fiction::layouts::layout_base::coordinate{j, i};
+                auto t2     = layout.above(t1);
+                reprs[i][j] = gate_repr(t1);
+
+                const auto east_west_connections = [&layout, &x_dirs, &t1, &t2, i, j](const auto& ft)
+                {
+                    if (layout.is_east_of(t1, ft) || (t2 && layout.is_east_of(*t2, ft)))
+                    {
+                        x_dirs[i][j] = "→";
+                    }
+                    if (j > 0 && (layout.is_west_of(t1, ft) || (t2 && layout.is_west_of(*t2, ft))))
+                    {
+                        x_dirs[i][j - 1] = "←";
+                    }
+                };
+
+                const auto north_south_connections = [&layout, &y_dirs, &t1, &t2, i, j](const auto& ft)
+                {
+                    if (layout.is_north_of(t1, ft) || (t2 && layout.is_north_of(*t2, ft)))
+                    {
+                        y_dirs[i][j] = "↑";
+                    }
+                    if (layout.is_south_of(t1, ft) || (t2 && layout.is_south_of(*t2, ft)))
+                    {
+                        y_dirs[i + 1u][j] = "↓";
+                    }
+                };
+
+                for (const auto& target : layout.outgoing_data_flow(t1))
                 {
                     east_west_connections(target);
                     north_south_connections(target);
                 }
+                if (t2)
+                {
+                    for (const auto& target : layout.outgoing_data_flow(*t2))
+                    {
+                        east_west_connections(target);
+                        north_south_connections(target);
+                    }
+                }
             }
         }
-    }
 
-    // actual printing
-    for (const auto r_ctr : std::views::iota(std::size_t{0}, reprs.size()))
-    {
-        const auto& row{reprs[r_ctr]};
-
-        for (const auto& d : y_dirs[r_ctr])
+        // actual printing
+        for (const auto r_ctr : std::views::iota(std::size_t{0}, reprs.size()))
         {
-            os << d << " ";
+            const auto& row{reprs[r_ctr]};
+
+            for (const auto& d : y_dirs[r_ctr])
+            {
+                os << d << " ";
+            }
+            os << '\n';
+
+            for (const auto c_ctr : std::views::iota(std::size_t{0}, row.size()))
+            {
+                const auto& gate{row[c_ctr]};
+
+                const auto t = fiction::layouts::layout_base::coordinate{c_ctr, r_ctr};
+
+                fmt::text_style color{};
+
+                if (clk_color)
+                {
+                    color = color | detail::CLOCK_COLOR[layout.get_clock_number(t)];
+                }
+                if (io_color && layout.is_synchronization_element(t))
+                {
+                    color = color | detail::SE_COLOR;
+                }
+                if (io_color && layout.is_pi_tile(t))
+                {
+                    color = color | detail::INP_COLOR;
+                }
+                else if (io_color && layout.is_po_tile(t))
+                {
+                    color = color | detail::OUT_COLOR;
+                }
+
+                os << fmt::format(color, fmt::runtime(gate));
+
+                os << x_dirs[r_ctr][c_ctr];
+            }
+            os << '\n';
         }
-        os << '\n';
 
-        for (const auto c_ctr : std::views::iota(std::size_t{0}, row.size()))
-        {
-            const auto& gate{row[c_ctr]};
-
-            const auto t = fiction::layouts::layout_base::coordinate{c_ctr, r_ctr};
-
-            fmt::text_style color{};
-
-            if (clk_color)
-            {
-                color = color | detail::CLOCK_COLOR[layout.get_clock_number(t)];
-            }
-            if (io_color && layout.is_synchronization_element(t))
-            {
-                color = color | detail::SE_COLOR;
-            }
-            if (io_color && layout.is_pi_tile(t))
-            {
-                color = color | detail::INP_COLOR;
-            }
-            else if (io_color && layout.is_po_tile(t))
-            {
-                color = color | detail::OUT_COLOR;
-            }
-
-            os << fmt::format(color, fmt::runtime(gate));
-
-            os << x_dirs[r_ctr][c_ctr];
-        }
-        os << '\n';
+        // terminate with a newline
+        os << "\n";
     }
-
-    // terminate with a newline
-    os << "\n";
 }
 /**
  * Writes a simplified 2D representation of a cell grid layout, i.e., a QCA, molQCA, or iNML layout, to an output

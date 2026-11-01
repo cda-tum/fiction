@@ -25,9 +25,12 @@
 #include "fiction/technology/qca/layout.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/io/print_layout.hpp>
+#include <fiction/layouts/shifted_cartesian_layout.hpp>
 
 #include <fmt/format.h>
 
@@ -66,6 +69,33 @@ TEST_CASE("Print terminal-only gate-level layout", "[print-gate-level-layout]")
     std::stringstream print_stream{};
     print_gate_level_layout(print_stream, layout, false, false);
     CHECK(print_stream.str().find("I O") != std::string::npos);
+}
+
+TEST_CASE("Print unsupported nonempty gate-level layouts", "[print-gate-level-layout]")
+{
+    /** @brief Captures the unsupported-topology diagnostic. */
+    std::stringstream print_stream{};
+
+    SECTION("Hexagonal layout")
+    {
+        /** @brief Nonempty hexagonal layout. */
+        hexagonal_gate_layout layout{arrangement::EVEN_ROW, {1, 1}};
+        layout.create_pi("a", {0, 0});
+
+        print_gate_level_layout(print_stream, layout, false, false);
+
+        CHECK(print_stream.str() == "[e] hexagonal layout printing is not supported\n");
+    }
+    SECTION("Shifted Cartesian layout")
+    {
+        /** @brief Nonempty shifted Cartesian layout. */
+        shifted_cartesian_gate_layout layout{arrangement::EVEN_ROW, {1, 1}};
+        layout.create_pi("a", {0, 0});
+
+        print_gate_level_layout(print_stream, layout, false, false);
+
+        CHECK(print_stream.str() == "[e] shifted cartesian layout printing is not supported\n");
+    }
 }
 
 TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")

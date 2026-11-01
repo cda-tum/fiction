@@ -137,7 +137,10 @@ class simple_gate_layout_tile_drawer
         {
             return fmt::format("{}:{}: {}", id.index, id.generation, label);
         }
-        return std::string{label};
+        else
+        {
+            return std::string{label};
+        }
     }
 
     /** @brief Return the tile color. */
