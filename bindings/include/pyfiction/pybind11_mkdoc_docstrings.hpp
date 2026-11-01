@@ -23438,8 +23438,8 @@ uniquely paired in increasing distance. The closest unpaired dots
 within `[params.minimum_distance, params.maximum_distance]` (defaults
 of 0.75 nm and 1.5 nm) form a pair. The lower bound keeps, e.g., the
 SiDBs of an atomic wire from being paired; the upper bound prevents
-unlikely pairings and bounds the work. Distances follow the layout's
-lattice. The pairs are returned sorted.
+unlikely pairings. Distances follow the layout's lattice. Pairs are
+sorted within each dot-tag group.
 
 Args:
     lyt: The layout to detect BDL pairs in.
@@ -23459,8 +23459,7 @@ static const char *mkd_doc_fiction_sidb_simulation_logic_detect_bdl_pairs_params
 static const char *mkd_doc_fiction_sidb_simulation_logic_detect_bdl_pairs_params_maximum_distance =
 R"doc(The maximum distance between two dots to be considered a BDL pair.
 This is useful to prevent unlikely pairings of SiDBs that are far
-apart and to improve performance of the matching algorithm. (unit:
-nm).)doc";
+apart. (unit: nm).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detect_bdl_pairs_params_minimum_distance =
 R"doc(The minimum distance between two SiDBs to be considered a BDL pair.
