@@ -305,8 +305,8 @@ class write_fgl_layout_impl
  * Version 2 stores width, height, and layer counts, explicit PI/PO order, and indexed source references.
  * The file includes every placed object, including complete dangling cones. Clock overrides and synchronization
  * elements and manual coordinate and directed-connection obstructions remain sparse. The format supports the standard
- * named clocking schemes and their overrides. Names preserve XML whitespace and exclude illegal XML 1.0 controls.
- * Validation finishes before the output stream changes.
+ * named clocking schemes and their overrides. Names preserve XML whitespace and use valid UTF-8 with XML 1.0
+ * characters. Validation finishes before the output stream changes.
  *
  * This overload uses an output stream to write into.
  *
@@ -315,7 +315,7 @@ class write_fgl_layout_impl
  * @param on_progress Receives completed serialization work.
  * @param os The output stream to write into.
  * @throws std::invalid_argument If the layout is incomplete, cyclic, physically invalid, uses an unsupported scheme, or
- * contains illegal XML text controls.
+ * contains invalid UTF-8 or illegal XML characters in a name.
  */
 template <typename Geometry>
 void write_fgl_layout(const fiction::layouts::gate_layout<Geometry>& lyt, std::ostream& os,
@@ -335,7 +335,7 @@ void write_fgl_layout(const fiction::layouts::gate_layout<Geometry>& lyt, std::o
  * @param on_progress Receives completed serialization work.
  * @param filename The file name to create and write into. Should preferably use the .fgl extension.
  * @throws std::invalid_argument If the layout is incomplete, cyclic, physically invalid, uses an unsupported scheme, or
- * contains illegal XML text controls.
+ * contains invalid UTF-8 or illegal XML characters in a name.
  * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
  */
 template <typename Geometry>

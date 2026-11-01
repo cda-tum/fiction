@@ -728,7 +728,8 @@ class read_fgl_layout_impl
 
 /**
  * Reads legacy maximum-index extents or version-2 extent counts, declared interface order, and manual obstructions.
- * Version 2 requires a complete, acyclic, physically valid layout. Validation finishes before assigning a target.
+ * Version 2 requires a complete, acyclic, physically valid layout whose names contain valid UTF-8 XML 1.0 text.
+ * Validation finishes before assigning a target.
  * The target layout changes only after a successful read.
  *
  * May throw an `fgl_parsing_error` if the FGL file is malformed.
@@ -746,7 +747,8 @@ template <typename Geometry>
 }
 /**
  * Reads legacy maximum-index extents or version-2 extent counts, declared interface order, and manual obstructions.
- * Version 2 requires a complete, acyclic, physically valid layout. Validation finishes before assigning a target.
+ * Version 2 requires a complete, acyclic, physically valid layout whose names contain valid UTF-8 XML 1.0 text.
+ * Validation finishes before assigning a target.
  * The target layout changes only after a successful read.
  *
  * May throw an `fgl_parsing_error` if the FGL file is malformed.

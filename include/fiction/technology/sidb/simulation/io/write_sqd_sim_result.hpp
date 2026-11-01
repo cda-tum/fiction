@@ -21,6 +21,7 @@
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/utils/atomic_write.hpp"
+#include "fiction/utils/io/xml_character.hpp"
 #include "fiction/utils/stl/stl_utils.hpp"
 #include "fiction/utils/version_info.hpp"
 
@@ -30,7 +31,6 @@
 
 #include <algorithm>
 #include <any>
-#include <cstddef>
 #include <cstdint>
 #include <ctime>
 #include <functional>
@@ -131,66 +131,6 @@ inline constexpr const char* DIST_ENERGY =
 }
 
 /**
- * @brief Consume one UTF-8 character permitted by XML 1.0.
- * @param remaining Nonempty UTF-8 text; advances past the consumed character.
- * @return Decoded XML character.
- * @throws std::invalid_argument If the encoding or XML character is invalid.
- * @see https://www.w3.org/TR/xml/#charsets
- * @see https://www.rfc-editor.org/rfc/rfc3629#section-4
- */
-[[nodiscard]] inline uint32_t next_xml_character(std::string_view& remaining)
-{
-    const auto leading = static_cast<unsigned char>(remaining.front());
-    remaining.remove_prefix(1);
-    uint32_t    character{leading};
-    uint32_t    minimum{};
-    std::size_t continuations{};
-    if (leading >= 0xc2 && leading <= 0xdf)
-    {
-        character     = leading & 0x1fu;
-        minimum       = 0x80;
-        continuations = 1;
-    }
-    else if (leading >= 0xe0 && leading <= 0xef)
-    {
-        character     = leading & 0x0fu;
-        minimum       = 0x800;
-        continuations = 2;
-    }
-    else if (leading >= 0xf0 && leading <= 0xf4)
-    {
-        character     = leading & 0x07u;
-        minimum       = 0x10000;
-        continuations = 3;
-    }
-    else if (leading >= 0x80)
-    {
-        throw std::invalid_argument("SiQAD metadata requires valid UTF-8");
-    }
-    if (remaining.size() < continuations)
-    {
-        throw std::invalid_argument("SiQAD metadata requires valid UTF-8");
-    }
-    for (std::size_t i = 0; i < continuations; ++i)
-    {
-        const auto continuation = static_cast<unsigned char>(remaining.front());
-        remaining.remove_prefix(1);
-        if ((continuation & 0xc0u) != 0x80u)
-        {
-            throw std::invalid_argument("SiQAD metadata requires valid UTF-8");
-        }
-        character = (character << 6u) | (continuation & 0x3fu);
-    }
-    if (character < minimum ||
-        !(character == 0x9 || character == 0xa || character == 0xd || (character >= 0x20 && character <= 0xd7ff) ||
-          (character >= 0xe000 && character <= 0xfffd) || (character >= 0x10000 && character <= 0x10ffff)))
-    {
-        throw std::invalid_argument("SiQAD metadata requires XML 1.0 characters encoded as UTF-8");
-    }
-    return character;
-}
-
-/**
  * @brief Whether a character can start an XML 1.0 name.
  * @param character Decoded Unicode character.
  * @return Whether the character matches NameStartChar.
@@ -216,13 +156,13 @@ inline constexpr const char* DIST_ENERGY =
  */
 inline void validate_xml_name(std::string_view name)
 {
-    if (name.empty() || !xml_name_start(next_xml_character(name)))
+    if (name.empty() || !xml_name_start(utils::io::detail::next_xml_character(name)))
     {
         throw std::invalid_argument("SiQAD parameter names require XML name characters");
     }
     while (!name.empty())
     {
-        const auto character = next_xml_character(name);
+        const auto character = utils::io::detail::next_xml_character(name);
         if (!xml_name_start(character) && character != '-' && character != '.' &&
             !(character >= '0' && character <= '9') && character != 0xb7 &&
             !(character >= 0x300 && character <= 0x36f) && !(character >= 0x203f && character <= 0x2040))
@@ -243,7 +183,7 @@ inline void validate_xml_name(std::string_view name)
     std::string_view remaining{value};
     while (!remaining.empty())
     {
-        static_cast<void>(next_xml_character(remaining));
+        static_cast<void>(utils::io::detail::next_xml_character(remaining));
     }
     tinyxml2::XMLPrinter printer{};
     printer.PushText(value.c_str());

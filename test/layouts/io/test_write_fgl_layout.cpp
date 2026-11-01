@@ -267,7 +267,8 @@ TEST_CASE("FGL preserves XML whitespace in layout and object names", "[write-fgl
 {
     cartesian_gate_layout layout{{3, 1, 1}, clocking::twoddwave()};
     /** @brief Short or long label containing whitespace, XML markup, and UTF-8. */
-    const auto label = GENERATE(std::string{"first\r\nsecond\t<&>"}, std::string(4096, ' ') + "\r\nsecond\t<&>ä水");
+    const auto label = GENERATE(std::string{"first\r\nsecond\t<&>"}, std::string(4096, ' ') + "\r\nsecond\t<&>ä水",
+                                std::string{"Caf\xC3\xA9 \xE6\xB0\xB4 \xF0\x9F\x98\x80"});
     CAPTURE(label.size());
     layout.set_layout_name(label);
     const auto input = layout.create_pi(label, {0, 0});
@@ -280,6 +281,7 @@ TEST_CASE("FGL preserves XML whitespace in layout and object names", "[write-fgl
     CHECK(restored.get_layout_name() == label);
     CHECK(restored.size() == 3);
     restored.foreach_object([&](const auto id) { CHECK(restored.get_name(id) == label); });
+    compare_written_and_read_layout(layout, restored);
 }
 
 TEST_CASE("FGL preserves clock numbers on crossing layers", "[write-fgl-layout]")
@@ -513,15 +515,19 @@ TEST_CASE("FGL rejects invalid finished placement and metadata", "[write-fgl-lay
     }
 }
 
-TEST_CASE("FGL rejects illegal XML controls before changing output", "[write-fgl-layout]")
+TEST_CASE("FGL rejects invalid XML text before changing output", "[write-fgl-layout]")
 {
-    const auto            control = GENERATE(char{0}, char{1}, char{8}, char{11}, char{12}, char{14}, char{31});
+    /** @brief Illegal ASCII controls, malformed UTF-8, and a forbidden Unicode XML character. */
+    const auto invalid =
+        GENERATE(std::string(1, '\0'), std::string(1, '\1'), std::string(1, '\10'), std::string(1, '\13'),
+                 std::string(1, '\14'), std::string(1, '\16'), std::string(1, '\37'),
+                 std::string(1, static_cast<char>(0x80)), std::string{"\xEF\xBF\xBE"});
     cartesian_gate_layout layout{{3, 1, 1}, clocking::twoddwave()};
     const auto            input  = layout.create_pi("a", {0, 0});
     const auto            wire   = layout.create_buf(input, {1, 0});
     const auto            output = layout.create_po(wire, "f", {2, 0});
-    const std::string     label  = std::string{"first"} + control + "second";
-    CAPTURE(static_cast<unsigned int>(control));
+    const std::string     label  = std::string{"first"} + invalid + "second";
+    CAPTURE(invalid.size(), static_cast<unsigned int>(static_cast<unsigned char>(invalid.front())));
     /** @brief Illegal names preserve both output streams and existing files. */
     const auto check_rejection = [&layout]
     {
@@ -537,10 +543,11 @@ TEST_CASE("FGL rejects illegal XML controls before changing output", "[write-fgl
             original << "sentinel";
         }
         CHECK_THROWS_AS(write_fgl_layout(layout, filename.string()), std::invalid_argument);
-        std::ifstream original{filename};
-        std::string   contents{};
-        std::getline(original, contents);
-        CHECK(contents == "sentinel");
+        std::ifstream original{filename, std::ios::binary};
+        /** @brief Complete destination bytes after a rejected write. */
+        std::stringstream contents{};
+        contents << original.rdbuf();
+        CHECK(contents.str() == "sentinel");
         original.close();
         std::filesystem::remove(filename);
     };

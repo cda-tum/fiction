@@ -62,7 +62,7 @@ void register_read_fgl_layout(nb::module_& m, const char* signature)
               R"doc(Reads a gate-level layout from an FGL file.
 
 Supports legacy maximum-index extents and version-2 extent counts, declared interface order, and manual obstructions.
-Version 2 requires a complete, acyclic, physically valid layout.
+Version 2 requires a complete, acyclic, physically valid layout whose names contain valid UTF-8 XML 1.0 text.
 
 Args:
     filename: Input file path.

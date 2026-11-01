@@ -964,6 +964,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - I/O:
 
+  - FGL export and version-2 import reject malformed UTF-8 and illegal XML characters in names.
   - Colored DOT drawers now use the node-color interface and shared edge palette.
   - SiDB simulation writers now reject mismatched distribution sites before writing. SiQAD results escape metadata and reject invalid UTF-8, XML characters, parameter names, and null C strings without replacing existing files.
   - Surface-defect import avoids exponential backtracking on malformed digit runs.
