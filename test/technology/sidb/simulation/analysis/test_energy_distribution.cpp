@@ -27,6 +27,7 @@
 #include <fiction/technology/sidb/simulation/analysis/energy_distribution.hpp>
 #include <fiction/technology/sidb/simulation/potential_landscape.hpp>
 
+#include <algorithm>
 #include <cstdint>
 #include <stdexcept>
 #include <utility>
@@ -128,5 +129,12 @@ TEST_CASE("Test calculate_energy_distribution function", "[energy-distribution]"
         CHECK(excited_state->electrostatic_potential_energy > 0.0);
         CHECK(result.size() == 2);
         CHECK_FALSE(result.get_nth_state(2).has_value());
+
+        /** @brief Complete visits preserve both energies and their degeneracies without requiring order. */
+        std::vector<std::pair<double, uint64_t>> states{};
+        result.for_each([&](const auto energy, const auto degeneracy) { states.emplace_back(energy, degeneracy); });
+        REQUIRE(states.size() == 2);
+        CHECK(std::count(states.cbegin(), states.cend(), std::pair{0.0, uint64_t{2}}) == 1);
+        CHECK(std::count(states.cbegin(), states.cend(), std::pair{third.energy(), uint64_t{1}}) == 1);
     }
 }
