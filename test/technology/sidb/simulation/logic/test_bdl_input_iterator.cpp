@@ -343,7 +343,7 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
     {
         CAPTURE(encoding, pattern);
         CHECK(bii == pattern);
-        CHECK((*bii).dots_with_tag(dot_tag::INPUT) == expected_inputs[pattern]);
+        CHECK((*bii).dots_with_tag(dot_tag::INPUT) == expected_inputs.at(pattern));
         CHECK((*bii).dots_with_tag(dot_tag::NORMAL) == lyt.dots_with_tag(dot_tag::NORMAL));
         CHECK((*bii).dots_with_tag(dot_tag::OUTPUT) == lyt.dots_with_tag(dot_tag::OUTPUT));
     }
