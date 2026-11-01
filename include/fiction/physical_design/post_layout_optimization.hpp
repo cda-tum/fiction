@@ -18,8 +18,10 @@
 
 #pragma once
 
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
+#endif
 
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/cartesian_layout.hpp"
@@ -907,4 +909,6 @@ inline void post_layout_optimization(fiction::layouts::gate_layout<fiction::layo
 }
 
 }  // namespace fiction::physical_design
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
+#endif
