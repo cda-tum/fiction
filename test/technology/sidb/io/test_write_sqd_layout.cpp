@@ -67,7 +67,7 @@ TEST_CASE("SQD export preserves output when lattice geometry is non-finite", "[s
     /** @brief Every scalar serialized in the lattice layer. */
     const std::array components{&lat.a1.first,       &lat.a1.second,       &lat.a2.first,       &lat.a2.second,
                                 &lat.basis[0].first, &lat.basis[0].second, &lat.basis[1].first, &lat.basis[1].second};
-    *components[component] = invalid;
+    *components.at(component) = invalid;
     /** @brief Layout whose geometry cannot be represented by finite SQD numbers. */
     const sidb::layout lyt{lat};
 

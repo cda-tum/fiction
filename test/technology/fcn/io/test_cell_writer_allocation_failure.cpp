@@ -18,6 +18,7 @@
 
 #include "utils/allocation_failure.hpp"
 
+#include <fiction/technology/fcn/cell_ports.hpp>
 #include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/fcn/io/write_qll_layout.hpp>
 #include <fiction/technology/inml/io/write_qcc_layout.hpp>
