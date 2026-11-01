@@ -14982,7 +14982,8 @@ static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_run =
 R"doc(Writes the layout with XML-escaped lattice text.
 
 Raises:
-    ValueError: If a lattice vector or basis component is non-finite.
+    ValueError: If a lattice component is non-finite or a charged-
+                defect material parameter is non-finite or negative.
 
 )doc";
 
@@ -15342,7 +15343,8 @@ Args:
     on_progress: Receives completed dot and defect records.
 
 Raises:
-    ValueError: If a lattice vector or basis component is non-finite;
+    ValueError: If a lattice component is non-finite or a charged-
+                defect material parameter is non-finite or negative;
                 the stream remains unchanged.
 
 )doc";
@@ -15357,7 +15359,8 @@ Args:
     on_progress: Receives completed dot and defect records.
 
 Raises:
-    ValueError: If a lattice vector or basis component is non-finite;
+    ValueError: If a lattice component is non-finite or a charged-
+                defect material parameter is non-finite or negative;
                 the destination remains unchanged.
     RuntimeError: If creating, writing, closing, or replacing the
                   output file fails.
