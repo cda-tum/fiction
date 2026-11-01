@@ -103,9 +103,6 @@ void register_sidb_generators(nb::module_& m);
 
 }  // namespace pyfiction
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
-
 NB_MODULE(sidb, m)
 {
     m.doc() = "Silicon Dangling Bond (SiDB) lattices, layouts, charge distributions, and simulation.";
@@ -140,5 +137,3 @@ NB_MODULE(sidb, m)
     auto generators = pyfiction::def_submodule(m, "generators", "Generators of SiDB layouts and circuits.");
     pyfiction::register_sidb_generators(generators);
 }
-
-#pragma GCC diagnostic pop
