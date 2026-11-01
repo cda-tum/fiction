@@ -2095,6 +2095,7 @@ class gate_layout : public CoordinateLayout
             else
             {
                 std::invoke(fn, value, index);
+                return true;
             }
         }
         else
@@ -2106,9 +2107,9 @@ class gate_layout : public CoordinateLayout
             else
             {
                 std::invoke(fn, value);
+                return true;
             }
         }
-        return true;
     }
     /** @brief Visits interface objects in their declared order. */
     template <typename Fn>

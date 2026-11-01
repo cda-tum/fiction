@@ -253,6 +253,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Code quality:
 
   - SiDB layout I/O tests compare complete defect visits and simplify SVG checks.
+  - Gate-layout visitors avoid unreachable returns, and gate-library mapping guards GNU diagnostics.
   - Modernized QCA tests with shared format expectations and SVG detail multiplicity checks.
   - FCN tests share port-list and constant-cell cases and check writer failure recovery.
     Writer docs describe border validation.
