@@ -18,7 +18,16 @@ from pathlib import Path
 
 
 def main() -> None:
-    """Install fiction, remove its producer tree, and check equivalence and SQD output."""
+    """Install fiction, remove its producer tree, and check equivalence and SQD output.
+
+    Raises:
+        FileNotFoundError: If CMake is unavailable.
+        AssertionError: If missing required TinyXML2 does not produce the expected failure.
+    """
+    cmake = shutil.which("cmake")
+    if cmake is None:
+        msg = "CMake executable is unavailable"
+        raise FileNotFoundError(msg)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cmake-option", action="append", default=[])
     args = parser.parse_args()
@@ -46,7 +55,7 @@ def main() -> None:
         shutil.copytree(source / "test/package", work / "consumer-source")
         prefix = work / "prefix"
         run(
-            "cmake",
+            cmake,
             "--preset",
             "tests-slim",
             "-DFICTION_TEST=OFF",
@@ -56,8 +65,8 @@ def main() -> None:
             *args.cmake_option,
             cwd=producer,
         )
-        run("cmake", "--build", "--preset", "tests-slim", "--parallel", "2", cwd=producer)
-        run("cmake", "--install", producer / "build-tests-slim")
+        run(cmake, "--build", "--preset", "tests-slim", "--parallel", "2", cwd=producer)
+        run(cmake, "--install", producer / "build-tests-slim")
         relocated = work / "relocated"
         prefix.rename(relocated)
         # TemporaryDirectory handles Git's read-only pack files on Windows.
@@ -76,7 +85,7 @@ def main() -> None:
         )
         build = work / "consumer-build"
         run(
-            "cmake",
+            cmake,
             "-S",
             work / "consumer-source",
             "-B",
@@ -90,22 +99,53 @@ def main() -> None:
             f"-Dtinyxml2_DIR={shadow.as_posix()}",
             "-Dtinyxml2_SHARED_LIBS=ON",
         )
-        run("cmake", "--build", build, "--parallel", "2", "--verbose")
+        run(cmake, "--build", build, "--parallel", "2", "--verbose")
         run("ctest", "--test-dir", build, "--output-on-failure")
         config_only = work / "missing-mockturtle/lib/cmake/fiction"
         config_only.mkdir(parents=True)
         shutil.copy2(relocated / "lib/cmake/fiction/fictionConfig.cmake", config_only)
         run(
-            "cmake",
+            cmake,
             "-S",
             work / "consumer-source",
             "-B",
             work / "missing-dependency-build",
             "-G",
             "Ninja",
-            "-DEXPECT_MISSING_MOCKTURTLE=ON",
+            "-DEXPECT_MISSING_DEPENDENCY=mockturtle",
             f"-Dfiction_DIR={config_only.as_posix()}",
         )
+        (relocated / "lib/cmake/tinyxml2").rename(work / "unavailable-tinyxml2")
+        run(
+            cmake,
+            "-S",
+            work / "consumer-source",
+            "-B",
+            work / "missing-tinyxml2-build",
+            "-G",
+            "Ninja",
+            "-DEXPECT_MISSING_DEPENDENCY=tinyxml2",
+            f"-Dfiction_DIR={relocated.as_posix()}/lib/cmake/fiction",
+        )
+        required = subprocess.run(
+            [
+                cmake,
+                "-S",
+                str(work / "consumer-source"),
+                "-B",
+                str(work / "required-tinyxml2-build"),
+                "-G",
+                "Ninja",
+                f"-Dfiction_DIR={relocated.as_posix()}/lib/cmake/fiction",
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        diagnostic = required.stdout + required.stderr
+        if required.returncode == 0 or "tinyxml2-config.cmake" not in diagnostic:
+            msg = f"Missing required TinyXML2 did not report failure:\n{diagnostic}"
+            raise AssertionError(msg)
 
 
 if __name__ == "__main__":
