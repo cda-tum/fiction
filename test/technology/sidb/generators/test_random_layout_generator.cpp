@@ -261,7 +261,7 @@ TEST_CASE("Random SiDB layout generation with defects", "[random-sidb-layout-gen
 
         auto defect_layout = layout{};
         defect_layout.assign_defect({2, 2, 0}, defect{defect_type::DB, -1, 5.6, 5});
-        defect_layout.assign_defect({4, 1, 0}, defect{defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 7});
+        defect_layout.assign_defect({4, 1, 0}, defect{defect_type::SINGLE_DIHYDRIDE, 0, 7.6, 7});
 
         const auto result_lyts = generate_multiple_random_layouts(params, std::optional{defect_layout});
         REQUIRE(result_lyts.has_value());
@@ -276,6 +276,10 @@ TEST_CASE("Random SiDB layout generation with defects", "[random-sidb-layout-gen
             CHECK(lyts.at(i).num_dots() == 5);
             CHECK(lyts.at(i).num_defects() == 2);
             CHECK(lyts.at(i).defects() == defect_layout.defects());
+            CHECK(lyts.at(i).get_dot_tag({2, 2, 0}) == dot_tag::EMPTY);
+            CHECK(lyts.at(i).get_dot_tag({3, 1, 0}) == dot_tag::EMPTY);
+            CHECK(lyts.at(i).get_dot_tag({4, 1, 0}) == dot_tag::EMPTY);
+            CHECK(lyts.at(i).get_dot_tag({5, 1, 0}) == dot_tag::EMPTY);
 
             for (std::size_t j = i + 1; j < lyts.size(); ++j)
             {
