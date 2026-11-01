@@ -31,9 +31,11 @@
 #include <tinyxml2.h>
 
 #include <cassert>
+#include <cmath>
 #include <ctime>
 #include <ostream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -192,9 +194,20 @@ class sqd_writer
 
     /**
      * Writes the layout with XML-escaped lattice text.
+     * @throws std::invalid_argument If a lattice vector or basis component is non-finite.
      */
     void run()
     {
+        /** @brief Geometry serialized into the lattice layer. */
+        const auto& lat = lyt.get_lattice();
+        for (const auto& [x, y] : {lat.a1, lat.a2, lat.basis[0], lat.basis[1]})
+        {
+            if (!std::isfinite(x) || !std::isfinite(y))
+            {
+                throw std::invalid_argument("SQD lattice geometry must be finite");
+            }
+        }
+
         std::stringstream header{}, design{};
 
         header << siqad::SQD_HEADER << siqad::OPEN_SIQAD;
@@ -327,6 +340,7 @@ class sqd_writer
  * @param lyt Layout to write.
  * @param os Output stream to write into.
  * @param on_progress Receives completed dot and defect records.
+ * @throws std::invalid_argument If a lattice vector or basis component is non-finite; the stream remains unchanged.
  */
 inline void write_sqd_layout(const layout& lyt, std::ostream& os, utils::progress_callback on_progress = {})
 {
@@ -340,6 +354,8 @@ inline void write_sqd_layout(const layout& lyt, std::ostream& os, utils::progres
  * @param lyt Layout to write.
  * @param filename File to write into.
  * @param on_progress Receives completed dot and defect records.
+ * @throws std::invalid_argument If a lattice vector or basis component is non-finite; the destination remains
+ * unchanged.
  * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
  */
 inline void write_sqd_layout(const layout& lyt, const std::string_view& filename,

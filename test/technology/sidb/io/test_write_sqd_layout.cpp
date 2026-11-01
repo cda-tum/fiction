@@ -15,7 +15,9 @@
  * @author Jan Drewniok (Drewniok)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
@@ -31,7 +33,15 @@
 
 #include <tinyxml2.h>
 
+#include <array>
+#include <filesystem>
+#include <fstream>
+#include <ios>
+#include <iterator>
+#include <limits>
+#include <random>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -42,6 +52,58 @@ using namespace fiction::physical_design;
 using namespace fiction::sidb;
 using namespace fiction::sidb::io;
 using namespace fiction::sidb::model;
+
+/** @brief SQD export rejects non-finite geometry before changing either destination. */
+TEST_CASE("SQD export preserves output when lattice geometry is non-finite", "[sqd]")
+{
+    /** @brief Component of the two primitive vectors and two basis vectors. */
+    const auto component = GENERATE(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u);
+    /** @brief Non-finite values rejected by the SQD numeric format. */
+    const auto invalid = GENERATE(std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::infinity(),
+                                  -std::numeric_limits<double>::infinity());
+    CAPTURE(component, invalid);
+    /** @brief Publicly constructible custom geometry. */
+    auto lat = sidb::lattice::si_100_2x1();
+    /** @brief Every scalar serialized in the lattice layer. */
+    const std::array components{&lat.a1.first,       &lat.a1.second,       &lat.a2.first,       &lat.a2.second,
+                                &lat.basis[0].first, &lat.basis[0].second, &lat.basis[1].first, &lat.basis[1].second};
+    *components[component] = invalid;
+    /** @brief Layout whose geometry cannot be represented by finite SQD numbers. */
+    const sidb::layout lyt{lat};
+
+    SECTION("stream")
+    {
+        /** @brief Complete destination contents before serialization. */
+        std::stringstream stream{};
+        stream << "original";
+        CHECK_THROWS_AS(write_sqd_layout(lyt, stream), std::invalid_argument);
+        CHECK(stream.str() == "original");
+    }
+    SECTION("file")
+    {
+        /** @brief Newly owned directory isolates destination and atomic-write temporary files. */
+        const auto directory =
+            std::filesystem::temp_directory_path() / ("fiction-sqd-test-" + std::to_string(std::random_device{}()));
+        REQUIRE(std::filesystem::create_directory(directory));
+        /** @brief Existing output that a failed export must preserve. */
+        const auto destination = directory / "output.sqd";
+        {
+            /** @brief Original file contents. */
+            std::ofstream original{destination, std::ios::binary};
+            original << "original";
+            REQUIRE(original.good());
+        }
+        CHECK_THROWS_AS(write_sqd_layout(lyt, destination.string()), std::invalid_argument);
+        {
+            /** @brief Complete destination after the rejected export. */
+            std::ifstream stream{destination, std::ios::binary};
+            /** @brief Every preserved destination byte. */
+            const std::string content{std::istreambuf_iterator<char>{stream}, std::istreambuf_iterator<char>{}};
+            CHECK(content == "original");
+        }
+        std::filesystem::remove_all(directory);
+    }
+}
 
 TEST_CASE("Write empty SQD layout", "[sqd]")
 {

@@ -960,6 +960,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - I/O:
 
+  - SQD export now rejects non-finite lattice geometry before changing output.
   - Colored DOT drawers now use the node-color interface and shared edge palette.
   - Surface-defect import avoids exponential backtracking on malformed digit runs.
   - SQD import now rejects NUL bytes, multiple XML roots, and text outside the root. SiDB filename readers preserve bytes after Ctrl-Z on Windows.
