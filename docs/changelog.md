@@ -262,6 +262,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     Writer docs describe border validation.
   - Modernized utility tests with named data rows, direct result checks, and complete progress observations.
   - Modernized physical-design helper tests with complete routing collections and independent solver rows.
+  - Streamlined BDL iterator, pair, wire, and logic-match tests with complete physical expectations.
   - Streamlined synthesis tests and strengthened clone, conversion, and gate-library checks.
   - Modernized path-finding tests with shared data rows, complete path comparisons, and cache reuse checks.
   - Geometry tests now compare complete coordinate and visitor results and share arrangement cases.
@@ -908,6 +909,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - `integral_abs` documents that signed minimum values are outside its representable-result domain.
   - Timing documentation now states the throughput formula and input hold time in clock cycles.
+  - BDL pair-detection documentation clarifies per-tag sorting and no longer implies a distance-bound performance guarantee.
   - Binding docstring instructions now use the generator wrapper that CI runs.
   - Hexagonal layout documentation now names the eastern border and `is_adjacent_of` correctly.
   - `gate_layout::incoming_data_flow` now documents required adjacency and optional clocking.
