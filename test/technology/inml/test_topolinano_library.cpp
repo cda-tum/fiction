@@ -236,7 +236,7 @@ TEST_CASE("ToPoliNano maps vertical staircase wires", "[inml-topolinano-library]
     shifted_cartesian_gate_layout lyt{arrangement::ODD_COLUMN, {5, 5}};
     /** @brief Internal wire whose complete cell tile is checked. */
     const layout_base::coordinate middle{2, 2};
-    /** @brief Incoming and outgoing tiles on opposite vertical sides. */
+    /** @brief Incoming tile above or below the wire. */
     const layout_base::coordinate incoming{2, down ? 1 : 3};
     /** @brief Outgoing tile on the opposite side from the input. */
     const layout_base::coordinate outgoing{2, down ? 3 : 1};

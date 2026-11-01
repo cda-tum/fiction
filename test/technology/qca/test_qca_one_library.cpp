@@ -238,6 +238,7 @@ TEST_CASE("QCA ONE vias in a sparse frame", "[qca-one-library]")
 /** @brief An incomplete AND gate has no supported physical orientation. */
 TEST_CASE("QCA ONE rejects a disconnected AND gate", "[qca-one-library]")
 {
+    /** @brief Layout whose AND gate has disconnected inputs. */
     cartesian_gate_layout lyt{{3, 3}};
     /** @brief AND truth table with both input slots disconnected. */
     kitty::dynamic_truth_table function{2};

@@ -621,6 +621,7 @@ TEST_CASE("Check unsupported gate type", "[molecular-qca-library]")
 /** @brief An incomplete AND gate has no supported physical orientation. */
 TEST_CASE("MolQCA rejects a disconnected AND gate", "[molecular-qca-library]")
 {
+    /** @brief Layout whose AND gate has disconnected inputs. */
     cartesian_gate_layout lyt{{3, 3}};
     /** @brief AND truth table with both input slots disconnected. */
     kitty::dynamic_truth_table function{2};
