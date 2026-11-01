@@ -254,6 +254,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Code quality:
 
   - SiDB model, layout, and gate-library tests now share data rows and check complete defect regions and exception ports.
+  - Modernized iNML and molecular QCA tests with complete SVG file checks, cell-type rows, and independent
+    gate-orientation cases.
   - Modernized QCA tests with shared format expectations and SVG detail multiplicity checks.
   - Modernized layout-transformation tests with named cases, defect-aware interface checks, and complete routing checks.
   - FCN tests share port-list and constant-cell cases and check writer failure recovery.
