@@ -27,6 +27,9 @@
 #include <fiction/technology/mol_qca/layout.hpp>
 #include <fiction/technology/mol_qca/sim7_mol_library.hpp>
 
+#include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
+
 #include <type_traits>
 
 using namespace fiction;
@@ -613,4 +616,26 @@ TEST_CASE("Check unsupported gate type", "[molecular-qca-library]")
 
     REQUIRE_THROWS_AS(sim7_mol_library::set_up_gate(layout, {1, 2}),
                       unsupported_gate_type_exception<layout_base::coordinate>);
+}
+
+/** @brief An incomplete AND gate has no supported physical orientation. */
+TEST_CASE("MolQCA rejects a disconnected AND gate", "[molecular-qca-library]")
+{
+    cartesian_gate_layout lyt{{3, 3}};
+    /** @brief AND truth table with both input slots disconnected. */
+    kitty::dynamic_truth_table function{2};
+    kitty::create_from_hex_string(function, "8");
+    /** @brief Coordinate reported by the rejected mapping. */
+    const layout_base::coordinate coordinate{1, 1};
+    lyt.create_gate({}, function, coordinate);
+
+    try
+    {
+        static_cast<void>(sim7_mol_library::set_up_gate(lyt, coordinate));
+        FAIL("A disconnected AND gate has no supported orientation");
+    }
+    catch (const unsupported_gate_orientation_exception<layout_base::coordinate, port_position>& error)
+    {
+        CHECK(error.where() == coordinate);
+    }
 }

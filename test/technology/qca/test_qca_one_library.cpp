@@ -24,10 +24,14 @@
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
+#include <fiction/technology/fcn/cell_ports.hpp>
 #include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/qca/layout.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/verification/design_rule_violations.hpp>
+
+#include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <cstdint>
 #include <sstream>
@@ -228,5 +232,27 @@ TEST_CASE("QCA ONE vias in a sparse frame", "[qca-one-library]")
         CHECK(layout.get_cell_mode({x, 5, 1}) == cell_mode::VERTICAL);
         CHECK(layout.get_cell_type({x, 5, 0}) == cell_type::NORMAL);
         CHECK(layout.get_cell_mode({x, 5, 0}) == cell_mode::VERTICAL);
+    }
+}
+
+/** @brief An incomplete AND gate has no supported physical orientation. */
+TEST_CASE("QCA ONE rejects a disconnected AND gate", "[qca-one-library]")
+{
+    cartesian_gate_layout lyt{{3, 3}};
+    /** @brief AND truth table with both input slots disconnected. */
+    kitty::dynamic_truth_table function{2};
+    kitty::create_from_hex_string(function, "8");
+    /** @brief Coordinate reported by the rejected mapping. */
+    const layout_base::coordinate coordinate{1, 1};
+    lyt.create_gate({}, function, coordinate);
+
+    try
+    {
+        static_cast<void>(qca_one_library::set_up_gate(lyt, coordinate));
+        FAIL("A disconnected AND gate has no supported orientation");
+    }
+    catch (const fcn::unsupported_gate_orientation_exception<layout_base::coordinate, fcn::port_position>& error)
+    {
+        CHECK(error.where() == coordinate);
     }
 }
