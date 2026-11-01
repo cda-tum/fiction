@@ -481,8 +481,8 @@ def is_ground_state(heuristic_results: sidb_simulation_result, exhaustive_result
         exhaustive_results: Result of an exact simulation of the same layout.
 
     Returns:
-        `true` iff the heuristic result contains every ground state of the
-        exact one.
+        `true` iff the exact result has charge distributions and both
+        results contain the same ground states.
     """
 
 def check_simulation_results_for_equivalence(result1: sidb_simulation_result, result2: sidb_simulation_result) -> bool:
