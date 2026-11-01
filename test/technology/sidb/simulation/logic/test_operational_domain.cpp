@@ -351,11 +351,15 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
 
     SECTION("invalid sweep dimensions")
     {
+        /** @brief Identity wire with valid input and output BDL pairs. */
+        const auto wire = blueprints::bdl_wire();
+
         SECTION("min/max mismatch")
         {
-            // 1-dimensional with invalid min/max on 1st dimension
+            // Invalid min/max on the first dimension.
             const operational_domain_params invalid_params_1{
-                .sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 10.0, .max = 1.0, .step = 0.1}}};
+                .sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 10.0, .max = 1.0, .step = 0.1},
+                                     {.dimension = sweep_parameter::LAMBDA_TF}}};
 
             // 2-dimensional with invalid min/max on 2nd dimension
             const operational_domain_params invalid_params_2{
@@ -369,36 +373,37 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
                                      {.dimension = sweep_parameter::MU_MINUS, .min = -0.4, .max = -0.5, .step = 0.01}}};
 
             /** @brief Invalid sweep and the dimension containing the invalid range. */
-            const auto [dimensions, params] = GENERATE_COPY(
+            const auto [invalid_dimension, params] = GENERATE_COPY(
                 std::pair{1u, invalid_params_1}, std::pair{2u, invalid_params_2}, std::pair{3u, invalid_params_3});
-            CAPTURE(dimensions);
+            CAPTURE(invalid_dimension);
             SECTION("grid_search")
             {
-                CHECK_THROWS_AS(operational_domain_grid_search(lat, std::vector{create_id_tt()}, params),
+                CHECK_THROWS_AS(operational_domain_grid_search(wire, std::vector{create_id_tt()}, params),
                                 std::invalid_argument);
             }
             SECTION("random_sampling")
             {
-                CHECK_THROWS_AS(operational_domain_random_sampling(lat, std::vector{create_id_tt()}, 100, params),
+                CHECK_THROWS_AS(operational_domain_random_sampling(wire, std::vector{create_id_tt()}, 100, params),
                                 std::invalid_argument);
             }
             SECTION("flood_fill")
             {
-                CHECK_THROWS_AS(operational_domain_flood_fill(lat, std::vector{create_id_tt()}, 1, params),
+                CHECK_THROWS_AS(operational_domain_flood_fill(wire, std::vector{create_id_tt()}, 1, params),
                                 std::invalid_argument);
             }
             SECTION("contour_tracing")
             {
-                CHECK_THROWS_AS(operational_domain_contour_tracing(lat, std::vector{create_id_tt()}, 1, params),
+                CHECK_THROWS_AS(operational_domain_contour_tracing(wire, std::vector{create_id_tt()}, 1, params),
                                 std::invalid_argument);
             }
         }
 
         SECTION("negative step size")
         {
-            // 1-dimensional with negative step size on 1st dimension
+            // Negative step size on the first dimension.
             const operational_domain_params invalid_params_1{
-                .sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 1.0, .max = 10.0, .step = -0.5}}};
+                .sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 1.0, .max = 10.0, .step = -0.5},
+                                     {.dimension = sweep_parameter::LAMBDA_TF}}};
 
             // 2-dimensional with negative step size on 2nd dimension
             const operational_domain_params invalid_params_2{
@@ -410,30 +415,30 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
                 .sweep_dimensions = {
                     {.dimension = sweep_parameter::EPSILON_R},
                     {.dimension = sweep_parameter::LAMBDA_TF},
-                    {.dimension = sweep_parameter::MU_MINUS, .min = -0.4, .max = -0.5, .step = -0.01}}};
+                    {.dimension = sweep_parameter::MU_MINUS, .min = -0.5, .max = -0.4, .step = -0.01}}};
 
             /** @brief Invalid sweep and the dimension containing the invalid range. */
-            const auto [dimensions, params] = GENERATE_COPY(
+            const auto [invalid_dimension, params] = GENERATE_COPY(
                 std::pair{1u, invalid_params_1}, std::pair{2u, invalid_params_2}, std::pair{3u, invalid_params_3});
-            CAPTURE(dimensions);
+            CAPTURE(invalid_dimension);
             SECTION("grid_search")
             {
-                CHECK_THROWS_AS(operational_domain_grid_search(lat, std::vector{create_id_tt()}, params),
+                CHECK_THROWS_AS(operational_domain_grid_search(wire, std::vector{create_id_tt()}, params),
                                 std::invalid_argument);
             }
             SECTION("random_sampling")
             {
-                CHECK_THROWS_AS(operational_domain_random_sampling(lat, std::vector{create_id_tt()}, 100, params),
+                CHECK_THROWS_AS(operational_domain_random_sampling(wire, std::vector{create_id_tt()}, 100, params),
                                 std::invalid_argument);
             }
             SECTION("flood_fill")
             {
-                CHECK_THROWS_AS(operational_domain_flood_fill(lat, std::vector{create_id_tt()}, 1, params),
+                CHECK_THROWS_AS(operational_domain_flood_fill(wire, std::vector{create_id_tt()}, 1, params),
                                 std::invalid_argument);
             }
             SECTION("contour_tracing")
             {
-                CHECK_THROWS_AS(operational_domain_contour_tracing(lat, std::vector{create_id_tt()}, 1, params),
+                CHECK_THROWS_AS(operational_domain_contour_tracing(wire, std::vector{create_id_tt()}, 1, params),
                                 std::invalid_argument);
             }
         }
