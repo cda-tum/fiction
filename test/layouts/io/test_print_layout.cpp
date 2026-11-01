@@ -197,6 +197,35 @@ TEST_CASE("Print crossing gate-level layout", "[print-gate-level-layout]")
     CHECK(print_stream.str() == layout_print);
 }
 
+TEST_CASE("Print gate symbols and terminal colors", "[print-gate-level-layout]")
+{
+    /** @brief Small layout containing each additional gate symbol. */
+    cartesian_gate_layout layout{{4, 3}, clocking::open()};
+    /** @brief Inputs of the OR and majority gates. */
+    const auto a = layout.create_pi("a", {0, 0}), b = layout.create_pi("b", {0, 1}), c = layout.create_pi("c", {0, 2});
+    /** @brief OR, majority, and XOR gates in separate rows. */
+    const auto or_gate = layout.create_or(a, b, {1, 0}), maj_gate = layout.create_maj(a, b, c, {1, 1}),
+               xor_gate = layout.create_xor(or_gate, maj_gate, {1, 2});
+    /** @brief Wire with two output consumers. */
+    const auto fanout = layout.create_buf(xor_gate, {2, 1});
+    layout.create_po(fanout, "f", {3, 0});
+    layout.create_po(fanout, "g", {3, 1});
+    REQUIRE(layout.is_fanout(fanout));
+
+    /** @brief Uncolored picture with the public gate symbols. */
+    std::stringstream plain{};
+    print_gate_level_layout(plain, layout, false, false);
+    CHECK(plain.str().find("|") != std::string::npos);
+    CHECK(plain.str().find("M") != std::string::npos);
+    CHECK(plain.str().find("X") != std::string::npos);
+    CHECK(plain.str().find("F") != std::string::npos);
+
+    /** @brief Terminal colors use ANSI escape sequences. */
+    std::stringstream colored{};
+    print_gate_level_layout(colored, layout, true, false);
+    CHECK(colored.str().find("\x1b[") != std::string::npos);
+}
+
 TEST_CASE("Print empty cell-level layout", "[print-cell-level-layout]")
 {
     using cell_layout = qca::layout;
