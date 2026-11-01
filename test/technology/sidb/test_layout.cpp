@@ -316,7 +316,7 @@ TEST_CASE("Defects", "[layout]")
         /** @brief The complete one-unit-cell rectangle retains the defect's basis index. */
         const std::unordered_set<lattice_site> expected_narrow{{4, 1, 0}, {5, 1, 0}, {6, 1, 0}, {4, 2, 0}, {5, 2, 0},
                                                                {6, 2, 0}, {4, 3, 0}, {5, 3, 0}, {6, 3, 0}};
-        CHECK(lyt.affected_sidbs({5, 2, 0}, std::pair<uint16_t, uint16_t>{1, 1}) == expected_narrow);
+        CHECK(lyt.affected_sidbs({5, 2, 0}, std::pair{uint16_t{1}, uint16_t{1}}) == expected_narrow);
 
         /** @brief Union of both charged rectangles and the neutral defect's site. */
         auto expected_all = expected_narrow;
@@ -331,7 +331,7 @@ TEST_CASE("Defects", "[layout]")
                              {1, 1, 0},
                              {1, 0, 1}});
         const auto all =
-            lyt.all_affected_sidbs(std::pair<uint16_t, uint16_t>{1, 1}, std::pair<uint16_t, uint16_t>{0, 0});
+            lyt.all_affected_sidbs(std::pair{uint16_t{1}, uint16_t{1}}, std::pair{uint16_t{0}, uint16_t{0}});
         CHECK(all == expected_all);
     }
     SECTION("bounding box covers defects")
@@ -351,12 +351,12 @@ TEST_CASE("Defects", "[layout]")
         lyt.assign_defect(last, charged);
         CHECK(lyt.bounding_box() == std::pair{first, last});
 
-        const auto lower = lyt.affected_sidbs(first, std::pair<uint16_t, uint16_t>{1, 1});
+        const auto lower = lyt.affected_sidbs(first, std::pair{uint16_t{1}, uint16_t{1}});
         CHECK(lower == std::unordered_set<lattice_site>{first,
                                                         {min_coordinate + 1, min_coordinate, 0},
                                                         {min_coordinate, min_coordinate + 1, 0},
                                                         {min_coordinate + 1, min_coordinate + 1, 0}});
-        const auto upper = lyt.affected_sidbs(last, std::pair<uint16_t, uint16_t>{1, 1});
+        const auto upper = lyt.affected_sidbs(last, std::pair{uint16_t{1}, uint16_t{1}});
         CHECK(upper == std::unordered_set<lattice_site>{last,
                                                         {max_coordinate - 1, max_coordinate, 1},
                                                         {max_coordinate, max_coordinate - 1, 1},
