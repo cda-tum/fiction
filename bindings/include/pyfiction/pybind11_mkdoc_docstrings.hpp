@@ -1508,7 +1508,7 @@ Args:
     c: Coordinate to check for border location.
 
 Returns:
-    `true` iff `c` is located at the layout's northern border.
+    `true` iff `c` is located at the layout's eastern border.
 
 )doc";
 
@@ -9879,16 +9879,11 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_get_offset =
-R"doc(Utility function to calculate the shift that has to be added to any
-x-coordinate on the hexagonal layout.
+R"doc(Calculates the horizontal shift for the hexagonal layout from placed
+objects and terminal extensions.
 
-This function iterates through diagonals starting from the bottom left
-corner until it finds a non-empty tile or until it has traversed all
-diagonals. In each iteration, it checks tiles along the diagonal line.
-If it finds a non-empty tile, it calculates an offset value, which is
-the number of columns on the left side of the hexagonal layout that
-will be empty. This offset is based on the leftmost tile that will
-appear in the hexagonal layout.
+Finds the first occupied ground-layer diagonal from placed objects,
+then adjusts the horizontal offset for extended terminals.
 
 Args:
     lyt: 2DDWave-clocked Cartesian gate-level layout to hexagonalize.

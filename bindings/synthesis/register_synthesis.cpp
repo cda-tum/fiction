@@ -64,9 +64,6 @@ void register_planarization(nb::module_& m);
 
 }  // namespace pyfiction
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
-
 NB_MODULE(synthesis, m)
 {
     m.doc() = "Truth tables and logic network transformations.";
@@ -82,5 +79,3 @@ NB_MODULE(synthesis, m)
     pyfiction::register_network_conversion(m);
     pyfiction::register_planarization(m);
 }
-
-#pragma GCC diagnostic pop
