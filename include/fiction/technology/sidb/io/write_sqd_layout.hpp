@@ -194,7 +194,8 @@ class sqd_writer
 
     /**
      * Writes the layout with XML-escaped lattice text.
-     * @throws std::invalid_argument If a lattice vector or basis component is non-finite.
+     * @throws std::invalid_argument If a lattice component is non-finite or a charged-defect material parameter is
+     * non-finite or negative.
      */
     void run()
     {
@@ -207,6 +208,19 @@ class sqd_writer
                 throw std::invalid_argument("SQD lattice geometry must be finite");
             }
         }
+        lyt.foreach_defect(
+            [](const auto& entry)
+            {
+                /** @brief Defect whose Coulomb parameters are serialized when charged. */
+                const auto& d = entry.second;
+                if (sidb::model::is_charged_defect_type(d) &&
+                    (!std::isfinite(d.epsilon_r) || !std::isfinite(d.lambda_tf) || d.epsilon_r < 0.0 ||
+                     d.lambda_tf < 0.0))
+                {
+                    throw std::invalid_argument(
+                        "SQD charged-defect material parameters must be finite and nonnegative");
+                }
+            });
 
         std::stringstream header{}, design{};
 
@@ -340,7 +354,8 @@ class sqd_writer
  * @param lyt Layout to write.
  * @param os Output stream to write into.
  * @param on_progress Receives completed dot and defect records.
- * @throws std::invalid_argument If a lattice vector or basis component is non-finite; the stream remains unchanged.
+ * @throws std::invalid_argument If a lattice component is non-finite or a charged-defect material parameter is
+ * non-finite or negative; the stream remains unchanged.
  */
 inline void write_sqd_layout(const layout& lyt, std::ostream& os, utils::progress_callback on_progress = {})
 {
@@ -354,8 +369,8 @@ inline void write_sqd_layout(const layout& lyt, std::ostream& os, utils::progres
  * @param lyt Layout to write.
  * @param filename File to write into.
  * @param on_progress Receives completed dot and defect records.
- * @throws std::invalid_argument If a lattice vector or basis component is non-finite; the destination remains
- * unchanged.
+ * @throws std::invalid_argument If a lattice component is non-finite or a charged-defect material parameter is
+ * non-finite or negative; the destination remains unchanged.
  * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
  */
 inline void write_sqd_layout(const layout& lyt, const std::string_view& filename,
