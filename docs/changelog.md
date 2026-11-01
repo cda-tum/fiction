@@ -253,6 +253,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - SiDB charge-state tests and port construction in gate libraries avoid MSVC conversion warnings.
   - SiDB layout I/O tests compare complete defect visits and simplify SVG checks.
   - Gate-layout visitors avoid unreachable returns, and gate-library mapping guards GNU diagnostics.
   - SiDB model, layout, and gate-library tests now share data rows and check complete defect regions and exception ports.
