@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <iterator>
 #include <mutex>
+#include <ranges>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -116,8 +117,8 @@ class progress_recorder
     [[nodiscard]] std::size_t final_count(const std::string_view task) const
     {
         /** @brief Last matching report in callback order. */
-        const auto last = std::find_if(reports.crbegin(), reports.crend(),
-                                       [task](const auto& report) { return report.task == task; });
+        const auto last = std::ranges::find_if(reports | std::views::reverse,
+                                               [task](const auto& report) { return report.task == task; });
 
         return last == reports.crend() ? 0 : last->done;
     }
