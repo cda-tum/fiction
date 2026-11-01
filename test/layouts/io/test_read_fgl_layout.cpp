@@ -1195,6 +1195,65 @@ TEST_CASE("FGL failed connection read leaves target unchanged", "[read-fgl-layou
     CHECK(layout.get_input_name(0) == "kept");
 }
 
+TEST_CASE("Version-2 FGL validates the selected layout name", "[read-fgl-layout]")
+{
+    /** @brief Empty version-2 layout without a stored name. */
+    std::string xml{R"(<fgl version="2"><layout><size><x>1</x><y>1</y><z>1</z></size>
+      <clocking><name>2DDWave</name></clocking><inputs/><outputs/></layout><gates/></fgl>)"};
+    SECTION("Missing name retains a valid Unicode fallback")
+    {
+        /** @brief Valid UTF-8 fallback name. */
+        const std::string name{"M\xc3\xbcnchen"};
+        /** @brief Returning-reader input. */
+        std::stringstream stream{xml};
+        CHECK(read_fgl_layout<cartesian_layout>(stream, name).get_layout_name() == name);
+        /** @brief Existing layout whose name supplies the fallback. */
+        cartesian_gate_layout target{{2, 1, 1}, clocking::twoddwave(), name};
+        /** @brief In-place-reader input. */
+        std::stringstream inplace{xml};
+        read_fgl_layout(target, inplace);
+        CHECK(target.get_layout_name() == name);
+        CHECK(target.width() == 1);
+    }
+    SECTION("Missing name validates the fallback before replacing the target")
+    {
+        /** @brief Invalid UTF-8 or XML character in the selected fallback. */
+        const auto name = GENERATE(std::string(1, static_cast<char>(0x80)), std::string(1, '\x01'));
+        CAPTURE(static_cast<unsigned int>(static_cast<unsigned char>(name.front())));
+        /** @brief Returning-reader input. */
+        std::stringstream stream{xml};
+        CHECK_THROWS_AS(read_fgl_layout<cartesian_layout>(stream, name), fgl_parsing_error);
+        /** @brief Existing layout whose payload a rejected read preserves. */
+        cartesian_gate_layout target{{2, 1, 1}, clocking::twoddwave(), name};
+        target.create_pi("kept", {0, 0});
+        /** @brief In-place-reader input. */
+        std::stringstream inplace{xml};
+        CHECK_THROWS_AS(read_fgl_layout(target, inplace), fgl_parsing_error);
+        CHECK(target.get_layout_name() == name);
+        CHECK(target.width() == 2);
+        CHECK(target.num_pis() == 1);
+        CHECK(target.get_input_name(0) == "kept");
+    }
+    SECTION("Present name overrides an unused invalid fallback")
+    {
+        /** @brief Stored name element and its decoded text. */
+        const auto [element, expected] =
+            GENERATE(table<std::string, std::string>({{"<name>stored</name>", "stored"}, {"<name/>", ""}}));
+        xml.insert(xml.find("<layout>") + std::string{"<layout>"}.size(), element);
+        /** @brief Unused fallback with invalid UTF-8. */
+        const std::string name(1, static_cast<char>(0x80));
+        /** @brief Returning-reader input. */
+        std::stringstream stream{xml};
+        CHECK(read_fgl_layout<cartesian_layout>(stream, name).get_layout_name() == expected);
+        /** @brief Existing layout whose invalid name the file replaces. */
+        cartesian_gate_layout target{{2, 1, 1}, clocking::twoddwave(), name};
+        /** @brief In-place-reader input. */
+        std::stringstream inplace{xml};
+        read_fgl_layout(target, inplace);
+        CHECK(target.get_layout_name() == expected);
+    }
+}
+
 TEST_CASE("Version-2 FGL rejects invalid Unicode names before assigning the target", "[read-fgl-layout]")
 {
     /** @brief Invalid name bytes that the XML parser may accept. */

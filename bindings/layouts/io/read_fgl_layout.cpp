@@ -67,13 +67,15 @@ Version 2 requires a complete, acyclic, physically valid layout whose names cont
 Args:
     filename: Input file path.
     layout_name: Initial layout name, overridden by a name stored in the file. Defaults to an empty string.
+        Version 2 validates this name as UTF-8 XML 1.0 text when the file has no name element.
     layout_type: Registered gate layout class. Defaults to cartesian_gate_layout.
 
 Returns:
     A new layout of the selected layout_type.
 
 Raises:
-    fgl_parsing_error: If the FGL file is malformed or incompatible with the selected layout type.
+    fgl_parsing_error: If the FGL file is malformed, incompatible with the selected layout type, or produces an invalid
+        version-2 layout.
     RuntimeError: If the file cannot be opened.
     TypeError: If layout_type is not a registered gate layout class.
 )doc");

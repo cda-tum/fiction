@@ -729,14 +729,15 @@ class read_fgl_layout_impl
 /**
  * Reads legacy maximum-index extents or version-2 extent counts, declared interface order, and manual obstructions.
  * Version 2 requires a complete, acyclic, physically valid layout whose names contain valid UTF-8 XML 1.0 text.
+ * A stored name overrides `name`; otherwise, version 2 validates `name` as the layout name.
  * Validation finishes before assigning a target.
  * The target layout changes only after a successful read.
  *
- * May throw an `fgl_parsing_error` if the FGL file is malformed.
+ * @throws fgl_parsing_error If the FGL file is malformed or the resulting version-2 layout is invalid.
  *
  * @tparam Geometry Coordinate geometry of the returned gate-level layout.
  * @param is The input stream to read from.
- * @param name The name to give to the generated layout.
+ * @param name Fallback layout name when the file has no name element.
  */
 template <typename Geometry>
 [[nodiscard]] layouts::gate_layout<Geometry> read_fgl_layout(std::istream& is, const std::string_view& name = "")
@@ -748,10 +749,11 @@ template <typename Geometry>
 /**
  * Reads legacy maximum-index extents or version-2 extent counts, declared interface order, and manual obstructions.
  * Version 2 requires a complete, acyclic, physically valid layout whose names contain valid UTF-8 XML 1.0 text.
+ * A stored name overrides the target's name; otherwise, version 2 validates the retained target name.
  * Validation finishes before assigning a target.
  * The target layout changes only after a successful read.
  *
- * May throw an `fgl_parsing_error` if the FGL file is malformed.
+ * @throws fgl_parsing_error If the FGL file is malformed or the resulting version-2 layout is invalid.
  *
  * This is an in-place version of `read_fgl_layout` that utilizes the given layout as a target to write to.
  *
@@ -768,12 +770,13 @@ void read_fgl_layout(layouts::gate_layout<Geometry>& lyt, std::istream& is)
 }
 /**
  * Reads a gate-level layout from an FGL file provided as a file name.
+ * A stored name overrides `name`; otherwise, version 2 validates `name` as UTF-8 XML 1.0 text.
  *
- * May throw an `fgl_parsing_error` if the FGL file is malformed.
+ * @throws fgl_parsing_error If the FGL file is malformed or the resulting version-2 layout is invalid.
  *
  * @tparam Geometry Coordinate geometry of the returned gate-level layout.
  * @param filename The file name to open and read from.
- * @param name The name to give to the generated layout.
+ * @param name Fallback layout name when the file has no name element.
  */
 template <typename Geometry>
 [[nodiscard]] layouts::gate_layout<Geometry> read_fgl_layout(const std::string_view& filename,
@@ -790,8 +793,9 @@ template <typename Geometry>
 }
 /**
  * Reads a gate-level layout from an FGL file provided as a file name.
+ * A stored name overrides the target's name; otherwise, version 2 validates the retained name as UTF-8 XML 1.0 text.
  *
- * May throw an `fgl_parsing_error` if the FGL file is malformed.
+ * @throws fgl_parsing_error If the FGL file is malformed or the resulting version-2 layout is invalid.
  *
  * This is an in-place version of `read_fgl_layout` that utilizes the given layout as a target to write to.
  *
