@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+import subprocess  # ruff: ignore[suspicious-subprocess-import] -- isolated optional dependency tests
+import sys
 from typing import TYPE_CHECKING, Any
 
 import pytest
@@ -39,37 +41,6 @@ from mnt.pyfiction.synthesis import create_and_tt, create_id_tt, create_or_tt, c
 
 if TYPE_CHECKING:
     from pathlib import Path
-
-
-@pytest.fixture
-def wire_with_canvas() -> sidb_layout:
-    """A BDL wire with two LOGIC dots, so that the sketch has a canvas to enumerate.
-
-    Returns:
-        The wire layout.
-    """
-    lyt = sidb_layout()
-
-    lyt.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.INPUT)
-    lyt.assign_sidb(lattice_site(2, 0, 1), sidb_dot_tag.INPUT)
-
-    lyt.assign_sidb(lattice_site(6, 1, 0), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(8, 1, 1), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(12, 2, 0), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(14, 2, 1), sidb_dot_tag.NORMAL)
-
-    lyt.assign_sidb(lattice_site(11, 3, 1), sidb_dot_tag.LOGIC)
-    lyt.assign_sidb(lattice_site(13, 6, 1), sidb_dot_tag.LOGIC)
-
-    lyt.assign_sidb(lattice_site(14, 7, 1), sidb_dot_tag.NORMAL)
-    lyt.assign_sidb(lattice_site(12, 8, 0), sidb_dot_tag.NORMAL)
-
-    lyt.assign_sidb(lattice_site(8, 8, 1), sidb_dot_tag.OUTPUT)
-    lyt.assign_sidb(lattice_site(6, 9, 0), sidb_dot_tag.OUTPUT)
-
-    lyt.assign_sidb(lattice_site(2, 9, 1), sidb_dot_tag.NORMAL)
-
-    return lyt
 
 
 def test_operational_domain_siqad_or_100_lattice(resources_dir):
@@ -513,6 +484,79 @@ def test_domain_reports_progress(resources_dir: Path, strategy: str) -> None:
     assert all(total in (done, 0) for done, total in finished)
     if strategy == "flood":
         assert any("exploring" in description and total == 0 for _, _, description, _, total, _ in workers)
+
+
+def test_operational_domain_to_numpy() -> None:
+    np = pytest.importorskip("numpy")
+    domain = operational_domain([sweep_parameter.LAMBDA_TF, sweep_parameter.EPSILON_R])
+    domain[parameter_point([5.0, 5.6])] = operational_status.OPERATIONAL
+    domain[parameter_point([5.1, 5.7])] = operational_status.NON_OPERATIONAL
+
+    coordinates, operational = domain.to_numpy()
+    del domain
+
+    assert coordinates.shape == (2, 2)
+    assert coordinates.dtype == np.float64
+    assert operational.dtype == np.bool_
+    assert {(tuple(row.tolist()), bool(flag)) for row, flag in zip(coordinates, operational, strict=True)} == {
+        ((5.0, 5.6), True),
+        ((5.1, 5.7), False),
+    }
+
+    del coordinates
+    assert set(operational.tolist()) == {False, True}
+
+    empty_coordinates, empty_operational = operational_domain([sweep_parameter.EPSILON_R]).to_numpy()
+    assert empty_coordinates.shape == (0, 1)
+    assert empty_operational.shape == (0,)
+
+
+@pytest.mark.parametrize("values", [[5.0], [5.0, 5.6, -0.3]])
+def test_operational_domain_to_numpy_rejects_mismatched_point(values: list[float]) -> None:
+    """NumPy export rejects points that do not match the domain's dimension count."""
+    pytest.importorskip("numpy")
+    domain = operational_domain([sweep_parameter.LAMBDA_TF, sweep_parameter.EPSILON_R])
+    domain[parameter_point(values)] = operational_status.OPERATIONAL
+
+    with pytest.raises(ValueError, match="point dimensions must match the operational domain"):
+        domain.to_numpy()
+
+
+@pytest.mark.parametrize("failure", ["numpy", "numpy._core", "broken"])
+def test_operational_domain_to_numpy_import_error(failure: str) -> None:
+    """Missing NumPy reports installation help; broken installations retain their error."""
+    script = """
+import importlib.abc
+import sys
+
+class MissingNumpy(importlib.abc.MetaPathFinder):
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname == "numpy":
+            if sys.argv[1] == "broken":
+                raise ImportError("NumPy ABI failed")
+            raise ModuleNotFoundError("missing dependency", name=sys.argv[1])
+        return None
+
+sys.meta_path.insert(0, MissingNumpy())
+from mnt.pyfiction.sidb.simulation.logic import operational_domain, sweep_parameter
+
+domain = operational_domain([sweep_parameter.EPSILON_R])
+try:
+    domain.to_numpy()
+except ImportError as error:
+    if sys.argv[1] == "numpy":
+        assert "uv pip install 'mnt-pyfiction[plot]'" in str(error), str(error)
+    elif sys.argv[1] == "numpy._core":
+        assert isinstance(error, ModuleNotFoundError) and error.name == "numpy._core", repr(error)
+    else:
+        assert str(error) == "NumPy ABI failed", str(error)
+else:
+    raise AssertionError("NumPy import failure must raise ImportError")
+"""
+    result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- isolated interpreter
+        [sys.executable, "-c", script, failure], capture_output=True, text=True, check=False
+    )
+    assert result.returncode == 0, result.stderr
 
 
 def test_single_point_keyword_domain(resources_dir: Path) -> None:

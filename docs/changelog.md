@@ -32,7 +32,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - CLI:
 
-  - `pip install mnt.pyfiction` installs the Python `fiction` shell, with interactive help,
+  - `fiction opdom` computes SQD operational domains without loading the shell, with statistics and 2D/3D
+    static or interactive plots. It requires `--csv` or `--plot`; plotting needs `mnt-pyfiction[plot]`.
+  - `fiction repl` explicitly selects the shell; bare `fiction`, shell flags, and piped input retain their behavior.
+    Leading `fiction --help` and `fiction -h` flags show route help even with additional options.
+  - Both `opdom` entry points accept `--algorithm` for all reconstruction methods, with `--samples` for
+    random sampling, flood fill, and contour tracing. Legacy flags remain accepted; `--sketch` adds filter-only analysis.
+  - Operational domain plots validate dependencies and colors before computation and preserve broken-package diagnostics.
+    Viewer failures retain exports and statistics.
+  - `uv tool install mnt.pyfiction` installs the Python `fiction` shell, with interactive help,
     completion, script files, piped input, and JSON statistics. The shell also runs as `python -m mnt.fiction.cli`.
   - Each file format has a dedicated `write_<format>` command; readers support AAG, PLA, and all FGL topologies.
   - `aig`, `abc`, and `generate` provide AIG optimization, external ABC scripts, and network generators.
@@ -74,6 +82,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
 
+  - Added SiQAD OR gate operational domain plots for all four reconstruction methods.
   - Documented GOLD's fixed-seed repeatability limits and geometric `AREA` priority on one-tile axes.
   - Added an FCN bibliography, BibTeX download, and OpenGraph metadata.
   - Added `nox -s docs` for local previews, link checks, and Read the Docs builds.
@@ -96,6 +105,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - `operational_domain.to_numpy()` returns sampled coordinates and operational flags as NumPy arrays.
+    The method rejects mismatched dimensions and reports an installation hint when NumPy is missing.
   - `mnt.pyfiction.synthesis.planarization` planarizes a balanced technology network and reports its virtual inputs
   - `mnt.pyfiction.synthesis.network_balancing` and `is_balanced` accept the `buffer_constant_outputs` keyword
   - The callback members of parameter classes accept `None`, which clears the callback.
@@ -350,6 +361,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     11.0.2 does not compile with clang 20.
 
 - Documentation:
+  - Installation guides now use `uv` for CLI tools and Python environments.
   - Documented all three gate-layout geometries and MSVC Release builds for Python.
   - A* documents the consistency requirement for custom heuristics and nonnegative step costs.
   - Python layout docstrings use `extent` for the extent argument.
@@ -810,6 +822,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Rebuild Python bindings when uncommitted C++ binding sources change.
   - Keep tinyxml2 static across build reconfiguration so Python imports find all libraries.
   - ClangCL test builds skip precompiled headers to avoid corrupted exception copies.
+  - Direct Python binding builds now request the stable-ABI component on CMake 3.26 and newer.
   - QuickSim and ClusterComplete compile with Apple libc++ without experimental library features.
   - CMake accepts Z3 installations inside the source checkout, including Python virtual environments.
   - `pyfiction` built against such a Z3 finds `libz3` at import time, so Read the Docs renders the Python API again.
