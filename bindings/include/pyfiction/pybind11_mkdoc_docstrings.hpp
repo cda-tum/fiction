@@ -28520,6 +28520,10 @@ Template Args:
 Returns:
     |n|.
 
+Precondition:
+    The absolute value of `n` is representable in `T`; signed minimum
+    values are excluded.
+
 )doc";
 
 static const char *mkd_doc_fiction_utils_math_round_to_n_decimal_places =

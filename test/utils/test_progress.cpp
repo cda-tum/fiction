@@ -49,9 +49,12 @@ using record = std::pair<std::size_t, std::size_t>;
  */
 struct recorder
 {
+    /** @brief Counts received in callback order. */
     std::vector<record> records{};
-    std::string         task{};
+    /** @brief Last reported task name. */
+    std::string task{};
 
+    /** @brief Returns a callback that records each observation. @return Recording callback. */
     utils::progress_callback callback()
     {
         return [this](const std::string_view t, const std::size_t done, const std::size_t total)
@@ -70,6 +73,8 @@ void let_throttle_pass()
     std::this_thread::sleep_for(std::chrono::milliseconds{120});
 }
 
+/** @brief Checks that completed counts never decrease. @param records Received reports. @return Whether counts increase
+ * monotonically. */
 bool is_monotone(const std::vector<record>& records)
 {
     return std::ranges::is_sorted(records, [](const auto& lhs, const auto& rhs) { return lhs.first < rhs.first; });
@@ -242,8 +247,8 @@ TEST_CASE("Two reporters share a caller-synchronized callback", "[progress]")
     first.join();
     second.join();
 
-    CHECK(std::ranges::count(rec.records, record{0, 3}) == 2);
-    CHECK(std::ranges::count(rec.records, record{3, 3}) == 2);
+    std::ranges::sort(rec.records);
+    CHECK(rec.records == std::vector<record>{{0, 3}, {0, 3}, {3, 3}, {3, 3}});
 }
 
 TEST_CASE("Concurrent advances are counted exactly once", "[progress]")
@@ -277,6 +282,8 @@ TEST_CASE("Concurrent advances are counted exactly once", "[progress]")
         }
     }
 
+    REQUIRE_FALSE(rec.records.empty());
+    CHECK(rec.records.front() == record{0, num_threads * items_per_thread});
     CHECK(rec.records.back() == record{num_threads * items_per_thread, num_threads * items_per_thread});
     CHECK(is_monotone(rec.records));
 }
@@ -320,7 +327,8 @@ TEST_CASE("Worker progress preserves identities and clears activity", "[progress
         }
     }
     CHECK(valid);
-    CHECK(finished.size() == 4);
+    std::ranges::sort(finished);
+    CHECK(finished == std::vector<std::size_t>{0, 1, 2, 3});
     CHECK(std::ranges::none_of(active, [](const bool running) { return running; }));
     CHECK(std::ranges::all_of(counts, [](const auto count) { return count == 3; }));
 }
