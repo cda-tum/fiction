@@ -45,10 +45,29 @@ void register_write_sqd_layout(nb::module_& m)
         "write_sqd_layout",
         [](const fiction::sidb::layout& lyt, const std::string& filename,
            const fiction::utils::progress_callback& on_progress)
-        { fiction::sidb::io::write_sqd_layout(lyt, filename, on_progress); },
+        {
+            if (on_progress)
+            {
+                /** @brief Layout snapshot taken while the GIL is held. */
+                const auto snapshot = lyt;
+                /** @brief Releases the GIL while the snapshot is written. */
+                const nb::gil_scoped_release release{};
+                fiction::sidb::io::write_sqd_layout(snapshot, filename, on_progress);
+            }
+            else
+            {
+                /** @brief Releases the GIL while the borrowed layout is written. */
+                const nb::gil_scoped_release release{};
+                fiction::sidb::io::write_sqd_layout(lyt, filename, on_progress);
+            }
+        },
         nb::arg("layout"), nb::arg("filename"), nb::arg("on_progress").none() = nb::none(),
-        parameter_doc(DOC(fiction_sidb_io_write_sqd_layout_2), {{"lyt", "layout"}}).c_str(),
-        nb::call_guard<nb::gil_scoped_release>());
+        (parameter_doc(DOC(fiction_sidb_io_write_sqd_layout_2), {{"lyt", "layout"}}) +
+         "\n\nWith on_progress, the writer copies the layout before calling Python. Callback mutations do not change "
+         "the exported snapshot. Without a callback, the writer borrows the layout.\n"
+         "Callback exceptions propagate from the initial report and progress updates. The final report during reporter "
+         "destruction ignores callback exceptions.")
+            .c_str());
 }
 
 }  // namespace pyfiction
