@@ -71,7 +71,11 @@ TEST_CASE("Test calculate_energy_distribution function", "[energy-distribution]"
         CHECK(result.size() == 1);
         const auto state = result.get_nth_state(0);
         REQUIRE(state.has_value());
-        CHECK_THAT(state->electrostatic_potential_energy, Catch::Matchers::WithinAbs(0.0, 0.00001));
+        // Clang-Tidy does not infer optional presence from Catch2 fatal REQUIRE.
+        if (state.has_value())
+        {
+            CHECK_THAT(state->electrostatic_potential_energy, Catch::Matchers::WithinAbs(0.0, 0.00001));
+        }
     }
 
     SECTION("one layout with one SiDB placed")
@@ -120,13 +124,19 @@ TEST_CASE("Test calculate_energy_distribution function", "[energy-distribution]"
         // The first two distributions form the degenerate ground state.
         const auto ground_state = result.get_nth_state(0);
         REQUIRE(ground_state.has_value());
-        CHECK(ground_state->degeneracy == 2);
-        CHECK(ground_state->electrostatic_potential_energy == 0.0);
+        if (ground_state.has_value())
+        {
+            CHECK(ground_state->degeneracy == 2);
+            CHECK(ground_state->electrostatic_potential_energy == 0.0);
+        }
 
         const auto excited_state = result.get_nth_state(1);
         REQUIRE(excited_state.has_value());
-        CHECK(excited_state->degeneracy == 1);
-        CHECK(excited_state->electrostatic_potential_energy > 0.0);
+        if (excited_state.has_value())
+        {
+            CHECK(excited_state->degeneracy == 1);
+            CHECK(excited_state->electrostatic_potential_energy > 0.0);
+        }
         CHECK(result.size() == 2);
         CHECK_FALSE(result.get_nth_state(2).has_value());
 

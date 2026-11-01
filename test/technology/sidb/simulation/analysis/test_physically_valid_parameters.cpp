@@ -148,15 +148,15 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
 
         const auto p1 = valid_parameters.contains(parameter_point{{5.9, 5.5}});
         REQUIRE(p1.has_value());
-        CHECK(std::get<0>(*p1) == 1);
+        CHECK(p1 == std::tuple{1});
 
         const auto p2 = valid_parameters.contains(parameter_point{{5.8, 4.4}});
         REQUIRE(p2.has_value());
-        CHECK(std::get<0>(*p2) == 0);
+        CHECK(p2 == std::tuple{0});
 
         const auto p3 = valid_parameters.contains(parameter_point{{6.0, 6.0}});
         REQUIRE(p3.has_value());
-        CHECK(std::get<0>(*p3) == 1);
+        CHECK(p3 == std::tuple{1});
     }
 }
 
@@ -221,19 +221,19 @@ TEST_CASE(
 
         const auto p1 = valid_parameters.contains(parameter_point{{5.6, 5.0}});
         REQUIRE(p1.has_value());
-        CHECK(std::get<0>(*p1) == 0);
+        CHECK(p1 == std::tuple{0});
 
         const auto p2 = valid_parameters.contains(parameter_point{{5.0, 5.9}});
         REQUIRE(p2.has_value());
-        CHECK(std::get<0>(*p2) == 2);
+        CHECK(p2 == std::tuple{2});
 
         const auto p3 = valid_parameters.contains(parameter_point{{5.4, 5.3}});
         REQUIRE(p3.has_value());
-        CHECK(std::get<0>(*p3) == 1);
+        CHECK(p3 == std::tuple{1});
 
         const auto p4 = valid_parameters.contains(parameter_point{{5.8, 5.3}});
         REQUIRE(p4.has_value());
-        CHECK(std::get<0>(*p4) == 0);
+        CHECK(p4 == std::tuple{0});
     }
 
     SECTION("Using the ground state of default physical parameters as given CDS, three dimensional sweep")
@@ -255,19 +255,19 @@ TEST_CASE(
         REQUIRE(valid_parameters.size() == 27);
         const auto p1 = valid_parameters.contains(parameter_point{{5.6, 5.0, -0.32}});
         REQUIRE(p1.has_value());
-        CHECK(std::get<0>(*p1) == 0);
+        CHECK(p1 == std::tuple{0});
 
         const auto p2 = valid_parameters.contains(parameter_point{{5.6, 5.0, -0.33}});
         REQUIRE(p2.has_value());
-        CHECK(std::get<0>(*p2) == 0);
+        CHECK(p2 == std::tuple{0});
 
         const auto p3 = valid_parameters.contains(parameter_point{{5.6, 5.0, -0.31}});
         REQUIRE(p3.has_value());
-        CHECK(std::get<0>(*p3) == 1);
+        CHECK(p3 == std::tuple{1});
 
         const auto p4 = valid_parameters.contains(parameter_point{{5.7, 5.2, -0.33}});
         REQUIRE(p4.has_value());
-        CHECK(std::get<0>(*p4) == 0);
+        CHECK(p4 == std::tuple{0});
     }
 }
 
