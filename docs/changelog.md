@@ -920,6 +920,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
 
+  - Graph coloring documents TabuCol's bounded search and empty-result contract. SiDB printing documents its
+    bounding-box cost, and progress reporting documents callback exception handling.
   - `integral_abs` documents that signed minimum values are outside its representable-result domain.
   - Timing documentation now states the throughput formula and input hold time in clock cycles.
   - BDL pair-detection documentation clarifies per-tag sorting and no longer implies a distance-bound performance guarantee.

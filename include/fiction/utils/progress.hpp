@@ -208,6 +208,8 @@ class worker_progress_scope
  * concurrently from any number of threads. The reporter forwards the first report, the final report in its destructor,
  * and intermediate reports whenever another percent of the total (or another 64 items when the total is unknown) was
  * completed and at least 100 ms have passed since the last report. An empty callback turns every member into a no-op.
+ * If a callback throws, construction and progress updates propagate the exception. The destructor ignores callback
+ * exceptions from its final report, including during stack unwinding.
  */
 class progress_reporter
 {

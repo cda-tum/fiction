@@ -88,10 +88,9 @@ enum class graph_coloring_engine : std::uint8_t
      */
     LMXRLF,  // randomized
     /**
-     * A \f$k\f$-coloring algorithm using tabu search proposed in \"Using Tabu Search Techniques for Graph Coloring\"
-     * by A. Hertz and D. de Werra in Computing 1987. The authors claim that it significantly outperforms simulated
-     * annealing. However, since it is a \f$k\f$-coloring algorithm, it is required to set `k_color_value` in
-     * `determine_vertex_coloring_params` to the chromatic number that is to be checked for.
+     * Randomized local search for a fixed color bound with a bounded iteration budget. Set `k_color_value` in
+     * `determine_vertex_coloring_params` to the color bound to search. A zero bound or an unsuccessful search returns
+     * an empty coloring. An unsuccessful search does not prove that the graph cannot be colored within the bound.
      */
     TABUCOL,  // k-coloring
     /**

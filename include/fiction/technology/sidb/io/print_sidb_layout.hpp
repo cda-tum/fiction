@@ -84,6 +84,9 @@ inline constexpr auto NO_COLOR = fmt::text_style{};
  * H-Si(111)-1x1 surface. Inputs, outputs, normal SiDBs, defects, and empty sites differ by color and symbol. With a
  * charge distribution, a charged SiDB is a filled circle colored by its sign and a neutral one a hollow circle.
  *
+ * The printer visits every site in the bounding box and emits output for empty sites. Runtime and output size grow
+ * with bounding-box area even for sparse layouts.
+ *
  * @param os Output stream to print into.
  * @param lyt Layout to print.
  * @param cd Charge distribution over the layout's SiDBs, or `nullptr` to print dot tags only.
