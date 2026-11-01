@@ -647,7 +647,13 @@ static const char *mkd_doc_fiction_fcn_unsupported_gate_orientation_exception_co
 
 static const char *mkd_doc_fiction_fcn_unsupported_gate_orientation_exception_ports = R"doc(Ports of the unsupported gate orientation.)doc";
 
-static const char *mkd_doc_fiction_fcn_unsupported_gate_orientation_exception_unsupported_gate_orientation_exception = R"doc(Records a gate coordinate and unsupported port orientation.)doc";
+static const char *mkd_doc_fiction_fcn_unsupported_gate_orientation_exception_unsupported_gate_orientation_exception =
+R"doc(Records a gate coordinate and unsupported port orientation.
+
+Raises:
+    MemoryError: If copying the ports cannot allocate storage.
+
+)doc";
 
 static const char *mkd_doc_fiction_fcn_unsupported_gate_orientation_exception_where =
 R"doc(Coordinate at which the unsupported gate orientation was found.
@@ -662,6 +668,9 @@ R"doc(Ports of the unsupported gate orientation.
 
 Returns:
     Ports.
+
+Raises:
+    MemoryError: If copying the ports cannot allocate storage.
 
 )doc";
 
@@ -14969,7 +14978,13 @@ static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_on_progress = R"doc
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_os = R"doc(Output stream.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_run = R"doc(Writes the layout with XML-escaped lattice text.)doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_run =
+R"doc(Writes the layout with XML-escaped lattice text.
+
+Raises:
+    ValueError: If a lattice vector or basis component is non-finite.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_sqd_writer =
 R"doc(Creates an SQD writer for a lattice layout.
@@ -15326,6 +15341,10 @@ Args:
     os: Output stream to write into.
     on_progress: Receives completed dot and defect records.
 
+Raises:
+    ValueError: If a lattice vector or basis component is non-finite;
+                the stream remains unchanged.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_io_write_sqd_layout_2 =
@@ -15338,6 +15357,8 @@ Args:
     on_progress: Receives completed dot and defect records.
 
 Raises:
+    ValueError: If a lattice vector or basis component is non-finite;
+                the destination remains unchanged.
     RuntimeError: If creating, writing, closing, or replacing the
                   output file fails.
 
