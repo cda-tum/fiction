@@ -141,6 +141,24 @@ Args:
 
 static const char *mkd_doc_fiction_fcn_area_stats_width = R"doc(Layout width in nm.)doc";
 
+static const char *mkd_doc_fiction_fcn_detail_checked_lookup =
+R"doc(Looks up a gate-library entry and throws when the key is absent.
+
+Args:
+    map: Gate-library map.
+    key: Key to find.
+
+Template Args:
+    Map: Map type.
+
+Returns:
+    Mapped value.
+
+Raises:
+    IndexError: If the key is absent.
+
+)doc";
+
 static const char *mkd_doc_fiction_fcn_gate_library =
 R"doc( Base class for various FCN libraries used to map gate-level layouts
  to cell-level ones. Any new gate library can extend `gate_library` if
@@ -27781,7 +27799,7 @@ static const char *mkd_doc_fiction_utils_graph_graph_coloring_engine_SAT = R"doc
 
 static const char *mkd_doc_fiction_utils_graph_graph_coloring_engine_TABUCOL =
 R"doc(Randomized local search for a fixed color bound with a bounded
-iteration budget. Set `k_color_value` in
+iteration budget. Set `heuristic_params.k_color_value` in
 `determine_vertex_coloring_params` to the color bound to search. A
 zero bound or an unsuccessful search returns an empty coloring. An
 unsuccessful search does not prove that the graph cannot be colored

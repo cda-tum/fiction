@@ -574,7 +574,7 @@ class graph_coloring_engine(enum.Enum):
     TABUCOL = 3
     """
     Randomized local search for a fixed color bound with a bounded
-    iteration budget. Set `k_color_value` in
+    iteration budget. Set `heuristic_params.k_color_value` in
     `determine_vertex_coloring_params` to the color bound to search. A
     zero bound or an unsuccessful search returns an empty coloring. An
     unsuccessful search does not prove that the graph cannot be colored
