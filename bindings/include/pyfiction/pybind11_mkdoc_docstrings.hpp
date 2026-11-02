@@ -8378,10 +8378,9 @@ by default, which, again, guarantees completeness, but becomes
 infeasible rather quickly. However, powerful symmetry breaking is
 applied that assists the solving process, e.g., it is known that all
 vertices that are belonging to the same objective are forming a
-clique, which can be pre-colored. Additionally, lexicographical
-orderings are enforced. For a more scalable (yet incomplete) approach,
-several coloring heuristics are available, from which can be chosen
-(see determine_vertex_coloring).
+clique, which can be pre-colored. For a more scalable (yet incomplete)
+approach, several coloring heuristics are available, from which can be
+chosen (see determine_vertex_coloring).
 
 This function will return `true` if all objectives could be satisfied
 or if the partial routing parameter was set. In the case of `true`
@@ -27616,16 +27615,11 @@ static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_graph
 static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_largest_clique = R"doc(Iterator to the largest given clique.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_pre_assign_largest_clique =
-R"doc(Reduce the search space by symmetry breaking. To this end, each vertex
-in the provided clique gets a different color assigned from the
-beginning.
+R"doc(Preassigns colors to the largest supplied clique, or the first vertex
+and one neighbor.
 
 Args:
     instance: Pointer to the solver instance.
-
-Returns:
-    A clique-first ordering of the vertices that assigns the clique
-    vertices the lowest indices.
 
 )doc";
 
@@ -27658,30 +27652,6 @@ Args:
 static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_solver_instance_solver_instance_2 = R"doc(Default constructor is not available.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_solver_instance_variables = R"doc(Stores all variables.)doc";
-
-static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_symmetry_breaking =
-R"doc(Reduce the search space by symmetry breaking. Two tactics are
-implemented:
-
- - pre-assigning different colors to the largest given clique, and -
-   transforming the coloring solution to be lexicographically minimal
-
-Args:
-    instance: Pointer to the solver instance.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_transform_solution_to_lexicographical_minimum =
-R"doc(Reduce the search space by symmetry breaking. To this end, the
-solution is transformed to be lexicographical minimal, i.e., no vertex
-is assigned color c unless color c - 1 has been assigned to any vertex
-of lower index.
-
-Args:
-    instance: Pointer to the solver instance.
-    clique_first_ordering: Vertex ordering with clique vertices first.
-
-)doc";
 
 static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring =
 R"doc(This function provides an interface to call various vertex coloring
