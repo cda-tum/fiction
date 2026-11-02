@@ -283,6 +283,22 @@ TEST_CASE("Concurrent advances are counted exactly once", "[progress]")
     CHECK(is_monotone(rec.records));
 }
 
+/** @brief Progress updates propagate callback exceptions. */
+TEST_CASE("Progress updates propagate callback exceptions", "[progress]")
+{
+    /** @brief Throws when an update supplies the total after the initial report. */
+    utils::progress_reporter reporter{[](const std::string_view, const std::size_t, const std::size_t total)
+                                      {
+                                          if (total != 0)
+                                          {
+                                              throw std::runtime_error{"progress update failed"};
+                                          }
+                                      },
+                                      "items"};
+
+    CHECK_THROWS_AS(reporter.set_total(1), std::runtime_error);
+}
+
 /** @brief Reporter destruction ignores callback exceptions after unfinished work. */
 TEST_CASE("The final progress report ignores callback exceptions", "[progress]")
 {
