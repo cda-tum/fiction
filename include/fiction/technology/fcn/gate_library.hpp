@@ -68,8 +68,11 @@ template <typename CoordinateType, typename PortType>
 class unsupported_gate_orientation_exception : public std::exception
 {
   public:
-    /** @brief Records a gate coordinate and unsupported port orientation. */
-    unsupported_gate_orientation_exception(const CoordinateType& c, const port_list<PortType>& p) noexcept :
+    /**
+     * @brief Records a gate coordinate and unsupported port orientation.
+     * @throws std::bad_alloc If copying the ports cannot allocate storage.
+     */
+    unsupported_gate_orientation_exception(const CoordinateType& c, const port_list<PortType>& p) :
             std::exception(),
             coord{c},
             ports{p}
@@ -87,8 +90,9 @@ class unsupported_gate_orientation_exception : public std::exception
      * Ports of the unsupported gate orientation.
      *
      * @return Ports.
+     * @throws std::bad_alloc If copying the ports cannot allocate storage.
      */
-    [[nodiscard]] port_list<PortType> which_ports() const noexcept
+    [[nodiscard]] port_list<PortType> which_ports() const
     {
         return ports;
     }

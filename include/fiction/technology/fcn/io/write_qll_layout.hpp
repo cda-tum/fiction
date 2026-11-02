@@ -129,11 +129,14 @@ class write_qll_layout_impl
     /** @brief Writes the FCN layout to the output stream in QLL format. */
     void run()
     {
-        if (std::is_same_v<Lyt, inml::layout> && !has_border_io_pins())
+        if constexpr (std::is_same_v<Lyt, inml::layout>)
         {
-            throw std::invalid_argument(
-                "the layout does not fulfill all requirements to be written as a QLL file because it does not have "
-                "designated I/O pins or they are not routed to the layout's borders");
+            if (!has_border_io_pins())
+            {
+                throw std::invalid_argument(
+                    "the layout does not fulfill all requirements to be written as a QLL file because it does not have "
+                    "designated I/O pins or they are not routed to the layout's borders");
+            }
         }
 
         write_header();

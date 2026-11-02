@@ -50,7 +50,8 @@ thread or a worker thread before the algorithm returns.
 
 Algorithms use a `progress_reporter` to forward their progress. Each reporter serializes its callbacks and throttles
 intermediate reports to whole percents and at most ten reports per second. It always forwards the first and final count
-of a task, including before a reset starts another pass. Callbacks must not throw exceptions. Callbacks shared by multiple
+of a task, including before a reset starts another pass. Construction and progress updates propagate callback exceptions
+on the calling thread; destruction ignores callback exceptions from the final report. Callbacks shared by multiple
 reporters must synchronize access to shared state, including Python callbacks that release the global interpreter lock.
 
 Parallel algorithms accept an optional `on_worker_progress` callback. Its arguments are the stable logical

@@ -31,9 +31,11 @@
 #include <tinyxml2.h>
 
 #include <cassert>
+#include <cmath>
 #include <ctime>
 #include <ostream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -59,100 +61,60 @@ inline constexpr const char* PROGRAM_BLOCK = "    <program>\n"
                                              "        <date>{}</date>\n"
                                              "    </program>\n";
 
-inline constexpr const char* GUI_BLOCK = "    <gui>\n"
-                                         "        <zoom>{}</zoom>\n"
-                                         "        <displayed_region x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\"/>\n"
-                                         "        <scroll x=\"{}\" y=\"{}\"/>\n"
-                                         "    </gui>\n";
-
-inline constexpr const char* LAYERS_BLOCK                    = "    <layers>\n{}"
-                                                               "    </layers>\n";
-inline constexpr const char* LATTICE_LAYER_DEFINITION_SI_100 = "        <layer_prop>\n"
-                                                               "            <name>Lattice</name>\n"
-                                                               "            <type>Lattice</type>\n"
-                                                               "            <role>Design</role>\n"
-                                                               "            <zoffset>0</zoffset>\n"
-                                                               "            <zheight>0</zheight>\n"
-                                                               "            <visible>1</visible>\n"
-                                                               "            <active>0</active>\n"
-                                                               "            <lat_vec>\n"
-                                                               "                <name>Si(100) 2x1</name>\n"
-                                                               "                <a1 x=\"3.84\" y=\"0\"/>\n"
-                                                               "                <a2 x=\"0\" y=\"7.68\"/>\n"
-                                                               "                <N>2</N>\n"
-                                                               "                <b1 x=\"0\" y=\"0\"/>\n"
-                                                               "                <b2 x=\"0\" y=\"2.25\"/>\n"
-                                                               "            </lat_vec>\n"
-                                                               "        </layer_prop>\n";
-inline constexpr const char* LATTICE_LAYER_DEFINITION_SI_111 = "        <layer_prop>\n"
-                                                               "            <name>Lattice</name>\n"
-                                                               "            <type>Lattice</type>\n"
-                                                               "            <role>Design</role>\n"
-                                                               "            <zoffset>0</zoffset>\n"
-                                                               "            <zheight>0</zheight>\n"
-                                                               "            <visible>1</visible>\n"
-                                                               "            <active>0</active>\n"
-                                                               "            <lat_vec>\n"
-                                                               "                 <name>Si(111) 1x1</name>\n"
-                                                               "                 <a1 x=\"6.65\" y=\"0\"/>\n"
-                                                               "                 <a2 x=\"0\" y=\"3.84\"/>\n"
-                                                               "                 <N>2</N>\n"
-                                                               "                 <b1 x=\"0\" y=\"0\"/>\n"
-                                                               "                 <b2 x=\"3.3255\" y=\"1.92\"/>\n"
-                                                               "            </lat_vec>\n"
-                                                               "        </layer_prop>\n";
-inline constexpr const char* LATTICE_LAYER_DEFINITION        = "        <layer_prop>\n"
-                                                               "            <name>Lattice</name>\n"
-                                                               "            <type>Lattice</type>\n"
-                                                               "            <role>Design</role>\n"
-                                                               "            <zoffset>0</zoffset>\n"
-                                                               "            <zheight>0</zheight>\n"
-                                                               "            <visible>1</visible>\n"
-                                                               "            <active>0</active>\n"
-                                                               "            <lat_vec>\n"
-                                                               "                <name>{}</name>\n"
-                                                               "                <a1 x=\"{}\" y=\"{}\"/>\n"
-                                                               "                <a2 x=\"{}\" y=\"{}\"/>\n"
-                                                               "                <N>2</N>\n"
-                                                               "                <b1 x=\"{}\" y=\"{}\"/>\n"
-                                                               "                <b2 x=\"{}\" y=\"{}\"/>\n"
-                                                               "            </lat_vec>\n"
-                                                               "        </layer_prop>\n";
-inline constexpr const char* SCREENSHOT_LAYER_DEFINITION     = "        <layer_prop>\n"
-                                                               "            <name>Screenshot Overlay</name>\n"
-                                                               "            <type>Misc</type>\n"
-                                                               "            <role>Overlay</role>\n"
-                                                               "            <zoffset>0</zoffset>\n"
-                                                               "            <zheight>0</zheight>\n"
-                                                               "            <visible>0</visible>\n"
-                                                               "            <active>0</active>\n"
-                                                               "        </layer_prop>\n";
-inline constexpr const char* SURFACE_LAYER_DEFINITION        = "        <layer_prop>\n"
-                                                               "            <name>Surface</name>\n"
-                                                               "            <type>DB</type>\n"
-                                                               "            <role>Design</role>\n"
-                                                               "            <zoffset>0</zoffset>\n"
-                                                               "            <zheight>0</zheight>\n"
-                                                               "            <visible>1</visible>\n"
-                                                               "            <active>0</active>\n"
-                                                               "        </layer_prop>\n";
-inline constexpr const char* ELECTRODE_LAYER_DEFINITION      = "        <layer_prop>\n"
-                                                               "            <name>Metal</name>\n"
-                                                               "            <type>Electrode</type>\n"
-                                                               "            <role>Design</role>\n"
-                                                               "            <zoffset>1000</zoffset>\n"
-                                                               "            <zheight>100</zheight>\n"
-                                                               "            <visible>1</visible>\n"
-                                                               "            <active>0</active>\n"
-                                                               "        </layer_prop>\n";
-inline constexpr const char* DEFECT_LAYER_DEFINITION         = "        <layer_prop>\n"
-                                                               "            <name>Defects</name>\n"
-                                                               "            <type>Defects</type>\n"
-                                                               "            <zoffset>0</zoffset>\n"
-                                                               "            <zheight>0</zheight>\n"
-                                                               "            <visible>1</visible>\n"
-                                                               "            <active>0</active>\n"
-                                                               "        </layer_prop>\n";
+inline constexpr const char* LAYERS_BLOCK                = "    <layers>\n{}"
+                                                           "    </layers>\n";
+inline constexpr const char* LATTICE_LAYER_DEFINITION    = "        <layer_prop>\n"
+                                                           "            <name>Lattice</name>\n"
+                                                           "            <type>Lattice</type>\n"
+                                                           "            <role>Design</role>\n"
+                                                           "            <zoffset>0</zoffset>\n"
+                                                           "            <zheight>0</zheight>\n"
+                                                           "            <visible>1</visible>\n"
+                                                           "            <active>0</active>\n"
+                                                           "            <lat_vec>\n"
+                                                           "                <name>{}</name>\n"
+                                                           "                <a1 x=\"{}\" y=\"{}\"/>\n"
+                                                           "                <a2 x=\"{}\" y=\"{}\"/>\n"
+                                                           "                <N>2</N>\n"
+                                                           "                <b1 x=\"{}\" y=\"{}\"/>\n"
+                                                           "                <b2 x=\"{}\" y=\"{}\"/>\n"
+                                                           "            </lat_vec>\n"
+                                                           "        </layer_prop>\n";
+inline constexpr const char* SCREENSHOT_LAYER_DEFINITION = "        <layer_prop>\n"
+                                                           "            <name>Screenshot Overlay</name>\n"
+                                                           "            <type>Misc</type>\n"
+                                                           "            <role>Overlay</role>\n"
+                                                           "            <zoffset>0</zoffset>\n"
+                                                           "            <zheight>0</zheight>\n"
+                                                           "            <visible>0</visible>\n"
+                                                           "            <active>0</active>\n"
+                                                           "        </layer_prop>\n";
+inline constexpr const char* SURFACE_LAYER_DEFINITION    = "        <layer_prop>\n"
+                                                           "            <name>Surface</name>\n"
+                                                           "            <type>DB</type>\n"
+                                                           "            <role>Design</role>\n"
+                                                           "            <zoffset>0</zoffset>\n"
+                                                           "            <zheight>0</zheight>\n"
+                                                           "            <visible>1</visible>\n"
+                                                           "            <active>0</active>\n"
+                                                           "        </layer_prop>\n";
+inline constexpr const char* ELECTRODE_LAYER_DEFINITION  = "        <layer_prop>\n"
+                                                           "            <name>Metal</name>\n"
+                                                           "            <type>Electrode</type>\n"
+                                                           "            <role>Design</role>\n"
+                                                           "            <zoffset>1000</zoffset>\n"
+                                                           "            <zheight>100</zheight>\n"
+                                                           "            <visible>1</visible>\n"
+                                                           "            <active>0</active>\n"
+                                                           "        </layer_prop>\n";
+inline constexpr const char* DEFECT_LAYER_DEFINITION     = "        <layer_prop>\n"
+                                                           "            <name>Defects</name>\n"
+                                                           "            <type>Defects</type>\n"
+                                                           "            <zoffset>0</zoffset>\n"
+                                                           "            <zheight>0</zheight>\n"
+                                                           "            <visible>1</visible>\n"
+                                                           "            <active>0</active>\n"
+                                                           "        </layer_prop>\n";
 
 inline constexpr const char* OPEN_DESIGN         = "    <design>\n";
 inline constexpr const char* LATTICE_LAYER       = "        <layer type=\"Lattice\"/>\n";
@@ -190,9 +152,6 @@ inline constexpr const char* COULOMB = "                <coulomb charge=\"{}\" e
 
 // color format is Alpha RBG
 inline constexpr const char* NORMAL_COLOR = "#ffc8c8c8";
-inline constexpr const char* INPUT_COLOR  = "#ff008dc8";
-inline constexpr const char* OUTPUT_COLOR = "#ffe28686";
-inline constexpr const char* CONST_COLOR  = "#ff000000";
 
 // maps defect types to their respective string representation
 inline const std::unordered_map<sidb::model::defect_type, const char*> defect_type_to_name{
@@ -235,9 +194,34 @@ class sqd_writer
 
     /**
      * Writes the layout with XML-escaped lattice text.
+     * @throws std::invalid_argument If a lattice component is non-finite or a charged-defect material parameter is
+     * non-finite or negative.
      */
     void run()
     {
+        /** @brief Geometry serialized into the lattice layer. */
+        const auto& lat = lyt.get_lattice();
+        for (const auto& [x, y] : {lat.a1, lat.a2, lat.basis[0], lat.basis[1]})
+        {
+            if (!std::isfinite(x) || !std::isfinite(y))
+            {
+                throw std::invalid_argument("SQD lattice geometry must be finite");
+            }
+        }
+        lyt.foreach_defect(
+            [](const auto& entry)
+            {
+                /** @brief Defect whose Coulomb parameters are serialized when charged. */
+                const auto& d = entry.second;
+                if (sidb::model::is_charged_defect_type(d) &&
+                    (!std::isfinite(d.epsilon_r) || !std::isfinite(d.lambda_tf) || d.epsilon_r < 0.0 ||
+                     d.lambda_tf < 0.0))
+                {
+                    throw std::invalid_argument(
+                        "SQD charged-defect material parameters must be finite and nonnegative");
+                }
+            });
+
         std::stringstream header{}, design{};
 
         header << siqad::SQD_HEADER << siqad::OPEN_SIQAD;
@@ -369,7 +353,10 @@ class sqd_writer
  *
  * @param lyt Layout to write.
  * @param os Output stream to write into.
- * @param on_progress Receives completed dot and defect records.
+ * @param on_progress Receives completed dot and defect records. The callback must not modify the layout being
+ * traversed.
+ * @throws std::invalid_argument If a lattice component is non-finite or a charged-defect material parameter is
+ * non-finite or negative; the stream remains unchanged.
  */
 inline void write_sqd_layout(const layout& lyt, std::ostream& os, utils::progress_callback on_progress = {})
 {
@@ -382,7 +369,10 @@ inline void write_sqd_layout(const layout& lyt, std::ostream& os, utils::progres
  *
  * @param lyt Layout to write.
  * @param filename File to write into.
- * @param on_progress Receives completed dot and defect records.
+ * @param on_progress Receives completed dot and defect records. The callback must not modify the layout being
+ * traversed.
+ * @throws std::invalid_argument If a lattice component is non-finite or a charged-defect material parameter is
+ * non-finite or negative; the destination remains unchanged.
  * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
  */
 inline void write_sqd_layout(const layout& lyt, const std::string_view& filename,

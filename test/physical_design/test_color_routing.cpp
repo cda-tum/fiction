@@ -52,7 +52,32 @@ TEST_CASE("Color routing validates endpoints before changing the layout", "[colo
     params.path_limit = 1;
     CHECK_THROWS_AS(color_routing(layout, objectives, params), std::invalid_argument);
     params.path_limit = 0;
-    CHECK_FALSE(color_routing(layout, objectives, params));
+    /** @brief Statistics count every objective when no routing is applied. */
+    color_routing_stats stats{};
+    CHECK_FALSE(color_routing(layout, objectives, params, &stats));
+    CHECK(stats.number_of_unsatisfied_objectives == objectives.size());
+    CHECK(layout.source({output, 0}) == input);
+    CHECK(layout.num_wires() == 1);
+    CHECK(layout.get_tile(output) == layout_base::coordinate{1, 1});
+}
+
+TEST_CASE("Color routing rejects TabuCol before changing the layout", "[color-routing]")
+{
+    /** @brief Partial routing must not bypass unsupported-engine validation. */
+    const auto partial = GENERATE(false, true);
+    CAPTURE(partial);
+    /** @brief Layout whose existing connection must survive the rejected engine. */
+    cartesian_gate_layout layout{{2, 2}, clocking::twoddwave()};
+    /** @brief Existing input. */
+    const auto input = layout.create_pi("input", {0, 0});
+    /** @brief Existing connected buffer. */
+    const auto output = layout.create_buf(input, {1, 1});
+    /** @brief Valid routing objective. */
+    const std::vector<routing_objective> objectives{{.source = {0, 0}, .target = {1, 1}, .input_index = 0}};
+
+    CHECK_THROWS_AS(color_routing(layout, objectives,
+                                  {.conduct_partial_routing = partial, .engine = graph_coloring_engine::TABUCOL}),
+                    std::invalid_argument);
     CHECK(layout.source({output, 0}) == input);
     CHECK(layout.num_wires() == 1);
     CHECK(layout.get_tile(output) == layout_base::coordinate{1, 1});

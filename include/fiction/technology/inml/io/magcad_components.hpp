@@ -35,10 +35,10 @@ inline constexpr const std::array<const char*, 6> COMPONENTS{"Magnet", "Coupler"
  * The MagCAD component, as an index into `COMPONENTS`, that a magnet type starts.
  */
 inline const std::unordered_map<magnet_type, uint8_t> COMPONENT_SELECTOR{
-    {magnet_type::NORMAL, 0},           {magnet_type::INPUT, 0},
-    {magnet_type::OUTPUT, 0},           {magnet_type::FANOUT_COUPLER_MAGNET, 1},
-    {magnet_type::CROSSWIRE_MAGNET, 2}, {magnet_type::SLANTED_EDGE_DOWN_MAGNET, 3},
-    {magnet_type::INVERTER_MAGNET, 4},  {magnet_type::SLANTED_EDGE_UP_MAGNET, 5}};
+    {magnet_type::NORMAL, uint8_t{0}},           {magnet_type::INPUT, uint8_t{0}},
+    {magnet_type::OUTPUT, uint8_t{0}},           {magnet_type::FANOUT_COUPLER_MAGNET, uint8_t{1}},
+    {magnet_type::CROSSWIRE_MAGNET, uint8_t{2}}, {magnet_type::SLANTED_EDGE_DOWN_MAGNET, uint8_t{3}},
+    {magnet_type::INVERTER_MAGNET, uint8_t{4}},  {magnet_type::SLANTED_EDGE_UP_MAGNET, uint8_t{5}}};
 /**
  * Adds to `skip` the magnets that belong to the MagCAD component starting at `c`, so that a writer that scans the
  * layout row by row emits every component once. The positions follow the ToPoliNano gate library.

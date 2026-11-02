@@ -573,13 +573,12 @@ class graph_coloring_engine(enum.Enum):
 
     TABUCOL = 3
     """
-    A :math:`k`-coloring algorithm using tabu search proposed in \\"Using
-    Tabu Search Techniques for Graph Coloring\\" by A. Hertz and D. de
-    Werra in Computing 1987. The authors claim that it significantly
-    outperforms simulated annealing. However, since it is a
-    :math:`k`-coloring algorithm, it is required to set `k_color_value` in
-    `determine_vertex_coloring_params` to the chromatic number that is to
-    be checked for.
+    Randomized local search for a fixed color bound with a bounded
+    iteration budget. Set `k_color_value` in
+    `determine_vertex_coloring_params` to the color bound to search. A
+    zero bound or an unsuccessful search returns an empty coloring. An
+    unsuccessful search does not prove that the graph cannot be colored
+    within the bound.
     """
 
     SAT = 4
@@ -641,12 +640,13 @@ def color_routing(
     Returns True when all objectives are satisfied or conduct_partial_routing is enabled.
     With path_limit=0, no candidate paths are generated and endpoint bounds are not checked.
     Raises ValueError for an out-of-extent objective endpoint when path_limit is None or nonzero.
+    Raises ValueError for TABUCOL, which requires a color bound that this API does not accept.
 
     Args:
         conduct_partial_routing: Do not abort if some objectives cannot be fulfilled, but partially route the layout as much as possible.
         crossings: Allow wires to cross on separate layers.
         path_limit: Maximum paths considered per objective; None enumerates all paths.
-        engine: The engine to use.
+        engine: MCS, DSATUR, LMXRLF, or SAT.
         partial_sat: Allow partial solutions when the SAT coloring engine is selected.
     """
 

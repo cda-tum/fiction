@@ -162,7 +162,7 @@ void register_gate_layout(nb::module_& m, const std::string& topology)
             {
                 if (const auto scheme = fiction::layouts::clocking::get_scheme(
                         name,
-                        [](const GateLyt& layout) -> std::optional<fiction::layouts::arrangement>
+                        []([[maybe_unused]] const GateLyt& layout) -> std::optional<fiction::layouts::arrangement>
                         {
                             if constexpr ((std::derived_from<GateLyt, fiction::layouts::hexagonal_layout> &&
                                            !std::derived_from<GateLyt, fiction::layouts::shifted_cartesian_layout>))

@@ -39,7 +39,9 @@ namespace fiction::utils
  * count. In between, reports are throttled, so consumers must not rely on seeing every intermediate value.
  *
  * The callback may be invoked from any thread the algorithm spawns. Each reporter serializes its own invocations;
- * callbacks shared by multiple reporters must synchronize access to shared state. The callback must not throw.
+ * callbacks shared by multiple reporters must synchronize access to shared state. See @ref progress_reporter for
+ * callback exception handling.
+ * The callback must not modify input objects that the algorithm traverses, unless the entry point documents a snapshot.
  */
 using progress_callback = std::function<void(std::string_view task, std::size_t done, std::size_t total)>;
 
@@ -208,6 +210,8 @@ class worker_progress_scope
  * concurrently from any number of threads. The reporter forwards the first report, the final report in its destructor,
  * and intermediate reports whenever another percent of the total (or another 64 items when the total is unknown) was
  * completed and at least 100 ms have passed since the last report. An empty callback turns every member into a no-op.
+ * If a callback throws, construction and progress updates propagate the exception on the calling thread. The destructor
+ * ignores callback exceptions from its final report, including during stack unwinding.
  */
 class progress_reporter
 {
