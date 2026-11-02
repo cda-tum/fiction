@@ -165,40 +165,42 @@ inline void print_sidb_layout(std::ostream& os, const layout& lyt, const charge_
             }
         }
 
-        if (const auto d = lyt.get_defect(s); d.type != model::defect_type::NONE && !printed)
+        if (!printed)
         {
-            if (model::is_negatively_charged_defect(d))
+            if (const auto d = lyt.get_defect(s); d.type != model::defect_type::NONE)
             {
-                paint(detail::NEGATIVE_DEFECT_COLOR, " ⊟ ");
-            }
-            else if (model::is_positively_charged_defect(d))
-            {
-                paint(detail::POSITIVE_DEFECT_COLOR, " ⊞ ");
-            }
-            else
-            {
-                paint(detail::NORMAL_COLOR, " ⊡ ");
-            }
+                if (model::is_negatively_charged_defect(d))
+                {
+                    paint(detail::NEGATIVE_DEFECT_COLOR, " ⊟ ");
+                }
+                else if (model::is_positively_charged_defect(d))
+                {
+                    paint(detail::POSITIVE_DEFECT_COLOR, " ⊞ ");
+                }
+                else
+                {
+                    paint(detail::NORMAL_COLOR, " ⊡ ");
+                }
 
-            printed = true;
-        }
+                printed = true;
+            }
+            else if (const auto ct = lyt.get_dot_tag(s); ct != dot_tag::EMPTY)
+            {
+                if (ct == dot_tag::INPUT)
+                {
+                    paint(detail::INPUT_COLOR, " ◯ ");
+                }
+                else if (ct == dot_tag::OUTPUT)
+                {
+                    paint(detail::OUTPUT_COLOR, " ◯ ");
+                }
+                else
+                {
+                    paint(detail::NORMAL_COLOR, " ◯ ");
+                }
 
-        if (const auto ct = lyt.get_dot_tag(s); ct != dot_tag::EMPTY && !printed)
-        {
-            if (ct == dot_tag::INPUT)
-            {
-                paint(detail::INPUT_COLOR, " ◯ ");
+                printed = true;
             }
-            else if (ct == dot_tag::OUTPUT)
-            {
-                paint(detail::OUTPUT_COLOR, " ◯ ");
-            }
-            else
-            {
-                paint(detail::NORMAL_COLOR, " ◯ ");
-            }
-
-            printed = true;
         }
 
         if (!printed)

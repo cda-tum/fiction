@@ -320,7 +320,7 @@ class sqd_reader
             }
         }
 
-        return lyt;
+        return std::move(lyt);
     }
     catch (const std::invalid_argument&)
     {

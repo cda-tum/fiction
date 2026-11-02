@@ -402,6 +402,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - I/O:
 
+  - SQD reads avoid copying the completed layout; SiDB text printing skips lookups for sites already drawn.
   - DOT drawers avoid copying completed rows and columns.
   - QCA SVG rendering now reuses static tile and latch templates without per-tile text copies.
   - FGL name escaping appends text in one pass to avoid repeated suffix copies for long whitespace-heavy names.
