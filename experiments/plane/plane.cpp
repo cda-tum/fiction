@@ -82,7 +82,7 @@ constexpr uint64_t MAX_DUPLICATIONS = 2000000;
 
 named_technology_network read_network(const std::string& name)
 {
-    std::ostringstream      os{};
+    std::ostringstream                                        os{};
     network_reader<std::shared_ptr<named_technology_network>> reader{fiction_experiments::benchmark_path(name), os};
 
     return *reader.get_networks().front();
@@ -217,6 +217,8 @@ try
             planarization_stats p_st{};
             const auto          planar = planarization(ranked, p_ps, &p_st);
 
+            const auto flat = flatten_planarization(planar).first;
+
             fmt::print("[i]   placing and routing {} planar nodes\n", planar.size());
             plane_stats                       l_st{};
             std::string                       error{};
@@ -227,13 +229,13 @@ try
 
             try
             {
-                const auto layout = plane<cartesian_gate_layout>(planar, {}, &l_st);
+                const auto layout = plane(flat, {}, &l_st);
 
                 crossings = layout.num_crossings();
 
                 fmt::print("[i]   checking equivalence of a {} x {} layout\n", l_st.x_size, l_st.y_size);
                 const mockturtle::stopwatch stop{eq_time};
-                const auto                  eq = layout_equivalent(planar, layout);
+                const auto                  eq = layout_equivalent(flat, layout);
                 equivalent                     = eq.first;
                 method                         = eq.second;
             }

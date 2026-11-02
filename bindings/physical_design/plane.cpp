@@ -15,11 +15,9 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
-#include <fiction/layouts/gate_layout.hpp>
-#include <fiction/networks/views/mutable_rank_view.hpp>
 #include <fiction/physical_design/plane.hpp>
+#include <fiction/types.hpp>
 
 #include <sstream>
 
@@ -79,12 +77,7 @@ void register_plane(nb::module_& m)
 
             const nb::gil_scoped_release release{};
 
-            // the node order of a planarized technology network is its rank order; `cleanup_dangling` would reorder
-            // the nodes, so a gate that no output reaches is rejected instead
-            const fiction::networks::views::mutable_rank_view ranked{network};
-
-            return fiction::physical_design::plane<fiction::layouts::cartesian_gate_layout>(ranked, parameters,
-                                                                                            statistics);
+            return fiction::physical_design::plane(network, parameters, statistics);
         },
         nb::arg("network"), nb::kw_only(), nb::arg("statistics") = nullptr,
         nb::arg("number_of_clock_phases") = plane_options{}.number_of_clock_phases,
