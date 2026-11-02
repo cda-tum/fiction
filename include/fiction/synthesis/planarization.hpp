@@ -16,22 +16,27 @@
 
 #pragma once
 
+#include "fiction/networks/name_utils.hpp"
 #include "fiction/networks/virtual_pi_network.hpp"
 #include "fiction/synthesis/crossing_gate_planarization.hpp"
 #include "fiction/synthesis/network_balancing.hpp"
 #include "fiction/synthesis/node_duplication_planarization.hpp"
 #include "fiction/synthesis/planar_fanout_substitution.hpp"
 #include "fiction/synthesis/planar_rebalancing.hpp"
+#include "fiction/types.hpp"
 #include "fiction/utils/graph/mincross.hpp"
 #include "fiction/utils/progress.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
+#include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <cstdint>
 #include <iostream>
 #include <stdexcept>
+#include <utility>
+#include <vector>
 
 namespace fiction::synthesis
 {
@@ -185,6 +190,76 @@ template <typename Ntk>
     }
 
     return result;
+}
+
+/**
+ * @brief Copies a planar network into a named technology network whose node order encodes the rank order.
+ *
+ * The result lists the primary inputs in the order of level 0, then the gates level by level in rank order. Virtual
+ * primary inputs become ordinary primary inputs of the result.
+ *
+ * @tparam Ntk Ranked network type of the planar network.
+ * @param planar Planar network, the result of `planarization`.
+ * @return The copy, and for every primary input of the copy the index of the input of the original network that it
+ * stands for. A virtual primary input maps to the index of its real primary input.
+ */
+template <typename Ntk>
+[[nodiscard]] std::pair<networks::named_technology_network, std::vector<uint32_t>>
+flatten_planarization(const networks::virtual_pi_network<Ntk>& planar)
+{
+    using planar_network = networks::virtual_pi_network<Ntk>;
+    using signal         = mockturtle::signal<networks::named_technology_network>;
+
+    networks::named_technology_network           dest{};
+    mockturtle::node_map<signal, planar_network> old2new{planar};
+    std::vector<uint32_t>                        original_input{};
+
+    old2new[planar.get_constant(false)] = dest.get_constant(false);
+    old2new[planar.get_constant(true)]  = dest.get_constant(true);
+
+    // the index of every real input in the original network is its creation order
+    mockturtle::node_map<uint32_t, planar_network> real_index{planar};
+    uint32_t                                       next_real = 0;
+
+    planar.foreach_pi_unranked(
+        [&planar, &real_index, &next_real](const auto& n)
+        {
+            if (planar.is_real_pi(n))
+            {
+                real_index[n] = next_real++;
+            }
+        });
+
+    planar.foreach_pi(
+        [&planar, &dest, &old2new, &real_index, &original_input](const auto& n)
+        {
+            old2new[n] = dest.create_pi();
+            original_input.push_back(real_index[planar.is_real_pi(n) ? n : planar.get_real_pi(n)]);
+        });
+
+    for (uint32_t level = 1; level <= planar.depth(); ++level)
+    {
+        planar.foreach_node_in_rank(level,
+                                    [&planar, &dest, &old2new](const auto& n)
+                                    {
+                                        if (planar.is_constant(n) || planar.is_pi(n))
+                                        {
+                                            return;
+                                        }
+
+                                        std::vector<signal> children{};
+                                        planar.foreach_fanin(n, [&planar, &old2new, &children](const auto& f)
+                                                             { children.push_back(old2new[planar.get_node(f)]); });
+
+                                        old2new[n] = dest.create_node(children, planar.node_function(n));
+                                    });
+    }
+
+    planar.foreach_po([&planar, &dest, &old2new](const auto& po) { dest.create_po(old2new[planar.get_node(po)]); });
+
+    networks::restore_names(planar, dest, old2new);
+
+    return {dest, original_input};
 }
 
 }  // namespace fiction::synthesis

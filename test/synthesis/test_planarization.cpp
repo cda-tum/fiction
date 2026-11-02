@@ -31,6 +31,7 @@
 #include <fiction/utils/graph/mincross.hpp>
 
 #include <mockturtle/algorithms/cleanup.hpp>
+#include <mockturtle/algorithms/simulation.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/traits.hpp>
 
@@ -583,4 +584,51 @@ TEST_CASE("Networks with virtual primary inputs are rejected", "[planarization]"
     REQUIRE(planar.num_virtual_pis() > 0);
 
     CHECK_THROWS_AS(planarization(planar), std::invalid_argument);
+}
+
+TEST_CASE("Flattening keeps the functions and the rank order of a planar network", "[planarization]")
+{
+    const auto ntk    = blueprints::full_adder_network<technology_network>();
+    const auto planar = planarization(rank(ntk));
+    REQUIRE(planar.num_virtual_pis() > 0);
+
+    const auto [flat, original_input] = flatten_planarization(planar);
+
+    REQUIRE(original_input.size() == flat.num_pis());
+    CHECK(flat.num_pis() == planar.num_pis());
+    CHECK(flat.num_pos() == planar.num_pos());
+
+    const mutable_rank_view ranked{flat};
+
+    CHECK(ranked.depth() == planar.depth());
+    CHECK(utils::graph::count_crossings(ranked) == 0);
+
+    for (uint32_t level = 0; level <= planar.depth(); ++level)
+    {
+        CAPTURE(level);
+        CHECK(ranked.rank_width(level) == planar.rank_width(level));
+    }
+
+    // every input assignment of the original network, with each copied input tied to the input it stands for
+    for (uint64_t assignment = 0; assignment < (uint64_t{1} << ntk.num_pis()); ++assignment)
+    {
+        CAPTURE(assignment);
+
+        std::vector<bool> original_values(ntk.num_pis());
+        for (std::size_t i = 0; i < original_values.size(); ++i)
+        {
+            original_values[i] = ((assignment >> i) & 1u) != 0;
+        }
+
+        std::vector<bool> flat_values(flat.num_pis());
+        for (std::size_t i = 0; i < flat_values.size(); ++i)
+        {
+            flat_values[i] = original_values[original_input[i]];
+        }
+
+        const auto expected = mockturtle::simulate<bool>(ntk, mockturtle::default_simulator<bool>{original_values});
+        const auto actual   = mockturtle::simulate<bool>(flat, mockturtle::default_simulator<bool>{flat_values});
+
+        CHECK(actual == expected);
+    }
 }
