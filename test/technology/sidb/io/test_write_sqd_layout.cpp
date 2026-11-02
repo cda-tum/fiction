@@ -15,7 +15,9 @@
  * @author Jan Drewniok (Drewniok)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
@@ -31,7 +33,15 @@
 
 #include <tinyxml2.h>
 
+#include <array>
+#include <filesystem>
+#include <fstream>
+#include <ios>
+#include <iterator>
+#include <limits>
+#include <random>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -42,6 +52,139 @@ using namespace fiction::physical_design;
 using namespace fiction::sidb;
 using namespace fiction::sidb::io;
 using namespace fiction::sidb::model;
+
+/** @brief SQD export rejects non-finite geometry before changing either destination. */
+TEST_CASE("SQD export preserves output when lattice geometry is non-finite", "[sqd]")
+{
+    /** @brief Component of the two primitive vectors and two basis vectors. */
+    const auto component = GENERATE(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u);
+    /** @brief Non-finite values rejected by the SQD numeric format. */
+    const auto invalid = GENERATE(std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::infinity(),
+                                  -std::numeric_limits<double>::infinity());
+    CAPTURE(component, invalid);
+    /** @brief Publicly constructible custom geometry. */
+    auto lat = sidb::lattice::si_100_2x1();
+    /** @brief Every scalar serialized in the lattice layer. */
+    const std::array components{&lat.a1.first,       &lat.a1.second,       &lat.a2.first,       &lat.a2.second,
+                                &lat.basis[0].first, &lat.basis[0].second, &lat.basis[1].first, &lat.basis[1].second};
+    *components.at(component) = invalid;
+    /** @brief Layout whose geometry cannot be represented by finite SQD numbers. */
+    const sidb::layout lyt{lat};
+
+    SECTION("stream")
+    {
+        /** @brief Complete destination contents before serialization. */
+        std::stringstream stream{};
+        stream << "original";
+        CHECK_THROWS_AS(write_sqd_layout(lyt, stream), std::invalid_argument);
+        CHECK(stream.str() == "original");
+    }
+    SECTION("file")
+    {
+        /** @brief Newly owned directory isolates destination and atomic-write temporary files. */
+        const auto directory =
+            std::filesystem::temp_directory_path() / ("fiction-sqd-test-" + std::to_string(std::random_device{}()));
+        REQUIRE(std::filesystem::create_directory(directory));
+        /** @brief Existing output that a failed export must preserve. */
+        const auto destination = directory / "output.sqd";
+        {
+            /** @brief Original file contents. */
+            std::ofstream original{destination, std::ios::binary};
+            original << "original";
+            REQUIRE(original.good());
+        }
+        CHECK_THROWS_AS(write_sqd_layout(lyt, destination.string()), std::invalid_argument);
+        {
+            /** @brief Complete destination after the rejected export. */
+            std::ifstream stream{destination, std::ios::binary};
+            /** @brief Every preserved destination byte. */
+            const std::string content{std::istreambuf_iterator<char>{stream}, std::istreambuf_iterator<char>{}};
+            CHECK(content == "original");
+        }
+        std::filesystem::remove_all(directory);
+    }
+}
+
+/** @brief Invalid charged-defect parameters leave destinations and progress unchanged. */
+TEST_CASE("SQD export preserves output when charged-defect parameters are invalid", "[sqd]")
+{
+    /** @brief Charge-zero special type and nonzero-charge generic type both serialize Coulomb parameters. */
+    auto surface_defect = GENERATE(defect{defect_type::DB, 0, 5.6, 5.0}, defect{defect_type::UNKNOWN, 1, 5.6, 5.0});
+    /** @brief Material parameter receiving an invalid value. */
+    const auto component = GENERATE(0u, 1u);
+    /** @brief Non-finite and negative values cannot represent SQD material parameters. */
+    const auto invalid = GENERATE(std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::infinity(),
+                                  -std::numeric_limits<double>::infinity(), -1.0);
+    CAPTURE(surface_defect.type, surface_defect.charge, component, invalid);
+    /** @brief Publicly mutable material parameters of a valid constructed defect. */
+    const std::array components{&surface_defect.epsilon_r, &surface_defect.lambda_tf};
+    *components.at(component) = invalid;
+    /** @brief Nonempty layout makes premature serialization progress observable. */
+    sidb::layout lyt{};
+    lyt.assign_sidb({1, 1, 1}, dot_tag::INPUT);
+    lyt.assign_defect({0, 0, 0}, surface_defect);
+    /** @brief Complete destination contents before export. */
+    const std::string original{"original\ncomplete second line\n"};
+    /** @brief Number of reports emitted before input validation rejects the layout. */
+    unsigned callbacks{};
+    /** @brief Nonthrowing observer records premature progress. */
+    const auto on_progress = [&](auto, auto, auto) { ++callbacks; };
+
+    SECTION("stream")
+    {
+        /** @brief Existing stream contents that a failed export must preserve. */
+        std::stringstream stream{};
+        stream << original;
+        CHECK_THROWS_AS(write_sqd_layout(lyt, stream, on_progress), std::invalid_argument);
+        CHECK(stream.str() == original);
+        CHECK(callbacks == 0);
+    }
+    SECTION("file")
+    {
+        /** @brief Owned directory isolates the existing destination. */
+        const auto directory =
+            std::filesystem::temp_directory_path() / ("fiction-sqd-test-" + std::to_string(std::random_device{}()));
+        REQUIRE(std::filesystem::create_directory(directory));
+        /** @brief Existing output that a failed export must preserve. */
+        const auto destination = directory / "output.sqd";
+        {
+            /** @brief Original file contents. */
+            std::ofstream stream{destination, std::ios::binary};
+            stream << original;
+            REQUIRE(stream.good());
+        }
+        CHECK_THROWS_AS(write_sqd_layout(lyt, destination.string(), on_progress), std::invalid_argument);
+        {
+            /** @brief Complete destination after the rejected export. */
+            std::ifstream stream{destination, std::ios::binary};
+            /** @brief Every preserved destination byte. */
+            const std::string content{std::istreambuf_iterator<char>{stream}, std::istreambuf_iterator<char>{}};
+            CHECK(content == original);
+        }
+        CHECK(callbacks == 0);
+        std::filesystem::remove_all(directory);
+    }
+}
+
+/** @brief Neutral-defect material parameters are omitted from SQD records. */
+TEST_CASE("SQD export ignores unused neutral-defect material parameters", "[sqd]")
+{
+    /** @brief Valid constructed neutral defect with publicly mutable unused metadata. */
+    defect neutral{defect_type::UNKNOWN};
+    neutral.epsilon_r = std::numeric_limits<double>::quiet_NaN();
+    neutral.lambda_tf = -1.0;
+    /** @brief Layout containing the neutral defect to serialize. */
+    sidb::layout lyt{};
+    lyt.assign_defect({1, 2, 0}, neutral);
+    /** @brief Complete SQD output whose reader must not encounter unused invalid numbers. */
+    std::stringstream stream{};
+    REQUIRE_NOTHROW(write_sqd_layout(lyt, stream));
+
+    /** @brief Expected neutral defect retains its type and site with default material parameters. */
+    sidb::layout expected{};
+    expected.assign_defect({1, 2, 0}, defect{defect_type::UNKNOWN});
+    CHECK(read_sqd_layout(stream) == expected);
+}
 
 TEST_CASE("Write empty SQD layout", "[sqd]")
 {

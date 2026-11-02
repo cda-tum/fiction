@@ -221,6 +221,7 @@ class convert_network_impl<NtkDest, NtkSrc, false>
  * @tparam NtkSrc Logic network with node, interface, and fanin traversal.
  * @param ntk The input logic network.
  * @return A logic network of type `NtkDest` that is logically equivalent to `ntk`.
+ * @throws std::invalid_argument If a source gate has neither a supported gate operation nor a truth table.
  */
 template <typename NtkDest, typename NtkSrc>
     requires mockturtle::is_network_type_v<NtkSrc> && mockturtle::is_network_type_v<NtkDest> &&

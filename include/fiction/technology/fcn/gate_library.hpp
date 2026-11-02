@@ -27,6 +27,7 @@
 #include <array>
 #include <cstdint>
 #include <exception>
+#include <stdexcept>
 #include <unordered_map>
 #include <vector>
 
@@ -68,8 +69,11 @@ template <typename CoordinateType, typename PortType>
 class unsupported_gate_orientation_exception : public std::exception
 {
   public:
-    /** @brief Records a gate coordinate and unsupported port orientation. */
-    unsupported_gate_orientation_exception(const CoordinateType& c, const port_list<PortType>& p) noexcept :
+    /**
+     * @brief Records a gate coordinate and unsupported port orientation.
+     * @throws std::bad_alloc If copying the ports cannot allocate storage.
+     */
+    unsupported_gate_orientation_exception(const CoordinateType& c, const port_list<PortType>& p) :
             std::exception(),
             coord{c},
             ports{p}
@@ -87,8 +91,9 @@ class unsupported_gate_orientation_exception : public std::exception
      * Ports of the unsupported gate orientation.
      *
      * @return Ports.
+     * @throws std::bad_alloc If copying the ports cannot allocate storage.
      */
-    [[nodiscard]] port_list<PortType> which_ports() const noexcept
+    [[nodiscard]] port_list<PortType> which_ports() const
     {
         return ports;
     }
@@ -103,6 +108,28 @@ class unsupported_gate_orientation_exception : public std::exception
      */
     const port_list<PortType> ports;
 };
+
+namespace detail
+{
+/**
+ * Looks up a gate-library entry and throws when the key is absent.
+ * @tparam Map Map type.
+ * @param map Gate-library map.
+ * @param key Key to find.
+ * @return Mapped value.
+ * @throws std::out_of_range If the key is absent.
+ */
+template <typename Map>
+[[nodiscard]] const typename Map::mapped_type& checked_lookup(const Map& map, const typename Map::key_type& key)
+{
+    if (const auto it = map.find(key); it != map.end())
+    {
+        return it->second;
+    }
+    // parallel-hashmap may abort on a missing key under ClangCL even with exceptions enabled.
+    throw std::out_of_range{"Gate-library key not found"};
+}
+}  // namespace detail
 
 /**
  * Base class for various FCN libraries used to map gate-level layouts to cell-level ones. Any new gate library can

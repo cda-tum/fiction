@@ -115,17 +115,28 @@ def test_clock_zone_iteration(make_layout):
 
 @pytest.mark.parametrize("make_layout", CLOCKED_LAYOUTS)
 def test_replace_clocking_scheme_keeps_synchronization_elements(make_layout: Callable[[], Any]) -> None:
+    """Lookup ignores case; replacement clears overrides and retains synchronization delays."""
     layout = make_layout()
     layout.assign_clock_number((1, 1), 3)
     layout.assign_synchronization_element((1, 1), 2)
     assert layout.is_synchronization_element((1, 1))
 
-    layout.replace_clocking_scheme("RES")
+    original_name = layout.get_clocking_scheme_name()
+    with pytest.raises(ValueError, match="Unknown clocking scheme"):
+        layout.replace_clocking_scheme("3DDWave")
+    assert layout.get_clocking_scheme_name() == original_name
+    assert layout.get_clock_number((1, 1)) == 3
+    assert layout.get_synchronization_element((1, 1)) == 2
+
+    layout.replace_clocking_scheme("rEs")
     assert layout.is_clocking_scheme("RES")
     assert layout.is_regularly_clocked()
+    assert layout.get_clock_number((1, 1)) == 1
     assert layout.get_synchronization_element((1, 1)) == 2
     assert layout.num_se() == 1
 
-    with pytest.raises(ValueError, match="Unknown clocking scheme"):
-        layout.replace_clocking_scheme("3DDWave")
-    assert layout.is_clocking_scheme("RES")
+    layout.replace_clocking_scheme("2dDwAvEhEx")
+    is_hexagonal = isinstance(layout, hexagonal_gate_layout)
+    assert layout.get_clocking_scheme_name() == ("2DDWAVEHEX" if is_hexagonal else "2DDWAVE")
+    assert layout.get_clock_number((1, 1)) == (1 if is_hexagonal else 2)
+    assert layout.get_synchronization_element((1, 1)) == 2
