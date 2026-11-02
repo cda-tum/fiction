@@ -254,6 +254,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - SiDB ground-state tests share parameter rows and check complete enumeration and clustered results.
   - Template dispatch and compiler-specific diagnostics avoid MSVC warnings.
   - Technology tests, gate libraries, and exporters avoid MSVC diagnostics.
   - SiDB layout I/O tests compare complete defect visits and simplify SVG checks.
@@ -929,6 +930,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
 
+  - ExGS Python documentation now describes all physically valid charge distributions.
   - Graph coloring documents TabuCol's bounded search and empty-result contract. SiDB printing documents its
     bounding-box cost, and progress reporting documents callback exception handling.
   - `integral_abs` documents that signed minimum values are outside its representable-result domain.
