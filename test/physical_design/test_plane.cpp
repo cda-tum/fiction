@@ -346,6 +346,14 @@ TEST_CASE("Invalid inputs are rejected", "[plane]")
 
         CHECK_THROWS_AS(plane(tec), std::invalid_argument);
     }
+    SECTION("a gate with only constant fanins")
+    {
+        const auto x1 = tec.create_pi();
+        tec.create_po(x1);
+        tec.create_po(tec.create_buf(tec.get_constant(true)));
+
+        CHECK_THROWS_AS(plane(tec), std::invalid_argument);
+    }
     SECTION("a gate that no output reaches")
     {
         const auto x1 = tec.create_pi();

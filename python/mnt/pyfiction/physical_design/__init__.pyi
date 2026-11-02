@@ -341,8 +341,8 @@ def plane(
 
     Raises:
         ValueError: If a gate of `network` is reached by no output, if `network` has no primary inputs, if a node drives
-            more than two fanouts, if a gate has a constant fanin next to a single non-constant one, if `network` is not
-            balanced, or if its node order has crossings.
+            more than two fanouts, if a gate has only constant fanins or a constant fanin next to a single non-constant one,
+            if `network` is not balanced, or if its node order has crossings.
         high_degree_fanin_exception: If a node has more than two non-constant fanins.
     """
 

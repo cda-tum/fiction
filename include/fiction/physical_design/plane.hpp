@@ -1593,8 +1593,8 @@ class plane_impl
  * @return Crossing-free gate-level layout that implements `ntk`.
  * @throws networks::high_degree_fanin_exception If a node has more than two non-constant fanins.
  * @throws std::invalid_argument If `ntk` has no primary inputs, if a node drives more than two fanouts, if no output
- * reaches a gate, if a gate has a constant fanin next to a single non-constant one, if `ntk` is not balanced, or if the
- * rank order of `ntk` has crossings.
+ * reaches a gate, if a gate has only constant fanins or a constant fanin next to a single non-constant one, if `ntk` is
+ * not balanced, or if the rank order of `ntk` has crossings.
  * @throws std::logic_error If placement or routing cannot keep the layout planar; such an input is a defect.
  */
 [[nodiscard]] inline layouts::cartesian_gate_layout plane(const networks::named_technology_network& ntk,
@@ -1626,7 +1626,8 @@ class plane_impl
         throw std::invalid_argument("A node drives more than two fanouts; substitute fanouts before placement");
     }
 
-    // a gate that keeps a single non-constant fanin next to a constant one has no placement; propagate constants first.
+    // a gate without non-constant fanins or with a single one next to a constant has no placement; propagate constants
+    // first.
     // A fanin below the previous level has no wire on the previous diagonal: the placement reads every predecessor
     // from the diagonal before the gate's own.
     const networks::views::mutable_rank_view ranked{ntk};
@@ -1638,7 +1639,7 @@ class plane_impl
         {
             const auto fc = networks::fanins(ranked, n);
 
-            if (fc.constant_fanin.has_value() && fc.fanin_nodes.size() == 1)
+            if (fc.fanin_nodes.empty() || (fc.constant_fanin.has_value() && fc.fanin_nodes.size() == 1))
             {
                 constant_gate = true;
             }
@@ -1655,8 +1656,8 @@ class plane_impl
     if (constant_gate)
     {
         throw std::invalid_argument(
-            "A gate has a constant fanin besides a single non-constant one; propagate constants "
-            "before placement");
+            "A gate has only constant fanins or a constant fanin besides a single non-constant one; propagate "
+            "constants before placement");
     }
 
     if (unbalanced)

@@ -13727,10 +13727,10 @@ Raises:
     networks::high_degree_fanin_exception: If a node has more than two
                                            non-constant fanins.
     ValueError: If `ntk` has no primary inputs, if a node drives more
-                than two fanouts, if no output reaches a gate, if a
-                gate has a constant fanin next to a single non-
-                constant one, if `ntk` is not balanced, or if the rank
-                order of `ntk` has crossings.
+                than two fanouts, if no output reaches a gate, if a gate
+                has only constant fanins or a constant fanin next to a
+                single non-constant one, if `ntk` is not balanced, or if
+                the rank order of `ntk` has crossings.
     std::logic_error: If placement or routing cannot keep the layout
                       planar; such an input is a defect.
 
