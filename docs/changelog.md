@@ -189,6 +189,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - QCA ONE via optimization now visits occupied crossing cells instead of scanning the full frame.
   - Avoid redundant progress-callback copies in algorithms and layout writers.
   - Critical-path analysis collapses wire chains to reduce traversal overhead on large layouts.
+  - SAT graph coloring now omits tautological symmetry clauses and unused vertex ordering.
   - Avoid helper threads for single-worker sampling and contour exploration.
   - Reduce coordinate-vector allocations during operational-domain traversal.
   - `cartesian_combinations` now moves completed storage between dimensions instead of copying it.
