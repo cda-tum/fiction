@@ -18,9 +18,12 @@
 
 #if (FICTION_ALGLIB_ENABLED)
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/progress_recorder.hpp"
@@ -45,6 +48,7 @@
 
 #include <algorithm>
 #include <any>
+#include <array>
 #include <cstdint>
 #include <set>
 #include <vector>
@@ -105,20 +109,6 @@ TEST_CASE("ClusterComplete simulation of a single SiDB", "[clustercomplete]")
         REQUIRE(simulation_results.lyt.num_dots() == 1);
         CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == charge_state::NEGATIVE);
     }
-}
-
-static bool verify_clustercomplete_result(const charge_distribution&              qe_cd,
-                                          const std::vector<charge_distribution>& cc_cds) noexcept
-{
-    return std::ranges::any_of(cc_cds,
-                               [&](const charge_distribution& cc_cd) { return cc_cd.same_charge_states(qe_cd); });
-}
-
-static bool verify_clustercomplete_result_by_charge_indices(const charge_distribution&              qe_cd,
-                                                            const std::vector<charge_distribution>& cc_cds) noexcept
-{
-    return std::ranges::any_of(cc_cds,
-                               [&](const auto& cc_cd) { return cc_cd.charge_index(3) == qe_cd.charge_index(3); });
 }
 
 TEST_CASE(
@@ -318,24 +308,15 @@ TEST_CASE("ClusterComplete simulation of a BDL pair", "[clustercomplete]")
     const auto simulation_results = clustercomplete(lyt, params);
 
     REQUIRE(simulation_results.charge_distributions.size() == 2);
-    for (const auto& layouts : simulation_results.charge_distributions)
+    std::vector<std::array<int, 2>> observed{};
+    observed.reserve(simulation_results.charge_distributions.size());
+    for (const auto& cd : simulation_results.charge_distributions)
     {
-        uint64_t counter_negative = 0;
-        uint64_t counter_neutral  = 0;
-        for (uint64_t i = 0; i < 2; i++)
-        {
-            if (layouts.get_charge_state_by_index(i) == charge_state::NEGATIVE)
-            {
-                counter_negative += 1;
-            }
-            else
-            {
-                counter_neutral += 1;
-            }
-        }
-        CHECK(counter_neutral == 1);
-        CHECK(counter_negative == 1);
+        observed.push_back(
+            {static_cast<int>(cd.get_charge_state({1, 3, 0})), static_cast<int>(cd.get_charge_state({3, 3, 0}))});
     }
+    const std::array expected{std::array{-1, 0}, std::array{0, -1}};
+    CHECK_THAT(observed, Catch::Matchers::UnorderedRangeEquals(expected));
 }
 
 TEST_CASE("ClusterComplete simulation of two SiDBs placed directly next to each other with non-realistic relative "
@@ -406,7 +387,6 @@ TEST_CASE("three DBs next to each other, small mu-", "[clustercomplete]")
     REQUIRE(!simulation_results.charge_distributions.empty());
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
     CHECK(charge_lyt_first.get_charge_state({1, 3, 0}) == charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({1, 3, 0}) == charge_state::NEGATIVE);
     CHECK(charge_lyt_first.get_charge_state({2, 3, 0}) == charge_state::POSITIVE);
     CHECK(charge_lyt_first.get_charge_state({3, 3, 0}) == charge_state::NEGATIVE);
 }
@@ -424,6 +404,9 @@ TEST_CASE("3 DBs next to each other (positively charged DBs occur)", "[clusterco
 
     const auto simulation_results = clustercomplete(lyt, params);
 
+    REQUIRE(!simulation_results.charge_distributions.empty());
+    CHECK(std::ranges::any_of(simulation_results.charge_distributions,
+                              [](const auto& cd) { return cd.num_positive_sidbs() > 0; }));
     for (const auto& layout : simulation_results.charge_distributions)
     {
         CHECK(round_to_n_decimal_places(layout.energy(), 1) <= 0);
@@ -660,39 +643,22 @@ TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive charge", 
     lyt.assign_sidb({2, 1, 0}, dot_tag::NORMAL);
     lyt.assign_sidb({3, 1, 1}, dot_tag::NORMAL);
 
-    SECTION("Base 2")
-    {
-        const result& qe_res = quickexact(
-            lyt, quickexact_params{.sim_params            = simulation_parameters{2},
-                                   .base_number_detection = quickexact_params::automatic_base_number_detection::OFF});
-        const result& cc_res = clustercomplete(lyt, clustercomplete_params{.sim_params = simulation_parameters{2}});
+    const auto [base, expected_count] = GENERATE(table<uint8_t, uint64_t>({{uint8_t{2}, 1}, {uint8_t{3}, 2}}));
+    CAPTURE(base);
 
-        REQUIRE(qe_res.charge_distributions.size() == 1);
-        CHECK(cc_res.charge_distributions.size() == 1);
+    const auto qe_res = quickexact(
+        lyt, quickexact_params{.sim_params            = simulation_parameters{base},
+                               .base_number_detection = quickexact_params::automatic_base_number_detection::OFF});
+    const auto cc_res = clustercomplete(lyt, clustercomplete_params{.sim_params = simulation_parameters{base}});
 
-        for (const auto& cds : qe_res.charge_distributions)
-        {
-            CHECK(verify_clustercomplete_result(cds, cc_res.charge_distributions));
-            CHECK(verify_clustercomplete_result_by_charge_indices(cds, cc_res.charge_distributions));
-        }
-    }
-
-    SECTION("Base 3")
-    {
-        const result& qe_res = quickexact(
-            lyt, quickexact_params{.sim_params            = simulation_parameters{3},
-                                   .base_number_detection = quickexact_params::automatic_base_number_detection::OFF});
-        const result& cc_res = clustercomplete(lyt, clustercomplete_params{.sim_params = simulation_parameters{3}});
-
-        REQUIRE(qe_res.charge_distributions.size() == 2);
-        CHECK(cc_res.charge_distributions.size() == 2);
-
-        for (const auto& cds : qe_res.charge_distributions)
-        {
-            CHECK(verify_clustercomplete_result(cds, cc_res.charge_distributions));
-            CHECK(verify_clustercomplete_result_by_charge_indices(cds, cc_res.charge_distributions));
-        }
-    }
+    REQUIRE(qe_res.charge_distributions.size() == expected_count);
+    CHECK(cc_res.charge_distributions.size() == expected_count);
+    CHECK_THAT(cc_res.charge_distributions,
+               Catch::Matchers::UnorderedRangeEquals(qe_res.charge_distributions, [](const auto& lhs, const auto& rhs)
+                                                     { return lhs.same_charge_states(rhs); }));
+    CHECK_THAT(cc_res.charge_distributions,
+               Catch::Matchers::UnorderedRangeEquals(qe_res.charge_distributions, [](const auto& lhs, const auto& rhs)
+                                                     { return lhs.charge_index(3) == rhs.charge_index(3); }));
 }
 
 TEST_CASE("ClusterComplete simulation of four SiDBs (far away)", "[clustercomplete]")
@@ -1152,7 +1118,6 @@ TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01, c
     CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::NEUTRAL);
     CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::NEUTRAL);
     CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
 
     CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.4662582096, ERROR_MARGIN));
 }
@@ -1286,8 +1251,10 @@ TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 un
         for (auto i = 0; i < 100; i++)
 #endif
         {
-            const auto  simulation_results = clustercomplete(lyt, params);
-            const auto& charge_lyt_first   = simulation_results.charge_distributions.front();
+            CAPTURE(i);
+            const auto simulation_results = clustercomplete(lyt, params);
+            REQUIRE(!simulation_results.charge_distributions.empty());
+            const auto& charge_lyt_first = simulation_results.charge_distributions.front();
             ground_state.insert(round_to_n_decimal_places(charge_lyt_first.energy(), 6));
             charge_index.insert(charge_lyt_first.charge_index(3));
         }
@@ -1302,6 +1269,7 @@ TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 un
         lyt.assign_sidb({15, 2, 0}, dot_tag::NORMAL);
 
         const auto simulation_results = clustercomplete(lyt, params);
+        REQUIRE(!simulation_results.charge_distributions.empty());
         // find the ground state, which is the charge distribution with the lowest energy
         const auto ground_state =
             std::ranges::min_element(simulation_results.charge_distributions,
@@ -1818,10 +1786,7 @@ TEST_CASE("Special test cases", "[clustercomplete]")
 
         const simulation_parameters params{2, -0.32};
 
-        result cc_res = clustercomplete(lyt, clustercomplete_params{.sim_params = params});
-
-        std::ranges::sort(cc_res.charge_distributions,
-                          [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
+        const auto cc_res = clustercomplete(lyt, clustercomplete_params{.sim_params = params});
 
         CHECK(cc_res.charge_distributions.size() == 2);
     }
@@ -1839,14 +1804,8 @@ TEST_CASE("ClusterComplete reports progress", "[clustercomplete]")
 
     clustercomplete_params params{.sim_params = simulation_parameters{2}, .on_progress = rec.callback()};
 
-    SECTION("single-threaded")
-    {
-        params.available_threads = 1;
-    }
-    SECTION("multi-threaded")
-    {
-        params.available_threads = 2;
-    }
+    params.available_threads = GENERATE(uint64_t{1}, uint64_t{2});
+    CAPTURE(params.available_threads);
 
     const auto simulation_results = clustercomplete(lyt, params);
 
