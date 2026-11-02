@@ -17,19 +17,24 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
+#include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/technology/sidb/simulation/io/write_location_and_ground_state.hpp>
+#include <fiction/technology/sidb/simulation/result.hpp>
 
 #include <cctype>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 
 using namespace fiction;
 using namespace fiction::sidb;
 using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::engines;
 using namespace fiction::sidb::simulation::io;
 
@@ -95,5 +100,101 @@ TEST_CASE("writes expected output", "[write_txt_sim_result]")
                                                 1.920;0.000;-1;)";
 
         REQUIRE(compare_output(ss.str(), expected_output));
+    }
+}
+
+TEST_CASE("Ground-state CSV rejects mismatched distribution sites before output", "[write_txt_sim_result]")
+{
+    layout lyt{};
+    lyt.assign_sidb({0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 0}, dot_tag::NORMAL);
+    layout other{};
+    /** @brief Check rejection of a distribution without modifying the destination stream. */
+    const auto check_rejected = [&lyt, &other](const double energy)
+    {
+        result res{};
+        res.lyt = lyt;
+        charge_distribution mismatch{other};
+        mismatch.assign_energy(energy);
+        res.charge_distributions = {charge_distribution{lyt}, mismatch};
+        std::stringstream os{};
+        os << "original";
+        CHECK_THROWS_AS(write_location_and_ground_state(res, os), std::invalid_argument);
+        CHECK(os.str() == "original");
+    };
+
+    SECTION("fewer distribution sites")
+    {
+        other.assign_sidb({0, 0}, dot_tag::NORMAL);
+        check_rejected(0.0);
+    }
+    SECTION("shifted distribution sites")
+    {
+        other.assign_sidb({1, 0}, dot_tag::NORMAL);
+        other.assign_sidb({3, 0}, dot_tag::NORMAL);
+        check_rejected(0.0);
+    }
+    SECTION("mismatched excited state")
+    {
+        other.assign_sidb({1, 0}, dot_tag::NORMAL);
+        other.assign_sidb({3, 0}, dot_tag::NORMAL);
+        check_rejected(1.0);
+    }
+}
+
+TEST_CASE("Ground-state CSV writes nothing for an empty result", "[write_txt_sim_result]")
+{
+    std::stringstream os{};
+    os << "original";
+    write_location_and_ground_state(result{}, os);
+    CHECK(os.str() == "original");
+}
+
+TEST_CASE("Ground-state CSV preserves distributions across site-list sharing", "[write_txt_sim_result]")
+{
+    layout lyt{};
+    lyt.assign_sidb({0, 0}, dot_tag::NORMAL);
+    lyt.assign_sidb({2, 0}, dot_tag::NORMAL);
+    const charge_distribution first{lyt};
+    result                    res{};
+    res.lyt = lyt;
+    /** @brief Check complete CSV output, including repeated columns, charge order, and coordinate precision. */
+    const auto check_output = [&res]
+    {
+        std::stringstream os{};
+        write_location_and_ground_state(res, os);
+        CHECK(os.str() == "x [nm]; y [nm];GS_0;GS_1;GS_2;\n"
+                          "0.000;0.000;-1;0;-1;\n"
+                          "0.768;0.000;-1;0;-1;\n");
+    };
+
+    SECTION("shared site lists")
+    {
+        res.charge_distributions = {first, charge_distribution{first.shared_sites(), charge_state::NEUTRAL}, first};
+        check_output();
+    }
+    SECTION("distinct equal-valued site lists")
+    {
+        res.charge_distributions = {charge_distribution{lyt}, charge_distribution{lyt, charge_state::NEUTRAL},
+                                    charge_distribution{lyt}};
+        check_output();
+    }
+    SECTION("nonconsecutive shared site list")
+    {
+        res.charge_distributions = {first, charge_distribution{lyt, charge_state::NEUTRAL}, first};
+        check_output();
+    }
+    SECTION("excited mismatch after shared distributions")
+    {
+        layout shifted{};
+        shifted.assign_sidb({0, 0}, dot_tag::NORMAL);
+        shifted.assign_sidb({3, 0}, dot_tag::NORMAL);
+        charge_distribution mismatch{shifted};
+        mismatch.assign_energy(1.0);
+        res.charge_distributions = {first, charge_distribution{first.shared_sites(), charge_state::NEUTRAL}, mismatch};
+        std::stringstream os{};
+        os << "original";
+        CHECK_THROWS_AS(write_location_and_ground_state(res, os), std::invalid_argument);
+        CHECK(os.str() == "original");
     }
 }

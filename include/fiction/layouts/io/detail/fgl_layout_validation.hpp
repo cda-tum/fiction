@@ -19,6 +19,7 @@
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
+#include "fiction/utils/io/xml_character.hpp"
 #include "fiction/verification/design_rule_violations.hpp"
 
 #include <concepts>
@@ -28,6 +29,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -35,18 +37,17 @@ namespace fiction::layouts::io::detail::fgl
 {
 
 /**
- * @brief Reject XML 1.0 control characters in a name.
+ * @brief Validate a UTF-8 name containing XML 1.0 characters.
  * @param value Layout or object name.
- * @throws std::invalid_argument If the name contains an illegal control character.
+ * @throws std::invalid_argument If the name contains invalid UTF-8 or an illegal XML character.
  */
 inline void validate_xml_text(const std::string& value)
 {
-    for (const auto character : value)
+    /** @brief Unvalidated UTF-8 name suffix. */
+    std::string_view remaining{value};
+    while (!remaining.empty())
     {
-        if (static_cast<unsigned char>(character) < 0x20 && character != '\t' && character != '\n' && character != '\r')
-        {
-            throw std::invalid_argument("FGL names require XML 1.0 text characters");
-        }
+        static_cast<void>(utils::io::detail::next_xml_character(remaining));
     }
 }
 
@@ -66,7 +67,7 @@ inline void validate_xml_text(const std::string& value)
  * @tparam Lyt Gate-level layout type.
  * @param lyt Layout to validate.
  * @throws std::invalid_argument If the layout is incomplete, cyclic, physically invalid, uses an unsupported
- * scheme, or contains illegal XML text controls.
+ * scheme, or contains invalid UTF-8 or illegal XML characters in a name.
  */
 template <typename Lyt>
 void validate_layout(const Lyt& lyt)

@@ -18,6 +18,7 @@
 #pragma once
 
 #include "fiction/technology/sidb/charge_distribution.hpp"
+#include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/simulation/analysis/minimum_energy.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
@@ -29,6 +30,7 @@
 #include <cstddef>
 #include <ostream>
 #include <ranges>
+#include <stdexcept>
 #include <string_view>
 #include <vector>
 
@@ -54,9 +56,21 @@ class location_and_ground_state_writer
 
     /**
      * @brief Writes positions in nanometers and one column per ground state; writes nothing for an empty result.
+     * @throws std::invalid_argument If a distribution has different sites from the result layout.
      */
     void run()
     {
+        /** @brief Last validated site vector; shared site storage is immutable. */
+        const std::vector<lattice_site>* previous_sites{nullptr};
+        for (const auto& cd : sim_result.charge_distributions)
+        {
+            const auto* sites = &cd.sites();
+            if (sites != previous_sites && *sites != sim_result.lyt.sidbs())
+            {
+                throw std::invalid_argument("Charge distribution sites do not match the result layout");
+            }
+            previous_sites = sites;
+        }
         const auto min_energy = fiction::utils::math::round_to_n_decimal_places(
             simulation::analysis::minimum_energy(sim_result.charge_distributions.cbegin(),
                                                  sim_result.charge_distributions.cend()),
@@ -114,10 +128,11 @@ class location_and_ground_state_writer
 
 /**
  * @brief Writes the SiDB positions of a simulation result and the charge states of its ground states as CSV to a
- * stream.
+ * stream. Invalid input leaves the stream unchanged.
  *
  * @param sim_result Result to write.
  * @param os Output stream to write into.
+ * @throws std::invalid_argument If a distribution has different sites from the result layout.
  */
 inline void write_location_and_ground_state(const sidb::simulation::result& sim_result, std::ostream& os)
 {
@@ -127,10 +142,12 @@ inline void write_location_and_ground_state(const sidb::simulation::result& sim_
 }
 /**
  * @brief Writes the SiDB positions of a simulation result and the charge states of its ground states as CSV.
+ * Invalid input preserves an existing file.
  *
  * @param sim_result Result to write.
  * @param filename File to write into.
  * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
+ * @throws std::invalid_argument If a distribution has different sites from the result layout.
  */
 inline void write_location_and_ground_state(const sidb::simulation::result& sim_result,
                                             const std::string_view&         filename)

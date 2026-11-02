@@ -22,12 +22,14 @@ reviews:
     - path: "**/*.{hpp,cpp}"
       instructions: >-
         Every file opens with the MIT copyright block, then a Doxygen block carrying
-        @file, a one-line @brief, and one @author line per contributor as
-        `Full Name (handle)`, oldest first. The copyright block is written by the
-        license-tools hook; never comment on its contents or suggest editing it, and note
-        that nothing may be placed above it. Flag a file this pull request edits whose
-        @author list does not name the pull request's author, and flag a new file missing
-        either block or carrying an include guard instead of `#pragma once`. See
+        @file, a one-line @brief, and @author entries for human contributors as
+        `Full Name (handle)`, oldest first. Human contributors editing a file add
+        themselves; preserve existing human author entries. Do not infer a human
+        contribution from the pull request account or add AI tools or models as authors.
+        Record AI assistance in commit trailers and public disclosures. The copyright
+        block is written by the license-tools hook; never comment on its contents or
+        suggest editing it, and note that nothing may be placed above it. Flag a new
+        file missing either block or carrying an include guard instead of `#pragma once`. See
         "File headers" in AGENTS.md.
     - path: "include/fiction/**"
       instructions: >-

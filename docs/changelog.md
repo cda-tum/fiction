@@ -264,6 +264,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - FCN tests share port-list and constant-cell cases and check writer failure recovery.
     Writer docs describe border validation.
   - Modernized utility tests with named data rows, direct result checks, and complete progress observations.
+  - SiDB simulation tests check complete CSV rows and degenerate ground states.
   - Modernized physical-design helper tests with complete routing collections and independent solver rows.
   - Streamlined BDL iterator, pair, wire, and logic-match tests with complete physical expectations.
   - Streamlined synthesis tests and strengthened clone, conversion, and gate-library checks.
@@ -400,6 +401,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - I/O:
 
   - QCA SVG rendering now reuses static tile and latch templates without per-tile text copies.
+  - Ground-state CSV export reuses site validation for consecutive distributions with shared site storage.
   - FGL name escaping appends text in one pass to avoid repeated suffix copies for long whitespace-heavy names.
   - `write_sidb_layout_svg` and `print_sidb_layout` color an `sidb::layout` from an optional
     `charge_distribution`
@@ -813,6 +815,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Build system:
 
   - PCH cache hashes now retain comments so GCC builds accept documentation-only header edits.
+  - Installed SQD simulation writers now link the co-installed static TinyXML2 library unless the consumer supplies
+    an existing `tinyxml2::tinyxml2` target.
   - Release benchmark builds now skip stripping when no strip tool is available.
   - Rebuild Python bindings when uncommitted C++ binding sources change.
   - Keep tinyxml2 static across build reconfiguration so Python imports find all libraries.
@@ -911,6 +915,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Documentation:
 
   - `integral_abs` documents that signed minimum values are outside its representable-result domain.
+  - Potential-landscape energy complexity includes charged-defect interactions.
   - Timing documentation now states the throughput formula and input hold time in clock cycles.
   - BDL pair-detection documentation clarifies per-tag sorting and no longer implies a distance-bound performance guarantee.
   - Binding docstring instructions now use the generator wrapper that CI runs.
@@ -964,7 +969,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - I/O:
 
+  - FGL export and version-2 import reject malformed UTF-8 and illegal XML characters in names.
+  - SiQAD simulation export now orders NaN energies without violating the sorting requirements.
   - Colored DOT drawers now use the node-color interface and shared edge palette.
+  - SiDB simulation writers now reject mismatched distribution sites before writing. SiQAD results escape metadata and reject invalid UTF-8, XML characters, parameter names, and null C strings without replacing existing files.
   - Surface-defect import avoids exponential backtracking on malformed digit runs.
   - SQD import now rejects NUL bytes, multiple XML roots, and text outside the root. SiDB filename readers preserve bytes after Ctrl-Z on Windows.
   - BLIF network readers now accept empty and whitespace-only lines without aborting.

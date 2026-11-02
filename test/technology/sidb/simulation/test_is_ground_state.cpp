@@ -58,7 +58,7 @@ TEST_CASE("check if ground state is found", "[is-ground-state]")
             result simulation_result_heuristic{};
             simulation_result_heuristic.lyt                  = lyt;
             simulation_result_heuristic.charge_distributions = {first};
-            CHECK(!is_ground_state(simulation_result_heuristic, simulation_result_exhaustive));
+            CHECK_FALSE(is_ground_state(simulation_result_heuristic, simulation_result_exhaustive));
         }
 
         SECTION("two identical ground states are stored in the simulation results")
@@ -80,7 +80,7 @@ TEST_CASE("check if ground state is found", "[is-ground-state]")
 
         SECTION("no exact result")
         {
-            CHECK(!is_ground_state(simulation_result_exhaustive, result{}));
+            CHECK_FALSE(is_ground_state(simulation_result_exhaustive, result{}));
         }
     }
 
@@ -94,6 +94,7 @@ TEST_CASE("check if ground state is found", "[is-ground-state]")
 
         REQUIRE(!simulation_results_quicksim.has_value());
         CHECK(simulation_results_exgs.charge_distributions.empty());
+        CHECK_FALSE(is_ground_state(result{}, simulation_results_exgs));
     }
 
     SECTION("Layout with seven SiDBs placed")
@@ -119,6 +120,7 @@ TEST_CASE("check if ground state is found", "[is-ground-state]")
 
         REQUIRE(simulation_results_quicksim.has_value());
 
+        // Clang-Tidy does not infer optional presence from Catch2's fatal REQUIRE.
         if (simulation_results_quicksim.has_value())
         {
             CHECK(is_ground_state(*simulation_results_quicksim, simulation_results_exgs));
