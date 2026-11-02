@@ -79,7 +79,7 @@ class qca_one_library : public fcn::gate_library<qca::layout, 5, 5>
                 }
                 if (p.out.size() == 2)
                 {
-                    return FANOUT_MAP.at(p);
+                    return fcn::detail::checked_lookup(FANOUT_MAP, p);
                 }
                 if (p.out.size() == 3)
                 {
@@ -89,22 +89,22 @@ class qca_one_library : public fcn::gate_library<qca::layout, 5, 5>
 
             if (lyt.is_buf(n))
             {
-                return WIRE_MAP.at(p);
+                return fcn::detail::checked_lookup(WIRE_MAP, p);
             }
 
             if (lyt.is_inv(n))
             {
-                return INVERTER_MAP.at(p);
+                return fcn::detail::checked_lookup(INVERTER_MAP, p);
             }
 
             if (lyt.is_and(n))
             {
-                return CONJUNCTION_MAP.at(p);
+                return fcn::detail::checked_lookup(CONJUNCTION_MAP, p);
             }
 
             if (lyt.is_or(n))
             {
-                return DISJUNCTION_MAP.at(p);
+                return fcn::detail::checked_lookup(DISJUNCTION_MAP, p);
             }
 
             if (lyt.is_maj(n))

@@ -110,7 +110,7 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
 
             if (lyt.is_inv(n))
             {
-                return INVERTER_MAP.at(p);
+                return fcn::detail::checked_lookup(INVERTER_MAP, p);
             }
 
             if (lyt.is_buf(n))
@@ -121,7 +121,7 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
                     return CROSSWIRE;
                 }
 
-                auto wire = WIRE_MAP.at(p);
+                auto wire = fcn::detail::checked_lookup(WIRE_MAP, p);
 
                 if (lyt.is_pi(n))
                 {
@@ -578,7 +578,7 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
             {fcn::port_position(3, 2), fcn::port_position(0, 2)}, {fcn::port_position(3, 3), fcn::port_position(0, 3)},
         };
 
-        return pp_map.at(p);
+        return fcn::detail::checked_lookup(pp_map, p);
     }
 
     // clang-format off

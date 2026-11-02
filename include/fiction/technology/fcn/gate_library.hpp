@@ -27,6 +27,7 @@
 #include <array>
 #include <cstdint>
 #include <exception>
+#include <stdexcept>
 #include <unordered_map>
 #include <vector>
 
@@ -107,6 +108,28 @@ class unsupported_gate_orientation_exception : public std::exception
      */
     const port_list<PortType> ports;
 };
+
+namespace detail
+{
+/**
+ * Looks up a gate-library entry and throws when the key is absent.
+ * @tparam Map Map type.
+ * @param map Gate-library map.
+ * @param key Key to find.
+ * @return Mapped value.
+ * @throws std::out_of_range If the key is absent.
+ */
+template <typename Map>
+[[nodiscard]] const typename Map::mapped_type& checked_lookup(const Map& map, const typename Map::key_type& key)
+{
+    if (const auto it = map.find(key); it != map.end())
+    {
+        return it->second;
+    }
+    // parallel-hashmap may abort on a missing key under ClangCL even with exceptions enabled.
+    throw std::out_of_range{"Gate-library key not found"};
+}
+}  // namespace detail
 
 /**
  * Base class for various FCN libraries used to map gate-level layouts to cell-level ones. Any new gate library can

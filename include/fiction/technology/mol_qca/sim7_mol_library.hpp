@@ -87,32 +87,32 @@ class sim7_mol_library : public fcn::gate_library<mol_qca::layout, 10, 10>
                     return set_up_1_to_3_fanout(p);
                 }
 
-                return FANOUT_MAP.at(p);
+                return fcn::detail::checked_lookup(FANOUT_MAP, p);
             }
 
             if (lyt.is_buf(n))
             {
-                return WIRE_MAP.at(p);
+                return fcn::detail::checked_lookup(WIRE_MAP, p);
             }
 
             if (lyt.is_inv(n))
             {
-                return INVERTER_MAP.at(p);
+                return fcn::detail::checked_lookup(INVERTER_MAP, p);
             }
 
             if (lyt.is_and(n))
             {
-                return CONJUNCTION_MAP.at(p);
+                return fcn::detail::checked_lookup(CONJUNCTION_MAP, p);
             }
 
             if (lyt.is_or(n))
             {
-                return DISJUNCTION_MAP.at(p);
+                return fcn::detail::checked_lookup(DISJUNCTION_MAP, p);
             }
 
             if (lyt.is_maj(n))
             {
-                return MAJORITY_MAP.at(p);
+                return fcn::detail::checked_lookup(MAJORITY_MAP, p);
             }
         }
         catch (const std::out_of_range&)

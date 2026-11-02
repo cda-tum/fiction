@@ -976,6 +976,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Gate libraries:
 
+  - Unsupported gate orientations now raise exceptions under ClangCL instead of aborting.
   - Gate-orientation diagnostics now propagate allocation failures when copying ports.
   - `fcn::gate_library::merge` now handles rectangular gates without out-of-bounds access.
   - On-the-fly SiDB gate mapping now rejects column arrangements instead of dropping north/south wires.
