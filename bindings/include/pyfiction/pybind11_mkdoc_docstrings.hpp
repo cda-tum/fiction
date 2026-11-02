@@ -8404,8 +8404,9 @@ Returns:
     enabled.
 
 Raises:
-    ValueError: If an objective endpoint lies outside the layout
-                extent when ps.path_limit is absent or nonzero.
+    ValueError: If TABUCOL is selected, or an objective endpoint lies
+                outside the layout extent when ps.path_limit is absent
+                or nonzero.
 
 )doc";
 
@@ -8417,7 +8418,9 @@ route the layout as much as possible.)doc";
 
 static const char *mkd_doc_fiction_physical_design_color_routing_params_crossings = R"doc(Enable crossings.)doc";
 
-static const char *mkd_doc_fiction_physical_design_color_routing_params_engine = R"doc(The engine to use.)doc";
+static const char *mkd_doc_fiction_physical_design_color_routing_params_engine =
+R"doc(The engine to use: MCS, DSATUR, LMXRLF, or SAT. TabuCol requires a
+color bound that this API does not accept.)doc";
 
 static const char *mkd_doc_fiction_physical_design_color_routing_params_partial_sat = R"doc(Allow partial solutions when the SAT engine is used.)doc";
 
@@ -15079,6 +15082,10 @@ defects, and empty sites differ by color and symbol. With a charge
 distribution, a charged SiDB is a filled circle colored by its sign
 and a neutral one a hollow circle.
 
+The printer visits every site in the bounding box and emits output for
+empty sites. Runtime and output size grow with bounding-box area even
+for sparse layouts.
+
 Args:
     os: Output stream to print into.
     lyt: Layout to print.
@@ -15340,7 +15347,8 @@ defect layer.
 Args:
     lyt: Layout to write.
     os: Output stream to write into.
-    on_progress: Receives completed dot and defect records.
+    on_progress: Receives completed dot and defect records. The
+                 callback must not modify the layout being traversed.
 
 Raises:
     ValueError: If a lattice component is non-finite or a charged-
@@ -15356,7 +15364,8 @@ the file's content.
 Args:
     lyt: Layout to write.
     filename: File to write into.
-    on_progress: Receives completed dot and defect records.
+    on_progress: Receives completed dot and defect records. The
+                 callback must not modify the layout being traversed.
 
 Raises:
     ValueError: If a lattice component is non-finite or a charged-
@@ -24931,6 +24940,10 @@ Returns:
     A logic network of type `NtkDest` that is logically equivalent to
     `ntk`.
 
+Raises:
+    ValueError: If a source gate has neither a supported gate
+                operation nor a truth table.
+
 Note:
     If `NtkDest` and `NtkSrc` are of the same type, this function
     returns `ntk` cleaned using `mockturtle::cleanup_dangling`.
@@ -27498,6 +27511,9 @@ Template Args:
 Returns:
     Corresponding node ID in the Brian Crites graph.
 
+Raises:
+    MemoryError: If decimal conversion cannot allocate storage.
+
 )doc";
 
 static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_graph = R"doc(The graph to be colored.)doc";
@@ -27535,7 +27551,11 @@ static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_pst = 
 
 static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_run = R"doc(Returns a vertex coloring using the selected coloring algorithm.)doc";
 
-static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_run_brian_crites_engine = R"doc()doc";
+static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_run_brian_crites_engine =
+R"doc(Runs the selected external heuristic with checked vertex ID
+restoration.
+
+)doc";
 
 static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_translate_to_brian_crites_graph =
 R"doc(Translates the given graph to an equivalent Brian Crites graph data
@@ -27546,6 +27566,10 @@ Args:
 
 Returns:
     Translated graph.
+
+Raises:
+    MemoryError: If the translated graph or its identifiers cannot
+                 allocate storage.
 
 )doc";
 
@@ -27687,7 +27711,17 @@ Template Args:
 
 Returns:
     An assignment of graph vertices to colors such that no two
-    adjacent vertices share the same color.
+    adjacent vertices share the same color. The assignment is empty
+    for an empty graph or when the selected engine finds no coloring
+    within its bounds.
+
+Raises:
+    ValueError: If the TabuCol color bound capped to the vertex count
+                exceeds the int range.
+    MemoryError: If heuristic graph or identifier translation cannot
+                 allocate storage.
+    OverflowError: If the coloring needs an integral color label
+                   outside the Color type's range.
 
 Note:
     If the `clique_size_color_frequency` parameter is set together
@@ -27700,8 +27734,8 @@ Note:
 static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_heuristic_params = R"doc(Parameters for heuristic graph coloring.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_heuristic_params_k_color_value =
-R"doc(:math:`k`-color value for :math:`k`-coloring algorithms, e.g.,
-TABUCOL.)doc";
+R"doc(:math:`k`-color bound for TABUCOL, capped to the number of graph
+vertices. Zero permits no colors.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_params =
 R"doc(Common parameters for the graph coloring algorithm.
@@ -27740,7 +27774,7 @@ static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_stats =
 
 static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_stats_chromatic_number =
 R"doc(The determined chromatic number (could be non-optimal depending on the
-applied engine).)doc";
+applied engine). Zero for an empty result.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_stats_color_frequency = R"doc(The frequency of the most used color.)doc";
 
@@ -27776,13 +27810,12 @@ via Coloring of Chordal Graphs\" by Jens Palsberg in CATS 2007.)doc";
 static const char *mkd_doc_fiction_utils_graph_graph_coloring_engine_SAT = R"doc(Custom iterative SAT-based encoding that finds optimal colorings.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_graph_coloring_engine_TABUCOL =
-R"doc(A :math:`k`-coloring algorithm using tabu search proposed in \"Using
-Tabu Search Techniques for Graph Coloring\" by A. Hertz and D. de
-Werra in Computing 1987. The authors claim that it significantly
-outperforms simulated annealing. However, since it is a
-:math:`k`-coloring algorithm, it is required to set `k_color_value` in
-`determine_vertex_coloring_params` to the chromatic number that is to
-be checked for.)doc";
+R"doc(Randomized local search for a fixed color bound with a bounded
+iteration budget. Set `k_color_value` in
+`determine_vertex_coloring_params` to the color bound to search. A
+zero bound or an unsuccessful search returns an empty coloring. An
+unsuccessful search does not prove that the graph cannot be colored
+within the bound.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_graph_coloring_sat_search_tactic =
 R"doc(An enumeration of search tactics to use for the SAT-based graph
@@ -28692,7 +28725,10 @@ threads. The reporter forwards the first report, the final report in
 its destructor, and intermediate reports whenever another percent of
 the total (or another 64 items when the total is unknown) was
 completed and at least 100 ms have passed since the last report. An
-empty callback turns every member into a no-op.)doc";
+empty callback turns every member into a no-op. If a callback throws,
+construction and progress updates propagate the exception on the
+calling thread. The destructor ignores callback exceptions from its
+final report, including during stack unwinding.)doc";
 
 static const char *mkd_doc_fiction_utils_progress_reporter_advance =
 R"doc(Records `n` completed work items and forwards a report if one is due.

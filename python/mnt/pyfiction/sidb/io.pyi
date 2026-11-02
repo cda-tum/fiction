@@ -24,7 +24,8 @@ def write_sqd_layout(
     Args:
         layout: Layout to write.
         filename: File to write into.
-        on_progress: Receives completed dot and defect records.
+        on_progress: Receives completed dot and defect records. The
+                     callback must not modify the layout being traversed.
 
     Raises:
         ValueError: If a lattice component is non-finite or a charged-
@@ -32,6 +33,11 @@ def write_sqd_layout(
                     the destination remains unchanged.
         RuntimeError: If creating, writing, closing, or replacing the
                       output file fails.
+
+
+
+    With on_progress, the writer copies the layout before calling Python. Callback mutations do not change the exported snapshot. Without a callback, the writer borrows the layout.
+    Callback exceptions propagate from the initial report and progress updates. The final report during reporter destruction ignores callback exceptions.
     """
 
 class sqd_parsing_error(RuntimeError): ...
@@ -240,6 +246,9 @@ def print_sidb_layout(
     second row per unit cell of an H-Si(111)-1x1 surface. Inputs, outputs, normal SiDBs,
     defects, and empty sites differ by color and symbol. With a charge distribution,
     a charged SiDB is a filled circle colored by its sign and a neutral one a hollow circle.
+
+    The printer visits every site in the bounding box and emits output for empty sites.
+    Runtime and output size grow with bounding-box area even for sparse layouts.
 
     Args:
         layout: Layout to render.
