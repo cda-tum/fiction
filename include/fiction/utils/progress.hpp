@@ -39,7 +39,8 @@ namespace fiction::utils
  * count. In between, reports are throttled, so consumers must not rely on seeing every intermediate value.
  *
  * The callback may be invoked from any thread the algorithm spawns. Each reporter serializes its own invocations;
- * callbacks shared by multiple reporters must synchronize access to shared state. The callback must not throw.
+ * callbacks shared by multiple reporters must synchronize access to shared state. See @ref progress_reporter for
+ * callback exception handling.
  * The callback must not modify input objects that the algorithm traverses, unless the entry point documents a snapshot.
  */
 using progress_callback = std::function<void(std::string_view task, std::size_t done, std::size_t total)>;
