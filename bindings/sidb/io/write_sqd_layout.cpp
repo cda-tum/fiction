@@ -14,8 +14,6 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "pyfiction/documentation.hpp"
-
 #include <fiction/technology/sidb/io/write_sqd_layout.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/utils/progress.hpp>
@@ -62,12 +60,29 @@ void register_write_sqd_layout(nb::module_& m)
             }
         },
         nb::arg("layout"), nb::arg("filename"), nb::arg("on_progress").none() = nb::none(),
-        (parameter_doc(DOC(fiction_sidb_io_write_sqd_layout_2), {{"lyt", "layout"}}) +
-         "\n\nWith on_progress, the writer copies the layout before calling Python. Callback mutations do not change "
-         "the exported snapshot. Without a callback, the writer borrows the layout.\n"
-         "Callback exceptions propagate from the initial report and progress updates. The final report during reporter "
-         "destruction ignores callback exceptions.")
-            .c_str());
+        R"doc(Writes a SiDB layout as an SQD file for SiQAD.
+
+The file records the layout's lattice, SiDB lattice coordinates and dot tags,
+and surface defects.
+
+With on_progress, the writer copies the layout before calling Python. Callback
+mutations of the source layout do not change the exported snapshot. Without a
+callback, the writer borrows the layout; other threads must not modify the layout
+until this call returns.
+
+Callback exceptions propagate from the initial report and progress updates.
+The final report during reporter destruction ignores callback exceptions.
+
+Args:
+    layout: Layout to write.
+    filename: File to write into.
+    on_progress: Receives completed dot and defect records; None disables progress reporting.
+
+Raises:
+    ValueError: A lattice component is non-finite or a charged-defect material
+        parameter is non-finite or negative; the destination remains unchanged.
+    RuntimeError: Creating, writing, closing, or replacing the output file fails.
+)doc");
 }
 
 }  // namespace pyfiction
