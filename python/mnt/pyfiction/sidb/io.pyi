@@ -18,26 +18,28 @@ def write_sqd_layout(
     layout: mnt.pyfiction.sidb.sidb_layout, filename: str, on_progress: Callable[[str, int, int], None] | None = None
 ) -> None:
     """
-    Writes an `sidb::layout` as an SQD file. See the stream overload for
-    the file's content.
+    Writes a SiDB layout as an SQD file for SiQAD.
+
+    The file records the layout's lattice, SiDB lattice coordinates and dot tags,
+    and surface defects.
+
+    With on_progress, the writer copies the layout before calling Python. Callback
+    mutations of the source layout do not change the exported snapshot. Without a
+    callback, the writer borrows the layout; other threads must not modify the layout
+    until this call returns.
+
+    Callback exceptions propagate from the initial report and progress updates.
+    The final report during reporter destruction ignores callback exceptions.
 
     Args:
         layout: Layout to write.
         filename: File to write into.
-        on_progress: Receives completed dot and defect records. The
-                     callback must not modify the layout being traversed.
+        on_progress: Receives completed dot and defect records; None disables progress reporting.
 
     Raises:
-        ValueError: If a lattice component is non-finite or a charged-
-                    defect material parameter is non-finite or negative;
-                    the destination remains unchanged.
-        RuntimeError: If creating, writing, closing, or replacing the
-                      output file fails.
-
-
-
-    With on_progress, the writer copies the layout before calling Python. Callback mutations do not change the exported snapshot. Without a callback, the writer borrows the layout.
-    Callback exceptions propagate from the initial report and progress updates. The final report during reporter destruction ignores callback exceptions.
+        ValueError: A lattice component is non-finite or a charged-defect material
+            parameter is non-finite or negative; the destination remains unchanged.
+        RuntimeError: Creating, writing, closing, or replacing the output file fails.
     """
 
 class sqd_parsing_error(RuntimeError): ...
