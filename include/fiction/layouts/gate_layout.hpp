@@ -2129,7 +2129,7 @@ class gate_layout : public CoordinateLayout
         /** @brief Complete elementary cache, committed after all allocations succeed. */
         mockturtle::truth_table_cache<kitty::dynamic_truth_table> initialized{16};
         initialized.insert(kitty::dynamic_truth_table{0});
-        for (const auto [literal, arity] : std::array<std::pair<uint64_t, uint32_t>, 7>{
+        for (const auto& [literal, arity] : std::array<std::pair<uint64_t, uint32_t>, 7>{
                  {{0x1, 1}, {0x8, 2}, {0xe, 2}, {0x2, 2}, {0xb, 2}, {0x6, 2}, {0xe8, 3}}})
         {
             kitty::dynamic_truth_table table{arity};
