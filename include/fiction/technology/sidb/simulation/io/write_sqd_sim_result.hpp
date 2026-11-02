@@ -165,8 +165,8 @@ inline void validate_xml_name(std::string_view name)
     {
         const auto character = utils::io::detail::next_xml_character(name);
         if (!xml_name_start(character) && character != '-' && character != '.' &&
-            !(character >= '0' && character <= '9') && character != 0xb7 &&
-            !(character >= 0x300 && character <= 0x36f) && !(character >= 0x203f && character <= 0x2040))
+            (character < '0' || character > '9') && character != 0xb7 && (character < 0x300 || character > 0x36f) &&
+            (character < 0x203f || character > 0x2040))
         {
             throw std::invalid_argument("SiQAD parameter names require XML name characters");
         }

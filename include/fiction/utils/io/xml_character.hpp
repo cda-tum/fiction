@@ -82,8 +82,8 @@ namespace fiction::utils::io::detail
         character = (character << 6u) | (continuation & 0x3fu);
     }
     if (character < minimum ||
-        !(character == 0x9 || character == 0xa || character == 0xd || (character >= 0x20 && character <= 0xd7ff) ||
-          (character >= 0xe000 && character <= 0xfffd) || (character >= 0x10000 && character <= 0x10ffff)))
+        (character != 0x9 && character != 0xa && character != 0xd && (character < 0x20 || character > 0xd7ff) &&
+         (character < 0xe000 || character > 0xfffd) && (character < 0x10000 || character > 0x10ffff)))
     {
         throw std::invalid_argument("XML text requires XML 1.0 characters encoded as UTF-8");
     }

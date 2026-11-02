@@ -15,12 +15,14 @@
  * @author Jan Drewniok (Drewniok)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
 #include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
+#include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/technology/sidb/simulation/io/write_sqd_sim_result.hpp>
@@ -130,7 +132,7 @@ TEST_CASE("SQD timestamp oracle accepts calendar boundaries and rejects invalid 
     CHECK(timestamp_in_window("2026-01-01 23:59:59", before, before));
     CHECK(timestamp_in_window("2026-01-02 00:00:00", before, before + 2));
     CHECK_FALSE(timestamp_in_window("2026-01-02 00:00:02", before, before + 2));
-    CHECK_FALSE(timestamp_in_window("2026-02-30 00:00:00", before, before + 90 * 86400));
+    CHECK_FALSE(timestamp_in_window("2026-02-30 00:00:00", before, before + (std::time_t{90} * 86400)));
     CHECK_FALSE(timestamp_in_window("2026-01-02", before, before + 2));
     CHECK_FALSE(timestamp_in_window("2026-1-2 00:00:00", before, before + 2));
 }
@@ -517,7 +519,7 @@ TEST_CASE("SQD simulation orders mixed finite and non-finite energies", "[sqd-si
                                                                {"0+", infinity},
                                                                {"--", nan}};
     /** @brief Next emitted distribution. */
-    auto* distribution = distributions->FirstChildElement("dist");
+    const auto* distribution = distributions->FirstChildElement("dist");
     for (const auto& [configuration, energy] : expected)
     {
         CAPTURE(configuration);

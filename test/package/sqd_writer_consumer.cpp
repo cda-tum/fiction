@@ -14,6 +14,7 @@
  */
 
 #include <fiction/technology/sidb/simulation/io/write_sqd_sim_result.hpp>
+#include <fiction/technology/sidb/simulation/result.hpp>
 
 #include <sstream>
 #include <string>
@@ -28,6 +29,7 @@ using namespace fiction::sidb::simulation::io;
  * @return Zero when the writer emits the expected metadata and document end.
  */
 int main()
+try
 {
     result sim_result{};
     sim_result.algorithm_name = "&<>\r";
@@ -40,4 +42,8 @@ int main()
                    document.ends_with("</sim_out>\n") ?
                0 :
                1;
+}
+catch (...)
+{
+    return 1;
 }
