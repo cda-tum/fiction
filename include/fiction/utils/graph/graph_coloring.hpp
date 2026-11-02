@@ -88,9 +88,10 @@ enum class graph_coloring_engine : std::uint8_t
      */
     LMXRLF,  // randomized
     /**
-     * Randomized local search for a fixed color bound with a bounded iteration budget. Set `k_color_value` in
-     * `determine_vertex_coloring_params` to the color bound to search. A zero bound or an unsuccessful search returns
-     * an empty coloring. An unsuccessful search does not prove that the graph cannot be colored within the bound.
+     * Randomized local search for a fixed color bound with a bounded iteration budget. Set
+     * `heuristic_params.k_color_value` in `determine_vertex_coloring_params` to the color bound to search. A zero bound
+     * or an unsuccessful search returns an empty coloring. An unsuccessful search does not prove that the graph cannot
+     * be colored within the bound.
      */
     TABUCOL,  // k-coloring
     /**
@@ -558,7 +559,7 @@ class sat_coloring_handler
                 instance->solver.add_clause(bill::lit_type{instance->variables[{v, c}], bill::positive_polarity});
             }
         }
-        else  // without clique information, at least the first vertex can be painted
+        else if (instance->k > 0)  // without clique information, paint the first vertex when a color exists
         {
             std::ignore = std::ranges::find_if(
                 graph.begin_vertices(), graph.end_vertices(),
@@ -568,15 +569,19 @@ class sat_coloring_handler
                     // assign color 0 to any vertex
                     instance->solver.add_clause(bill::lit_type{instance->variables[{v, 0}], bill::positive_polarity});
 
-                    std::ignore = std::ranges::find_if(graph.begin_adjacent(v), graph.end_adjacent(v),
-                                                       [&instance](const auto& av)
-                                                       {
-                                                           // assign color 1 to an adjacent vertex
-                                                           instance->solver.add_clause(bill::lit_type{
-                                                               instance->variables[{av, 1}], bill::positive_polarity});
+                    if (instance->k > 1)
+                    {
+                        std::ignore =
+                            std::ranges::find_if(graph.begin_adjacent(v), graph.end_adjacent(v),
+                                                 [&instance](const auto& av)
+                                                 {
+                                                     // assign color 1 to an adjacent vertex
+                                                     instance->solver.add_clause(bill::lit_type{
+                                                         instance->variables[{av, 1}], bill::positive_polarity});
 
-                                                           return true;  // abort loop after first iteration
-                                                       });
+                                                     return true;  // abort loop after first iteration
+                                                 });
+                    }
 
                     return true;  // abort loop after first iteration
                 });

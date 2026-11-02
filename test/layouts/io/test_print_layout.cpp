@@ -219,6 +219,8 @@ TEST_CASE("Print gate symbols and terminal colors", "[print-gate-level-layout]")
     CHECK(plain.str().find('M') != std::string::npos);
     CHECK(plain.str().find('X') != std::string::npos);
     CHECK(plain.str().find('F') != std::string::npos);
+    CHECK(plain.str().find('|') < plain.str().find('M'));
+    CHECK(plain.str().find('M') < plain.str().find('X'));
 
     /** @brief Terminal colors use ANSI escape sequences. */
     std::stringstream colored{};

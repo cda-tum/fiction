@@ -361,6 +361,27 @@ TEST_CASE("K", "[graph-coloring]")
     check_coloring_engines(create_complete_graph<graph>(vertices), size, vertices);
 }
 
+TEST_CASE("SAT colors small graphs without clique information", "[graph-coloring]")
+{
+    /** @brief Graph with integral vertex identifiers. */
+    using graph = undirected_graph<std::size_t, uint8_t, undirected_pair<std::size_t>, uint8_t>;
+    /** @brief A single vertex, two isolated vertices, or one edge. */
+    graph input{};
+    /** @brief Graph shape to test. */
+    const auto shape = GENERATE(0, 1, 2);
+    CAPTURE(shape);
+    input.insert_vertex(0, {});
+    if (shape > 0)
+    {
+        input.insert_vertex(1, {});
+    }
+    if (shape == 2)
+    {
+        input.insert_edge(0, 1, {});
+    }
+    check_sat_search_tactics(input, shape == 2 ? 2u : 1u, {});
+}
+
 TEST_CASE("String IDs (mostly a compile test)", "[graph-coloring]")
 {
     // using a graph data structure with dummy values for its associated types
