@@ -216,9 +216,9 @@ class color_routing_impl
  * path limit can be set that restricts the number of paths to the \f$k\f$ shortest. Additionally, for the coloring
  * process, SAT solving is used by default, which, again, guarantees completeness, but becomes infeasible rather
  * quickly. However, powerful symmetry breaking is applied that assists the solving process, e.g., it is known that all
- * vertices that are belonging to the same objective are forming a clique, which can be pre-colored. Additionally,
- * lexicographical orderings are enforced. For a more scalable (yet incomplete) approach, several coloring heuristics
- * are available, from which can be chosen (see determine_vertex_coloring).
+ * vertices that are belonging to the same objective are forming a clique, which can be pre-colored.
+ * For a more scalable (yet incomplete) approach, several coloring heuristics are available, from which can be chosen
+ * (see determine_vertex_coloring).
  *
  * This function will return `true` if all objectives could be satisfied or if the partial routing parameter was set. In
  * the case of `true` being returned, all determined paths have been routed in the given layout.
