@@ -8464,9 +8464,6 @@ Args:
     ntk: Network.
     n: Single-fanin node.
 
-Template Args:
-    Ntk: Ranked network type with a fanout interface.
-
 Returns:
     Allowed orientation.
 
@@ -8585,9 +8582,6 @@ gate.
 Args:
     ntk: Network.
     n: Single-fanin node.
-
-Template Args:
-    Ntk: Ranked network type with a fanout interface.
 
 Returns:
     Connection type.
@@ -8717,10 +8711,6 @@ Args:
     node2pos: Positions of the placed nodes.
     lvl: Level.
 
-Template Args:
-    Ntk: Ranked network type with a fanout interface.
-    Lyt: Layout type.
-
 Returns:
     Orientations and new lines, aligned with the rank order of the
     level.
@@ -8806,10 +8796,6 @@ Args:
     new_lines: New lines per node.
     lvl: Level.
 
-Template Args:
-    Ntk: Ranked network type.
-    Lyt: Layout type.
-
 Returns:
     East and south runs per node.
 
@@ -8838,13 +8824,9 @@ it.
 Args:
     lyt: Layout.
     t: Tile east or south of `pre_t`.
-    ntk: Named technology network over the storage of the ranked
-         network, see `placement_view`.
+    ntk: Network.
     n: Node.
     pre_t: Tile that holds the predecessor's signal.
-
-Template Args:
-    Lyt: Gate-level layout type.
 
 Returns:
     Signal of the placed node.
@@ -8865,17 +8847,13 @@ keep their meaning whichever predecessor sits north.
 Args:
     lyt: Layout.
     t: Tile.
-    ntk: Named technology network over the storage of the ranked
-         network, see `placement_view`.
+    ntk: Network.
     n: Node.
     first_t: Tile that holds the first fanin's signal, in the column
              or the row of `t`.
     second_t: Tile that holds the second fanin's signal, in the other
               one of column and row of `t`.
     c: Value of a constant third fanin, if any.
-
-Template Args:
-    Lyt: Gate-level layout type.
 
 Returns:
     Signal of the placed node.
@@ -9912,9 +9890,6 @@ Args:
     ntk: Network.
     n: Fanout node.
 
-Template Args:
-    Ntk: Ranked network type with a fanout interface.
-
 Returns:
     Connection type; `BOTH_SINGLE` for a fanout that drives an output.
 
@@ -10682,9 +10657,6 @@ Args:
     ntk: Network.
     n: Node.
 
-Template Args:
-    Ntk: Network type.
-
 Returns:
     Non-constant fanins.
 
@@ -10874,11 +10846,7 @@ bottom left. For each level the lookup tables give every node an
 orientation and a demand for routing lines, `compute_wiring` turns the
 demands into the east and south runs of the predecessors' wires, and
 the nodes are placed in rank order at the ends of those wires. The
-wire of a fanout node is shared by its consumers.
-
-Template Args:
-    Lyt: Gate-level layout type.
-    Ntk: Ranked, planar network type.)doc";
+wire of a fanout node is shared by its consumers.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_plane_impl_check_diagonal =
 R"doc(Checks that a placed node sits on the level's diagonal.
@@ -10924,10 +10892,6 @@ static const char *mkd_doc_fiction_physical_design_detail_plane_impl_output_slot
 static const char *mkd_doc_fiction_physical_design_detail_plane_impl_output_slot_index = R"doc(Index of the output.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_plane_impl_output_slot_rank = R"doc(Rank position of the driver on the output level.)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_plane_impl_pi2node =
-R"doc(Primary input of the layout for every input node; sets the input order
-of the layout.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_plane_impl_place_input =
 R"doc(Places a primary input.
@@ -10982,10 +10946,6 @@ Args:
     wiring: Wire lengths of the level.
 
 )doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_plane_impl_placement_ntk =
-R"doc(Named technology network over the storage of `ntk`, the form that
-`place` reads gate functions from.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_plane_impl_plane_impl =
 R"doc(Creates the implementation.
@@ -11159,10 +11119,6 @@ Args:
     lvl: Level of `n`.
     n: Node.
 
-Template Args:
-    Ntk: Ranked network type.
-    Lyt: Layout type.
-
 Returns:
     Gap; zero on the input level and for a predecessor without left
     neighbour.
@@ -11211,9 +11167,6 @@ Args:
     ntk: Network.
     n: Node.
 
-Template Args:
-    Ntk: Ranked network type.
-
 Returns:
     Fanins of `n`, leftmost first.
 
@@ -11225,9 +11178,6 @@ R"doc(Fanouts of a node sorted by rank position.
 Args:
     ntk: Network.
     n: Node.
-
-Template Args:
-    Ntk: Ranked network type with a fanout interface.
 
 Returns:
     Fanouts of `n`, leftmost first.
@@ -11247,9 +11197,6 @@ Args:
     lyt: Layout.
     a: Signal to continue.
     t: Tile.
-
-Template Args:
-    Lyt: Gate-level layout type.
 
 Returns:
     Signal of the buffer on `t`.
@@ -11441,9 +11388,6 @@ Args:
     ntk: Network.
     lvl: Level.
 
-Template Args:
-    Ntk: Ranked network type with a fanout interface.
-
 Returns:
     Orientation of the first node.
 
@@ -11529,9 +11473,6 @@ Args:
     ntk: Network.
     lvl: Level.
 
-Template Args:
-    Ntk: Ranked network type.
-
 Returns:
     Positions, ascending.
 
@@ -11547,10 +11488,6 @@ Args:
     lyt: Layout.
     node2pos: Positions of the placed nodes.
     lvl: Level.
-
-Template Args:
-    Ntk: Ranked network type.
-    Lyt: Layout type.
 
 Returns:
     Rows per gate, in the order of `two_input_indices`.
@@ -11593,9 +11530,6 @@ Args:
     east: Length of the east run.
     south: Length of the south run that follows.
 
-Template Args:
-    Lyt: Gate-level layout type.
-
 Returns:
     Tile the signal ends on.
 
@@ -11613,9 +11547,6 @@ Args:
     lyt: Layout.
     src: Tile that holds the signal.
     dest: Tile east or south of `src`.
-
-Template Args:
-    Lyt: Gate-level layout type.
 
 Returns:
     Signal on the tile before `dest`; the signal of `src` if the tiles
@@ -13778,9 +13709,9 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_plane =
-R"doc(Places and routes a planar, balanced, fanout-substituted, ranked logic
-network as a 2DDWave-clocked gate-level layout without wire crossings
-(PLANE, Planar Layout from Network Embedding).
+R"doc(Places and routes a planar, balanced, fanout-substituted logic network
+as a 2DDWave-clocked gate-level layout without wire crossings (PLANE,
+Planar Layout from Network Embedding).
 
 The approach was originally proposed in \"A Fully Planar Approach to
 Field-coupled Nanocomputing: Scalable Placement and Routing Without
@@ -13796,20 +13727,16 @@ level share one diagonal. Primary inputs sit on the left and top
 borders, primary outputs on the right border; constant outputs take
 rows of their own below the others.
 
-The input must be planar in its rank order (see
-`synthesis::planarization`) with at most two non-constant fanins and
-at most two fanouts per node, primary outputs included.
+The node order of the input is its rank order. The input must be
+planar in that order with at most two non-constant fanins and at most
+two fanouts per node, primary outputs included.
+`synthesis::flatten_planarization` turns the result of
+`synthesis::planarization` into such a network.
 
 Args:
     ntk: Network to place and route.
     ps: Parameters.
     pst: Statistics.
-
-Template Args:
-    Lyt: Cartesian gate-level layout type.
-    Ntk: Ranked technology network type with levels and rank positions
-         (see `mutable_rank_view`); the result of
-         `synthesis::planarization` is one.
 
 Returns:
     Crossing-free gate-level layout that implements `ntk`.
@@ -13817,10 +13744,12 @@ Returns:
 Raises:
     networks::high_degree_fanin_exception: If a node has more than two
                                            non-constant fanins.
-    ValueError: If `ntk` has no primary inputs, if a node drives more
-                than two fanouts, if a gate has a constant fanin next
-                to a single non-constant one, if `ntk` is not
-                balanced, or if the rank order of `ntk` has crossings.
+    std::invalid_argument: If `ntk` has no primary inputs, if a node
+                           drives more than two fanouts, if no output
+                           reaches a gate, if a gate has a constant
+                           fanin next to a single non-constant one, if
+                           `ntk` is not balanced, or if the rank order
+                           of `ntk` has crossings.
     std::logic_error: If placement or routing cannot keep the layout
                       planar; such an input is a defect.
 
@@ -27546,6 +27475,27 @@ static const char *mkd_doc_fiction_synthesis_fanout_substitution_params_threshol
 R"doc(Maximum number of outputs any gate is allowed to have before
 substitution applies. Must be at least one.)doc";
 
+static const char *mkd_doc_fiction_synthesis_flatten_planarization =
+R"doc(Copies a planar network into a named technology network whose node
+order encodes the rank order.
+
+The result lists the primary inputs in the order of level 0, then the
+gates level by level in rank order. Virtual primary inputs become
+ordinary primary inputs of the result.
+
+Args:
+    planar: Planar network, the result of `planarization`.
+
+Template Args:
+    Ntk: Ranked network type of the planar network.
+
+Returns:
+    The copy, and for every primary input of the copy the index of the
+    input of the original network that it stands for. A virtual
+    primary input maps to the index of its real primary input.
+
+)doc";
+
 static const char *mkd_doc_fiction_synthesis_io_tt_reader =
 R"doc(Reads whitespace-separated pairs of a hexadecimal truth table and its
 corresponding Boolean expression. Truth tables use a `0x` or `0X`
@@ -28027,10 +27977,11 @@ Returns:
     of at most `fanout_degree` outputs.
 
 Raises:
-    ValueError: If `ps.fanout_degree` is below 2, or if `ntk` is not
-                balanced with unified outputs, contains virtual
-                primary inputs, or violates another precondition of
-                `node_duplication_planarization`.
+    std::invalid_argument: If `ps.fanout_degree` is below 2, or if
+                           `ntk` is not balanced with unified outputs,
+                           contains virtual primary inputs, or
+                           violates another precondition of
+                           `node_duplication_planarization`.
     std::runtime_error: If a stage cannot keep its contract (see the
                         stages' documentation), or if the result is
                         not planar or not balanced with unified
@@ -28046,7 +27997,7 @@ whether the crossing gates are built from XOR gates.
 
 The pipeline defaults to the hybrid strategy, which decides per level
 between duplicating nodes and keeping the crossings for the crossing
-gates.)doc";
+gates. @hideinitializer)doc";
 
 static const char *mkd_doc_fiction_synthesis_planarization_params_fanout_degree =
 R"doc(Maximum output degree of the fanout nodes in the result.
