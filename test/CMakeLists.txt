@@ -93,7 +93,6 @@ foreach(FILE IN LISTS FILENAMES)
 
   target_link_libraries(${TEST_NAME} PRIVATE Catch2::Catch2WithMain)
 
-  # Make Catch2 ignore SIGTERMs sent to applications when timeouts are reached
   target_compile_definitions(${TEST_NAME} PRIVATE CATCH_CONFIG_NO_POSIX_SIGNALS)
 
   # The shared PCH carrier inherits libfiction's allocator dependencies.

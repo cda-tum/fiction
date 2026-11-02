@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <iterator>
 #include <mutex>
+#include <ranges>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -88,24 +89,24 @@ class progress_recorder
      */
     [[nodiscard]] bool is_consistent(const std::string_view task) const
     {
-        const auto task_reports = reports_of(task);
+        /** @brief Most recent report of the selected task. */
+        const progress_record* previous{nullptr};
 
-        if (task_reports.empty() || task_reports.front().done != 0)
+        for (const auto& report : reports)
         {
-            return false;
-        }
-
-        for (std::size_t i = 1; i < task_reports.size(); ++i)
-        {
-            if (task_reports[i].done < task_reports[i - 1].done && task_reports[i].done != 0)
+            if (report.task != task)
+            {
+                continue;
+            }
+            if ((previous == nullptr && report.done != 0) ||
+                (previous != nullptr && report.done < previous->done && report.done != 0))
             {
                 return false;
             }
+            previous = &report;
         }
 
-        const auto& last = task_reports.back();
-
-        return last.total == 0 || last.done == last.total;
+        return previous != nullptr && (previous->total == 0 || previous->done == previous->total);
     }
     /**
      * @brief Returns the final count reported for a task.
@@ -115,9 +116,11 @@ class progress_recorder
      */
     [[nodiscard]] std::size_t final_count(const std::string_view task) const
     {
-        const auto task_reports = reports_of(task);
+        /** @brief Last matching report in callback order. */
+        const auto last = std::ranges::find_if(reports | std::views::reverse,
+                                               [task](const auto& report) { return report.task == task; });
 
-        return task_reports.empty() ? 0 : task_reports.back().done;
+        return last == reports.crend() ? 0 : last->done;
     }
 
   private:

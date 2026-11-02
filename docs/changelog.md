@@ -259,6 +259,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Modernized iNML and molecular QCA tests with complete SVG file checks, cell-type rows, and independent
     gate-orientation cases.
   - Streamlined QuickExact and QuickSim tests while preserving physical inputs, charge configurations, and timeout coverage.
+  - Progress-recorder queries now inspect report histories without copying them.
   - Modernized QCA tests with shared format expectations and SVG detail multiplicity checks.
   - Modernized layout-transformation tests with named cases, defect-aware interface checks, and complete routing checks.
   - FCN tests share port-list and constant-cell cases and check writer failure recovery.
@@ -842,6 +843,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     and leave the shell usable. Status text accounts for Unicode display widths.
 
 - Code quality:
+  - The half-adder test fixture now names its AND output `carry` and its XOR output `sum`.
   - `find_first_two_of` now returns the end iterator when either range has fewer than two elements.
 
 - Continuous integration:

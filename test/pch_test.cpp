@@ -15,7 +15,7 @@
  */
 
 //
-// Carrier translation unit for the test suite's shared pre-compiled header. The 118 test executables
+// Carrier translation unit for the test suite's shared pre-compiled header. The test executables
 // reuse the PCH built for this target instead of each building their own.
 //
 

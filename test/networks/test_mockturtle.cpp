@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
@@ -25,6 +26,7 @@
 #include <fiction/networks/mockturtle_utils.hpp>
 #include <fiction/synthesis/technology_mapping_library.hpp>
 
+#include <kitty/bit_operations.hpp>
 #include <kitty/dynamic_truth_table.hpp>
 #include <kitty/print.hpp>
 #include <lorina/common.hpp>
@@ -36,10 +38,12 @@
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/tech_library.hpp>
 
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <iterator>
 #include <sstream>
+#include <string>
 #include <vector>
 
 using namespace fiction;
@@ -199,5 +203,35 @@ TEST_CASE("Technology mapping", "[mockturtle]")
         const mockturtle::tech_library<3> gate_lib{gates};
 
         check_all(gate_lib);
+    }
+}
+
+TEST_CASE("Half-adder blueprint names its sum and carry functions", "[mockturtle]")
+{
+    /** @brief Half-adder outputs evaluated independently of their declared order. */
+    const auto network = blueprints::half_adder_network<mockturtle::aig_network>();
+    /** @brief Complete output functions for the two primary inputs. */
+    const auto functions = mockturtle::simulate<kitty::dynamic_truth_table>(
+        network, mockturtle::default_simulator<kitty::dynamic_truth_table>{2});
+    REQUIRE(network.num_pos() == 2);
+    REQUIRE(functions.size() == 2);
+
+    /** @brief Output names sorted only to check completeness and uniqueness. */
+    std::array names{network.get_output_name(0), network.get_output_name(1)};
+    std::ranges::sort(names);
+    CHECK(names == std::array{std::string{"carry"}, std::string{"sum"}});
+
+    for (uint32_t input{}; input < 4; ++input)
+    {
+        CAPTURE(input);
+        /** @brief Independent arithmetic sum of the two input bits. */
+        const auto sum = (input & 1u) + ((input >> 1u) & 1u);
+        for (uint32_t output{}; output < network.num_pos(); ++output)
+        {
+            CAPTURE(output, network.get_output_name(output));
+            /** @brief Named bit of the arithmetic sum. */
+            const auto expected = network.get_output_name(output) == "sum" ? (sum & 1u) != 0 : (sum & 2u) != 0;
+            CHECK(static_cast<bool>(kitty::get_bit(functions[output], input)) == expected);
+        }
     }
 }
