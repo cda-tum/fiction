@@ -129,13 +129,10 @@ TEST_CASE("Test calculate_energy_distribution function", "[energy-distribution]"
         REQUIRE(second_state.has_value());
         if (first_state.has_value() && second_state.has_value())
         {
-            /** @brief Complete indexed states, independent of their retrieval order. */
-            const std::vector<std::pair<double, uint64_t>> indexed_states{
-                {first_state->electrostatic_potential_energy, first_state->degeneracy},
-                {second_state->electrostatic_potential_energy, second_state->degeneracy}};
-            CHECK(std::count(indexed_states.cbegin(), indexed_states.cend(), std::pair{0.0, uint64_t{2}}) == 1);
-            CHECK(std::count(indexed_states.cbegin(), indexed_states.cend(), std::pair{third.energy(), uint64_t{1}}) ==
-                  1);
+            CHECK(first_state->electrostatic_potential_energy == 0.0);
+            CHECK(first_state->degeneracy == 2);
+            CHECK(second_state->electrostatic_potential_energy == third.energy());
+            CHECK(second_state->degeneracy == 1);
         }
         CHECK(result.size() == 2);
         CHECK_FALSE(result.get_nth_state(2).has_value());
