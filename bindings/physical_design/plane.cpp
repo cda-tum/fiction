@@ -69,7 +69,7 @@ void register_plane(nb::module_& m)
 
     m.def(
         "plane",
-        [](const py_tec_network& network, stats* statistics,
+        [](const fiction::networks::named_technology_network& network, stats* statistics,
            const decltype(plane_options{}.number_of_clock_phases) number_of_clock_phases,
            const decltype(plane_options{}.on_progress)&           on_progress)
         {

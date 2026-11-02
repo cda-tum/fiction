@@ -38,6 +38,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
+#include <memory>
 #include <optional>
 #include <span>
 #include <sstream>
@@ -79,10 +80,10 @@ constexpr uint32_t SIMULATION_PATTERNS = 4096;
  */
 constexpr uint64_t MAX_DUPLICATIONS = 2000000;
 
-tec_nt read_network(const std::string& name)
+named_technology_network read_network(const std::string& name)
 {
     std::ostringstream      os{};
-    network_reader<tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
+    network_reader<std::shared_ptr<named_technology_network>> reader{fiction_experiments::benchmark_path(name), os};
 
     return *reader.get_networks().front();
 }

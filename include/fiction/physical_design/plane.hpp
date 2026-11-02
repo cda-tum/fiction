@@ -1157,15 +1157,15 @@ template <typename Lyt>
  */
 template <typename Ntk>
     requires std::derived_from<Ntk, networks::technology_network>
-[[nodiscard]] tec_nt placement_view(const Ntk& ntk)
+[[nodiscard]] networks::named_technology_network placement_view(const Ntk& ntk)
 {
-    if constexpr (std::derived_from<Ntk, tec_nt>)
+    if constexpr (std::derived_from<Ntk, networks::named_technology_network>)
     {
-        return static_cast<const tec_nt&>(ntk);
+        return static_cast<const networks::named_technology_network&>(ntk);
     }
     else
     {
-        return tec_nt{static_cast<const networks::technology_network&>(ntk)};
+        return networks::named_technology_network{static_cast<const networks::technology_network&>(ntk)};
     }
 }
 /**
@@ -1182,7 +1182,7 @@ template <typename Ntk>
  */
 template <typename Lyt>
 [[nodiscard]] typename Lyt::object_id connect_and_place_planar(Lyt& lyt, const layouts::layout_base::coordinate& t,
-                                                               const tec_nt& ntk, const tec_nt::node& n,
+                                                               const networks::named_technology_network& ntk, const networks::named_technology_network::node& n,
                                                                const layouts::layout_base::coordinate& pre_t)
 {
     if (!lyt.is_empty_tile(t))
@@ -1212,7 +1212,7 @@ template <typename Lyt>
  */
 template <typename Lyt>
 [[nodiscard]] typename Lyt::object_id
-connect_and_place_planar(Lyt& lyt, const layouts::layout_base::coordinate& t, const tec_nt& ntk, const tec_nt::node& n,
+connect_and_place_planar(Lyt& lyt, const layouts::layout_base::coordinate& t, const networks::named_technology_network& ntk, const networks::named_technology_network::node& n,
                          const layouts::layout_base::coordinate& first_t,
                          const layouts::layout_base::coordinate& second_t, const std::optional<bool>& c = std::nullopt)
 {
@@ -1612,7 +1612,7 @@ class plane_impl
     /**
      * @brief Named technology network over the storage of `ntk`, the form that `place` reads gate functions from.
      */
-    const tec_nt placement_ntk;
+    const networks::named_technology_network placement_ntk;
     /**
      * @brief Parameters.
      */
