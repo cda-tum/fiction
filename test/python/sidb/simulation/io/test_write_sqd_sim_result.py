@@ -42,7 +42,7 @@ def test_write_sqd_sim_result(tmp_path: Path) -> None:
     filename = tmp_path / "result.xml"
     write_sqd_sim_result(result, str(filename))
 
-    text = filename.read_text()
+    text = filename.read_text(encoding="utf-8")
     assert text.startswith("<?xml")
     assert "<sim_out>" in text
     assert "<dbdot" in text
