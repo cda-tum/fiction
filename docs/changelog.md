@@ -258,6 +258,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - SiDB model, layout, and gate-library tests now share data rows and check complete defect regions and exception ports.
   - Modernized iNML and molecular QCA tests with complete SVG file checks, cell-type rows, and independent
     gate-orientation cases.
+  - SiDB generator tests share timeout and backend rows and check complete layouts, defects, and timeout statistics.
+  - Name lookup and on-the-fly circuit design avoid MSVC warnings about unreachable code and integer conversions.
+  - Gate-library connector construction avoids implicit integer conversions.
   - Streamlined QuickExact and QuickSim tests while preserving physical inputs, charge configurations, and timeout coverage.
   - Modernized QCA tests with shared format expectations and SVG detail multiplicity checks.
   - Modernized layout-transformation tests with named cases, defect-aware interface checks, and complete routing checks.
@@ -842,6 +845,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     and leave the shell usable. Status text accounts for Unicode display widths.
 
 - Code quality:
+  - QuickCell's defect test now passes the defective skeleton and checks complete result metadata.
   - `find_first_two_of` now returns the end iterator when either range has fewer than two elements.
 
 - Continuous integration:

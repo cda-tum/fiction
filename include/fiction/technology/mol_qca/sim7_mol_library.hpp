@@ -59,6 +59,8 @@ class sim7_mol_library : public fcn::gate_library<mol_qca::layout, 10, 10>
      * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a molQCA gate.
      * @return molQCA gate representation of `t` including I/Os, rotation, const cells, etc.
+     * @throws fcn::unsupported_gate_type_exception If `t` has no gate or its gate type is unsupported.
+     * @throws fcn::unsupported_gate_orientation_exception If the gate's physical port orientation is unsupported.
      */
     [[nodiscard]] static gate set_up_gate(const layouts::cartesian_gate_layout&            lyt,
                                           const fiction::layouts::layout_base::coordinate& t)
@@ -146,37 +148,37 @@ class sim7_mol_library : public fcn::gate_library<mol_qca::layout, 10, 10>
         // determine incoming connector ports for 10×10 tiles
         if (lyt.template has_northern_incoming_signal<RespectClocking>(t))
         {
-            p.inp.emplace(4u, 0u);
+            p.inp.insert(fcn::port_position{4u, 0u});
         }
         if (lyt.template has_eastern_incoming_signal<RespectClocking>(t))
         {
-            p.inp.emplace(9u, 4u);
+            p.inp.insert(fcn::port_position{9u, 4u});
         }
         if (lyt.template has_southern_incoming_signal<RespectClocking>(t))
         {
-            p.inp.emplace(5u, 9u);
+            p.inp.insert(fcn::port_position{5u, 9u});
         }
         if (lyt.template has_western_incoming_signal<RespectClocking>(t))
         {
-            p.inp.emplace(0u, 5u);
+            p.inp.insert(fcn::port_position{0u, 5u});
         }
 
         // determine outgoing connector ports (same regions)
         if (lyt.template has_northern_outgoing_signal<RespectClocking>(t))
         {
-            p.out.emplace(4u, 0u);
+            p.out.insert(fcn::port_position{4u, 0u});
         }
         if (lyt.template has_eastern_outgoing_signal<RespectClocking>(t))
         {
-            p.out.emplace(9u, 4u);
+            p.out.insert(fcn::port_position{9u, 4u});
         }
         if (lyt.template has_southern_outgoing_signal<RespectClocking>(t))
         {
-            p.out.emplace(5u, 9u);
+            p.out.insert(fcn::port_position{5u, 9u});
         }
         if (lyt.template has_western_outgoing_signal<RespectClocking>(t))
         {
-            p.out.emplace(0u, 5u);
+            p.out.insert(fcn::port_position{0u, 5u});
         }
 
         const auto object = lyt.find_object(t);
@@ -194,12 +196,12 @@ class sim7_mol_library : public fcn::gate_library<mol_qca::layout, 10, 10>
             if (lyt.template has_no_incoming_signal<RespectClocking>(t))
             {
                 // place on left edge
-                p.inp.emplace(0u, 5u);
+                p.inp.insert(fcn::port_position{0u, 5u});
             }
             if (lyt.template has_no_outgoing_signal<RespectClocking>(t))
             {
                 // place on right edge
-                p.out.emplace(9u, 4u);
+                p.out.insert(fcn::port_position{9u, 4u});
             }
         }
 

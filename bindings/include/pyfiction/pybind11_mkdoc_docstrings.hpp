@@ -1055,14 +1055,22 @@ Args:
 
 Returns:
     ToPoliNano gate representation of `t` including I/Os, rotation,
-    etc.
+    etc., or an empty gate for a crossing-layer tile.
 
 Raises:
     ValueError: If `lyt` shifts rows instead of columns.
-    fcn::unsupported_gate_type_exception: If a terminal also acts as a
-                                          fanout. Connect the terminal
-                                          to a separate fanout wire
+    fcn::unsupported_gate_type_exception: If a tile outside the
+                                          crossing layer has no gate,
+                                          its gate type is
+                                          unsupported, or a terminal
+                                          also acts as a fanout.
+                                          Connect the terminal to a
+                                          separate fanout wire
                                           instead.
+    fcn::unsupported_gate_orientation_exception: If the gate's
+                                                 physical port
+                                                 orientation is
+                                                 unsupported.
 
 )doc";
 
@@ -6716,6 +6724,14 @@ Args:
 Returns:
     molQCA gate representation of `t` including I/Os, rotation, const
     cells, etc.
+
+Raises:
+    fcn::unsupported_gate_type_exception: If `t` has no gate or its
+                                          gate type is unsupported.
+    fcn::unsupported_gate_orientation_exception: If the gate's
+                                                 physical port
+                                                 orientation is
+                                                 unsupported.
 
 )doc";
 
@@ -13860,10 +13876,16 @@ Returns:
     cells, etc.
 
 Raises:
-    fcn::unsupported_gate_type_exception: If a terminal also acts as a
+    fcn::unsupported_gate_type_exception: If `t` has no gate, its gate
+                                          type is unsupported, or a
+                                          terminal also acts as a
                                           fanout. Connect the terminal
                                           to a separate fanout wire
                                           instead.
+    fcn::unsupported_gate_orientation_exception: If the gate's
+                                                 physical port
+                                                 orientation is
+                                                 unsupported.
 
 )doc";
 

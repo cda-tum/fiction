@@ -16,6 +16,7 @@
  * @author Benjamin Hien (hibenj)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/progress_recorder.hpp"
@@ -25,6 +26,7 @@
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/analysis/can_positive_charges_occur.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -63,13 +65,7 @@ TEST_CASE("Random SiDB layout generation", "[random-sidb-layout-generator]")
         REQUIRE(result_lyt.has_value());
 
         CHECK(result_lyt.value().num_dots() == 1);
-        result_lyt.value().foreach_dot(
-            [](const auto& cell)
-            {
-                CHECK(cell.x == 5);
-                CHECK(cell.y == 5);
-                CHECK(cell.z == 1);
-            });
+        CHECK(result_lyt.value().sidbs() == std::vector<lattice_site>{{5, 5, 1}});
     }
 
     SECTION("given corner coordinates")
@@ -80,13 +76,7 @@ TEST_CASE("Random SiDB layout generation", "[random-sidb-layout-generator]")
         REQUIRE(result_lyt.has_value());
 
         CHECK(result_lyt.value().num_dots() == 0);
-        result_lyt.value().foreach_dot(
-            [&](const auto& cell)
-            {
-                CHECK(cell.x == 0);
-                CHECK(cell.y == 0);
-                CHECK(cell.z == 0);
-            });
+        CHECK(result_lyt.value().sidbs().empty());
     }
 
     SECTION("given corner coordinates and number of placed SiDBs")
@@ -145,6 +135,7 @@ TEST_CASE("Random SiDB layout generation", "[random-sidb-layout-generator]")
                 CHECK(cell.y < 91);
                 CHECK(cell.z <= 1);
             });
+        CHECK_FALSE(can_positive_charges_occur(result_lyt.value(), params.sim_params));
     }
 
     SECTION("given previous layouts")
@@ -163,6 +154,8 @@ TEST_CASE("Random SiDB layout generation", "[random-sidb-layout-generator]")
 
         for (const auto& lyt : result_lyts.value())
         {
+            CHECK(lyt.num_dots() == 10);
+            CHECK_FALSE(can_positive_charges_occur(lyt, params.sim_params));
             lyt.foreach_dot(
                 [](const auto& cell)
                 {
@@ -212,27 +205,8 @@ TEST_CASE("Random SiDB layout generation", "[random-sidb-layout-generator]")
 
 TEST_CASE("Random SiDB layout generation with defects", "[random-sidb-layout-generator]")
 {
-    SECTION("given two identical coordinates")
-    {
-        const generate_random_layout_params params{.coordinate_pair = {{5, 5, 1}, {5, 5, 1}}, .number_of_sidbs = 1};
-
-        const auto result_lyt = generate_random_layout(params);
-        REQUIRE(result_lyt.has_value());
-
-        CHECK(result_lyt.value().num_dots() == 1);
-        result_lyt.value().foreach_dot(
-            [](const auto& cell)
-            {
-                CHECK(cell.x == 5);
-                CHECK(cell.y == 5);
-                CHECK(cell.z == 1);
-            });
-    }
-
     SECTION("region including only one cell and there is a defect")
     {
-        // it is not possible to generate a random layout since the position where a SiDB could be placed is occupied by
-        // a defect.
         const generate_random_layout_params params{.coordinate_pair = {{2, 1, 1}, {2, 1, 1}},
                                                    .number_of_sidbs = 1,
                                                    .positive_sidbs =
@@ -249,8 +223,6 @@ TEST_CASE("Random SiDB layout generation with defects", "[random-sidb-layout-gen
 
     SECTION("region including only one cell and there is no defect")
     {
-        // it is not possible to generate a random layout since the position where a SiDB could be placed is occupied by
-        // a defect.
         const generate_random_layout_params params{.coordinate_pair = {{2, 1, 1}, {2, 1, 1}},
                                                    .number_of_sidbs = 1,
                                                    .positive_sidbs =
@@ -271,6 +243,10 @@ TEST_CASE("Random SiDB layout generation with defects", "[random-sidb-layout-gen
         CHECK(result_lyt.value().get_dot_tag({2, 1, 1}) == dot_tag::LOGIC);
         CHECK(result_lyt.value().get_defect({3, 1, 1}) == defect{defect_type::DB, -1, 5.6, 5});
         CHECK(result_lyt.value().get_defect({4, 1, 1}) == defect{defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 7});
+        /** @brief Only the unoccupied canvas site is added to the defective skeleton. */
+        auto expected = defect_layout;
+        expected.assign_sidb({2, 1, 1}, dot_tag::LOGIC);
+        CHECK(result_lyt.value() == expected);
     }
 
     SECTION("Check uniqueness of many layouts sharing a defective skeleton")
@@ -285,21 +261,30 @@ TEST_CASE("Random SiDB layout generation with defects", "[random-sidb-layout-gen
 
         auto defect_layout = layout{};
         defect_layout.assign_defect({2, 2, 0}, defect{defect_type::DB, -1, 5.6, 5});
-        defect_layout.assign_defect({4, 1, 0}, defect{defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 7});
+        defect_layout.assign_defect({4, 1, 0}, defect{defect_type::SINGLE_DIHYDRIDE, 0, 7.6, 7});
 
         const auto result_lyts = generate_multiple_random_layouts(params, std::optional{defect_layout});
-        const auto lyts        = result_lyts.value_or(std::vector<layout>{});
+        REQUIRE(result_lyts.has_value());
+        /** @brief Borrow the generated layouts after checking successful generation. */
+        const auto& lyts = result_lyts.value();
 
         REQUIRE(lyts.size() == 20);
 
         for (std::size_t i = 0; i < lyts.size(); ++i)
         {
+            CAPTURE(i);
             CHECK(lyts.at(i).num_dots() == 5);
             CHECK(lyts.at(i).num_defects() == 2);
+            CHECK(lyts.at(i).defects() == defect_layout.defects());
+            CHECK(lyts.at(i).get_dot_tag({2, 2, 0}) == dot_tag::EMPTY);
+            CHECK(lyts.at(i).get_dot_tag({3, 1, 0}) == dot_tag::EMPTY);
+            CHECK(lyts.at(i).get_dot_tag({4, 1, 0}) == dot_tag::EMPTY);
+            CHECK(lyts.at(i).get_dot_tag({5, 1, 0}) == dot_tag::EMPTY);
 
             for (std::size_t j = i + 1; j < lyts.size(); ++j)
             {
-                CHECK(!(lyts.at(i) == lyts.at(j)));
+                CAPTURE(j);
+                CHECK_FALSE(lyts.at(i) == lyts.at(j));
             }
         }
     }
@@ -325,16 +310,12 @@ TEST_CASE("Random SiDB layout generation with defects", "[random-sidb-layout-gen
         CHECK(result_lyt.value().num_dots() == 10);
         CHECK(result_lyt.value().num_defects() == 5);
 
-        // check if all cells are not closer than two cells (Euclidean distance).
-        result_lyt.value().foreach_dot(
-            [](const auto& cell)
-            {
-                CHECK(cell != lattice_site{2, 2, 0});
-                CHECK(cell != lattice_site{4, 1, 0});
-                CHECK(cell != lattice_site{5, 1, 0});
-                CHECK(cell != lattice_site{7, 1, 0});
-                CHECK(cell != lattice_site{2, 1, 0});
-            });
+        CHECK(result_lyt.value().defects() == defect_layout.defects());
+        for (const auto& [site, surface_defect] : defect_layout.defects())
+        {
+            CAPTURE(site.x, site.y, site.z);
+            CHECK(result_lyt.value().get_dot_tag(site) == dot_tag::EMPTY);
+        }
     }
 }
 

@@ -223,3 +223,168 @@ TEST_CASE("ToPoliNano preserves wire segments without a neighboring row", "[inml
     CHECK(lyt.get_cell_type({1, 0}) == magnet_type::NORMAL);
     CHECK(lyt.get_cell_type({2, 0}) == magnet_type::OUTPUT);
 }
+
+/** @brief Vertical connections select the complete physical staircase wire. */
+TEST_CASE("ToPoliNano maps vertical staircase wires", "[inml-topolinano-library]")
+{
+    /** @brief Direction of the wire's signal flow. */
+    const auto down = GENERATE(true, false);
+    CAPTURE(down);
+    /** @brief Column-shifted layout with one clocked PI-wire-PO chain. */
+    shifted_cartesian_gate_layout lyt{arrangement::ODD_COLUMN, {5, 5}};
+    /** @brief Internal wire whose complete cell tile is checked. */
+    const layout_base::coordinate middle{2, 2};
+    /** @brief Incoming tile above or below the wire. */
+    const layout_base::coordinate incoming{2, down ? 1 : 3};
+    /** @brief Outgoing tile on the opposite side from the input. */
+    const layout_base::coordinate outgoing{2, down ? 3 : 1};
+    /** @brief Primary input driving the staircase. */
+    const auto input = lyt.create_pi("a", incoming);
+    /** @brief Wire connecting the two vertical neighbors. */
+    const auto wire = lyt.create_buf(input, middle);
+    lyt.create_po(wire, "f", outgoing);
+    lyt.assign_clock_number(incoming, 0);
+    lyt.assign_clock_number(middle, 1);
+    lyt.assign_clock_number(outgoing, 2);
+
+    // clang-format off
+
+    /** @brief Physical staircase from the upper left to the lower right connector. */
+    static constexpr const topolinano_library::gate downward{
+        topolinano_library::cell_list_to_gate<char>({{{'x', ' ', ' ', ' '},
+                                                    {'x', 'x', 'x', ' '},
+                                                    {' ', ' ', 'x', ' '},
+                                                    {' ', ' ', 'x', 'x'}}})};
+    /** @brief Physical staircase from the lower left to the upper right connector. */
+    static constexpr const topolinano_library::gate upward{
+        topolinano_library::cell_list_to_gate<char>({{{' ', ' ', 'x', 'x'},
+                                                    {' ', ' ', 'x', ' '},
+                                                    {'x', 'x', 'x', ' '},
+                                                    {'x', ' ', ' ', ' '}}})};
+
+    // clang-format on
+
+    CHECK(topolinano_library::set_up_gate(lyt, middle) == (down ? downward : upward));
+}
+
+/** @brief A wire feeding a northern majority gate uses the short top-edge connection. */
+TEST_CASE("ToPoliNano connects a wire to a northern majority gate", "[inml-topolinano-library]")
+{
+    /** @brief Clocked majority circuit with a separate wire on one input. */
+    shifted_cartesian_gate_layout lyt{arrangement::ODD_COLUMN, {5, 6}};
+    /** @brief Primary input driving the wire. */
+    const auto a = lyt.create_pi("a", {1, 2});
+    /** @brief Second input of the majority gate. */
+    const auto b = lyt.create_pi("b", {1, 1});
+    /** @brief Third input of the majority gate. */
+    const auto c = lyt.create_pi("c", {3, 1});
+    /** @brief Wire immediately south of the majority gate. */
+    const auto wire = lyt.create_buf(a, {2, 3});
+    /** @brief Majority gate with three adjacent inputs. */
+    const auto majority = lyt.create_maj(wire, b, c, {2, 2});
+    lyt.create_po(majority, "f", {2, 1});
+    lyt.assign_clock_number({1, 2}, 0);
+    lyt.assign_clock_number({2, 3}, 1);
+    lyt.assign_clock_number({1, 1}, 1);
+    lyt.assign_clock_number({3, 1}, 1);
+    lyt.assign_clock_number({2, 2}, 2);
+    lyt.assign_clock_number({2, 1}, 3);
+
+    // clang-format off
+
+    /** @brief Complete physical wire entering the majority gate from below. */
+    static constexpr const topolinano_library::gate expected{
+        topolinano_library::cell_list_to_gate<char>({{{'x', 'x', ' ', ' '},
+                                                    {' ', ' ', ' ', ' '},
+                                                    {' ', ' ', ' ', ' '},
+                                                    {' ', ' ', ' ', ' '}}})};
+
+    // clang-format on
+
+    CHECK(topolinano_library::set_up_gate(lyt, {2, 3}) == expected);
+}
+
+/** @brief The inverter preserves the physical connection from a southwest AND gate. */
+TEST_CASE("ToPoliNano connects an inverter to a southwest AND gate", "[inml-topolinano-library]")
+{
+    /** @brief Adjacent clocked AND-inverter circuit. */
+    shifted_cartesian_gate_layout lyt{arrangement::ODD_COLUMN, {5, 5}};
+    /** @brief First input of the AND gate. */
+    const auto a = lyt.create_pi("a", {0, 2});
+    /** @brief Second input of the AND gate. */
+    const auto b = lyt.create_pi("b", {0, 3});
+    /** @brief AND gate southwest of the inverter. */
+    const auto conjunction = lyt.create_and(a, b, {1, 2});
+    /** @brief Inverter driving the northeast primary output. */
+    const auto inverter = lyt.create_not(conjunction, {2, 2});
+    lyt.create_po(inverter, "f", {3, 1});
+    lyt.assign_clock_number({0, 2}, 0);
+    lyt.assign_clock_number({0, 3}, 0);
+    lyt.assign_clock_number({1, 2}, 1);
+    lyt.assign_clock_number({2, 2}, 2);
+    lyt.assign_clock_number({3, 1}, 3);
+
+    // clang-format off
+
+    /** @brief Complete physical inverter from the lower-left to upper-right connector. */
+    static constexpr const topolinano_library::gate expected{
+        topolinano_library::cell_list_to_gate<char>({{{'n', 'n', 'n', 'n'},
+                                                    {'x', ' ', ' ', ' '},
+                                                    {'x', ' ', ' ', ' '},
+                                                    {'x', ' ', ' ', ' '}}})};
+
+    // clang-format on
+
+    CHECK(topolinano_library::set_up_gate(lyt, {2, 2}) == expected);
+}
+
+/** @brief An adjacent clocked NAND gate has no ToPoliNano implementation. */
+TEST_CASE("ToPoliNano rejects an unsupported NAND gate", "[inml-topolinano-library]")
+{
+    /** @brief Clocked NAND circuit with two adjacent primary inputs. */
+    shifted_cartesian_gate_layout lyt{arrangement::ODD_COLUMN, {5, 5}};
+    /** @brief First input northwest of the NAND gate. */
+    const auto a = lyt.create_pi("a", {1, 1});
+    /** @brief Second input southwest of the NAND gate. */
+    const auto b = lyt.create_pi("b", {1, 2});
+    /** @brief Gate coordinate reported by the rejection. */
+    const layout_base::coordinate coordinate{2, 2};
+    /** @brief Unsupported gate driving the primary output. */
+    const auto nand = lyt.create_nand(a, b, coordinate);
+    lyt.create_po(nand, "f", {3, 1});
+    lyt.assign_clock_number({1, 1}, 0);
+    lyt.assign_clock_number({1, 2}, 0);
+    lyt.assign_clock_number(coordinate, 1);
+    lyt.assign_clock_number({3, 1}, 2);
+
+    try
+    {
+        static_cast<void>(topolinano_library::set_up_gate(lyt, coordinate));
+        FAIL("The gate library has no NAND implementation");
+    }
+    catch (const fcn::unsupported_gate_type_exception<layout_base::coordinate>& error)
+    {
+        CHECK(error.where() == coordinate);
+    }
+}
+
+/** @brief A disconnected wire maps to its complete default physical tile. */
+TEST_CASE("ToPoliNano maps a disconnected wire", "[inml-topolinano-library]")
+{
+    /** @brief Column-shifted layout containing one disconnected wire. */
+    shifted_cartesian_gate_layout lyt{arrangement::ODD_COLUMN, {4, 4}};
+    lyt.create_buf({2, 2});
+
+    // clang-format off
+
+    /** @brief Complete wire between the default upper-left and lower-right connectors. */
+    static constexpr const topolinano_library::gate expected{
+        topolinano_library::cell_list_to_gate<char>({{{'x', ' ', ' ', ' '},
+                                                    {'x', 'x', 'x', ' '},
+                                                    {' ', ' ', 'x', 'x'},
+                                                    {' ', ' ', ' ', ' '}}})};
+
+    // clang-format on
+
+    CHECK(topolinano_library::set_up_gate(lyt, {2, 2}) == expected);
+}

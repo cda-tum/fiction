@@ -53,10 +53,12 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
      *
      * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a ToPoliNano gate.
-     * @return ToPoliNano gate representation of `t` including I/Os, rotation, etc.
+     * @return ToPoliNano gate representation of `t` including I/Os, rotation, etc., or an empty gate for a
+     * crossing-layer tile.
      * @throws std::invalid_argument If `lyt` shifts rows instead of columns.
-     * @throws fcn::unsupported_gate_type_exception If a terminal also acts as a fanout. Connect the terminal to a
-     * separate fanout wire instead.
+     * @throws fcn::unsupported_gate_type_exception If a tile outside the crossing layer has no gate, its gate type is
+     * unsupported, or a terminal also acts as a fanout. Connect the terminal to a separate fanout wire instead.
+     * @throws fcn::unsupported_gate_orientation_exception If the gate's physical port orientation is unsupported.
      */
     [[nodiscard]] static gate set_up_gate(const layouts::shifted_cartesian_gate_layout&    lyt,
                                           const fiction::layouts::layout_base::coordinate& t)
@@ -410,31 +412,31 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
             // inputs
             if (lyt.has_northern_incoming_signal(t))
             {
-                p.inp.emplace(0u, 0u);
+                p.inp.insert(fcn::port_position{0u, 0u});
             }
             else if (lyt.has_southern_incoming_signal(t))
             {
-                p.inp.emplace(0u, 3u);
+                p.inp.insert(fcn::port_position{0u, 3u});
             }
             else if (lyt.has_north_western_incoming_signal(t))
             {
-                p.inp.emplace(0u, 0u);
+                p.inp.insert(fcn::port_position{0u, 0u});
             }
             else if (lyt.has_south_western_incoming_signal(t))
             {
                 // special case: if predecessor is AND, OR, MAJ, input port is at (0,3)
                 if (has_and_or_maj_fanin(lyt, n))
                 {
-                    p.inp.emplace(0u, 3u);
+                    p.inp.insert(fcn::port_position{0u, 3u});
                 }
                 else
                 {
-                    p.inp.emplace(0u, 2u);
+                    p.inp.insert(fcn::port_position{0u, 2u});
                 }
             }
             else
             {
-                p.inp.emplace(0u, 0u);
+                p.inp.insert(fcn::port_position{0u, 0u});
             }
 
             // outputs
@@ -445,36 +447,36 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
                 const auto northern_object = north ? lyt.find_object(*north) : std::nullopt;
                 if (northern_object && lyt.is_maj(*northern_object))
                 {
-                    p.out.emplace(1u, 0u);
+                    p.out.insert(fcn::port_position{1u, 0u});
                 }
                 else
                 {
-                    p.out.emplace(3u, 0u);
+                    p.out.insert(fcn::port_position{3u, 0u});
                 }
             }
             else if (lyt.has_southern_outgoing_signal(t))
             {
-                p.out.emplace(3u, 3u);
+                p.out.insert(fcn::port_position{3u, 3u});
             }
             else if (lyt.has_north_eastern_outgoing_signal(t))
             {
-                p.out.emplace(3u, 0u);
+                p.out.insert(fcn::port_position{3u, 0u});
             }
             else if (lyt.has_south_eastern_outgoing_signal(t))
             {
                 // special case: if successor is a fanout, output port is at (3,3)
                 if (has_fanout_fanout(lyt, n))
                 {
-                    p.out.emplace(3u, 3u);
+                    p.out.insert(fcn::port_position{3u, 3u});
                 }
                 else
                 {
-                    p.out.emplace(3u, 2u);
+                    p.out.insert(fcn::port_position{3u, 2u});
                 }
             }
             else
             {
-                p.out.emplace(3u, 2u);
+                p.out.insert(fcn::port_position{3u, 2u});
             }
         }
         else  // PI, PO, etc.
@@ -488,8 +490,8 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
                     // but only if that gate is SW of the PO
                     if (lyt.has_south_western_incoming_signal(t))
                     {
-                        p.inp.emplace(0u, 3u);
-                        p.out.emplace(3u, 3u);
+                        p.inp.insert(fcn::port_position{0u, 3u});
+                        p.out.insert(fcn::port_position{3u, 3u});
 
                         return p;
                     }
@@ -497,18 +499,18 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
                 // if input is north-western, output port is at (3,0)
                 else if (lyt.has_north_western_incoming_signal(t))
                 {
-                    p.out.emplace(3u, 0u);
+                    p.out.insert(fcn::port_position{3u, 0u});
                 }
                 // if input is south-western, output port is at (3,2)
                 else if (lyt.has_south_western_incoming_signal(t))
                 {
-                    p.out.emplace(3u, 2u);
+                    p.out.insert(fcn::port_position{3u, 2u});
                 }
             }
 
             if (lyt.has_north_western_incoming_signal(t))
             {
-                p.inp.emplace(0u, 0u);
+                p.inp.insert(fcn::port_position{0u, 0u});
             }
             if (lyt.has_south_western_incoming_signal(t))
             {
@@ -517,16 +519,16 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
                     // special case: if predecessor is AND, OR, MAJ, input port is at (0,3)
                     if (has_and_or_maj_fanin(lyt, n))
                     {
-                        p.inp.emplace(0u, 3u);
+                        p.inp.insert(fcn::port_position{0u, 3u});
                     }
                     else
                     {
-                        p.inp.emplace(0u, 2u);
+                        p.inp.insert(fcn::port_position{0u, 2u});
                     }
                 }
                 else
                 {
-                    p.inp.emplace(0u, 2u);
+                    p.inp.insert(fcn::port_position{0u, 2u});
                 }
             }
             // special case: PI determines input according to successor
@@ -535,38 +537,30 @@ class topolinano_library : public fcn::gate_library<inml::layout, 4, 4>
                 // if successor is a fan-out, input port is at (0,3) and output port at (3,3)
                 if (has_fanout_fanout(lyt, n))
                 {
-                    p.inp.emplace(0u, 3u);
-                    p.out.emplace(3u, 3u);
+                    p.inp.insert(fcn::port_position{0u, 3u});
+                    p.out.insert(fcn::port_position{3u, 3u});
 
                     return p;
                 }
                 // if output is north-eastern, input port is at (0,0)
                 if (lyt.has_north_eastern_outgoing_signal(t))
                 {
-                    p.inp.emplace(0u, 0u);
+                    p.inp.insert(fcn::port_position{0u, 0u});
                 }
                 // if output is south-eastern, input port is at (0,2)
                 else if (lyt.has_south_eastern_outgoing_signal(t))
                 {
-                    p.inp.emplace(0u, 2u);
+                    p.inp.insert(fcn::port_position{0u, 2u});
                 }
             }
             // determine outgoing connector ports
             if (lyt.has_north_eastern_outgoing_signal(t))
             {
-                // special case: output port of AND, OR, MAJ is fixed at pos (3,1)
-                if (lyt.is_and(n) || lyt.is_or(n) || lyt.is_maj(n))
-                {
-                    p.out.emplace(3u, 1u);
-                }
-                else
-                {
-                    p.out.emplace(3u, 0u);
-                }
+                p.out.insert(fcn::port_position{3u, 0u});
             }
             if (lyt.has_south_eastern_outgoing_signal(t))
             {
-                p.out.emplace(3u, 2u);
+                p.out.insert(fcn::port_position{3u, 2u});
             }
         }
 
