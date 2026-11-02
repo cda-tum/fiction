@@ -347,7 +347,8 @@ class sqd_sim_result_writer
 /**
  * Writes a simulation result as a SiQAD simulation result file to a stream. Metadata text is XML-escaped, and
  * additional parameter names use XML 1.0 name characters. Metadata uses UTF-8. Invalid input leaves the stream
- * unchanged.
+ * unchanged. Charge distributions follow `std::weak_order` on their energies. Equivalent energies have no
+ * specified relative order.
  *
  * @param sim_result Result to write.
  * @param os Output stream to write into.
@@ -363,6 +364,8 @@ inline void write_sqd_sim_result(const sidb::simulation::result& sim_result, std
 }
 /**
  * Writes a simulation result as a SiQAD simulation result file. Invalid input preserves an existing file.
+ * Charge distributions follow `std::weak_order` on their energies. Equivalent energies have no specified relative
+ * order.
  *
  * @param sim_result Result to write.
  * @param filename File to write into.
