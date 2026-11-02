@@ -40,6 +40,8 @@ def write_dot_layout(
     """
     Writes a gate-level layout to a DOT file. Terminal names use quoted DOT strings.
 
+    The writer borrows layout without taking a snapshot. The callback and other threads must not modify layout until the call returns.
+
     Args:
         layout: Gate-level layout to draw.
         filename: Output file path.
