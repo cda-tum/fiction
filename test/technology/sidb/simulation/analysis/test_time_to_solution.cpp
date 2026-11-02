@@ -35,7 +35,7 @@
 
 #include <chrono>
 #include <cmath>
-#include <cstdlib>
+#include <cstddef>
 #include <stdexcept>
 #include <thread>
 #include <vector>
@@ -167,14 +167,8 @@ TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to-solution
         CHECK(tts_stat_quickexact.time_to_solution > 0.0);
         CHECK(tts_stat_quickexact.mean_single_runtime > 0.0);
 
-        // calculate tts manually.
-        double tts_calculated = (tts_stat_quickexact.acc == 100) ? tts_stat_quickexact.mean_single_runtime :
-                                                                   (tts_stat_quickexact.mean_single_runtime *
-                                                                    std::log(1.0 - tts_params.confidence_level) /
-                                                                    std::log(1.0 - tts_stat_quickexact.acc));
-
-        CHECK_THAT(tts_stat_quickexact.time_to_solution - tts_calculated,
-                   Catch::Matchers::WithinAbs(0.0, ERROR_MARGIN));
+        CHECK_THAT(tts_stat_quickexact.time_to_solution,
+                   Catch::Matchers::WithinAbs(tts_stat_quickexact.mean_single_runtime, ERROR_MARGIN));
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -186,18 +180,8 @@ TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to-solution
         CHECK(tts_stat_clustercomplete.time_to_solution > 0.0);
         CHECK(tts_stat_clustercomplete.mean_single_runtime > 0.0);
 
-        if (tts_stat_clustercomplete.acc == 100)
-        {
-            tts_calculated = tts_stat_clustercomplete.mean_single_runtime;
-        }
-        else
-        {
-            tts_calculated =
-                (tts_stat_clustercomplete.mean_single_runtime * std::log(1.0 - tts_params.confidence_level) /
-                 std::log(1.0 - tts_stat_clustercomplete.acc));
-        }
-        CHECK_THAT(tts_stat_clustercomplete.time_to_solution - tts_calculated,
-                   Catch::Matchers::WithinAbs(0.0, ERROR_MARGIN));
+        CHECK_THAT(tts_stat_clustercomplete.time_to_solution,
+                   Catch::Matchers::WithinAbs(tts_stat_clustercomplete.mean_single_runtime, ERROR_MARGIN));
 
 #endif  // FICTION_ALGLIB_ENABLED
     }
@@ -242,11 +226,7 @@ TEST_CASE("time-to-solution test with simulation results", "[time-to-solution]")
         CHECK(st.time_to_solution > 0.0);
         CHECK(st.mean_single_runtime > 0.0);
 
-        const auto tts_calculated = (st.acc == 100) ?
-                                        st.mean_single_runtime :
-                                        (st.mean_single_runtime * std::log(1.0 - 0.997) / std::log(1.0 - st.acc));
-
-        CHECK_THAT(st.time_to_solution - tts_calculated, Catch::Matchers::WithinAbs(0.0, ERROR_MARGIN));
+        CHECK_THAT(st.time_to_solution, Catch::Matchers::WithinAbs(st.mean_single_runtime, ERROR_MARGIN));
     }
 }
 

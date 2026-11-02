@@ -15,7 +15,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/technology/sidb/simulation/analysis/calculate_energy_and_state_type.hpp>
 #include <fiction/technology/sidb/simulation/analysis/energy_distribution.hpp>

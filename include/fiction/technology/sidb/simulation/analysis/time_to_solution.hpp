@@ -63,10 +63,8 @@ struct time_to_solution_params
      */
     uint64_t repetitions = 100;
     /**
-     * The confidence level represents the probability that the confidence interval calculated from the simulation
-     * contains the true value. For example, a 99.7 % (0.997) confidence level means that if the simulation were
-     * repeated many times, approximately 997 out of 1000 of the calculated confidence intervals would contain the true
-     * value.
+     * Target probability of finding the ground state at least once across repeated heuristic attempts.
+     * For example, 0.997 requests a 99.7 % probability of at least one success.
      */
     double confidence_level = 0.997;
     /**
@@ -126,7 +124,7 @@ struct time_to_solution_stats
 };
 /**
  * Computes the time-to-solution (TTS) of *QuickSim* from an exact result and a series of heuristic results: the
- * accuracy is the share of heuristic runs that found the ground state, and TTS is the mean heuristic runtime
+ * accuracy `acc` is the fraction of heuristic runs that found the ground state, and TTS is the mean heuristic runtime
  * scaled to reach the given confidence level, `t · log(1 - c) / log(1 - acc)`. An empty sample yields zero accuracy,
  * zero mean heuristic runtime, and infinite time-to-solution.
  *
