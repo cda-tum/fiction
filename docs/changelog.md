@@ -254,6 +254,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Code quality:
 
   - SiDB ground-state tests share parameter rows and check complete enumeration and clustered results.
+  - Modernized ClusterComplete and cluster hierarchy tests with complete charge distributions, input rows,
+    and checked prerequisites.
   - SiDB model, layout, and gate-library tests now share data rows and check complete defect regions and exception ports.
   - Modernized iNML and molecular QCA tests with complete SVG file checks, cell-type rows, and independent
     gate-orientation cases.
