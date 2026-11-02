@@ -35,8 +35,9 @@ class sqd_parsing_error(RuntimeError): ...
 
 def read_sqd_layout(filename: str, layout_name: str = "") -> mnt.pyfiction.sidb.sidb_layout:
     """
-    Reads an SQD file into an `sidb::layout`. See the stream overload for
-    the file's interpretation.
+    Reads an SQD file into an `sidb::layout` in binary mode. The input
+    must have a single `siqad` root, no text outside the root, and no NUL
+    bytes. See the stream overload for the lattice interpretation.
 
     Args:
         filename: The file to read.
@@ -56,8 +57,8 @@ class missing_position_exception(ValueError): ...
 
 def read_surface_defects(filename: str, layout_name: str = "") -> mnt.pyfiction.sidb.sidb_layout:
     """
-    Reads a defect matrix from a file into a defects-only `sidb::layout`.
-    See the stream overload for the format.
+    Reads a defect matrix from a file in binary mode into a defects-only
+    `sidb::layout`. See the stream overload for the format.
 
     Args:
         filename: The file to read.

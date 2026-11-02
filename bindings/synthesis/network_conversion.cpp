@@ -14,9 +14,8 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "pyfiction/types.hpp"
-
 #include <fiction/synthesis/network_conversion.hpp>
+#include <fiction/types.hpp>
 
 #include <cstdint>
 #include <type_traits>
@@ -64,7 +63,8 @@ enum class network_target : std::uint8_t
  * @brief A network of any type that `convert_network` accepts.
  */
 using any_network =
-    std::variant<const py_tec_network*, const py_aig_network*, const py_xag_network*, const py_mig_network*>;
+    std::variant<const fiction::networks::named_technology_network*, const fiction::networks::named_aig_network*,
+                 const fiction::networks::named_xag_network*, const fiction::networks::named_mig_network*>;
 
 /**
  * @brief Converts a network into `NtkDest` while the GIL is released.
@@ -101,10 +101,10 @@ inline nb::object convert_to_target(const any_network& network, const network_ta
 {
     switch (target)
     {
-        case network_target::AIG: return convert_to<py_aig_network>(network);
-        case network_target::XAG: return convert_to<py_xag_network>(network);
-        case network_target::MIG: return convert_to<py_mig_network>(network);
-        default: return convert_to<py_tec_network>(network);
+        case network_target::AIG: return convert_to<fiction::networks::named_aig_network>(network);
+        case network_target::XAG: return convert_to<fiction::networks::named_xag_network>(network);
+        case network_target::MIG: return convert_to<fiction::networks::named_mig_network>(network);
+        default: return convert_to<fiction::networks::named_technology_network>(network);
     }
 }
 

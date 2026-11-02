@@ -25,7 +25,6 @@
 
 #include <phmap.h>
 
-#include <concepts>
 #include <stdexcept>
 
 namespace fiction::mol_qca
@@ -57,18 +56,13 @@ class sim7_mol_library : public fcn::gate_library<mol_qca::layout, 10, 10>
      * information from the stored grid into account to choose the correct gate representation for that tile. May it
      * be a gate or wires. Rotation and special marks like input and output, const cells etc. are computed additionally.
      *
-     * @tparam GateLyt Cartesian gate-level layout type.
      * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a molQCA gate.
      * @return molQCA gate representation of `t` including I/Os, rotation, const cells, etc.
      */
-    template <typename GateLyt>
-    [[nodiscard]] static gate set_up_gate(const GateLyt& lyt, const fiction::layouts::layout_base::coordinate& t)
+    [[nodiscard]] static gate set_up_gate(const layouts::cartesian_gate_layout&            lyt,
+                                          const fiction::layouts::layout_base::coordinate& t)
     {
-        static_assert(
-            requires { requires std::same_as<typename GateLyt::object_id, fiction::layouts::layout_object_id>; },
-            "GateLyt must be a gate-level layout");
-
         const auto object = lyt.find_object(t);
         if (!object)
         {
@@ -85,7 +79,7 @@ class sim7_mol_library : public fcn::gate_library<mol_qca::layout, 10, 10>
                 // Fan-out orientation is determined from all physically connected fan-out branches. Clocking-aware
                 // routing can hide valid 1-to-3 branches because clocking schemes usually expose only a subset of
                 // outgoing directions from a tile.
-                p                      = determine_port_routing<GateLyt, false>(lyt, t);
+                p                      = determine_port_routing<false>(lyt, t);
                 const auto fanout_size = p.out.size();
 
                 if (fanout_size == 3u)
@@ -137,15 +131,15 @@ class sim7_mol_library : public fcn::gate_library<mol_qca::layout, 10, 10>
      * south `(5, 9)`, and west `(0, 5)`. Primary inputs and outputs without explicit incoming or outgoing signals are
      * assigned to the west and east borders, respectively.
      *
-     * @tparam Lyt Gate-level layout type.
      * @tparam RespectClocking Whether to respect the layout clocking while tracing incoming and outgoing signals.
      * @param lyt Layout that hosts tile `t`.
      * @param t Tile whose port routing is determined.
      * @return Incoming and outgoing molQCA connector positions for `t`.
      */
-    template <typename Lyt, bool RespectClocking = true>
+    template <bool RespectClocking = true>
     [[nodiscard]] static fcn::port_list<fcn::port_position>
-    determine_port_routing(const Lyt& lyt, const fiction::layouts::layout_base::coordinate& t)
+    determine_port_routing(const layouts::cartesian_gate_layout&            lyt,
+                           const fiction::layouts::layout_base::coordinate& t)
     {
         fcn::port_list<fcn::port_position> p{};
 

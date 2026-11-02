@@ -187,8 +187,6 @@ class network_reader
                         });
                 }
             }
-            // parse ...
-            // else if (extension(p) == ...)
         }
     }
     /**

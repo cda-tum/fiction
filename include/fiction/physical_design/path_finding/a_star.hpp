@@ -23,7 +23,6 @@
 #include "fiction/physical_design/path_finding/cost.hpp"
 #include "fiction/physical_design/path_finding/distance.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
-#include "fiction/utils/stl/stl_utils.hpp"
 
 #include <phmap.h>
 
@@ -33,6 +32,7 @@
 #include <cstdint>
 #include <functional>
 #include <limits>
+#include <queue>
 #include <stdexcept>
 #include <type_traits>
 #include <vector>
@@ -54,8 +54,13 @@ struct a_star_params
 namespace detail
 {
 
-/** @brief Finds a layout path using A* search. */
-template <typename Path, typename Lyt, typename Dist, typename Cost>
+/**
+ * @brief Implements A* search.
+ * @tparam Lyt Layout type.
+ * @tparam Dist Distance value type.
+ * @tparam Cost Step cost value type.
+ */
+template <typename Lyt, typename Dist, typename Cost>
 class a_star_impl
 {
   public:
@@ -85,7 +90,7 @@ class a_star_impl
      *
      * @return The shortest path in `layout` from `objective.source` to `objective.target`.
      */
-    [[nodiscard]] Path run()
+    [[nodiscard]] layout_coordinate_path run()
     {
         if (!layout.contains_coordinate(objective.source) || !layout.contains_coordinate(objective.target))
         {
@@ -102,8 +107,11 @@ class a_star_impl
             {
                 return reconstruct_path();
             }
-            // don't examine the current coordinate again
-            closed_list.insert(current);
+            // Superseded queue entries must not expand a processed coordinate again.
+            if (!closed_list.insert(current).second)
+            {
+                continue;
+            }
 
             // expand from current coordinate
             expand(current);
@@ -165,27 +173,14 @@ class a_star_impl
         {
             return this->f > other.f;
         }
-        /**
-         * Equality operator that only compares the stored coordinates. This allows for a convenient lookup in the
-         * priority queue.
-         *
-         * @param other Other coordinate_f to compare with.
-         * @return `true` iff this coord value is equal to the other's.
-         */
-        bool operator==(const coordinate_f& other) const
-        {
-            return this->coord == other.coord;
-        }
     };
 
     /**
-     * Priority queue for coordinates sorted by their f-values. Uses std::greater to get the smallest f-value on top...
-     * C++ is weird at times...
+     * Priority queue for coordinates sorted by increasing f-values.
      */
-    using a_star_priority_queue =
-        fiction::utils::stl::searchable_priority_queue<coordinate_f, std::vector<coordinate_f>, std::greater<>>;
+    using a_star_priority_queue = std::priority_queue<coordinate_f, std::vector<coordinate_f>, std::greater<>>;
     /**
-     * Open list that contains all coordinates to process next sorted by their f-value.
+     * Queued improvements sorted by f-value. Superseded entries are skipped after their coordinate is processed.
      */
     a_star_priority_queue open_list{};
     /**
@@ -195,11 +190,11 @@ class a_star_impl
     /**
      * Stores the g-cost for each coordinate c, i.e., the length of the shortest path from source to c found so far.
      */
-    phmap::parallel_flat_hash_map<fiction::layouts::layout_base::coordinate, g_f_type> g_values{};
+    phmap::flat_hash_map<fiction::layouts::layout_base::coordinate, g_f_type> g_values{};
     /**
      * Tracks the origin of each coordinate to recreate the path.
      */
-    phmap::parallel_flat_hash_map<fiction::layouts::layout_base::coordinate, fiction::layouts::layout_base::coordinate>
+    phmap::flat_hash_map<fiction::layouts::layout_base::coordinate, fiction::layouts::layout_base::coordinate>
         came_from{};
     /**
      * Fetches and pops the coordinate with the lowest f-value from the open list priority queue.
@@ -220,7 +215,9 @@ class a_star_impl
      */
     void expand(const fiction::layouts::layout_base::coordinate& current)
     {
-        const auto explore_successor = [this, current](const auto& adjacent)
+        /** @brief Fixed path cost of the coordinate being expanded. */
+        const auto current_g         = g(current);
+        const auto explore_successor = [this, current, current_g](const auto& adjacent)
         {
             const auto next = physical_design::detail::routing_successor(layout, current, adjacent, objective.target,
                                                                          params.crossings, search_obstructions);
@@ -237,11 +234,11 @@ class a_star_impl
             }
 
             // compute the g-value of cz. In this implementation, the costs of each 'step' are given by a function
-            const g_f_type tentative_g = g(current) + cost(current, successor);
+            const g_f_type tentative_g = current_g + cost(current, successor);
 
-            // f-value does not matter because the comparator compares only the coordinates
-            const auto it = open_list.find({successor, 0});
-            if (it != open_list.end() && no_improvement(successor, tentative_g))
+            /** @brief Best cost found for this successor, if any. */
+            const auto known = g_values.find(successor);
+            if (known != g_values.cend() && tentative_g >= known->second)
             {
                 return;  // skip the coordinate if it does not offer improvement
             }
@@ -253,17 +250,7 @@ class a_star_impl
             // compute new f-value
             const auto f = tentative_g + static_cast<g_f_type>(distance(successor, objective.target));
 
-            // if successor is contained in the open list (frontier)
-            if (it != open_list.end())
-            {
-                // update its f-value
-                it->f = f;
-            }
-            else
-            {
-                // add successor to the open list
-                open_list.push({successor, f});
-            }
+            open_list.push({successor, f});
         };
 
         if constexpr (requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; })
@@ -313,25 +300,14 @@ class a_star_impl
         g_values.insert_or_assign(c, g_val);
     }
     /**
-     * Checks if the given g-value is greater or equal than the stored g-value of the given coordinate. If that is the
-     * case, the new g-value does not improve the path.
-     *
-     * @param c Coordinate to whose g-value is to be checked.
-     * @param g_val g-value to compare to c's.
-     * @return `true` iff the given g-value does not mean an improvement for the given coordinate.
-     */
-    bool no_improvement(const fiction::layouts::layout_base::coordinate& c, const g_f_type g_val)
-    {
-        return g_val >= g(c);
-    }
-    /**
      * Reconstruct the final path from the origin map that was created during the path finding algorithm.
      *
      * @return The shortest path connecting source and target.
      */
-    [[nodiscard]] Path reconstruct_path() const
+    [[nodiscard]] layout_coordinate_path reconstruct_path() const
     {
-        Path path{};
+        /** @brief Coordinate path reconstructed from the predecessor map. */
+        layout_coordinate_path path{};
 
         // iterate backwards over the found connections and add them to the path
         for (auto current = objective.target; current != objective.source; current = came_from.at(current))
@@ -354,9 +330,10 @@ class a_star_impl
  * `gate_layout`) and respects the underlying information flow imposed by `layout`'s clocking scheme.
  *
  * A* is an extension of Dijkstra's algorithm for shortest paths but offers better average complexity. It uses a
- * heuristic distance function that estimates the remaining costs towards the target in every step. Thus, this heuristic
- * function should neither be complex to calculate nor overestimating the remaining costs. Common heuristics to be used
- * are the Manhattan and the Euclidean distance functions. See `distance_functor` for implementations.
+ * heuristic distance function that estimates the remaining costs towards the target in every step. The heuristic must
+ * be consistent with the step costs: `h(u) <= cost(u, v) + h(v)` for every traversable step, with `h(target) = 0`.
+ * Step costs must be nonnegative. Manhattan and Euclidean distance satisfy this condition for unit-cost Cartesian
+ * steps. See `distance_functor` for implementations.
  *
  * Paths do not pass obstructed coordinates or connections, except that the target is never obstructed. A coordinate
  * or connection is obstructed if the `obstructions` argument marks it or if the layout's `is_obstructed_coordinate`
@@ -371,9 +348,8 @@ class a_star_impl
  * In certain cases it might be desirable to determine regular coordinate paths even if the layout implements a clocking
  * interface. This can be achieved by static-casting the layout to a coordinate layout when calling this function:
  * @code{.cpp}
- * using path = layout_coordinate_path;
  * fiction::layouts::cartesian_gate_layout layout = ...;
- * auto shortest_path = a_star<path>(static_cast<cartesian_layout>(layout), {source, target});
+ * auto shortest_path = a_star(static_cast<cartesian_layout>(layout), {source, target});
  * @endcode
  *
  * A* was introduced in \"A Formal Basis for the Heuristic Determination of Minimum Cost Paths\" by Peter E. Hart, Nils
@@ -381,7 +357,6 @@ class a_star_impl
  *
  * This implementation is based on the pseudocode from https://en.wikipedia.org/wiki/A_star_search_algorithm.
  *
- * @tparam Path Type of the returned path.
  * @tparam Lyt Type of the layout to perform path finding on.
  * @tparam Dist Distance value type to be used in the heuristic estimation function.
  * @tparam Cost Cost value type to be used when determining moving cost between coordinates.
@@ -392,15 +367,17 @@ class a_star_impl
  * @param params Parameters.
  * @param obstructions Additional coordinate and connection constraints; the search does not modify them.
  * @return The shortest loop-less path in `layout` from `objective.source` to `objective.target`.
+ * @throws std::invalid_argument If either endpoint lies outside the layout extent.
  */
-template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost = uint8_t>
+template <typename Lyt, typename Dist = uint64_t, typename Cost = uint8_t>
     requires std::derived_from<Lyt, fiction::layouts::layout_base>
-[[nodiscard]] Path a_star(const Lyt& layout, const routing_objective& objective,
-                          const distance_functor<Dist>& dist_fn = manhattan_distance_functor(),
-                          const cost_functor<Cost>&     cost_fn = unit_cost_functor<uint8_t>(),
-                          const a_star_params& params = {}, const layouts::obstructions& obstructions = {})
+[[nodiscard]] layout_coordinate_path a_star(const Lyt& layout, const routing_objective& objective,
+                                            const distance_functor<Dist>& dist_fn      = manhattan_distance_functor(),
+                                            const cost_functor<Cost>&     cost_fn      = unit_cost_functor<uint8_t>(),
+                                            const a_star_params&          params       = {},
+                                            const layouts::obstructions&  obstructions = {})
 {
-    return detail::a_star_impl<Path, Lyt, Dist, Cost>{layout, objective, dist_fn, cost_fn, params, obstructions}.run();
+    return detail::a_star_impl<Lyt, Dist, Cost>{layout, objective, dist_fn, cost_fn, params, obstructions}.run();
 }
 /**
  * A distance function that does not approximate but compute the actual minimum path length on the given layout via A*
@@ -416,6 +393,7 @@ template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost =
  * @param target Target coordinate.
  * @param obstructions Additional constraints; caller and layout obstructions remain unchanged.
  * @return Minimum path length between `source` and `target` in `layout`.
+ * @throws std::invalid_argument If source or target lies outside the layout extent.
  */
 template <typename Lyt>
     requires std::derived_from<Lyt, fiction::layouts::layout_base>
@@ -423,9 +401,8 @@ template <typename Lyt>
                                        const fiction::layouts::layout_base::coordinate& target,
                                        const layouts::obstructions&                     obstructions = {})
 {
-    const auto path_length = a_star<layout_coordinate_path>(layout, {source, target}, manhattan_distance_functor(),
-                                                            unit_cost_functor<>(), {}, obstructions)
-                                 .size();
+    const auto path_length =
+        a_star(layout, {source, target}, manhattan_distance_functor(), unit_cost_functor<>(), {}, obstructions).size();
 
     if (path_length == 0ul)
     {
@@ -436,6 +413,7 @@ template <typename Lyt>
 }
 /**
  * A pre-defined distance functor that uses the A* distance.
+ * Calling this functor throws std::invalid_argument if source or target lies outside the layout extent.
  *
  * @tparam Lyt Coordinate layout type.
  */
@@ -443,7 +421,10 @@ template <typename Lyt>
 class a_star_distance_functor : public distance_functor<uint64_t>
 {
   public:
-    /** @brief Computes distances in the borrowed layout. @param lyt Layout that outlives this functor. */
+    /**
+     * @brief Borrows a layout for distance evaluations.
+     * @param lyt Layout that outlives this functor.
+     */
     explicit a_star_distance_functor(const Lyt& lyt) :
             distance_functor<uint64_t>(
                 [&lyt](const layouts::layout_base::coordinate& source, const layouts::layout_base::coordinate& target)

@@ -14,9 +14,8 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "pyfiction/types.hpp"
-
 #include <fiction/networks/io/dot_drawers.hpp>
+#include <fiction/types.hpp>
 
 #include <string>
 
@@ -79,10 +78,10 @@ Raises:
  */
 void register_dot_drawers(nb::module_& m)
 {
-    detail::register_write_dot_network<py_tec_network>(m);
-    detail::register_write_dot_network<py_aig_network>(m);
-    detail::register_write_dot_network<py_xag_network>(m);
-    detail::register_write_dot_network<py_mig_network>(m);
+    detail::register_write_dot_network<fiction::networks::named_technology_network>(m);
+    detail::register_write_dot_network<fiction::networks::named_aig_network>(m);
+    detail::register_write_dot_network<fiction::networks::named_xag_network>(m);
+    detail::register_write_dot_network<fiction::networks::named_mig_network>(m);
 }
 
 }  // namespace pyfiction

@@ -17,9 +17,9 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/synthesis/technology_mapping.hpp>
+#include <fiction/types.hpp>
 
 #include <mockturtle/algorithms/emap.hpp>
 
@@ -106,29 +106,28 @@ void register_technology_mapping_impl(nb::module_& m)
            const decltype(fiction::synthesis::technology_mapping_params{}.and_xor) and_xor,
            fiction::synthesis::technology_mapping_stats*                           stats)
         {
-            fiction::synthesis::technology_mapping_params params{};
-            params.decay   = decay;
-            params.inv     = inv;
-            params.and2    = and2;
-            params.nand2   = nand2;
-            params.or2     = or2;
-            params.nor2    = nor2;
-            params.xor2    = xor2;
-            params.xnor2   = xnor2;
-            params.lt2     = lt2;
-            params.gt2     = gt2;
-            params.le2     = le2;
-            params.ge2     = ge2;
-            params.and3    = and3;
-            params.xor_and = xor_and;
-            params.or_and  = or_and;
-            params.onehot  = onehot;
-            params.maj3    = maj3;
-            params.gamble  = gamble;
-            params.dot     = dot;
-            params.mux     = mux;
-            params.and_xor = and_xor;
-            const nb::gil_scoped_release release{};
+            const fiction::synthesis::technology_mapping_params params{.decay   = decay,
+                                                                       .inv     = inv,
+                                                                       .and2    = and2,
+                                                                       .nand2   = nand2,
+                                                                       .or2     = or2,
+                                                                       .nor2    = nor2,
+                                                                       .xor2    = xor2,
+                                                                       .xnor2   = xnor2,
+                                                                       .lt2     = lt2,
+                                                                       .gt2     = gt2,
+                                                                       .le2     = le2,
+                                                                       .ge2     = ge2,
+                                                                       .and3    = and3,
+                                                                       .xor_and = xor_and,
+                                                                       .or_and  = or_and,
+                                                                       .onehot  = onehot,
+                                                                       .maj3    = maj3,
+                                                                       .gamble  = gamble,
+                                                                       .dot     = dot,
+                                                                       .mux     = mux,
+                                                                       .and_xor = and_xor};
+            const nb::gil_scoped_release                        release{};
             return fiction::synthesis::technology_mapping<Ntk>(network, params, stats);
         },
         nb::arg("network"), nb::kw_only(), nb::arg("decay") = fiction::synthesis::technology_mapping_params{}.decay,
@@ -269,10 +268,10 @@ void register_technology_mapping(nb::module_& m)
         nb::sig("def all_supported_standard_functions() -> TechnologyMappingOptions"),
         "Return boolean mapping keywords for all supported standard functions.");
 
-    detail::register_technology_mapping_impl<py_tec_network>(m);
-    detail::register_technology_mapping_impl<py_aig_network>(m);
-    detail::register_technology_mapping_impl<py_xag_network>(m);
-    detail::register_technology_mapping_impl<py_mig_network>(m);
+    detail::register_technology_mapping_impl<fiction::networks::named_technology_network>(m);
+    detail::register_technology_mapping_impl<fiction::networks::named_aig_network>(m);
+    detail::register_technology_mapping_impl<fiction::networks::named_xag_network>(m);
+    detail::register_technology_mapping_impl<fiction::networks::named_mig_network>(m);
 }
 
 }  // namespace pyfiction

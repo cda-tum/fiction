@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
@@ -35,6 +36,7 @@
 #include <cstdint>
 #include <limits>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
@@ -55,11 +57,19 @@ void check_border_contract(const Lyt& lyt)
     lyt.foreach_coordinate(
         [&lyt](const auto& c)
         {
+            CAPTURE(c);
             CHECK(lyt.contains_coordinate(c));
 
             CHECK(lyt.north(c).has_value() == (c.y != 0));
             CHECK(lyt.west(c).has_value() == (c.x != 0));
             CHECK(lyt.below(c).has_value() == (c.z != 0));
+            CHECK(lyt.east(c).has_value() == std::cmp_less(c.x + 1, lyt.width()));
+            CHECK(lyt.south(c).has_value() == std::cmp_less(c.y + 1, lyt.height()));
+            CHECK(lyt.above(c).has_value() == std::cmp_less(c.z + 1, lyt.layers()));
+            CHECK(lyt.is_at_northern_border(c) == (c.y == 0));
+            CHECK(lyt.is_at_eastern_border(c) == std::cmp_equal(c.x + 1, lyt.width()));
+            CHECK(lyt.is_at_southern_border(c) == std::cmp_equal(c.y + 1, lyt.height()));
+            CHECK(lyt.is_at_western_border(c) == (c.x == 0));
 
             for (const auto& n : lyt.adjacent_coordinates(c))
             {
@@ -83,6 +93,7 @@ void check_moves_stay_adjacent(const Lyt& lyt)
     lyt.foreach_coordinate(
         [&lyt](const auto& c)
         {
+            CAPTURE(c);
             for (const auto& moved : {lyt.north(c), lyt.north_east(c), lyt.east(c), lyt.south_east(c), lyt.south(c),
                                       lyt.south_west(c), lyt.west(c), lyt.north_west(c)})
             {
@@ -158,6 +169,7 @@ TEST_CASE("Layouts support only the ground and crossing layers", "[coordinate-co
     {
         for (const auto layers : {0u, 1u, 2u})
         {
+            CAPTURE(layers);
             /** Layout with a supported layer count. */
             auto lyt = make_layout(layout_base::extent{2, 3, layers});
             CHECK(lyt.layers() == layers);
@@ -168,6 +180,7 @@ TEST_CASE("Layouts support only the ground and crossing layers", "[coordinate-co
             CHECK_FALSE(lyt.is_crossing_layer({0, 0, 2}));
             for (const auto too_many : {3u, uint32_t{1} << 31u})
             {
+                CAPTURE(too_many);
                 CHECK_THROWS_AS(make_layout(layout_base::extent{2, 3, too_many}), std::out_of_range);
                 CHECK_THROWS_AS(lyt.resize({4, 5, too_many}), std::out_of_range);
                 CHECK(lyt.get_extent() == layout_base::extent{2, 3, layers});
@@ -188,6 +201,7 @@ TEST_CASE("Layouts support only the ground and crossing layers", "[coordinate-co
     for (const auto a :
          {arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN})
     {
+        CAPTURE(static_cast<int>(a));
         check_layers([a](const auto& size) { return hexagonal_layout{a, size}; });
         check_layers([a](const auto& size) { return shifted_cartesian_layout{a, size}; });
         check_layers([a](const auto& size) { return gate_layout<hexagonal_layout>{a, size}; });
@@ -216,6 +230,7 @@ TEMPLATE_TEST_CASE("Geometry neighbors respect borders", "[coordinate-contracts]
     const auto a =
         GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
 
+    CAPTURE(static_cast<int>(a));
     const auto layout = blueprints::make_layout<TestType>(a, {5, 4, 2});
     check_border_contract(layout);
     if constexpr (!std::same_as<TestType, cartesian_layout>)
@@ -229,6 +244,7 @@ TEST_CASE("Hexagonal diagonals at the borders reject coordinates outside the lay
     const auto a =
         GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
 
+    CAPTURE(static_cast<int>(a));
     const hexagonal_layout lyt{a, {4, 4, 1}};
 
     // the origin has no north or west neighbor in any direction
@@ -251,6 +267,7 @@ TEST_CASE("Hexagonal neighbor queries stay inside the layout for any 32-bit coor
     for (const auto a :
          {arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN})
     {
+        CAPTURE(static_cast<int>(a));
         const hexagonal_layout hex{a, {7, 7, 2}};
 
         for (const auto& c : {fiction::layouts::layout_base::coordinate{},
@@ -264,6 +281,7 @@ TEST_CASE("Hexagonal neighbor queries stay inside the layout for any 32-bit coor
                               {-1, 1, 0},
                               {7, 1, 0}})
         {
+            CAPTURE(c);
             for (const auto& n : hex.adjacent_coordinates(c))
             {
                 CHECK(hex.contains_coordinate(n));

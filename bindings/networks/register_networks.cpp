@@ -56,9 +56,6 @@ void register_networks_io(nb::module_& m);
 
 }  // namespace pyfiction
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
-
 NB_MODULE(networks, m)
 {
     m.doc() = "Logic networks and their simulation.";
@@ -76,5 +73,3 @@ NB_MODULE(networks, m)
     auto io = pyfiction::def_submodule(m, "io", "Readers, writers, and drawers of logic networks.");
     pyfiction::register_networks_io(io);
 }
-
-#pragma GCC diagnostic pop

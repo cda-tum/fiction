@@ -30,7 +30,7 @@ int main()
     network.create_po(network.create_and(a, b));
     const auto aig = fiction::synthesis::convert_network<mockturtle::aig_network>(network);
     const auto mapped = fiction::synthesis::technology_mapping(aig, fiction::synthesis::and_or_not());
-    const auto placed = fiction::physical_design::orthogonal<fiction::layouts::cartesian_gate_layout>(mapped);
+    const auto placed = fiction::physical_design::orthogonal<fiction::layouts::cartesian_layout>(mapped);
     assert(fiction::verification::equivalence_checking(network, placed) == fiction::verification::eq_type::STRONG);
     fiction::verification::count_gate_types_stats counts{};
     fiction::verification::count_gate_types(placed, &counts);

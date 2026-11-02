@@ -344,8 +344,9 @@ TEST_CASE("Random SiDB layout generation reports progress", "[random-sidb-layout
 {
     progress_recorder rec{};
 
-    generate_random_layout_params params{.coordinate_pair = {{1, 1, 0}, {5, 7, 1}}, .number_of_sidbs = 5};
-    params.on_progress = rec.callback();
+    generate_random_layout_params params{.coordinate_pair = {{1, 1, 0}, {5, 7, 1}},
+                                         .number_of_sidbs = 5,
+                                         .on_progress     = rec.callback()};
 
     SECTION("single layout")
     {

@@ -121,11 +121,6 @@ charge_configuration_to_string(const std::vector<charge_state>& charge_distribut
 
     for (const auto& cs : charge_distribution)
     {
-        if (cs == charge_state::NONE)
-        {
-            continue;
-        }
-
         switch (cs)
         {
             case charge_state::NEGATIVE:

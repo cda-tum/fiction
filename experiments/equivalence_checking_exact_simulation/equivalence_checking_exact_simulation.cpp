@@ -112,8 +112,7 @@ try
                     }
 
 #if (FICTION_ALGLIB_ENABLED)
-                    clustercomplete_params cc_params{.sim_params = params};
-                    cc_params.available_threads = 1;
+                    const clustercomplete_params cc_params{.sim_params = params, .available_threads = 1};
 
                     auto result_clustercomplete = clustercomplete(lyt, cc_params);
 

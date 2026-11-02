@@ -15,8 +15,11 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/virtual_pi_network.hpp>
@@ -27,126 +30,129 @@
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/networks/xmg.hpp>
 
-#include <cstdint>
+#include <type_traits>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::networks;
 
-TEST_CASE("Check loops", "[virtual-pi-network]")
+TEST_CASE("Real and virtual input visitors report complete collections", "[virtual-pi-network]")
 {
     virtual_pi_network<technology_network> vpi{};
+    STATIC_REQUIRE(is_virtual_network_type_v<decltype(vpi)>);
 
-    CHECK(is_virtual_network_type_v<decltype(vpi)>);
+    const auto a    = vpi.create_pi();
+    const auto b    = vpi.create_pi();
+    const auto c    = vpi.create_virtual_pi(a);
+    const auto d    = vpi.create_virtual_pi(a);
+    const auto e    = vpi.create_virtual_pi(b);
+    const auto gate = vpi.create_and(b, c);
+    vpi.create_po(gate);
 
-    const auto a  = vpi.create_pi();
-    const auto b  = vpi.create_pi();
-    const auto c  = vpi.create_virtual_pi(a);
-    const auto f1 = vpi.create_and(a, b);
-    const auto f2 = vpi.create_and(b, c);
+    CHECK(vpi.get_real_pi(vpi.get_node(c)) == vpi.get_node(a));
+    CHECK(vpi.get_real_pi(vpi.get_node(d)) == vpi.get_node(a));
+    CHECK(vpi.get_real_pi(vpi.get_node(e)) == vpi.get_node(b));
+    CHECK(vpi.num_real_pis() == 2);
+    CHECK(vpi.num_real_cis() == 2);
+    CHECK(vpi.num_virtual_pis() == 3);
+    CHECK(vpi.num_virtual_cis() == 3);
+    for (const auto signal : {a, b})
+    {
+        const auto node = vpi.get_node(signal);
+        CAPTURE(node);
+        CHECK(vpi.is_real_pi(node));
+        CHECK(vpi.is_real_ci(node));
+        CHECK_FALSE(vpi.is_virtual_pi(node));
+        CHECK_FALSE(vpi.is_virtual_ci(node));
+    }
+    for (const auto signal : {c, d, e})
+    {
+        const auto node = vpi.get_node(signal);
+        CAPTURE(node);
+        CHECK(vpi.is_virtual_pi(node));
+        CHECK(vpi.is_virtual_ci(node));
+        CHECK_FALSE(vpi.is_real_pi(node));
+        CHECK_FALSE(vpi.is_real_ci(node));
+    }
+    CHECK_FALSE(vpi.is_real_pi(vpi.get_node(gate)));
+    CHECK_FALSE(vpi.is_virtual_pi(vpi.get_node(gate)));
 
-    vpi.create_po(f1);
-    vpi.create_po(f2);
-
-    CHECK(vpi.get_real_pi(c) == a);
-
-    uint32_t size_real_pis    = 0;
-    uint32_t size_virtual_pis = 0;
-    uint32_t size_real_cis    = 0;
-    uint32_t size_virtual_cis = 0;
-    vpi.foreach_real_pi(
-        [&](const auto& pi)
-        {
-            if (vpi.is_real_pi(pi))
-            {
-                ++size_real_pis;
-            }
-        });
-    vpi.foreach_virtual_pi(
-        [&](const auto& pi)
-        {
-            if (vpi.is_virtual_pi(pi))
-            {
-                ++size_virtual_pis;
-            }
-        });
-    vpi.foreach_real_ci(
-        [&](const auto& ci)
-        {
-            if (vpi.is_real_ci(ci))
-            {
-                ++size_real_cis;
-            }
-        });
-    vpi.foreach_virtual_ci(
-        [&](const auto& ci)
-        {
-            if (vpi.is_virtual_pi(ci))
-            {
-                ++size_virtual_cis;
-            }
-        });
-
-    CHECK(size_real_pis == size_real_cis);
-    CHECK(size_virtual_pis == size_virtual_cis);
-    CHECK(size_real_pis == vpi.num_real_pis());
-    CHECK(size_virtual_pis == vpi.num_virtual_pis());
+    /** @brief Complete traversal observations, including duplicate visits. */
+    std::vector<technology_network::node> visited{};
+    vpi.foreach_real_pi([&](const auto node) { visited.push_back(node); });
+    CHECK_THAT(visited, Catch::Matchers::UnorderedRangeEquals(std::vector{a, b}));
+    visited.clear();
+    vpi.foreach_real_ci([&](const auto node) { visited.push_back(node); });
+    CHECK_THAT(visited, Catch::Matchers::UnorderedRangeEquals(std::vector{a, b}));
+    visited.clear();
+    vpi.foreach_virtual_pi([&](const auto node) { visited.push_back(node); });
+    CHECK_THAT(visited, Catch::Matchers::UnorderedRangeEquals(std::vector{c, d, e}));
+    visited.clear();
+    vpi.foreach_virtual_ci([&](const auto node) { visited.push_back(node); });
+    CHECK_THAT(visited, Catch::Matchers::UnorderedRangeEquals(std::vector{c, d, e}));
 }
 
-TEST_CASE("Copy technology network and size consistency", "[virtual-pi-network]")
-{
-    virtual_pi_network<technology_network> vpi{};
-
-    const auto a = vpi.create_pi();
-    const auto b = vpi.create_pi();
-
-    const auto f1 = vpi.create_and(a, b);
-
-    const auto c = vpi.create_virtual_pi(a);
-    const auto d = vpi.create_virtual_pi(b);
-
-    const auto f2 = vpi.create_and(b, c);
-    const auto f3 = vpi.create_or(a, d);
-
-    vpi.create_po(f1);
-    vpi.create_po(f2);
-    vpi.create_po(f3);
-
-    // This is the size with the virtual PIs
-    CHECK(vpi.size() == 9);
-    // This is the size disregarding virtual PIs. So this corresponds to the size in a normal technology_network
-    CHECK(vpi.real_size() == 7);
-    // check cloning
-    const auto clone = vpi.clone();
-    CHECK(clone.size() == vpi.size());
-    CHECK(vpi.num_real_pis() == vpi.num_real_cis());
-    CHECK(vpi.num_virtual_pis() == vpi.num_virtual_cis());
-}
-
-TEMPLATE_TEST_CASE("Copy networks and size consistency", "[virtual-pi-network]", mockturtle::aig_network,
-                   mockturtle::xag_network, mockturtle::mig_network, mockturtle::xmg_network)
+TEMPLATE_TEST_CASE("Clones preserve virtual input mappings and own independent storage", "[virtual-pi-network]",
+                   technology_network, mockturtle::aig_network, mockturtle::xag_network, mockturtle::mig_network,
+                   mockturtle::xmg_network)
 {
     virtual_pi_network<TestType> vpi{};
-
-    const auto a  = vpi.create_pi();
-    const auto b  = vpi.create_pi();
-    const auto f1 = vpi.create_and(a, b);
-    // create virtual PIs
-    const auto c  = vpi.create_virtual_pi(a);
-    const auto d  = vpi.create_virtual_pi(b);
-    const auto f2 = vpi.create_and(b, c);
-    const auto f3 = vpi.create_or(a, d);
+    const auto                   a  = vpi.create_pi();
+    const auto                   b  = vpi.create_pi();
+    const auto                   f1 = vpi.create_and(a, b);
+    const auto                   c  = vpi.create_virtual_pi(a);
+    const auto                   d  = vpi.create_virtual_pi(b);
+    const auto                   f2 = vpi.create_and(b, c);
+    const auto                   f3 = vpi.create_or(a, d);
     vpi.create_po(f1);
     vpi.create_po(f2);
     vpi.create_po(f3);
 
-    // This is the size with the virtual PIs
-    CHECK(vpi.size() == 8);
-    // This is the size disregarding virtual PIs. So this corresponds to the size in a normal technology_network
-    CHECK(vpi.real_size() == 6);
-    // check cloning
-    const auto clone = vpi.clone();
+    if constexpr (std::is_same_v<TestType, technology_network>)
+    {
+        CHECK(vpi.size() == 9);
+        CHECK(vpi.real_size() == 7);
+    }
+    else
+    {
+        CHECK(vpi.size() == 8);
+        CHECK(vpi.real_size() == 6);
+    }
+    CHECK(vpi.num_real_pis() == 2);
+    CHECK(vpi.num_real_cis() == 2);
+    CHECK(vpi.num_virtual_pis() == 2);
+    CHECK(vpi.num_virtual_cis() == 2);
+
+    auto clone = vpi.clone();
     CHECK(clone.size() == vpi.size());
-    // check virtual PI removal
-    CHECK(vpi.num_real_pis() == vpi.num_real_cis());
-    CHECK(vpi.num_virtual_pis() == vpi.num_virtual_cis());
+    CHECK(clone.real_size() == vpi.real_size());
+    CHECK(clone.get_real_pi(clone.get_node(c)) == clone.get_node(a));
+    CHECK(clone.get_real_pi(clone.get_node(d)) == clone.get_node(b));
+    CHECK(clone.num_real_pis() == 2);
+    CHECK(clone.num_real_cis() == 2);
+    CHECK(clone.num_virtual_pis() == 2);
+    CHECK(clone.num_virtual_cis() == 2);
+    CHECK(clone.num_pos() == 3);
+
+    SECTION("Changes to the clone leave the source unchanged")
+    {
+        const auto extra         = clone.create_pi();
+        const auto virtual_extra = clone.create_virtual_pi(extra);
+        CHECK(clone.get_real_pi(clone.get_node(virtual_extra)) == clone.get_node(extra));
+        CHECK(clone.num_real_pis() == 3);
+        CHECK(clone.num_virtual_pis() == 3);
+        CHECK(clone.size() == vpi.size() + 2);
+        CHECK(vpi.num_real_pis() == 2);
+        CHECK(vpi.num_virtual_pis() == 2);
+        CHECK_FALSE(vpi.is_virtual_pi(clone.get_node(virtual_extra)));
+    }
+    SECTION("Changes to the source leave the clone unchanged")
+    {
+        const auto extra = vpi.create_virtual_pi(a);
+        CHECK(vpi.num_virtual_pis() == 3);
+        CHECK(vpi.size() == clone.size() + 1);
+        CHECK(clone.num_real_pis() == 2);
+        CHECK(clone.num_virtual_pis() == 2);
+        CHECK_FALSE(clone.is_virtual_pi(vpi.get_node(extra)));
+    }
 }

@@ -61,18 +61,16 @@ void register_gate_level_drvs_impl(nb::module_& m)
            const decltype(gate_level_drv_options{}.border_io) border_io, const bool print_report,
            fiction::verification::gate_level_drv_stats* statistics) -> std::pair<std::size_t, std::size_t>
         {
-            gate_level_drv_options params{};
-            params.on_progress              = on_progress;
-            params.outside_extent           = outside_extent;
-            params.non_adjacent_connections = non_adjacent_connections;
-            params.missing_connections      = missing_connections;
-            params.crossing_gates           = crossing_gates;
-            params.clocked_data_flow        = clocked_data_flow;
-            params.has_io                   = has_io;
-            params.border_io                = border_io;
-
-            std::ostringstream report_stream{};
-            params.out = &report_stream;
+            std::ostringstream           report_stream{};
+            const gate_level_drv_options params{.outside_extent           = outside_extent,
+                                                .non_adjacent_connections = non_adjacent_connections,
+                                                .missing_connections      = missing_connections,
+                                                .crossing_gates           = crossing_gates,
+                                                .clocked_data_flow        = clocked_data_flow,
+                                                .has_io                   = has_io,
+                                                .border_io                = border_io,
+                                                .out                      = &report_stream,
+                                                .on_progress              = on_progress};
 
             fiction::verification::gate_level_drv_stats stats{};
 

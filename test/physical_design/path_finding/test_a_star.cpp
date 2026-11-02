@@ -15,6 +15,7 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
@@ -26,18 +27,103 @@
 #include <fiction/physical_design/path_finding/distance.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
 
+#include <array>
+#include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::physical_design;
 using namespace fiction::physical_design::path_finding;
 
+TEST_CASE("A* preserves priority after improving a queued coordinate", "[A*]")
+{
+    /** @brief Six-tile geometry with two competing routes. */
+    const cartesian_layout layout{{2, 3}};
+    /** @brief Eastbound costs for each row. */
+    const std::array<uint32_t, 3> east{17, 25, 22};
+    /** @brief Southbound costs for the first two rows. */
+    const std::array<uint32_t, 4> south{14, 2, 2, 15};
+    /** @brief Directed costs; reverse steps cost 30. */
+    const cost_functor<uint32_t> cost{
+        [&](const auto& source, const auto& target)
+        {
+            if (target.x > source.x)
+            {
+                return east.at(static_cast<std::size_t>(source.y));
+            }
+            if (target.y > source.y)
+            {
+                return south.at((2 * static_cast<std::size_t>(source.y)) + static_cast<std::size_t>(source.x));
+            }
+            return uint32_t{30};
+        }};
+    /** @brief Admissible heuristic for the weighted search. */
+    const distance_functor<uint32_t> zero{[](const auto&, const auto&) { return uint32_t{0}; }};
+    /** @brief Minimum-cost route, whose edge costs sum to 34. */
+    const auto path = a_star(layout, {.source = {0, 0}, .target = {1, 2}}, zero, cost);
+    /** @brief Accumulated cost of the returned route. */
+    uint32_t total_cost{};
+    REQUIRE_FALSE(path.empty());
+    for (std::size_t i = 1; i < path.size(); ++i)
+    {
+        total_cost += cost(path[i - 1], path[i]);
+    }
+    CHECK(total_cost == 34);
+}
+
+TEST_CASE("A* retains least costs after multiple route improvements", "[A*]")
+{
+    /** @brief Weighted geometry with a zero-cost edge and two routes improved before reaching the target. */
+    const cartesian_layout layout{{3, 2}};
+    /** @brief Eastbound costs for each row. */
+    const std::array<uint32_t, 4> east{20, 1, 0, 100};
+    /** @brief Southbound costs for each column. */
+    const std::array<uint32_t, 3> south{1, 1000, 50};
+    /** @brief Directed edge costs, including a cheap northbound step from the lower middle tile. */
+    const cost_functor<uint32_t> cost{
+        [&](const auto& source, const auto& target)
+        {
+            if (target.x > source.x)
+            {
+                return east.at((2 * static_cast<std::size_t>(source.y)) + static_cast<std::size_t>(source.x));
+            }
+            if (target.y > source.y)
+            {
+                return south.at(static_cast<std::size_t>(source.x));
+            }
+            return source == layout_base::coordinate{1, 1} && target == layout_base::coordinate{1, 0} ? uint32_t{1} :
+                                                                                                        uint32_t{1000};
+        }};
+    /** @brief Exercise Dijkstra search and a nonzero consistent heuristic. */
+    const auto heuristic_enabled = GENERATE(false, true);
+    /** @brief Minimum remaining costs for the six coordinates. */
+    const std::array<std::array<uint32_t, 3>, 2> remaining{{{53, 51, 50}, {52, 52, 0}}};
+    /** @brief Consistent lower bounds on the remaining route cost. */
+    const distance_functor<uint32_t> heuristic{
+        [&](const auto& source, const auto&)
+        {
+            return heuristic_enabled ?
+                       remaining.at(static_cast<std::size_t>(source.y)).at(static_cast<std::size_t>(source.x)) :
+                       uint32_t{0};
+        }};
+    /** @brief Minimum-cost route through the zero-cost edge. */
+    const auto path = a_star(layout, {.source = {0, 0}, .target = {2, 1}}, heuristic, cost);
+    REQUIRE_FALSE(path.empty());
+    /** @brief Accumulated route cost. */
+    uint32_t total_cost{};
+    for (std::size_t i = 1; i < path.size(); ++i)
+    {
+        total_cost += cost(path[i - 1], path[i]);
+    }
+    CHECK(total_cost == 53);
+}
+
 TEST_CASE("A* on 2x2 layouts", "[A*]")
 {
-    using lyt        = cartesian_layout;
-    using coord_path = layout_coordinate_path;
+    using lyt = cartesian_layout;
 
     SECTION("coordinate paths")
     {
@@ -45,10 +131,10 @@ TEST_CASE("A* on 2x2 layouts", "[A*]")
 
         SECTION("(0,0) to (1,1)")  // path of length 3
         {
-            const auto path = a_star<coord_path>(layout, {.source = {0, 0}, .target = {1, 1}});
+            const auto path = a_star(layout, {.source = {0, 0}, .target = {1, 1}});
             const auto dist = a_star_distance(layout, {0, 0}, {1, 1});
 
-            CHECK(path.size() == 3);
+            REQUIRE(path.size() == 3);
             CHECK(dist == 2);
             CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
             CHECK(path.target() == fiction::layouts::layout_base::coordinate{1, 1});
@@ -58,10 +144,10 @@ TEST_CASE("A* on 2x2 layouts", "[A*]")
         }
         SECTION("(1,1) to (0,0)")  // path of length 3
         {
-            const auto path = a_star<coord_path>(layout, {.source = {1, 1}, .target = {0, 0}});
+            const auto path = a_star(layout, {.source = {1, 1}, .target = {0, 0}});
             const auto dist = a_star_distance(layout, {1, 1}, {0, 0});
 
-            CHECK(path.size() == 3);
+            REQUIRE(path.size() == 3);
             CHECK(dist == 2);
             CHECK(path.source() == fiction::layouts::layout_base::coordinate{1, 1});
             CHECK(path.target() == fiction::layouts::layout_base::coordinate{0, 0});
@@ -71,7 +157,7 @@ TEST_CASE("A* on 2x2 layouts", "[A*]")
         }
         SECTION("(0,0) to (0,0)")  // source and target are identical
         {
-            const auto path = a_star<coord_path>(layout, {.source = {0, 0}, .target = {0, 0}});
+            const auto path = a_star(layout, {.source = {0, 0}, .target = {0, 0}});
             const auto dist = a_star_distance(layout, {0, 0}, {0, 0});
 
             CHECK(path.size() == 1);
@@ -88,10 +174,10 @@ TEST_CASE("A* on 2x2 layouts", "[A*]")
 
             SECTION("(0,0) to (1,1)")  // path of length 3
             {
-                const auto path = a_star<coord_path>(layout, {.source = {0, 0}, .target = {1, 1}});
+                const auto path = a_star(layout, {.source = {0, 0}, .target = {1, 1}});
                 const auto dist = a_star_distance(layout, {0, 0}, {1, 1});
 
-                CHECK(path.size() == 3);
+                REQUIRE(path.size() == 3);
                 CHECK(dist == 2);
                 CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
                 CHECK(path.target() == fiction::layouts::layout_base::coordinate{1, 1});
@@ -101,7 +187,7 @@ TEST_CASE("A* on 2x2 layouts", "[A*]")
             }
             SECTION("(1,1) to (0,0)")  // no valid paths
             {
-                const auto path = a_star<coord_path>(layout, {.source = {1, 1}, .target = {0, 0}});
+                const auto path = a_star(layout, {.source = {1, 1}, .target = {0, 0}});
                 const auto dist = a_star_distance(layout, {1, 1}, {0, 0});
 
                 CHECK(path.empty());
@@ -109,7 +195,7 @@ TEST_CASE("A* on 2x2 layouts", "[A*]")
             }
             SECTION("(0,0) to (0,0)")  // source and target are identical
             {
-                const auto path = a_star<coord_path>(layout, {.source = {0, 0}, .target = {0, 0}});
+                const auto path = a_star(layout, {.source = {0, 0}, .target = {0, 0}});
                 const auto dist = a_star_distance(layout, {0, 0}, {0, 0});
 
                 CHECK(path.size() == 1);
@@ -124,19 +210,15 @@ TEST_CASE("A* on 2x2 layouts", "[A*]")
 
             SECTION("(0,0) to (0,1)")  // path of length 4
             {
-                const auto path = a_star<coord_path>(layout, {.source = {0, 0}, .target = {0, 1}});
+                const auto path = a_star(layout, {.source = {0, 0}, .target = {0, 1}});
                 const auto dist = a_star_distance(layout, {0, 0}, {0, 1});
 
-                CHECK(path.size() == 4);
+                CHECK(path == layout_coordinate_path{{{0, 0}, {1, 0}, {1, 1}, {0, 1}}});
                 CHECK(dist == 3);
-                CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
-                CHECK(path.target() == fiction::layouts::layout_base::coordinate{0, 1});
-                CHECK(path[1] == fiction::layouts::layout_base::coordinate{1, 0});
-                CHECK(path[2] == fiction::layouts::layout_base::coordinate{1, 1});
             }
             SECTION("(0,0) to (0,0)")  // source and target are identical
             {
-                const auto path = a_star<coord_path>(layout, {.source = {0, 0}, .target = {0, 0}});
+                const auto path = a_star(layout, {.source = {0, 0}, .target = {0, 0}});
                 const auto dist = a_star_distance(layout, {0, 0}, {0, 0});
 
                 CHECK(path.size() == 1);
@@ -150,8 +232,7 @@ TEST_CASE("A* on 2x2 layouts", "[A*]")
 
 TEST_CASE("A* on 4x4 layouts", "[A*]")
 {
-    using lyt        = cartesian_layout;
-    using coord_path = layout_coordinate_path;
+    using lyt = cartesian_layout;
 
     SECTION("coordinate paths")
     {
@@ -159,7 +240,7 @@ TEST_CASE("A* on 4x4 layouts", "[A*]")
 
         SECTION("(0,0) to (3,3) without obstruction")  // path of length 7
         {
-            const auto path = a_star<coord_path>(layout, {.source = {0, 0}, .target = {3, 3}});
+            const auto path = a_star(layout, {.source = {0, 0}, .target = {3, 3}});
             const auto dist = a_star_distance(layout, {0, 0}, {3, 3});
 
             CHECK(path.size() == 7);
@@ -176,7 +257,7 @@ TEST_CASE("A* on 4x4 layouts", "[A*]")
 
             SECTION("(0,0) to (3,3) without obstruction")  // path of length 7
             {
-                const auto path = a_star<coord_path>(layout, {.source = {0, 0}, .target = {3, 3}});
+                const auto path = a_star(layout, {.source = {0, 0}, .target = {3, 3}});
                 const auto dist = a_star_distance(layout, {0, 0}, {3, 3});
 
                 CHECK(path.size() == 7);
@@ -191,7 +272,7 @@ TEST_CASE("A* on 4x4 layouts", "[A*]")
 
             SECTION("(0,0) to (3,3) without obstruction")  // path of length 7
             {
-                const auto path = a_star<coord_path>(layout, {.source = {0, 0}, .target = {3, 3}});
+                const auto path = a_star(layout, {.source = {0, 0}, .target = {3, 3}});
                 const auto dist = a_star_distance(layout, {0, 0}, {3, 3});
 
                 CHECK(path.size() == 7);
@@ -205,14 +286,13 @@ TEST_CASE("A* on 4x4 layouts", "[A*]")
 
 TEST_CASE("A* on 4x4 layouts with varying cost functions", "[A*]")
 {
-    using coord_path = layout_coordinate_path;
 
     const cartesian_gate_layout layout{cartesian_gate_layout::extent{4, 4, 1}, clocking::use()};
 
     SECTION("Unit cost")
     {
-        const auto path = a_star<coord_path, cartesian_gate_layout>(
-            layout, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor(), unit_cost_functor<>());
+        const auto path = a_star<cartesian_gate_layout>(layout, {.source = {0, 0}, .target = {3, 3}},
+                                                        manhattan_distance_functor(), unit_cost_functor<>());
 
         CHECK(path.size() == 7);
         CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
@@ -220,8 +300,8 @@ TEST_CASE("A* on 4x4 layouts with varying cost functions", "[A*]")
     }
     SECTION("Random cost")
     {
-        const auto path = a_star<coord_path, cartesian_gate_layout>(
-            layout, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor(), random_cost_functor<>());
+        const auto path = a_star<cartesian_gate_layout>(layout, {.source = {0, 0}, .target = {3, 3}},
+                                                        manhattan_distance_functor(), random_cost_functor<>());
 
         CHECK(path.size() == 7);
         CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
@@ -229,10 +309,35 @@ TEST_CASE("A* on 4x4 layouts with varying cost functions", "[A*]")
     }
 }
 
+TEST_CASE("A* minimizes nonuniform path costs", "[A*]")
+{
+    /** @brief Two routes reach the target with costs six and five. */
+    const cartesian_gate_layout layout{cartesian_gate_layout::extent{3, 2, 1}, clocking::twoddwave()};
+    /** @brief Zero is an admissible heuristic for every nonnegative edge cost. */
+    const distance_functor<uint64_t> estimate{[](const auto&, const auto&) { return uint64_t{0}; }};
+    /** @brief An expensive target is queued before a cheaper route improves another open coordinate. */
+    const cost_functor<uint64_t> cost{
+        [](const layout_base::coordinate& source, const layout_base::coordinate& target) -> uint64_t
+        {
+            if (source == layout_base::coordinate{0, 0})
+            {
+                return target == layout_base::coordinate{1, 0} ? 1 : 3;
+            }
+            if (source == layout_base::coordinate{1, 0})
+            {
+                return target == layout_base::coordinate{2, 0} ? 1 : 10;
+            }
+            return source == layout_base::coordinate{2, 0} ? 4 : 1;
+        }};
+    /** @brief The minimum-cost route has three edges. */
+    const auto path = a_star(layout, {.source = {0, 0}, .target = {2, 1}}, estimate, cost);
+    REQUIRE(path.size() == 4);
+    CHECK(cost(path[0], path[1]) + cost(path[1], path[2]) + cost(path[2], path[3]) == 5);
+}
+
 TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
 {
-    using lyt        = cartesian_layout;
-    using coord_path = layout_coordinate_path;
+    using lyt = cartesian_layout;
 
     SECTION("Manhattan distance")
     {
@@ -242,8 +347,7 @@ TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
 
             SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
             {
-                const auto path =
-                    a_star<coord_path>(layout, {.source = {0, 0}, .target = {9, 9}}, manhattan_distance_functor());
+                const auto path = a_star(layout, {.source = {0, 0}, .target = {9, 9}}, manhattan_distance_functor());
 
                 CHECK(path.size() == 19);
                 CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
@@ -258,8 +362,8 @@ TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
 
                 SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
                 {
-                    const auto path = a_star<coord_path, gate_layout<lyt>>(layout, {.source = {0, 0}, .target = {9, 9}},
-                                                                           manhattan_distance_functor());
+                    const auto path = a_star<gate_layout<lyt>>(layout, {.source = {0, 0}, .target = {9, 9}},
+                                                               manhattan_distance_functor());
 
                     CHECK(path.size() == 19);
                     CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
@@ -273,7 +377,7 @@ TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
                 SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
                 {
                     const auto path =
-                        a_star<coord_path>(layout, {.source = {0, 0}, .target = {9, 9}}, manhattan_distance_functor());
+                        a_star(layout, {.source = {0, 0}, .target = {9, 9}}, manhattan_distance_functor());
 
                     CHECK(path.size() == 19);
                     CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
@@ -290,8 +394,7 @@ TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
 
             SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
             {
-                const auto path =
-                    a_star<coord_path>(layout, {.source = {0, 0}, .target = {9, 9}}, euclidean_distance_functor());
+                const auto path = a_star(layout, {.source = {0, 0}, .target = {9, 9}}, euclidean_distance_functor());
 
                 CHECK(path.size() == 19);
                 CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
@@ -306,8 +409,8 @@ TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
 
                 SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
                 {
-                    const auto path = a_star<coord_path, gate_layout<lyt>>(layout, {.source = {0, 0}, .target = {9, 9}},
-                                                                           euclidean_distance_functor());
+                    const auto path = a_star<gate_layout<lyt>>(layout, {.source = {0, 0}, .target = {9, 9}},
+                                                               euclidean_distance_functor());
 
                     CHECK(path.size() == 19);
                     CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
@@ -321,7 +424,7 @@ TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
                 SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
                 {
                     const auto path =
-                        a_star<coord_path>(layout, {.source = {0, 0}, .target = {9, 9}}, euclidean_distance_functor());
+                        a_star(layout, {.source = {0, 0}, .target = {9, 9}}, euclidean_distance_functor());
 
                     CHECK(path.size() == 19);
                     CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
@@ -334,7 +437,6 @@ TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
 
 TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
 {
-    using coord_path = layout_coordinate_path;
 
     SECTION("coordinate paths")
     {
@@ -352,20 +454,12 @@ TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
             search_obstructions.obstruct_coordinate({2, 2});
             // effectively blocking (3,2) as well
 
-            const auto path =
-                a_star<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor(),
-                                   unit_cost_functor<>(), {}, search_obstructions);  // only one path possible
+            const auto path = a_star(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor(),
+                                     unit_cost_functor<>(), {}, search_obstructions);  // only one path possible
             const auto dist = a_star_distance(obstr_lyt, {0, 0}, {3, 3}, search_obstructions);
 
-            CHECK(path.size() == 7);
+            CHECK(path == layout_coordinate_path{{{0, 0}, {0, 1}, {0, 2}, {0, 3}, {1, 3}, {2, 3}, {3, 3}}});
             CHECK(dist == 6);
-            CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
-            CHECK(path.target() == fiction::layouts::layout_base::coordinate{3, 3});
-            CHECK(path[1] == fiction::layouts::layout_base::coordinate{0, 1});
-            CHECK(path[2] == fiction::layouts::layout_base::coordinate{0, 2});
-            CHECK(path[3] == fiction::layouts::layout_base::coordinate{0, 3});
-            CHECK(path[4] == fiction::layouts::layout_base::coordinate{1, 3});
-            CHECK(path[5] == fiction::layouts::layout_base::coordinate{2, 3});
         }
     }
     SECTION("clocking paths")
@@ -385,20 +479,12 @@ TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
                 obstr_lyt.create_pi("obstruction", {2, 2});
                 // effectively blocking (3,2) as well
 
-                const auto path =
-                    a_star<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor(),
-                                       unit_cost_functor<>());  // only one path possible
+                const auto path = a_star(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor(),
+                                         unit_cost_functor<>());  // only one path possible
                 const auto dist = a_star_distance(obstr_lyt, {0, 0}, {3, 3});
 
-                CHECK(path.size() == 7);
+                CHECK(path == layout_coordinate_path{{{0, 0}, {0, 1}, {0, 2}, {0, 3}, {1, 3}, {2, 3}, {3, 3}}});
                 CHECK(dist == 6);
-                CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
-                CHECK(path.target() == fiction::layouts::layout_base::coordinate{3, 3});
-                CHECK(path[1] == fiction::layouts::layout_base::coordinate{0, 1});
-                CHECK(path[2] == fiction::layouts::layout_base::coordinate{0, 2});
-                CHECK(path[3] == fiction::layouts::layout_base::coordinate{0, 3});
-                CHECK(path[4] == fiction::layouts::layout_base::coordinate{1, 3});
-                CHECK(path[5] == fiction::layouts::layout_base::coordinate{2, 3});
             }
         }
         SECTION("USE")
@@ -412,20 +498,12 @@ TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
                 // create a PI as obstruction
                 obstr_lyt.create_pi("obstruction", {3, 0});  // blocks 3 paths
 
-                const auto path =
-                    a_star<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor(),
-                                       unit_cost_functor<>());  // only one path possible
+                const auto path = a_star(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor(),
+                                         unit_cost_functor<>());  // only one path possible
                 const auto dist = a_star_distance(obstr_lyt, {0, 0}, {3, 3});
 
-                CHECK(path.size() == 7);
+                CHECK(path == layout_coordinate_path{{{0, 0}, {1, 0}, {1, 1}, {1, 2}, {2, 2}, {3, 2}, {3, 3}}});
                 CHECK(dist == 6);
-                CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
-                CHECK(path.target() == fiction::layouts::layout_base::coordinate{3, 3});
-                CHECK(path[1] == fiction::layouts::layout_base::coordinate{1, 0});
-                CHECK(path[2] == fiction::layouts::layout_base::coordinate{1, 1});
-                CHECK(path[3] == fiction::layouts::layout_base::coordinate{1, 2});
-                CHECK(path[4] == fiction::layouts::layout_base::coordinate{2, 2});
-                CHECK(path[5] == fiction::layouts::layout_base::coordinate{3, 2});
             }
         }
     }
@@ -433,7 +511,6 @@ TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
 
 TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
 {
-    using coord_path = layout_coordinate_path;
 
     SECTION("coordinate paths")
     {
@@ -450,18 +527,10 @@ TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
             search_obstructions.obstruct_connection({0, 2}, {1, 2});
             // leaving only one valid path via (0,4)
 
-            const auto path =
-                a_star<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor(),
-                                   unit_cost_functor<>(), {}, search_obstructions);  // only one path possible
+            const auto path = a_star(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor(),
+                                     unit_cost_functor<>(), {}, search_obstructions);  // only one path possible
 
-            CHECK(path.size() == 7);
-            CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
-            CHECK(path.target() == fiction::layouts::layout_base::coordinate{3, 3});
-            CHECK(path[1] == fiction::layouts::layout_base::coordinate{0, 1});
-            CHECK(path[2] == fiction::layouts::layout_base::coordinate{0, 2});
-            CHECK(path[3] == fiction::layouts::layout_base::coordinate{0, 3});
-            CHECK(path[4] == fiction::layouts::layout_base::coordinate{1, 3});
-            CHECK(path[5] == fiction::layouts::layout_base::coordinate{2, 3});
+            CHECK(path == layout_coordinate_path{{{0, 0}, {0, 1}, {0, 2}, {0, 3}, {1, 3}, {2, 3}, {3, 3}}});
         }
     }
     SECTION("clocking paths")
@@ -481,18 +550,10 @@ TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
                 search_obstructions.obstruct_connection({0, 2}, {1, 2});
                 // leaving only one valid path via (0,4)
 
-                const auto path =
-                    a_star<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor(),
-                                       unit_cost_functor<>(), {}, search_obstructions);  // only one path possible
+                const auto path = a_star(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor(),
+                                         unit_cost_functor<>(), {}, search_obstructions);  // only one path possible
 
-                CHECK(path.size() == 7);
-                CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
-                CHECK(path.target() == fiction::layouts::layout_base::coordinate{3, 3});
-                CHECK(path[1] == fiction::layouts::layout_base::coordinate{0, 1});
-                CHECK(path[2] == fiction::layouts::layout_base::coordinate{0, 2});
-                CHECK(path[3] == fiction::layouts::layout_base::coordinate{0, 3});
-                CHECK(path[4] == fiction::layouts::layout_base::coordinate{1, 3});
-                CHECK(path[5] == fiction::layouts::layout_base::coordinate{2, 3});
+                CHECK(path == layout_coordinate_path{{{0, 0}, {0, 1}, {0, 2}, {0, 3}, {1, 3}, {2, 3}, {3, 3}}});
             }
         }
         SECTION("USE")
@@ -507,18 +568,10 @@ TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
                 // create a PI as obstruction
                 search_obstructions.obstruct_connection({2, 0}, {3, 0});  // blocks 3 paths
 
-                const auto path =
-                    a_star<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor(),
-                                       unit_cost_functor<>(), {}, search_obstructions);  // only one path possible
+                const auto path = a_star(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, manhattan_distance_functor(),
+                                         unit_cost_functor<>(), {}, search_obstructions);  // only one path possible
 
-                CHECK(path.size() == 7);
-                CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
-                CHECK(path.target() == fiction::layouts::layout_base::coordinate{3, 3});
-                CHECK(path[1] == fiction::layouts::layout_base::coordinate{1, 0});
-                CHECK(path[2] == fiction::layouts::layout_base::coordinate{1, 1});
-                CHECK(path[3] == fiction::layouts::layout_base::coordinate{1, 2});
-                CHECK(path[4] == fiction::layouts::layout_base::coordinate{2, 2});
-                CHECK(path[5] == fiction::layouts::layout_base::coordinate{3, 2});
+                CHECK(path == layout_coordinate_path{{{0, 0}, {1, 0}, {1, 1}, {1, 2}, {2, 2}, {3, 2}, {3, 3}}});
             }
         }
     }
@@ -526,13 +579,12 @@ TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
 
 TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
 {
-    using coord_path = layout_coordinate_path;
 
     using dist = manhattan_distance_functor;
     using cost = unit_cost_functor<uint8_t>;
 
     // enable crossings
-    const a_star_params params{true};
+    const a_star_params params{.crossings = true};
 
     SECTION("Single crossing")
     {
@@ -552,10 +604,9 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
                     const auto w  = obstr_lyt.create_buf(pi, {1, 1});  // obstruction that can be crossed over
                     obstr_lyt.create_po(w, "obstruction PO", {1, 2});  // obstructs 1 coordinate
 
-                    const auto path =
-                        a_star<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {2, 2}}, dist(), cost(), params);
+                    const auto path = a_star(obstr_lyt, {.source = {0, 0}, .target = {2, 2}}, dist(), cost(), params);
 
-                    CHECK(path == coord_path{{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1}, {2, 2}}});
+                    CHECK(path == layout_coordinate_path{{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1}, {2, 2}}});
                 }
             }
             SECTION("USE")
@@ -572,10 +623,9 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
                     const auto w  = obstr_lyt.create_buf(pi, {1, 1});  // obstruction that can be crossed over
                     obstr_lyt.create_po(w, "obstruction PO", {0, 1});  // obstructs 1 coordinate
 
-                    const auto path =
-                        a_star<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {2, 2}}, dist(), cost(), params);
+                    const auto path = a_star(obstr_lyt, {.source = {0, 0}, .target = {2, 2}}, dist(), cost(), params);
 
-                    CHECK(path == coord_path{{{0, 0}, {1, 0}, {1, 1, 1}, {1, 2}, {2, 2}}});
+                    CHECK(path == layout_coordinate_path{{{0, 0}, {1, 0}, {1, 1, 1}, {1, 2}, {2, 2}}});
                 }
             }
         }
@@ -604,11 +654,12 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
                     const auto w22 = obstr_lyt.create_buf(w21, {2, 2});  // obstruction that can be crossed over
                     obstr_lyt.create_po(w22, "obstruction PO", {2, 3});  // obstructs 1 coordinate
 
-                    const auto path =
-                        a_star<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, dist(), cost(), params);
+                    const auto path = a_star(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, dist(), cost(), params);
 
-                    CHECK((path == coord_path{{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1, 1}, {3, 1}, {3, 2}, {3, 3}}} ||
-                           path == coord_path{{{0, 0}, {0, 1}, {0, 2}, {1, 2, 1}, {2, 2, 1}, {3, 2}, {3, 3}}}));
+                    CHECK((path ==
+                               layout_coordinate_path{{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1, 1}, {3, 1}, {3, 2}, {3, 3}}} ||
+                           path ==
+                               layout_coordinate_path{{{0, 0}, {0, 1}, {0, 2}, {1, 2, 1}, {2, 2, 1}, {3, 2}, {3, 3}}}));
                 }
             }
         }
@@ -635,10 +686,9 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
                     const auto w2  = obstr_lyt.create_buf(pi2, {2, 1});  // obstruction that can be crossed over
                     obstr_lyt.create_po(w2, "obstruction PO", {3, 1});   // obstructs 1 coordinate
 
-                    const auto path =
-                        a_star<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {3, 2}}, dist(), cost(), params);
+                    const auto path = a_star(obstr_lyt, {.source = {0, 0}, .target = {3, 2}}, dist(), cost(), params);
 
-                    CHECK(path == coord_path{{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1, 1}, {2, 2}, {3, 2}}});
+                    CHECK(path == layout_coordinate_path{{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1, 1}, {2, 2}, {3, 2}}});
                 }
             }
         }
@@ -647,8 +697,7 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
 
 TEST_CASE("A* path finding with the A* distance functor (don't do this!)", "[A*]")
 {
-    using lyt        = cartesian_layout;
-    using coord_path = layout_coordinate_path;
+    using lyt = cartesian_layout;
 
     SECTION("coordinate paths")
     {
@@ -657,7 +706,7 @@ TEST_CASE("A* path finding with the A* distance functor (don't do this!)", "[A*]
         SECTION("(0,0) to (3,3) without obstruction")  // path of length 7
         {
             const auto path =
-                a_star<coord_path>(layout, {.source = {0, 0}, .target = {3, 3}}, a_star_distance_functor<lyt>(layout));
+                a_star(layout, {.source = {0, 0}, .target = {3, 3}}, a_star_distance_functor<lyt>(layout));
 
             CHECK(path.size() == 7);
             CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
@@ -672,8 +721,8 @@ TEST_CASE("A* path finding with the A* distance functor (don't do this!)", "[A*]
 
             SECTION("(0,0) to (3,3) without obstruction")  // path of length 7
             {
-                const auto path = a_star<coord_path>(layout, {.source = {0, 0}, .target = {3, 3}},
-                                                     a_star_distance_functor<gate_layout<lyt>>(layout));
+                const auto path = a_star(layout, {.source = {0, 0}, .target = {3, 3}},
+                                         a_star_distance_functor<gate_layout<lyt>>(layout));
 
                 CHECK(path.size() == 7);
                 CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
@@ -686,8 +735,8 @@ TEST_CASE("A* path finding with the A* distance functor (don't do this!)", "[A*]
 
             SECTION("(0,0) to (3,3) without obstruction")  // path of length 7
             {
-                const auto path = a_star<coord_path>(layout, {.source = {0, 0}, .target = {3, 3}},
-                                                     a_star_distance_functor<gate_layout<lyt>>(layout));
+                const auto path = a_star(layout, {.source = {0, 0}, .target = {3, 3}},
+                                         a_star_distance_functor<gate_layout<lyt>>(layout));
 
                 CHECK(path.size() == 7);
                 CHECK(path.source() == fiction::layouts::layout_base::coordinate{0, 0});
@@ -733,9 +782,22 @@ TEST_CASE("A* invokes distance and cost functor overrides", "[A*]")
     const cartesian_layout  layout{{3, 3}};
     const counting_distance heuristic{};
     const counting_cost     edge_cost{};
-    const auto              path =
-        a_star<layout_coordinate_path>(layout, {.source = {0, 0}, .target = {2, 2}}, heuristic, edge_cost);
+    const auto              path = a_star(layout, {.source = {0, 0}, .target = {2, 2}}, heuristic, edge_cost);
     CHECK(path.size() == 5);
     CHECK(heuristic.calls > 0);
     CHECK(edge_cost.calls > 0);
+}
+
+TEST_CASE("A* distance evaluations reject endpoints outside the layout", "[A*]")
+{
+    /** @brief Two-by-two geometry for endpoint validation. */
+    const cartesian_layout layout{{2, 2}};
+    /** @brief Borrowed-layout distance evaluator constructed before invocation. */
+    const a_star_distance_functor<cartesian_layout> distance{layout};
+    CHECK_THROWS_AS(a_star(layout, {.source = {2, 0}, .target = {0, 0}}), std::invalid_argument);
+    CHECK_THROWS_AS(a_star(layout, {.source = {0, 0}, .target = {-1, 0}}), std::invalid_argument);
+    CHECK_THROWS_AS(a_star_distance(layout, {2, 0}, {0, 0}), std::invalid_argument);
+    CHECK_THROWS_AS(a_star_distance(layout, {0, 0}, {-1, 0}), std::invalid_argument);
+    CHECK_THROWS_AS(distance({2, 0}, {0, 0}), std::invalid_argument);
+    CHECK_THROWS_AS(distance({0, 0}, {-1, 0}), std::invalid_argument);
 }

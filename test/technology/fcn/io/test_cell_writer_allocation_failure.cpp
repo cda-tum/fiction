@@ -11,6 +11,7 @@
 /**
  * @file
  * @brief Cell writers propagate terminal-list allocation failures.
+ * @author Marcel Walter (marcelwa)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -48,6 +49,19 @@ TEST_CASE("Cell writers propagate terminal-list allocation failures", "[cell-wri
                 lyt.assign_cell_name({0, 0}, "terminal");
                 /** @brief Destination prepared before fault injection. */
                 std::ostringstream stream{};
+                // Warm formatting and stream state before arming terminal-list allocation failure.
+                if (qcc)
+                {
+                    write_qcc_layout(lyt, stream);
+                }
+                else
+                {
+                    write_qll_layout(lyt, stream);
+                }
+                /** @brief Complete output used to check recovery after the injected failure. */
+                const auto expected = stream.str();
+                CHECK(expected.find("name=\"terminal\"") != std::string::npos);
+                stream.str(std::string{});
                 /** @brief Records an allocation failure propagated through the public writer. */
                 bool propagated{};
                 try
@@ -74,6 +88,7 @@ TEST_CASE("Cell writers propagate terminal-list allocation failures", "[cell-wri
                     throw;
                 }
                 CHECK(propagated);
+                CHECK(stream.str().empty());
 
                 if (qcc)
                 {
@@ -83,7 +98,7 @@ TEST_CASE("Cell writers propagate terminal-list allocation failures", "[cell-wri
                 {
                     CHECK_NOTHROW(write_qll_layout(lyt, stream));
                 }
-                CHECK(stream.str().find("name=\"terminal\"") != std::string::npos);
+                CHECK(stream.str() == expected);
             }
         }
     }

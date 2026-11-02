@@ -81,9 +81,6 @@ void register_layouts_io(nb::module_& m);
 
 }  // namespace pyfiction
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
-
 NB_MODULE(layouts, m)
 {
     m.doc() = "Coordinates, layout topologies, clocking, and gate-level layouts.";
@@ -103,5 +100,3 @@ NB_MODULE(layouts, m)
     auto io = pyfiction::def_submodule(m, "io", "Readers, writers, and drawers of gate-level layouts.");
     pyfiction::register_layouts_io(io);
 }
-
-#pragma GCC diagnostic pop

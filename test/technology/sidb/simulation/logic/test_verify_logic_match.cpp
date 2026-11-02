@@ -28,7 +28,8 @@
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/verify_logic_match.hpp>
-#include <fiction/types.hpp>
+
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <stdexcept>
 #include <vector>
@@ -51,21 +52,23 @@ TEST_CASE("Bestagon FO2 gate", "[verify-logic-match]")
 
     const quickexact_params params{.sim_params = simulation_parameters{2, -0.32}};
 
-    SECTION("The index is 2, which means that the left input is set to one and the right input is set to zero.")
+    // The fan-out has one Boolean input, encoded by patterns 0 and 1.
+    SECTION("Input zero")
     {
-        bii = 2;
+        bii = 0;
 
         const auto simulation_results = quickexact(*bii, params);
 
         const auto gs = simulation_results.groundstates();
 
-        REQUIRE(!gs.empty());
+        REQUIRE_FALSE(gs.empty());
 
-        CHECK(verify_logic_match(*bii, gs.front(), is_operational_params{}, std::vector<tt>{create_fan_out_tt()}, 2,
-                                 input_wires, output_wires) == operational_status::OPERATIONAL);
+        CHECK(verify_logic_match(*bii, gs.front(), is_operational_params{},
+                                 std::vector<kitty::dynamic_truth_table>{create_fan_out_tt()}, 0, input_wires,
+                                 output_wires) == operational_status::OPERATIONAL);
     }
 
-    SECTION("Index is 1, which means that the left input is set to zero and the right input is set to one.")
+    SECTION("Input one")
     {
         bii = 1;
 
@@ -73,18 +76,14 @@ TEST_CASE("Bestagon FO2 gate", "[verify-logic-match]")
 
         const auto gs = simulation_results.groundstates();
 
-        REQUIRE(!gs.empty());
+        REQUIRE_FALSE(gs.empty());
 
-        SECTION("Correct index")
-        {
-            CHECK(verify_logic_match(*bii, gs.front(), is_operational_params{}, std::vector<tt>{create_fan_out_tt()}, 1,
-                                     input_wires, output_wires) == operational_status::OPERATIONAL);
-        }
-        SECTION("Wrong input index")
-        {
-            CHECK(verify_logic_match(*bii, gs.front(), is_operational_params{}, std::vector<tt>{create_fan_out_tt()}, 2,
-                                     input_wires, output_wires) == operational_status::NON_OPERATIONAL);
-        }
+        CHECK(verify_logic_match(*bii, gs.front(), is_operational_params{},
+                                 std::vector<kitty::dynamic_truth_table>{create_fan_out_tt()}, 1, input_wires,
+                                 output_wires) == operational_status::OPERATIONAL);
+        CHECK(verify_logic_match(*bii, gs.front(), is_operational_params{},
+                                 std::vector<kitty::dynamic_truth_table>{create_fan_out_tt()}, 0, input_wires,
+                                 output_wires) == operational_status::NON_OPERATIONAL);
     }
 }
 
@@ -102,7 +101,7 @@ TEST_CASE("AND gate mirrored on the x-axis on the H-Si 111 surface", "[verify-lo
 
     const quickexact_params params{.sim_params = simulation_parameters{2, -0.32}};
 
-    SECTION("The index is 2, which means that the left input is set to one and the right input is set to zero.")
+    SECTION("Left input one and right input zero")
     {
         bii = 2;
 
@@ -110,13 +109,14 @@ TEST_CASE("AND gate mirrored on the x-axis on the H-Si 111 surface", "[verify-lo
 
         const auto gs = simulation_results.groundstates();
 
-        REQUIRE(!gs.empty());
+        REQUIRE_FALSE(gs.empty());
 
-        CHECK(verify_logic_match(*bii, gs.front(), is_operational_params{}, std::vector<tt>{create_and_tt()}, 2,
-                                 input_wires, output_wires) == operational_status::OPERATIONAL);
+        CHECK(verify_logic_match(*bii, gs.front(), is_operational_params{},
+                                 std::vector<kitty::dynamic_truth_table>{create_and_tt()}, 2, input_wires,
+                                 output_wires) == operational_status::OPERATIONAL);
     }
 
-    SECTION("Index is 1, which means that the left input is set to zero and the right input is set to one.")
+    SECTION("Left input zero and right input one")
     {
         bii = 1;
 
@@ -124,21 +124,16 @@ TEST_CASE("AND gate mirrored on the x-axis on the H-Si 111 surface", "[verify-lo
 
         const auto gs = simulation_results.groundstates();
 
-        REQUIRE(!gs.empty());
+        REQUIRE_FALSE(gs.empty());
 
-        is_operational_params op_params{};
-        op_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+        const is_operational_params op_params{.op_condition =
+                                                  is_operational_params::operational_condition::REJECT_KINKS};
 
-        SECTION("Correct index")
-        {
-            CHECK(verify_logic_match(*bii, gs.front(), op_params, std::vector<tt>{create_and_tt()}, 1, input_wires,
-                                     output_wires) == operational_status::OPERATIONAL);
-        }
-        SECTION("Wrong input index")
-        {
-            CHECK(verify_logic_match(*bii, gs.front(), op_params, std::vector<tt>{create_and_tt()}, 2, input_wires,
-                                     output_wires) == operational_status::NON_OPERATIONAL);
-        }
+        CHECK(verify_logic_match(*bii, gs.front(), op_params, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
+                                 1, input_wires, output_wires) == operational_status::OPERATIONAL);
+        // Both patterns have output 0; the wrong input pattern must fail the kink check.
+        CHECK(verify_logic_match(*bii, gs.front(), op_params, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
+                                 2, input_wires, output_wires) == operational_status::NON_OPERATIONAL);
     }
 }
 
@@ -148,9 +143,27 @@ TEST_CASE("Logic matching propagates invalid lattice basis errors", "[verify-log
     lattice_site invalid{};
     invalid.z = 2;
     lyt.assign_sidb(invalid, dot_tag::NORMAL);
-    is_operational_params params{};
-    params.sim_params.base = 2;
+    const is_operational_params params{.sim_params = simulation_parameters{2}};
 
     CHECK_THROWS_AS(verify_logic_match(lyt, charge_distribution{lyt}, params, std::vector{create_id_tt()}, 0, {}, {}),
+                    std::out_of_range);
+}
+
+TEST_CASE("Logic matching rejects invalid specifications", "[verify-logic-match][invalid-spec]")
+{
+    /** @brief AND layout whose charge distribution is checked. */
+    const auto lyt = blueprints::siqad_and_gate();
+    /** @brief Charge distribution supplied to the logic check. */
+    const charge_distribution cd{lyt};
+    CHECK_THROWS_AS(verify_logic_match(lyt, cd, {}, {}, 0, {}, {}), std::invalid_argument);
+    CHECK_THROWS_AS(verify_logic_match(lyt, cd, {}, {create_and_tt(), create_id_tt()}, 0, {}, {}),
+                    std::invalid_argument);
+}
+
+TEST_CASE("Logic matching rejects an input pattern outside the specification", "[verify-logic-match][invalid-pattern]")
+{
+    /** @brief AND layout whose charge distribution is checked. */
+    const auto lyt = blueprints::siqad_and_gate();
+    CHECK_THROWS_AS(verify_logic_match(lyt, charge_distribution{lyt}, {}, {create_and_tt()}, 4, {}, {}),
                     std::out_of_range);
 }

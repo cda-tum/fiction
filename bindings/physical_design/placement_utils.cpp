@@ -15,13 +15,12 @@
  */
 
 #include "fiction/layouts/layout_base.hpp"
-#include "pyfiction/types.hpp"
+#include "pyfiction/types.hpp"  // NOLINT(misc-include-cleaner): preserves coordinate and extent tuple signatures.
 
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/placement_utils.hpp>
 #include <fiction/types.hpp>
 
-#include <concepts>
 #include <optional>
 
 #include <nanobind/nanobind.h>
@@ -35,8 +34,6 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-static_assert(std::same_as<py_tec_network, fiction::tec_nt>);
-
 namespace detail
 {
 
@@ -48,31 +45,37 @@ void register_place(nb::module_& m)
     // Keep the GIL: each overload places one gate with at most three inputs.
     m.def(
         "place",
-        [](Lyt& lyt, const fiction::layouts::layout_base::coordinate& t, const py_tec_network& ntk,
-           const py_tec_network::node& n) { return fiction::physical_design::place(lyt, t, ntk, n); },
+        [](Lyt& lyt, const fiction::layouts::layout_base::coordinate& t,
+           const fiction::networks::named_technology_network&       ntk,
+           const fiction::networks::named_technology_network::node& n)
+        { return fiction::physical_design::place(lyt, t, ntk, n); },
         nb::arg("lyt"), nb::arg("t"), nb::arg("ntk"), nb::arg("n"),
         "Places a primary input at the given coordinate and returns its output port.");
 
     m.def(
         "place",
-        [](Lyt& lyt, const fiction::layouts::layout_base::coordinate& t, const py_tec_network& ntk,
-           const py_tec_network::node& n, const typename Lyt::object_id& a)
+        [](Lyt& lyt, const fiction::layouts::layout_base::coordinate& t,
+           const fiction::networks::named_technology_network&       ntk,
+           const fiction::networks::named_technology_network::node& n, const typename Lyt::object_id& a)
         { return fiction::physical_design::place(lyt, t, ntk, n, a); },
         nb::arg("lyt"), nb::arg("t"), nb::arg("ntk"), nb::arg("n"), nb::arg("a"));
 
     m.def(
         "place",
-        [](Lyt& lyt, const fiction::layouts::layout_base::coordinate& t, const py_tec_network& ntk,
-           const py_tec_network::node& n, const typename Lyt::object_id& a, const typename Lyt::object_id& b,
-           const std::optional<bool>& c = std::nullopt)
+        [](Lyt& lyt, const fiction::layouts::layout_base::coordinate& t,
+           const fiction::networks::named_technology_network&       ntk,
+           const fiction::networks::named_technology_network::node& n, const typename Lyt::object_id& a,
+           const typename Lyt::object_id& b, const std::optional<bool>& c = std::nullopt)
         { return fiction::physical_design::place(lyt, t, ntk, n, a, b, c); },
         nb::arg("lyt"), nb::arg("t"), nb::arg("ntk"), nb::arg("n"), nb::arg("a"), nb::arg("b"), nb::arg("c"));
 
     m.def(
         "place",
-        [](Lyt& lyt, const fiction::layouts::layout_base::coordinate& t, const py_tec_network& ntk,
-           const py_tec_network::node& n, const typename Lyt::object_id& a, const typename Lyt::object_id& b,
-           const typename Lyt::object_id& c) { return fiction::physical_design::place(lyt, t, ntk, n, a, b, c); },
+        [](Lyt& lyt, const fiction::layouts::layout_base::coordinate& t,
+           const fiction::networks::named_technology_network&       ntk,
+           const fiction::networks::named_technology_network::node& n, const typename Lyt::object_id& a,
+           const typename Lyt::object_id& b, const typename Lyt::object_id& c)
+        { return fiction::physical_design::place(lyt, t, ntk, n, a, b, c); },
         nb::arg("lyt"), nb::arg("t"), nb::arg("ntk"), nb::arg("n"), nb::arg("a"), nb::arg("b"), nb::arg("c"));
 }
 

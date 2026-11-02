@@ -70,13 +70,13 @@ void register_random_layout_generator(nb::module_& m)
            const decltype(generate_random_layout_options{}.maximal_attempts)     maximal_attempts,
            const decltype(generate_random_layout_options{}.on_progress)&         on_progress)
         {
-            generate_random_layout_options params{};
-            params.sim_params       = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            params.coordinate_pair  = coordinate_pair;
-            params.number_of_sidbs  = number_of_sidbs;
-            params.positive_sidbs   = positive_sidbs;
-            params.maximal_attempts = maximal_attempts;
-            params.on_progress      = on_progress;
+            const generate_random_layout_options params{
+                .coordinate_pair  = coordinate_pair,
+                .number_of_sidbs  = number_of_sidbs,
+                .positive_sidbs   = positive_sidbs,
+                .sim_params       = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf),
+                .maximal_attempts = maximal_attempts,
+                .on_progress      = on_progress};
             const nb::gil_scoped_release release{};
             return fiction::sidb::generators::generate_random_layout(params, skeleton);
         },
@@ -123,15 +123,15 @@ Args:
                               .maximal_attempts_for_multiple_layouts)            maximal_attempts_for_multiple_layouts,
            const decltype(generate_random_layout_options{}.on_progress)&         on_progress)
         {
-            generate_random_layout_options params{};
-            params.sim_params       = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            params.coordinate_pair  = coordinate_pair;
-            params.number_of_sidbs  = number_of_sidbs;
-            params.positive_sidbs   = positive_sidbs;
-            params.maximal_attempts = maximal_attempts;
-            params.number_of_unique_generated_layouts    = number_of_unique_generated_layouts;
-            params.maximal_attempts_for_multiple_layouts = maximal_attempts_for_multiple_layouts;
-            params.on_progress                           = on_progress;
+            const generate_random_layout_options params{
+                .coordinate_pair                    = coordinate_pair,
+                .number_of_sidbs                    = number_of_sidbs,
+                .positive_sidbs                     = positive_sidbs,
+                .sim_params                         = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf),
+                .maximal_attempts                   = maximal_attempts,
+                .number_of_unique_generated_layouts = number_of_unique_generated_layouts,
+                .maximal_attempts_for_multiple_layouts = maximal_attempts_for_multiple_layouts,
+                .on_progress                           = on_progress};
             const nb::gil_scoped_release release{};
             return fiction::sidb::generators::generate_multiple_random_layouts(params, skeleton);
         },

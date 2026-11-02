@@ -15,14 +15,17 @@
  * @author Simon Hofmann (simon1hofmann)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "fiction/layouts/layout_base.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
+#include <fiction/technology/fcn/cell_ports.hpp>
 #include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp>
 #include <fiction/technology/sidb/layout.hpp>
@@ -42,32 +45,33 @@
 #include <thread>
 
 using namespace fiction;
+using namespace fiction::networks;
 using namespace fiction::layouts;
 using namespace fiction::sidb;
 using namespace fiction::sidb::generators;
 
-TEST_CASE("Circuit design deduces the gate layout type", "[on-the-fly-circuit-design]")
+TEST_CASE("Circuit design accepts a hexagonal gate layout", "[on-the-fly-circuit-design]")
 {
     hexagonal_gate_layout gate_layout{arrangement::EVEN_ROW, {3, 3}};
     const auto            first  = gate_layout.create_pi("a", {0, 0});
     const auto            second = gate_layout.create_pi("b", {1, 0});
     gate_layout.create_and(first, second, {1, 2});
 
-    on_the_fly_circuit_design_params params{};
-    params.sidb_on_the_fly_gate_library_parameters.design_gate_params.number_of_canvas_sidbs = 0;
+    const on_the_fly_circuit_design_params params{
+        .sidb_on_the_fly_gate_library_parameters = {.design_gate_params = {.number_of_canvas_sidbs = 0}}};
 
     CHECK_THROWS_AS(on_the_fly_circuit_design(gate_layout, params), unsuccessful_gate_design_error);
 }
 
 TEST_CASE("Circuit design rejects unsupported gates before gate search", "[on-the-fly-circuit-design]")
 {
-    hexagonal_gate_layout            gate_layout{arrangement::EVEN_ROW, {3, 2}, clocking::row()};
-    const auto                       first    = gate_layout.create_pi("a", {0, 0});
-    const auto                       second   = gate_layout.create_pi("b", {1, 0});
-    const auto                       third    = gate_layout.create_pi("c", {2, 0});
-    const auto                       majority = gate_layout.create_maj(first, second, third, {1, 1});
-    on_the_fly_circuit_design_params params{};
-    params.sidb_on_the_fly_gate_library_parameters.design_gate_params.number_of_canvas_sidbs = 0;
+    hexagonal_gate_layout                  gate_layout{arrangement::EVEN_ROW, {3, 2}, clocking::row()};
+    const auto                             first    = gate_layout.create_pi("a", {0, 0});
+    const auto                             second   = gate_layout.create_pi("b", {1, 0});
+    const auto                             third    = gate_layout.create_pi("c", {2, 0});
+    const auto                             majority = gate_layout.create_maj(first, second, third, {1, 1});
+    const on_the_fly_circuit_design_params params{
+        .sidb_on_the_fly_gate_library_parameters = {.design_gate_params = {.number_of_canvas_sidbs = 0}}};
 
     CHECK_THROWS_AS(on_the_fly_circuit_design(gate_layout, params),
                     fcn::unsupported_gate_type_exception<fiction::layouts::layout_base::coordinate>);
@@ -89,18 +93,19 @@ TEST_CASE("Circuit design honors both circuit and gate timeouts", "[on-the-fly-c
     CHECK(params.timeout == std::numeric_limits<uint64_t>::max());
     CHECK(gates.operational_params.timeout == std::numeric_limits<uint64_t>::max());
 
-    SECTION("Zero circuit budget expires with unlimited gate budgets")
+    /** @brief Correlated time budgets and whether progress includes the controlled delay. */
+    const auto [scenario, circuit_budget, gate_budget, delayed_progress] =
+        GENERATE(Catch::Generators::table<const char*, uint64_t, uint64_t, bool>(
+            {{"Zero circuit budget expires with unlimited gate budgets", 0, std::numeric_limits<uint64_t>::max(),
+              false},
+             {"Zero gate budget expires within a positive circuit budget", 10'000, 0, false},
+             {"Unlimited gate budgets cannot override a finite circuit budget", 20,
+              std::numeric_limits<uint64_t>::max(), true}}));
+    CAPTURE(scenario, circuit_budget, gate_budget, delayed_progress);
+    params.timeout                   = circuit_budget;
+    gates.operational_params.timeout = gate_budget;
+    if (delayed_progress)
     {
-        params.timeout = 0;
-    }
-    SECTION("Zero gate budget expires within a positive circuit budget")
-    {
-        params.timeout                   = 10'000;
-        gates.operational_params.timeout = 0;
-    }
-    SECTION("Unlimited gate budgets cannot override a finite circuit budget")
-    {
-        params.timeout    = 20;
         gates.on_progress = [](auto, auto, auto) { std::this_thread::sleep_for(std::chrono::milliseconds{25}); };
     }
 
@@ -117,27 +122,35 @@ TEST_CASE("Circuit design honors both circuit and gate timeouts", "[on-the-fly-c
 #if (FICTION_Z3_SOLVER)
 TEST_CASE("Defect-aware circuit design propagates gate errors", "[on-the-fly-circuit-design]")
 {
-    tec_nt     network{};
-    const auto first  = network.create_pi();
-    const auto second = network.create_pi();
+    named_technology_network network{};
+    const auto               first  = network.create_pi();
+    const auto               second = network.create_pi();
     network.create_po(network.create_and(first, second));
 
     const hexagonal_gate_layout tiling{arrangement::EVEN_ROW, {3, 3}, clocking::row()};
     const sidb::layout          surface{};
 
-    on_the_fly_circuit_design_on_defective_surface_params params{};
-    params.exact_design_parameters.scheme        = "Row";
-    params.exact_design_parameters.upper_bound_x = 3;
-    params.exact_design_parameters.upper_bound_y = 3;
-    params.exact_design_parameters.fixed_size    = true;
-    params.exact_design_parameters.timeout       = 10'000;
-    auto& gates                                  = params.sidb_on_the_fly_gate_library_parameters.design_gate_params;
+    on_the_fly_circuit_design_on_defective_surface_params params{.exact_design_parameters = {.scheme        = "Row",
+                                                                                             .upper_bound_x = 3,
+                                                                                             .upper_bound_y = 3,
+                                                                                             .fixed_size    = true,
+                                                                                             .timeout       = 10'000}};
+    auto& gates = params.sidb_on_the_fly_gate_library_parameters.design_gate_params;
 
     SECTION("Expired circuit budget")
     {
         params.timeout = 0;
         CHECK_THROWS_AS(on_the_fly_circuit_design_on_defective_surface(network, tiling, surface, params),
                         utils::timeout_error);
+    }
+    SECTION("Unsupported gate orientations reach the caller")
+    {
+        /** @brief Gate-library error reported from gate design. */
+        using orientation_error =
+            fcn::unsupported_gate_orientation_exception<layout_base::coordinate, fcn::port_direction>;
+        gates.on_progress = [](auto, auto, auto) { throw orientation_error{{}, {}}; };
+        CHECK_THROWS_AS(on_the_fly_circuit_design_on_defective_surface(network, tiling, surface, params),
+                        orientation_error);
     }
     SECTION("The circuit budget also covers gate design")
     {

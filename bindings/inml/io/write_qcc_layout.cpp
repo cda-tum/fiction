@@ -54,10 +54,9 @@ void register_write_qcc_layout(nb::module_& m)
            const decltype(write_qcc_layout_options{}.on_progress)&                   on_progress,
            const decltype(write_qcc_layout_options{}.use_filename_as_component_name) use_filename_as_component_name)
         {
-            write_qcc_layout_options params{};
-            params.on_progress                    = on_progress;
-            params.use_filename_as_component_name = use_filename_as_component_name;
-            const nb::gil_scoped_release release{};
+            const write_qcc_layout_options params{.use_filename_as_component_name = use_filename_as_component_name,
+                                                  .on_progress                    = on_progress};
+            const nb::gil_scoped_release   release{};
             fiction::inml::io::write_qcc_layout(lyt, filename, params);
         },
         nb::arg("layout"), nb::arg("filename"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
@@ -72,7 +71,7 @@ Args:
     use_filename_as_component_name: Use the output filename as the component name inside the QCC file.
 
 Raises:
-    ValueError: The layout has no designated I/O pins or the pins are not routed to its borders.
+    ValueError: An input or output cell is not at its designated horizontal border.
     RuntimeError: The file cannot be created, written, closed, or replaced.
 )doc");
 }

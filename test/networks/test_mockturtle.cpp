@@ -22,11 +22,11 @@
 
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
-#include <fiction/networks/technology_network.hpp>
+#include <fiction/networks/mockturtle_utils.hpp>
 #include <fiction/synthesis/technology_mapping_library.hpp>
 
-#include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
+#include <kitty/print.hpp>
 #include <lorina/common.hpp>
 #include <lorina/genlib.hpp>
 #include <mockturtle/algorithms/mapper.hpp>
@@ -36,6 +36,9 @@
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/tech_library.hpp>
 
+#include <array>
+#include <cstdint>
+#include <iterator>
 #include <sstream>
 #include <vector>
 
@@ -44,78 +47,109 @@ using namespace fiction::layouts;
 using namespace fiction::networks;
 using namespace fiction::synthesis;
 
+/**
+ * @brief Checks whether a callback supports filtered element traversal.
+ * @tparam Fn Callback type to test.
+ */
+template <typename Fn>
+concept filtered_callback = requires(int* first, Fn fn) {
+    mockturtle::detail::foreach_element_if_transform<int*, int>(
+        first, first, [](int) { return true; }, [](int value) { return value; }, fn);
+};
+
+static_assert(filtered_callback<decltype([](int) {})>);
+static_assert(filtered_callback<decltype([](int, uint32_t) {})>);
+static_assert(filtered_callback<decltype([](int) { return true; })>);
+static_assert(filtered_callback<decltype([](int, uint32_t) { return true; })>);
+static_assert(!filtered_callback<int>);
+
+TEST_CASE("Filtered traversal transforms elements and stops on false", "[mockturtle]")
+{
+    /** Source values traversed through raw-pointer iterators. */
+    std::array       values{1, 2, 3, 4, 5, 6};
+    const auto       even   = [](const int value) { return value % 2 == 0; };
+    const auto       triple = [](const int value) { return 3 * value; };
+    std::vector<int> visited{};
+    mockturtle::detail::foreach_element_if_transform<int*, int>(
+        values.data(), std::next(values.data(), std::ssize(values)), even, triple,
+        [&visited](const int value) { visited.push_back(value); });
+    CHECK(visited == std::vector<int>{6, 12, 18});
+
+    visited.clear();
+    std::vector<uint32_t> indices{};
+    auto* const           stopped = mockturtle::detail::foreach_element_if_transform<int*, int>(
+        values.data(), std::next(values.data(), std::ssize(values)), even, triple,
+        [&visited, &indices](const int value, const uint32_t index)
+        {
+            visited.push_back(value);
+            indices.push_back(index);
+            return value < 12;
+        },
+        5);
+    CHECK(stopped == std::next(values.data(), 4));
+    CHECK(visited == std::vector<int>{6, 12});
+    CHECK(indices == std::vector<uint32_t>{5, 6});
+}
+
 TEST_CASE("Extracted layout simulation", "[mockturtle]")
 {
-    // adapted from mockturtle/test/networks/klut.cpp
-
-    const auto and_or_layout   = blueprints::and_or_gate_layout<cartesian_gate_layout>();
-    const auto xor_maj_layout  = blueprints::xor_maj_gate_layout<cartesian_gate_layout>();
-    const auto crossing_layout = blueprints::crossing_layout<cartesian_gate_layout>();
-
-    REQUIRE((mockturtle::has_compute_v<decltype(extract_layout_network(and_or_layout)), kitty::dynamic_truth_table>));
-
-    kitty::dynamic_truth_table tt_maj(3u), tt_and(2u), tt_or(2u);
-    kitty::create_from_hex_string(tt_maj, "e8");
-    kitty::create_from_hex_string(tt_and, "8");
-    kitty::create_from_hex_string(tt_or, "e");
-
-    const auto and_or_tts = mockturtle::simulate<kitty::dynamic_truth_table>(
-        extract_layout_network(and_or_layout),
-        mockturtle::default_simulator<kitty::dynamic_truth_table>{and_or_layout.num_pis()});
-
-    REQUIRE(and_or_tts.size() == 2);
-    CHECK(and_or_tts[0] == tt_and);
-    CHECK(and_or_tts[1] == tt_or);
-
-    const auto xor_maj_tts = mockturtle::simulate<kitty::dynamic_truth_table>(
-        extract_layout_network(xor_maj_layout),
-        mockturtle::default_simulator<kitty::dynamic_truth_table>{xor_maj_layout.num_pis()});
-
-    kitty::dynamic_truth_table tt_3xor2(3u);
-    kitty::create_from_hex_string(tt_3xor2, "66");  // 2-input XOR in three variables (1 xor 2)
-
-    REQUIRE(xor_maj_tts.size() == 2);
-    CHECK(xor_maj_tts[0] == tt_maj);
-    CHECK(xor_maj_tts[1] == tt_3xor2);
-
-    const auto crossing_tts = mockturtle::simulate<kitty::dynamic_truth_table>(
-        extract_layout_network(crossing_layout),
-        mockturtle::default_simulator<kitty::dynamic_truth_table>{crossing_layout.num_pis()});
-
-    kitty::dynamic_truth_table tt_and12(4u), tt_and34(4u);
-
-    kitty::create_from_hex_string(tt_and12, "8888");  // 2-input AND in four variables (1 and 2)
-    kitty::create_from_hex_string(tt_and34, "f000");  // 2-input AND in four variables (3 and 4)
-
-    REQUIRE(crossing_tts.size() == 2);
-    CHECK(crossing_tts[0] == tt_and12);
-    CHECK(crossing_tts[1] == tt_and34);
-
+    STATIC_REQUIRE(mockturtle::has_compute_v<decltype(extract_layout_network(cartesian_gate_layout{})),
+                                             kitty::dynamic_truth_table>);
+    SECTION("AND and OR outputs")
+    {
+        const auto lyt    = blueprints::and_or_gate_layout<cartesian_gate_layout>();
+        const auto tables = mockturtle::simulate<kitty::dynamic_truth_table>(
+            extract_layout_network(lyt), mockturtle::default_simulator<kitty::dynamic_truth_table>{lyt.num_pis()});
+        REQUIRE(tables.size() == 2);
+        CHECK(kitty::to_hex(tables[0]) == "8");
+        CHECK(kitty::to_hex(tables[1]) == "e");
+    }
+    SECTION("Majority and XOR outputs")
+    {
+        const auto lyt    = blueprints::xor_maj_gate_layout<cartesian_gate_layout>();
+        const auto tables = mockturtle::simulate<kitty::dynamic_truth_table>(
+            extract_layout_network(lyt), mockturtle::default_simulator<kitty::dynamic_truth_table>{lyt.num_pis()});
+        REQUIRE(tables.size() == 2);
+        CHECK(kitty::to_hex(tables[0]) == "e8");
+        CHECK(kitty::to_hex(tables[1]) == "66");  // Two-input XOR in three variables.
+    }
+    SECTION("Crossing outputs")
+    {
+        const auto lyt    = blueprints::crossing_layout<cartesian_gate_layout>();
+        const auto tables = mockturtle::simulate<kitty::dynamic_truth_table>(
+            extract_layout_network(lyt), mockturtle::default_simulator<kitty::dynamic_truth_table>{lyt.num_pis()});
+        REQUIRE(tables.size() == 2);
+        CHECK(kitty::to_hex(tables[0]) == "8888");  // AND of the first two inputs.
+        CHECK(kitty::to_hex(tables[1]) == "f000");  // AND of the last two inputs.
+    }
     SECTION("Synchronization elements")
     {
-        const auto se_or_layout = blueprints::se_gate_layout<cartesian_gate_layout>();
-
-        const auto se_or_tts = mockturtle::simulate<kitty::dynamic_truth_table>(
-            extract_layout_network(se_or_layout),
-            mockturtle::default_simulator<kitty::dynamic_truth_table>{se_or_layout.num_pis()});
-
-        REQUIRE(se_or_tts.size() == 1);
-        CHECK(se_or_tts[0] == tt_or);
+        const auto lyt    = blueprints::se_gate_layout<cartesian_gate_layout>();
+        const auto tables = mockturtle::simulate<kitty::dynamic_truth_table>(
+            extract_layout_network(lyt), mockturtle::default_simulator<kitty::dynamic_truth_table>{lyt.num_pis()});
+        REQUIRE(tables.size() == 1);
+        CHECK(kitty::to_hex(tables[0]) == "e");
     }
 }
 
-template <typename Ntk, typename Lib>
-technology_network map(const Ntk& ntk, const Lib& lib)
-{
-    return mockturtle::map<technology_network>(ntk, lib);
-}
-
+/**
+ * @brief Checks that mapping preserves a network's output functions.
+ * @tparam Ntk Source network type.
+ * @tparam Lib Technology library type.
+ * @param ntk Source network.
+ * @param lib Technology library.
+ */
 template <typename Ntk, typename Lib>
 void check(const Ntk& ntk, const Lib& lib)
 {
-    check_eq(ntk, map(ntk, lib));
+    check_eq(ntk, mockturtle::map(ntk, lib));
 }
 
+/**
+ * @brief Checks majority, n-ary, and full-adder networks against a library.
+ * @tparam Lib Technology library type.
+ * @param lib Technology library.
+ */
 template <typename Lib>
 void check_all(const Lib& lib)
 {

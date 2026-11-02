@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Network and truth-table presets and checked layout conversions for Python bindings.
+ * @brief Coordinate conversion and tuple-accepting type casters for Python bindings.
  * @author Marcel Walter (marcelwa)
  * @author Benjamin Hien (hibenj)
  */
@@ -18,13 +18,6 @@
 #pragma once
 
 #include <fiction/layouts/layout_base.hpp>
-#include <fiction/networks/technology_network.hpp>
-
-#include <kitty/dynamic_truth_table.hpp>
-#include <mockturtle/networks/aig.hpp>
-#include <mockturtle/networks/mig.hpp>
-#include <mockturtle/networks/xag.hpp>
-#include <mockturtle/views/names_view.hpp>
 
 #include <cstdint>
 #include <limits>
@@ -40,26 +33,6 @@ namespace nb = nanobind;
 namespace pyfiction
 {
 
-/**
- * Truth table.
- */
-using py_tt = kitty::dynamic_truth_table;
-/**
- * @brief Technology network used by physical design and verification bindings.
- */
-using py_tec_network = mockturtle::names_view<fiction::networks::technology_network>;
-/**
- * @brief Named AND-inverter graph.
- */
-using py_aig_network = mockturtle::names_view<mockturtle::aig_network>;
-/**
- * @brief Named XOR-AND-inverter graph.
- */
-using py_xag_network = mockturtle::names_view<mockturtle::xag_network>;
-/**
- * @brief Named majority-inverter graph.
- */
-using py_mig_network = mockturtle::names_view<mockturtle::mig_network>;
 /**
  * Converts a Python integer to a signed coordinate axis.
  *

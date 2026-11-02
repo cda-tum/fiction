@@ -27,6 +27,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <ranges>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -58,6 +59,11 @@ template <class Ntk, bool has_rank_interface =
                          mockturtle::has_rank_position_v<Ntk> && mockturtle::has_at_rank_position_v<Ntk> &&
                          mockturtle::has_swap_v<Ntk> && mockturtle::has_width_v<Ntk> &&
                          mockturtle::has_foreach_node_in_rank_v<Ntk> && mockturtle::has_foreach_gate_in_rank_v<Ntk>>
+    requires requires { typename static_depth_view<Ntk>; } &&
+             (has_rank_interface || (mockturtle::is_network_type_v<Ntk> && mockturtle::has_foreach_node_v<Ntk> &&
+                                     mockturtle::has_get_node_v<Ntk> && mockturtle::has_num_pis_v<Ntk> &&
+                                     mockturtle::has_is_ci_v<Ntk> && mockturtle::has_is_constant_v<Ntk> &&
+                                     mockturtle::has_size_v<Ntk> && mockturtle::has_node_to_index_v<Ntk>))
 class mutable_rank_view
 {};
 
@@ -79,7 +85,7 @@ class mutable_rank_view<Ntk, true> : public fiction::networks::views::static_dep
 /**
  * @class mutable_rank_view<Ntk, false>
  *
- * If no rank_interface exists, inherits from mockturtle::static_depth_view<Ntk> and initializes ranks for the network.
+ * If no rank interface exists, inherits from `static_depth_view<Ntk>` and initializes the network ranks.
  *
  * @tparam Ntk The network type.
  */
@@ -102,15 +108,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      * Initializes an empty `mutable_rank_view` object, sets up base class properties,
      * and ensures that the network type (Ntk) satisfies required interface methods.
      */
-    explicit mutable_rank_view() : fiction::networks::views::static_depth_view<Ntk>(), ranks{}, max_rank_width{0}
-    {
-        static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-        static_assert(mockturtle::has_foreach_node_v<Ntk>, "Ntk does not implement the foreach_node method");
-        static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node method");
-        static_assert(mockturtle::has_num_pis_v<Ntk>, "Ntk does not implement the num_pis method");
-        static_assert(mockturtle::has_is_ci_v<Ntk>, "Ntk does not implement the is_ci method");
-        static_assert(mockturtle::has_is_constant_v<Ntk>, "Ntk does not implement the is_constant method");
-    }
+    explicit mutable_rank_view() : fiction::networks::views::static_depth_view<Ntk>(), ranks{}, max_rank_width{0} {}
 
     /**
      * Constructs an `mutable_rank_view` from an existing network.
@@ -126,13 +124,6 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
             ranks{this->depth() + 1},
             max_rank_width{0}
     {
-        static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-        static_assert(mockturtle::has_foreach_node_v<Ntk>, "Ntk does not implement the foreach_node method");
-        static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node method");
-        static_assert(mockturtle::has_num_pis_v<Ntk>, "Ntk does not implement the num_pis method");
-        static_assert(mockturtle::has_is_ci_v<Ntk>, "Ntk does not implement the is_ci method");
-        static_assert(mockturtle::has_is_constant_v<Ntk>, "Ntk does not implement the is_constant method");
-
         rank_pos.assign(this->size(), NO_RANK);
 
         init_ranks();
@@ -149,13 +140,6 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
             ranks{this->depth() + 1},
             max_rank_width{0}
     {
-        static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-        static_assert(mockturtle::has_foreach_node_v<Ntk>, "Ntk does not implement the foreach_node method");
-        static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node method");
-        static_assert(mockturtle::has_num_pis_v<Ntk>, "Ntk does not implement the num_pis method");
-        static_assert(mockturtle::has_is_ci_v<Ntk>, "Ntk does not implement the is_ci method");
-        static_assert(mockturtle::has_is_constant_v<Ntk>, "Ntk does not implement the is_constant method");
-
         rank_pos.assign(this->size(), NO_RANK);
 
         init_ranks(init_ranks_vec);
@@ -337,8 +321,9 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      *
      * @param level Level at which to return the nodes.
      * @return The node order at the given level.
+     * @throws std::bad_alloc If copying the rank fails.
      */
-    [[nodiscard]] std::vector<node> get_ranks(const uint32_t level) const noexcept
+    [[nodiscard]] std::vector<node> get_ranks(const uint32_t level) const
     {
         assert(level < ranks.size() && "level must be less than the number of ranks");
 
@@ -349,8 +334,9 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      * Gets all associated nodes in rank order across all levels.
      *
      * @return A vector of vectors containing the node order for each level.
+     * @throws std::bad_alloc If copying the ranks fails.
      */
-    [[nodiscard]] std::vector<std::vector<node>> get_all_ranks() const noexcept
+    [[nodiscard]] std::vector<std::vector<node>> get_all_ranks() const
     {
         return ranks;
     }
@@ -450,6 +436,8 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      * Applies a given function to each node in rank order.
      *
      * This function overrides the `foreach_node` method of the base class.
+     * Constants are excluded. Optional callback indices increase across all ranks from zero.
+     * A callback returning `false` stops the entire traversal.
      *
      * @tparam Fn Functor type.
      * @param fn The function to apply.
@@ -457,10 +445,8 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     template <typename Fn>
     void foreach_node(Fn&& fn) const
     {
-        for (uint32_t l = 0; l < ranks.size(); ++l)
-        {
-            foreach_node_in_rank(l, std::forward<Fn>(fn));
-        }
+        const auto nodes = std::views::join(ranks);
+        mockturtle::detail::foreach_element(nodes.begin(), nodes.end(), std::forward<Fn>(fn));
     }
 
     /**
@@ -485,6 +471,8 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      * Applies a given function to each gate in rank order.
      *
      * This function overrides the `foreach_gate` method of the base class.
+     * Optional callback indices increase across all ranks from zero.
+     * A callback returning `false` stops the entire traversal.
      *
      * @tparam Fn Functor type.
      * @param fn The function to apply.
@@ -492,10 +480,9 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     template <typename Fn>
     void foreach_gate(Fn&& fn) const
     {
-        for (uint32_t l = 0; l < ranks.size(); ++l)
-        {
-            foreach_gate_in_rank(l, std::forward<Fn>(fn));
-        }
+        const auto nodes = std::views::join(ranks);
+        mockturtle::detail::foreach_element_if(
+            nodes.begin(), nodes.end(), [this](const auto& n) { return !this->is_ci(n); }, std::forward<Fn>(fn));
     }
 
     /**
@@ -572,17 +559,6 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
         mockturtle::detail::foreach_element(pis.cbegin(), pis.cend(), std::forward<Fn>(fn));
     }
     /**
-     * Overrides the base class method to also call the add_event on create_pi().
-     *
-     * @return Newly created PI signal.
-     */
-    signal create_pi()
-    {
-        auto const n = fiction::networks::views::static_depth_view<Ntk>::create_pi();
-        return n;
-    }
-
-    /**
      * @brief Recomputes levels and ranks.
      *
      * Ranks start in node index order per level. After an exception the view holds no valid ranks until
@@ -603,9 +579,12 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     /**
      * Add a node to the `mutable_rank_view` and update its rank.
      *
+     * Recompute the ranks with `update_ranks` before querying them after an exception.
+     *
      * @param n Node added to the `mutable_rank_view`.
+     * @throws std::bad_alloc If rank or level storage cannot grow.
      */
-    void on_add(node const& n) noexcept
+    void on_add(node const& n)
     {
         fiction::networks::views::static_depth_view<Ntk>::on_add(n);
 

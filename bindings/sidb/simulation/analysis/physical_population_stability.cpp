@@ -87,11 +87,10 @@ void register_physical_population_stability(nb::module_& m)
            const decltype(physical_population_stability_options{}.precision_for_distance_corresponding_to_potential)
                precision_for_distance_corresponding_to_potential)
         {
-            physical_population_stability_options params{};
-            params.precision_for_distance_corresponding_to_potential =
-                precision_for_distance_corresponding_to_potential;
-            params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            params.timeout    = timeout;
+            const physical_population_stability_options params{
+                .sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf),
+                .precision_for_distance_corresponding_to_potential = precision_for_distance_corresponding_to_potential,
+                .timeout                                           = timeout};
             const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::analysis::physical_population_stability(lyt, params);
         },

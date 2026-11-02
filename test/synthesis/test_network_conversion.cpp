@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
@@ -23,6 +24,7 @@
 #include <fiction/synthesis/fanout_substitution.hpp>
 #include <fiction/synthesis/network_balancing.hpp>
 #include <fiction/synthesis/network_conversion.hpp>
+#include <fiction/types.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
@@ -31,7 +33,6 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
-#include <mockturtle/views/names_view.hpp>
 
 #include <array>
 #include <string>
@@ -41,32 +42,47 @@ using namespace fiction;
 using namespace fiction::networks;
 using namespace fiction::synthesis;
 
+/**
+ * @brief Checks whether a source can convert to the named technology network.
+ * @tparam Ntk Source network type.
+ */
+template <typename Ntk>
+concept technology_convertible = requires(const Ntk& ntk) { convert_network<named_technology_network>(ntk); };
+
+static_assert(technology_convertible<mockturtle::aig_network>);
+static_assert(!technology_convertible<int>);
+
+/**
+ * @brief Checks Boolean behavior in every supported destination type.
+ * @tparam Ntk Source network type.
+ * @param ntk Source network.
+ */
 template <typename Ntk>
 void to_x(const Ntk& ntk)
 {
-    SECTION("MIG")
     {
+        INFO("MIG destination");
         const auto converted_mig = convert_network<mockturtle::mig_network>(ntk);
 
         check_eq(ntk, converted_mig);
     }
 
-    SECTION("AIG")
     {
+        INFO("AIG destination");
         const auto converted_aig = convert_network<mockturtle::aig_network>(ntk);
 
         check_eq(ntk, converted_aig);
     }
 
-    SECTION("XAG")
     {
+        INFO("XAG destination");
         const auto converted_xag = convert_network<mockturtle::xag_network>(ntk);
 
         check_eq(ntk, converted_xag);
     }
 
-    SECTION("TEC")
     {
+        INFO("TEC destination");
         const auto converted_tec = convert_network<technology_network>(ntk);
 
         check_eq(ntk, converted_tec);
@@ -103,18 +119,19 @@ TEST_CASE("Simple network conversion", "[network-conversion]")
 
 TEST_CASE("Name conservation after network conversion", "[network-conversion]")
 {
-    auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
+    auto maj = blueprints::maj1_network<named_mig_network>();
     maj.set_network_name("maj");
 
-    const auto converted_maj = convert_network<mockturtle::names_view<technology_network>>(maj);
+    const auto converted_maj = convert_network<named_technology_network>(maj);
 
     // network name
     CHECK(converted_maj.get_network_name() == "maj");
 
     // PI names
-    CHECK(converted_maj.get_name(converted_maj.make_signal(2)) == "a");
-    CHECK(converted_maj.get_name(converted_maj.make_signal(3)) == "b");
-    CHECK(converted_maj.get_name(converted_maj.make_signal(4)) == "c");
+    REQUIRE(converted_maj.num_pis() == 3u);
+    CHECK(converted_maj.get_name(converted_maj.make_signal(converted_maj.pi_at(0))) == "a");
+    CHECK(converted_maj.get_name(converted_maj.make_signal(converted_maj.pi_at(1))) == "b");
+    CHECK(converted_maj.get_name(converted_maj.make_signal(converted_maj.pi_at(2))) == "c");
 
     // PO names
     CHECK(converted_maj.get_output_name(0) == "f");
@@ -228,8 +245,9 @@ TEST_CASE("Convert every two- and three-input function without losing the interf
     {
         for (auto function = 0u; function < (1u << (1u << variables)); ++function)
         {
-            mockturtle::names_view<technology_network> source{};
-            std::vector<technology_network::signal>    inputs{};
+            CAPTURE(variables, function);
+            named_technology_network                source{};
+            std::vector<technology_network::signal> inputs{};
             inputs.reserve(variables);
             for (auto index = 0u; index < variables; ++index)
             {
@@ -242,10 +260,11 @@ TEST_CASE("Convert every two- and three-input function without losing the interf
             source.create_po(output, "f");
             source.create_po(source.create_not(output), "g");
             source.create_po(source.get_constant(true), "one");
-            const auto verify = [&](const auto& converted)
+            const auto verify = [&](const auto& converted, const char* destination)
             {
+                CAPTURE(destination);
                 CHECK(converted.num_pis() == variables);
-                CHECK(converted.num_pos() == 3u);
+                REQUIRE(converted.num_pos() == 3u);
                 CHECK(converted.get_output_name(0) == "f");
                 CHECK(converted.get_output_name(1) == "g");
                 CHECK(converted.get_output_name(2) == "one");
@@ -256,10 +275,10 @@ TEST_CASE("Convert every two- and three-input function without losing the interf
                 CHECK(actual[1] == ~expected);
                 CHECK(kitty::is_const0(~actual[2]));
             };
-            verify(convert_network<mockturtle::names_view<technology_network>>(source));
-            verify(convert_network<mockturtle::names_view<mockturtle::aig_network>>(source));
-            verify(convert_network<mockturtle::names_view<mockturtle::xag_network>>(source));
-            verify(convert_network<mockturtle::names_view<mockturtle::mig_network>>(source));
+            verify(convert_network<named_technology_network>(source), "TEC");
+            verify(convert_network<named_aig_network>(source), "AIG");
+            verify(convert_network<named_xag_network>(source), "XAG");
+            verify(convert_network<named_mig_network>(source), "MIG");
         }
     }
 }

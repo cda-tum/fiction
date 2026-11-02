@@ -41,9 +41,6 @@ void register_mol_qca_io(nb::module_& m);
 
 }  // namespace pyfiction
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
-
 NB_MODULE(mol_qca, m)
 {
     m.doc() = "Molecular QCA cell-level layouts.";
@@ -55,5 +52,3 @@ NB_MODULE(mol_qca, m)
     auto io = pyfiction::def_submodule(m, "io", "Writers of molecular QCA cell-level layouts.");
     pyfiction::register_mol_qca_io(io);
 }
-
-#pragma GCC diagnostic pop

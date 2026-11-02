@@ -62,21 +62,24 @@ void draw(const Lyt& lyt, const std::string_view& filename, const fiction::utils
     if constexpr (std::derived_from<Lyt, fiction::layouts::cartesian_layout>)
     {
         fiction::layouts::io::write_dot_layout<
-            Lyt, fiction::layouts::io::gate_layout_cartesian_drawer<Lyt, ClockColors, DrawIndexes>>(lyt, filename, {},
-                                                                                                    on_progress);
+            typename Lyt::coordinate_layout,
+            fiction::layouts::io::gate_layout_cartesian_drawer<Lyt, ClockColors, DrawIndexes>>(lyt, filename, {},
+                                                                                               on_progress);
     }
     else if constexpr (std::derived_from<Lyt, fiction::layouts::shifted_cartesian_layout>)
     {
         fiction::layouts::io::write_dot_layout<
-            Lyt, fiction::layouts::io::gate_layout_shifted_cartesian_drawer<Lyt, ClockColors, DrawIndexes>>(
-            lyt, filename, {}, on_progress);
+            typename Lyt::coordinate_layout,
+            fiction::layouts::io::gate_layout_shifted_cartesian_drawer<Lyt, ClockColors, DrawIndexes>>(lyt, filename,
+                                                                                                       {}, on_progress);
     }
     else if constexpr ((std::derived_from<Lyt, fiction::layouts::hexagonal_layout> &&
                         !std::derived_from<Lyt, fiction::layouts::shifted_cartesian_layout>))
     {
         fiction::layouts::io::write_dot_layout<
-            Lyt, fiction::layouts::io::gate_layout_hexagonal_drawer<Lyt, ClockColors, DrawIndexes>>(lyt, filename, {},
-                                                                                                    on_progress);
+            typename Lyt::coordinate_layout,
+            fiction::layouts::io::gate_layout_hexagonal_drawer<Lyt, ClockColors, DrawIndexes>>(lyt, filename, {},
+                                                                                               on_progress);
     }
 }
 

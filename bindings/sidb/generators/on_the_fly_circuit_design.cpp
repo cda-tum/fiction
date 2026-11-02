@@ -115,25 +115,23 @@ void register_on_the_fly_circuit_design(nb::module_& m)
                               .sidb_on_the_fly_gate_library_parameters
                               .influence_radius_charged_defects) influence_radius_charged_defects)
         {
-            on_the_fly_circuit_design_options params{};
-            params.sidb_on_the_fly_gate_library_parameters.design_gate_params.operational_params =
-                make_operational_parameters(design_gate_timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
-            params.timeout                                                                = timeout;
-            params.sidb_on_the_fly_gate_library_parameters.design_gate_params.design_mode = design_mode;
-            params.sidb_on_the_fly_gate_library_parameters.design_gate_params.canvas      = canvas;
-            params.sidb_on_the_fly_gate_library_parameters.design_gate_params.number_of_canvas_sidbs =
-                number_of_canvas_sidbs;
-            params.sidb_on_the_fly_gate_library_parameters.design_gate_params.maximal_random_design_attempts =
-                maximal_random_design_attempts;
-            params.sidb_on_the_fly_gate_library_parameters.design_gate_params.termination_cond = termination_cond;
-            params.sidb_on_the_fly_gate_library_parameters.design_gate_params.on_progress      = on_progress;
-            params.sidb_on_the_fly_gate_library_parameters.canvas_sidb_complex_gates = canvas_sidb_complex_gates;
-            params.sidb_on_the_fly_gate_library_parameters.using_predefined_crossing_and_double_wire_if_possible =
-                using_predefined_crossing_and_double_wire_if_possible;
-            params.sidb_on_the_fly_gate_library_parameters.influence_radius_charged_defects =
-                influence_radius_charged_defects;
+            const on_the_fly_circuit_design_options params{
+                .sidb_on_the_fly_gate_library_parameters =
+                    {.design_gate_params = {.operational_params = make_operational_parameters(
+                                                design_gate_timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                                threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                                input_bdl_config, op_condition, strategy_to_analyze_operational_status),
+                                            .design_mode                    = design_mode,
+                                            .canvas                         = canvas,
+                                            .number_of_canvas_sidbs         = number_of_canvas_sidbs,
+                                            .maximal_random_design_attempts = maximal_random_design_attempts,
+                                            .termination_cond               = termination_cond,
+                                            .on_progress                    = on_progress},
+                     .canvas_sidb_complex_gates = canvas_sidb_complex_gates,
+                     .using_predefined_crossing_and_double_wire_if_possible =
+                         using_predefined_crossing_and_double_wire_if_possible,
+                     .influence_radius_charged_defects = influence_radius_charged_defects},
+                .timeout = timeout};
 
             // Own the layout before releasing the GIL so Python edits cannot race the design.
             const auto                   snapshot = layout.clone();

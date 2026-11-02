@@ -49,12 +49,14 @@ function(fiction_enable_cache)
       if(WIN32)
         message(
           STATUS
-            "Set `sloppiness = pch_defines,time_macros` in your ccache configuration, or ccache will not cache PCH-using compilations"
+            "Set `sloppiness = pch_defines,time_macros` and `keep_comments_cpp = true` in your ccache configuration for PCH-using compilations"
         )
       else()
+        # GCC's #pragma once identity includes comments, so cached PCHs must
+        # too.
         set(CACHE_LAUNCHER
             ${CMAKE_COMMAND} -E env CCACHE_SLOPPINESS=pch_defines,time_macros
-            ${CACHE_BINARY})
+            CCACHE_COMMENTS=true ${CACHE_BINARY})
       endif()
     endif()
 

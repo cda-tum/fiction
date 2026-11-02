@@ -12,6 +12,7 @@
  * @file
  * @brief Tests for `fiction/synthesis/planar_rebalancing.hpp`.
  * @author Benjamin Hien (hibenj)
+ * @author Marcel Walter (marcelwa)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -94,7 +95,7 @@ TEST_CASE("Buffer chains are removed and only the needed buffers are re-inserted
 
     // the input is not balanced: x2 enters the gate directly
     const mutable_rank_view ranked{tec};
-    REQUIRE(!is_balanced(ranked));
+    REQUIRE_FALSE(is_balanced(ranked));
 
     const auto rebalanced = planar_rebalancing(ranked);
 
@@ -163,15 +164,15 @@ TEST_CASE("Gates driven only by constants are rejected", "[planar-rebalancing]")
     SECTION("an AND gate of two constants drives an output")
     {
         tec.create_po(tec.create_and(tec.get_constant(true), tec.get_constant(true)));
+        CHECK_THROWS_AS(planar_rebalancing(rank(tec)), std::invalid_argument);
     }
 
     SECTION("an AND gate of two constants feeds a gate that an input reaches")
     {
         const auto x1 = tec.create_pi();
         tec.create_po(tec.create_or(x1, tec.create_and(tec.get_constant(true), tec.get_constant(true))));
+        CHECK_THROWS_AS(planar_rebalancing(rank(tec)), std::invalid_argument);
     }
-
-    CHECK_THROWS_AS(planar_rebalancing(rank(tec)), std::invalid_argument);
 }
 
 TEST_CASE("Constant outputs", "[planar-rebalancing]")
@@ -233,8 +234,7 @@ TEST_CASE("Fanout degree three is kept", "[planar-rebalancing]")
     const auto ntk    = blueprints::parity_network<technology_network>();
     const auto planar = node_duplication_planarization(rank(ntk));
 
-    planar_fanout_substitution_params ps{};
-    ps.degree = 3;
+    const planar_fanout_substitution_params ps{.degree = 3};
 
     const auto substituted = planar_fanout_substitution(planar, ps);
     const auto rebalanced  = planar_rebalancing(substituted);
@@ -250,18 +250,19 @@ TEST_CASE("Progress is reported", "[planar-rebalancing]")
     std::vector<std::size_t> done{};
     std::size_t              total = 0;
 
-    planar_rebalancing_params ps{};
-    ps.on_progress = [&done, &total](std::string_view, const std::size_t d, const std::size_t t)
-    {
-        done.push_back(d);
-        total = t;
-    };
+    const planar_rebalancing_params ps{
+        .on_progress = [&done, &total](std::string_view, const std::size_t d, const std::size_t t)
+        {
+            done.push_back(d);
+            total = t;
+        }};
 
     const auto rebalanced = planar_rebalancing(substituted, ps);
 
     check_contract(ntk, rebalanced);
     CHECK(total == 3);
     REQUIRE(!done.empty());
+    CHECK(done.front() == 0);
     CHECK(done.back() == total);
 }
 

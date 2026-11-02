@@ -18,13 +18,13 @@
 
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/operational_parameters.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 
 #include <fmt/format.h>
+#include <kitty/dynamic_truth_table.hpp>
 
 #include <cstddef>
 #include <optional>
@@ -76,7 +76,8 @@ inline void register_operational_domain_functions(nb::module_& m)
 
     m.def(
         "operational_domain_grid_search",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const decltype(operational_options{}.timeout) timeout,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+           const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
            const decltype(operational_options{}.sim_params.epsilon_r) epsilon_r,
@@ -100,12 +101,13 @@ inline void register_operational_domain_functions(nb::module_& m)
            const decltype(operational_domain_options{}.on_worker_progress)&              on_worker_progress,
            operational_domain_stats*                                                     stats)
         {
-            operational_domain_options params{};
-            params.operational_params =
-                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
-
+            operational_domain_options params{
+                .operational_params =
+                    make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                                threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                                input_bdl_config, op_condition, strategy_to_analyze_operational_status),
+                .on_progress        = on_progress,
+                .on_worker_progress = on_worker_progress};
             if (sweep_dimensions)
             {
                 params.sweep_dimensions = *sweep_dimensions;
@@ -114,8 +116,6 @@ inline void register_operational_domain_functions(nb::module_& m)
             {
                 params.number_of_threads = *number_of_threads;
             }
-            params.on_progress        = on_progress;
-            params.on_worker_progress = on_worker_progress;
             const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::operational_domain_grid_search(lyt, spec, params, stats);
         },
@@ -168,7 +168,7 @@ Args:
 )doc");
     m.def(
         "operational_domain_random_sampling",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples,
            const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
@@ -193,12 +193,13 @@ Args:
            const decltype(operational_domain_options{}.on_worker_progress)&              on_worker_progress,
            operational_domain_stats*                                                     stats)
         {
-            operational_domain_options params{};
-            params.operational_params =
-                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
-
+            operational_domain_options params{
+                .operational_params =
+                    make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                                threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                                input_bdl_config, op_condition, strategy_to_analyze_operational_status),
+                .on_progress        = on_progress,
+                .on_worker_progress = on_worker_progress};
             if (sweep_dimensions)
             {
                 params.sweep_dimensions = *sweep_dimensions;
@@ -207,8 +208,6 @@ Args:
             {
                 params.number_of_threads = *number_of_threads;
             }
-            params.on_progress        = on_progress;
-            params.on_worker_progress = on_worker_progress;
             const nb::gil_scoped_release release{};
 
             return fiction::sidb::simulation::logic::operational_domain_random_sampling(lyt, spec, samples, params,
@@ -262,7 +261,7 @@ Args:
 )doc");
     m.def(
         "operational_domain_flood_fill",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples,
            const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
@@ -287,12 +286,13 @@ Args:
            const decltype(operational_domain_options{}.on_worker_progress)&              on_worker_progress,
            operational_domain_stats*                                                     stats)
         {
-            operational_domain_options params{};
-            params.operational_params =
-                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
-
+            operational_domain_options params{
+                .operational_params =
+                    make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                                threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                                input_bdl_config, op_condition, strategy_to_analyze_operational_status),
+                .on_progress        = on_progress,
+                .on_worker_progress = on_worker_progress};
             if (sweep_dimensions)
             {
                 params.sweep_dimensions = *sweep_dimensions;
@@ -301,8 +301,6 @@ Args:
             {
                 params.number_of_threads = *number_of_threads;
             }
-            params.on_progress        = on_progress;
-            params.on_worker_progress = on_worker_progress;
             const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::operational_domain_flood_fill(lyt, spec, samples, params, stats);
         },
@@ -354,7 +352,7 @@ Args:
 )doc");
     m.def(
         "operational_domain_contour_tracing",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples,
            const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
@@ -379,12 +377,13 @@ Args:
            const decltype(operational_domain_options{}.on_worker_progress)&              on_worker_progress,
            operational_domain_stats*                                                     stats)
         {
-            operational_domain_options params{};
-            params.operational_params =
-                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
-
+            operational_domain_options params{
+                .operational_params =
+                    make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                                threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                                input_bdl_config, op_condition, strategy_to_analyze_operational_status),
+                .on_progress        = on_progress,
+                .on_worker_progress = on_worker_progress};
             if (sweep_dimensions)
             {
                 params.sweep_dimensions = *sweep_dimensions;
@@ -393,8 +392,6 @@ Args:
             {
                 params.number_of_threads = *number_of_threads;
             }
-            params.on_progress        = on_progress;
-            params.on_worker_progress = on_worker_progress;
             const nb::gil_scoped_release release{};
 
             return fiction::sidb::simulation::logic::operational_domain_contour_tracing(lyt, spec, samples, params,
@@ -448,7 +445,8 @@ Args:
 )doc");
     m.def(
         "critical_temperature_domain_grid_search",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const decltype(operational_options{}.timeout) timeout,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
+           const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
            const decltype(operational_options{}.sim_params.epsilon_r) epsilon_r,
@@ -472,12 +470,13 @@ Args:
            const decltype(operational_domain_options{}.on_worker_progress)&              on_worker_progress,
            operational_domain_stats*                                                     stats)
         {
-            operational_domain_options params{};
-            params.operational_params =
-                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
-
+            operational_domain_options params{
+                .operational_params =
+                    make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                                threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                                input_bdl_config, op_condition, strategy_to_analyze_operational_status),
+                .on_progress        = on_progress,
+                .on_worker_progress = on_worker_progress};
             if (sweep_dimensions)
             {
                 params.sweep_dimensions = *sweep_dimensions;
@@ -486,8 +485,6 @@ Args:
             {
                 params.number_of_threads = *number_of_threads;
             }
-            params.on_progress        = on_progress;
-            params.on_worker_progress = on_worker_progress;
             const nb::gil_scoped_release release{};
             return fiction::sidb::simulation::logic::critical_temperature_domain_grid_search(lyt, spec, params, stats);
         },
@@ -541,7 +538,7 @@ Args:
 )doc");
     m.def(
         "critical_temperature_domain_random_sampling",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples,
            const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
@@ -566,12 +563,13 @@ Args:
            const decltype(operational_domain_options{}.on_worker_progress)&              on_worker_progress,
            operational_domain_stats*                                                     stats)
         {
-            operational_domain_options params{};
-            params.operational_params =
-                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
-
+            operational_domain_options params{
+                .operational_params =
+                    make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                                threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                                input_bdl_config, op_condition, strategy_to_analyze_operational_status),
+                .on_progress        = on_progress,
+                .on_worker_progress = on_worker_progress};
             if (sweep_dimensions)
             {
                 params.sweep_dimensions = *sweep_dimensions;
@@ -580,8 +578,6 @@ Args:
             {
                 params.number_of_threads = *number_of_threads;
             }
-            params.on_progress        = on_progress;
-            params.on_worker_progress = on_worker_progress;
             const nb::gil_scoped_release release{};
 
             return fiction::sidb::simulation::logic::critical_temperature_domain_random_sampling(lyt, spec, samples,
@@ -637,7 +633,7 @@ Args:
 )doc");
     m.def(
         "critical_temperature_domain_flood_fill",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples,
            const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
@@ -662,12 +658,13 @@ Args:
            const decltype(operational_domain_options{}.on_worker_progress)&              on_worker_progress,
            operational_domain_stats*                                                     stats)
         {
-            operational_domain_options params{};
-            params.operational_params =
-                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
-
+            operational_domain_options params{
+                .operational_params =
+                    make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                                threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                                input_bdl_config, op_condition, strategy_to_analyze_operational_status),
+                .on_progress        = on_progress,
+                .on_worker_progress = on_worker_progress};
             if (sweep_dimensions)
             {
                 params.sweep_dimensions = *sweep_dimensions;
@@ -676,8 +673,6 @@ Args:
             {
                 params.number_of_threads = *number_of_threads;
             }
-            params.on_progress        = on_progress;
-            params.on_worker_progress = on_worker_progress;
             const nb::gil_scoped_release release{};
 
             return fiction::sidb::simulation::logic::critical_temperature_domain_flood_fill(lyt, spec, samples, params,
@@ -733,7 +728,7 @@ Args:
 )doc");
     m.def(
         "critical_temperature_domain_contour_tracing",
-        [](const layout& lyt, const std::vector<py_tt>& spec, const std::size_t samples,
+        [](const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec, const std::size_t samples,
            const decltype(operational_options{}.timeout)              timeout,
            const decltype(operational_options{}.sim_params.base)      base,
            const decltype(operational_options{}.sim_params.mu_minus)  mu_minus,
@@ -758,12 +753,13 @@ Args:
            const decltype(operational_domain_options{}.on_worker_progress)&              on_worker_progress,
            operational_domain_stats*                                                     stats)
         {
-            operational_domain_options params{};
-            params.operational_params =
-                make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
-                                            threshold_bdl_interdistance, minimum_distance, maximum_distance,
-                                            input_bdl_config, op_condition, strategy_to_analyze_operational_status);
-
+            operational_domain_options params{
+                .operational_params =
+                    make_operational_parameters(timeout, base, mu_minus, epsilon_r, lambda_tf, sim_engine,
+                                                threshold_bdl_interdistance, minimum_distance, maximum_distance,
+                                                input_bdl_config, op_condition, strategy_to_analyze_operational_status),
+                .on_progress        = on_progress,
+                .on_worker_progress = on_worker_progress};
             if (sweep_dimensions)
             {
                 params.sweep_dimensions = *sweep_dimensions;
@@ -772,8 +768,6 @@ Args:
             {
                 params.number_of_threads = *number_of_threads;
             }
-            params.on_progress        = on_progress;
-            params.on_worker_progress = on_worker_progress;
             const nb::gil_scoped_release release{};
 
             return fiction::sidb::simulation::logic::critical_temperature_domain_contour_tracing(lyt, spec, samples,

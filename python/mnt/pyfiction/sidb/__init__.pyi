@@ -583,10 +583,13 @@ class sidb_layout:
 
     def num_charged_defects(self) -> int:
         """
-        Number of charged defects.
+        Number of defects classified as charged by
+        `model::is_charged_defect_type`. Includes `DB`, `SI_VACANCY`, and
+        `ARSENIC` even at zero charge; these defects also contribute to
+        `num_neutral_defects`.
 
         Returns:
-            Number of defects with non-zero charge.
+            Number of defects with non-zero charge or a charged defect type.
         """
 
     def num_neutral_defects(self) -> int:

@@ -18,8 +18,10 @@
 
 #pragma once
 
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
+#endif
 
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/cartesian_layout.hpp"
@@ -358,10 +360,9 @@ class post_layout_optimization_impl
             plyt{lyt},
             ps{std::move(p)},
             pst{st},
-            start{std::chrono::high_resolution_clock::now()}
-    {
-        wiring_reduction_params.on_progress = ps.on_progress;
-    }
+            start{std::chrono::high_resolution_clock::now()},
+            wiring_reduction_params{.on_progress = ps.on_progress}
+    {}
 
     /** @brief Optimizes placement and wiring until convergence or timeout. */
     void run()
@@ -551,7 +552,7 @@ class post_layout_optimization_impl
     /**
      * Wiring reduction parameters.
      */
-    fiction::physical_design::wiring_reduction_params wiring_reduction_params{};
+    fiction::physical_design::wiring_reduction_params wiring_reduction_params;
     /**
      * Wiring reduction stats.
      */
@@ -658,11 +659,10 @@ class post_layout_optimization_impl
     {
         using dist = physical_design::path_finding::twoddwave_distance_functor;
         using cost = physical_design::path_finding::unit_cost_functor<uint8_t>;
-        physical_design::path_finding::a_star_params astar_params{};
-        astar_params.crossings = !ps.planar_optimization;
+        const physical_design::path_finding::a_star_params astar_params{.crossings = !ps.planar_optimization};
 
-        const auto path = physical_design::path_finding::a_star<layout_coordinate_path>(
-            lyt, {.source = start_tile, .target = end_tile}, dist(), cost(), astar_params, search_obstructions);
+        const auto path = physical_design::path_finding::a_star(lyt, {.source = start_tile, .target = end_tile}, dist(),
+                                                                cost(), astar_params, search_obstructions);
 
         // obstruct the tiles along the computed path.
         for (const auto& tile : path)
@@ -794,13 +794,13 @@ class post_layout_optimization_impl
         const auto diagonal_limit = static_cast<int64_t>(original.x) + original.y;
         for (int64_t diagonal{}; diagonal < static_cast<int64_t>(lyt.width()) + lyt.height() - 1; ++diagonal)
         {
-            for (int64_t x{}; x <= diagonal; ++x)
+            /** @brief First column whose diagonal coordinate lies inside the layout. */
+            const auto first_x = std::max<int64_t>(0, diagonal - static_cast<int64_t>(lyt.height()) + 1);
+            /** @brief Last column whose diagonal coordinate lies inside the layout. */
+            const auto last_x = std::min<int64_t>(diagonal, static_cast<int64_t>(lyt.width()) - 1);
+            for (int64_t x = first_x; x <= last_x; ++x)
             {
                 const auto y = diagonal - x;
-                if (std::cmp_greater_equal(x, lyt.width()) || std::cmp_greater_equal(y, lyt.height()))
-                {
-                    continue;
-                }
                 if (x < min_x || y < min_y)
                 {
                     continue;
@@ -909,4 +909,6 @@ inline void post_layout_optimization(fiction::layouts::gate_layout<fiction::layo
 }
 
 }  // namespace fiction::physical_design
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
+#endif

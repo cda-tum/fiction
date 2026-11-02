@@ -51,20 +51,27 @@ TEST_CASE("Failed serialization preserves the destination", "[atomic-write]")
     std::filesystem::permissions(destination, permissions);
 #endif
 
-    CHECK_THROWS_AS(detail::atomic_write(destination.string(),
-                                         [](std::ostream& stream)
-                                         {
-                                             stream << "partial";
-                                             throw std::runtime_error("serialization failed");
-                                         }),
-                    std::runtime_error);
-    CHECK_THROWS_AS(detail::atomic_write(destination.string(),
-                                         [](std::ostream& stream)
-                                         {
-                                             stream << "partial";
-                                             stream.setstate(std::ios::badbit);
-                                         }),
-                    std::ios_base::failure);
+    SECTION("writer exception")
+    {
+        CHECK_THROWS_AS(detail::atomic_write(destination.string(),
+                                             [](std::ostream& stream)
+                                             {
+                                                 stream << "partial";
+                                                 throw std::runtime_error("serialization failed");
+                                             }),
+                        std::runtime_error);
+    }
+    SECTION("stream failure")
+    {
+        CHECK_THROWS_AS(detail::atomic_write(destination.string(),
+                                             [](std::ostream& stream)
+                                             {
+                                                 stream << "partial";
+                                                 stream.setstate(std::ios::badbit);
+                                             }),
+                        std::ios_base::failure);
+    }
+    CHECK(std::distance(std::filesystem::directory_iterator{directory}, std::filesystem::directory_iterator{}) == 1);
     {
         std::ifstream     stream{destination};
         const std::string content{std::istreambuf_iterator<char>{stream}, std::istreambuf_iterator<char>{}};

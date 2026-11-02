@@ -42,8 +42,7 @@ void check_virtual_eq(const Spec& spec, const Impl& impl)
 
     if (miter.has_value())  // the optional-access check does not model REQUIRE
     {
-        mockturtle::equivalence_checking_stats st{};
-        const auto                             cec = mockturtle::equivalence_checking(*miter, {}, &st);
+        const auto cec = mockturtle::equivalence_checking(*miter);
 
         REQUIRE(cec.has_value());
         CHECK(cec.value_or(false));

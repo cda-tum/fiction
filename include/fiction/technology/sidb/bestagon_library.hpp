@@ -19,9 +19,7 @@
 #pragma once
 
 #include "fiction/layouts/gate_layout.hpp"
-#include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
-#include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
@@ -30,7 +28,6 @@
 
 #include <phmap.h>
 
-#include <concepts>
 #include <stdexcept>
 #include <utility>
 
@@ -59,22 +56,14 @@ class bestagon_library : public fcn::gate_library<sidb::layout, 60, 46>  // widt
      * information from the stored grid into account to choose the correct gate representation for that tile. May it
      * be a gate or wires. Rotation and special marks like input and output, const cells etc. are computed additionally.
      *
-     * @tparam GateLyt Hexagonal gate-level layout type.
      * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a Bestagon gate.
      * @return Bestagon gate representation of `t` including mirroring.
      * @throws std::invalid_argument If `lyt` is not pointy-top, i.e., its arrangement shifts columns.
      */
-    template <typename GateLyt>
-    [[nodiscard]] static gate set_up_gate(const GateLyt& lyt, const fiction::layouts::layout_base::coordinate& t)
+    [[nodiscard]] static gate set_up_gate(const layouts::hexagonal_gate_layout&            lyt,
+                                          const fiction::layouts::layout_base::coordinate& t)
     {
-        static_assert(
-            requires { requires std::same_as<typename GateLyt::object_id, fiction::layouts::layout_object_id>; },
-            "GateLyt must be a gate-level layout");
-        static_assert((std::derived_from<GateLyt, fiction::layouts::hexagonal_layout> &&
-                       !std::derived_from<GateLyt, fiction::layouts::shifted_cartesian_layout>),
-                      "GateLyt must be a hexagonal layout");
-
         const auto p      = skeleton_bestagon_library::determine_port_routing(lyt, t);
         const auto object = lyt.find_object(t);
         if (!object)

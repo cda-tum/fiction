@@ -24,11 +24,11 @@
 :members:
 ```
 
-```{doxygenfunction} fiction::layouts::io::write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {}, utils::progress_callback on_progress = {})
+```{doxygenfunction} fiction::layouts::io::write_dot_layout(const layouts::gate_layout<Geometry>& lyt, std::ostream& os, const Drawer& drawer = {}, utils::progress_callback on_progress = {})
 
 ```
 
-```{doxygenfunction} fiction::layouts::io::write_dot_layout(const Lyt& lyt, const std::string_view& filename, const Drawer& drawer = {}, utils::progress_callback on_progress = {})
+```{doxygenfunction} fiction::layouts::io::write_dot_layout(const layouts::gate_layout<Geometry>& lyt, const std::string_view& filename, const Drawer& drawer = {}, utils::progress_callback on_progress = {})
 
 ```
 

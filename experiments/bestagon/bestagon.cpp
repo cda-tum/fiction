@@ -22,6 +22,7 @@
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>  // Cartesian grids
 #include <fiction/layouts/gate_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/networks/technology_network.hpp>         // technology-mapped network type
@@ -59,6 +60,8 @@
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include <experiments.hpp>
 
 using namespace fiction;
 using namespace fiction::fcn;
@@ -129,14 +132,13 @@ try
     const mockturtle::tech_library<2> gate_lib{gates};
 
     // parameters for SMT-based physical design
-    exact_physical_design_params exact_params{};
-    exact_params.scheme             = "Row";
-    exact_params.layout_arrangement = arrangement::EVEN_ROW;
-    exact_params.crossings          = true;
-    exact_params.border_io          = true;
-    exact_params.desynchronize      = true;
-    exact_params.timeout            = 3'600'000;  // 1h in ms
-    exact_physical_design_stats exact_stats{};
+    const exact_physical_design_params exact_params{.scheme             = "Row",
+                                                    .layout_arrangement = arrangement::EVEN_ROW,
+                                                    .crossings          = true,
+                                                    .border_io          = true,
+                                                    .desynchronize      = true,
+                                                    .timeout            = 3'600'000};  // 1h in ms
+    exact_physical_design_stats        exact_stats{};
 
     static constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::b1_r2 &
                                                    ~fiction_experiments::clpl & ~fiction_experiments::two_bit_add_maj &
@@ -169,8 +171,8 @@ try
         const mockturtle::depth_view depth_mapped_network{mapped_network};
 
         // perform layout generation with an SMT-based exact algorithm
-        const auto gate_layout =
-            exact<hexagonal_gate_layout>(convert_network<tec_nt>(mapped_network), exact_params, &exact_stats);
+        const auto gate_layout = exact<hexagonal_layout>(convert_network<named_technology_network>(mapped_network),
+                                                         exact_params, &exact_stats);
 
         if (gate_layout.has_value())
         {

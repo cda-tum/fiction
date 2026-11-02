@@ -1479,8 +1479,6 @@ inline fiction::inml::layout single_layer_inml_crosswire()
  * Samuel Sze Hang Ng, Jan Drewniok, Marcel Walter, Jacob Retallick, Robert Wille, and Konrad Walus.
  *
  * (https://github.com/samuelngsh/si-111-paper-supplementary/blob/main/bestagon-111-gates/gates/AND_mu_032_0.sqd)
- *
- *  @tparam Lyt SiDB cell-level layout type based on SiQAD-coordinates.
  */
 [[nodiscard]] inline fiction::sidb::layout and_gate_111() noexcept
 {

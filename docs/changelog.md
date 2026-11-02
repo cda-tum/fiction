@@ -45,7 +45,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Crossing-cost sweeps avoid repeated edge-counter lookups.
+  - Physical-design solver tests check layout statistics and report failing parameter rows.
+  - Modernized network-view tests with complete visitor checks, typed trait cases, and copy/move coverage.
+  - Modernized network I/O and verification tests with independent cases and complete interface checks.
   - Added QCA SVG regression tests for colors, detail modes, tile labels, and file output.
+  - Layout I/O tests name malformed-input rows, check stream preservation, and verify printed fanins and fanouts.
+  - Added a Catch2 contributor guide and gate-layout test examples for fixtures, data tables,
+    diagnostics, and contract-focused assertions. Visitor checks now detect missing and duplicate results.
 
 - Continuous integration:
 
@@ -70,6 +77,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
 
+  - Documented GOLD's fixed-seed repeatability limits and geometric `AREA` priority on one-tile axes.
   - Added an FCN bibliography, BibTeX download, and OpenGraph metadata.
   - Added `nox -s docs` for local previews, link checks, and Read the Docs builds.
   - Added synchronized C++/Python tabs and code copy buttons.
@@ -153,11 +161,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
-  - **Breaking:** Physical design accepts only named technology networks (`tec_nt`). Convert other network types
-    with `convert_network<tec_nt>` before placement; names survive conversion and extraction.
+  - `post_layout_optimization` avoids enumerating out-of-frame relocation coordinates.
+  - `fanout_substitution` uses entropy only when no random seed is supplied.
+  - Interface matching uses less temporary memory for named interfaces.
+  - Crossing-cost estimation omits an unused counter for each swept edge.
+  - Combination generation avoids one allocation and copy per result.
+  - SiDB domain sampling now stops once every grid point has been collected.
+  - **Breaking:** Physical design accepts only named technology networks (`networks::named_technology_network`). Convert other network types
+    with `convert_network<networks::named_technology_network>` before placement; names survive conversion and extraction.
   - `verification::virtual_miter` is no longer `noexcept`, since the rank view it builds can throw.
   - `synthesis::node_duplication_planarization` skips unused cone-weight traversals when ranking duplication choices.
   - `utils::graph::mincross` with optimization runs about 10x faster and returns the same rank order.
+  - Path enumeration moves completed results and selected candidates. Completed graph results transfer their owned storage.
   - `potential_to_distance_conversion` now uses a bounded inverse search and avoids intermediate underflow.
     Zero potential returns infinity; invalid potentials, physical parameters, or precision above 15 decimal places
     throw `std::invalid_argument`.
@@ -172,6 +187,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Layout extraction and critical-path analysis reduce per-object allocations with flat traversal maps.
   - Gate-layout iteration skips removed objects through a compact live-object bitmap.
   - GOLD reuses built-in objective costs while ranking candidates and accepting solutions.
+  - GOLD reduces placement-sequence copies, repeated frontier-cost lookups, and buffer allocations.
+  - A* reduces per-search map overhead and repeated cost lookups, and replaces linear frontier lookups with lazy queue entries.
+    Equal-cost route choices can differ.
   - **Breaking:** A*, path enumeration, and Yen's algorithm route around the gates and wires of every gate-level
     layout and take temporary constraints as a separate `obstructions` argument, leaving the caller's data unchanged.
     `&a_star_distance<Lyt>` no longer converts to a `distance_functor`; use `a_star_distance_functor`.
@@ -180,6 +198,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Critical-path analysis collapses wire chains to reduce traversal overhead on large layouts.
   - Avoid helper threads for single-worker sampling and contour exploration.
   - Reduce coordinate-vector allocations during operational-domain traversal.
+  - `cartesian_combinations` now moves completed storage between dimensions instead of copying it.
   - Reuse completed three-dimensional contour surfaces across initial samples.
   - Contour tracing explores boundary surfaces in three or more dimensions in parallel. It uses
     `operational_domain_params::number_of_threads`; large contour interiors also use parallel inference.
@@ -239,6 +258,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Long options use hyphens. See the CLI migration table for renamed options, topology choices, clock
     phases, gate selectors, and gate-library aliases. `clustercomplete --base` defaults to 3.
 
+- Code quality:
+
+  - Modernized ClusterComplete and cluster hierarchy tests with complete charge distributions, input rows,
+    and checked prerequisites.
+  - SiDB model, layout, and gate-library tests now share data rows and check complete defect regions and exception ports.
+  - Modernized iNML and molecular QCA tests with complete SVG file checks, cell-type rows, and independent
+    gate-orientation cases.
+  - Streamlined QuickExact and QuickSim tests while preserving physical inputs, charge configurations, and timeout coverage.
+  - Modernized QCA tests with shared format expectations and SVG detail multiplicity checks.
+  - Modernized layout-transformation tests with named cases, defect-aware interface checks, and complete routing checks.
+  - FCN tests share port-list and constant-cell cases and check writer failure recovery.
+    Writer docs describe border validation.
+  - Modernized utility tests with named data rows, direct result checks, and complete progress observations.
+  - Modernized physical-design helper tests with complete routing collections and independent solver rows.
+  - Streamlined BDL iterator, pair, wire, and logic-match tests with complete physical expectations.
+  - Streamlined synthesis tests and strengthened clone, conversion, and gate-library checks.
+  - Modernized path-finding tests with shared data rows, complete path comparisons, and cache reuse checks.
+  - Geometry tests now compare complete coordinate and visitor results and share arrangement cases.
+  - Planarization tests use correlated cost and degree rows and check progress completion and callback precedence.
+  - Parameter configurations now use C++20 designated initializers and `const` where possible.
+  - Modernized network-core contract tests with complete traversal and clone-isolation checks.
+  - Streamlined clocking tests with explicit period tables and allocation-independent rollback sweeps.
+
 - Continuous integration:
   - Read the Docs now builds on Ubuntu 26.04.
   - Replaced Ubuntu 22.04 and GCC 11 CI coverage with Ubuntu 26.04, GCC 15, and Clang 22.
@@ -253,6 +295,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - **Breaking:** Gray-code iterators now satisfy C++20 random access and return values; replace `auto&` bindings
+    with `auto`. Use C++20 ranges for constant-time advancement and distance; legacy traversal is forward-only
+    and linear.
+  - **Breaking:** Network presets replace `*_nt` with `networks::named_aig_network`,
+    `named_xag_network`, `named_mig_network`, and `named_technology_network`.
+    `kitty::dynamic_truth_table` replaces `fiction::tt`; Python names stay unchanged.
+  - **Breaking:** Routing algorithms and path containers now use `layout_coordinate_path` directly. Remove path template
+    arguments from C++ calls and container declarations.
   - `technology_network` and `virtual_pi_network` answer `is_pi`, `is_ci`, and `is_virtual_pi` and iterate gates and
     fanins in constant time per node.
   - `networks::views::mutable_rank_view::set_ranks` and `set_all_ranks` throw `std::invalid_argument` or
@@ -315,7 +365,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
   - Documented all three gate-layout geometries and MSVC Release builds for Python.
+  - A* documents the consistency requirement for custom heuristics and nonnegative step costs.
   - Python layout docstrings use `extent` for the extent argument.
+  - Clarified that custom clocking scheme names do not register schemes for catalog lookup.
   - Corrected the coordinate page's `last_coordinate()` accessor reference.
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
   - Standardized paper links in the docs and README to DOI URLs and corrected the `ortho`, `equiv`, and Yen references.
@@ -327,6 +379,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Experiments:
 
+  - Parameter configurations now use designated initializers with unchanged inputs and computations.
+  - Experiments use canonical network types and `kitty::dynamic_truth_table` without changing their computations.
+  - Clock-number assignment helpers now take concrete Cartesian gate layouts.
+    Experiment parameters, inputs, and output columns are unchanged.
   - Physical-design experiments convert mapped networks before placement with unchanged computations.
   - Gate-layout experiments use canonical types with unchanged computations.
   - The `planarization` experiment keeps duplication parameters immutable.
@@ -349,6 +405,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - The ToPoliNano library and CLI reject row-shifted Cartesian layouts.
 
 - I/O:
+
+  - QCA SVG rendering now reuses static tile and latch templates without per-tile text copies.
+  - FGL name escaping appends text in one pass to avoid repeated suffix copies for long whitespace-heavy names.
   - `write_sidb_layout_svg` and `print_sidb_layout` color an `sidb::layout` from an optional
     `charge_distribution`
   - **Breaking:** FGL writers now emit version 2 with size counts, declared interface order, and numbered input connections. Readers also accept legacy maximum-coordinate sizes; writers reject incomplete or physically invalid layouts before writing.
@@ -456,6 +515,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - **Breaking:** Gate-only APIs now use canonical gate layouts; fixed-geometry entry points are non-templates.
+    Multi-geometry factories take coordinate geometries; nested layouts and unsupported library/geometry pairs fail overload resolution.
+  - Template APIs now declare their type and callback requirements with C++20 `requires` clauses and shared naming concepts.
+    Unsupported arguments fail overload resolution; optional naming operations remain no-ops when unsupported.
   - C++ Python binding helpers now use a `register_` prefix.
   - Python bindings use the `nb` namespace alias for nanobind.
   - The C++ test suite and the experiments now open the namespaces they use, one
@@ -572,9 +635,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **Breaking:** `reserve_input_nodes` is gone. Place each primary input with `place` or `create_pi` when its coordinate is known.
 - Code quality:
 
+  - **Breaking:** Removed preset pointer aliases, `truth_table_t`, `logic_network_t`, `*_name`,
+    `get_ntk_type_name`, and `ntk_type_name`. Use `std::shared_ptr<T>` for shared ownership.
   - **Breaking:** Removed `utils/stl/execution_utils.hpp` and its `FICTION_EXECUTION_POLICY_*` macros.
 - Data structures:
 
+  - **Breaking:** Removed the non-network layout and gate-library capability traits and `cell<Lyt>`.
+    Use local `requires` expressions and `layouts::layout_base::coordinate`; network extension traits remain supported.
   - **Breaking:** Removed layout `volume()` and `volume_of`. Use `area() * layers()` to count coordinates.
   - **Breaking:** Layouts now reject more than two layers. Use one ground layer and an optional crossing layer;
     empty layouts remain supported.
@@ -584,7 +651,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     `has_foreach_outgoing_clocked_zone_v`; `has_is_obstructed_coordinate_v` and `has_is_obstructed_connection_v`;
     `has_foreach_tile_v`, `has_foreach_adjacent_tile_v`, `has_foreach_adjacent_opposite_tiles_v`,
     `has_is_gate_tile_v`, `has_is_wire_tile_v`, `has_is_empty_tile_v`, `has_is_empty_cell_v`, `has_foreach_cell_v`,
-    and `has_is_empty_v`. Use concrete gate-level layout arguments or `is_cell_grid_v`. The unused `is_offset_coord_v`
+    and `has_is_empty_v`. Use concrete gate-level layout arguments or local grid requirements. The unused `is_offset_coord_v`
     and `has_offset_coord_v` are gone as well.
   - **Breaking:** The alias `wiring_reduction_layout_type`; `create_wiring_reduction_layout` returns a
     `wiring_reduction_layout`.
@@ -592,8 +659,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     and `sidb_technology` with their predicates and `cell_mark` enums; the traits `technology`,
     `has_*_technology_v`, `is_cell_level_layout_v`, and `has_post_layout_optimization_v`; the aliases
     `qca_cell_clk_lyt`, `mol_qca_cell_clk_lyt`, `inml_cell_clk_lyt`, `sidb_cell_clk_lyt`, `sidb_cell_clk_lyt_cube`,
-    and `cell_layout_t`; `tech_impl_name`, `tech_cell_name`, and `to_sidb_layout`. Use the technology layouts and
-    `is_cell_grid_v`.
+    and `cell_layout_t`; `tech_impl_name`, `tech_cell_name`, and `to_sidb_layout`. Use the technology layouts.
   - **Breaking:** The header `sidb/technology.hpp`. `sidb::dot_tag` is defined in `sidb/layout.hpp`, like the cell
     types of the other technologies.
 - Dependencies:
@@ -658,6 +724,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - `on_the_fly_gate_library` now honors `DESIGN_ON_THE_FLY` for crossings and double wires on defective surfaces.
+  - Node-duplication planarization reports bounded progress for outputs driven directly by inputs.
+  - `surface_analysis` now propagates allocation failure while building its blacklist.
+  - `is_balanced` now propagates allocation failures instead of terminating.
+  - `is_fanout_substituted` now accepts progress callbacks whose copies can throw.
+  - `virtual_miter` now preserves EXODC output relations for integer-signal destinations.
+  - Combination generation now uses full-width position indices.
+  - Kinks-rejected energy labels now count each matching charge distribution once, preserving degenerate-state
+    occupation probabilities. Both energy-labeling variants document ascending energy order.
+  - Operational checks now reject invalid specifications and unsupported QuickSim inputs across entry points.
+    Empty simulation results no longer count as operational input patterns.
+  - `verify_logic_match` now rejects input patterns outside the specification.
+  - Gate-based critical-temperature checks now reject empty or mixed-variable specifications with
+    `std::invalid_argument` (`ValueError` in Python).
+  - SiDB contour tracing now terminates for isolated operational points.
+  - SiDB parameter sweeps now reject colliding coordinates before allocating dimension indices,
+    and reject overflowing point counts.
+  - SiDB sweep indices now use the full platform index width on Windows.
+  - A* now restores frontier ordering after a cheaper route reaches a queued coordinate.
+  - Simulated annealing now rejects non-finite temperature bounds with `std::invalid_argument`.
+  - Defect-aware circuit design now propagates unsupported gate-orientation errors.
+  - Simulated annealing now keeps acceptance random state local to each worker thread.
+    Callable and thread-start failures propagate after started workers finish; signed cost differences avoid overflow.
+  - Multi-state simulated annealing now rejects zero instances with `std::invalid_argument`.
+  - Minimum-energy searches now require forward iterators, including iterators without `operator->`,
+    and propagate iterator failures.
   - Branching name restoration now skips unmapped routes. Placement reduces an explicit third constant without
     changing the other inputs' truth-table order.
   - Energy-distribution extrema now reject empty distributions with `std::invalid_argument` (`ValueError` in Python).
@@ -727,6 +819,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Build system:
 
+  - PCH cache hashes now retain comments so GCC builds accept documentation-only header edits.
   - Release benchmark builds now skip stripping when no strip tool is available.
   - Rebuild Python bindings when uncommitted C++ binding sources change.
   - Keep tinyxml2 static across build reconfiguration so Python imports find all libraries.
@@ -768,9 +861,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
+  - Network initialization, rank insertion and copying, and virtual-PI removal now propagate allocation failure.
+    Recompute ranks after a failed insertion.
+  - Depth-view construction supports copy-only node costs and propagates move-construction failures.
+  - Gray-code iterators now index from their current position, compare positions, support copy assignment,
+    and preserve 64-bit offsets and distances across the signed boundary.
+  - Edge-color views now support clearing only node colors and clearing both node and edge colors.
   - Gate-level layout moves now propagate geometry failures and preserve owned state.
     Custom geometry controls its assignment failure guarantee.
+  - SiDB layout copy assignment now preserves the destination when allocation fails.
   - Depth and rank view assignment now preserves wrapped network names and metadata.
+  - Breadth-first topological views now visit gates with repeated fanins.
+  - Breadth-first topological views now cache node indices for constant expected lookup time.
+  - Depth views now refresh critical paths after explicit updates and count complemented output edges, including
+    outputs connected before `static_depth_view::on_add`.
+  - Rank traversal now keeps callback indices and early termination across levels.
   - `networks::views::mutable_rank_view::update_ranks` resets `width()`.
   - Clocking-state moves now avoid synchronization-map allocations on Windows.
   - Gate-layout name-presence queries now report empty names consistently after failed assignment.
@@ -812,8 +917,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
 
+  - `integral_abs` documents that signed minimum values are outside its representable-result domain.
+  - Timing documentation now states the throughput formula and input hold time in clock cycles.
+  - BDL pair-detection documentation clarifies per-tag sorting and no longer implies a distance-bound performance guarantee.
+  - Binding docstring instructions now use the generator wrapper that CI runs.
+  - Hexagonal layout documentation now names the eastern border and `is_adjacent_of` correctly.
+  - `gate_layout::incoming_data_flow` now documents required adjacency and optional clocking.
   - Python keyword-only APIs document option meanings and units, including exact search bounds.
+  - SiDB layout documentation now distinguishes charged defect types from non-zero defect charges.
   - Corrected planarization complexity bounds to include weighted-cone traversals.
+  - Corrected the reference for Yen's loopless path algorithm.
   - Python critical-temperature domain docstrings state the fixed confidence default.
   - Physical-design statistics now document that wire counts exclude primary inputs and outputs.
   - Python potential-to-distance conversion and population-stability docstrings now name `ValueError` for invalid arguments.
@@ -849,6 +962,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Gate libraries:
 
+  - `fcn::gate_library::merge` now handles rectangular gates without out-of-bounds access.
   - On-the-fly SiDB gate mapping now rejects column arrangements instead of dropping north/south wires.
   - QCA ONE and ToPoliNano now reject terminal fanouts instead of losing their I/O markers.
     Connect terminals to separate fanout wires for mapping.
@@ -857,10 +971,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - I/O:
 
+  - Colored DOT drawers now use the node-color interface and shared edge palette.
+  - Surface-defect import avoids exponential backtracking on malformed digit runs.
+  - SQD import now rejects NUL bytes, multiple XML roots, and text outside the root. SiDB filename readers preserve bytes after Ctrl-Z on Windows.
   - BLIF network readers now accept empty and whitespace-only lines without aborting.
   - QCC and QLL writers now propagate allocation failures while sorting terminal cells.
+  - QCADesigner output now rejects names containing CR, LF, or null bytes before changing output.
+  - QCADesigner and cell-based QCA SVG output now avoid scanning empty cell positions in sparse layouts.
+  - QCADesigner output now preserves quantum-dot offsets and avoids integer overflow at large coordinates, and retains label widths for long names.
   - Gate-layout DOT output now preserves signed coordinate IDs and quoted terminal names.
   - FGL round trips now preserve whitespace-only layout and port names.
+  - `tt_reader` now handles empty input, rejects incomplete or malformed hexadecimal records, and reports file-open and read failures.
   - FGL version 2 now preserves manual obstructions and XML whitespace in names. Readers reject unfinished or physically invalid layouts; writers reject illegal XML control characters before changing output.
   - FGL gate IDs now reject malformed, negative, and out-of-range integers with a parsing error.
   - QCA SVG output now includes synchronized cells in tiled layouts and wraps latch clock labels within the clock cycle.
@@ -883,6 +1004,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - Domain keyword options now reuse the default sweep storage instead of allocating a second vector.
   - Cell-grid clocking names now remain valid when converted to Python strings.
   - Layout object IDs, input ports, and extents now compare unequal to unrelated Python values.
     Mutable extents are unhashable.

@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
@@ -47,6 +48,7 @@ TEST_CASE("Unit cost", "[cost]")
                  std::pair{layout_base::coordinate{0, 0}, layout_base::coordinate{-1, -1}},
                  std::pair{layout_base::coordinate{-4, -3}, layout_base::coordinate{1, -1}},
                  std::pair{layout_base::coordinate{-2, -8}, layout_base::coordinate{-6, -4}});
+    CAPTURE(source, target);
     SECTION("Direct function")
     {
         const auto value = unit_cost<>(source, target);
@@ -81,15 +83,18 @@ TEST_CASE("Random cost", "[cost]")
                  std::pair{layout_base::coordinate{0, 0}, layout_base::coordinate{-1, -1}},
                  std::pair{layout_base::coordinate{-4, -3}, layout_base::coordinate{1, -1}},
                  std::pair{layout_base::coordinate{-2, -8}, layout_base::coordinate{-6, -4}});
+    CAPTURE(source, target);
     SECTION("Direct function")
     {
         const auto value = random_cost<>(source, target);
-        CHECK((value >= 0 && value <= 1));
+        CHECK(value >= 0);
+        CHECK(value <= 1);
     }
     SECTION("Functor")
     {
         const random_cost_functor<> cost{};
         const auto                  value = cost(source, target);
-        CHECK((value >= 0 && value <= 1));
+        CHECK(value >= 0);
+        CHECK(value <= 1);
     }
 }

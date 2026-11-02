@@ -17,11 +17,15 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 #include "utils/progress_recorder.hpp"
+// Catch2 selects this specialization through its diagnostic templates.
+#include "utils/routing_objective_string_maker.hpp"  // IWYU pragma: keep
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
@@ -34,30 +38,38 @@
 #include <fiction/types.hpp>
 
 #include <mockturtle/networks/aig.hpp>
-#include <mockturtle/utils/stopwatch.hpp>
 
-#include <algorithm>
 #include <cstdint>
 #include <stdexcept>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::networks;
 using namespace fiction::physical_design;
 
+/**
+ * @brief Checks functional equivalence after wiring reduction.
+ * @tparam Lyt Gate layout type.
+ * @tparam Ntk Specification network type.
+ * @param ntk Specification network.
+ */
 template <typename Lyt, typename Ntk>
 static void check_layout_equiv(const Ntk& ntk)
 {
-    auto layout = orthogonal<Lyt>(fiction::synthesis::convert_network<tec_nt>(ntk), {});
+    auto layout = orthogonal<typename Lyt::coordinate_layout>(
+        fiction::synthesis::convert_network<named_technology_network>(ntk), {});
 
     wiring_reduction_stats stats{};
     wiring_reduction(layout, {}, &stats);
 
     check_eq(ntk, layout);
-
-    CHECK(mockturtle::to_seconds(stats.time_total) > 0);
 }
 
+/**
+ * @brief Checks distinct network shapes and gate functions.
+ * @tparam Lyt Gate layout type.
+ */
 template <typename Lyt>
 static void check_layout_equiv_all()
 {
@@ -169,11 +181,10 @@ TEST_CASE("Layout equivalence", "[wiring-reduction]")
 
     SECTION("Timeout")
     {
-        auto layout = orthogonal<cartesian_gate_layout>(blueprints::mux21_network<technology_network>(), {});
+        auto layout = orthogonal<cartesian_layout>(blueprints::mux21_network<technology_network>(), {});
 
-        wiring_reduction_stats  stats{};
-        wiring_reduction_params params{};
-        params.timeout = 1000000;
+        wiring_reduction_stats        stats{};
+        const wiring_reduction_params params{.timeout = 1000000};
         wiring_reduction(layout, params, &stats);
 
         check_eq(blueprints::mux21_network<technology_network>(), layout);
@@ -181,11 +192,10 @@ TEST_CASE("Layout equivalence", "[wiring-reduction]")
 
     SECTION("Timeout exceeded")
     {
-        auto layout = orthogonal<cartesian_gate_layout>(blueprints::mux21_network<technology_network>(), {});
+        auto layout = orthogonal<cartesian_layout>(blueprints::mux21_network<technology_network>(), {});
 
-        wiring_reduction_stats  stats{};
-        wiring_reduction_params params{};
-        params.timeout = 0;
+        wiring_reduction_stats        stats{};
+        const wiring_reduction_params params{.timeout = 0};
         wiring_reduction(layout, params, &stats);
 
         check_eq(blueprints::mux21_network<technology_network>(), layout);
@@ -240,11 +250,10 @@ TEST_CASE("Optimization accepts interior terminals", "[wiring-reduction]")
 TEST_CASE("Wiring reduction reports progress", "[wiring-reduction]")
 {
     const auto ntk    = blueprints::mux21_network<technology_network>();
-    auto       layout = orthogonal<cartesian_gate_layout>(ntk);
+    auto       layout = orthogonal<cartesian_layout>(ntk);
 
-    progress_recorder       rec{};
-    wiring_reduction_params params{};
-    params.on_progress = rec.callback();
+    progress_recorder             rec{};
+    const wiring_reduction_params params{.on_progress = rec.callback()};
 
     wiring_reduction(layout, params);
 
@@ -280,10 +289,10 @@ TEST_CASE("Wiring reduction preserves identities and ordered input ports", "[wir
     CHECK(layout.contains(po));
     CHECK(layout.source({po, 0}) == gate);
     const auto objectives = extract_routing_objectives(layout);
-    CHECK(std::ranges::find(objectives, routing_objective{layout.get_tile(a), layout.get_tile(gate), 0}) !=
-          objectives.end());
-    CHECK(std::ranges::find(objectives, routing_objective{layout.get_tile(b), layout.get_tile(gate), 1}) !=
-          objectives.end());
+    CHECK_THAT(objectives, Catch::Matchers::UnorderedRangeEquals(
+                               std::vector<routing_objective>{{layout.get_tile(a), layout.get_tile(gate), 0},
+                                                              {layout.get_tile(b), layout.get_tile(gate), 1},
+                                                              {layout.get_tile(gate), layout.get_tile(po), 0}}));
     CHECK(layout.is_lt(gate));
     CHECK(layout.num_wires() < independent.num_wires());
     CHECK(independent.height() == 6);

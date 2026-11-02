@@ -12,9 +12,12 @@
  * @file
  * @brief Tests for `fiction/synthesis/crossing_gate_planarization.hpp`.
  * @author Benjamin Hien (hibenj)
+ * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
@@ -138,44 +141,30 @@ TEST_CASE("Primary inputs without fanout are kept", "[crossing-gate-planarizatio
 
 TEST_CASE("A single crossing becomes one crossing gate", "[crossing-gate-planarization]")
 {
+    const auto xor_gates = GENERATE(false, true);
+    CAPTURE(xor_gates);
+
     const auto tec    = single_crossing_network();
     const auto ranked = rank(tec);
     REQUIRE(count_crossings(ranked) == 1);
 
-    SECTION("AND, OR, and NOT gates")
-    {
-        crossing_gate_planarization_params ps{};
-        ps.xor_gates = false;
+    const crossing_gate_planarization_params ps{.xor_gates = xor_gates};
 
-        crossing_gate_planarization_stats st{};
-        const auto                        planar = crossing_gate_planarization(ranked, ps, &st);
+    crossing_gate_planarization_stats st{};
+    const auto                        planar = crossing_gate_planarization(ranked, ps, &st);
 
-        check_contract(tec, planar);
-        CHECK(st.num_crossings == 1);
+    check_contract(tec, planar);
+    CHECK(st.num_crossings == 1);
 
-        // the sizes the hybrid strategy of the node duplication plans with
-        CHECK(planar.size() == ranked.size() + synthesis::detail::AND_OR_CROSSING_GATE_NODES);
-        CHECK(planar.depth() == ranked.depth() + synthesis::detail::AND_OR_CROSSING_GATE_DEPTH);
-    }
-    SECTION("XOR gates")
-    {
-        crossing_gate_planarization_params ps{};
-        ps.xor_gates = true;
+    // The hybrid cost model must agree with the actual crossing gate construction.
+    CHECK(planar.size() == ranked.size() + (xor_gates ? synthesis::detail::XOR_CROSSING_GATE_NODES :
+                                                        synthesis::detail::AND_OR_CROSSING_GATE_NODES));
+    CHECK(planar.depth() == ranked.depth() + (xor_gates ? synthesis::detail::XOR_CROSSING_GATE_DEPTH :
+                                                          synthesis::detail::AND_OR_CROSSING_GATE_DEPTH));
 
-        crossing_gate_planarization_stats st{};
-        const auto                        planar = crossing_gate_planarization(ranked, ps, &st);
-
-        check_contract(tec, planar);
-        CHECK(st.num_crossings == 1);
-
-        // the sizes the hybrid strategy of the node duplication plans with
-        CHECK(planar.size() == ranked.size() + synthesis::detail::XOR_CROSSING_GATE_NODES);
-        CHECK(planar.depth() == ranked.depth() + synthesis::detail::XOR_CROSSING_GATE_DEPTH);
-
-        std::ostringstream os{};
-        st.report(os);
-        CHECK(os.str().find("crossings") != std::string::npos);
-    }
+    std::ostringstream os{};
+    st.report(os);
+    CHECK(os.str().find("crossings") != std::string::npos);
 }
 
 TEST_CASE("Planar networks are copied without crossing gates", "[crossing-gate-planarization]")
@@ -203,8 +192,8 @@ TEST_CASE("Blueprint networks with several crossings", "[crossing-gate-planariza
 
         for (const bool xor_gates : {false, true})
         {
-            crossing_gate_planarization_params ps{};
-            ps.xor_gates = xor_gates;
+            CAPTURE(xor_gates, ntk.num_pis(), ntk.num_pos());
+            const crossing_gate_planarization_params ps{.xor_gates = xor_gates};
 
             crossing_gate_planarization_stats st{};
             const auto                        planar = crossing_gate_planarization(ranked, ps, &st);
@@ -221,8 +210,7 @@ TEST_CASE("Ranks with too many crossings are rejected", "[crossing-gate-planariz
     const auto ranked = rank(blueprints::clpl<technology_network>());
     REQUIRE(count_crossings(ranked) > 1);
 
-    crossing_gate_planarization_params ps{};
-    ps.max_crossings_per_level = 0;
+    const crossing_gate_planarization_params ps{.max_crossings_per_level = 0};
 
     CHECK_THROWS_AS(crossing_gate_planarization(ranked, ps), std::runtime_error);
 }
@@ -235,18 +223,18 @@ TEST_CASE("Progress is reported", "[crossing-gate-planarization]")
     std::vector<std::size_t> done{};
     std::size_t              total = 0;
 
-    crossing_gate_planarization_params ps{};
-    ps.on_progress = [&done, &total](std::string_view, const std::size_t d, const std::size_t t)
-    {
-        done.push_back(d);
-        total = t;
-    };
+    const crossing_gate_planarization_params ps{
+        .on_progress = [&done, &total](std::string_view, const std::size_t d, const std::size_t t)
+        {
+            done.push_back(d);
+            total = t;
+        }};
 
     const auto planar = crossing_gate_planarization(ranked, ps);
 
     check_contract(tec, planar);
     CHECK(total == ranked.depth());
     REQUIRE(!done.empty());
+    CHECK(done.front() == 0);
     CHECK(done.back() == total);
-    // the reporter may throttle intermediate values; only the total and the final count are promised
 }

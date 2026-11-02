@@ -97,10 +97,10 @@ namespace detail
 namespace defects
 {
 
-/* Regex */
-
-inline const std::regex RE_DEFECT_MATRIX{R"(\[(?:\s*\d+\s*)+\])"};  // each match is one row
-inline const std::regex RE_ROW_INDICES{R"((\d+))"};                 // each match is one index
+/** @brief Matches a bracketed row of whitespace-separated non-negative defect indices. */
+inline const std::regex RE_DEFECT_MATRIX{R"(\[\s*\d+(?:\s+\d+)*\s*\])"};
+/** @brief Matches one defect index within a recognized row. */
+inline const std::regex RE_ROW_INDICES{R"(\d+)"};
 
 /**
  * Maps indices in the data format to defect types.
@@ -112,15 +112,6 @@ inline constexpr std::array<sidb::model::defect_type, 11> INDEX_TO_DEFECT{
      sidb::model::defect_type::RAISED_SI, sidb::model::defect_type::ETCH_PIT, sidb::model::defect_type::MISSING_DIMER}};
 
 }  // namespace defects
-
-// data types cannot properly be converted to bit field types
-#pragma GCC diagnostic push
-#ifndef __clang__
-#pragma GCC diagnostic ignored "-Wuseless-cast"
-#endif
-#pragma GCC diagnostic ignored "-Wconversion"
-
-#pragma GCC diagnostic pop
 
 /**
  * Reads a defect matrix into a defects-only `sidb::layout`: entry `x` of row `y` becomes the defect at column `x` of
@@ -150,16 +141,14 @@ class surface_defects_reader
      */
     layout run()
     {
-        // each match is one row
-        const std::vector<std::smatch> matrix_matches{
-            std::sregex_iterator(std::cbegin(defect_matrix), std::cend(defect_matrix), defects::RE_DEFECT_MATRIX),
-            std::sregex_iterator()};
-
         std::size_t row_length = 0;
-
-        for (std::size_t y = 0; y < matrix_matches.size(); ++y)
+        /** @brief Index of the current recognized row. */
+        std::size_t y = 0;
+        for (auto row =
+                 std::sregex_iterator(std::cbegin(defect_matrix), std::cend(defect_matrix), defects::RE_DEFECT_MATRIX);
+             row != std::sregex_iterator(); ++row, ++y)
         {
-            const auto row_str = matrix_matches[y].str();
+            const auto row_str = row->str();
 
             // each match is a defect index
             const std::vector<std::smatch> row_matches{
@@ -212,6 +201,7 @@ class surface_defects_reader
 /**
  * Reads a defect matrix from a stream into a defects-only `sidb::layout` on the H-Si(100)-2x1 lattice. Each `[...]`
  * row lists one defect index per column; entry `x` of row `y` becomes the defect at column `x` of single-SiDB row `y`.
+ * Open file streams in binary mode to preserve every input byte.
  *
  * @param is The input stream to read from.
  * @param name The name to give to the layout.
@@ -226,7 +216,8 @@ class surface_defects_reader
     return p.run();
 }
 /**
- * Reads a defect matrix from a file into a defects-only `sidb::layout`. See the stream overload for the format.
+ * Reads a defect matrix from a file in binary mode into a defects-only `sidb::layout`. See the stream overload for
+ * the format.
  *
  * @param filename The file to read.
  * @param name The name to give to the layout.
@@ -235,17 +226,14 @@ class surface_defects_reader
  */
 [[nodiscard]] inline layout read_surface_defects(const std::string_view& filename, const std::string_view& name = "")
 {
-    std::ifstream is{std::string{filename}, std::ifstream::in};
+    std::ifstream is{std::string{filename}, std::ifstream::in | std::ifstream::binary};
 
     if (!is.is_open())
     {
         throw std::ifstream::failure("could not open file");
     }
 
-    auto lyt = read_surface_defects(is, name);
-    is.close();
-
-    return lyt;
+    return read_surface_defects(is, name);
 }
 
 }  // namespace fiction::sidb::io

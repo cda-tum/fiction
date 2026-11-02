@@ -41,7 +41,8 @@ namespace fiction::sidb::simulation::analysis
  * @return The parameter points where `cd` is physically valid, each with its excited-state number; empty if `cd`
  * does not cover the layout's SiDBs in raster order.
  * @throws std::invalid_argument if a sweep range has non-finite or reversed bounds, a non-positive
- * or non-finite step, more points than the storage range permits, or the engine is not QuickExact, EXGS, or QuickSim.
+ * or non-finite step, more points than the storage range permits, colliding `logic::parameter_point` identities, or the
+ * engine is not QuickExact, EXGS, or QuickSim.
  */
 [[nodiscard]] inline domain<logic::parameter_point, uint64_t>
 physically_valid_parameters(const layout& lyt, const charge_distribution& cd,

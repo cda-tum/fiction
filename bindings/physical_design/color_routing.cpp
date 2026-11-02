@@ -62,19 +62,19 @@ void register_color_routing_impl(nb::module_& m)
            const decltype(color_routing_options{}.engine)                                      engine,
            const decltype(color_routing_options{}.partial_sat)                                 partial_sat)
         {
-            color_routing_options params{};
-            params.conduct_partial_routing = conduct_partial_routing;
-            params.crossings               = crossings;
-            params.path_limit              = path_limit;
-            params.engine                  = engine;
-            params.partial_sat             = partial_sat;
+            const color_routing_options params{.conduct_partial_routing = conduct_partial_routing,
+                                               .crossings               = crossings,
+                                               .path_limit              = path_limit,
+                                               .engine                  = engine,
+                                               .partial_sat             = partial_sat};
 
             std::vector<fiction::physical_design::routing_objective> objs{};
             objs.reserve(objectives.size());
 
             for (const auto& obj : objectives)
             {
-                objs.push_back({std::get<0>(obj), std::get<1>(obj), std::get<2>(obj)});
+                objs.push_back(
+                    {.source = std::get<0>(obj), .target = std::get<1>(obj), .input_index = std::get<2>(obj)});
             }
 
             return fiction::physical_design::color_routing(lyt, objs, params);
@@ -86,6 +86,8 @@ void register_color_routing_impl(nb::module_& m)
         nb::arg("partial_sat") = color_routing_options{}.partial_sat, nb::call_guard<nb::gil_scoped_release>(),
         R"doc(Route the supplied connections in place by coloring their path intersections.
 Returns True when all objectives are satisfied or conduct_partial_routing is enabled.
+With path_limit=0, no candidate paths are generated and endpoint bounds are not checked.
+Raises ValueError for an out-of-extent objective endpoint when path_limit is None or nonzero.
 
 Args:
     conduct_partial_routing: Do not abort if some objectives cannot be fulfilled, but partially route the layout as much as possible.

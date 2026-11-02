@@ -17,9 +17,9 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/synthesis/fanout_substitution.hpp>
+#include <fiction/types.hpp>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner): enables callback conversion
@@ -55,21 +55,22 @@ void register_fanout_substitution(nb::module_& m)
 
     m.def(
         "fanout_substitution",
-        [](const py_tec_network&                                                         network,
+        [](const fiction::networks::named_technology_network&                            network,
            const decltype(fiction::synthesis::fanout_substitution_params{}.on_progress)& on_progress,
            const decltype(fiction::synthesis::fanout_substitution_params{}.strategy)     strategy,
            const decltype(fiction::synthesis::fanout_substitution_params{}.degree)       degree,
            const decltype(fiction::synthesis::fanout_substitution_params{}.threshold)    threshold,
            const decltype(fiction::synthesis::fanout_substitution_params{}.seed)         seed)
         {
-            fiction::synthesis::fanout_substitution_params params{};
-            params.on_progress = on_progress;
-            params.strategy    = strategy;
-            params.degree      = degree;
-            params.threshold   = threshold;
-            params.seed        = seed;
-            const nb::gil_scoped_release release{};
-            return fiction::synthesis::fanout_substitution<py_tec_network, py_tec_network>(network, params);
+            const fiction::synthesis::fanout_substitution_params params{.strategy    = strategy,
+                                                                        .degree      = degree,
+                                                                        .threshold   = threshold,
+                                                                        .seed        = seed,
+                                                                        .on_progress = on_progress};
+            const nb::gil_scoped_release                         release{};
+            return fiction::synthesis::fanout_substitution<fiction::networks::named_technology_network,
+                                                           fiction::networks::named_technology_network>(network,
+                                                                                                        params);
         },
         nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
         nb::arg("strategy")  = fiction::synthesis::fanout_substitution_params{}.strategy,
@@ -89,35 +90,35 @@ Args:
 
     m.def(
         "is_fanout_substituted",
-        [](const py_tec_network&                                                         network,
+        [](const fiction::networks::named_technology_network&                            network,
            const decltype(fiction::synthesis::fanout_substitution_params{}.on_progress)& on_progress,
            const decltype(fiction::synthesis::fanout_substitution_params{}.strategy)     strategy,
            const decltype(fiction::synthesis::fanout_substitution_params{}.degree)       degree,
            const decltype(fiction::synthesis::fanout_substitution_params{}.threshold)    threshold,
            const decltype(fiction::synthesis::fanout_substitution_params{}.seed)         seed)
         {
-            fiction::synthesis::fanout_substitution_params params{};
-            params.on_progress = on_progress;
-            params.strategy    = strategy;
-            params.degree      = degree;
-            params.threshold   = threshold;
-            params.seed        = seed;
-            const nb::gil_scoped_release release{};
-            return fiction::synthesis::is_fanout_substituted<py_tec_network>(network, params);
+            const fiction::synthesis::fanout_substitution_params params{.strategy    = strategy,
+                                                                        .degree      = degree,
+                                                                        .threshold   = threshold,
+                                                                        .seed        = seed,
+                                                                        .on_progress = on_progress};
+            const nb::gil_scoped_release                         release{};
+            return fiction::synthesis::is_fanout_substituted<fiction::networks::named_technology_network>(network,
+                                                                                                          params);
         },
         nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
         nb::arg("strategy")  = fiction::synthesis::fanout_substitution_params{}.strategy,
         nb::arg("degree")    = fiction::synthesis::fanout_substitution_params{}.degree,
         nb::arg("threshold") = fiction::synthesis::fanout_substitution_params{}.threshold,
         nb::arg("seed")      = fiction::synthesis::fanout_substitution_params{}.seed,
-        R"doc(Check whether every network node respects the keyword fanout limits.
+        R"doc(Check whether nonconstant network nodes respect the keyword fanout limits.
 
 Args:
-    on_progress: Callback receiving (task, completed, total); None disables progress reporting.
-    strategy: Substitution strategy of high-degree fanout networks (depth-first vs. breadth-first).
-    degree: Maximum output degree of each fan-out node. Must be at least two.
-    threshold: Maximum number of outputs any gate is allowed to have before substitution applies. Must be at least one.
-    seed: Random seed; None selects a fresh random seed.
+    on_progress: Accepted without emitting progress reports.
+    strategy: Accepted without affecting this check.
+    degree: Maximum output degree of each fanout node.
+    threshold: Maximum output degree of each non-fanout node.
+    seed: Accepted without affecting this check.
 )doc");
 }
 

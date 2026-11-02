@@ -48,13 +48,27 @@ void check(const Lyt& lyt, const uint64_t length, const uint64_t throughput)
 
 TEST_CASE("Balanced layout", "[throughput]")
 {
-    check(blueprints::and_or_gate_layout<cartesian_gate_layout>(), 3, 1);
-    check(blueprints::xor_maj_gate_layout<cartesian_gate_layout>(), 3, 1);
-    check(blueprints::or_not_gate_layout<cartesian_gate_layout>(), 4, 1);
-    check(blueprints::fanout_layout<cartesian_gate_layout>(), 5, 1);
-    check(blueprints::crossing_layout<cartesian_gate_layout>(), 4, 1);
-
-    SECTION("Synchronization Elements")
+    SECTION("AND-OR")
+    {
+        check(blueprints::and_or_gate_layout<cartesian_gate_layout>(), 3, 1);
+    }
+    SECTION("XOR-MAJ")
+    {
+        check(blueprints::xor_maj_gate_layout<cartesian_gate_layout>(), 3, 1);
+    }
+    SECTION("OR-NOT")
+    {
+        check(blueprints::or_not_gate_layout<cartesian_gate_layout>(), 4, 1);
+    }
+    SECTION("Fanout")
+    {
+        check(blueprints::fanout_layout<cartesian_gate_layout>(), 5, 1);
+    }
+    SECTION("Crossing")
+    {
+        check(blueprints::crossing_layout<cartesian_gate_layout>(), 4, 1);
+    }
+    SECTION("Synchronization elements")
     {
         check(blueprints::se_gate_layout<cartesian_gate_layout>(), 4, 1);
     }

@@ -21,12 +21,17 @@
 
 #include <fiction/synthesis/delete_virtual_pis.hpp>
 
+// NOLINTNEXTLINE(misc-include-cleaner): Provides cleanup_dangling for argument-dependent lookup.
+#include <mockturtle/algorithms/cleanup.hpp>
+#include <mockturtle/networks/aig.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 
 #include <algorithm>
 #include <cstddef>
+#include <iterator>
 #include <optional>
+#include <type_traits>
 #include <vector>
 
 namespace fiction::verification
@@ -104,17 +109,18 @@ leaves_by_creation_order(const Ntk& ntk, const std::vector<mockturtle::signal<Nt
  * virtual primary inputs (PIs). Virtual PIs are removed during miter construction, and all edges connected to them are
  * remapped to their corresponding original PIs, ensuring consistent PI counts when the networks are equivalent.
  *
- * The resulting miter connects two networks with the same number of inputs and produces a single primary output. This
- * output represents the OR of the XORs of all primary output pairs. Thus, the miter outputs 1 for any input assignment
- * where the primary outputs of the two networks differ.
+ * The resulting miter connects two networks with the same number of inputs and produces a single primary output.
+ * Without external observability don't-cares (EXODCs), the output is the OR of the XORs of all primary output pairs.
+ * With EXODCs, the output is 1 when the output pair is not observably equivalent under the source's relation.
+ * If both networks carry EXODC relations, the first network's relation takes precedence.
  *
  * The input networks may have different types. If the two input networks have mismatched numbers of primary inputs or
  * outputs, the method returns `std::nullopt`.
  * Primary inputs are paired by creation order, also for ranked networks that list them in rank order.
  *
  * @tparam NtkDest The type of the resulting network.
- * @tparam NtkSource1 The type of the first input network.
- * @tparam NtkSource2 The type of the second input network.
+ * @tparam NtkSrc1 Type of the first input network with interface counts.
+ * @tparam NtkSrc2 Type of the second input network with interface counts.
  * @param ntk1_in The first input network.
  * @param ntk2_in The second input network.
  * @return An `optional` containing the virtual miter network if successful, or `std::nullopt` if the networks are
@@ -122,21 +128,14 @@ leaves_by_creation_order(const Ntk& ntk, const std::vector<mockturtle::signal<Nt
  */
 
 template <typename NtkDest, typename NtkSrc1, typename NtkSrc2>
+    requires mockturtle::is_network_type_v<NtkSrc1> && mockturtle::is_network_type_v<NtkSrc2> &&
+             mockturtle::is_network_type_v<NtkDest> && mockturtle::has_num_pis_v<NtkSrc1> &&
+             mockturtle::has_num_pos_v<NtkSrc1> && mockturtle::has_num_pis_v<NtkSrc2> &&
+             mockturtle::has_num_pos_v<NtkSrc2> && mockturtle::has_create_pi_v<NtkDest> &&
+             mockturtle::has_create_po_v<NtkDest> && mockturtle::has_create_xor_v<NtkDest> &&
+             mockturtle::has_create_nary_or_v<NtkDest>
 [[nodiscard]] std::optional<NtkDest> virtual_miter(const NtkSrc1& ntk1_in, const NtkSrc2& ntk2_in)
 {
-    static_assert(mockturtle::is_network_type_v<NtkSrc1>, "NtkSource1 is not a network type");
-    static_assert(mockturtle::is_network_type_v<NtkSrc2>, "NtkSource2 is not a network type");
-    static_assert(mockturtle::is_network_type_v<NtkDest>, "NtkDest is not a network type");
-
-    static_assert(mockturtle::has_num_pis_v<NtkSrc1>, "NtkSource1 does not implement the num_pis method");
-    static_assert(mockturtle::has_num_pos_v<NtkSrc1>, "NtkSource1 does not implement the num_pos method");
-    static_assert(mockturtle::has_num_pis_v<NtkSrc2>, "NtkSource2 does not implement the num_pis method");
-    static_assert(mockturtle::has_num_pos_v<NtkSrc2>, "NtkSource2 does not implement the num_pos method");
-    static_assert(mockturtle::has_create_pi_v<NtkDest>, "NtkDest does not implement the create_pi method");
-    static_assert(mockturtle::has_create_po_v<NtkDest>, "NtkDest does not implement the create_po method");
-    static_assert(mockturtle::has_create_xor_v<NtkDest>, "NtkDest does not implement the create_xor method");
-    static_assert(mockturtle::has_create_nary_or_v<NtkDest>, "NtkDest does not implement the create_nary_or method");
-
     // handle (delete and remap) virtual primary inputs
     const NtkSrc1 ntk1 = detail::handle_virtual_pis(ntk1_in);
     const NtkSrc2 ntk2 = detail::handle_virtual_pis(ntk2_in);
@@ -163,14 +162,38 @@ template <typename NtkDest, typename NtkSrc1, typename NtkSrc2>
     const auto pos1 = cleanup_dangling(ntk1, dest, leaves1.cbegin(), leaves1.cend());
     const auto pos2 = cleanup_dangling(ntk2, dest, leaves2.cbegin(), leaves2.cend());
 
-    if constexpr (mockturtle::has_EXODC_interface_v<decltype(ntk1)>)
+    if constexpr (mockturtle::has_EXODC_interface_v<decltype(ntk1)> ||
+                  mockturtle::has_EXODC_interface_v<decltype(ntk2)>)
     {
-        ntk1.build_oe_miter(dest, pos1, pos2);
-        return dest;
-    }
-    if constexpr (mockturtle::has_EXODC_interface_v<decltype(ntk2)>)
-    {
-        ntk2.build_oe_miter(dest, pos1, pos2);
+        /** @brief Builds the output relation without applying Boolean negation to integer signals. */
+        const auto build_oe_miter = [&](const auto& ntk)
+        {
+            if constexpr (std::is_integral_v<mockturtle::signal<NtkDest>>)
+            {
+                mockturtle::aig_network                      oe{};
+                std::vector<mockturtle::aig_network::signal> inputs1(pos1.size()), inputs2(pos2.size());
+                std::ranges::generate(inputs1, [&] { return oe.create_pi(); });
+                std::ranges::generate(inputs2, [&] { return oe.create_pi(); });
+                ntk.build_oe_miter(oe, inputs1, inputs2);
+                auto leaves = pos1;
+                leaves.insert(leaves.end(), pos2.begin(), pos2.end());
+                const auto outputs = cleanup_dangling(oe, dest, leaves.cbegin(), leaves.cend());
+                dest.create_po(outputs.front());
+            }
+            else
+            {
+                ntk.build_oe_miter(dest, pos1, pos2);
+            }
+        };
+
+        if constexpr (mockturtle::has_EXODC_interface_v<decltype(ntk1)>)
+        {
+            build_oe_miter(ntk1);
+        }
+        else
+        {
+            build_oe_miter(ntk2);
+        }
         return dest;
     }
 

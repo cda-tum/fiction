@@ -28,7 +28,6 @@
 #include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/inml/layout.hpp>
 #include <fiction/technology/inml/topolinano_library.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/verification/design_rule_violations.hpp>
 
 #include <sstream>
@@ -43,9 +42,7 @@ using namespace fiction::verification;
 
 TEST_CASE("ToPoliNano library traits", "[inml-topolinano-library]")
 {
-    CHECK(std::is_same_v<topolinano_library::layout, inml::layout>);
-    CHECK(!has_get_functional_implementations_v<topolinano_library>);
-    CHECK(!has_get_gate_ports_v<topolinano_library>);
+    STATIC_REQUIRE(std::is_same_v<topolinano_library::layout, inml::layout>);
 }
 
 TEST_CASE("Setting up input ports, gates, and wires", "[inml-topolinano-library]")
@@ -149,10 +146,9 @@ TEST_CASE("ToPoliNano rejects primary-input fanout", "[inml-topolinano-library]"
     lyt.create_po(pi, "north", {1, 0});
     lyt.create_po(pi, "south", {1, 1});
 
-    std::ostringstream    report{};
-    gate_level_drv_params ps{};
-    ps.out = &report;
-    gate_level_drv_stats st{};
+    std::ostringstream          report{};
+    const gate_level_drv_params ps{.out = &report};
+    gate_level_drv_stats        st{};
     gate_level_drvs(lyt, ps, &st);
     INFO(report.str());
     REQUIRE(st.drvs == 0);

@@ -31,7 +31,7 @@
 #include <fiction/utils/graph/mincross.hpp>
 #include <fiction/verification/virtual_miter.hpp>
 
-#include <fmt/format.h>
+#include <fmt/base.h>
 #include <kitty/partial_truth_table.hpp>
 #include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/algorithms/equivalence_checking.hpp>
@@ -45,10 +45,13 @@
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
+#include <memory>
 #include <span>
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include <experiments.hpp>
 
 using namespace fiction;
 using namespace fiction::networks;
@@ -79,10 +82,10 @@ constexpr uint32_t SIMULATION_PATTERNS = 4096;
  * @param name Benchmark name relative to `benchmarks/`, without extension.
  * @return The network.
  */
-tec_nt read_network(const std::string& name)
+named_technology_network read_network(const std::string& name)
 {
-    std::ostringstream      os{};
-    network_reader<tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
+    std::ostringstream                                        os{};
+    network_reader<std::shared_ptr<named_technology_network>> reader{fiction_experiments::benchmark_path(name), os};
 
     return *reader.get_networks().front();
 }
@@ -283,9 +286,7 @@ try
         {
             const auto ntk = mockturtle::cleanup_dangling(read_network(benchmark));
 
-            network_balancing_params b_ps{};
-            b_ps.unify_outputs           = true;
-            b_ps.buffer_constant_outputs = false;
+            const network_balancing_params b_ps{.unify_outputs = true, .buffer_constant_outputs = false};
 
             const auto balanced = network_balancing<technology_network>(ntk, b_ps);
 

@@ -22,12 +22,10 @@
 #include <mockturtle/views/fanout_view.hpp>
 #include <mockturtle/views/immutable_view.hpp>
 
-#include <algorithm>
-#include <cassert>
 #include <cstdint>
-#include <iterator>
 #include <queue>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace fiction::networks::views
@@ -70,6 +68,12 @@ namespace fiction::networks::views
  * @tparam sorted Whether the network already provides a topological order.
  */
 template <class Ntk, bool sorted = mockturtle::is_topologically_sorted_v<Ntk>>
+    requires(sorted || (mockturtle::is_network_type_v<Ntk> && mockturtle::has_size_v<Ntk> &&
+                        mockturtle::has_get_constant_v<Ntk> && mockturtle::has_foreach_pi_v<Ntk> &&
+                        mockturtle::has_foreach_fanin_v<Ntk> && mockturtle::has_incr_trav_id_v<Ntk> &&
+                        mockturtle::has_set_visited_v<Ntk> && mockturtle::has_trav_id_v<Ntk> &&
+                        mockturtle::has_visited_v<Ntk> && mockturtle::has_foreach_ci_v<Ntk> &&
+                        mockturtle::has_foreach_node_v<Ntk> && mockturtle::has_get_node_v<Ntk>))
 class bfs_topo_view
 {};
 
@@ -98,16 +102,6 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
      */
     explicit bfs_topo_view(const Ntk& ntk) : mockturtle::immutable_view<Ntk>(ntk), fanout_ntk(ntk)
     {
-        static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
-        static_assert(mockturtle::has_size_v<Ntk>, "Ntk does not implement the size method");
-        static_assert(mockturtle::has_get_constant_v<Ntk>, "Ntk does not implement the get_constant method");
-        static_assert(mockturtle::has_foreach_pi_v<Ntk>, "Ntk does not implement the foreach_pi method");
-        static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin method");
-        static_assert(mockturtle::has_incr_trav_id_v<Ntk>, "Ntk does not implement the incr_trav_id method");
-        static_assert(mockturtle::has_set_visited_v<Ntk>, "Ntk does not implement the set_visited method");
-        static_assert(mockturtle::has_trav_id_v<Ntk>, "Ntk does not implement the trav_id method");
-        static_assert(mockturtle::has_visited_v<Ntk>, "Ntk does not implement the visited method");
-
         update_bfs_topo();
     }
 
@@ -134,14 +128,15 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
     }
 
     /**
-     * Returns the topological index of a node.
+     * Returns the topological index of a node in expected constant time.
      *
      * @param n Node whose index is to be determined.
-     * @return Index of the node in the topological order.
+     * @return Index of the node in the topological order, or `size()` if the node is absent.
      */
     uint32_t node_to_index(const node& n) const
     {
-        return static_cast<uint32_t>(std::ranges::distance(topo_order.cbegin(), std::ranges::find(topo_order, n)));
+        const auto index = topo_index.find(n);
+        return index == topo_index.cend() ? size() : index->second;
     }
 
     /**
@@ -208,13 +203,14 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
     }
 
     /**
-     * Updates the breadth-first topological order of the network.
-     * Called once during construction.
+     * Recomputes the breadth-first topological order and node indices for the unchanged underlying network.
+     * The constructor calls this function automatically.
      */
     void update_bfs_topo()
     {
         fanout_ntk.incr_trav_id();
         topo_order.clear();
+        topo_index.clear();
         topo_order.reserve(fanout_ntk.size());
 
         std::queue<node>                   q{};
@@ -236,8 +232,8 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
         fanout_ntk.foreach_node(
             [&](auto n)
             {
-                unvisited_fanin_count[n] = 0;
-                fanout_ntk.foreach_fanin(n, [&](const auto& /*f*/) { ++unvisited_fanin_count[n]; });
+                // Count the same fanout entries consumed below; fanout views can collapse repeated fanins.
+                fanout_ntk.foreach_fanout(n, [&](const auto& child) { ++unvisited_fanin_count[child]; });
             });
 
         fanout_ntk.foreach_ci(
@@ -272,6 +268,12 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
                                           }
                                       });
         }
+
+        topo_index.reserve(topo_order.size());
+        for (uint32_t index = 0; index < size(); ++index)
+        {
+            topo_index.emplace(topo_order[index], index);
+        }
     }
 
   private:
@@ -279,6 +281,12 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
      * Stores nodes in topological order from constants and PIs to reachable gates.
      */
     std::vector<node> topo_order;
+
+    /**
+     * @brief Topological index per visited node.
+     * Value-owned storage avoids the network pointer retained by `mockturtle::node_map` across copies and moves.
+     */
+    std::unordered_map<node, uint32_t> topo_index;
 
     /**
      * Fanout-augmented view of the original network for efficient traversal.

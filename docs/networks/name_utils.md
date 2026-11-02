@@ -34,7 +34,7 @@
 
 ```
 
-```{doxygenfunction} fiction::networks::restore_signal_names(const tec_nt& ntk_src, NtkDest& ntk_dest, const mockturtle::node_map<physical_design::branching_signal_container<fanout_size>, tec_nt>& old2new)
+```{doxygenfunction} fiction::networks::restore_signal_names(const fiction::networks::named_technology_network& ntk_src, NtkDest& ntk_dest, const mockturtle::node_map<physical_design::branching_signal_container<fanout_size>, fiction::networks::named_technology_network>& old2new)
 
 ```
 

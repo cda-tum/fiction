@@ -142,12 +142,9 @@ void validate_layout(const Lyt& lyt)
                 throw std::invalid_argument("FGL requires synchronization elements inside the extent");
             }
         });
-    verification::gate_level_drv_params params{};
-    params.missing_connections = false;
-    params.has_io              = false;
-    std::ostringstream report{};
-    params.out = &report;
-    verification::gate_level_drv_stats stats{};
+    std::ostringstream                        report{};
+    const verification::gate_level_drv_params params{.missing_connections = false, .has_io = false, .out = &report};
+    verification::gate_level_drv_stats        stats{};
     verification::gate_level_drvs(lyt, params, &stats);
     if (stats.drvs != 0)
     {

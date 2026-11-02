@@ -17,8 +17,11 @@
  * @author Benjamin Hien (hibenj)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
@@ -38,13 +41,14 @@
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/on_the_fly_gate_library.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
-#include <fiction/types.hpp>
 
+#include <fmt/format.h>
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
 
 #include <algorithm>
 #include <cstddef>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -60,21 +64,64 @@ using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation::logic;
 using namespace fiction::synthesis;
 
+/** @brief Checks static library application without instantiating its body. @tparam Lyt Gate layout type. */
+template <typename Lyt>
+concept bestagon_mappable = requires(const Lyt& lyt) { apply_gate_library<bestagon_library>(lyt); };
+
+/** @brief Checks static library application on a defective surface. @tparam Lyt Gate layout type. */
+template <typename Lyt>
+concept defective_bestagon_mappable = requires(const Lyt& lyt, const sidb::layout& surface) {
+    apply_gate_library_to_defective_surface<bestagon_library>(lyt, surface);
+};
+
+/** @brief Checks parameterized library application. @tparam Lyt Gate layout type. */
+template <typename Lyt>
+concept on_the_fly_mappable = requires(const Lyt& lyt, const on_the_fly_gate_library_params& params) {
+    apply_parameterized_gate_library<on_the_fly_gate_library>(lyt, params);
+};
+
+/** @brief Checks parameterized library application on a defective surface. @tparam Lyt Gate layout type. */
+template <typename Lyt>
+concept defective_on_the_fly_mappable =
+    requires(const Lyt& lyt, const on_the_fly_gate_library_params& params, const sidb::layout& surface) {
+        apply_parameterized_gate_library_to_defective_surface<on_the_fly_gate_library>(lyt, params, surface);
+    };
+
+static_assert(bestagon_mappable<hexagonal_gate_layout>);
+static_assert(!bestagon_mappable<cartesian_gate_layout>);
+static_assert(defective_bestagon_mappable<hexagonal_gate_layout>);
+static_assert(!defective_bestagon_mappable<cartesian_gate_layout>);
+static_assert(on_the_fly_mappable<hexagonal_gate_layout>);
+static_assert(!on_the_fly_mappable<cartesian_gate_layout>);
+static_assert(defective_on_the_fly_mappable<hexagonal_gate_layout>);
+static_assert(!defective_on_the_fly_mappable<cartesian_gate_layout>);
+
 namespace
 {
-void check_equivalence(const sidb::layout& layout_designed, const std::string& path_layout_correct)
+/**
+ * @brief Checks dot counts and fixed dot tags, allowing LOGIC dots to move among defect-free sites.
+ * @param layout_designed Mapped SiDB layout.
+ * @param path_layout_correct SQD reference with the expected fixed interface and dot counts.
+ */
+void check_sidb_interface(const sidb::layout& layout_designed, const std::string& path_layout_correct)
 {
+    INFO(path_layout_correct);
     const auto layout_correct = read_sqd_layout(path_layout_correct);
 
-    REQUIRE(layout_designed.num_dots() == layout_correct.num_dots());
+    CHECK(layout_designed.num_dots() == layout_correct.num_dots());
 
-    REQUIRE(layout_designed.num_dots_with_tag(dot_tag::LOGIC) == layout_correct.num_dots_with_tag(dot_tag::LOGIC));
+    CHECK(layout_designed.num_dots_with_tag(dot_tag::LOGIC) == layout_correct.num_dots_with_tag(dot_tag::LOGIC));
 
     layout_designed.foreach_dot(
         [&layout_correct, &layout_designed](const auto& c)
         {
+            CAPTURE(c.x, c.y, c.z);
             // Gates designed on-the-fly are not necessarily identical each time.
-            if (layout_designed.get_dot_tag(c) != dot_tag::LOGIC)
+            if (layout_designed.get_dot_tag(c) == dot_tag::LOGIC)
+            {
+                CHECK(layout_designed.get_defect(c).type == defect_type::NONE);
+            }
+            else
             {
                 CHECK(layout_designed.get_dot_tag(c) == layout_correct.get_dot_tag(c));
             }
@@ -102,32 +149,28 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
 
         CHECK(placed.num_dots() == 18);
         CHECK(placed.get_lattice() == surface.get_lattice());
-        CHECK(placed.get_defect(site_at_row(-2, -3)).type == defect_type::DB);
+        CHECK_THAT(placed.defects(), Catch::Matchers::UnorderedRangeEquals(surface.defects()));
     }
     SECTION("Design SiDB circuit on-the-fly")
     {
-        on_the_fly_gate_library_params params{};
-
-        design_gates_params design_gate_params{};
-        design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
-        design_gate_params.termination_cond = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION;
-        design_gate_params.canvas           = {site_at_row(24, 17), site_at_row(34, 28)};
-
         SECTION("AND gate can be designed successfully")
         {
-            design_gate_params.number_of_canvas_sidbs = 2;
+            const design_gates_params design_gate_params{
+                .operational_params     = {.sim_params = simulation_parameters{2, -0.32}},
+                .canvas                 = {site_at_row(24, 17), site_at_row(34, 28)},
+                .number_of_canvas_sidbs = 2,
+                .termination_cond       = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION};
 
-            params.design_gate_params = design_gate_params;
-
-            REQUIRE_NOTHROW(apply_parameterized_gate_library<on_the_fly_gate_library>(layout, params));
+            const on_the_fly_gate_library_params params{.design_gate_params = design_gate_params};
 
             const auto bestagon_and = (apply_parameterized_gate_library<on_the_fly_gate_library>(layout, params));
 
-            check_equivalence(
+            check_sidb_interface(
                 bestagon_and,
                 fmt::format("{}/resources/on_the_fly_gate_library/single_tile_layout/AND_gate.sqd", TEST_PATH));
 
-            CHECK(is_operational(bestagon_and, std::vector<tt>{create_and_tt()}, design_gate_params.operational_params)
+            CHECK(is_operational(bestagon_and, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
+                                 design_gate_params.operational_params)
                       .first == operational_status::OPERATIONAL);
 
             CHECK(bestagon_and.num_dots() == 19);
@@ -143,11 +186,11 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
                     apply_parameterized_gate_library_to_defective_surface<on_the_fly_gate_library>(layout, params,
                                                                                                    surface);
 
-                CHECK(bestagon_and_with_defects.num_defects() == 2);
-                CHECK(bestagon_and_with_defects.get_defect(site_at_row(30, 20)).type == defect_type::DB);
-                CHECK(bestagon_and_with_defects.get_defect(site_at_row(45, 55)).type == defect_type::DB);
+                CHECK_THAT(bestagon_and_with_defects.defects(),
+                           Catch::Matchers::UnorderedRangeEquals(surface.defects()));
 
-                CHECK(is_operational(bestagon_and_with_defects, std::vector<tt>{create_and_tt()},
+                CHECK(is_operational(bestagon_and_with_defects,
+                                     std::vector<kitty::dynamic_truth_table>{create_and_tt()},
                                      design_gate_params.operational_params)
                           .first == operational_status::OPERATIONAL);
 
@@ -157,10 +200,15 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
         SECTION("AND gate cannot be designed with one SiDB, exception handling on invalid parameters")
         {
             // Set up the parameters with an invalid configuration (1 SiDB for an AND gate)
-            design_gate_params.number_of_canvas_sidbs = 1;
-            params.design_gate_params                 = design_gate_params;
+            const design_gates_params design_gate_params{
+                .operational_params     = {.sim_params = simulation_parameters{2, -0.32}},
+                .canvas                 = {site_at_row(24, 17), site_at_row(34, 28)},
+                .number_of_canvas_sidbs = 1,
+                .termination_cond       = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION};
+            const on_the_fly_gate_library_params params{.design_gate_params = design_gate_params};
 
-            CHECK_THROWS(apply_parameterized_gate_library<on_the_fly_gate_library>(layout, params));
+            CHECK_THROWS_AS(apply_parameterized_gate_library<on_the_fly_gate_library>(layout, params),
+                            gate_design_exception);
         }
     }
 }
@@ -181,48 +229,49 @@ TEST_CASE("Gate-level layout with two input wires, one double wire, and two outp
     {
         const auto double_wire = (apply_gate_library<bestagon_library>(layout));
 
-        check_equivalence(double_wire,
-                          fmt::format("{}/resources/bestagon_library/multi_tile_layout/double_wire.sqd", TEST_PATH));
+        check_sidb_interface(double_wire,
+                             fmt::format("{}/resources/bestagon_library/multi_tile_layout/double_wire.sqd", TEST_PATH));
     }
 
     SECTION("Use parameterized gate library")
     {
-        on_the_fly_gate_library_params params{};
-
-        design_gates_params design_gate_params{};
-        design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
-        design_gate_params.canvas                        = {site_at_row(24, 17), site_at_row(34, 28)};
-        design_gate_params.termination_cond = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION;
-
         SECTION("use predefined gate implementation for complex gates (double wire and crossing)")
         {
-            design_gate_params.number_of_canvas_sidbs = 2;
-            params.using_predefined_crossing_and_double_wire_if_possible =
-                on_the_fly_gate_library_params::complex_gate_design_policy::USING_PREDEFINED;
-            params.design_gate_params = design_gate_params;
+            const design_gates_params design_gate_params{
+                .operational_params     = {.sim_params = simulation_parameters{2, -0.32}},
+                .canvas                 = {site_at_row(24, 17), site_at_row(34, 28)},
+                .number_of_canvas_sidbs = 2,
+                .termination_cond       = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION};
+            const on_the_fly_gate_library_params params{
+                .design_gate_params = design_gate_params,
+                .using_predefined_crossing_and_double_wire_if_possible =
+                    on_the_fly_gate_library_params::complex_gate_design_policy::USING_PREDEFINED};
 
             const auto bestagon_double_wire =
                 (apply_parameterized_gate_library<on_the_fly_gate_library>(layout, params));
 
-            check_equivalence(
+            check_sidb_interface(
                 bestagon_double_wire,
                 fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/predefined_double_wire.sqd",
                             TEST_PATH));
         }
         SECTION("Design all gates of the layout on-the-fly")
         {
-            design_gate_params.canvas                 = {site_at_row(24, 17), site_at_row(29, 28)};
-            design_gate_params.number_of_canvas_sidbs = 3;
-            design_gate_params.design_mode            = design_gates_params::design_gates_mode::QUICKCELL;
-            design_gate_params.termination_cond = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION;
-            params.design_gate_params           = design_gate_params;
-            params.using_predefined_crossing_and_double_wire_if_possible =
-                on_the_fly_gate_library_params::complex_gate_design_policy::DESIGN_ON_THE_FLY;
+            const design_gates_params design_gate_params{
+                .operational_params     = {.sim_params = simulation_parameters{2, -0.32}},
+                .design_mode            = design_gates_params::design_gates_mode::QUICKCELL,
+                .canvas                 = {site_at_row(24, 17), site_at_row(29, 28)},
+                .number_of_canvas_sidbs = 3,
+                .termination_cond       = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION};
+            const on_the_fly_gate_library_params params{
+                .design_gate_params = design_gate_params,
+                .using_predefined_crossing_and_double_wire_if_possible =
+                    on_the_fly_gate_library_params::complex_gate_design_policy::DESIGN_ON_THE_FLY};
 
             const auto bestagon_double_wire =
                 (apply_parameterized_gate_library<on_the_fly_gate_library>(layout, params));
 
-            check_equivalence(
+            check_sidb_interface(
                 bestagon_double_wire,
                 fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/double_wire.sqd", TEST_PATH));
 
@@ -237,12 +286,11 @@ TEST_CASE("Gate-level layout with two input wires, one double wire, and two outp
                     apply_parameterized_gate_library_to_defective_surface<on_the_fly_gate_library>(layout, params,
                                                                                                    surface);
 
-                CHECK(bestagon_double_wire_with_defects.num_defects() == 2);
-                CHECK(bestagon_double_wire_with_defects.get_defect(site_at_row(30, 20)).type == defect_type::DB);
-                CHECK(bestagon_double_wire_with_defects.get_defect(site_at_row(45, 55)).type == defect_type::DB);
+                CHECK_THAT(bestagon_double_wire_with_defects.defects(),
+                           Catch::Matchers::UnorderedRangeEquals(surface.defects()));
 
-                check_equivalence(
-                    bestagon_double_wire,
+                check_sidb_interface(
+                    bestagon_double_wire_with_defects,
                     fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/double_wire_and_defects.sqd",
                                 TEST_PATH));
             }
@@ -250,7 +298,7 @@ TEST_CASE("Gate-level layout with two input wires, one double wire, and two outp
     }
 }
 
-TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
+TEST_CASE("Gate-level layout with different gates", "[apply-gate-library]")
 {
     SECTION("INV with input and output wire tile")
     {
@@ -264,26 +312,24 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
         {
             const auto inverter = (apply_gate_library<bestagon_library>(layout));
 
-            check_equivalence(inverter,
-                              fmt::format("{}/resources/bestagon_library/multi_tile_layout/INV.sqd", TEST_PATH));
+            check_sidb_interface(inverter,
+                                 fmt::format("{}/resources/bestagon_library/multi_tile_layout/INV.sqd", TEST_PATH));
         }
 
         SECTION("Use parameterized gate library")
         {
-            on_the_fly_gate_library_params params{};
+            const design_gates_params design_gate_params{
+                .operational_params     = {.sim_params = simulation_parameters{2, -0.32}},
+                .canvas                 = {site_at_row(25, 19), site_at_row(32, 25)},
+                .number_of_canvas_sidbs = 3,
+                .termination_cond       = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION};
 
-            design_gates_params design_gate_params{};
-            design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
-            design_gate_params.canvas                        = {site_at_row(25, 19), site_at_row(32, 25)};
-            design_gate_params.number_of_canvas_sidbs        = 3;
-            design_gate_params.termination_cond = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION;
-
-            params.design_gate_params = design_gate_params;
+            const on_the_fly_gate_library_params params{.design_gate_params = design_gate_params};
 
             const auto inverter = (apply_parameterized_gate_library<on_the_fly_gate_library>(layout, params));
 
-            check_equivalence(inverter,
-                              fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/INV.sqd", TEST_PATH));
+            check_sidb_interface(
+                inverter, fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/INV.sqd", TEST_PATH));
 
             SECTION("with defects")
             {
@@ -297,9 +343,10 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
                     apply_parameterized_gate_library_to_defective_surface<on_the_fly_gate_library>(layout, params,
                                                                                                    defect_layout);
 
-                CHECK(inverter_with_defects.num_defects() == 1);
+                CHECK_THAT(inverter_with_defects.defects(),
+                           Catch::Matchers::UnorderedRangeEquals(defect_layout.defects()));
 
-                check_equivalence(
+                check_sidb_interface(
                     inverter_with_defects,
                     fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/INV_and_defects.sqd",
                                 TEST_PATH));
@@ -320,26 +367,24 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
         {
             const auto or_layout = (apply_gate_library<bestagon_library>(layout));
 
-            check_equivalence(or_layout,
-                              fmt::format("{}/resources/bestagon_library/multi_tile_layout/OR.sqd", TEST_PATH));
+            check_sidb_interface(or_layout,
+                                 fmt::format("{}/resources/bestagon_library/multi_tile_layout/OR.sqd", TEST_PATH));
         }
 
         SECTION("Use parameterized gate library")
         {
-            on_the_fly_gate_library_params params{};
+            const design_gates_params design_gate_params{
+                .operational_params     = {.sim_params = simulation_parameters{2, -0.32}},
+                .canvas                 = {site_at_row(24, 17), site_at_row(34, 28)},
+                .number_of_canvas_sidbs = 3,
+                .termination_cond       = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION};
 
-            design_gates_params design_gate_params{};
-            design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
-            design_gate_params.canvas                        = {site_at_row(24, 17), site_at_row(34, 28)};
-            design_gate_params.number_of_canvas_sidbs        = 3;
-            design_gate_params.termination_cond = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION;
-
-            params.design_gate_params = design_gate_params;
+            const on_the_fly_gate_library_params params{.design_gate_params = design_gate_params};
 
             const auto or_layout = (apply_parameterized_gate_library<on_the_fly_gate_library>(layout, params));
 
-            check_equivalence(or_layout,
-                              fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/OR.sqd", TEST_PATH));
+            check_sidb_interface(
+                or_layout, fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/OR.sqd", TEST_PATH));
 
             SECTION("with defects")
             {
@@ -353,9 +398,10 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
                     apply_parameterized_gate_library_to_defective_surface<on_the_fly_gate_library>(layout, params,
                                                                                                    defect_layout);
 
-                CHECK(or_layout_with_defects.num_defects() == 1);
+                CHECK_THAT(or_layout_with_defects.defects(),
+                           Catch::Matchers::UnorderedRangeEquals(defect_layout.defects()));
 
-                check_equivalence(
+                check_sidb_interface(
                     or_layout_with_defects,
                     fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/OR_and_defects.sqd",
                                 TEST_PATH));
@@ -376,25 +422,23 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
         {
             const auto nand_layout = (apply_gate_library<bestagon_library>(layout));
 
-            check_equivalence(nand_layout,
-                              fmt::format("{}/resources/bestagon_library/multi_tile_layout/NAND.sqd", TEST_PATH));
+            check_sidb_interface(nand_layout,
+                                 fmt::format("{}/resources/bestagon_library/multi_tile_layout/NAND.sqd", TEST_PATH));
         }
 
         SECTION("Use parameterized gate library")
         {
-            on_the_fly_gate_library_params params{};
+            const design_gates_params design_gate_params{
+                .operational_params     = {.sim_params = simulation_parameters{2, -0.32}},
+                .canvas                 = {site_at_row(24, 17), site_at_row(34, 28)},
+                .number_of_canvas_sidbs = 3,
+                .termination_cond       = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION};
 
-            design_gates_params design_gate_params{};
-            design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
-            design_gate_params.canvas                        = {site_at_row(24, 17), site_at_row(34, 28)};
-            design_gate_params.number_of_canvas_sidbs        = 3;
-            design_gate_params.termination_cond = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION;
-
-            params.design_gate_params = design_gate_params;
+            const on_the_fly_gate_library_params params{.design_gate_params = design_gate_params};
 
             const auto nand_layout = (apply_parameterized_gate_library<on_the_fly_gate_library>(layout, params));
 
-            check_equivalence(
+            check_sidb_interface(
                 nand_layout, fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/NAND.sqd", TEST_PATH));
 
             SECTION("with defects")
@@ -414,9 +458,10 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
                     apply_parameterized_gate_library_to_defective_surface<on_the_fly_gate_library>(layout, params,
                                                                                                    defect_layout);
 
-                CHECK(nand_layout_with_defects.num_defects() == 2);
+                CHECK_THAT(nand_layout_with_defects.defects(),
+                           Catch::Matchers::UnorderedRangeEquals(defect_layout.defects()));
 
-                check_equivalence(
+                check_sidb_interface(
                     nand_layout_with_defects,
                     fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/NAND_and_defects.sqd",
                                 TEST_PATH));
@@ -437,26 +482,24 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
         {
             const auto nor_layout = (apply_gate_library<bestagon_library>(layout));
 
-            check_equivalence(nor_layout,
-                              fmt::format("{}/resources/bestagon_library/multi_tile_layout/NOR.sqd", TEST_PATH));
+            check_sidb_interface(nor_layout,
+                                 fmt::format("{}/resources/bestagon_library/multi_tile_layout/NOR.sqd", TEST_PATH));
         }
 
         SECTION("Use parameterized gate library")
         {
-            on_the_fly_gate_library_params params{};
+            const design_gates_params design_gate_params{
+                .operational_params     = {.sim_params = simulation_parameters{2, -0.32}},
+                .canvas                 = {site_at_row(24, 17), site_at_row(34, 28)},
+                .number_of_canvas_sidbs = 3,
+                .termination_cond       = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION};
 
-            design_gates_params design_gate_params{};
-            design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
-            design_gate_params.canvas                        = {site_at_row(24, 17), site_at_row(34, 28)};
-            design_gate_params.number_of_canvas_sidbs        = 3;
-            design_gate_params.termination_cond = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION;
-
-            params.design_gate_params = design_gate_params;
+            const on_the_fly_gate_library_params params{.design_gate_params = design_gate_params};
 
             const auto nor_layout = (apply_parameterized_gate_library<on_the_fly_gate_library>(layout, params));
 
-            check_equivalence(nor_layout,
-                              fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/NOR.sqd", TEST_PATH));
+            check_sidb_interface(
+                nor_layout, fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/NOR.sqd", TEST_PATH));
         }
     }
 
@@ -473,45 +516,40 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
         {
             const auto xor_layout = (apply_gate_library<bestagon_library>(layout));
 
-            check_equivalence(xor_layout,
-                              fmt::format("{}/resources/bestagon_library/multi_tile_layout/XOR.sqd", TEST_PATH));
+            check_sidb_interface(xor_layout,
+                                 fmt::format("{}/resources/bestagon_library/multi_tile_layout/XOR.sqd", TEST_PATH));
         }
 
         SECTION("Use parameterized gate library")
         {
-            on_the_fly_gate_library_params params{};
+            const design_gates_params design_gate_params{
+                .operational_params     = {.sim_params = simulation_parameters{2, -0.32}},
+                .canvas                 = {site_at_row(24, 17), site_at_row(34, 28)},
+                .number_of_canvas_sidbs = 3,
+                .termination_cond       = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION};
 
-            design_gates_params design_gate_params{};
-            design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
-            design_gate_params.canvas                        = {site_at_row(24, 17), site_at_row(34, 28)};
-            design_gate_params.number_of_canvas_sidbs        = 3;
-            design_gate_params.termination_cond = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION;
-
-            params.design_gate_params = design_gate_params;
+            const on_the_fly_gate_library_params params{.design_gate_params = design_gate_params};
 
             const auto xor_layout = (apply_parameterized_gate_library<on_the_fly_gate_library>(layout, params));
 
-            check_equivalence(xor_layout,
-                              fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/XOR.sqd", TEST_PATH));
+            check_sidb_interface(
+                xor_layout, fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/XOR.sqd", TEST_PATH));
         }
 
         SECTION("Use parameterized gate library, reject kinks")
         {
-            on_the_fly_gate_library_params params{};
+            const design_gates_params design_gate_params{
+                .operational_params     = {.sim_params   = simulation_parameters{2, -0.32},
+                                           .op_condition = is_operational_params::operational_condition::REJECT_KINKS},
+                .canvas                 = {site_at_row(24, 17), site_at_row(34, 28)},
+                .number_of_canvas_sidbs = 3,
+                .termination_cond       = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION};
 
-            design_gates_params design_gate_params{};
-            design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
-            design_gate_params.canvas                        = {site_at_row(24, 17), site_at_row(34, 28)};
-            design_gate_params.number_of_canvas_sidbs        = 3;
-            design_gate_params.termination_cond = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION;
-            design_gate_params.operational_params.op_condition =
-                is_operational_params::operational_condition::REJECT_KINKS;
-
-            params.design_gate_params = design_gate_params;
+            const on_the_fly_gate_library_params params{.design_gate_params = design_gate_params};
 
             const auto xor_layout = (apply_parameterized_gate_library<on_the_fly_gate_library>(layout, params));
 
-            check_equivalence(
+            check_sidb_interface(
                 xor_layout,
                 fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/XOR_rejecting_kinks.sqd",
                             TEST_PATH));
@@ -531,25 +569,23 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
         {
             const auto xnor_layout = (apply_gate_library<bestagon_library>(layout));
 
-            check_equivalence(xnor_layout,
-                              fmt::format("{}/resources/bestagon_library/multi_tile_layout/XNOR.sqd", TEST_PATH));
+            check_sidb_interface(xnor_layout,
+                                 fmt::format("{}/resources/bestagon_library/multi_tile_layout/XNOR.sqd", TEST_PATH));
         }
 
         SECTION("Use parameterized gate library")
         {
-            on_the_fly_gate_library_params params{};
+            const design_gates_params design_gate_params{
+                .operational_params     = {.sim_params = simulation_parameters{2, -0.32}},
+                .canvas                 = {site_at_row(24, 17), site_at_row(34, 28)},
+                .number_of_canvas_sidbs = 3,
+                .termination_cond       = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION};
 
-            design_gates_params design_gate_params{};
-            design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
-            design_gate_params.canvas                        = {site_at_row(24, 17), site_at_row(34, 28)};
-            design_gate_params.number_of_canvas_sidbs        = 3;
-            design_gate_params.termination_cond = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION;
-
-            params.design_gate_params = design_gate_params;
+            const on_the_fly_gate_library_params params{.design_gate_params = design_gate_params};
 
             const auto xnor_layout = (apply_parameterized_gate_library<on_the_fly_gate_library>(layout, params));
 
-            check_equivalence(
+            check_sidb_interface(
                 xnor_layout, fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/XNOR.sqd", TEST_PATH));
         }
     }
@@ -646,10 +682,10 @@ TEST_CASE("On-the-fly SiDB fanout gate", "[apply-gate-library]")
     layout.create_po(fanout, "output1", {0, 2});
     layout.create_po(fanout, "output2", {1, 2});
 
-    on_the_fly_gate_library_params params{};
-    params.design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
-    params.design_gate_params.design_mode                   = design_gates_params::design_gates_mode::QUICKCELL;
-    params.design_gate_params.number_of_canvas_sidbs        = 3;
+    const on_the_fly_gate_library_params params{
+        .design_gate_params = {.operational_params     = {.sim_params = simulation_parameters{2, -0.32}},
+                               .design_mode            = design_gates_params::design_gates_mode::QUICKCELL,
+                               .number_of_canvas_sidbs = 3}};
 
     const auto fanout_gate = on_the_fly_gate_library::set_up_gate(layout, {1, 1}, params);
 
@@ -679,10 +715,10 @@ TEST_CASE("On-the-fly SiDB crossing gate", "[apply-gate-library]")
     const auto wire2  = layout.create_buf(input2, {1, 1, 1});
     layout.create_po(wire2, "output2", {0, 2, 0});
 
-    on_the_fly_gate_library_params params{};
-    params.design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
-    params.using_predefined_crossing_and_double_wire_if_possible =
-        on_the_fly_gate_library_params::complex_gate_design_policy::USING_PREDEFINED;
+    const on_the_fly_gate_library_params params{
+        .design_gate_params = {.operational_params = {.sim_params = simulation_parameters{2, -0.32}}},
+        .using_predefined_crossing_and_double_wire_if_possible =
+            on_the_fly_gate_library_params::complex_gate_design_policy::USING_PREDEFINED};
 
     const auto crossing_gate = on_the_fly_gate_library::set_up_gate(layout, {1, 1, 0}, params);
 
@@ -694,6 +730,43 @@ TEST_CASE("On-the-fly SiDB crossing gate", "[apply-gate-library]")
     surface.assign_defect(site_at_row(0, 0), defect{defect_type::DB, -1, 2, 5});
 
     CHECK(on_the_fly_gate_library::set_up_gate(layout, {1, 1, 0}, params, surface) == crossing_gate);
+}
+
+TEST_CASE("On-the-fly complex SiDB gates honor the design policy", "[apply-gate-library]")
+{
+    const auto [crossing, surface_kind] = GENERATE(
+        (Catch::Generators::table<bool, int>({{false, 0}, {false, 1}, {false, 2}, {true, 0}, {true, 1}, {true, 2}})));
+    CAPTURE(crossing, surface_kind);
+
+    hexagonal_gate_layout layout{arrangement::EVEN_ROW, {3, 3, 2}, clocking::row()};
+    const auto            input1 = layout.create_pi("input1", {0, 0});
+    const auto            input2 = layout.create_pi("input2", {1, 0});
+    const auto            wire1  = layout.create_buf(input1, {1, 1, 0});
+    const auto            wire2  = layout.create_buf(input2, {1, 1, 1});
+    layout.create_po(wire1, "output1", {crossing ? 1 : 0, 2, 0});
+    layout.create_po(wire2, "output2", {crossing ? 0 : 1, 2, 0});
+
+    std::optional<sidb::layout> surface{};
+    if (surface_kind != 0)
+    {
+        surface.emplace();
+        if (surface_kind == 2)
+        {
+            surface->assign_defect(site_at_row(0, 0), defect{defect_type::DB, -1, 2, 5});
+        }
+    }
+
+    on_the_fly_gate_library_params params{
+        .design_gate_params        = {.operational_params     = {.sim_params = simulation_parameters{2, -0.32}},
+                                      .canvas                 = {site_at_row(24, 17), site_at_row(24, 17)},
+                                      .number_of_canvas_sidbs = 2},
+        .canvas_sidb_complex_gates = 2};
+    const auto predefined = on_the_fly_gate_library::set_up_gate(layout, {1, 1, 0}, params);
+    CHECK(on_the_fly_gate_library::set_up_gate(layout, {1, 1, 0}, params, surface) == predefined);
+
+    params.using_predefined_crossing_and_double_wire_if_possible =
+        on_the_fly_gate_library_params::complex_gate_design_policy::DESIGN_ON_THE_FLY;
+    CHECK_THROWS_AS(on_the_fly_gate_library::set_up_gate(layout, {1, 1, 0}, params, surface), gate_design_exception);
 }
 
 TEST_CASE("Gate-library progress counts completed mappings", "[apply-gate-library]")
@@ -719,6 +792,7 @@ TEST_CASE("Gate-library progress counts completed mappings", "[apply-gate-librar
 TEST_CASE("Bestagon library rejects layouts that shift columns", "[apply-gate-library]")
 {
     const auto a = GENERATE(arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
+    CAPTURE(a);
 
     hexagonal_gate_layout layout{a, {3, 3}, clocking::row()};
     layout.create_pi("x", {0, 0});

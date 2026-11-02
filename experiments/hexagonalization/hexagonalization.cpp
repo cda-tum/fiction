@@ -55,6 +55,7 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::networks;
 using namespace fiction::fcn;
 using namespace fiction::layouts;
 using namespace fiction::physical_design;
@@ -158,14 +159,13 @@ try
         const mockturtle::depth_view depth_mapped_network{mapped_network};
 
         // perform layout generation with an SMT-based exact algorithm
-        const auto gate_layout =
-            orthogonal<cartesian_gate_layout>(convert_network<tec_nt>(mapped_network), {}, &orthogonal_stats);
+        const auto gate_layout = orthogonal<cartesian_layout>(convert_network<named_technology_network>(mapped_network),
+                                                              {}, &orthogonal_stats);
 
         // compute critical path and throughput
         const auto cp_tp = critical_path_length_and_throughput(gate_layout);
 
-        const auto hex_layout = hexagonalization<hexagonal_gate_layout, cartesian_gate_layout>(
-            gate_layout, hexagonalization_params, &hexagonalization_stats);
+        const auto hex_layout = hexagonalization(gate_layout, hexagonalization_params, &hexagonalization_stats);
 
         // check equivalence
         equivalence_checking_stats eq_stats{};

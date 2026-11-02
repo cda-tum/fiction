@@ -22,11 +22,13 @@
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <limits>
 #include <new>
+#include <type_traits>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -236,9 +238,26 @@ TEST_CASE("Defects", "[layout]")
         CHECK(lyt.num_positively_charged_defects() == 1);
         CHECK(lyt.num_neutral_defects() == 1);
 
-        std::vector<lattice_site> visited{};
-        lyt.foreach_defect([&visited](const auto& sd) { visited.push_back(sd.first); });
-        CHECK(visited == std::vector<lattice_site>{{0, 0, 0}, {1, 0, 1}, {5, 2, 0}});
+        /** @brief Complete ordered defects observed by the callback. */
+        std::vector<std::pair<lattice_site, defect>> visited{};
+        /** @brief The canonical defects, independent of either callback overload. */
+        const std::vector<std::pair<lattice_site, defect>> expected{{{0, 0, 0}, positive},
+                                                                    {{1, 0, 1}, neutral},
+                                                                    {{5, 2, 0}, charged}};
+        lyt.foreach_defect([&visited](const auto& sd) { visited.push_back(sd); });
+        CHECK(visited == expected);
+        visited.clear();
+
+        /** @brief Indices reported for the ordered defect visits. */
+        std::vector<std::size_t> indices{};
+        lyt.foreach_defect(
+            [&](const auto& sd, const auto i)
+            {
+                visited.push_back(sd);
+                indices.push_back(i);
+            });
+        CHECK(visited == expected);
+        CHECK(indices == std::vector<std::size_t>{0, 1, 2});
     }
     SECTION("erase and move")
     {
@@ -250,6 +269,15 @@ TEST_CASE("Defects", "[layout]")
         CHECK(lyt.num_defects() == 2);
         CHECK(lyt.get_defect({5, 2, 0}).type == defect_type::NONE);
         CHECK(lyt.get_defect({6, 2, 0}) == charged);
+    }
+    SECTION("charged defect types with zero charge also count as neutral")
+    {
+        lyt.assign_defect({5, 2, 0}, defect{defect_type::SI_VACANCY});
+        CHECK(lyt.get_defect({5, 2, 0}).charge == 0);
+        CHECK(lyt.num_charged_defects() == 2);
+        CHECK(lyt.num_neutral_defects() == 2);
+        CHECK(lyt.num_negatively_charged_defects() == 0);
+        CHECK(lyt.num_positively_charged_defects() == 1);
     }
     SECTION("move using sites borrowed from the layout")
     {
@@ -282,13 +310,29 @@ TEST_CASE("Defects", "[layout]")
         CHECK(around_charged.contains({5 - 26, 2 - 13, 0}));
         CHECK(around_charged.contains({5 + 26, 2 + 13, 0}));
         CHECK(!around_charged.contains({5, 2, 1}));
+        CHECK(std::ranges::all_of(around_charged, [](const auto& s)
+                                  { return s.z == 0 && s.x >= -21 && s.x <= 31 && s.y >= -11 && s.y <= 15; }));
 
-        const auto narrow = lyt.affected_sidbs({5, 2, 0}, std::pair<uint16_t, uint16_t>{1, 1});
-        CHECK(narrow.size() == 9);
+        /** @brief The complete one-unit-cell rectangle retains the defect's basis index. */
+        const std::unordered_set<lattice_site> expected_narrow{{4, 1, 0}, {5, 1, 0}, {6, 1, 0}, {4, 2, 0}, {5, 2, 0},
+                                                               {6, 2, 0}, {4, 3, 0}, {5, 3, 0}, {6, 3, 0}};
+        CHECK(lyt.affected_sidbs({5, 2, 0}, std::pair{uint16_t{1}, uint16_t{1}}) == expected_narrow);
 
+        /** @brief Union of both charged rectangles and the neutral defect's site. */
+        auto expected_all = expected_narrow;
+        expected_all.insert({{-1, -1, 0},
+                             {0, -1, 0},
+                             {1, -1, 0},
+                             {-1, 0, 0},
+                             {0, 0, 0},
+                             {1, 0, 0},
+                             {-1, 1, 0},
+                             {0, 1, 0},
+                             {1, 1, 0},
+                             {1, 0, 1}});
         const auto all =
-            lyt.all_affected_sidbs(std::pair<uint16_t, uint16_t>{1, 1}, std::pair<uint16_t, uint16_t>{0, 0});
-        CHECK(all.size() == 9 + 1 + 9);
+            lyt.all_affected_sidbs(std::pair{uint16_t{1}, uint16_t{1}}, std::pair{uint16_t{0}, uint16_t{0}});
+        CHECK(all == expected_all);
     }
     SECTION("bounding box covers defects")
     {
@@ -307,19 +351,42 @@ TEST_CASE("Defects", "[layout]")
         lyt.assign_defect(last, charged);
         CHECK(lyt.bounding_box() == std::pair{first, last});
 
-        const auto lower = lyt.affected_sidbs(first, std::pair<uint16_t, uint16_t>{1, 1});
-        CHECK(lower.size() == 4);
-        CHECK(lower.contains(first));
-        CHECK(lower.contains({min_coordinate + 1, min_coordinate + 1, 0}));
-        const auto upper = lyt.affected_sidbs(last, std::pair<uint16_t, uint16_t>{1, 1});
-        CHECK(upper.size() == 4);
-        CHECK(upper.contains(last));
-        CHECK(upper.contains({max_coordinate - 1, max_coordinate - 1, 1}));
+        const auto lower = lyt.affected_sidbs(first, std::pair{uint16_t{1}, uint16_t{1}});
+        CHECK(lower == std::unordered_set<lattice_site>{first,
+                                                        {min_coordinate + 1, min_coordinate, 0},
+                                                        {min_coordinate, min_coordinate + 1, 0},
+                                                        {min_coordinate + 1, min_coordinate + 1, 0}});
+        const auto upper = lyt.affected_sidbs(last, std::pair{uint16_t{1}, uint16_t{1}});
+        CHECK(upper == std::unordered_set<lattice_site>{last,
+                                                        {max_coordinate - 1, max_coordinate, 1},
+                                                        {max_coordinate, max_coordinate - 1, 1},
+                                                        {max_coordinate - 1, max_coordinate - 1, 1}});
     }
 }
 
 TEST_CASE("Layout updates preserve data when allocation fails", "[layout]")
 {
+    SECTION("copy assignment")
+    {
+        /** @brief Source with allocated name, dots, and defects. */
+        layout source{lattice::si_111_1x1(), "source layout with an allocated name"};
+        source.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+        source.assign_sidb({1, 0, 0}, dot_tag::OUTPUT);
+        source.assign_sidb({2, 0, 1});
+        source.assign_defect({3, 0, 0}, defect{defect_type::SI_VACANCY});
+
+        /** @brief Populated destination retained when allocation fails. */
+        layout original{};
+        original.assign_sidb({5, 0, 0}, dot_tag::LOGIC);
+        /** @brief Destination after successful copy assignment. */
+        const auto result = check_allocation_failures(
+            original,
+            [&source](/** @brief Destination updated under an allocation budget. */ layout& lyt) { lyt = source; });
+        CHECK(result == source);
+        CHECK(result.get_dot_tag({0, 0, 0}) == dot_tag::INPUT);
+        CHECK(result.get_dot_tag({1, 0, 0}) == dot_tag::OUTPUT);
+        CHECK(result.get_dot_tag({2, 0, 1}) == dot_tag::NORMAL);
+    }
     SECTION("SiDB insertion")
     {
         const auto result = check_allocation_failures(layout{}, [](layout& lyt) { lyt.assign_sidb({0, 0, 0}); });
@@ -337,4 +404,34 @@ TEST_CASE("Layout updates preserve data when allocation fails", "[layout]")
         CHECK(result.get_defect({0, 0, 0}).type == defect_type::NONE);
         CHECK(result.get_defect({1, 0, 0}) == vacancy);
     }
+}
+
+TEST_CASE("Layout assignment preserves value semantics", "[layout]")
+{
+    STATIC_REQUIRE(std::is_nothrow_move_constructible_v<layout>);
+    STATIC_REQUIRE(std::is_nothrow_move_assignable_v<layout>);
+
+    /** @brief Reference layout for copy and move checks. */
+    layout original{lattice::si_111_1x1(), "named layout"};
+    original.assign_sidb({0, 0, 0}, dot_tag::INPUT);
+    original.assign_defect({1, 0, 0}, defect{defect_type::SI_VACANCY});
+    /** @brief Independent copy used for self-assignment. */
+    auto copy = original;
+    /** @brief Alias that exercises self-assignment. */
+    const auto& same = copy;
+    copy             = same;
+    CHECK(copy == original);
+
+    /** @brief Destination whose storage remains independent of the source. */
+    layout assigned{};
+    CHECK(&(assigned = copy) == &assigned);
+    CHECK(assigned == original);
+    copy.assign_sidb({0, 0, 0}, dot_tag::OUTPUT);
+    CHECK(assigned.get_dot_tag({0, 0, 0}) == dot_tag::INPUT);
+
+    /** @brief Destination that receives the assigned layout's storage. */
+    auto moved = std::move(assigned);
+    CHECK(moved == original);
+    assigned = std::move(moved);
+    CHECK(assigned == original);
 }

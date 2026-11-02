@@ -19,8 +19,6 @@
 #include <fiction/utils/io/csv_writer.hpp>
 
 #include <sstream>
-#include <string>
-#include <string_view>
 
 using namespace fiction;
 using namespace fiction::utils::io;
@@ -30,6 +28,12 @@ TEST_CASE("CSV writer", "[csv-writer]")
     std::stringstream ss{};
 
     csv_writer writer(ss);
+
+    SECTION("writing no values")
+    {
+        writer.write_line();
+        CHECK(ss.str() == "\n");
+    }
 
     SECTION("writing single integer value")
     {
@@ -45,6 +49,7 @@ TEST_CASE("CSV writer", "[csv-writer]")
 
     SECTION("writing single double value")
     {
+        // NOLINTNEXTLINE(modernize-use-std-numbers): the decimal input is part of the exact serialization test.
         writer.write_line(3.14159);
         CHECK(ss.str() == "3.14159\n");
     }

@@ -643,16 +643,14 @@ class critical_temperature_impl
  * @param params Simulation and physical parameters.
  * @param pst Statistics.
  * @return The critical temperature (unit: K).
+ * @throws std::invalid_argument if `spec` is empty or truth-table variable counts differ.
  */
 inline double critical_temperature_gate_based(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
                                               const critical_temperature_params& params = {},
                                               critical_temperature_stats*        pst    = nullptr)
 {
 
-    assert(!spec.empty());
-    // all elements in tts must have the same number of variables
-    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
-                                      { return a.num_vars() != b.num_vars(); }) == spec.end());
+    logic::detail::check_specification(spec);
 
     critical_temperature_stats st{};
 
@@ -689,8 +687,9 @@ inline double critical_temperature_gate_based(const layout& lyt, const std::vect
  * @param output_bdl_wires BDL output wires of the layout.
  * @param pst Statistics.
  * @return The critical temperature (unit: K).
- * @throws std::invalid_argument if `spec` is empty, if the number of input pattern layouts does not match the number
- * of input combinations of `spec`, or if the number of output BDL pairs does not match the number of truth tables.
+ * @throws std::invalid_argument if `spec` is empty, truth-table variable counts differ, the number of input pattern
+ * layouts does not match the number of input combinations, or the number of output BDL pairs does not match the
+ * number of truth tables.
  */
 inline double critical_temperature_gate_based(const std::vector<layout>&                     input_pattern_layouts,
                                               const std::vector<kitty::dynamic_truth_table>& spec,
@@ -701,13 +700,7 @@ inline double critical_temperature_gate_based(const std::vector<layout>&        
                                               critical_temperature_stats*                    pst = nullptr)
 {
 
-    // unlike the other overload, this one indexes caller-supplied containers, so a wrong size is an out-of-bounds
-    // read rather than a wrong answer. It is also reachable from `pyfiction` with arbitrary lists, so the checks
-    // have to survive `NDEBUG`
-    if (spec.empty())
-    {
-        throw std::invalid_argument("spec is empty");
-    }
+    logic::detail::check_specification(spec);
 
     if (input_pattern_layouts.size() != spec.front().num_bits())
     {
@@ -721,10 +714,6 @@ inline double critical_temperature_gate_based(const std::vector<layout>&        
         throw std::invalid_argument(fmt::format("expected {} output BDL pairs, one per truth table, but got {}",
                                                 spec.size(), output_bdl_pairs.size()));
     }
-
-    // all elements in tts must have the same number of variables
-    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
-                                      { return a.num_vars() != b.num_vars(); }) == spec.end());
 
     critical_temperature_stats st{};
 

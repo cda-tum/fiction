@@ -325,9 +325,10 @@ TEST_CASE("Time-to-solution reports progress", "[time-to-solution]")
 
     progress_recorder rec{};
 
-    const quicksim_params   qs_params{.sim_params = simulation_parameters{2, -0.32}};
-    time_to_solution_params tts_params{.engine = exact_engine::QUICKEXACT, .repetitions = 5};
-    tts_params.on_progress = rec.callback();
+    const quicksim_params         qs_params{.sim_params = simulation_parameters{2, -0.32}};
+    const time_to_solution_params tts_params{.engine      = exact_engine::QUICKEXACT,
+                                             .repetitions = 5,
+                                             .on_progress = rec.callback()};
 
     time_to_solution_stats stats{};
     time_to_solution(lyt, qs_params, tts_params, &stats);

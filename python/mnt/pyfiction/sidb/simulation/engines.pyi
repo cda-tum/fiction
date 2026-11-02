@@ -73,13 +73,13 @@ def quicksim(
     on_worker_progress: Callable[[int, int, str, int, int, bool], None] | None = None,
 ) -> mnt.pyfiction.sidb.simulation.sidb_simulation_result | None:
     """
-    Search for low-energy charge distributions with QuickSim.
+    Search for low-energy distributions of negative and neutral charges with QuickSim.
     The keyword options select physical values, iterations, threads, runtime, and progress callbacks.
     Returns None when the heuristic search finds no physically valid charge distribution.
     Raises ValueError when base is neither 2 nor 3.
 
     Args:
-        base: Number of charge states: 2 for negative and neutral, or 3 to include positive charges.
+        base: Accepts 2 or 3; QuickSim searches negative and neutral charge states for either value.
         mu_minus: Negative-charge transition energy in eV.
         epsilon_r: Relative permittivity (dimensionless).
         lambda_tf: Thomas-Fermi screening distance in nm.

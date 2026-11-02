@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/allocation_failure.hpp"
@@ -67,9 +68,9 @@ template <typename State, typename Update, typename Check>
 State check_allocation_failures(const State& original, const Update& update, const Check& unchanged)
 {
     require_allocation_failure_support();
-    bool failed{};
     for (std::size_t failure = 0;; ++failure)
     {
+        CAPTURE(failure);
         REQUIRE(failure < ALLOCATION_FAILURE_ATTEMPT_LIMIT);
         auto candidate = original;
         try
@@ -77,13 +78,11 @@ State check_allocation_failures(const State& original, const Update& update, con
             allocation_budget = failure;
             update(candidate);
             allocation_budget.reset();
-            CHECK(failed);
             return candidate;
         }
         catch (const std::bad_alloc&)
         {
             allocation_budget.reset();
-            failed = true;
             unchanged(candidate);
         }
         catch (...)

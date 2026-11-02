@@ -17,6 +17,7 @@
 
 #if (FICTION_ALGLIB_ENABLED)
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/technology/sidb/lattice.hpp>
@@ -35,10 +36,35 @@ using namespace fiction;
 using namespace fiction::sidb;
 
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
-using set_container = std::set<uint64>;
+using set_container = std::set<uint64_t>;
 #else
 using set_container = phmap::flat_hash_set<uint64_t>;
 #endif
+
+TEST_CASE("SiDB cluster hierarchy of empty and singleton layouts", "[sidb-cluster-hierarchy]")
+{
+    layout lyt{};
+
+    SECTION("Empty layout")
+    {
+        const auto h = sidb::simulation::engines::detail::cluster_hierarchy(lyt);
+
+        CHECK(h.c.empty());
+        CHECK(h.sub.at(0) == nullptr);
+        CHECK(h.sub.at(1) == nullptr);
+    }
+
+    SECTION("Single SiDB")
+    {
+        lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
+
+        const auto h = sidb::simulation::engines::detail::cluster_hierarchy(lyt);
+
+        CHECK(h.c == set_container{0});
+        CHECK(h.sub.at(0) == nullptr);
+        CHECK(h.sub.at(1) == nullptr);
+    }
+}
 
 TEST_CASE("SiDB cluster hierarchy of a Y-shape SiDB OR gate with input 01", "[sidb-cluster-hierarchy]")
 {
@@ -58,6 +84,7 @@ TEST_CASE("SiDB cluster hierarchy of a Y-shape SiDB OR gate with input 01", "[si
     // check for spooky non-determinism in alglib
     for (int8_t i = 0; i < 100; ++i)
     {
+        CAPTURE(int{i});
         const sidb::simulation::engines::detail::binary_cluster_hierarchy_node& h =
             sidb::simulation::engines::detail::cluster_hierarchy(lyt);
 
@@ -114,6 +141,7 @@ TEST_CASE("SiDB cluster hierarchy of an 8 DB layout with separated groups of SiD
     REQUIRE(h.sub.at(0)->sub.at(0) != nullptr);
     REQUIRE(h.sub.at(0)->sub.at(1) != nullptr);
     REQUIRE(h.sub.at(1)->sub.at(0) != nullptr);
+    REQUIRE(h.sub.at(1)->sub.at(1) != nullptr);
 
     CHECK(h.sub.at(0)->sub.at(0)->c == set_container{4, 5});
     CHECK(h.sub.at(0)->sub.at(1)->c == set_container{2, 3});

@@ -15,17 +15,15 @@
  * @author Jan Drewniok (Drewniok)
  */
 
-#include "fiction_experiments.hpp"  // experiment class
-
 #include <fiction/synthesis/truth_tables.hpp>                                  // truth tables helper functions
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>                      // reader for SiDB layouts
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>             // SiDB simulation parameters
 #include <fiction/technology/sidb/simulation/engine.hpp>                       // SiDB simulation engines
 #include <fiction/technology/sidb/simulation/io/write_operational_domain.hpp>  // writer for operational domains
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>  // operational domain computation algorithms
-#include <fiction/types.hpp>  // pre-defined types suitable for the FCN domain
 
-#include <fmt/format.h>                    // output formatting
+#include <fmt/format.h>  // output formatting
+#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/utils/stopwatch.hpp>  // stopwatch for time measurement
 
 #include <array>
@@ -36,6 +34,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <experiments.hpp>
 
 using namespace fiction;
 using namespace fiction::sidb::io;
@@ -70,46 +70,34 @@ try
     };
 
     // simulation parameters
-    simulation_parameters sim_params{};
-    sim_params.base     = 2;
-    sim_params.mu_minus = -0.32;
+    const simulation_parameters sim_params{2, -0.32};
 
     // operational domain parameters
-    operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.sim_params = sim_params;
-    op_domain_params.operational_params.sim_engine = engine::QUICKEXACT;
-    op_domain_params.sweep_dimensions              = {{.dimension = sweep_parameter::EPSILON_R},
-                                                      {.dimension = sweep_parameter::LAMBDA_TF},
-                                                      {.dimension = sweep_parameter::MU_MINUS}};
-    op_domain_params.sweep_dimensions[0].min       = 1.0;
-    op_domain_params.sweep_dimensions[0].max       = 10.0;
-    op_domain_params.sweep_dimensions[0].step      = 0.05;
-    op_domain_params.sweep_dimensions[1].min       = 1.0;
-    op_domain_params.sweep_dimensions[1].max       = 10.0;
-    op_domain_params.sweep_dimensions[1].step      = 0.05;
-    op_domain_params.sweep_dimensions[2].min       = -0.50;
-    op_domain_params.sweep_dimensions[2].max       = -0.10;
-    op_domain_params.sweep_dimensions[2].step      = 0.0025;
+    const operational_domain_params op_domain_params{
+        .operational_params = {.sim_params = sim_params, .sim_engine = engine::QUICKEXACT},
+        .sweep_dimensions   = {{.dimension = sweep_parameter::EPSILON_R, .min = 1.0, .max = 10.0, .step = 0.05},
+                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 1.0, .max = 10.0, .step = 0.05},
+                               {.dimension = sweep_parameter::MU_MINUS, .min = -0.50, .max = -0.10, .step = 0.0025}}};
 
     // write operational domain parameters
-    write_operational_domain_params write_op_domain_params{};
-    write_op_domain_params.non_operational_tag = "0";
-    write_op_domain_params.operational_tag     = "1";
-    write_op_domain_params.writing_mode        = write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY;
+    const write_operational_domain_params write_op_domain_params{
+        .operational_tag     = "1",
+        .non_operational_tag = "0",
+        .writing_mode        = write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY};
 
     static const std::string folder = fmt::format("{}sidb_gate_libraries/bestagon_gates/", EXPERIMENTS_PATH);
 
-    static const std::array<std::pair<std::string, std::vector<tt>>, 10> gates = {
-        std::make_pair("and", std::vector<tt>{create_and_tt()}),
-        std::make_pair("nand", std::vector<tt>{create_nand_tt()}),
-        std::make_pair("nor", std::vector<tt>{create_nor_tt()}),
-        std::make_pair("xnor", std::vector<tt>{create_xnor_tt()}),
-        std::make_pair("xor", std::vector<tt>{create_xor_tt()}),
-        std::make_pair("or", std::vector<tt>{create_or_tt()}),
-        std::make_pair("wire", std::vector<tt>{create_id_tt()}),
-        std::make_pair("wire_diag", std::vector<tt>{create_id_tt()}),
-        std::make_pair("inv", std::vector<tt>{create_not_tt()}),
-        std::make_pair("inv_diag", std::vector<tt>{create_not_tt()})};
+    static const std::array<std::pair<std::string, std::vector<kitty::dynamic_truth_table>>, 10> gates = {
+        std::make_pair("and", std::vector<kitty::dynamic_truth_table>{create_and_tt()}),
+        std::make_pair("nand", std::vector<kitty::dynamic_truth_table>{create_nand_tt()}),
+        std::make_pair("nor", std::vector<kitty::dynamic_truth_table>{create_nor_tt()}),
+        std::make_pair("xnor", std::vector<kitty::dynamic_truth_table>{create_xnor_tt()}),
+        std::make_pair("xor", std::vector<kitty::dynamic_truth_table>{create_xor_tt()}),
+        std::make_pair("or", std::vector<kitty::dynamic_truth_table>{create_or_tt()}),
+        std::make_pair("wire", std::vector<kitty::dynamic_truth_table>{create_id_tt()}),
+        std::make_pair("wire_diag", std::vector<kitty::dynamic_truth_table>{create_id_tt()}),
+        std::make_pair("inv", std::vector<kitty::dynamic_truth_table>{create_not_tt()}),
+        std::make_pair("inv_diag", std::vector<kitty::dynamic_truth_table>{create_not_tt()})};
 
     // total number of samples
     static std::size_t total_samples_gs = 0;

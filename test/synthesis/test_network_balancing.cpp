@@ -15,7 +15,10 @@
  * @author Benjamin Hien (hibenj)
  */
 
+#include <catch2/catch_message.hpp>
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
@@ -45,52 +48,17 @@ TEST_CASE("Simple network balancing", "[network-balancing]")
     check_eq(tec, balanced);
 }
 
-TEST_CASE("Complex network balancing", "[network-balancing]")
+TEMPLATE_TEST_CASE("Complex network balancing", "[network-balancing]", mockturtle::aig_network, mockturtle::mig_network,
+                   mockturtle::xag_network, technology_network)
 {
-    const auto aig = blueprints::maj4_network<mockturtle::aig_network>();
-    const auto mig = blueprints::maj4_network<mockturtle::mig_network>();
-    const auto xag = blueprints::maj4_network<mockturtle::xag_network>();
-    const auto tec = blueprints::maj4_network<technology_network>();
+    const auto unify_outputs = GENERATE(false, true);
+    CAPTURE(unify_outputs);
+    const auto source   = blueprints::maj4_network<TestType>();
+    const auto balanced = network_balancing<technology_network>(source, {.unify_outputs = unify_outputs});
 
-    SECTION("without primary output unification")
-    {
-        const auto balanced_aig = network_balancing<technology_network>(aig);
-        const auto balanced_mig = network_balancing<technology_network>(mig);
-        const auto balanced_xag = network_balancing<technology_network>(xag);
-        const auto balanced_tec = network_balancing<technology_network>(tec);
-
-        CHECK(is_balanced(balanced_aig));
-        CHECK(is_balanced(balanced_mig));
-        CHECK(is_balanced(balanced_xag));
-        CHECK(is_balanced(balanced_tec));
-
-        CHECK(!is_balanced(balanced_aig, {.unify_outputs = true}));
-        CHECK(!is_balanced(balanced_mig, {.unify_outputs = true}));
-        CHECK(!is_balanced(balanced_xag, {.unify_outputs = true}));
-        CHECK(!is_balanced(balanced_tec, {.unify_outputs = true}));
-
-        check_eq(aig, balanced_aig);
-        check_eq(mig, balanced_mig);
-        check_eq(xag, balanced_xag);
-        check_eq(tec, balanced_tec);
-    }
-    SECTION("with primary output unification")
-    {
-        const auto balanced_aig = network_balancing<technology_network>(aig, {.unify_outputs = true});
-        const auto balanced_mig = network_balancing<technology_network>(mig, {.unify_outputs = true});
-        const auto balanced_xag = network_balancing<technology_network>(xag, {.unify_outputs = true});
-        const auto balanced_tec = network_balancing<technology_network>(tec, {.unify_outputs = true});
-
-        CHECK(is_balanced(balanced_aig, {.unify_outputs = true}));
-        CHECK(is_balanced(balanced_mig, {.unify_outputs = true}));
-        CHECK(is_balanced(balanced_xag, {.unify_outputs = true}));
-        CHECK(is_balanced(balanced_tec, {.unify_outputs = true}));
-
-        check_eq(aig, balanced_aig);
-        check_eq(mig, balanced_mig);
-        check_eq(xag, balanced_xag);
-        check_eq(tec, balanced_tec);
-    }
+    CHECK(is_balanced(balanced));
+    CHECK(is_balanced(balanced, {.unify_outputs = true}) == unify_outputs);
+    check_eq(source, balanced);
 }
 
 TEST_CASE("Balance a network without primary outputs", "[network-balancing]")
@@ -129,7 +97,7 @@ TEST_CASE("Constant primary outputs are not buffered when unifying outputs", "[n
         network_balancing<technology_network>(ntk, {.unify_outputs = true, .buffer_constant_outputs = false});
 
     CHECK(is_balanced(balanced, {.unify_outputs = true, .buffer_constant_outputs = false}));
-    CHECK(!is_balanced(balanced, {.unify_outputs = true}));
+    CHECK_FALSE(is_balanced(balanced, {.unify_outputs = true}));
     CHECK(balanced.num_pos() == 2);
 
     uint32_t constant_pos = 0;

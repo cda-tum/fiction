@@ -12,6 +12,7 @@
  * @file
  * @brief Planarizes a ranked logic network by duplicating nodes level by level.
  * @author Benjamin Hien (hibenj)
+ * @author Marcel Walter (marcelwa)
  */
 
 #pragma once
@@ -522,7 +523,7 @@ class node_duplication_planarization_impl
         const auto pos = output_level();
 
         levels.push_back(pos);
-        progress.advance();
+        progress.advance(ntk.depth() == 0 ? 0 : 1);
 
         // outputs that inputs drive directly form the only level; there is nothing below them to order
         if (!is_final_level(pos))
@@ -1238,10 +1239,10 @@ class node_duplication_planarization_impl
                                         run_trace* trace = nullptr) const
     {
         // the cone weights steer the tie-breaks, so the run must weigh like the main one
-        node_duplication_planarization_params sub_ps{};
-        sub_ps.strategy         = node_duplication_planarization_params::planarization_strategy::DUPLICATION;
-        sub_ps.max_duplications = 0;  // the budget cuts the run off
-        sub_ps.duplication_cost = ps.duplication_cost;
+        const node_duplication_planarization_params sub_ps{
+            .strategy         = node_duplication_planarization_params::planarization_strategy::DUPLICATION,
+            .duplication_cost = ps.duplication_cost,
+            .max_duplications = 0};  // the budget cuts the run off
 
         node_duplication_planarization_stats sub_st{};
 

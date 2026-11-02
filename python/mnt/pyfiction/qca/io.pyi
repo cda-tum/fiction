@@ -30,6 +30,7 @@ def write_qca_layout(
         create_inter_layer_via_cells: Create via cells in between each layer.
 
     Raises:
+        ValueError: The layout name or a serialized cell name contains a line break or null byte.
         RuntimeError: The file cannot be created, written, closed, or replaced.
     """
 

@@ -176,7 +176,7 @@ struct detect_bdl_pairs_params
     double minimum_distance{0.75};
     /**
      * The maximum distance between two dots to be considered a BDL pair. This is useful to prevent unlikely pairings
-     * of SiDBs that are far apart and to improve performance of the matching algorithm. (unit: nm).
+     * of SiDBs that are far apart. (unit: nm).
      */
     double maximum_distance{1.5};
 };
@@ -185,8 +185,8 @@ struct detect_bdl_pairs_params
  * Detects the BDL pairs of an SiDB layout. Dots with the given tag are uniquely paired in increasing distance.
  * The closest unpaired dots within `[params.minimum_distance, params.maximum_distance]` (defaults of 0.75 nm
  * and 1.5 nm) form a pair. The lower bound
- * keeps, e.g., the SiDBs of an atomic wire from being paired; the upper bound prevents unlikely pairings and bounds
- * the work. Distances follow the layout's lattice. The pairs are returned sorted.
+ * keeps, e.g., the SiDBs of an atomic wire from being paired; the upper bound prevents unlikely pairings.
+ * Distances follow the layout's lattice. Pairs are sorted within each dot-tag group.
  *
  * @param lyt The layout to detect BDL pairs in.
  * @param type Optional dot tag to restrict the detection to (`INPUT`, `OUTPUT`, `NORMAL`, ...). If omitted, the

@@ -20,6 +20,22 @@ from mnt.pyfiction.layouts import (
 from mnt.pyfiction.physical_design import color_routing
 
 
+def test_endpoint_validation_preserves_layout() -> None:
+    """Reject invalid endpoints during search and preserve existing connections."""
+    layout = cartesian_gate_layout((2, 2), "2DDWave")
+    input_node = layout.create_pi("input", (0, 0))
+    output = layout.create_buf(input_node, (1, 1))
+    objectives = [((2, 0), (1, 1), 0)]
+    with pytest.raises(ValueError, match="Routing endpoints"):
+        color_routing(layout, objectives)
+    with pytest.raises(ValueError, match="Routing endpoints"):
+        color_routing(layout, objectives, path_limit=1)
+    assert not color_routing(layout, objectives, path_limit=0)
+    assert layout.source(layout_input_port(output, 0)) == input_node
+    assert layout.num_wires() == 1
+    assert layout.get_tile(output) == coordinate(1, 1)
+
+
 @pytest.mark.parametrize(
     "make_lyt",
     [

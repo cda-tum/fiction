@@ -52,10 +52,10 @@ struct planarization_params
      *
      * The pipeline defaults to the hybrid strategy, which decides per level between duplicating nodes and keeping the
      * crossings for the crossing gates.
+     * @hideinitializer
      */
-    // NOLINTNEXTLINE(modernize-use-designated-initializers): Sphinx cannot render designated initializers
     node_duplication_planarization_params duplication{
-        node_duplication_planarization_params::planarization_strategy::HYBRID};
+        .strategy = node_duplication_planarization_params::planarization_strategy::HYBRID};
     /**
      * @brief Maximum output degree of the fanout nodes in the result.
      *
@@ -158,12 +158,9 @@ template <typename Ntk>
             planar = crossing_gate_planarization(planar, cg_ps, &st.crossing_gates);
         }
 
-        planar_fanout_substitution_params fs_ps{};
-        fs_ps.on_progress = progress;
-        fs_ps.degree      = ps.fanout_degree;
+        const planar_fanout_substitution_params fs_ps{.on_progress = progress, .degree = ps.fanout_degree};
 
-        planar_rebalancing_params rb_ps{};
-        rb_ps.on_progress = progress;
+        const planar_rebalancing_params rb_ps{.on_progress = progress};
 
         result = planar_rebalancing(planar_fanout_substitution(planar, fs_ps), rb_ps);
 

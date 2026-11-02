@@ -126,7 +126,7 @@ class fanout_substitution_impl
     {
         if (ps.strategy == fanout_substitution_params::substitution_strategy::RANDOM)
         {
-            rng.emplace(ps.seed.value_or(std::random_device{}()));
+            rng.emplace(ps.seed.has_value() ? ps.seed.value() : std::random_device{}());
         }
     }
 
@@ -480,6 +480,12 @@ class is_fanout_substituted_impl
  * @throws std::invalid_argument If `ps.degree` is less than two or `ps.threshold` is zero.
  */
 template <typename NtkDest, typename NtkSrc>
+    requires mockturtle::is_network_type_v<NtkSrc> && mockturtle::is_network_type_v<NtkDest> &&
+             mockturtle::has_is_constant_v<NtkDest> && mockturtle::has_create_pi_v<NtkDest> &&
+             mockturtle::has_create_not_v<NtkDest> && mockturtle::has_create_po_v<NtkDest> &&
+             mockturtle::has_create_buf_v<NtkDest> && mockturtle::has_clone_node_v<NtkDest> &&
+             mockturtle::has_fanout_size_v<NtkDest> && mockturtle::has_foreach_gate_v<NtkDest> &&
+             mockturtle::has_foreach_fanin_v<NtkDest> && mockturtle::has_foreach_po_v<NtkDest>
 NtkDest fanout_substitution(const NtkSrc& ntk_src, fanout_substitution_params ps = {})
 {
     if (ps.degree < 2 || ps.threshold == 0)
@@ -487,25 +493,7 @@ NtkDest fanout_substitution(const NtkSrc& ntk_src, fanout_substitution_params ps
         throw std::invalid_argument("Fanout degree must be at least two and threshold must be at least one");
     }
 
-    static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a network type");
-    static_assert(mockturtle::is_network_type_v<NtkDest>, "NtkDest is not a network type");
-
-    static_assert(mockturtle::has_is_constant_v<NtkDest>, "NtkSrc does not implement the is_constant function");
-    static_assert(mockturtle::has_create_pi_v<NtkDest>, "NtkDest does not implement the create_pi function");
-    static_assert(mockturtle::has_create_not_v<NtkDest>, "NtkDest does not implement the create_not function");
-    static_assert(mockturtle::has_create_po_v<NtkDest>, "NtkDest does not implement the create_po function");
-    static_assert(mockturtle::has_create_buf_v<NtkDest>, "NtkDest does not implement the create_buf function");
-    static_assert(mockturtle::has_clone_node_v<NtkDest>, "NtkDest does not implement the clone_node function");
-    static_assert(mockturtle::has_fanout_size_v<NtkDest>, "NtkDest does not implement the fanout_size function");
-    static_assert(mockturtle::has_foreach_gate_v<NtkDest>, "NtkDest does not implement the foreach_gate function");
-    static_assert(mockturtle::has_foreach_fanin_v<NtkDest>, "NtkDest does not implement the foreach_fanin function");
-    static_assert(mockturtle::has_foreach_po_v<NtkDest>, "NtkDest does not implement the foreach_po function");
-
-    detail::fanout_substitution_impl<NtkDest, NtkSrc> p{ntk_src, ps};
-
-    auto result = p.run();
-
-    return result;
+    return detail::fanout_substitution_impl<NtkDest, NtkSrc>{ntk_src, ps}.run();
 }
 /**
  * Checks if a logic network is properly fanout-substituted with regard to the provided parameters, i.e., if no node
@@ -517,17 +505,11 @@ NtkDest fanout_substitution(const NtkSrc& ntk_src, fanout_substitution_params ps
  * @return `true` iff `ntk` is properly fanout-substituted with regard to `ps`.
  */
 template <typename Ntk>
+    requires mockturtle::is_network_type_v<Ntk> && mockturtle::has_foreach_gate_v<Ntk> &&
+             mockturtle::has_fanout_size_v<Ntk>
 bool is_fanout_substituted(const Ntk& ntk, fanout_substitution_params ps = {}) noexcept
 {
-    static_assert(mockturtle::is_network_type_v<Ntk>, "NtkSrc is not a network type");
-    static_assert(mockturtle::has_foreach_gate_v<Ntk>, "Ntk does not implement the foreach_gate function");
-    static_assert(mockturtle::has_fanout_size_v<Ntk>, "Ntk does not implement the fanout_size function");
-
-    detail::is_fanout_substituted_impl<Ntk> p{ntk, ps};
-
-    auto result = p.run();
-
-    return result;
+    return detail::is_fanout_substituted_impl<Ntk>{ntk, std::move(ps)}.run();
 }
 
 }  // namespace fiction::synthesis

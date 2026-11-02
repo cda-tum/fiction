@@ -94,13 +94,12 @@ void register_post_layout_optimization(nb::module_& m)
            const decltype(post_layout_optimization_options{}.on_progress)&         on_progress,
            fiction::physical_design::post_layout_optimization_stats*               statistics)
         {
-            post_layout_optimization_options params{};
-            params.max_gate_relocations = max_gate_relocations;
-            params.optimize_pos_only    = optimize_pos_only;
-            params.planar_optimization  = planar_optimization;
-            params.timeout              = timeout;
-            params.on_progress          = on_progress;
-            const nb::gil_scoped_release release{};
+            const post_layout_optimization_options params{.max_gate_relocations = max_gate_relocations,
+                                                          .optimize_pos_only    = optimize_pos_only,
+                                                          .planar_optimization  = planar_optimization,
+                                                          .timeout              = timeout,
+                                                          .on_progress          = on_progress};
+            const nb::gil_scoped_release           release{};
             fiction::physical_design::post_layout_optimization(layout, params, statistics);
         },
         nb::arg("layout"), nb::kw_only(),

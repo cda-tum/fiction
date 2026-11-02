@@ -16,6 +16,7 @@
 
 #include "fiction_experiments.hpp"
 
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/io/network_reader.hpp>          // custom reader for folders of networks
 #include <fiction/physical_design/determine_clocking.hpp>  // SAT-based clock number assignment
@@ -33,12 +34,12 @@
 #include <mockturtle/utils/stopwatch.hpp>     // time measurements
 #include <mockturtle/utils/tech_library.hpp>  // technology library utils
 
-#include <concepts>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -46,6 +47,7 @@
 
 using namespace fiction;
 using namespace fiction::layouts;
+using namespace fiction::networks;
 using namespace fiction::networks::io;
 using namespace fiction::physical_design;
 using namespace fiction::synthesis;
@@ -53,17 +55,11 @@ using namespace fiction::verification;
 
 /**
  * @brief Assigns clock zero to every tile in the declared frame.
- * @tparam Lyt Gate-level layout type.
  * @param lyt Layout whose clock numbers are cleared.
  * @throws std::bad_alloc If an override cannot be allocated.
  */
-template <typename Lyt>
-void remove_clocking(Lyt& lyt)
+void remove_clocking(cartesian_gate_layout& lyt)
 {
-    static_assert(
-        requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; },
-        "Lyt is not a gate-level layout");
-
     lyt.foreach_tile([&lyt](const auto& t) { lyt.assign_clock_number(t, 0); });
 }
 
@@ -101,7 +97,7 @@ try
     const mockturtle::map_params map_params{};
 
     // instantiate a network reader
-    network_reader<aig_ptr> reader{network_folder, std::cout};
+    network_reader<std::shared_ptr<named_aig_network>> reader{network_folder, std::cout};
 
     for (const auto& benchmark : reader.get_networks(true))  // for each benchmark sorted by size (ascending)
     {
@@ -113,7 +109,8 @@ try
         const auto mapped_network = mockturtle::map(network, gate_lib, map_params);
 
         // perform layout generation with an exact SMT-based algorithm
-        const auto original_layout = orthogonal<cartesian_gate_layout>(convert_network<tec_nt>(mapped_network));
+        const auto original_layout =
+            orthogonal<cartesian_layout>(convert_network<named_technology_network>(mapped_network));
 
         // obtain layout characteristics
         const auto width  = original_layout.width();

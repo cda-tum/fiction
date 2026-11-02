@@ -82,10 +82,9 @@ void register_detect_bdl_pairs(nb::module_& m)
            const decltype(detect_bdl_pairs_options{}.maximum_distance) maximum_distance)
         {
             validate_bdl_pair_distances(minimum_distance, maximum_distance);
-            detect_bdl_pairs_options params{};
-            params.minimum_distance = minimum_distance;
-            params.maximum_distance = maximum_distance;
-            const nb::gil_scoped_release release{};
+            const detect_bdl_pairs_options params{.minimum_distance = minimum_distance,
+                                                  .maximum_distance = maximum_distance};
+            const nb::gil_scoped_release   release{};
             return fiction::sidb::simulation::logic::detect_bdl_pairs(lyt, type, params);
         },
         nb::arg("lyt"), nb::arg("type") = std::nullopt, nb::kw_only(),

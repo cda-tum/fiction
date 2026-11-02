@@ -20,12 +20,13 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "fiction/layouts/layout_base.hpp"
-
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
+#include <fiction/layouts/layout_base.hpp>
+#include <fiction/layouts/layout_utils.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
+#include <fiction/technology/fcn/cell_ports.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
@@ -34,6 +35,7 @@
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
+#include <kitty/print.hpp>
 
 #include <array>
 #include <chrono>
@@ -49,12 +51,13 @@ using namespace fiction::synthesis;
 
 TEST_CASE("Parameterized gate library traits", "[parameterized-gate-library]")
 {
-    CHECK(std::is_same_v<on_the_fly_gate_library::layout, sidb::layout>);
+    STATIC_REQUIRE(std::is_same_v<on_the_fly_gate_library::layout, sidb::layout>);
 }
 
 TEST_CASE("On-the-fly SiDB gate mapping rejects column arrangements", "[parameterized-gate-library]")
 {
     const auto a = GENERATE(arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
+    CAPTURE(static_cast<unsigned>(a));
 
     hexagonal_gate_layout gate_layout{a, {1, 3}, clocking::twoddwave()};
     const auto            input = gate_layout.create_pi("x", {0, 0});
@@ -65,7 +68,7 @@ TEST_CASE("On-the-fly SiDB gate mapping rejects column arrangements", "[paramete
                     std::invalid_argument);
 }
 
-TEST_CASE("Predefined SiDB gates on defective surfaces honor the per-gate timeout", "[parameterized-gate-library]")
+TEST_CASE("On-the-fly SiDB gate mapping rejects an expired per-gate budget", "[parameterized-gate-library]")
 {
     for (const bool crossing : std::array{false, true})
     {
@@ -81,17 +84,17 @@ TEST_CASE("Predefined SiDB gates on defective surfaces honor the per-gate timeou
         sidb::layout surface{};
         surface.assign_defect(site_at_row(0, 0), defect{defect_type::DB, -1, 2, 5});
 
-        on_the_fly_gate_library_params params{};
-        params.design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
-        params.design_gate_params.operational_params.timeout    = 0;
+        /** @brief Enclosing budget that outlives the per-gate timeout. */
         const auto enclosing_deadline = std::chrono::steady_clock::now() + std::chrono::seconds{2};
-        params.design_gate_params.operational_params.deadline = enclosing_deadline;
+        const on_the_fly_gate_library_params params{
+            .design_gate_params = {.operational_params = {.sim_params = simulation_parameters{2, -0.32},
+                                                          .deadline   = enclosing_deadline,
+                                                          .timeout    = 0}}};
 
         CHECK_THROWS_AS(on_the_fly_gate_library::set_up_gate(gate_layout, {1, 1, 0}, params, surface),
                         utils::timeout_error);
-        // The zero gate budget must expire, not the enclosing deadline used to bound a regression.
+        // A zero gate budget expires during parameter validation, before mapping starts.
         CHECK(std::chrono::steady_clock::now() < enclosing_deadline);
-        CHECK(params.design_gate_params.operational_params.deadline == enclosing_deadline);
     }
 }
 
@@ -109,21 +112,32 @@ TEST_CASE("Unsuccessful binary SiDB designs retain the tile, function, and ports
     {
         for (const bool with_defects : std::array{false, true})
         {
+            CAPTURE(kitty::to_binary(function), with_defects);
             hexagonal_gate_layout gate_layout{arrangement::EVEN_ROW, {3, 3}, clocking::row()};
             const auto            input1 = gate_layout.create_pi("input1", {0, 0});
             const auto            input2 = gate_layout.create_pi("input2", {1, 0});
             const auto            gate   = gate_layout.create_gate({input1, input2}, function, {1, 1});
             gate_layout.create_po(gate, "output", {0, 2});
 
-            on_the_fly_gate_library_params params{};
-            params.design_gate_params.canvas                 = {site_at_row(24, 17), site_at_row(24, 17)};
-            params.design_gate_params.number_of_canvas_sidbs = 2;
+            const on_the_fly_gate_library_params params{
+                .design_gate_params = {.canvas                 = {site_at_row(24, 17), site_at_row(24, 17)},
+                                       .number_of_canvas_sidbs = 2}};
 
             std::optional<sidb::layout> surface{};
             if (with_defects)
             {
                 surface.emplace();
-                surface->assign_defect(site_at_row(0, 0), defect{defect_type::DB, -1, 2, 5});
+                /** @brief The tested defect must lie inside the mapped tile's influence radius. */
+                const auto center =
+                    to_lattice_site(relative_to_absolute_cell_position<on_the_fly_gate_library::gate_x_size(),
+                                                                       on_the_fly_gate_library::gate_y_size()>(
+                        gate_layout, {1, 1},
+                        {on_the_fly_gate_library::gate_x_size() / 2, on_the_fly_gate_library::gate_y_size() / 2}));
+                /** @brief Defect on the mapped tile, independent of the center calculation. */
+                const auto defect_site = site_at_row(90, 57);
+                REQUIRE(surface->get_lattice().nm_distance(center, defect_site) <
+                        params.influence_radius_charged_defects);
+                surface->assign_defect(defect_site, defect{defect_type::DB, -1, 2, 5});
             }
 
             try
@@ -135,8 +149,12 @@ TEST_CASE("Unsuccessful binary SiDB designs retain the tile, function, and ports
             {
                 CHECK(error.which_tile() == fiction::layouts::layout_base::coordinate{1, 1});
                 CHECK(error.which_truth_table() == function);
-                CHECK(error.which_port_list().inp.size() == 2);
-                CHECK(error.which_port_list().out.size() == 1);
+                /** @brief Both north inputs feed the south-west output in this row arrangement. */
+                const fcn::port_list<fcn::port_direction> expected_ports{
+                    {fcn::port_direction{fcn::port_direction::cardinal::NORTH_WEST},
+                     fcn::port_direction{fcn::port_direction::cardinal::NORTH_EAST}},
+                    {fcn::port_direction{fcn::port_direction::cardinal::SOUTH_WEST}}};
+                CHECK(error.which_port_list() == expected_ports);
             }
         }
     }

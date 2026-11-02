@@ -16,18 +16,30 @@
 
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/obstructions.hpp>
+#include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/physical_design/path_finding/a_star.hpp>
 #include <fiction/physical_design/path_finding/cost.hpp>
 #include <fiction/physical_design/path_finding/distance.hpp>
 #include <fiction/physical_design/path_finding/enumerate_all_paths.hpp>
 #include <fiction/physical_design/path_finding/k_shortest_paths.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
+
+#include <algorithm>
+#include <array>
+#include <concepts>
+#include <cstdint>
+#include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -36,17 +48,26 @@ using namespace fiction::physical_design::path_finding;
 
 TEST_CASE("Yen's algorithm respects a zero path limit", "[k-shortest-paths]")
 {
-    using lyt  = cartesian_layout;
-    using path = layout_coordinate_path;
+    using lyt = cartesian_layout;
+
     const lyt layout{lyt::extent{2, 2, 1}};
-    CHECK(yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {1, 1}}, 0).empty());
-    CHECK(yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {0, 0}}, 0).empty());
+    CHECK(yen_k_shortest_paths(layout, {.source = {0, 0}, .target = {1, 1}}, 0).empty());
+    CHECK(yen_k_shortest_paths(layout, {.source = {0, 0}, .target = {0, 0}}, 0).empty());
+}
+
+TEST_CASE("Yen validates routing endpoints when paths are requested", "[k-shortest-paths]")
+{
+    /** @brief Single-tile geometry for endpoint validation. */
+    const cartesian_layout layout{{1, 1}};
+    CHECK_THROWS_AS(yen_k_shortest_paths(layout, {.source = {2, 0}, .target = {1, 1}}, 1), std::invalid_argument);
+    CHECK_THROWS_AS(yen_k_shortest_paths(layout, {.source = {0, 0}, .target = {0, 2}}, 1), std::invalid_argument);
+    CHECK(yen_k_shortest_paths(layout, {.source = {2, 0}, .target = {1, 1}}, 0).empty());
+    CHECK(yen_k_shortest_paths(layout, {.source = {0, 0}, .target = {0, 2}}, 0).empty());
 }
 
 TEST_CASE("Yen's algorithm on 2x2 layouts", "[k-shortest-paths]")
 {
-    using lyt  = cartesian_layout;
-    using path = layout_coordinate_path;
+    using lyt = cartesian_layout;
 
     SECTION("coordinate paths")
     {
@@ -58,82 +79,56 @@ TEST_CASE("Yen's algorithm on 2x2 layouts", "[k-shortest-paths]")
 
             SECTION("(0,0) to (1,1)")  // two valid paths
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {1, 1}}, k);
+                const auto collection = yen_k_shortest_paths(layout, {.source = {0, 0}, .target = {1, 1}}, k);
 
-                CHECK(collection.size() == 1);
-                CHECK(collection[0].source() == fiction::layouts::layout_base::coordinate{0, 0});
-                CHECK(collection[0].target() == fiction::layouts::layout_base::coordinate{1, 1});
+                REQUIRE(collection.size() == 1);
+                CHECK((collection[0] == layout_coordinate_path{{{0, 0}, {0, 1}, {1, 1}}} ||
+                       collection[0] == layout_coordinate_path{{{0, 0}, {1, 0}, {1, 1}}}));
             }
             SECTION("(1,1) to (0,0)")  // two valid paths
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {.source = {1, 1}, .target = {0, 0}}, k);
+                const auto collection = yen_k_shortest_paths(layout, {.source = {1, 1}, .target = {0, 0}}, k);
 
-                CHECK(collection.size() == 1);
-                CHECK(collection[0].source() == fiction::layouts::layout_base::coordinate{1, 1});
-                CHECK(collection[0].target() == fiction::layouts::layout_base::coordinate{0, 0});
+                REQUIRE(collection.size() == 1);
+                CHECK((collection[0] == layout_coordinate_path{{{1, 1}, {0, 1}, {0, 0}}} ||
+                       collection[0] == layout_coordinate_path{{{1, 1}, {1, 0}, {0, 0}}}));
             }
             SECTION("(0,0) to (0,0)")  // source and target are identical
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {0, 0}}, k);
+                const auto collection = yen_k_shortest_paths(layout, {.source = {0, 0}, .target = {0, 0}}, k);
 
-                CHECK(collection.size() == 1);
-                CHECK(collection.contains({{{0, 0}}}));
+                CHECK_THAT(collection,
+                           Catch::Matchers::UnorderedRangeEquals(path_collection{layout_coordinate_path{{{0, 0}}}}));
             }
         }
-        SECTION("k = 2")
+        SECTION("k = 2 or 3")
         {
-            constexpr const auto k = 2;
+            /** @brief Requested path limits. */
+            const auto k = GENERATE(2u, 3u);
+            CAPTURE(k);
 
             SECTION("(0,0) to (1,1)")  // two valid paths
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {1, 1}}, k);
+                const auto collection = yen_k_shortest_paths(layout, {.source = {0, 0}, .target = {1, 1}}, k);
 
-                CHECK(collection.size() == 2);
-                CHECK(collection.contains({{0, 0}, {1, 0}, {1, 1}}));
-                CHECK(collection.contains({{0, 0}, {0, 1}, {1, 1}}));
+                CHECK_THAT(collection, Catch::Matchers::UnorderedRangeEquals(
+                                           path_collection{layout_coordinate_path{{{0, 0}, {1, 0}, {1, 1}}},
+                                                           layout_coordinate_path{{{0, 0}, {0, 1}, {1, 1}}}}));
             }
-            SECTION("(1,1) to (0,0)")  // no valid paths
+            SECTION("(1,1) to (0,0)")  // two valid paths
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {.source = {1, 1}, .target = {0, 0}}, k);
+                const auto collection = yen_k_shortest_paths(layout, {.source = {1, 1}, .target = {0, 0}}, k);
 
-                CHECK(collection.size() == 2);
-                CHECK(collection.contains({{1, 1}, {1, 0}, {0, 0}}));
-                CHECK(collection.contains({{1, 1}, {0, 1}, {0, 0}}));
-            }
-            SECTION("(0,0) to (0,0)")  // source and target are identical
-            {
-                const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {0, 0}}, k);
-
-                CHECK(collection.size() == 1);
-                CHECK(collection.contains({{{0, 0}}}));
-            }
-        }
-        SECTION("k = 3")
-        {
-            constexpr const auto k = 3;
-
-            SECTION("(0,0) to (1,1)")  // two valid paths
-            {
-                const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {1, 1}}, k);
-
-                CHECK(collection.size() == 2);
-                CHECK(collection.contains({{0, 0}, {1, 0}, {1, 1}}));
-                CHECK(collection.contains({{0, 0}, {0, 1}, {1, 1}}));
-            }
-            SECTION("(1,1) to (0,0)")  // no valid paths
-            {
-                const auto collection = yen_k_shortest_paths<path>(layout, {.source = {1, 1}, .target = {0, 0}}, k);
-
-                CHECK(collection.size() == 2);
-                CHECK(collection.contains({{1, 1}, {1, 0}, {0, 0}}));
-                CHECK(collection.contains({{1, 1}, {0, 1}, {0, 0}}));
+                CHECK_THAT(collection, Catch::Matchers::UnorderedRangeEquals(
+                                           path_collection{layout_coordinate_path{{{1, 1}, {1, 0}, {0, 0}}},
+                                                           layout_coordinate_path{{{1, 1}, {0, 1}, {0, 0}}}}));
             }
             SECTION("(0,0) to (0,0)")  // source and target are identical
             {
-                const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {0, 0}}, k);
+                const auto collection = yen_k_shortest_paths(layout, {.source = {0, 0}, .target = {0, 0}}, k);
 
-                CHECK(collection.size() == 1);
-                CHECK(collection.contains({{{0, 0}}}));
+                CHECK_THAT(collection,
+                           Catch::Matchers::UnorderedRangeEquals(path_collection{layout_coordinate_path{{{0, 0}}}}));
             }
         }
     }
@@ -149,76 +144,52 @@ TEST_CASE("Yen's algorithm on 2x2 layouts", "[k-shortest-paths]")
 
                 SECTION("(0,0) to (1,1)")  // two valid paths
                 {
-                    const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {1, 1}}, k);
+                    const auto collection = yen_k_shortest_paths(layout, {.source = {0, 0}, .target = {1, 1}}, k);
 
-                    CHECK(collection.size() == 1);
-                    CHECK(collection[0].source() == fiction::layouts::layout_base::coordinate{0, 0});
-                    CHECK(collection[0].target() == fiction::layouts::layout_base::coordinate{1, 1});
+                    REQUIRE(collection.size() == 1);
+                    CHECK((collection[0] == layout_coordinate_path{{{0, 0}, {0, 1}, {1, 1}}} ||
+                           collection[0] == layout_coordinate_path{{{0, 0}, {1, 0}, {1, 1}}}));
                 }
                 SECTION("(1,1) to (0,0)")  // no valid paths
                 {
-                    const auto collection = yen_k_shortest_paths<path>(layout, {.source = {1, 1}, .target = {0, 0}}, k);
+                    const auto collection = yen_k_shortest_paths(layout, {.source = {1, 1}, .target = {0, 0}}, k);
 
                     CHECK(collection.empty());
                 }
                 SECTION("(0,0) to (0,0)")  // source and target are identical
                 {
-                    const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {0, 0}}, k);
+                    const auto collection = yen_k_shortest_paths(layout, {.source = {0, 0}, .target = {0, 0}}, k);
 
-                    CHECK(collection.size() == 1);
-                    CHECK(collection.contains({{{0, 0}}}));
+                    CHECK_THAT(collection, Catch::Matchers::UnorderedRangeEquals(
+                                               path_collection{layout_coordinate_path{{{0, 0}}}}));
                 }
             }
-            SECTION("k = 2")
+            SECTION("k = 2 or 3")
             {
-                constexpr const auto k = 2;
+                /** @brief Requested path limits. */
+                const auto k = GENERATE(2u, 3u);
+                CAPTURE(k);
 
                 SECTION("(0,0) to (1,1)")  // two valid paths
                 {
-                    const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {1, 1}}, k);
+                    const auto collection = yen_k_shortest_paths(layout, {.source = {0, 0}, .target = {1, 1}}, k);
 
-                    CHECK(collection.size() == 2);
-                    CHECK(collection.contains({{0, 0}, {1, 0}, {1, 1}}));
-                    CHECK(collection.contains({{0, 0}, {0, 1}, {1, 1}}));
+                    CHECK_THAT(collection, Catch::Matchers::UnorderedRangeEquals(
+                                               path_collection{layout_coordinate_path{{{0, 0}, {1, 0}, {1, 1}}},
+                                                               layout_coordinate_path{{{0, 0}, {0, 1}, {1, 1}}}}));
                 }
                 SECTION("(1,1) to (0,0)")  // no valid paths
                 {
-                    const auto collection = yen_k_shortest_paths<path>(layout, {.source = {1, 1}, .target = {0, 0}}, k);
+                    const auto collection = yen_k_shortest_paths(layout, {.source = {1, 1}, .target = {0, 0}}, k);
 
                     CHECK(collection.empty());
                 }
                 SECTION("(0,0) to (0,0)")  // source and target are identical
                 {
-                    const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {0, 0}}, k);
+                    const auto collection = yen_k_shortest_paths(layout, {.source = {0, 0}, .target = {0, 0}}, k);
 
-                    CHECK(collection.size() == 1);
-                    CHECK(collection.contains({{{0, 0}}}));
-                }
-            }
-            SECTION("k = 3")
-            {
-                constexpr const auto k = 3;
-
-                SECTION("(0,0) to (1,1)")  // two valid paths
-                {
-                    const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {1, 1}}, k);
-
-                    CHECK(collection.size() == 2);
-                    CHECK(collection.contains({{0, 0}, {1, 0}, {1, 1}}));
-                    CHECK(collection.contains({{0, 0}, {0, 1}, {1, 1}}));
-                }
-                SECTION("(1,1) to (0,0)")  // no valid paths
-                {
-                    const auto collection = yen_k_shortest_paths<path>(layout, {.source = {1, 1}, .target = {0, 0}}, k);
-
-                    CHECK(collection.empty());
-                }
-                SECTION("(0,0) to (0,0)")  // source and target are identical
-                {
-                    const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {0, 0}}, k);
-
-                    CHECK(collection.size() == 1);
-                    CHECK(collection.contains({{{0, 0}}}));
+                    CHECK_THAT(collection, Catch::Matchers::UnorderedRangeEquals(
+                                               path_collection{layout_coordinate_path{{{0, 0}}}}));
                 }
             }
         }
@@ -232,55 +203,38 @@ TEST_CASE("Yen's algorithm on 2x2 layouts", "[k-shortest-paths]")
 
                 SECTION("(0,0) to (0,1)")  // one valid path
                 {
-                    const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {0, 1}}, k);
+                    const auto collection = yen_k_shortest_paths(layout, {.source = {0, 0}, .target = {0, 1}}, k);
 
-                    CHECK(collection.size() == 1);
-                    CHECK(collection.contains({{{0, 0}, {1, 0}, {1, 1}, {0, 1}}}));
+                    CHECK_THAT(collection, Catch::Matchers::UnorderedRangeEquals(path_collection{
+                                               layout_coordinate_path{{{0, 0}, {1, 0}, {1, 1}, {0, 1}}}}));
                 }
                 SECTION("(0,0) to (0,0)")  // source and target are identical
                 {
-                    const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {0, 0}}, k);
+                    const auto collection = yen_k_shortest_paths(layout, {.source = {0, 0}, .target = {0, 0}}, k);
 
-                    CHECK(collection.size() == 1);
-                    CHECK(collection.contains({{{0, 0}}}));
+                    CHECK_THAT(collection, Catch::Matchers::UnorderedRangeEquals(
+                                               path_collection{layout_coordinate_path{{{0, 0}}}}));
                 }
             }
-            SECTION("k = 2")
+            SECTION("k = 2 or 3")
             {
-                constexpr const auto k = 2;
+                /** @brief Requested path limits. */
+                const auto k = GENERATE(2u, 3u);
+                CAPTURE(k);
 
                 SECTION("(0,0) to (0,1)")  // one valid path
                 {
-                    const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {0, 1}}, k);
+                    const auto collection = yen_k_shortest_paths(layout, {.source = {0, 0}, .target = {0, 1}}, k);
 
-                    CHECK(collection.size() == 1);
-                    CHECK(collection.contains({{{0, 0}, {1, 0}, {1, 1}, {0, 1}}}));
+                    CHECK_THAT(collection, Catch::Matchers::UnorderedRangeEquals(path_collection{
+                                               layout_coordinate_path{{{0, 0}, {1, 0}, {1, 1}, {0, 1}}}}));
                 }
                 SECTION("(0,0) to (0,0)")  // source and target are identical
                 {
-                    const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {0, 0}}, k);
+                    const auto collection = yen_k_shortest_paths(layout, {.source = {0, 0}, .target = {0, 0}}, k);
 
-                    CHECK(collection.size() == 1);
-                    CHECK(collection.contains({{{0, 0}}}));
-                }
-            }
-            SECTION("k = 3")
-            {
-                constexpr const auto k = 3;
-
-                SECTION("(0,0) to (0,1)")  // one valid path
-                {
-                    const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {0, 1}}, k);
-
-                    CHECK(collection.size() == 1);
-                    CHECK(collection.contains({{{0, 0}, {1, 0}, {1, 1}, {0, 1}}}));
-                }
-                SECTION("(0,0) to (0,0)")  // source and target are identical
-                {
-                    const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {0, 0}}, k);
-
-                    CHECK(collection.size() == 1);
-                    CHECK(collection.contains({{{0, 0}}}));
+                    CHECK_THAT(collection, Catch::Matchers::UnorderedRangeEquals(
+                                               path_collection{layout_coordinate_path{{{0, 0}}}}));
                 }
             }
         }
@@ -289,8 +243,8 @@ TEST_CASE("Yen's algorithm on 2x2 layouts", "[k-shortest-paths]")
 
 TEST_CASE("Yen's algorithm enumerates every simple path on a small grid", "[k-shortest-paths]")
 {
-    using lyt  = cartesian_layout;
-    using path = layout_coordinate_path;
+    using lyt = cartesian_layout;
+
     const lyt layout{lyt::extent{3, 3, 1}};
     layout.foreach_coordinate(
         [&](const auto& source)
@@ -299,178 +253,69 @@ TEST_CASE("Yen's algorithm enumerates every simple path on a small grid", "[k-sh
                 [&](const auto& target)
                 {
                     const routing_objective objective{.source = source, .target = target};
-                    const auto              expected = enumerate_all_paths<path>(layout, objective);
-                    const auto              actual   = yen_k_shortest_paths<path>(layout, objective, 100);
+                    const auto              expected = enumerate_all_paths(layout, objective);
+                    const auto              actual   = yen_k_shortest_paths(layout, objective, 100);
                     CAPTURE(source, target);
-                    CHECK(actual.size() == expected.size());
-                    for (const auto& candidate : expected)
-                    {
-                        CHECK(actual.contains(candidate));
-                    }
+                    CHECK_THAT(actual, Catch::Matchers::UnorderedRangeEquals(expected));
                 });
         });
 }
 
 TEST_CASE("Yen's algorithm on 4x4 layouts", "[k-shortest-paths]")
 {
-    using lyt  = cartesian_layout;
-    using path = layout_coordinate_path;
+    /**
+     * @brief Checks distinct shortest paths against exhaustive enumeration and known minimum-length counts.
+     * @param layout Coordinate or clocked geometry.
+     * @param k Number of shortest paths to request.
+     * @param minimum_path_count Number of length-seven paths in the geometry.
+     */
+    const auto check_paths = [](const auto& layout, const uint32_t k, const uint32_t minimum_path_count)
+    {
+        CAPTURE(k);
+        /** @brief Independently enumerated legal paths in the selected geometry. */
+        const auto all = enumerate_all_paths(layout, {.source = {0, 0}, .target = {3, 3}});
+        /** @brief Requested subset of the shortest paths. */
+        const auto paths = yen_k_shortest_paths(layout, {.source = {0, 0}, .target = {3, 3}}, k);
+        CHECK(paths.size() == k);
+        CHECK(std::ranges::count_if(paths, [](const auto& path) { return path.size() == 7; }) ==
+              std::min(k, minimum_path_count));
+        for (const auto& path : paths)
+        {
+            CAPTURE(path);
+            CHECK(all.contains(path));
+            CHECK(std::ranges::count(paths, path) == 1);
+            CHECK((path.size() == 7 || path.size() == 11));
+        }
+    };
 
     SECTION("coordinate paths")
     {
-        const lyt layout{lyt::extent{4, 4, 1}};
-
-        SECTION("k = 1")
-        {
-            constexpr const auto k = 1;
-
-            SECTION("(0,0) to (3,3) without obstruction")  // 184 valid paths
-            {
-                const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {3, 3}}, k);
-
-                CHECK(collection.size() == k);
-            }
-        }
-        SECTION("k = 5")
-        {
-            constexpr const auto k = 5;
-
-            SECTION("(0,0) to (3,3) without obstruction")  // 184 valid paths
-            {
-                const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {3, 3}}, k);
-
-                CHECK(collection.size() == k);
-            }
-        }
-        SECTION("k = 10")
-        {
-            constexpr const auto k = 10;
-
-            SECTION("(0,0) to (3,3) without obstruction")  // 184 valid paths
-            {
-                const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {3, 3}}, k);
-
-                CHECK(collection.size() == k);
-            }
-        }
-        SECTION("k = 20")
-        {
-            constexpr const auto k = 20;
-
-            SECTION("(0,0) to (3,3) without obstruction")  // 184 valid paths
-            {
-                const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {3, 3}}, k);
-
-                CHECK(collection.size() == k);
-            }
-        }
+        /** @brief Unclocked geometry admits 184 simple paths. */
+        const cartesian_layout layout{{4, 4, 1}};
+        /** @brief Every requested subset lies within the twenty minimum-length paths. */
+        const auto k = GENERATE(1u, 5u, 10u, 20u);
+        check_paths(layout, k, 20);
     }
-    SECTION("clocking paths")
+    SECTION("2DDWave")
     {
-        SECTION("2DDWave")
-        {
-            const gate_layout<lyt> layout{gate_layout<lyt>::extent{4, 4, 1}, clocking::twoddwave()};
-
-            SECTION("k = 1")
-            {
-                constexpr const auto k = 1;
-
-                SECTION("(0,0) to (3,3) without obstruction")  // 20 valid paths
-                {
-                    const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {3, 3}}, k);
-
-                    CHECK(collection.size() == k);
-                }
-            }
-            SECTION("k = 5")
-            {
-                constexpr const auto k = 5;
-
-                SECTION("(0,0) to (3,3) without obstruction")  // 20 valid paths
-                {
-                    const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {3, 3}}, k);
-
-                    CHECK(collection.size() == k);
-                }
-            }
-            SECTION("k = 10")
-            {
-                constexpr const auto k = 10;
-
-                SECTION("(0,0) to (3,3) without obstruction")  // 20 valid paths
-                {
-                    const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {3, 3}}, k);
-
-                    CHECK(collection.size() == k);
-                }
-            }
-            SECTION("k = 20")
-            {
-                constexpr const auto k = 20;
-
-                SECTION("(0,0) to (3,3) without obstruction")  // 20 valid paths
-                {
-                    const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {3, 3}}, k);
-
-                    CHECK(collection.size() == k);
-                }
-            }
-        }
-        SECTION("USE")
-        {
-            const gate_layout<lyt> layout{gate_layout<lyt>::extent{4, 4, 1}, clocking::use()};
-
-            SECTION("k = 1")
-            {
-                constexpr const auto k = 1;
-
-                SECTION("(0,0) to (3,3) without obstruction")  // 4 valid paths
-                {
-                    const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {3, 3}}, k);
-
-                    CHECK(collection.size() == k);
-                }
-            }
-            SECTION("k = 2")
-            {
-                constexpr const auto k = 2;
-
-                SECTION("(0,0) to (3,3) without obstruction")  // 4 valid paths
-                {
-                    const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {3, 3}}, k);
-
-                    CHECK(collection.size() == k);
-                }
-            }
-            SECTION("k = 3")
-            {
-                constexpr const auto k = 3;
-
-                SECTION("(0,0) to (3,3) without obstruction")  // 4 valid paths
-                {
-                    const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {3, 3}}, k);
-
-                    CHECK(collection.size() == k);
-                }
-            }
-            SECTION("k = 4")
-            {
-                constexpr const auto k = 4;
-
-                SECTION("(0,0) to (3,3) without obstruction")  // 4 valid paths
-                {
-                    const auto collection = yen_k_shortest_paths<path>(layout, {.source = {0, 0}, .target = {3, 3}}, k);
-
-                    CHECK(collection.size() == k);
-                }
-            }
-        }
+        /** @brief Directed geometry admits twenty minimum-length paths. */
+        const cartesian_gate_layout layout{{4, 4, 1}, clocking::twoddwave()};
+        /** @brief Requests cover partial and complete path collections. */
+        const auto k = GENERATE(1u, 5u, 10u, 20u);
+        check_paths(layout, k, 20);
+    }
+    SECTION("USE")
+    {
+        /** @brief Cyclic geometry admits two length-seven and two length-eleven paths. */
+        const cartesian_gate_layout layout{{4, 4, 1}, clocking::use()};
+        /** @brief Requests cover partial and complete path collections. */
+        const auto k = GENERATE(1u, 2u, 3u, 4u);
+        check_paths(layout, k, 2);
     }
 }
 
 TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction", "[k-shortest-paths]")
 {
-    using coord_path = layout_coordinate_path;
 
     SECTION("coordinate paths")
     {
@@ -488,17 +333,12 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
             search_obstructions.obstruct_coordinate({2, 2});
             // effectively blocking (3,2) as well
 
-            const auto collection = yen_k_shortest_paths<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, 1,
-                                                                     {}, search_obstructions);
+            const auto collection =
+                yen_k_shortest_paths(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, 1, {}, search_obstructions);
 
             REQUIRE(collection.size() == 1);
             const auto& path = collection[0];
-            REQUIRE(path.size() == 7);
-            CHECK(path[1] == fiction::layouts::layout_base::coordinate{0, 1});
-            CHECK(path[2] == fiction::layouts::layout_base::coordinate{0, 2});
-            CHECK(path[3] == fiction::layouts::layout_base::coordinate{0, 3});
-            CHECK(path[4] == fiction::layouts::layout_base::coordinate{1, 3});
-            CHECK(path[5] == fiction::layouts::layout_base::coordinate{2, 3});
+            CHECK(path == layout_coordinate_path{{{0, 0}, {0, 1}, {0, 2}, {0, 3}, {1, 3}, {2, 3}, {3, 3}}});
 
             // coordinates should still be obstructed
             CHECK(search_obstructions.is_obstructed_coordinate({3, 0}));
@@ -524,17 +364,12 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
                 obstr_lyt.create_pi("obstruction", {2, 2});
                 // effectively blocking (3,2) as well
 
-                const auto collection = yen_k_shortest_paths<coord_path>(
-                    obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, 1);  // only one path possible
+                const auto collection =
+                    yen_k_shortest_paths(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, 1);  // only one path possible
 
                 REQUIRE(collection.size() == 1);
                 const auto& path = collection[0];
-                REQUIRE(path.size() == 7);
-                CHECK(path[1] == fiction::layouts::layout_base::coordinate{0, 1});
-                CHECK(path[2] == fiction::layouts::layout_base::coordinate{0, 2});
-                CHECK(path[3] == fiction::layouts::layout_base::coordinate{0, 3});
-                CHECK(path[4] == fiction::layouts::layout_base::coordinate{1, 3});
-                CHECK(path[5] == fiction::layouts::layout_base::coordinate{2, 3});
+                CHECK(path == layout_coordinate_path{{{0, 0}, {0, 1}, {0, 2}, {0, 3}, {1, 3}, {2, 3}, {3, 3}}});
             }
             SECTION("(0,0) to (3,3) with coordinate obstruction via declaration")  // path of length 7
             {
@@ -548,18 +383,12 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
                 search_obstructions.obstruct_coordinate({2, 2});
                 // effectively blocking (3,2) as well
 
-                const auto collection =
-                    yen_k_shortest_paths<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, 1, {},
-                                                     search_obstructions);  // only one path possible
+                const auto collection = yen_k_shortest_paths(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, 1, {},
+                                                             search_obstructions);  // only one path possible
 
                 REQUIRE(collection.size() == 1);
                 const auto& path = collection[0];
-                REQUIRE(path.size() == 7);
-                CHECK(path[1] == fiction::layouts::layout_base::coordinate{0, 1});
-                CHECK(path[2] == fiction::layouts::layout_base::coordinate{0, 2});
-                CHECK(path[3] == fiction::layouts::layout_base::coordinate{0, 3});
-                CHECK(path[4] == fiction::layouts::layout_base::coordinate{1, 3});
-                CHECK(path[5] == fiction::layouts::layout_base::coordinate{2, 3});
+                CHECK(path == layout_coordinate_path{{{0, 0}, {0, 1}, {0, 2}, {0, 3}, {1, 3}, {2, 3}, {3, 3}}});
 
                 // coordinates should still be obstructed
                 CHECK(search_obstructions.is_obstructed_coordinate({3, 0}));
@@ -579,17 +408,12 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
                 // create a PI as obstruction
                 obstr_lyt.create_pi("obstruction", {3, 0});  // blocks 3 paths
 
-                const auto collection = yen_k_shortest_paths<coord_path>(
-                    obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, 1);  // only one path possible
+                const auto collection =
+                    yen_k_shortest_paths(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, 1);  // only one path possible
 
                 REQUIRE(collection.size() == 1);
                 const auto& path = collection[0];
-                REQUIRE(path.size() == 7);
-                CHECK(path[1] == fiction::layouts::layout_base::coordinate{1, 0});
-                CHECK(path[2] == fiction::layouts::layout_base::coordinate{1, 1});
-                CHECK(path[3] == fiction::layouts::layout_base::coordinate{1, 2});
-                CHECK(path[4] == fiction::layouts::layout_base::coordinate{2, 2});
-                CHECK(path[5] == fiction::layouts::layout_base::coordinate{3, 2});
+                CHECK(path == layout_coordinate_path{{{0, 0}, {1, 0}, {1, 1}, {1, 2}, {2, 2}, {3, 2}, {3, 3}}});
             }
             SECTION("(0,0) to (3,3) with coordinate obstruction via declaration")  // path of length 7
             {
@@ -599,18 +423,12 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
                 // create a PI as obstruction
                 search_obstructions.obstruct_coordinate({3, 0});  // blocks 3 paths
 
-                const auto collection =
-                    yen_k_shortest_paths<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, 1, {},
-                                                     search_obstructions);  // only one path possible
+                const auto collection = yen_k_shortest_paths(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, 1, {},
+                                                             search_obstructions);  // only one path possible
 
                 REQUIRE(collection.size() == 1);
                 const auto& path = collection[0];
-                REQUIRE(path.size() == 7);
-                CHECK(path[1] == fiction::layouts::layout_base::coordinate{1, 0});
-                CHECK(path[2] == fiction::layouts::layout_base::coordinate{1, 1});
-                CHECK(path[3] == fiction::layouts::layout_base::coordinate{1, 2});
-                CHECK(path[4] == fiction::layouts::layout_base::coordinate{2, 2});
-                CHECK(path[5] == fiction::layouts::layout_base::coordinate{3, 2});
+                CHECK(path == layout_coordinate_path{{{0, 0}, {1, 0}, {1, 1}, {1, 2}, {2, 2}, {3, 2}, {3, 3}}});
 
                 // coordinates should still be obstructed
                 CHECK(search_obstructions.is_obstructed_coordinate({3, 0}));
@@ -621,7 +439,6 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
 
 TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with connection obstruction", "[k-shortest-paths]")
 {
-    using coord_path = layout_coordinate_path;
 
     SECTION("coordinate paths")
     {
@@ -638,17 +455,12 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with connection obstruction
             search_obstructions.obstruct_connection({0, 2}, {1, 2});
             // leaving only one valid path via (0,4)
 
-            const auto collection = yen_k_shortest_paths<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, 1,
-                                                                     {}, search_obstructions);
+            const auto collection =
+                yen_k_shortest_paths(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, 1, {}, search_obstructions);
 
             REQUIRE(collection.size() == 1);
             const auto& path = collection[0];
-            REQUIRE(path.size() == 7);
-            CHECK(path[1] == fiction::layouts::layout_base::coordinate{0, 1});
-            CHECK(path[2] == fiction::layouts::layout_base::coordinate{0, 2});
-            CHECK(path[3] == fiction::layouts::layout_base::coordinate{0, 3});
-            CHECK(path[4] == fiction::layouts::layout_base::coordinate{1, 3});
-            CHECK(path[5] == fiction::layouts::layout_base::coordinate{2, 3});
+            CHECK(path == layout_coordinate_path{{{0, 0}, {0, 1}, {0, 2}, {0, 3}, {1, 3}, {2, 3}, {3, 3}}});
 
             // connections should still be obstructed
             CHECK(search_obstructions.is_obstructed_connection({0, 0}, {1, 0}));
@@ -673,18 +485,12 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with connection obstruction
                 search_obstructions.obstruct_connection({0, 2}, {1, 2});
                 // leaving only one valid path via (0,4)
 
-                const auto collection =
-                    yen_k_shortest_paths<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, 1, {},
-                                                     search_obstructions);  // only one path possible
+                const auto collection = yen_k_shortest_paths(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, 1, {},
+                                                             search_obstructions);  // only one path possible
 
                 REQUIRE(collection.size() == 1);
                 const auto& path = collection[0];
-                REQUIRE(path.size() == 7);
-                CHECK(path[1] == fiction::layouts::layout_base::coordinate{0, 1});
-                CHECK(path[2] == fiction::layouts::layout_base::coordinate{0, 2});
-                CHECK(path[3] == fiction::layouts::layout_base::coordinate{0, 3});
-                CHECK(path[4] == fiction::layouts::layout_base::coordinate{1, 3});
-                CHECK(path[5] == fiction::layouts::layout_base::coordinate{2, 3});
+                CHECK(path == layout_coordinate_path{{{0, 0}, {0, 1}, {0, 2}, {0, 3}, {1, 3}, {2, 3}, {3, 3}}});
 
                 // connections should still be obstructed
                 CHECK(search_obstructions.is_obstructed_connection({0, 0}, {1, 0}));
@@ -703,18 +509,12 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with connection obstruction
 
                 search_obstructions.obstruct_connection({2, 0}, {3, 0});  // blocks 3 paths
 
-                const auto collection =
-                    yen_k_shortest_paths<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, 1, {},
-                                                     search_obstructions);  // only one path possible
+                const auto collection = yen_k_shortest_paths(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, 1, {},
+                                                             search_obstructions);  // only one path possible
 
                 REQUIRE(collection.size() == 1);
                 const auto& path = collection[0];
-                REQUIRE(path.size() == 7);
-                CHECK(path[1] == fiction::layouts::layout_base::coordinate{1, 0});
-                CHECK(path[2] == fiction::layouts::layout_base::coordinate{1, 1});
-                CHECK(path[3] == fiction::layouts::layout_base::coordinate{1, 2});
-                CHECK(path[4] == fiction::layouts::layout_base::coordinate{2, 2});
-                CHECK(path[5] == fiction::layouts::layout_base::coordinate{3, 2});
+                CHECK(path == layout_coordinate_path{{{0, 0}, {1, 0}, {1, 1}, {1, 2}, {2, 2}, {3, 2}, {3, 3}}});
 
                 // connections should still be obstructed
                 CHECK(search_obstructions.is_obstructed_connection({2, 0}, {3, 0}));
@@ -725,10 +525,9 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with connection obstruction
 
 TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "[k-shortest-paths]")
 {
-    using coord_path = layout_coordinate_path;
 
     // enable crossings
-    const yen_k_shortest_paths_params params{a_star_params{true}};
+    const yen_k_shortest_paths_params params{.astar_params = a_star_params{.crossings = true}};
 
     SECTION("Single crossing")
     {
@@ -749,11 +548,11 @@ TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "
                     obstr_lyt.create_po(w, "obstruction PO", {1, 2});  // obstructs 1 coordinate
 
                     const auto collection =
-                        yen_k_shortest_paths<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {2, 2}}, 1, params);
+                        yen_k_shortest_paths(obstr_lyt, {.source = {0, 0}, .target = {2, 2}}, 1, params);
 
                     REQUIRE(collection.size() == 1);
                     const auto& path = collection[0];
-                    CHECK(path == coord_path{{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1}, {2, 2}}});
+                    CHECK(path == layout_coordinate_path{{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1}, {2, 2}}});
                 }
             }
             SECTION("USE")
@@ -771,11 +570,11 @@ TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "
                     obstr_lyt.create_po(w, "obstruction PO", {0, 1});  // obstructs 1 coordinate
 
                     const auto collection =
-                        yen_k_shortest_paths<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {2, 2}}, 1, params);
+                        yen_k_shortest_paths(obstr_lyt, {.source = {0, 0}, .target = {2, 2}}, 1, params);
 
                     REQUIRE(collection.size() == 1);
                     const auto& path = collection[0];
-                    CHECK(path == coord_path{{{0, 0}, {1, 0}, {1, 1, 1}, {1, 2}, {2, 2}}});
+                    CHECK(path == layout_coordinate_path{{{0, 0}, {1, 0}, {1, 1, 1}, {1, 2}, {2, 2}}});
                 }
             }
         }
@@ -805,13 +604,13 @@ TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "
                     obstr_lyt.create_po(w22, "obstruction PO", {2, 3});  // obstructs 1 coordinate
 
                     const auto collection =
-                        yen_k_shortest_paths<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, 2, params);
+                        yen_k_shortest_paths(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, 2, params);
 
-                    REQUIRE(collection.size() == 2);
-                    CHECK(collection.contains(
-                        coord_path{{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1, 1}, {3, 1}, {3, 2}, {3, 3}}}));
-                    CHECK(collection.contains(
-                        coord_path{{{0, 0}, {0, 1}, {0, 2}, {1, 2, 1}, {2, 2, 1}, {3, 2}, {3, 3}}}));
+                    CHECK_THAT(
+                        collection,
+                        Catch::Matchers::UnorderedRangeEquals(path_collection{
+                            layout_coordinate_path{{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1, 1}, {3, 1}, {3, 2}, {3, 3}}},
+                            layout_coordinate_path{{{0, 0}, {0, 1}, {0, 2}, {1, 2, 1}, {2, 2, 1}, {3, 2}, {3, 3}}}}));
                 }
             }
         }
@@ -839,11 +638,11 @@ TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "
                     obstr_lyt.create_po(w2, "obstruction PO", {3, 1});   // obstructs 1 coordinate
 
                     const auto collection =
-                        yen_k_shortest_paths<coord_path>(obstr_lyt, {.source = {0, 0}, .target = {3, 2}}, 1, params);
+                        yen_k_shortest_paths(obstr_lyt, {.source = {0, 0}, .target = {3, 2}}, 1, params);
 
                     REQUIRE(collection.size() == 1);
                     const auto& path = collection[0];
-                    CHECK(path == coord_path{{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1, 1}, {2, 2}, {3, 2}}});
+                    CHECK(path == layout_coordinate_path{{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1, 1}, {2, 2}, {3, 2}}});
                 }
             }
         }
@@ -852,23 +651,24 @@ TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "
 
 TEST_CASE("Path enumeration reaches targets in the crossing layer", "[k-shortest-paths]")
 {
-    using path = layout_coordinate_path;
+
     cartesian_gate_layout layout{cartesian_gate_layout::extent{2, 2, 2}, clocking::twoddwave()};
     layout.create_pi("a", {0, 0});
     layout.obstruct_coordinate({1, 0});
     layout.create_pi("b", {1, 0, 1});
     const routing_objective objective{.source = {0, 0}, .target = {1, 0, 1}};
     const auto              shortest =
-        a_star<path>(layout, objective, manhattan_distance_functor{}, unit_cost_functor<>{}, {.crossings = true});
+        a_star(layout, objective, manhattan_distance_functor{}, unit_cost_functor<>{}, {.crossings = true});
     REQUIRE_FALSE(shortest.empty());
-    const auto all = enumerate_all_paths<path>(layout, objective, {.crossings = true});
+    const auto all = enumerate_all_paths(layout, objective, {.crossings = true});
     CHECK(all.contains(shortest));
-    CHECK(yen_k_shortest_paths<path>(layout, objective, 10, {{true}}).size() == all.size());
+    CHECK_THAT(yen_k_shortest_paths(layout, objective, 10, {.astar_params = {.crossings = true}}),
+               Catch::Matchers::UnorderedRangeEquals(all));
 }
 
 TEST_CASE("Path searches preserve persistent and caller-supplied obstructions", "[k-shortest-paths]")
 {
-    using path = layout_coordinate_path;
+
     cartesian_gate_layout layout{cartesian_gate_layout::extent{4, 4, 1}, clocking::twoddwave()};
     layout.obstruct_coordinate({1, 0});
     layout.obstruct_connection({0, 1}, {1, 1});
@@ -878,28 +678,26 @@ TEST_CASE("Path searches preserve persistent and caller-supplied obstructions", 
     extra.obstruct_connection({1, 2}, {2, 2});
 
     const routing_objective objective{.source = {0, 0}, .target = {3, 3}};
-    const auto              all = enumerate_all_paths<path>(layout, objective, {}, extra);
+    const auto              all = enumerate_all_paths(layout, objective, {}, extra);
     REQUIRE_FALSE(all.empty());
     for (auto repetition = 0; repetition < 2; ++repetition)
     {
-        const auto shortest =
-            a_star<path>(layout, objective, manhattan_distance_functor{}, unit_cost_functor<>{}, {}, extra);
+        CAPTURE(repetition);
+        const auto shortest = a_star(layout, objective, manhattan_distance_functor{}, unit_cost_functor<>{}, {}, extra);
         CHECK(all.contains(shortest));
-        const auto paths = yen_k_shortest_paths<path>(layout, objective, 20, {}, extra);
-        CHECK(paths.size() == all.size());
-        for (const auto& candidate : paths)
-        {
-            CHECK(all.contains(candidate));
-        }
+        const auto paths = yen_k_shortest_paths(layout, objective, 20, {}, extra);
+        CHECK_THAT(paths, Catch::Matchers::UnorderedRangeEquals(all));
         layout.foreach_coordinate(
             [&](const auto& c)
             {
+                CAPTURE(c);
                 CHECK(layout.is_obstructed_coordinate(c) == (c == fiction::layouts::layout_base::coordinate{1, 0}));
                 CHECK(extra.is_obstructed_coordinate(c) == (c == fiction::layouts::layout_base::coordinate{1, 0} ||
                                                             c == fiction::layouts::layout_base::coordinate{2, 1}));
                 layout.foreach_coordinate(
                     [&](const auto& target)
                     {
+                        CAPTURE(c, target);
                         CHECK(layout.is_obstructed_connection(c, target) ==
                               (c == fiction::layouts::layout_base::coordinate{0, 1} &&
                                target == fiction::layouts::layout_base::coordinate{1, 1}));
@@ -909,4 +707,71 @@ TEST_CASE("Path searches preserve persistent and caller-supplied obstructions", 
                     });
             });
     }
+}
+
+TEST_CASE("Searches share concrete coordinate paths across geometries", "[k-shortest-paths]")
+{
+    /** @brief Checks endpoint and membership contracts. @param layout Geometry to search. */
+    const auto check_paths = [](const auto& layout)
+    {
+        /** @brief Routing endpoints shared by the geometry checks. */
+        const routing_objective objective{.source = {0, 0}, .target = {1, 1}};
+        /** @brief A* path between the test endpoints. */
+        const layout_coordinate_path shortest = a_star(layout, objective);
+        /** @brief All simple paths between the test endpoints. */
+        const path_collection all = enumerate_all_paths(layout, objective);
+        /** @brief Up to ten Yen paths between the test endpoints. */
+        const path_collection limited = yen_k_shortest_paths(layout, objective, 10);
+        REQUIRE_FALSE(shortest.empty());
+        REQUIRE_FALSE(all.empty());
+        REQUIRE_FALSE(limited.empty());
+        CHECK(shortest.source() == objective.source);
+        CHECK(shortest.target() == objective.target);
+        CHECK(all.contains(shortest));
+        /** @brief Yen path checked against exhaustive enumeration. */
+        for (const auto& path : limited)
+        {
+            CHECK(path.source() == objective.source);
+            CHECK(path.target() == objective.target);
+            CHECK(all.contains(path));
+        }
+    };
+    SECTION("Cartesian")
+    {
+        /** @brief Two-by-two Cartesian geometry for shared-path checks. */
+        const cartesian_layout layout{{2, 2}};
+        check_paths(layout);
+        CHECK(a_star(layout, {{0, 0}, {1, 1}}).size() == 3);
+        CHECK(enumerate_all_paths(layout, {{0, 0}, {1, 1}}).size() == 2);
+        CHECK(yen_k_shortest_paths(layout, {{0, 0}, {1, 1}}, 10).size() == 2);
+    }
+    SECTION("Shifted Cartesian")
+    {
+        check_paths(shifted_cartesian_layout{arrangement::ODD_ROW, {2, 2}});
+    }
+    SECTION("Hexagonal")
+    {
+        check_paths(hexagonal_layout{arrangement::ODD_ROW, {2, 2}});
+    }
+}
+
+TEST_CASE("Path search declarations constrain layout arguments", "[k-shortest-paths]")
+{
+    /** @brief Probes each search declaration. @tparam Lyt Candidate layout type. */
+    constexpr auto accepts_layout = []<typename Lyt>()
+    {
+        return std::array{requires(const Lyt& layout, const routing_objective& objective) {
+                              { a_star(layout, objective) } -> std::same_as<layout_coordinate_path>;
+                          },
+                          requires(const Lyt& layout, const routing_objective& objective) {
+                              { enumerate_all_paths(layout, objective) } -> std::same_as<path_collection>;
+                          },
+                          requires(const Lyt& layout, const routing_objective& objective) {
+                              { yen_k_shortest_paths(layout, objective, 1) } -> std::same_as<path_collection>;
+                          }};
+    };
+    STATIC_REQUIRE(accepts_layout.template operator()<cartesian_layout>() == std::array{true, true, true});
+    STATIC_REQUIRE(accepts_layout.template operator()<shifted_cartesian_layout>() == std::array{true, true, true});
+    STATIC_REQUIRE(accepts_layout.template operator()<hexagonal_layout>() == std::array{true, true, true});
+    STATIC_REQUIRE(accepts_layout.template operator()<int>() == std::array{false, false, false});
 }

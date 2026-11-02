@@ -111,24 +111,22 @@ void register_time_to_solution(nb::module_& m)
            fiction::sidb::simulation::analysis::time_to_solution_stats*     ps)
         {
             validate_confidence_level(confidence_level);
-            quicksim_options qs_params{};
-            qs_params.sim_params      = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-            qs_params.iteration_steps = iteration_steps;
-            qs_params.alpha           = alpha;
-            if (number_threads)
-            {
-                qs_params.number_threads = *number_threads;
-            }
-            qs_params.timeout            = quicksim_timeout;
-            qs_params.on_progress        = quicksim_on_progress;
-            qs_params.on_worker_progress = on_worker_progress;
-            time_to_solution_options tts_params{};
-            tts_params.timeout          = timeout;
-            tts_params.engine           = engine;
-            tts_params.repetitions      = repetitions;
-            tts_params.confidence_level = confidence_level;
-            tts_params.on_progress      = on_progress;
-            const nb::gil_scoped_release release{};
+            // MSVC 19.44 crashes when the fallback constructs QuickSim options inside the initializer.
+            const quicksim_options defaults{};
+            const quicksim_options qs_params{
+                .sim_params         = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf),
+                .iteration_steps    = iteration_steps,
+                .alpha              = alpha,
+                .number_threads     = number_threads ? *number_threads : defaults.number_threads,
+                .timeout            = quicksim_timeout,
+                .on_progress        = quicksim_on_progress,
+                .on_worker_progress = on_worker_progress};
+            const time_to_solution_options tts_params{.engine           = engine,
+                                                      .repetitions      = repetitions,
+                                                      .confidence_level = confidence_level,
+                                                      .on_progress      = on_progress,
+                                                      .timeout          = timeout};
+            const nb::gil_scoped_release   release{};
             fiction::sidb::simulation::analysis::time_to_solution(lyt, qs_params, tts_params, ps);
         },
         nb::arg("lyt"), nb::kw_only(), nb::arg("base") = quicksim_options{}.sim_params.base,

@@ -318,24 +318,24 @@ class quickexact_impl
         uint64_t previous_charge_index = 0;
         uint64_t iterations            = 0;
 
-        fiction::utils::math::gray_code_iterator gci{0};
-
         utils::progress_reporter progress{params.on_progress, "charge configurations",
                                           reduced_state.max_charge_index() + 1};
 
-        for (gci = 0; gci <= reduced_state.max_charge_index(); ++gci)
+        for (fiction::utils::math::gray_code_iterator gci{}; gci <= reduced_state.max_charge_index(); ++gci)
         {
             // Reading the clock per configuration dominates the cheap Gray-code update.
             if ((iterations++ & 1023u) == 0)
             {
                 utils::check_deadline(params.deadline);
             }
+            /** Current Gray code, shared by the state update and its history. */
+            const auto gray_code = *gci;
             reduced_state.assign_charge_index_by_gray_code(
-                *gci, previous_charge_index, simulation::detail::dependent_dot_mode::VARIABLE,
+                gray_code, previous_charge_index, simulation::detail::dependent_dot_mode::VARIABLE,
                 simulation::detail::energy_calculation::KEEP_OLD_ENERGY_VALUE,
                 simulation::detail::charge_distribution_history::CONSIDER);
 
-            previous_charge_index = *gci;
+            previous_charge_index = gray_code;
 
             if (reduced_state.is_physically_valid())
             {

@@ -54,17 +54,16 @@ inline operational_options make_operational_parameters(
     const decltype(operational_options{}.strategy_to_analyze_operational_status) strategy_to_analyze_operational_status)
 {
     validate_bdl_pair_distances(minimum_distance, maximum_distance);
-    operational_options params{};
-    params.sim_params = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf);
-    params.timeout    = timeout;
-    params.sim_engine = sim_engine;
-    params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance       = threshold_bdl_interdistance;
-    params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = minimum_distance;
-    params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = maximum_distance;
-    params.input_bdl_iterator_params.input_bdl_config                                  = input_bdl_config;
-    params.op_condition                                                                = op_condition;
-    params.strategy_to_analyze_operational_status = strategy_to_analyze_operational_status;
-    return params;
+    return operational_options{
+        .sim_params                = make_simulation_parameters(base, mu_minus, epsilon_r, lambda_tf),
+        .sim_engine                = sim_engine,
+        .input_bdl_iterator_params = {.bdl_wire_params  = {.threshold_bdl_interdistance = threshold_bdl_interdistance,
+                                                           .bdl_pairs_params = {.minimum_distance = minimum_distance,
+                                                                                .maximum_distance = maximum_distance}},
+                                      .input_bdl_config = input_bdl_config},
+        .op_condition              = op_condition,
+        .strategy_to_analyze_operational_status = strategy_to_analyze_operational_status,
+        .timeout                                = timeout};
 }
 
 }  // namespace pyfiction

@@ -23,7 +23,6 @@
 #include <fiction/layouts/obstructions.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/physical_design/path_finding/enumerate_all_paths.hpp>
-#include <fiction/physical_design/routing_utils.hpp>
 
 #include <optional>
 #include <vector>
@@ -66,12 +65,11 @@ void register_enumerate_all_paths_impl(nb::module_& m)
            const decltype(enumerate_all_paths_options{}.crossings) crossings,
            const std::optional<fiction::layouts::obstructions>&    supplied_obstructions)
         {
-            enumerate_all_paths_options params{};
-            const auto                  obstructions = supplied_obstructions.value_or(fiction::layouts::obstructions{});
-            params.crossings                         = crossings;
+            const enumerate_all_paths_options params{.crossings = crossings};
+            const auto obstructions = supplied_obstructions.value_or(fiction::layouts::obstructions{});
 
-            const auto all_paths = fiction::physical_design::path_finding::enumerate_all_paths<
-                fiction::physical_design::layout_coordinate_path, Lyt>(lyt, {source, target}, params, obstructions);
+            const auto all_paths = fiction::physical_design::path_finding::enumerate_all_paths<Lyt>(
+                lyt, {source, target}, params, obstructions);
 
             std::vector<std::vector<fiction::layouts::layout_base::coordinate>> paths{};
             paths.reserve(all_paths.size());
@@ -88,6 +86,7 @@ void register_enumerate_all_paths_impl(nb::module_& m)
         nb::call_guard<nb::gil_scoped_release>(),
         R"doc(Enumerate all loop-free paths from source to target in the layout.
 The keyword options select obstructions and crossing constraints.
+Raises ValueError when source or target lies outside the layout extent.
 
 Args:
     crossings: Allow wires to cross on separate layers.

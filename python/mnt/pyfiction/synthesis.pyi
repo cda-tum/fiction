@@ -355,14 +355,14 @@ def is_fanout_substituted(
     seed: int | None = None,
 ) -> bool:
     """
-    Check whether every network node respects the keyword fanout limits.
+    Check whether nonconstant network nodes respect the keyword fanout limits.
 
     Args:
-        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
-        strategy: Substitution strategy of high-degree fanout networks (depth-first vs. breadth-first).
-        degree: Maximum output degree of each fan-out node. Must be at least two.
-        threshold: Maximum number of outputs any gate is allowed to have before substitution applies. Must be at least one.
-        seed: Random seed; None selects a fresh random seed.
+        on_progress: Accepted without emitting progress reports.
+        strategy: Accepted without affecting this check.
+        degree: Maximum output degree of each fanout node.
+        threshold: Maximum output degree of each non-fanout node.
+        seed: Accepted without affecting this check.
     """
 
 def network_balancing(
@@ -393,13 +393,15 @@ def is_balanced(
 ) -> bool:
     """
     Check whether network paths are balanced.
-    Set unify_outputs to require every output at the same logic depth.
+    Set unify_outputs to compare output depths.
 
     Args:
-        on_progress: Callback receiving (task, completed, total); None disables progress reporting.
-        unify_outputs: Flag to indicate that all output nodes should be in the same rank.
-        buffer_constant_outputs: Whether outputs driven by a constant receive a buffer chain when unifying outputs;
-            set to False for flows that do not place constants, which then also ignore them in the check.
+        on_progress: Accepted without emitting progress reports.
+        unify_outputs: Require the selected outputs to have equal logic depth.
+        buffer_constant_outputs: Include constant-driven outputs when unify_outputs is True.
+
+    Raises:
+        MemoryError: If allocating depth information or output levels fails.
     """
 
 class missing_required_gates_exception(RuntimeError): ...

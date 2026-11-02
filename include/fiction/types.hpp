@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Preset network and truth-table types that instantiate the algorithms.
+ * @brief Preset network types that instantiate the algorithms.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Benjamin Hien (hibenj)
@@ -20,93 +20,32 @@
 
 #include "fiction/networks/technology_network.hpp"
 
-#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/views/names_view.hpp>
 
-#include <memory>
-#include <type_traits>
-#include <variant>
-
-namespace fiction
+namespace fiction::networks
 {
-/**
- * This file provides preset types that can be used as parameter types to run fiction's algorithms. They are furthermore
- * utilized in fiction's CLI. Naturally, this selection is neither complete nor final and can be extended at any time by
- * custom types.
- */
 
 /**
- * Truth tables.
+ * @brief AND-inverter graph with network, signal, and output names.
  */
-using tt     = kitty::dynamic_truth_table;
-using tt_ptr = std::shared_ptr<tt>;
-
-using truth_table_t = tt_ptr;
+using named_aig_network = mockturtle::names_view<mockturtle::aig_network>;
 
 /**
- * Logic networks.
+ * @brief XOR-AND-inverter graph with network, signal, and output names.
  */
-using aig_nt  = mockturtle::names_view<mockturtle::aig_network>;
-using aig_ptr = std::shared_ptr<aig_nt>;
-
-inline constexpr auto aig_name = "AIG";
-
-using xag_nt  = mockturtle::names_view<mockturtle::xag_network>;
-using xag_ptr = std::shared_ptr<xag_nt>;
-
-inline constexpr auto xag_name = "XAG";
-
-using mig_nt  = mockturtle::names_view<mockturtle::mig_network>;
-using mig_ptr = std::shared_ptr<mig_nt>;
-
-inline constexpr auto mig_name = "MIG";
-
-using tec_nt  = mockturtle::names_view<fiction::networks::technology_network>;
-using tec_ptr = std::shared_ptr<tec_nt>;
-
-inline constexpr auto tec_name = "TEC";
-
-using logic_network_t = std::variant<aig_ptr, xag_ptr, mig_ptr, tec_ptr>;
-
-template <class Ntk>
-constexpr const char* get_ntk_type_name()
-{
-    if constexpr (std::is_same_v<std::decay_t<Ntk>, aig_nt>)
-    {
-        return aig_name;
-    }
-    else if constexpr (std::is_same_v<std::decay_t<Ntk>, xag_nt>)
-    {
-        return xag_name;
-    }
-    else if constexpr (std::is_same_v<std::decay_t<Ntk>, mig_nt>)
-    {
-        return mig_name;
-    }
-    else if constexpr (std::is_same_v<std::decay_t<Ntk>, tec_nt>)
-    {
-        return tec_name;
-    }
-    else
-    {
-        return "?";
-    }
-}
-
-template <class Ntk>
-inline constexpr auto ntk_type_name = get_ntk_type_name<Ntk>();
+using named_xag_network = mockturtle::names_view<mockturtle::xag_network>;
 
 /**
- * Every `*_ptr` alias points at the type its name says (`aig_ptr` at `aig_nt`, and so on). The
- * aliases above are written by hand, so this pins each pair.
+ * @brief Majority-inverter graph with network, signal, and output names.
  */
-static_assert(std::is_same_v<tt_ptr::element_type, tt>);
-static_assert(std::is_same_v<aig_ptr::element_type, aig_nt>);
-static_assert(std::is_same_v<xag_ptr::element_type, xag_nt>);
-static_assert(std::is_same_v<mig_ptr::element_type, mig_nt>);
-static_assert(std::is_same_v<tec_ptr::element_type, tec_nt>);
+using named_mig_network = mockturtle::names_view<mockturtle::mig_network>;
 
-}  // namespace fiction
+/**
+ * @brief Technology network with network, signal, and output names.
+ */
+using named_technology_network = mockturtle::names_view<technology_network>;
+
+}  // namespace fiction::networks
