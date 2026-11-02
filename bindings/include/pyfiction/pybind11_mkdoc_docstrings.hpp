@@ -10819,24 +10819,6 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_placement_view =
-R"doc(Named technology network over the storage of `ntk`, the form that
-`place` reads gate functions from.
-
-The view shares the nodes of `ntk`, so node identifiers stay valid,
-and keeps the names of `ntk` if it carries any.
-
-Args:
-    ntk: Network.
-
-Template Args:
-    Ntk: Network type derived from `technology_network`.
-
-Returns:
-    Named view over the storage of `ntk`.
-
-)doc";
-
 static const char *mkd_doc_fiction_physical_design_detail_plane_impl =
 R"doc(Implementation of PLANE.
 
@@ -13744,12 +13726,11 @@ Returns:
 Raises:
     networks::high_degree_fanin_exception: If a node has more than two
                                            non-constant fanins.
-    std::invalid_argument: If `ntk` has no primary inputs, if a node
-                           drives more than two fanouts, if no output
-                           reaches a gate, if a gate has a constant
-                           fanin next to a single non-constant one, if
-                           `ntk` is not balanced, or if the rank order
-                           of `ntk` has crossings.
+    ValueError: If `ntk` has no primary inputs, if a node drives more
+                than two fanouts, if no output reaches a gate, if a
+                gate has a constant fanin next to a single non-
+                constant one, if `ntk` is not balanced, or if the rank
+                order of `ntk` has crossings.
     std::logic_error: If placement or routing cannot keep the layout
                       planar; such an input is a defect.
 
@@ -27977,11 +27958,10 @@ Returns:
     of at most `fanout_degree` outputs.
 
 Raises:
-    std::invalid_argument: If `ps.fanout_degree` is below 2, or if
-                           `ntk` is not balanced with unified outputs,
-                           contains virtual primary inputs, or
-                           violates another precondition of
-                           `node_duplication_planarization`.
+    ValueError: If `ps.fanout_degree` is below 2, or if `ntk` is not
+                balanced with unified outputs, contains virtual
+                primary inputs, or violates another precondition of
+                `node_duplication_planarization`.
     std::runtime_error: If a stage cannot keep its contract (see the
                         stages' documentation), or if the result is
                         not planar or not balanced with unified
@@ -27997,7 +27977,7 @@ whether the crossing gates are built from XOR gates.
 
 The pipeline defaults to the hybrid strategy, which decides per level
 between duplicating nodes and keeping the crossings for the crossing
-gates. @hideinitializer)doc";
+gates.)doc";
 
 static const char *mkd_doc_fiction_synthesis_planarization_params_fanout_degree =
 R"doc(Maximum output degree of the fanout nodes in the result.
