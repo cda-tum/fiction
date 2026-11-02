@@ -83,7 +83,7 @@ def test_three_sidbs(lat, all_negative_energy):
         assert state is not None
         states.append(state)
     assert all(s.degeneracy == 1 for s in states)
-    assert sorted(s.electrostatic_potential_energy for s in states) == pytest.approx(
+    assert [s.electrostatic_potential_energy for s in states] == pytest.approx(
         sorted([cd1.energy(), cd2.energy(), cd3.energy(), cd4.energy()]), abs=1e-7
     )
 
@@ -109,7 +109,7 @@ def test_degenerate_states():
     second = distribution.get_nth_state(1)
     assert first is not None
     assert second is not None
-    assert sorted([
+    assert [
         (first.electrostatic_potential_energy, first.degeneracy),
         (second.electrostatic_potential_energy, second.degeneracy),
-    ]) == [(pytest.approx(0.5), 2), (pytest.approx(1.0), 1)]
+    ] == [(pytest.approx(0.5), 2), (pytest.approx(1.0), 1)]
