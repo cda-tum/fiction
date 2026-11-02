@@ -283,6 +283,27 @@ TEST_CASE("Concurrent advances are counted exactly once", "[progress]")
     CHECK(is_monotone(rec.records));
 }
 
+/** @brief Reporter destruction ignores callback exceptions after unfinished work. */
+TEST_CASE("The final progress report ignores callback exceptions", "[progress]")
+{
+    /** @brief Records that the destructor invoked the throwing callback. */
+    bool final_reported{};
+    {
+        /** @brief Unknown-total reporting throttles intermediate updates until 64 items complete. */
+        utils::progress_reporter reporter{[&](const std::string_view, const std::size_t done, const std::size_t)
+                                          {
+                                              if (done != 0)
+                                              {
+                                                  final_reported = true;
+                                                  throw std::runtime_error{"final report failed"};
+                                              }
+                                          },
+                                          "items"};
+        reporter.advance();
+    }
+    CHECK(final_reported);
+}
+
 TEST_CASE("Worker progress preserves identities and clears activity", "[progress]")
 {
     std::vector<std::size_t> finished{};

@@ -11,6 +11,8 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING
 
+import pytest
+
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.io import read_sqd_layout, write_sqd_layout
 
@@ -62,3 +64,23 @@ def test_write_snapshots_layout_for_progress_callback(tmp_path: Path) -> None:
     exported = read_sqd_layout(str(path))
     assert exported.num_dots() == 2
     assert exported.get_dot_tag(unvisited) == sidb_dot_tag.NORMAL
+
+
+def test_write_preserves_destination_when_initial_callback_raises(tmp_path: Path) -> None:
+    """An initial callback exception preserves the destination and removes temporary output."""
+    lyt = sidb_layout()
+    lyt.assign_sidb(lattice_site(0, 0, 0))
+    path = tmp_path / "preserved.sqd"
+    path.write_bytes(b"original")
+    error = RuntimeError("SQD callback failed")
+
+    def fail(_task: str, _done: int, _total: int) -> None:
+        """Raise the original Python exception from the initial native report."""
+        raise error
+
+    with pytest.raises(RuntimeError) as caught:
+        write_sqd_layout(lyt, str(path), on_progress=fail)
+
+    assert caught.value is error
+    assert path.read_bytes() == b"original"
+    assert list(tmp_path.iterdir()) == [path]
