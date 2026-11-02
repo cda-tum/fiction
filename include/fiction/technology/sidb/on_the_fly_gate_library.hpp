@@ -234,7 +234,7 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
             {
                 if (p.out.size() == 2)
                 {
-                    const auto skeleton = cell_list_to_layout(ONE_IN_TWO_OUT_MAP.at(p));
+                    const auto skeleton = cell_list_to_layout(fcn::detail::checked_lookup(ONE_IN_TWO_OUT_MAP, p));
 
                     if (defect_surface.has_value())
                     {
@@ -261,7 +261,8 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
 
                         const auto skeleton = cell_list_to_layout(TWO_IN_TWO_OUT);
 
-                        if (auto cell_list = TWO_IN_TWO_OUT_MAP.at({p, pa}); cell_list == DOUBLE_WIRE)
+                        if (auto cell_list = fcn::detail::checked_lookup(TWO_IN_TWO_OUT_MAP, {p, pa});
+                            cell_list == DOUBLE_WIRE)
                         {
                             if (defect_surface.has_value())
                             {
@@ -319,7 +320,7 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
                         return design_gate(skeleton, synthesis::create_crossing_wire_tt(), complex_gate_param, p, t);
                     }
 
-                    const auto cell_list = ONE_IN_ONE_OUT_MAP.at(p);
+                    const auto cell_list = fcn::detail::checked_lookup(ONE_IN_ONE_OUT_MAP, p);
                     if (cell_list == EMPTY_GATE)
                     {
                         return EMPTY_GATE;
@@ -343,7 +344,7 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
 
             if (lyt.is_inv(n))
             {
-                const auto skeleton = cell_list_to_layout(ONE_IN_ONE_OUT_MAP.at(p));
+                const auto skeleton = cell_list_to_layout(fcn::detail::checked_lookup(ONE_IN_ONE_OUT_MAP, p));
 
                 if (defect_surface.has_value())
                 {
@@ -357,7 +358,7 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::layout, 60, 46>  
                 return design_gate(skeleton, std::vector<kitty::dynamic_truth_table>{f}, params, p, t);
             }
 
-            const auto skeleton = cell_list_to_layout(TWO_IN_ONE_OUT_MAP.at(p));
+            const auto skeleton = cell_list_to_layout(fcn::detail::checked_lookup(TWO_IN_ONE_OUT_MAP, p));
 
             if (defect_surface.has_value())
             {

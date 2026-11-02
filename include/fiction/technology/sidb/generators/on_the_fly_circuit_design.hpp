@@ -198,7 +198,7 @@ struct on_the_fly_circuit_design_on_defective_surface_stats
         // generating the blacklist based on neutral defects. The long-range electrostatic influence of charged defects
         // is not considered as gates are designed on-the-fly.
         auto black_list = physical_design::surface_analysis<sidb::skeleton_bestagon_library>(
-            lattice_tiling, defective_surface, std::pair<uint16_t, uint16_t>{0, 0});
+            lattice_tiling, defective_surface, std::pair<uint16_t, uint16_t>{});
 
         while (!gate_layout.has_value())
         {
