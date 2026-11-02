@@ -15,7 +15,10 @@ import mnt.pyfiction.sidb.simulation.logic
 
 def write_sqd_sim_result(sim_result: mnt.pyfiction.sidb.simulation.sidb_simulation_result, filename: str) -> None:
     """
-    Writes a simulation result as a SiQAD simulation result file.
+    Writes a simulation result as a SiQAD simulation result file. Invalid
+    input preserves an existing file. Charge distributions follow
+    `std::weak_order` on their energies. Equivalent energies have no
+    specified relative order.
 
     Args:
         sim_result: Result to write.
@@ -24,8 +27,10 @@ def write_sqd_sim_result(sim_result: mnt.pyfiction.sidb.simulation.sidb_simulati
     Raises:
         RuntimeError: If creating, writing, closing, or replacing the
                       output file fails.
-        ValueError: if a distribution has different sites from the result
-                    layout.
+        ValueError: If a distribution has different sites from the result
+                    layout, a parameter name contains invalid XML name
+                    characters, or metadata contains invalid UTF-8, an
+                    illegal XML character, or a null C string.
     """
 
 class sample_writing_mode(enum.Enum):
@@ -150,6 +155,8 @@ def write_location_and_ground_state(
     Writes the SiDB positions of a simulation result and the charge states
     of its ground states as CSV.
 
+    Invalid input preserves an existing file.
+
     Args:
         sim_result: Result to write.
         filename: File to write into.
@@ -157,4 +164,6 @@ def write_location_and_ground_state(
     Raises:
         RuntimeError: If creating, writing, closing, or replacing the
                       output file fails.
+        ValueError: If a distribution has different sites from the result
+                    layout.
     """

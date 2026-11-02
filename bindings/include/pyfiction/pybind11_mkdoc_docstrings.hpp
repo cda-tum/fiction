@@ -5020,18 +5020,19 @@ Template Args:
 Raises:
     ValueError: If the layout is incomplete, cyclic, physically
                 invalid, uses an unsupported scheme, or contains
-                illegal XML text controls.
+                invalid UTF-8 or illegal XML characters in a name.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_fgl_validate_xml_text =
-R"doc(Reject XML 1.0 control characters in a name.
+R"doc(Validate a UTF-8 name containing XML 1.0 characters.
 
 Args:
     value: Layout or object name.
 
 Raises:
-    ValueError: If the name contains an illegal control character.
+    ValueError: If the name contains invalid UTF-8 or an illegal XML
+                character.
 
 )doc";
 
@@ -5371,29 +5372,34 @@ Template Args:
 static const char *mkd_doc_fiction_layouts_io_read_fgl_layout =
 R"doc(Reads legacy maximum-index extents or version-2 extent counts,
 declared interface order, and manual obstructions. Version 2 requires
-a complete, acyclic, physically valid layout. Validation finishes
-before assigning a target. The target layout changes only after a
-successful read.
-
-May throw an `fgl_parsing_error` if the FGL file is malformed.
+a complete, acyclic, physically valid layout whose names contain valid
+UTF-8 XML 1.0 text. A stored name overrides `name`; otherwise, version
+2 validates `name` as the layout name. Validation finishes before
+assigning a target. The target layout changes only after a successful
+read.
 
 Args:
     is: The input stream to read from.
-    name: The name to give to the generated layout.
+    name: Fallback layout name when the file has no name element.
 
 Template Args:
     Geometry: Coordinate geometry of the returned gate-level layout.
+
+Raises:
+    fgl_parsing_error: If the FGL file is malformed or the resulting
+                       version-2 layout is invalid.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_io_read_fgl_layout_2 =
 R"doc(Reads legacy maximum-index extents or version-2 extent counts,
 declared interface order, and manual obstructions. Version 2 requires
-a complete, acyclic, physically valid layout. Validation finishes
-before assigning a target. The target layout changes only after a
-successful read.
+a complete, acyclic, physically valid layout whose names contain valid
+UTF-8 XML 1.0 text. A stored name overrides the target's name;
+otherwise, version 2 validates the retained target name. Validation
+finishes before assigning a target. The target layout changes only
+after a successful read.
 
-May throw an `fgl_parsing_error` if the FGL file is malformed.
 
 This is an in-place version of `read_fgl_layout` that utilizes the
 given layout as a target to write to.
@@ -5405,26 +5411,35 @@ Args:
 Template Args:
     Geometry: Coordinate geometry of the gate-level layout.
 
+Raises:
+    fgl_parsing_error: If the FGL file is malformed or the resulting
+                       version-2 layout is invalid.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_io_read_fgl_layout_3 =
-R"doc(Reads a gate-level layout from an FGL file provided as a file name.
-
-May throw an `fgl_parsing_error` if the FGL file is malformed.
+R"doc(Reads a gate-level layout from an FGL file provided as a file name. A
+stored name overrides `name`; otherwise, version 2 validates `name` as
+UTF-8 XML 1.0 text.
 
 Args:
     filename: The file name to open and read from.
-    name: The name to give to the generated layout.
+    name: Fallback layout name when the file has no name element.
 
 Template Args:
     Geometry: Coordinate geometry of the returned gate-level layout.
 
+Raises:
+    fgl_parsing_error: If the FGL file is malformed or the resulting
+                       version-2 layout is invalid.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_io_read_fgl_layout_4 =
-R"doc(Reads a gate-level layout from an FGL file provided as a file name.
+R"doc(Reads a gate-level layout from an FGL file provided as a file name. A
+stored name overrides the target's name; otherwise, version 2
+validates the retained name as UTF-8 XML 1.0 text.
 
-May throw an `fgl_parsing_error` if the FGL file is malformed.
 
 This is an in-place version of `read_fgl_layout` that utilizes the
 given layout as a target to write to.
@@ -5435,6 +5450,10 @@ Args:
 
 Template Args:
     Geometry: Coordinate geometry of the gate-level layout.
+
+Raises:
+    fgl_parsing_error: If the FGL file is malformed or the resulting
+                       version-2 layout is invalid.
 
 )doc";
 
@@ -5537,8 +5556,8 @@ object, including complete dangling cones. Clock overrides and
 synchronization elements and manual coordinate and directed-connection
 obstructions remain sparse. The format supports the standard named
 clocking schemes and their overrides. Names preserve XML whitespace
-and exclude illegal XML 1.0 controls. Validation finishes before the
-output stream changes.
+and use valid UTF-8 with XML 1.0 characters. Validation finishes
+before the output stream changes.
 
 This overload uses an output stream to write into.
 
@@ -5553,7 +5572,7 @@ Template Args:
 Raises:
     ValueError: If the layout is incomplete, cyclic, physically
                 invalid, uses an unsupported scheme, or contains
-                illegal XML text controls.
+                invalid UTF-8 or illegal XML characters in a name.
 
 )doc";
 
@@ -5575,7 +5594,7 @@ Template Args:
 Raises:
     ValueError: If the layout is incomplete, cyclic, physically
                 invalid, uses an unsupported scheme, or contains
-                illegal XML text controls.
+                invalid UTF-8 or illegal XML characters in a name.
     RuntimeError: If creating, writing, closing, or replacing the
                   output file fails.
 
@@ -21304,6 +21323,9 @@ Args:
 Returns:
     The string representation of the value.
 
+Raises:
+    ValueError: If the value contains a null C string.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_location_and_ground_state_writer =
@@ -21325,6 +21347,10 @@ static const char *mkd_doc_fiction_sidb_simulation_io_detail_location_and_ground
 R"doc(Writes positions in nanometers and one column per ground state; writes
 nothing for an empty result.
 
+Raises:
+    ValueError: If a distribution has different sites from the result
+                layout.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_location_and_ground_state_writer_sim_result = R"doc(Simulation result to serialize.)doc";
@@ -21334,14 +21360,32 @@ R"doc(Writes a `result` as a SiQAD simulation result file: engine info,
 physical parameters, the SiDB positions in ångström, and every charge
 distribution sorted by energy.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer_create_engine_info =
+R"doc(Creates the engine name, version, and runtime XML fragment.
+
+Returns:
+    Engine metadata with escaped text.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer_create_simulation_parameters =
+R"doc(Creates the physical and additional simulation parameter XML fragment.
+
+Returns:
+    Simulation parameters with valid element names and escaped text.
+
+)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer_os = R"doc(Output stream.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer_run =
 R"doc(Writes the complete SiQAD simulation-result document.
 
 Raises:
-    ValueError: if a distribution has different sites from the result
-                layout.
+    ValueError: If a distribution has different sites from the result
+                layout, a parameter name contains invalid XML name
+                characters, or metadata contains invalid UTF-8, an
+                illegal XML character, or a null C string.
 
 )doc";
 
@@ -21358,11 +21402,7 @@ Args:
 
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer_write_electron_distributions = R"doc(Writes the charge distributions in energy order.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer_write_engine_info = R"doc(Writes the engine name, version, and runtime.)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer_write_physical_locations = R"doc(Writes the SiDB positions in ångström.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer_write_simulation_parameters = R"doc(Writes the physical and additional simulation parameters.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_sweep_parameter_to_string =
 R"doc(Converts a sweep parameter to a string representation. This is used to
@@ -21373,6 +21413,50 @@ Args:
 
 Returns:
     The string representation of the sweep parameter.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_validate_xml_name =
+R"doc(Validate an XML 1.0 name encoded as UTF-8.
+
+Args:
+    name: Parameter element name.
+
+Raises:
+    ValueError: If the name, UTF-8 encoding, or XML characters are
+                invalid.
+
+See also:
+    https://www.w3.org/TR/xml/#NT-Name
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_xml_name_start =
+R"doc(Whether a character can start an XML 1.0 name.
+
+Args:
+    character: Decoded Unicode character.
+
+Returns:
+    Whether the character matches NameStartChar.
+
+See also:
+    https://www.w3.org/TR/xml/#NT-NameStartChar
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_xml_text =
+R"doc(Escape XML element text and preserve carriage returns when parsed.
+
+Args:
+    value: Text to escape.
+
+Returns:
+    Escaped XML text.
+
+Raises:
+    ValueError: If the text contains invalid UTF-8 or an illegal XML
+                1.0 character.
 
 )doc";
 
@@ -21416,17 +21500,24 @@ position.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_write_location_and_ground_state =
 R"doc(Writes the SiDB positions of a simulation result and the charge states
-of its ground states as CSV to a stream.
+of its ground states as CSV to a stream. Invalid input leaves the
+stream unchanged.
 
 Args:
     sim_result: Result to write.
     os: Output stream to write into.
+
+Raises:
+    ValueError: If a distribution has different sites from the result
+                layout.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_write_location_and_ground_state_2 =
 R"doc(Writes the SiDB positions of a simulation result and the charge states
 of its ground states as CSV.
+
+Invalid input preserves an existing file.
 
 Args:
     sim_result: Result to write.
@@ -21435,6 +21526,8 @@ Args:
 Raises:
     RuntimeError: If creating, writing, closing, or replacing the
                   output file fails.
+    ValueError: If a distribution has different sites from the result
+                layout.
 
 )doc";
 
@@ -21562,20 +21655,28 @@ the operational samples anyway.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_write_sqd_sim_result =
 R"doc(Writes a simulation result as a SiQAD simulation result file to a
-stream.
+stream. Metadata text is XML-escaped, and additional parameter names
+use XML 1.0 name characters. Metadata uses UTF-8. Invalid input leaves
+the stream unchanged. Charge distributions follow `std::weak_order` on
+their energies. Equivalent energies have no specified relative order.
 
 Args:
     sim_result: Result to write.
     os: Output stream to write into.
 
 Raises:
-    ValueError: if a distribution has different sites from the result
-                layout.
+    ValueError: If a distribution has different sites from the result
+                layout, a parameter name contains invalid XML name
+                characters, or metadata contains invalid UTF-8, an
+                illegal XML character, or a null C string.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_write_sqd_sim_result_2 =
-R"doc(Writes a simulation result as a SiQAD simulation result file.
+R"doc(Writes a simulation result as a SiQAD simulation result file. Invalid
+input preserves an existing file. Charge distributions follow
+`std::weak_order` on their energies. Equivalent energies have no
+specified relative order.
 
 Args:
     sim_result: Result to write.
@@ -21584,8 +21685,10 @@ Args:
 Raises:
     RuntimeError: If creating, writing, closing, or replacing the
                   output file fails.
-    ValueError: if a distribution has different sites from the result
-                layout.
+    ValueError: If a distribution has different sites from the result
+                layout, a parameter name contains invalid XML name
+                characters, or metadata contains invalid UTF-8, an
+                illegal XML character, or a null C string.
 
 )doc";
 
@@ -28087,6 +28190,29 @@ additional arguments to process.
 
 Template Args:
     Ts: An empty variadic template argument pack.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_io_detail_next_xml_character =
+R"doc(Consume one UTF-8 character permitted by XML 1.0.
+
+Args:
+    remaining: UTF-8 text; advances past the consumed character.
+
+Returns:
+    Decoded XML character.
+
+Raises:
+    ValueError: If the encoding or XML character is invalid.
+
+Precondition:
+    remaining is nonempty.
+
+See also:
+    https://www.w3.org/TR/xml/#charsets
+
+See also:
+    https://www.rfc-editor.org/rfc/rfc3629#section-4
 
 )doc";
 
