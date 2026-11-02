@@ -497,7 +497,7 @@ namespace detail
  * @param lyt The layout the operational domain is computed for.
  * @param params The operational domain parameters to validate.
  * @param min_sweep_dimensions The number of sweep dimensions the calling algorithm requires at least. Grid search and
- * random sampling accept any number; flood fill and contour tracing need at least two.
+ * random sampling require at least one; flood fill and contour tracing need at least two.
  * @param algorithm_name The name of the calling algorithm, used to phrase the sweep dimension count error.
  * @throws std::invalid_argument if the parameters are invalid.
  */
@@ -2355,8 +2355,8 @@ class operational_domain_impl
  * @param stats Statistics of the process.
  * @return The operational domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
- * is requested without rejecting kinks or on a layout without `LOGIC` dots. Any number of sweep
- * dimensions is accepted.
+ * is requested without rejecting kinks or on a layout without `LOGIC` dots. At least one sweep
+ * dimension is required.
  */
 [[nodiscard]] inline operational_domain
 operational_domain_grid_search(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
@@ -2397,8 +2397,8 @@ operational_domain_grid_search(const layout& lyt, const std::vector<kitty::dynam
  * @param stats Operational domain computation statistics.
  * @return The operational domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
- * is requested without rejecting kinks or on a layout without `LOGIC` dots. Any number of sweep
- * dimensions is accepted.
+ * is requested without rejecting kinks or on a layout without `LOGIC` dots. At least one sweep
+ * dimension is required.
  */
 [[nodiscard]] inline operational_domain
 operational_domain_random_sampling(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
@@ -2450,8 +2450,8 @@ operational_domain_random_sampling(const layout& lyt, const std::vector<kitty::d
  * @return The operational domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
  * is requested without rejecting kinks or on a layout without `LOGIC` dots. Flood fill and contour
- * tracing additionally require at least two sweep dimensions; grid search and random sampling accept
- * any number.
+ * tracing additionally require at least two sweep dimensions; grid search and random sampling require
+ * at least one.
  */
 [[nodiscard]] inline operational_domain
 operational_domain_flood_fill(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
@@ -2502,8 +2502,8 @@ operational_domain_flood_fill(const layout& lyt, const std::vector<kitty::dynami
  * @return The operational domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
  * is requested without rejecting kinks or on a layout without `LOGIC` dots. Flood fill and contour
- * tracing additionally require at least two sweep dimensions; grid search and random sampling accept
- * any number.
+ * tracing additionally require at least two sweep dimensions; grid search and random sampling require
+ * at least one.
  */
 [[nodiscard]] inline operational_domain
 operational_domain_contour_tracing(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
@@ -2544,8 +2544,8 @@ operational_domain_contour_tracing(const layout& lyt, const std::vector<kitty::d
  * @param stats Operational domain computation statistics.
  * @return The critical temperature domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
- * is requested without rejecting kinks or on a layout without `LOGIC` dots. Any number of sweep
- * dimensions is accepted.
+ * is requested without rejecting kinks or on a layout without `LOGIC` dots. At least one sweep
+ * dimension is required.
  */
 [[nodiscard]] inline critical_temperature_domain
 critical_temperature_domain_grid_search(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
@@ -2587,8 +2587,8 @@ critical_temperature_domain_grid_search(const layout& lyt, const std::vector<kit
  * @param stats Operational domain computation statistics.
  * @return The critical temperature domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
- * is requested without rejecting kinks or on a layout without `LOGIC` dots. Any number of sweep
- * dimensions is accepted.
+ * is requested without rejecting kinks or on a layout without `LOGIC` dots. At least one sweep
+ * dimension is required.
  */
 [[nodiscard]] inline critical_temperature_domain
 critical_temperature_domain_random_sampling(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
@@ -2636,8 +2636,8 @@ critical_temperature_domain_random_sampling(const layout& lyt, const std::vector
  * @return The critical temperature domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
  * is requested without rejecting kinks or on a layout without `LOGIC` dots. Flood fill and contour
- * tracing additionally require at least two sweep dimensions; grid search and random sampling accept
- * any number.
+ * tracing additionally require at least two sweep dimensions; grid search and random sampling require
+ * at least one.
  */
 [[nodiscard]] inline critical_temperature_domain
 critical_temperature_domain_flood_fill(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
@@ -2688,8 +2688,8 @@ critical_temperature_domain_flood_fill(const layout& lyt, const std::vector<kitt
  * @return The critical temperature domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
  * is requested without rejecting kinks or on a layout without `LOGIC` dots. Flood fill and contour
- * tracing additionally require at least two sweep dimensions; grid search and random sampling accept
- * any number.
+ * tracing additionally require at least two sweep dimensions; grid search and random sampling require
+ * at least one.
  */
 [[nodiscard]] inline critical_temperature_domain
 critical_temperature_domain_contour_tracing(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
