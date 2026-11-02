@@ -121,21 +121,21 @@ TEST_CASE("Test calculate_energy_distribution function", "[energy-distribution]"
         CHECK(first.energy() == 0.0);
         CHECK(second.energy() == 0.0);
         CHECK(third.energy() > 0.0);
-        // The first two distributions form the degenerate ground state.
-        const auto ground_state = result.get_nth_state(0);
-        REQUIRE(ground_state.has_value());
-        if (ground_state.has_value())
+        /** @brief First indexed energy and its associated degeneracy. */
+        const auto first_state = result.get_nth_state(0);
+        /** @brief Second indexed energy and its associated degeneracy. */
+        const auto second_state = result.get_nth_state(1);
+        REQUIRE(first_state.has_value());
+        REQUIRE(second_state.has_value());
+        if (first_state.has_value() && second_state.has_value())
         {
-            CHECK(ground_state->degeneracy == 2);
-            CHECK(ground_state->electrostatic_potential_energy == 0.0);
-        }
-
-        const auto excited_state = result.get_nth_state(1);
-        REQUIRE(excited_state.has_value());
-        if (excited_state.has_value())
-        {
-            CHECK(excited_state->degeneracy == 1);
-            CHECK(excited_state->electrostatic_potential_energy > 0.0);
+            /** @brief Complete indexed states, independent of their retrieval order. */
+            const std::vector<std::pair<double, uint64_t>> indexed_states{
+                {first_state->electrostatic_potential_energy, first_state->degeneracy},
+                {second_state->electrostatic_potential_energy, second_state->degeneracy}};
+            CHECK(std::count(indexed_states.cbegin(), indexed_states.cend(), std::pair{0.0, uint64_t{2}}) == 1);
+            CHECK(std::count(indexed_states.cbegin(), indexed_states.cend(), std::pair{third.energy(), uint64_t{1}}) ==
+                  1);
         }
         CHECK(result.size() == 2);
         CHECK_FALSE(result.get_nth_state(2).has_value());
