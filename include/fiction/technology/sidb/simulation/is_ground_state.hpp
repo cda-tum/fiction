@@ -20,7 +20,6 @@
 #include "fiction/technology/sidb/simulation/result.hpp"
 
 #include <algorithm>
-#include <cassert>
 
 namespace fiction::sidb::simulation
 {
@@ -42,8 +41,6 @@ namespace fiction::sidb::simulation
 
     const auto exact     = exact_results.groundstates();
     const auto heuristic = heuristic_results.groundstates();
-
-    assert(heuristic.size() <= exact.size() && "The heuristic results must be less equal than the exact results.");
 
     if (exact.size() != heuristic.size())
     {

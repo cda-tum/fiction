@@ -719,6 +719,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Ground-state CSV output now rejects nonfinite energies before changing output and preserves finite
+    minimum-energy states when six-decimal rounding overflows.
+  - `is_ground_state` now returns `false` for extra heuristic ground states in Debug and Release.
   - `on_the_fly_gate_library` now honors `DESIGN_ON_THE_FLY` for crossings and double wires on defective surfaces.
   - Node-duplication planarization reports bounded progress for outputs driven directly by inputs.
   - `surface_analysis` now propagates allocation failure while building its blacklist.

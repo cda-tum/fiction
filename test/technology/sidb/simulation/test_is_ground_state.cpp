@@ -78,6 +78,15 @@ TEST_CASE("check if ground state is found", "[is-ground-state]")
             CHECK(is_ground_state(simulation_result_heuristic, simulation_result_exhaustive));
         }
 
+        SECTION("heuristic has additional ground states")
+        {
+            result simulation_result_heuristic{};
+            simulation_result_heuristic.lyt                   = lyt;
+            simulation_result_heuristic.charge_distributions  = {first, second};
+            simulation_result_exhaustive.charge_distributions = {first};
+            CHECK_FALSE(is_ground_state(simulation_result_heuristic, simulation_result_exhaustive));
+        }
+
         SECTION("no exact result")
         {
             CHECK_FALSE(is_ground_state(simulation_result_exhaustive, result{}));

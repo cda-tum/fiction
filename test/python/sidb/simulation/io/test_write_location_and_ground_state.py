@@ -46,18 +46,31 @@ def test_write_location_and_ground_state(tmp_path: Path) -> None:
     assert all(len(line.split(";")) == len(lines[0].split(";")) for line in lines[1:])
 
 
-def test_mismatched_sites_preserve_destination(tmp_path: Path) -> None:
-    """Mismatched distribution sites raise ValueError and preserve an existing file.
+@pytest.mark.parametrize(
+    "energy",
+    [
+        pytest.param(None, id="mismatched-sites"),
+        pytest.param(float("nan"), id="nan"),
+        pytest.param(float("inf"), id="positive-infinity"),
+        pytest.param(float("-inf"), id="negative-infinity"),
+    ],
+)
+def test_invalid_input_preserves_destination(energy: float | None, tmp_path: Path) -> None:
+    """Invalid distributions raise ValueError and preserve an existing file.
 
     Args:
+        energy: Nonfinite energy, or None for mismatched distribution sites.
         tmp_path: Temporary output directory.
     """
 
     layout = sidb_layout()
     layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
+    distribution = charge_distribution() if energy is None else charge_distribution(layout)
+    if energy is not None:
+        distribution.assign_energy(energy)
     result = sidb_simulation_result()
     result.layout = layout
-    result.charge_distributions = [charge_distribution()]
+    result.charge_distributions = [distribution]
     filename = tmp_path / "ground_state.txt"
     filename.write_text("original")
 

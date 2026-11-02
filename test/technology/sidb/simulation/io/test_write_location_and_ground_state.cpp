@@ -15,6 +15,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/technology/sidb/charge_distribution.hpp>
@@ -27,6 +28,8 @@
 #include <fiction/technology/sidb/simulation/result.hpp>
 
 #include <cctype>
+#include <initializer_list>
+#include <limits>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -184,6 +187,18 @@ TEST_CASE("Ground-state CSV preserves distributions across site-list sharing", "
         res.charge_distributions = {first, charge_distribution{lyt, charge_state::NEUTRAL}, first};
         check_output();
     }
+    SECTION("largest-magnitude finite energies")
+    {
+        for (const auto energy : {std::numeric_limits<double>::max(), std::numeric_limits<double>::lowest()})
+        {
+            res.charge_distributions = {first, charge_distribution{first.shared_sites(), charge_state::NEUTRAL}, first};
+            for (auto& cd : res.charge_distributions)
+            {
+                cd.assign_energy(energy);
+            }
+            check_output();
+        }
+    }
     SECTION("excited mismatch after shared distributions")
     {
         layout shifted{};
@@ -196,5 +211,27 @@ TEST_CASE("Ground-state CSV preserves distributions across site-list sharing", "
         os << "original";
         CHECK_THROWS_AS(write_location_and_ground_state(res, os), std::invalid_argument);
         CHECK(os.str() == "original");
+    }
+}
+
+TEST_CASE("Ground-state CSV rejects nonfinite energies before output", "[write_txt_sim_result]")
+{
+    layout lyt{};
+    lyt.assign_sidb({0, 0}, dot_tag::NORMAL);
+    result res{};
+    res.lyt = lyt;
+    for (const auto energy : {std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::infinity(),
+                              -std::numeric_limits<double>::infinity()})
+    {
+        for (const auto index : {0u, 1u})
+        {
+            res.charge_distributions = {charge_distribution{lyt}, charge_distribution{lyt}};
+            res.charge_distributions[index].assign_energy(energy);
+            std::stringstream os{};
+            os << "original";
+            CAPTURE(energy, index);
+            CHECK_THROWS_AS(write_location_and_ground_state(res, os), std::invalid_argument);
+            CHECK(os.str() == "original");
+        }
     }
 }
