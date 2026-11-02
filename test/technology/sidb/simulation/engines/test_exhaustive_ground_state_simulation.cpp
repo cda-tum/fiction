@@ -16,11 +16,12 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-#include "fiction/technology/sidb/simulation/result.hpp"
 #include "utils/progress_recorder.hpp"
 
 #include <fiction/technology/sidb/lattice.hpp>
@@ -28,10 +29,13 @@
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
+#include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/utils/execution_timeout.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
+#include <array>
 #include <chrono>
+#include <cstddef>
 #include <cstdint>
 
 using namespace fiction;
@@ -43,11 +47,12 @@ using namespace fiction::utils::math;
 TEST_CASE("ExGS rejects incomplete simulations after the caller deadline", "[exhaustive-ground-state-simulation]")
 {
     layout lyt{};
-    auto   deadline = std::chrono::steady_clock::time_point::max();
 
     SECTION("Already expired")
     {
-        deadline = std::chrono::steady_clock::now();
+        const auto deadline = std::chrono::steady_clock::now();
+        CHECK_THROWS_AS(exhaustive_ground_state_simulation(lyt, simulation_parameters{2, -0.32}, {}, deadline),
+                        utils::timeout_error);
     }
     SECTION("Expires while enumerating")
     {
@@ -55,11 +60,10 @@ TEST_CASE("ExGS rejects incomplete simulations after the caller deadline", "[exh
         {
             lyt.assign_sidb({i, 0, 0}, dot_tag::NORMAL);
         }
-        deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds{1};
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds{1};
+        CHECK_THROWS_AS(exhaustive_ground_state_simulation(lyt, simulation_parameters{2, -0.32}, {}, deadline),
+                        utils::timeout_error);
     }
-
-    CHECK_THROWS_AS(exhaustive_ground_state_simulation(lyt, simulation_parameters{2, -0.32}, {}, deadline),
-                    utils::timeout_error);
 }
 
 TEST_CASE("Empty layout ExGS simulation", "[exhaustive-ground-state-simulation]")
@@ -73,7 +77,6 @@ TEST_CASE("Empty layout ExGS simulation", "[exhaustive-ground-state-simulation]"
     CHECK(simulation_results.charge_distributions.empty());
     CHECK(simulation_results.additional_simulation_parameters.empty());
     CHECK(simulation_results.algorithm_name == "ExGS");
-    CHECK(simulation_results.additional_simulation_parameters.empty());
 }
 
 TEST_CASE("Single SiDB ExGS simulation", "[exhaustive-ground-state-simulation]")
@@ -192,131 +195,41 @@ TEST_CASE("ExGS simulation of a Y-shaped SiDB OR gate with input 01", "[exhausti
     lyt.assign_sidb({10, 8, 1}, dot_tag::NORMAL);
     lyt.assign_sidb({16, 1, 0}, dot_tag::NORMAL);
 
-    simulation_parameters params{2, -0.28};
+    const auto& [name, params, expected_charges,
+                 expected_energy] = GENERATE(Catch::Generators::table<const char*, simulation_parameters,
+                                                                      std::array<int, 8>, double>(
+        {{"Standard Physical Parameters",
+          simulation_parameters{2, -0.28, 5.6, 5.0},
+          {-1, -1, -1, -1, -1, 0, 0, 0},
+          0.4662582096},
+         {"Increased mu_minus", simulation_parameters{2, -0.1, 5.6, 5.0}, {-1, 0, -1, 0, -1, 0, 0, 0}, 0.061037632},
+         {"Decreased mu_minus",
+          simulation_parameters{2, -0.7, 5.6, 5.0},
+          {-1, -1, -1, -1, -1, -1, -1, -1},
+          2.069954113},
+         {"Decreased lambda_tf",
+          simulation_parameters{2, -0.28, 5.6, 1},
+          {-1, -1, -1, -1, -1, -1, -1, -1},
+          0.5432404075},
+         {"Increased lambda_tf", simulation_parameters{2, -0.28, 5.6, 10}, {-1, 0, -1, 0, -1, -1, 0, 0}, 0.2930574885},
+         {"Increased epsilon_r",
+          simulation_parameters{2, -0.28, 10, 5.0},
+          {-1, -1, -1, -1, -1, 0, 0, -1},
+          0.505173434}}));
+    CAPTURE(name);
 
-    SECTION("Standard Physical Parameters")
+    const auto simulation_results = exhaustive_ground_state_simulation(lyt, params);
+
+    REQUIRE(simulation_results.charge_distributions.size() == 1);
+    const auto&                       charges = simulation_results.charge_distributions.front();
+    const std::array<lattice_site, 8> sites{
+        {{6, 2, 0}, {12, 3, 0}, {10, 8, 1}, {10, 6, 1}, {16, 1, 0}, {10, 5, 0}, {14, 2, 0}, {8, 3, 0}}};
+    for (std::size_t i = 0; i < sites.size(); ++i)
     {
-        const auto simulation_results = exhaustive_ground_state_simulation(lyt, params);
-
-        REQUIRE(!simulation_results.charge_distributions.empty());
-        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-
-        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::NEUTRAL);
-        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::NEUTRAL);
-        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::NEUTRAL);
-
-        CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.4662582096, ERROR_MARGIN));
+        CAPTURE(i);
+        CHECK(static_cast<int>(charge_state_to_sign(charges.get_charge_state(sites.at(i)))) == expected_charges.at(i));
     }
-
-    SECTION("Increased mu_minus")
-    {
-        params.mu_minus = -0.1;
-
-        const auto simulation_results = exhaustive_ground_state_simulation(lyt, params);
-
-        REQUIRE(!simulation_results.charge_distributions.empty());
-        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-
-        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == charge_state::NEUTRAL);
-        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == charge_state::NEUTRAL);
-        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::NEUTRAL);
-        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::NEUTRAL);
-        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::NEUTRAL);
-
-        CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.061037632, ERROR_MARGIN));
-    }
-
-    SECTION("Decreased mu_minus")
-    {
-        params.mu_minus = -0.7;
-
-        const auto simulation_results = exhaustive_ground_state_simulation(lyt, params);
-
-        REQUIRE(!simulation_results.charge_distributions.empty());
-        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-
-        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::NEGATIVE);
-
-        CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(2.069954113, ERROR_MARGIN));
-    }
-
-    SECTION("Decreased lambda_tf")
-    {
-        params.lambda_tf = 1;
-
-        const auto simulation_results = exhaustive_ground_state_simulation(lyt, params);
-
-        REQUIRE(!simulation_results.charge_distributions.empty());
-        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-
-        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::NEGATIVE);
-
-        CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.5432404075, ERROR_MARGIN));
-    }
-
-    SECTION("Increased lambda_tf")
-    {
-        params.lambda_tf = 10;
-
-        const auto simulation_results = exhaustive_ground_state_simulation(lyt, params);
-
-        REQUIRE(!simulation_results.charge_distributions.empty());
-        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-
-        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == charge_state::NEUTRAL);
-        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == charge_state::NEUTRAL);
-        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::NEUTRAL);
-        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::NEUTRAL);
-
-        CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.2930574885, ERROR_MARGIN));
-    }
-
-    SECTION("Increased epsilon_r")
-    {
-        params.epsilon_r = 10;
-
-        const auto simulation_results = exhaustive_ground_state_simulation(lyt, params);
-
-        REQUIRE(!simulation_results.charge_distributions.empty());
-        const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-
-        CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({12, 3, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 8, 1}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 6, 1}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({16, 1, 0}) == charge_state::NEGATIVE);
-        CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::NEUTRAL);
-        CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::NEUTRAL);
-        CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::NEGATIVE);
-
-        CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.505173434, ERROR_MARGIN));
-    }
+    CHECK_THAT(charges.energy(), Catch::Matchers::WithinAbs(expected_energy, ERROR_MARGIN));
 }
 
 TEST_CASE("ExGS simulation of positively charged SiDBs", "[exhaustive-ground-state-simulation]")

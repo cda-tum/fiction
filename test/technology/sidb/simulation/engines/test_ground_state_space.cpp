@@ -18,6 +18,7 @@
 
 #if (FICTION_ALGLIB_ENABLED)
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
@@ -37,15 +38,8 @@
 
 #include <mockturtle/utils/stopwatch.hpp>
 
-#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
-#include <set>
-#else
-#include <phmap.h>
-#endif
-
 #include <array>
 #include <cstdint>
-#include <iterator>
 #include <limits>
 #include <vector>
 
@@ -78,6 +72,7 @@ TEST_CASE("Ground State Space statistics use the landscape charge base", "[groun
 
     const auto res = ground_state_space(land);
 
+    REQUIRE(res.top_cluster);
     CHECK(res.maximum_top_level_multisets == 2);
 }
 
@@ -88,13 +83,14 @@ TEST_CASE("Ground State Space construction of a single SiDB", "[ground-state-spa
 
     const ground_state_space_results& res = ground_state_space(lyt);
 
+    REQUIRE(res.top_cluster);
     CHECK(res.top_cluster->num_sidbs() == 1);
     CHECK(res.top_cluster->uid == 0);  // same UIDs, but only with single SiDB simulation
     REQUIRE(res.top_cluster->sidbs.size() == 1);
     CHECK(*res.top_cluster->sidbs.cbegin() == 0);
     REQUIRE(res.top_cluster->children.size() == 1);
     CHECK((*res.top_cluster->children.cbegin())->uid == 0);  // <<< same with here
-    CHECK(res.top_cluster->charge_space.size() == 1);
+    REQUIRE(res.top_cluster->charge_space.size() == 1);
     CHECK(res.maximum_top_level_multisets == 3);
     CHECK(*res.top_cluster->charge_space.cbegin() ==
           sidb::simulation::engines::detail::cluster_charge_state{charge_state::NEGATIVE});
@@ -117,6 +113,8 @@ TEST_CASE("Ground State Space uses the landscape physical parameters", "[ground-
     const potential_landscape land{lyt, simulation_parameters{2, -0.32}};
     const auto                expected = ground_state_space(land);
     const auto                actual   = ground_state_space(land, {.sim_params = simulation_parameters{3, 0.5}});
+    REQUIRE(expected.top_cluster);
+    REQUIRE(actual.top_cluster);
     REQUIRE(expected.top_cluster->charge_space.size() == 1);
     CHECK(actual.top_cluster->charge_space == expected.top_cluster->charge_space);
 }
@@ -132,6 +130,7 @@ TEST_CASE("Ground State Space construction of two SiDBs directly next to each ot
     {
         const ground_state_space_results& res =
             ground_state_space(lyt, ground_state_space_params{.sim_params = simulation_parameters{2}});
+        REQUIRE(res.top_cluster);
         CHECK(res.top_cluster->charge_space.empty());
     }
 
@@ -139,7 +138,8 @@ TEST_CASE("Ground State Space construction of two SiDBs directly next to each ot
     {
         const ground_state_space_results& res =
             ground_state_space(lyt, ground_state_space_params{.sim_params = simulation_parameters{3}});
-        CHECK(!res.top_cluster->charge_space.empty());
+        REQUIRE(res.top_cluster);
+        CHECK_FALSE(res.top_cluster->charge_space.empty());
     }
 }
 
@@ -159,6 +159,7 @@ TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-state-spa
     const ground_state_space_results& gss_res =
         ground_state_space(lyt, ground_state_space_params{.sim_params = simulation_parameters{2}});
 
+    REQUIRE(gss_res.top_cluster);
     CHECK(mockturtle::to_seconds(gss_res.runtime) > 0.0);
 
     CHECK(gss_res.maximum_top_level_multisets == gss_res.top_cluster->charge_space.size() + 7);
@@ -185,152 +186,44 @@ TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-state-spa
     REQUIRE(gss_res.top_cluster->charge_space.cbegin()->compositions.size() == 1);
     REQUIRE(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.size() == 2);
 
-    if (gss_res.top_cluster->charge_space.cbegin()
-            ->compositions.cbegin()
-            ->proj_states.cbegin()
-            ->cluster->sidbs.size() == 3)
+    const auto& composition = gss_res.top_cluster->charge_space.cbegin()->compositions.front();
+    const auto& first       = composition.proj_states.front();
+    const auto& second      = composition.proj_states.back();
+    REQUIRE(first.cluster);
+    REQUIRE(second.cluster);
+    const auto& three = first.cluster->sidbs.size() == 3 ? first : second;
+    const auto& four  = first.cluster->sidbs.size() == 3 ? second : first;
+
+    CHECK(three.cluster->sidbs == std::vector<uint64_t>{0ul, 1ul, 2ul});
+    CHECK((three.multiset_conf >> 32ull) == 2);
+    CHECK(static_cast<uint32_t>(three.multiset_conf) == 0);
+    CHECK(four.cluster->sidbs == std::vector<uint64_t>{3ul, 4ul, 5ul, 6ul});
+    CHECK((four.multiset_conf >> 32ull) == 3);
+    CHECK(static_cast<uint32_t>(four.multiset_conf) == 0);
+
+    for (uint64_t sidb_ix = 0; sidb_ix < 7; ++sidb_ix)
     {
-        CHECK(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin()->cluster->sidbs ==
-              std::vector<uint64_t>{0ul, 1ul, 2ul});
-        CHECK((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin()->multiset_conf >>
-               32ull) == 2);
-        CHECK(((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin()->multiset_conf
-                << 32ull) >>
-               32ull) == 0);
-
-        CHECK(std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(), 1)
-                  ->cluster->sidbs == std::vector<uint64_t>{3ul, 4ul, 5ul, 6ul});
-        CHECK((std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(), 1)
-                   ->multiset_conf >>
-               32ull) == 3);
-        CHECK(((std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(), 1)
-                    ->multiset_conf
-                << 32ull) >>
-               32ull) == 0);
-
-        for (uint64_t sidb_ix = 0; sidb_ix < 7; ++sidb_ix)
-        {
-            CHECK_THAT(
-                gss_res.top_cluster->charge_space.cbegin()
-                        ->compositions.cbegin()
-                        ->pot_bounds.get<sidb::simulation::engines::detail::bound_direction::LOWER>(sidb_ix) -
-                    gss_res.top_cluster->charge_space.cbegin()
-                        ->compositions.cbegin()
-                        ->proj_states.cbegin()
-                        ->cluster->pot_projs.at(sidb_ix)
-                        .get_pot_proj_for_m_conf<sidb::simulation::engines::detail::bound_direction::LOWER>(
-                            gss_res.top_cluster->charge_space.cbegin()
-                                ->compositions.cbegin()
-                                ->proj_states.cbegin()
-                                ->multiset_conf)
-                        .pot_val -
-                    std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
-                              1)
-                        ->cluster->pot_projs.at(sidb_ix)
-                        .get_pot_proj_for_m_conf<sidb::simulation::engines::detail::bound_direction::LOWER>(
-                            std::next(
-                                gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
-                                1)
-                                ->multiset_conf)
-                        .pot_val,
-                Catch::Matchers::WithinAbs(0.0, std::numeric_limits<double>::epsilon()));
-            CHECK_THAT(
-                gss_res.top_cluster->charge_space.cbegin()
-                        ->compositions.cbegin()
-                        ->pot_bounds.get<sidb::simulation::engines::detail::bound_direction::UPPER>(sidb_ix) -
-                    gss_res.top_cluster->charge_space.cbegin()
-                        ->compositions.cbegin()
-                        ->proj_states.cbegin()
-                        ->cluster->pot_projs.at(sidb_ix)
-                        .get_pot_proj_for_m_conf<sidb::simulation::engines::detail::bound_direction::UPPER>(
-                            gss_res.top_cluster->charge_space.cbegin()
-                                ->compositions.cbegin()
-                                ->proj_states.cbegin()
-                                ->multiset_conf)
-                        .pot_val -
-                    std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
-                              1)
-                        ->cluster->pot_projs.at(sidb_ix)
-                        .get_pot_proj_for_m_conf<sidb::simulation::engines::detail::bound_direction::UPPER>(
-                            std::next(
-                                gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
-                                1)
-                                ->multiset_conf)
-                        .pot_val,
-                Catch::Matchers::WithinAbs(0.0, std::numeric_limits<double>::epsilon()));
-        }
-    }
-    else
-    {
-        CHECK(std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(), 1)
-                  ->cluster->sidbs == std::vector<uint64_t>{0ul, 1ul, 2ul});
-        CHECK((std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(), 1)
-                   ->multiset_conf >>
-               32ull) == 2);
-        CHECK(((std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(), 1)
-                    ->multiset_conf
-                << 32ull) >>
-               32ull) == 0);
-
-        CHECK(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin()->cluster->sidbs ==
-              std::vector<uint64_t>{3ul, 4ul, 5ul, 6ul});
-        CHECK((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin()->multiset_conf >>
-               32ull) == 3);
-        CHECK(((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin()->multiset_conf
-                << 32ull) >>
-               32ull) == 0);
-
-        for (uint64_t sidb_ix = 0; sidb_ix < 7; ++sidb_ix)
-        {
-            CHECK_THAT(
-                gss_res.top_cluster->charge_space.cbegin()
-                        ->compositions.cbegin()
-                        ->pot_bounds.get<sidb::simulation::engines::detail::bound_direction::LOWER>(sidb_ix) -
-                    gss_res.top_cluster->charge_space.cbegin()
-                        ->compositions.cbegin()
-                        ->proj_states.cbegin()
-                        ->cluster->pot_projs.at(sidb_ix)
-                        .get_pot_proj_for_m_conf<sidb::simulation::engines::detail::bound_direction::LOWER>(
-                            gss_res.top_cluster->charge_space.cbegin()
-                                ->compositions.cbegin()
-                                ->proj_states.cbegin()
-                                ->multiset_conf)
-                        .pot_val -
-                    std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
-                              1)
-                        ->cluster->pot_projs.at(sidb_ix)
-                        .get_pot_proj_for_m_conf<sidb::simulation::engines::detail::bound_direction::LOWER>(
-                            std::next(
-                                gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
-                                1)
-                                ->multiset_conf)
-                        .pot_val,
-                Catch::Matchers::WithinAbs(0.0, std::numeric_limits<double>::epsilon()));
-            CHECK_THAT(
-                gss_res.top_cluster->charge_space.cbegin()
-                        ->compositions.cbegin()
-                        ->pot_bounds.get<sidb::simulation::engines::detail::bound_direction::UPPER>(sidb_ix) -
-                    gss_res.top_cluster->charge_space.cbegin()
-                        ->compositions.cbegin()
-                        ->proj_states.cbegin()
-                        ->cluster->pot_projs.at(sidb_ix)
-                        .get_pot_proj_for_m_conf<sidb::simulation::engines::detail::bound_direction::UPPER>(
-                            gss_res.top_cluster->charge_space.cbegin()
-                                ->compositions.cbegin()
-                                ->proj_states.cbegin()
-                                ->multiset_conf)
-                        .pot_val -
-                    std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
-                              1)
-                        ->cluster->pot_projs.at(sidb_ix)
-                        .get_pot_proj_for_m_conf<sidb::simulation::engines::detail::bound_direction::UPPER>(
-                            std::next(
-                                gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
-                                1)
-                                ->multiset_conf)
-                        .pot_val,
-                Catch::Matchers::WithinAbs(0.0, std::numeric_limits<double>::epsilon()));
-        }
+        CAPTURE(sidb_ix);
+        CHECK_THAT(composition.pot_bounds.get<sidb::simulation::engines::detail::bound_direction::LOWER>(sidb_ix) -
+                       first.cluster->pot_projs.at(sidb_ix)
+                           .get_pot_proj_for_m_conf<sidb::simulation::engines::detail::bound_direction::LOWER>(
+                               first.multiset_conf)
+                           .pot_val -
+                       second.cluster->pot_projs.at(sidb_ix)
+                           .get_pot_proj_for_m_conf<sidb::simulation::engines::detail::bound_direction::LOWER>(
+                               second.multiset_conf)
+                           .pot_val,
+                   Catch::Matchers::WithinAbs(0.0, std::numeric_limits<double>::epsilon()));
+        CHECK_THAT(composition.pot_bounds.get<sidb::simulation::engines::detail::bound_direction::UPPER>(sidb_ix) -
+                       first.cluster->pot_projs.at(sidb_ix)
+                           .get_pot_proj_for_m_conf<sidb::simulation::engines::detail::bound_direction::UPPER>(
+                               first.multiset_conf)
+                           .pot_val -
+                       second.cluster->pot_projs.at(sidb_ix)
+                           .get_pot_proj_for_m_conf<sidb::simulation::engines::detail::bound_direction::UPPER>(
+                               second.multiset_conf)
+                           .pot_val,
+                   Catch::Matchers::WithinAbs(0.0, std::numeric_limits<double>::epsilon()));
     }
 }
 
@@ -358,6 +251,7 @@ TEST_CASE("Ground state space construction of a 14 DB layout", "[ground-state-sp
 
     const ground_state_space_results& gss_res = ground_state_space(lyt);
 
+    REQUIRE(gss_res.top_cluster);
     CHECK(gss_res.top_cluster->sidbs.size() == 14);
     CHECK(gss_res.top_cluster->charge_space.size() == 5);
 
@@ -418,6 +312,7 @@ TEST_CASE("Ground state space construction of a 28 DB layout", "[ground-state-sp
 
     gss_res.report();
 
+    REQUIRE(gss_res.top_cluster);
     CHECK(gss_res.top_cluster->sidbs.size() == 28);
 
     // STL containers return 96, while phmap containers typically give 95
@@ -436,14 +331,27 @@ TEST_CASE("Ground state space construction of a 28 DB layout", "[ground-state-sp
     }
 }
 
+/**
+ * @brief Checks that a charge distribution follows a stored composition with the required multiset at every cluster.
+ * @param valid_cl Charge distribution to find in the hierarchy.
+ * @param gss_node Cluster to inspect.
+ * @param required_multiset Multiset selected by the parent composition.
+ * @return Whether the hierarchy contains the charge distribution under the selected multiset.
+ */
 static bool verify_ground_state_space_stats(const charge_distribution&                            valid_cl,
-                                            const sidb::simulation::engines::detail::cluster_ptr& gss_node) noexcept
+                                            const sidb::simulation::engines::detail::cluster_ptr& gss_node,
+                                            const uint64_t required_multiset) noexcept
 {
     sidb::simulation::engines::detail::cluster_charge_state cl_m_conf{};
 
     for (const uint64_t i : gss_node->sidbs)
     {
         cl_m_conf.add_charge(valid_cl.get_charge_state_by_index(i));
+    }
+
+    if (static_cast<uint64_t>(cl_m_conf) != required_multiset)
+    {
+        return false;
     }
 
     const sidb::simulation::engines::detail::cluster_charge_state_space::const_iterator found_m_conf =
@@ -467,7 +375,8 @@ static bool verify_ground_state_space_stats(const charge_distribution&          
 
         for (const sidb::simulation::engines::detail::cluster_projector_state& pst : composition.proj_states)
         {
-            composition_has_correct_charge_conf &= verify_ground_state_space_stats(valid_cl, pst.cluster);
+            composition_has_correct_charge_conf &=
+                verify_ground_state_space_stats(valid_cl, pst.cluster, pst.multiset_conf);
         }
 
         found_charge_conf |= composition_has_correct_charge_conf;
@@ -482,19 +391,29 @@ TEST_CASE("Ground State Space construction of sub-10 DB layouts", "[ground-state
 
     const auto& verify_layout = [](const layout& lyt)
     {
+        CAPTURE(lyt.get_lattice().name);
         const result&                     qe_res   = quickexact(lyt);
         const result&                     exgs_res = exhaustive_ground_state_simulation(lyt);
         const ground_state_space_results& gss_res  = ground_state_space(lyt);
 
+        REQUIRE(gss_res.top_cluster);
+        REQUIRE_FALSE(qe_res.charge_distributions.empty());
+        REQUIRE_FALSE(exgs_res.charge_distributions.empty());
         for (const auto& cl : qe_res.charge_distributions)
         {
-            const bool verification = verify_ground_state_space_stats(cl, gss_res.top_cluster);
+            CAPTURE(cl.charge_index(3));
+            const auto required_multiset =
+                (static_cast<uint64_t>(cl.num_negative_sidbs()) << 32ull) | cl.num_positive_sidbs();
+            const bool verification = verify_ground_state_space_stats(cl, gss_res.top_cluster, required_multiset);
             CHECK(verification);
         }
 
         for (const auto& cl : exgs_res.charge_distributions)
         {
-            const bool verification = verify_ground_state_space_stats(cl, gss_res.top_cluster);
+            CAPTURE(cl.charge_index(3));
+            const auto required_multiset =
+                (static_cast<uint64_t>(cl.num_negative_sidbs()) << 32ull) | cl.num_positive_sidbs();
+            const bool verification = verify_ground_state_space_stats(cl, gss_res.top_cluster, required_multiset);
             CHECK(verification);
         }
     };
