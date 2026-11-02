@@ -17089,8 +17089,7 @@ Template Args:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_energy_distribution_get_nth_state =
-R"doc(Returns the nth state (energy + degeneracy) in the energy
-distribution.
+R"doc(Returns the nth state (energy + degeneracy) in ascending energy order.
 
 Args:
     state_index: The index of the state to be retrieved.
@@ -17350,10 +17349,11 @@ Args:
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_for_given_simulation_results =
 R"doc(Computes the time-to-solution (TTS) of *QuickSim* from an exact result
-and a series of heuristic results: the accuracy `acc` is the fraction
-of heuristic runs that found the ground state, and TTS is the mean
-heuristic runtime scaled to reach the given confidence level, `t ·
-log(1 - c) / log(1 - acc)`. An empty sample yields zero accuracy, zero
+and a series of heuristic results: the success fraction `p` is the
+fraction of heuristic runs that found the ground state, and TTS is the
+mean heuristic runtime scaled to reach the given confidence level, `t
+· log(1 - c) / log(1 - p)`. The `acc` statistic reports the success
+fraction as a percentage. An empty sample yields zero accuracy, zero
 mean heuristic runtime, and infinite time-to-solution.
 
 Args:
