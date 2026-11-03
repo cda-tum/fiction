@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/technology/sidb/io/read_surface_defects.hpp>
@@ -39,6 +40,7 @@ TEST_CASE("Read surface defects into an sidb::layout", "[read-sidb-surface-defec
     {
         for (const auto* const surface : {"[]", "[[]]", "[[][][]]"})
         {
+            CAPTURE(surface);
             std::istringstream surface_stream{surface};
 
             const auto lyt = read_surface_defects(surface_stream);
@@ -87,6 +89,7 @@ TEST_CASE("Read surface defects into an sidb::layout", "[read-sidb-surface-defec
              {"[[0 1 0 0] [0 -5 0 0] [0 1 0 0]]", "[[0 1 0 0] [0 Z 0 0] [0 1 0 0]]",
               "[[0 1 0 0] [1111111111111111111111111111111111111111111111111111111111111111x] [0 1 0 0]]"})
         {
+            CAPTURE(surface);
             std::istringstream surface_stream{surface};
             const auto         lyt = read_surface_defects(surface_stream);
             // the ignored line does not count as a row, so the third line lands on row 1
@@ -131,6 +134,8 @@ TEST_CASE("Surface defect files preserve every parsed row", "[read-sidb-surface-
     /** @brief Expected defects after parsing the complete input. */
     const auto expected = read_surface_defects(stream);
     REQUIRE(expected.num_defects() == 2);
+    CHECK(expected.get_defect(site_at_row(0, 0)).type == defect_type::DB);
+    CHECK(expected.get_defect(site_at_row(0, 1)).type == defect_type::SI_VACANCY);
     /** @brief File containing the same bytes as the stream. */
     const auto filename =
         std::filesystem::temp_directory_path() / ("fiction-surface-input-" + std::to_string(std::random_device{}()));
