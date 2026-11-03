@@ -189,6 +189,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - QCA ONE via optimization now visits occupied crossing cells instead of scanning the full frame.
   - Avoid redundant progress-callback copies in algorithms and layout writers.
   - Critical-path analysis collapses wire chains to reduce traversal overhead on large layouts.
+  - SAT graph coloring now omits tautological symmetry clauses and unused vertex ordering.
   - Avoid helper threads for single-worker sampling and contour exploration.
   - Reduce coordinate-vector allocations during operational-domain traversal.
   - `cartesian_combinations` now moves completed storage between dimensions instead of copying it.
@@ -253,6 +254,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - SiDB ground-state tests share parameter rows and check complete enumeration and clustered results.
+  - Template dispatch and compiler-specific diagnostics avoid MSVC warnings.
+  - Technology tests, gate libraries, and exporters avoid MSVC diagnostics.
+  - SiDB layout I/O tests compare complete defect visits and simplify SVG checks.
+  - Gate-layout visitors avoid unreachable returns, and gate-library mapping guards GNU diagnostics.
   - Modernized ClusterComplete and cluster hierarchy tests with complete charge distributions, input rows,
     and checked prerequisites.
   - SiDB model, layout, and gate-library tests now share data rows and check complete defect regions and exception ports.
@@ -265,8 +271,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - FCN tests share port-list and constant-cell cases and check writer failure recovery.
     Writer docs describe border validation.
   - Modernized utility tests with named data rows, direct result checks, and complete progress observations.
+  - SiDB simulation tests check complete CSV rows and degenerate ground states.
   - Modernized physical-design helper tests with complete routing collections and independent solver rows.
   - Streamlined BDL iterator, pair, wire, and logic-match tests with complete physical expectations.
+  - Streamlined SiDB analysis tests while preserving energy, degeneracy, parameter-sweep, and timeout checks.
   - Streamlined synthesis tests and strengthened clone, conversion, and gate-library checks.
   - Modernized path-finding tests with shared data rows, complete path comparisons, and cache reuse checks.
   - Geometry tests now compare complete coordinate and visitor results and share arrangement cases.
@@ -358,6 +366,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     11.0.2 does not compile with clang 20.
 
 - Documentation:
+  - Color routing documentation no longer claims lexicographic ordering.
+  - Progress callback docs state the input-mutation precondition, propagation from construction and updates,
+    and suppression during reporter destruction.
   - Documented all three gate-layout geometries and MSVC Release builds for Python.
   - A* documents the consistency requirement for custom heuristics and nonnegative step costs.
   - Python layout docstrings use `extent` for the extent argument.
@@ -400,7 +411,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - I/O:
 
+  - SQD reads avoid copying the completed layout; SiDB text printing skips lookups for sites already drawn.
+  - DOT drawers avoid copying completed rows and columns.
   - QCA SVG rendering now reuses static tile and latch templates without per-tile text copies.
+  - XML text validation handles printable ASCII faster.
   - FGL name escaping appends text in one pass to avoid repeated suffix copies for long whitespace-heavy names.
   - `write_sidb_layout_svg` and `print_sidb_layout` color an `sidb::layout` from an optional
     `charge_distribution`
@@ -718,6 +732,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Ground-state CSV output now rejects nonfinite energies before changing output and preserves finite
+    minimum-energy states when six-decimal rounding overflows.
+  - `is_ground_state` now returns `false` for extra heuristic ground states in Debug and Release.
+  - C++ critical-temperature analysis now rejects negative, non-finite, and out-of-range temperature limits before simulation.
+  - Graph coloring now preserves the selected color type and reports zero colors for empty results.
+    Color frequencies use vertex-sized counts.
+  - Graph coloring now propagates allocation failures from graph and identifier translation.
+  - Graph coloring now rejects integral output color types that cannot hold the computed labels.
+    SAT search keeps its internal color indices wide and returns an empty coloring for an empty graph.
+  - `color_routing` now rejects TabuCol, which requires an unavailable color bound, and counts all objectives
+    when routing fails.
+  - Graph coloring now preserves wide integral vertex IDs and caps TabuCol color bounds before conversion.
+    TabuCol rejects effective color counts above `INT_MAX`.
   - `on_the_fly_gate_library` now honors `DESIGN_ON_THE_FLY` for crossings and double wires on defective surfaces.
   - Node-duplication planarization reports bounded progress for outputs driven directly by inputs.
   - `surface_analysis` now propagates allocation failure while building its blacklist.
@@ -814,6 +841,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Build system:
 
   - PCH cache hashes now retain comments so GCC builds accept documentation-only header edits.
+  - Installed SQD simulation writers now require the co-installed static TinyXML2 package.
   - Release benchmark builds now skip stripping when no strip tool is available.
   - Rebuild Python bindings when uncommitted C++ binding sources change.
   - Keep tinyxml2 static across build reconfiguration so Python imports find all libraries.
@@ -911,7 +939,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
 
+  - Time-to-solution confidence documentation now names the target probability of at least one success.
+  - ExGS Python documentation now describes all physically valid charge distributions.
+  - Graph coloring documents TabuCol's bounded search and empty-result contract. SiDB printing documents its
+    bounding-box cost, and progress reporting documents callback exception handling.
   - `integral_abs` documents that signed minimum values are outside its representable-result domain.
+  - Potential-landscape energy complexity includes charged-defect interactions.
   - Timing documentation now states the throughput formula and input hold time in clock cycles.
   - BDL pair-detection documentation clarifies per-tag sorting and no longer implies a distance-bound performance guarantee.
   - Binding docstring instructions now use the generator wrapper that CI runs.
@@ -956,6 +989,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Gate libraries:
 
+  - Unsupported gate orientations now raise exceptions under ClangCL instead of aborting.
+  - Gate-orientation diagnostics now propagate allocation failures when copying ports.
   - `fcn::gate_library::merge` now handles rectangular gates without out-of-bounds access.
   - On-the-fly SiDB gate mapping now rejects column arrangements instead of dropping north/south wires.
   - QCA ONE and ToPoliNano now reject terminal fanouts instead of losing their I/O markers.
@@ -965,7 +1000,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - I/O:
 
+  - FGL export and version-2 import reject malformed UTF-8 and illegal XML characters in names.
+  - SiQAD simulation export now orders NaN energies without violating the sorting requirements.
+  - SQD export now rejects non-finite lattice geometry and invalid charged-defect material parameters before changing output.
   - Colored DOT drawers now use the node-color interface and shared edge palette.
+  - SiDB simulation writers now reject mismatched distribution sites before writing. SiQAD results escape metadata and reject invalid UTF-8, XML characters, parameter names, and null C strings without replacing existing files.
   - Surface-defect import avoids exponential backtracking on malformed digit runs.
   - SQD import now rejects NUL bytes, multiple XML roots, and text outside the root. SiDB filename readers preserve bytes after Ctrl-Z on Windows.
   - BLIF network readers now accept empty and whitespace-only lines without aborting.
@@ -998,6 +1037,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
+  - `write_sqd_layout` now snapshots layouts when a progress callback is supplied, so callback mutations leave
+    the exported layout unchanged.
   - Domain keyword options now reuse the default sweep storage instead of allocating a second vector.
   - Cell-grid clocking names now remain valid when converted to Python strings.
   - Layout object IDs, input ports, and extents now compare unequal to unrelated Python values.

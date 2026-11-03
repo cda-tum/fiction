@@ -1195,6 +1195,124 @@ TEST_CASE("FGL failed connection read leaves target unchanged", "[read-fgl-layou
     CHECK(layout.get_input_name(0) == "kept");
 }
 
+TEST_CASE("Version-2 FGL validates the selected layout name", "[read-fgl-layout]")
+{
+    /** @brief Empty version-2 layout without a stored name. */
+    std::string xml{R"(<fgl version="2"><layout><size><x>1</x><y>1</y><z>1</z></size>
+      <clocking><name>2DDWave</name></clocking><inputs/><outputs/></layout><gates/></fgl>)"};
+    SECTION("Missing name retains a valid Unicode fallback")
+    {
+        /** @brief Valid UTF-8 fallback name. */
+        const std::string name{"M\xc3\xbcnchen"};
+        /** @brief Returning-reader input. */
+        std::stringstream stream{xml};
+        CHECK(read_fgl_layout<cartesian_layout>(stream, name).get_layout_name() == name);
+        /** @brief Existing layout whose name supplies the fallback. */
+        cartesian_gate_layout target{{2, 1, 1}, clocking::twoddwave(), name};
+        /** @brief In-place-reader input. */
+        std::stringstream inplace{xml};
+        read_fgl_layout(target, inplace);
+        CHECK(target.get_layout_name() == name);
+        CHECK(target.width() == 1);
+    }
+    SECTION("Missing name validates the fallback before replacing the target")
+    {
+        /** @brief Invalid UTF-8 or XML character in the selected fallback. */
+        const auto name = GENERATE(std::string(1, static_cast<char>(0x80)), std::string(1, '\x01'));
+        CAPTURE(static_cast<unsigned int>(static_cast<unsigned char>(name.front())));
+        /** @brief Returning-reader input. */
+        std::stringstream stream{xml};
+        CHECK_THROWS_AS(read_fgl_layout<cartesian_layout>(stream, name), fgl_parsing_error);
+        /** @brief Existing layout whose payload a rejected read preserves. */
+        cartesian_gate_layout target{{2, 1, 1}, clocking::twoddwave(), name};
+        target.create_pi("kept", {0, 0});
+        /** @brief In-place-reader input. */
+        std::stringstream inplace{xml};
+        CHECK_THROWS_AS(read_fgl_layout(target, inplace), fgl_parsing_error);
+        CHECK(target.get_layout_name() == name);
+        CHECK(target.width() == 2);
+        CHECK(target.num_pis() == 1);
+        CHECK(target.get_input_name(0) == "kept");
+    }
+    SECTION("Present name overrides an unused invalid fallback")
+    {
+        /** @brief Stored name element and its decoded text. */
+        const auto [element, expected] =
+            GENERATE(table<std::string, std::string>({{"<name>stored</name>", "stored"}, {"<name/>", ""}}));
+        xml.insert(xml.find("<layout>") + std::string{"<layout>"}.size(), element);
+        /** @brief Unused fallback with invalid UTF-8. */
+        const std::string name(1, static_cast<char>(0x80));
+        /** @brief Returning-reader input. */
+        std::stringstream stream{xml};
+        CHECK(read_fgl_layout<cartesian_layout>(stream, name).get_layout_name() == expected);
+        /** @brief Existing layout whose invalid name the file replaces. */
+        cartesian_gate_layout target{{2, 1, 1}, clocking::twoddwave(), name};
+        /** @brief In-place-reader input. */
+        std::stringstream inplace{xml};
+        read_fgl_layout(target, inplace);
+        CHECK(target.get_layout_name() == expected);
+    }
+}
+
+TEST_CASE("Version-2 FGL rejects invalid Unicode names before assigning the target", "[read-fgl-layout]")
+{
+    /** @brief Invalid name bytes that the XML parser may accept. */
+    const auto invalid = GENERATE(std::string(1, static_cast<char>(0x80)), std::string{"\xEF\xBF\xBE"});
+    CAPTURE(invalid.size(), static_cast<unsigned int>(static_cast<unsigned char>(invalid.front())));
+    /** @brief Existing target whose complete payload a rejected read preserves. */
+    cartesian_gate_layout target{{3, 1, 1}, clocking::twoddwave(), "kept"};
+    /** @brief Named input in the preserved target. */
+    const auto input = target.create_pi("input", {0, 0});
+    /** @brief Buffer connecting the preserved target's interface. */
+    const auto wire = target.create_buf(input, {1, 0});
+    target.create_po(wire, "output", {2, 0});
+    target.assign_synchronization_element({1, 0}, 2);
+    target.obstruct_coordinate({-1, -2, -3});
+    target.obstruct_connection({-1, -2, -3}, {4, 5, 6});
+    /**
+     * @brief Return the complete serialized layout payload, excluding time-dependent fiction metadata.
+     * @param layout Layout to serialize.
+     * @return Serialized layout payload.
+     */
+    const auto payload = [](const auto& layout)
+    {
+        /** @brief Serialized complete FGL document. */
+        std::stringstream serialized{};
+        write_fgl_layout(layout, serialized);
+        /** @brief Document bytes whose layout payload follows the fiction metadata. */
+        const auto xml = serialized.str();
+        return xml.substr(xml.find("  <layout>"));
+    };
+    /** @brief Complete payload before the read. */
+    const auto original = payload(target);
+    /** @brief Independent document containing an invalid name. */
+    std::string xml = original;
+    /** @brief Reject the document through both overloads and preserve the complete existing payload. */
+    const auto check_rejection = [&]
+    {
+        xml.insert(0, "<fgl version=\"2\">\n");
+        /** @brief Returning-reader input. */
+        std::stringstream rejected{xml};
+        CHECK_THROWS_AS(read_fgl_layout<cartesian_layout>(rejected), fgl_parsing_error);
+        /** @brief In-place-reader input. */
+        std::stringstream malformed{xml};
+        CHECK_THROWS_AS(read_fgl_layout(target, malformed), fgl_parsing_error);
+        CHECK(payload(target) == original);
+    };
+    SECTION("Layout name")
+    {
+        xml.replace(xml.find("<name>kept</name>"), std::string{"<name>kept</name>"}.size(),
+                    "<name>first" + invalid + "second</name>");
+        check_rejection();
+    }
+    SECTION("Object name")
+    {
+        xml.replace(xml.find("<name>input</name>"), std::string{"<name>input</name>"}.size(),
+                    "<name>first" + invalid + "second</name>");
+        check_rejection();
+    }
+}
+
 TEST_CASE("Version-2 FGL validates explicit interfaces and ports", "[read-fgl-layout]")
 {
     std::string xml{R"(<fgl version="2"><layout><size><x>2</x><y>1</y><z>1</z></size>

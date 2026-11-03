@@ -141,6 +141,24 @@ Args:
 
 static const char *mkd_doc_fiction_fcn_area_stats_width = R"doc(Layout width in nm.)doc";
 
+static const char *mkd_doc_fiction_fcn_detail_checked_lookup =
+R"doc(Looks up a gate-library entry and throws when the key is absent.
+
+Args:
+    map: Gate-library map.
+    key: Key to find.
+
+Template Args:
+    Map: Map type.
+
+Returns:
+    Mapped value.
+
+Raises:
+    IndexError: If the key is absent.
+
+)doc";
+
 static const char *mkd_doc_fiction_fcn_gate_library =
 R"doc( Base class for various FCN libraries used to map gate-level layouts
  to cell-level ones. Any new gate library can extend `gate_library` if
@@ -647,7 +665,13 @@ static const char *mkd_doc_fiction_fcn_unsupported_gate_orientation_exception_co
 
 static const char *mkd_doc_fiction_fcn_unsupported_gate_orientation_exception_ports = R"doc(Ports of the unsupported gate orientation.)doc";
 
-static const char *mkd_doc_fiction_fcn_unsupported_gate_orientation_exception_unsupported_gate_orientation_exception = R"doc(Records a gate coordinate and unsupported port orientation.)doc";
+static const char *mkd_doc_fiction_fcn_unsupported_gate_orientation_exception_unsupported_gate_orientation_exception =
+R"doc(Records a gate coordinate and unsupported port orientation.
+
+Raises:
+    MemoryError: If copying the ports cannot allocate storage.
+
+)doc";
 
 static const char *mkd_doc_fiction_fcn_unsupported_gate_orientation_exception_where =
 R"doc(Coordinate at which the unsupported gate orientation was found.
@@ -662,6 +686,9 @@ R"doc(Ports of the unsupported gate orientation.
 
 Returns:
     Ports.
+
+Raises:
+    MemoryError: If copying the ports cannot allocate storage.
 
 )doc";
 
@@ -5020,18 +5047,19 @@ Template Args:
 Raises:
     ValueError: If the layout is incomplete, cyclic, physically
                 invalid, uses an unsupported scheme, or contains
-                illegal XML text controls.
+                invalid UTF-8 or illegal XML characters in a name.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_fgl_validate_xml_text =
-R"doc(Reject XML 1.0 control characters in a name.
+R"doc(Validate a UTF-8 name containing XML 1.0 characters.
 
 Args:
     value: Layout or object name.
 
 Raises:
-    ValueError: If the name contains an illegal control character.
+    ValueError: If the name contains invalid UTF-8 or an illegal XML
+                character.
 
 )doc";
 
@@ -5371,29 +5399,34 @@ Template Args:
 static const char *mkd_doc_fiction_layouts_io_read_fgl_layout =
 R"doc(Reads legacy maximum-index extents or version-2 extent counts,
 declared interface order, and manual obstructions. Version 2 requires
-a complete, acyclic, physically valid layout. Validation finishes
-before assigning a target. The target layout changes only after a
-successful read.
-
-May throw an `fgl_parsing_error` if the FGL file is malformed.
+a complete, acyclic, physically valid layout whose names contain valid
+UTF-8 XML 1.0 text. A stored name overrides `name`; otherwise, version
+2 validates `name` as the layout name. Validation finishes before
+assigning a target. The target layout changes only after a successful
+read.
 
 Args:
     is: The input stream to read from.
-    name: The name to give to the generated layout.
+    name: Fallback layout name when the file has no name element.
 
 Template Args:
     Geometry: Coordinate geometry of the returned gate-level layout.
+
+Raises:
+    fgl_parsing_error: If the FGL file is malformed or the resulting
+                       version-2 layout is invalid.
 
 )doc";
 
 static const char *mkd_doc_fiction_layouts_io_read_fgl_layout_2 =
 R"doc(Reads legacy maximum-index extents or version-2 extent counts,
 declared interface order, and manual obstructions. Version 2 requires
-a complete, acyclic, physically valid layout. Validation finishes
-before assigning a target. The target layout changes only after a
-successful read.
+a complete, acyclic, physically valid layout whose names contain valid
+UTF-8 XML 1.0 text. A stored name overrides the target's name;
+otherwise, version 2 validates the retained target name. Validation
+finishes before assigning a target. The target layout changes only
+after a successful read.
 
-May throw an `fgl_parsing_error` if the FGL file is malformed.
 
 This is an in-place version of `read_fgl_layout` that utilizes the
 given layout as a target to write to.
@@ -5405,26 +5438,35 @@ Args:
 Template Args:
     Geometry: Coordinate geometry of the gate-level layout.
 
+Raises:
+    fgl_parsing_error: If the FGL file is malformed or the resulting
+                       version-2 layout is invalid.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_io_read_fgl_layout_3 =
-R"doc(Reads a gate-level layout from an FGL file provided as a file name.
-
-May throw an `fgl_parsing_error` if the FGL file is malformed.
+R"doc(Reads a gate-level layout from an FGL file provided as a file name. A
+stored name overrides `name`; otherwise, version 2 validates `name` as
+UTF-8 XML 1.0 text.
 
 Args:
     filename: The file name to open and read from.
-    name: The name to give to the generated layout.
+    name: Fallback layout name when the file has no name element.
 
 Template Args:
     Geometry: Coordinate geometry of the returned gate-level layout.
 
+Raises:
+    fgl_parsing_error: If the FGL file is malformed or the resulting
+                       version-2 layout is invalid.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_io_read_fgl_layout_4 =
-R"doc(Reads a gate-level layout from an FGL file provided as a file name.
+R"doc(Reads a gate-level layout from an FGL file provided as a file name. A
+stored name overrides the target's name; otherwise, version 2
+validates the retained name as UTF-8 XML 1.0 text.
 
-May throw an `fgl_parsing_error` if the FGL file is malformed.
 
 This is an in-place version of `read_fgl_layout` that utilizes the
 given layout as a target to write to.
@@ -5435,6 +5477,10 @@ Args:
 
 Template Args:
     Geometry: Coordinate geometry of the gate-level layout.
+
+Raises:
+    fgl_parsing_error: If the FGL file is malformed or the resulting
+                       version-2 layout is invalid.
 
 )doc";
 
@@ -5537,8 +5583,8 @@ object, including complete dangling cones. Clock overrides and
 synchronization elements and manual coordinate and directed-connection
 obstructions remain sparse. The format supports the standard named
 clocking schemes and their overrides. Names preserve XML whitespace
-and exclude illegal XML 1.0 controls. Validation finishes before the
-output stream changes.
+and use valid UTF-8 with XML 1.0 characters. Validation finishes
+before the output stream changes.
 
 This overload uses an output stream to write into.
 
@@ -5553,7 +5599,7 @@ Template Args:
 Raises:
     ValueError: If the layout is incomplete, cyclic, physically
                 invalid, uses an unsupported scheme, or contains
-                illegal XML text controls.
+                invalid UTF-8 or illegal XML characters in a name.
 
 )doc";
 
@@ -5575,7 +5621,7 @@ Template Args:
 Raises:
     ValueError: If the layout is incomplete, cyclic, physically
                 invalid, uses an unsupported scheme, or contains
-                illegal XML text controls.
+                invalid UTF-8 or illegal XML characters in a name.
     RuntimeError: If creating, writing, closing, or replacing the
                   output file fails.
 
@@ -8369,10 +8415,9 @@ by default, which, again, guarantees completeness, but becomes
 infeasible rather quickly. However, powerful symmetry breaking is
 applied that assists the solving process, e.g., it is known that all
 vertices that are belonging to the same objective are forming a
-clique, which can be pre-colored. Additionally, lexicographical
-orderings are enforced. For a more scalable (yet incomplete) approach,
-several coloring heuristics are available, from which can be chosen
-(see determine_vertex_coloring).
+clique, which can be pre-colored. For a more scalable (yet incomplete)
+approach, several coloring heuristics are available, from which can be
+chosen (see determine_vertex_coloring).
 
 This function will return `true` if all objectives could be satisfied
 or if the partial routing parameter was set. In the case of `true`
@@ -8395,8 +8440,9 @@ Returns:
     enabled.
 
 Raises:
-    ValueError: If an objective endpoint lies outside the layout
-                extent when ps.path_limit is absent or nonzero.
+    ValueError: If TABUCOL is selected, or an objective endpoint lies
+                outside the layout extent when ps.path_limit is absent
+                or nonzero.
 
 )doc";
 
@@ -8408,7 +8454,9 @@ route the layout as much as possible.)doc";
 
 static const char *mkd_doc_fiction_physical_design_color_routing_params_crossings = R"doc(Enable crossings.)doc";
 
-static const char *mkd_doc_fiction_physical_design_color_routing_params_engine = R"doc(The engine to use.)doc";
+static const char *mkd_doc_fiction_physical_design_color_routing_params_engine =
+R"doc(The engine to use: MCS, DSATUR, LMXRLF, or SAT. TabuCol requires a
+color bound that this API does not accept.)doc";
 
 static const char *mkd_doc_fiction_physical_design_color_routing_params_partial_sat = R"doc(Allow partial solutions when the SAT engine is used.)doc";
 
@@ -14969,7 +15017,14 @@ static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_on_progress = R"doc
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_os = R"doc(Output stream.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_run = R"doc(Writes the layout with XML-escaped lattice text.)doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_run =
+R"doc(Writes the layout with XML-escaped lattice text.
+
+Raises:
+    ValueError: If a lattice component is non-finite or a charged-
+                defect material parameter is non-finite or negative.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_sqd_writer =
 R"doc(Creates an SQD writer for a lattice layout.
@@ -15062,6 +15117,10 @@ unit cell of an H-Si(111)-1x1 surface. Inputs, outputs, normal SiDBs,
 defects, and empty sites differ by color and symbol. With a charge
 distribution, a charged SiDB is a filled circle colored by its sign
 and a neutral one a hollow circle.
+
+The printer visits every site in the bounding box and emits output for
+empty sites. Runtime and output size grow with bounding-box area even
+for sparse layouts.
 
 Args:
     os: Output stream to print into.
@@ -15324,7 +15383,13 @@ defect layer.
 Args:
     lyt: Layout to write.
     os: Output stream to write into.
-    on_progress: Receives completed dot and defect records.
+    on_progress: Receives completed dot and defect records. The
+                 callback must not modify the layout being traversed.
+
+Raises:
+    ValueError: If a lattice component is non-finite or a charged-
+                defect material parameter is non-finite or negative;
+                the stream remains unchanged.
 
 )doc";
 
@@ -15335,9 +15400,13 @@ the file's content.
 Args:
     lyt: Layout to write.
     filename: File to write into.
-    on_progress: Receives completed dot and defect records.
+    on_progress: Receives completed dot and defect records. The
+                 callback must not modify the layout being traversed.
 
 Raises:
+    ValueError: If a lattice component is non-finite or a charged-
+                defect material parameter is non-finite or negative;
+                the destination remains unchanged.
     RuntimeError: If creating, writing, closing, or replacing the
                   output file fails.
 
@@ -16635,8 +16704,9 @@ Returns:
     The critical temperature (unit: K).
 
 Raises:
-    ValueError: if `spec` is empty or truth-table variable counts
-                differ.
+    ValueError: If `spec` is empty, truth-table variable counts
+                differ, or `max_temperature` is negative, non-finite,
+                or exceeds the centikelvin iteration range.
 
 )doc";
 
@@ -16672,11 +16742,12 @@ Returns:
     The critical temperature (unit: K).
 
 Raises:
-    ValueError: if `spec` is empty, truth-table variable counts
+    ValueError: If `spec` is empty, truth-table variable counts
                 differ, the number of input pattern layouts does not
                 match the number of input combinations, or the number
                 of output BDL pairs does not match the number of truth
-                tables.
+                tables, or `max_temperature` is negative, non-finite,
+                or exceeds the centikelvin iteration range.
 
 )doc";
 
@@ -16693,7 +16764,11 @@ Args:
     pst: Statistics.
 
 Returns:
-    The critical temperature (unit: K)
+    The critical temperature (unit: K).
+
+Raises:
+    ValueError: If `max_temperature` is negative, non-finite, or
+                exceeds the centikelvin iteration range.
 
 )doc";
 
@@ -16718,7 +16793,8 @@ applicable if engine == QUICKSIM).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_params_max_temperature =
 R"doc(Maximum simulation temperature beyond which no simulation will be
-conducted (~ 126 °C by default) (unit: K).)doc";
+conducted (~ 126 °C by default) (unit: K). Must be nonnegative and fit
+the centikelvin iteration range.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_params_on_progress =
 R"doc(Callback that receives the number of simulated input patterns (gate-
@@ -16757,6 +16833,23 @@ Args:
 static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_stats_sim_params = R"doc(All parameters for physical SiDB simulations.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_stats_time_total = R"doc(The total runtime of the critical temperature computation.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_checked_parameters =
+R"doc(Starts the shared budget and validates the centikelvin iteration
+range.
+
+Args:
+    params: Critical temperature parameters.
+
+Returns:
+    Parameters with a validated shared deadline and temperature range.
+
+Raises:
+    utils::timeout_error: If the deadline expires.
+    ValueError: If the operational parameters or temperature range are
+                invalid.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl =
 R"doc(Computes the temperature limit for SiDB ground-state occupation or
@@ -17015,8 +17108,7 @@ Template Args:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_energy_distribution_get_nth_state =
-R"doc(Returns the nth state (energy + degeneracy) in the energy
-distribution.
+R"doc(Returns the nth state (energy + degeneracy) in ascending energy order.
 
 Args:
     state_index: The index of the state to be retrieved.
@@ -17276,10 +17368,11 @@ Args:
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_for_given_simulation_results =
 R"doc(Computes the time-to-solution (TTS) of *QuickSim* from an exact result
-and a series of heuristic results: the accuracy is the share of
-heuristic runs that found the ground state, and TTS is the mean
-heuristic runtime scaled to reach the given confidence level, `t ·
-log(1 - c) / log(1 - acc)`. An empty sample yields zero accuracy, zero
+and a series of heuristic results: the success fraction `p` is the
+fraction of heuristic runs that found the ground state, and TTS is the
+mean heuristic runtime scaled to reach the given confidence level, `t
+· log(1 - c) / log(1 - p)`. The `acc` statistic reports the success
+fraction as a percentage. An empty sample yields zero accuracy, zero
 mean heuristic runtime, and infinite time-to-solution.
 
 Args:
@@ -17294,11 +17387,9 @@ Args:
 static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_params = R"doc(Parameters for measuring heuristic accuracy and time-to-solution.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_params_confidence_level =
-R"doc(The confidence level represents the probability that the confidence
-interval calculated from the simulation contains the true value. For
-example, a 99.7 % (0.997) confidence level means that if the
-simulation were repeated many times, approximately 997 out of 1000 of
-the calculated confidence intervals would contain the true value.)doc";
+R"doc(Target probability of finding the ground state at least once across
+repeated heuristic attempts. For example, 0.997 requests a 99.7 %
+probability of at least one success.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_params_deadline =
 R"doc(Shared caller deadline. `time_point::max()` leaves the enclosing
@@ -21304,6 +21395,9 @@ Args:
 Returns:
     The string representation of the value.
 
+Raises:
+    ValueError: If the value contains a null C string.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_location_and_ground_state_writer =
@@ -21322,8 +21416,15 @@ Args:
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_location_and_ground_state_writer_os = R"doc(Destination of the CSV output.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_location_and_ground_state_writer_run =
-R"doc(Writes positions in nanometers and one column per ground state; writes
-nothing for an empty result.
+R"doc(Writes positions in nanometers and one column per minimum-energy
+entry.
+
+Preserves input order and duplicates; writes nothing for an empty
+result.
+
+Raises:
+    ValueError: If a distribution has different sites from the result
+                layout or a nonfinite energy.
 
 )doc";
 
@@ -21334,14 +21435,32 @@ R"doc(Writes a `result` as a SiQAD simulation result file: engine info,
 physical parameters, the SiDB positions in ångström, and every charge
 distribution sorted by energy.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer_create_engine_info =
+R"doc(Creates the engine name, version, and runtime XML fragment.
+
+Returns:
+    Engine metadata with escaped text.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer_create_simulation_parameters =
+R"doc(Creates the physical and additional simulation parameter XML fragment.
+
+Returns:
+    Simulation parameters with valid element names and escaped text.
+
+)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer_os = R"doc(Output stream.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer_run =
 R"doc(Writes the complete SiQAD simulation-result document.
 
 Raises:
-    ValueError: if a distribution has different sites from the result
-                layout.
+    ValueError: If a distribution has different sites from the result
+                layout, a parameter name contains invalid XML name
+                characters, or metadata contains invalid UTF-8, an
+                illegal XML character, or a null C string.
 
 )doc";
 
@@ -21358,11 +21477,7 @@ Args:
 
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer_write_electron_distributions = R"doc(Writes the charge distributions in energy order.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer_write_engine_info = R"doc(Writes the engine name, version, and runtime.)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer_write_physical_locations = R"doc(Writes the SiDB positions in ångström.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_sqd_sim_result_writer_write_simulation_parameters = R"doc(Writes the physical and additional simulation parameters.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_sweep_parameter_to_string =
 R"doc(Converts a sweep parameter to a string representation. This is used to
@@ -21373,6 +21488,50 @@ Args:
 
 Returns:
     The string representation of the sweep parameter.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_validate_xml_name =
+R"doc(Validate an XML 1.0 name encoded as UTF-8.
+
+Args:
+    name: Parameter element name.
+
+Raises:
+    ValueError: If the name, UTF-8 encoding, or XML characters are
+                invalid.
+
+See also:
+    https://www.w3.org/TR/xml/#NT-Name
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_xml_name_start =
+R"doc(Whether a character can start an XML 1.0 name.
+
+Args:
+    character: Decoded Unicode character.
+
+Returns:
+    Whether the character matches NameStartChar.
+
+See also:
+    https://www.w3.org/TR/xml/#NT-NameStartChar
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_xml_text =
+R"doc(Escape XML element text and preserve carriage returns when parsed.
+
+Args:
+    value: Text to escape.
+
+Returns:
+    Escaped XML text.
+
+Raises:
+    ValueError: If the text contains invalid UTF-8 or an illegal XML
+                1.0 character.
 
 )doc";
 
@@ -21415,18 +21574,27 @@ R"doc(The tag used to represent the non-influential value of a defect
 position.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_write_location_and_ground_state =
-R"doc(Writes the SiDB positions of a simulation result and the charge states
-of its ground states as CSV to a stream.
+R"doc(Writes SiDB positions and minimum-energy charge distributions as CSV
+to a stream.
+
+Preserves input order and duplicate minimum-energy entries. Invalid
+input leaves the stream unchanged.
 
 Args:
     sim_result: Result to write.
     os: Output stream to write into.
 
+Raises:
+    ValueError: If a distribution has different sites from the result
+                layout or a nonfinite energy.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_write_location_and_ground_state_2 =
-R"doc(Writes the SiDB positions of a simulation result and the charge states
-of its ground states as CSV.
+R"doc(Writes SiDB positions and minimum-energy charge distributions as CSV.
+
+Preserves input order and duplicate minimum-energy entries. Invalid
+input preserves an existing file.
 
 Args:
     sim_result: Result to write.
@@ -21435,6 +21603,8 @@ Args:
 Raises:
     RuntimeError: If creating, writing, closing, or replacing the
                   output file fails.
+    ValueError: If a distribution has different sites from the result
+                layout or a nonfinite energy.
 
 )doc";
 
@@ -21562,20 +21732,28 @@ the operational samples anyway.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_write_sqd_sim_result =
 R"doc(Writes a simulation result as a SiQAD simulation result file to a
-stream.
+stream. Metadata text is XML-escaped, and additional parameter names
+use XML 1.0 name characters. Metadata uses UTF-8. Invalid input leaves
+the stream unchanged. Charge distributions follow `std::weak_order` on
+their energies. Equivalent energies have no specified relative order.
 
 Args:
     sim_result: Result to write.
     os: Output stream to write into.
 
 Raises:
-    ValueError: if a distribution has different sites from the result
-                layout.
+    ValueError: If a distribution has different sites from the result
+                layout, a parameter name contains invalid XML name
+                characters, or metadata contains invalid UTF-8, an
+                illegal XML character, or a null C string.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_write_sqd_sim_result_2 =
-R"doc(Writes a simulation result as a SiQAD simulation result file.
+R"doc(Writes a simulation result as a SiQAD simulation result file. Invalid
+input preserves an existing file. Charge distributions follow
+`std::weak_order` on their energies. Equivalent energies have no
+specified relative order.
 
 Args:
     sim_result: Result to write.
@@ -21584,8 +21762,10 @@ Args:
 Raises:
     RuntimeError: If creating, writing, closing, or replacing the
                   output file fails.
-    ValueError: if a distribution has different sites from the result
-                layout.
+    ValueError: If a distribution has different sites from the result
+                layout, a parameter name contains invalid XML name
+                characters, or metadata contains invalid UTF-8, an
+                illegal XML character, or a null C string.
 
 )doc";
 
@@ -21599,8 +21779,8 @@ Args:
     exact_results: Result of an exact simulation of the same layout.
 
 Returns:
-    `true` iff the heuristic result contains every ground state of the
-    exact one.
+    `true` iff the exact result has charge distributions and both
+    results contain the same ground states.
 
 )doc";
 
@@ -24360,8 +24540,8 @@ static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_energy =
 R"doc(The electrostatic potential energy of a charge distribution given its
 local internal potentials, i.e., the energy of the SiDB charges in the
 potential of the other SiDBs, the defects, and the external sources,
-plus the energy of the defect charges. O(N + D·N) for D charged
-defects.
+plus the energy of the defect charges. O(N + D·N + D²) for N SiDBs and
+D charged defects.
 
 Args:
     cd: Charge distribution over this landscape's SiDBs.
@@ -24379,7 +24559,8 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_energy_2 =
-R"doc(The electrostatic potential energy of a charge distribution. O(N²).
+R"doc(The electrostatic potential energy of a charge distribution. O(N² +
+D·N + D²) for N SiDBs and D charged defects.
 
 Args:
     cd: Charge distribution over this landscape's SiDBs.
@@ -24394,7 +24575,7 @@ Raises:
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_evaluate =
 R"doc(Evaluates a charge distribution: returns a copy with its energy set.
-O(N²).
+O(N² + D·N + D²) for N SiDBs and D charged defects.
 
 Args:
     cd: Charge distribution over this landscape's SiDBs.
@@ -24906,6 +25087,10 @@ Template Args:
 Returns:
     A logic network of type `NtkDest` that is logically equivalent to
     `ntk`.
+
+Raises:
+    ValueError: If a source gate has neither a supported gate
+                operation nor a truth table.
 
 Note:
     If `NtkDest` and `NtkSrc` are of the same type, this function
@@ -27474,6 +27659,9 @@ Template Args:
 Returns:
     Corresponding node ID in the Brian Crites graph.
 
+Raises:
+    MemoryError: If decimal conversion cannot allocate storage.
+
 )doc";
 
 static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_graph = R"doc(The graph to be colored.)doc";
@@ -27511,7 +27699,11 @@ static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_pst = 
 
 static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_run = R"doc(Returns a vertex coloring using the selected coloring algorithm.)doc";
 
-static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_run_brian_crites_engine = R"doc()doc";
+static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_run_brian_crites_engine =
+R"doc(Runs the selected external heuristic with checked vertex ID
+restoration.
+
+)doc";
 
 static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_translate_to_brian_crites_graph =
 R"doc(Translates the given graph to an equivalent Brian Crites graph data
@@ -27522,6 +27714,10 @@ Args:
 
 Returns:
     Translated graph.
+
+Raises:
+    MemoryError: If the translated graph or its identifiers cannot
+                 allocate storage.
 
 )doc";
 
@@ -27568,16 +27764,11 @@ static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_graph
 static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_largest_clique = R"doc(Iterator to the largest given clique.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_pre_assign_largest_clique =
-R"doc(Reduce the search space by symmetry breaking. To this end, each vertex
-in the provided clique gets a different color assigned from the
-beginning.
+R"doc(Preassigns colors to the largest supplied clique, or the first vertex
+and one neighbor.
 
 Args:
     instance: Pointer to the solver instance.
-
-Returns:
-    A clique-first ordering of the vertices that assigns the clique
-    vertices the lowest indices.
 
 )doc";
 
@@ -27611,30 +27802,6 @@ static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_solve
 
 static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_solver_instance_variables = R"doc(Stores all variables.)doc";
 
-static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_symmetry_breaking =
-R"doc(Reduce the search space by symmetry breaking. Two tactics are
-implemented:
-
- - pre-assigning different colors to the largest given clique, and -
-   transforming the coloring solution to be lexicographically minimal
-
-Args:
-    instance: Pointer to the solver instance.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_transform_solution_to_lexicographical_minimum =
-R"doc(Reduce the search space by symmetry breaking. To this end, the
-solution is transformed to be lexicographical minimal, i.e., no vertex
-is assigned color c unless color c - 1 has been assigned to any vertex
-of lower index.
-
-Args:
-    instance: Pointer to the solver instance.
-    clique_first_ordering: Vertex ordering with clique vertices first.
-
-)doc";
-
 static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring =
 R"doc(This function provides an interface to call various vertex coloring
 algorithms on the given graph. A vertex coloring is the assignment of
@@ -27663,7 +27830,17 @@ Template Args:
 
 Returns:
     An assignment of graph vertices to colors such that no two
-    adjacent vertices share the same color.
+    adjacent vertices share the same color. The assignment is empty
+    for an empty graph or when the selected engine finds no coloring
+    within its bounds.
+
+Raises:
+    ValueError: If the TabuCol color bound capped to the vertex count
+                exceeds the int range.
+    MemoryError: If heuristic graph or identifier translation cannot
+                 allocate storage.
+    OverflowError: If the coloring needs an integral color label
+                   outside the Color type's range.
 
 Note:
     If the `clique_size_color_frequency` parameter is set together
@@ -27676,8 +27853,8 @@ Note:
 static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_heuristic_params = R"doc(Parameters for heuristic graph coloring.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_heuristic_params_k_color_value =
-R"doc(:math:`k`-color value for :math:`k`-coloring algorithms, e.g.,
-TABUCOL.)doc";
+R"doc(:math:`k`-color bound for TABUCOL, capped to the number of graph
+vertices. Zero permits no colors.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_params =
 R"doc(Common parameters for the graph coloring algorithm.
@@ -27716,7 +27893,7 @@ static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_stats =
 
 static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_stats_chromatic_number =
 R"doc(The determined chromatic number (could be non-optimal depending on the
-applied engine).)doc";
+applied engine). Zero for an empty result.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_stats_color_frequency = R"doc(The frequency of the most used color.)doc";
 
@@ -27752,13 +27929,12 @@ via Coloring of Chordal Graphs\" by Jens Palsberg in CATS 2007.)doc";
 static const char *mkd_doc_fiction_utils_graph_graph_coloring_engine_SAT = R"doc(Custom iterative SAT-based encoding that finds optimal colorings.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_graph_coloring_engine_TABUCOL =
-R"doc(A :math:`k`-coloring algorithm using tabu search proposed in \"Using
-Tabu Search Techniques for Graph Coloring\" by A. Hertz and D. de
-Werra in Computing 1987. The authors claim that it significantly
-outperforms simulated annealing. However, since it is a
-:math:`k`-coloring algorithm, it is required to set `k_color_value` in
-`determine_vertex_coloring_params` to the chromatic number that is to
-be checked for.)doc";
+R"doc(Randomized local search for a fixed color bound with a bounded
+iteration budget. Set `heuristic_params.k_color_value` in
+`determine_vertex_coloring_params` to the color bound to search. A
+zero bound or an unsuccessful search returns an empty coloring. An
+unsuccessful search does not prove that the graph cannot be colored
+within the bound.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_graph_coloring_sat_search_tactic =
 R"doc(An enumeration of search tactics to use for the SAT-based graph
@@ -28086,6 +28262,29 @@ additional arguments to process.
 
 Template Args:
     Ts: An empty variadic template argument pack.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_io_detail_next_xml_character =
+R"doc(Consume one UTF-8 character permitted by XML 1.0.
+
+Args:
+    remaining: UTF-8 text; advances past the consumed character.
+
+Returns:
+    Decoded XML character.
+
+Raises:
+    ValueError: If the encoding or XML character is invalid.
+
+Precondition:
+    remaining is nonempty.
+
+See also:
+    https://www.w3.org/TR/xml/#charsets
+
+See also:
+    https://www.rfc-editor.org/rfc/rfc3629#section-4
 
 )doc";
 
@@ -28668,7 +28867,10 @@ threads. The reporter forwards the first report, the final report in
 its destructor, and intermediate reports whenever another percent of
 the total (or another 64 items when the total is unknown) was
 completed and at least 100 ms have passed since the last report. An
-empty callback turns every member into a no-op.)doc";
+empty callback turns every member into a no-op. If a callback throws,
+construction and progress updates propagate the exception on the
+calling thread. The destructor ignores callback exceptions from its
+final report, including during stack unwinding.)doc";
 
 static const char *mkd_doc_fiction_utils_progress_reporter_advance =
 R"doc(Records `n` completed work items and forwards a report if one is due.

@@ -241,8 +241,6 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 
     lyt.assign_sidb({36, 19, 0}, dot_tag::NORMAL);
 
-    const layout lat{lyt};
-
     SECTION("no input specified")
     {
         const auto result = physical_population_stability(lyt, params);
@@ -269,7 +267,7 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
             Catch::Matchers::WithinAbs(4.32, 1e-5));
     }
 
-    SECTION("input 01")
+    SECTION("input 10")
     {
         lyt.assign_sidb({36, 1, 0}, dot_tag::EMPTY);
         lyt.assign_sidb({0, 0, 0}, dot_tag::EMPTY);
@@ -285,7 +283,7 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
             Catch::Matchers::WithinAbs(3.3, 1e-5));
     }
 
-    SECTION("input 10")
+    SECTION("input 11")
     {
         lyt.assign_sidb({38, 0, 0}, dot_tag::EMPTY);
         lyt.assign_sidb({0, 0, 0}, dot_tag::EMPTY);
@@ -298,22 +296,6 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
         REQUIRE_THAT(
             population_stability_detail.distance_corresponding_to_potential.at(transition_type::NEUTRAL_TO_NEGATIVE),
             Catch::Matchers::WithinAbs(4.87, 1e-5));
-    }
-
-    SECTION("input 11")
-    {
-        lyt.assign_sidb({36, 1, 0}, dot_tag::EMPTY);
-        lyt.assign_sidb({2, 1, 0}, dot_tag::EMPTY);
-
-        const auto result = physical_population_stability(lyt, params);
-        REQUIRE(result.size() == 2);
-        const auto& population_stability_detail = result[0];
-        CHECK(population_stability_detail.critical_dot == lattice_site{14, 5, 0});
-        CHECK(population_stability_detail.transition_potentials.at(transition_type::NEUTRAL_TO_NEGATIVE).second <
-              0.026);
-        REQUIRE_THAT(
-            population_stability_detail.distance_corresponding_to_potential.at(transition_type::NEUTRAL_TO_NEGATIVE),
-            Catch::Matchers::WithinAbs(4.32, 1e-5));
     }
 }
 

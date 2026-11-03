@@ -101,7 +101,7 @@ def exhaustive_ground_state_simulation(
     on_progress: Callable[[str, int, int], None] | None = None,
 ) -> mnt.pyfiction.sidb.simulation.sidb_simulation_result:
     """
-    Find all minimum-energy charge distributions by exhaustive simulation.
+    Find all physically valid charge distributions by exhaustive simulation.
     The physical model is supplied by the scalar keyword values.
 
     Args:
