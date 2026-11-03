@@ -16,6 +16,7 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
 
@@ -38,7 +39,7 @@ using namespace fiction::networks::views;
 using namespace fiction::synthesis;
 using namespace fiction::utils::graph;
 
-TEST_CASE("Dummy Check", "[mincross]")
+TEST_CASE("Minimize crossings in an XOR network", "[mincross]")
 {
     mockturtle::aig_network aig;
 
@@ -53,9 +54,10 @@ TEST_CASE("Dummy Check", "[mincross]")
     const mincross_params p{};
     const auto            ntk = mincross(aig_r, p, &st);
     CHECK(st.num_crossings == 1);
+    CHECK(count_crossings(ntk) == 1);
 }
 
-TEST_CASE("Fixed PIs Check", "[mincross]")
+TEST_CASE("Keep primary inputs in rank order when requested", "[mincross]")
 {
     technology_network tec;
 
@@ -67,19 +69,24 @@ TEST_CASE("Fixed PIs Check", "[mincross]")
     tec.create_po(f);
     tec.create_po(b);
 
-    const auto aig_r = mutable_rank_view(tec);
+    const auto aig_r        = mutable_rank_view(tec);
+    const auto original_pis = aig_r.get_ranks(0);
 
     mincross_stats  st{};
     mincross_params p{.fixed_pis = false};
     auto            ntk = mincross(aig_r, p, &st);
     CHECK(st.num_crossings == 0);
+    CHECK(count_crossings(ntk) == 0);
 
     p.fixed_pis = true;
     ntk         = mincross(aig_r, p, &st);
     CHECK(st.num_crossings == 1);
+    CHECK(count_crossings(ntk) == 1);
+    CHECK(ntk.get_ranks(0) == original_pis);
+    CHECK(aig_r.get_ranks(0) == original_pis);
 }
 
-TEST_CASE("Planar Network", "[mincross]")
+TEST_CASE("Minimize crossings without changing network connectivity", "[mincross]")
 {
     mockturtle::aig_network aig;
 
@@ -96,19 +103,42 @@ TEST_CASE("Planar Network", "[mincross]")
     rank1.push_back(aig_r.get_node(f2));
     rank1.push_back(aig_r.get_node(f1));
     aig_r.set_ranks(1, rank1);
+    const auto original_pis = aig_r.get_ranks(0);
 
     mincross_stats  st{};
     mincross_params p{.optimize = false};
 
     auto ntk = mincross(aig_r, p, &st);  // counts crossings
     CHECK(st.num_crossings == 3);
+    CHECK(ntk.get_all_ranks() == aig_r.get_all_ranks());
 
     p.optimize = true;
     ntk        = mincross(aig_r, p, &st);
     CHECK(st.num_crossings == 0);
+    CHECK(count_crossings(ntk) == 0);
+
+    p.fixed_pis = true;
+    ntk         = mincross(aig_r, p, &st);
+    CHECK(st.num_crossings == 0);
+    CHECK(count_crossings(ntk) == 0);
+    CHECK(ntk.get_ranks(0) == original_pis);
+    CHECK(aig_r.get_ranks(0) == original_pis);
+    const std::vector<mockturtle::node<mockturtle::aig_network>> expected_rank{aig.get_node(f1), aig.get_node(f2)};
+    CHECK(ntk.get_ranks(1) == expected_rank);
+    CHECK(aig_r.get_ranks(1) == rank1);
+    CHECK(ntk.po_at(0) == f1);
+    CHECK(ntk.po_at(1) == f2);
+    std::vector<mockturtle::signal<mockturtle::aig_network>> fanins1{};
+    std::vector<mockturtle::signal<mockturtle::aig_network>> fanins2{};
+    ntk.foreach_fanin(ntk.get_node(f1), [&fanins1](const auto& f) { fanins1.push_back(f); });
+    ntk.foreach_fanin(ntk.get_node(f2), [&fanins2](const auto& f) { fanins2.push_back(f); });
+    const std::vector<mockturtle::signal<mockturtle::aig_network>> expected_fanins1{x1, x2};
+    const std::vector<mockturtle::signal<mockturtle::aig_network>> expected_fanins2{x2, x3};
+    CHECK_THAT(fanins1, Catch::Matchers::UnorderedRangeEquals(expected_fanins1));
+    CHECK_THAT(fanins2, Catch::Matchers::UnorderedRangeEquals(expected_fanins2));
 }
 
-TEST_CASE("Majority", "[mincross]")
+TEST_CASE("Minimize crossings in a majority network", "[mincross]")
 {
     technology_network tec{};
 
@@ -131,13 +161,15 @@ TEST_CASE("Majority", "[mincross]")
 
     auto ntk = mincross(tec_r, p, &st);  // counts crossings
     CHECK(st.num_crossings == 2);
+    CHECK(ntk.get_all_ranks() == tec_r.get_all_ranks());
 
     p.optimize = true;
     ntk        = mincross(tec_r, p, &st);
     CHECK(st.num_crossings == 0);
+    CHECK(count_crossings(ntk) == 0);
 }
 
-TEST_CASE("Adder", "[mincross]")
+TEST_CASE("Minimize crossings in a full adder", "[mincross]")
 {
     auto tec = blueprints::full_adder_network<named_technology_network>();
 
@@ -152,10 +184,12 @@ TEST_CASE("Adder", "[mincross]")
 
     auto ntk = mincross(tec_r, p, &st);  // counts crossings
     CHECK(st.num_crossings == 4);
+    CHECK(ntk.get_all_ranks() == tec_r.get_all_ranks());
 
     p.optimize = true;
     ntk        = mincross(tec_r, p, &st);
     CHECK(st.num_crossings == 2);
+    CHECK(count_crossings(ntk) == 2);
 }
 
 TEST_CASE("Counting crossings agrees with mincross without optimization", "[mincross]")
