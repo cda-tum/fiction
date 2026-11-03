@@ -436,7 +436,7 @@ template <typename E>
  */
 [[nodiscard]] inline std::size_t num_fanins(const placement_network& ntk, const placement_node& n)
 {
-    return networks::fanins(ntk, n).fanin_nodes.size();
+    return ntk.fanin_size(n) - networks::num_constant_fanins(ntk, n);
 }
 /**
  * @brief Non-constant fanins of a node sorted by rank position.
