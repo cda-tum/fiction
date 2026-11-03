@@ -2203,6 +2203,13 @@ TEST_CASE("Operational-domain sweeps reject non-finite and oversized ranges", "[
 {
     const layout              lyt{};
     operational_domain_params params{};
+    for (const auto step : {0.0, -0.0})
+    {
+        params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6, .step = step}};
+        CHECK_THROWS_AS(
+            operational_domain_grid_search(lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, params),
+            std::invalid_argument);
+    }
     for (const auto value : {std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::infinity()})
     {
         for (const auto& range :
