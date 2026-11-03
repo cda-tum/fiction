@@ -201,13 +201,13 @@ class technology_network : public mockturtle::klut_network
         return _create_node({a, b}, 8);
     }
 
-    /** @brief Creates a GE gate with the supplied signals. */
+    /** @brief Creates a GE gate with the function `!a | b`. */
     signal create_ge(signal a, signal b)
     {
         return _create_node({a, b}, 9);
     }
 
-    /** @brief Creates a GT gate with the supplied signals. */
+    /** @brief Creates a GT gate with the function `!a & b`. */
     signal create_gt(signal a, signal b)
     {
         return _create_node({a, b}, 10);
