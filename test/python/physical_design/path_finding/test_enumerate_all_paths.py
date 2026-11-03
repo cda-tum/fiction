@@ -8,6 +8,7 @@
 
 from __future__ import annotations
 
+import itertools
 from typing import TYPE_CHECKING
 
 import pytest
@@ -22,7 +23,7 @@ from mnt.pyfiction.layouts import (
     shifted_cartesian_gate_layout,
     shifted_cartesian_layout,
 )
-from mnt.pyfiction.physical_design.path_finding import enumerate_all_paths
+from mnt.pyfiction.physical_design.path_finding import enumerate_all_paths, yen_k_shortest_paths
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -85,6 +86,32 @@ def test_hexagonal_clocking_path() -> None:
     """Hexagonal clocking permits the direct diagonal connection."""
     layout = hexagonal_gate_layout(arrangement.EVEN_ROW, (3, 3), "2DDWAVEHEX", "Layout")
     assert enumerate_all_paths(layout, (0, 0), (1, 1)) == [[(0, 0), (1, 1)]]
+
+
+def test_unclocked_cartesian_detours() -> None:
+    """Enumerate every simple route across a three-by-three Cartesian layout."""
+    layout = cartesian_layout((3, 3))
+    all_paths = enumerate_all_paths(layout, (0, 0), (2, 2))
+    shortest_paths = yen_k_shortest_paths(layout, (0, 0), (2, 2), 13)
+    assert len(all_paths) == len({tuple(path) for path in all_paths}) == 12
+    for path in all_paths:
+        assert path[0] == (0, 0)
+        assert path[-1] == (2, 2)
+        assert len(path) == len(set(path))
+        assert all(0 <= site.x < 3 and 0 <= site.y < 3 and site.z == 0 for site in path)
+        assert all(abs(a.x - b.x) + abs(a.y - b.y) == 1 for a, b in itertools.pairwise(path))
+    assert len(shortest_paths) == 12
+    assert {tuple(path) for path in shortest_paths} == {tuple(path) for path in all_paths}
+    assert [len(path) for path in shortest_paths] == sorted(len(path) for path in shortest_paths)
+
+
+def test_unreachable_target_with_clock_cycle() -> None:
+    """A clock cycle cannot cause repeated traversal while seeking an unreachable target."""
+    layout = cartesian_gate_layout((3, 2), "OPEN")
+    for site, phase in [((0, 0), 0), ((1, 0), 1), ((1, 1), 2), ((0, 1), 3)]:
+        layout.assign_clock_number(site, phase)
+    assert enumerate_all_paths(layout, (0, 0), (2, 0)) == []
+    assert yen_k_shortest_paths(layout, (0, 0), (2, 0), 2) == []
 
 
 @pytest.mark.parametrize(
