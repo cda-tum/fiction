@@ -129,6 +129,11 @@ TEST_CASE("Read surface defects into an sidb::layout", "[read-sidb-surface-defec
                              Catch::Matchers::Predicate<missing_position_exception>(
                                  [](const auto& e) { return e.where() == 1; }, "missing position is on row 1"));
 
+        std::istringstream ignored_line{"[1 2]\n[invalid]\n[1]"};
+        CHECK_THROWS_MATCHES(read_surface_defects(ignored_line), missing_position_exception,
+                             Catch::Matchers::Predicate<missing_position_exception>(
+                                 [](const auto& e) { return e.where() == 1; }, "ignored lines do not count as rows"));
+
         CHECK_THROWS_AS(read_surface_defects("/this/file/does/not/exist.txt"), std::ifstream::failure);
     }
 }
@@ -144,21 +149,26 @@ TEST_CASE("Surface defect files preserve every parsed row", "[read-sidb-surface-
     REQUIRE(expected.num_defects() == 2);
     CHECK(expected.get_defect(site_at_row(0, 0)).type == defect_type::DB);
     CHECK(expected.get_defect(site_at_row(0, 1)).type == defect_type::SI_VACANCY);
-    /** @brief File containing the same bytes as the stream. */
-    const auto filename =
+    /** @brief Exclusively created directory containing the test file. */
+    const auto directory =
         std::filesystem::temp_directory_path() / ("fiction-surface-input-" + std::to_string(std::random_device{}()));
+    REQUIRE(std::filesystem::create_directory(directory));
+    const auto filename = directory / "surface";
     /** @brief Remove the temporary file during stack unwinding as well. */
     struct file_cleanup
     {
         /** @brief Path to the temporary file. */
         const std::filesystem::path& path;
+        /** @brief Path to the owned directory. */
+        const std::filesystem::path& directory;
         /** @brief Remove the file without throwing during stack unwinding. */
         ~file_cleanup()
         {
             std::error_code error{};
             std::filesystem::remove(path, error);
+            std::filesystem::remove(directory, error);
         }
-    } cleanup{filename};
+    } cleanup{filename, directory};
     {
         /** @brief Binary output preserves the separator. */
         std::ofstream output{filename, std::ios::binary};
