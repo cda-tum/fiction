@@ -113,8 +113,9 @@ struct planarization_stats
  * strategy kept with `crossing_gate_planarization`, restores fanout nodes with `planar_fanout_substitution`, and
  * removes the buffers that this leaves behind with `planar_rebalancing`.
  *
- * Duplicated primary inputs become virtual primary inputs of the result. The function checks the result for crossings
- * and for balance with unified outputs. The fanout degree is not checked; `is_fanout_substituted` does it on request.
+ * Duplicated primary inputs become virtual primary inputs of the result, named after their real ones. The function
+ * checks the result for crossings and for balance with unified outputs. The fanout degree is not checked;
+ * `is_fanout_substituted` does it on request.
  *
  * @tparam Ntk Ranked, balanced network type (see `mutable_rank_view`) without virtual primary inputs.
  * @param ntk Source network.
@@ -196,7 +197,7 @@ template <typename Ntk>
  * @brief Copies a planar network into a named technology network whose node order encodes the rank order.
  *
  * The result lists the primary inputs in the order of level 0, then the gates level by level in rank order. Virtual
- * primary inputs become ordinary primary inputs of the result.
+ * primary inputs become ordinary primary inputs of the result; all names are kept.
  *
  * @tparam Ntk Ranked network type of the planar network.
  * @param planar Planar network, the result of `planarization`.

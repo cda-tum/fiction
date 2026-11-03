@@ -13,7 +13,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `synthesis::planarization` turns a balanced, ranked network into a planar, balanced, fanout-substituted one and
     checks planarity and balance on its result
   - `synthesis::node_duplication_planarization` planarizes a balanced, ranked network by duplicating nodes; its
-    hybrid strategy keeps the crossings of a level where crossing gates are cheaper
+    hybrid strategy keeps the crossings of a level where crossing gates are cheaper, and duplicated inputs carry the
+    names of their originals
   - `synthesis::crossing_gate_planarization` replaces the crossings of a balanced, ranked network with crossing
     gates built from XOR or AND-OR-NOT gates
   - `synthesis::network_balancing_params::buffer_constant_outputs` lets a flow that does not place constants keep

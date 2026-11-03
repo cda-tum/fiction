@@ -28,8 +28,10 @@
 #include <fiction/synthesis/network_balancing.hpp>
 #include <fiction/synthesis/node_duplication_planarization.hpp>
 #include <fiction/synthesis/planarization.hpp>
+#include <fiction/types.hpp>
 #include <fiction/utils/graph/mincross.hpp>
 
+#include <fmt/format.h>
 #include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
 #include <mockturtle/networks/aig.hpp>
@@ -631,4 +633,38 @@ TEST_CASE("Flattening keeps the functions and the rank order of a planar network
 
         CHECK(actual == expected);
     }
+}
+
+TEST_CASE("Duplicated inputs carry the names of their originals", "[planarization]")
+{
+    auto ntk = blueprints::full_adder_network<named_technology_network>();
+
+    ntk.foreach_pi([&ntk](const auto& pi, const auto i) { ntk.set_name(ntk.make_signal(pi), fmt::format("in{}", i)); });
+
+    const mutable_rank_view ranked{
+        network_balancing<named_technology_network>(ntk, {.unify_outputs = true, .buffer_constant_outputs = false})};
+
+    const auto planar = planarization(ranked);
+    REQUIRE(planar.num_virtual_pis() > 0);
+
+    planar.foreach_pi(
+        [&planar](const auto& pi)
+        {
+            const auto real = planar.is_virtual_pi(pi) ? planar.get_real_pi(pi) : pi;
+
+            CAPTURE(pi, real);
+            REQUIRE(planar.has_name(planar.make_signal(pi)));
+            CHECK(planar.get_name(planar.make_signal(pi)) == planar.get_name(planar.make_signal(real)));
+        });
+
+    const auto [flat, original_input] = flatten_planarization(planar);
+
+    REQUIRE(original_input.size() == flat.num_pis());
+
+    flat.foreach_pi(
+        [&flat, &original_input = original_input](const auto& pi, const auto i)
+        {
+            CAPTURE(i, original_input[i]);
+            CHECK(flat.get_name(flat.make_signal(pi)) == fmt::format("in{}", original_input[i]));
+        });
 }

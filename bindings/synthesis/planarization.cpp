@@ -185,8 +185,8 @@ Args:
 
 Returns:
     A pair of the planar, balanced, fanout-substituted network in rank order and, for every input of that
-    network, the index of the input of `network` it stands for. A duplicated input appears several times; tie
-    those inputs together when simulating or checking equivalence.
+    network, the index of the input of `network` it stands for. A duplicated input appears several times, each
+    copy named after the input it stands for; tie those inputs together when simulating or checking equivalence.
 
 Raises:
     ValueError: If `network` is not balanced with unified outputs, if a gate has only constant fanins, if
