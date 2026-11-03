@@ -38,12 +38,10 @@
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/tech_library.hpp>
 
-#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <iterator>
 #include <sstream>
-#include <string>
 #include <vector>
 
 using namespace fiction;
@@ -217,11 +215,6 @@ TEST_CASE("Half-adder blueprint names its sum and carry functions", "[mockturtle
     REQUIRE(functions.size() == 2);
     CHECK(network.get_output_name(0) == "carry");
     CHECK(network.get_output_name(1) == "sum");
-
-    /** @brief Output names sorted only to check completeness and uniqueness. */
-    std::array names{network.get_output_name(0), network.get_output_name(1)};
-    std::ranges::sort(names);
-    CHECK(names == std::array{std::string{"carry"}, std::string{"sum"}});
 
     for (uint32_t input{}; input < 4; ++input)
     {
