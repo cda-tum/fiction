@@ -114,6 +114,28 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
     }
 }
 
+TEST_CASE("Enumerate cyclic clocking with a chord", "[enumerate-all-paths]")
+{
+    cartesian_gate_layout layout{cartesian_gate_layout::extent{3, 3, 1}, clocking::open()};
+    layout.assign_clock_number({0, 0}, 0);
+    layout.assign_clock_number({1, 0}, 1);
+    layout.assign_clock_number({2, 0}, 2);
+    layout.assign_clock_number({2, 1}, 3);
+    layout.assign_clock_number({2, 2}, 0);
+    layout.assign_clock_number({1, 2}, 1);
+    layout.assign_clock_number({0, 2}, 2);
+    layout.assign_clock_number({0, 1}, 3);
+    layout.assign_clock_number({1, 1}, 0);
+
+    const path_collection expected{layout_coordinate_path{{{0, 1}, {0, 0}, {1, 0}, {2, 0}, {2, 1}}},
+                                   layout_coordinate_path{{{0, 1}, {1, 1}, {1, 0}, {2, 0}, {2, 1}}}};
+    for (auto i = 0; i < 2; ++i)
+    {
+        const auto paths = enumerate_all_paths(layout, {.source = {0, 1}, .target = {2, 1}});
+        CHECK_THAT(paths, Catch::Matchers::UnorderedRangeEquals(expected));
+    }
+}
+
 TEST_CASE("Enumerate all paths on 4x4 layouts", "[enumerate-all-paths]")
 {
     using lyt = cartesian_layout;
