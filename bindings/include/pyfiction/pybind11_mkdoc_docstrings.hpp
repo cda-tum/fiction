@@ -1082,14 +1082,22 @@ Args:
 
 Returns:
     ToPoliNano gate representation of `t` including I/Os, rotation,
-    etc.
+    etc., or an empty gate for a crossing-layer tile.
 
 Raises:
     ValueError: If `lyt` shifts rows instead of columns.
-    fcn::unsupported_gate_type_exception: If a terminal also acts as a
-                                          fanout. Connect the terminal
-                                          to a separate fanout wire
+    fcn::unsupported_gate_type_exception: If a tile outside the
+                                          crossing layer has no gate,
+                                          its gate type is
+                                          unsupported, or a terminal
+                                          also acts as a fanout.
+                                          Connect the terminal to a
+                                          separate fanout wire
                                           instead.
+    fcn::unsupported_gate_orientation_exception: If the gate's
+                                                 physical port
+                                                 orientation is
+                                                 unsupported.
 
 )doc";
 
@@ -6763,6 +6771,14 @@ Returns:
     molQCA gate representation of `t` including I/Os, rotation, const
     cells, etc.
 
+Raises:
+    fcn::unsupported_gate_type_exception: If `t` has no gate or its
+                                          gate type is unsupported.
+    fcn::unsupported_gate_orientation_exception: If the gate's
+                                                 physical port
+                                                 orientation is
+                                                 unsupported.
+
 )doc";
 
 static const char *mkd_doc_fiction_mol_qca_sim7_mol_library_sim7_mol_library = R"doc(Deleted constructor to prevent instantiation.)doc";
@@ -7256,6 +7272,30 @@ Returns:
 Raises:
     ValueError: If the primary input counts or primary output counts
                 differ.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_match_outputs =
+R"doc(Matches primary outputs by unique nonempty names, then by remaining
+declared positions.
+
+A name matches only when it occurs once in each interface. Empty,
+duplicate, and unmatched names fall back to the remaining positions in
+declared order. Every output receives exactly one match.
+
+Args:
+    left: Left interface owner.
+    right: Right interface owner.
+
+Template Args:
+    Left: Network or placed object layout.
+    Right: Network or placed object layout.
+
+Returns:
+    Right primary output index for each left primary output index.
+
+Raises:
+    ValueError: If the primary output counts differ.
 
 )doc";
 
@@ -14585,10 +14625,16 @@ Returns:
     cells, etc.
 
 Raises:
-    fcn::unsupported_gate_type_exception: If a terminal also acts as a
+    fcn::unsupported_gate_type_exception: If `t` has no gate, its gate
+                                          type is unsupported, or a
+                                          terminal also acts as a
                                           fanout. Connect the terminal
                                           to a separate fanout wire
                                           instead.
+    fcn::unsupported_gate_orientation_exception: If the gate's
+                                                 physical port
+                                                 orientation is
+                                                 unsupported.
 
 )doc";
 
@@ -23036,7 +23082,7 @@ Raises:
                 rejecting kinks or on a layout without `LOGIC` dots.
                 Flood fill and contour tracing additionally require at
                 least two sweep dimensions; grid search and random
-                sampling accept any number.
+                sampling require at least one.
 
 )doc";
 
@@ -23096,7 +23142,7 @@ Raises:
                 rejecting kinks or on a layout without `LOGIC` dots.
                 Flood fill and contour tracing additionally require at
                 least two sweep dimensions; grid search and random
-                sampling accept any number.
+                sampling require at least one.
 
 )doc";
 
@@ -23154,7 +23200,7 @@ Raises:
     ValueError: if the given sweep parameters are invalid, or if the
                 operational domain sketch is requested without
                 rejecting kinks or on a layout without `LOGIC` dots.
-                Any number of sweep dimensions is accepted.
+                At least one sweep dimension is required.
 
 )doc";
 
@@ -23205,7 +23251,7 @@ Raises:
     ValueError: if the given sweep parameters are invalid, or if the
                 operational domain sketch is requested without
                 rejecting kinks or on a layout without `LOGIC` dots.
-                Any number of sweep dimensions is accepted.
+                At least one sweep dimension is required.
 
 )doc";
 
@@ -24259,6 +24305,19 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_parameter_value_identity =
+R"doc(Returns the identity of a parameter value. Finite values within the
+integer grid use cells of width `ERROR_MARGIN`; values outside the
+grid compare exactly, and all NaNs share one identity.
+
+Args:
+    value: Parameter value.
+
+Returns:
+    Grid cell, exact value, or NaN identity.
+
+)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_validate_operational_domain_params =
 R"doc(Validates the sweep count, finite ordered bounds, positive finite
 steps, point counts, and the preconditions of the operational domain
@@ -24279,7 +24338,7 @@ Args:
     params: The operational domain parameters to validate.
     min_sweep_dimensions: The number of sweep dimensions the calling
                           algorithm requires at least. Grid search and
-                          random sampling accept any number; flood
+                          random sampling require at least one; flood
                           fill and contour tracing need at least two.
     algorithm_name: The name of the calling algorithm, used to phrase
                     the sweep dimension count error.
@@ -24709,7 +24768,7 @@ Raises:
                 rejecting kinks or on a layout without `LOGIC` dots.
                 Flood fill and contour tracing additionally require at
                 least two sweep dimensions; grid search and random
-                sampling accept any number.
+                sampling require at least one.
 
 )doc";
 
@@ -24766,7 +24825,7 @@ Raises:
                 rejecting kinks or on a layout without `LOGIC` dots.
                 Flood fill and contour tracing additionally require at
                 least two sweep dimensions; grid search and random
-                sampling accept any number.
+                sampling require at least one.
 
 )doc";
 
@@ -24826,7 +24885,7 @@ Raises:
     ValueError: if the given sweep parameters are invalid, or if the
                 operational domain sketch is requested without
                 rejecting kinks or on a layout without `LOGIC` dots.
-                Any number of sweep dimensions is accepted.
+                At least one sweep dimension is required.
 
 )doc";
 
@@ -24908,7 +24967,7 @@ Raises:
     ValueError: if the given sweep parameters are invalid, or if the
                 operational domain sketch is requested without
                 rejecting kinks or on a layout without `LOGIC` dots.
-                Any number of sweep dimensions is accepted.
+                At least one sweep dimension is required.
 
 )doc";
 
@@ -25041,9 +25100,9 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_parameter_point_operator_eq =
-R"doc(Equality operator. Checks if this parameter point is equal to another
-point within a specified tolerance. The tolerance is defined by
-`constants::ERROR_MARGIN`.
+R"doc(Equality operator. Finite values within the integer grid use cells of
+width `ERROR_MARGIN`. Values outside the grid compare exactly, and all
+NaN values compare equal.
 
 Args:
     other: Other parameter point to compare with.
@@ -25066,9 +25125,9 @@ Args:
 static const char *mkd_doc_fiction_sidb_simulation_logic_parameter_point_parameters = R"doc(Parameter values for each dimension.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_parameter_point_quantize =
-R"doc(Maps a parameter value onto the grid of `constants::ERROR_MARGIN`-wide
-cells that both this type's equality and its `std::hash`
-specialization are defined on.
+R"doc(Maps a parameter value onto the grid of `ERROR_MARGIN`-wide cells used
+by equality and hashing for values whose cell indices fit in
+`int64_t`.
 
 Comparing parameter values with a tolerance, as in `std::fabs(lhs -
 rhs) < constants::ERROR_MARGIN`, does not yield an equivalence
@@ -25083,6 +25142,10 @@ Args:
 
 Returns:
     The index of the cell `value` falls into.
+
+Raises:
+    IndexError: If the value is non-finite or its cell index does not
+                fit in `int64_t`.
 
 )doc";
 
@@ -30188,6 +30251,7 @@ R"doc(Standard constructor.
 Args:
     specification: Logical specification of intended functionality.
     implementation: Implementation of specified functionality.
+    p: Parameters.
     st: Statistics.
 
 )doc";
@@ -30216,11 +30280,20 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_verification_detail_equivalence_checking_impl_ps = R"doc(Parameters.)doc";
+
 static const char *mkd_doc_fiction_verification_detail_equivalence_checking_impl_pst = R"doc(Result statistics.)doc";
 
 static const char *mkd_doc_fiction_verification_detail_equivalence_checking_impl_run =
-R"doc(Checks design rules, aligned logic, and throughput. @return Physical
-equivalence type.
+R"doc(Checks design rules, aligned logic, and throughput.
+
+Returns:
+    Physical equivalence type.
+
+Raises:
+    ValueError: If the input mapping is non-empty and does not name
+                one specification input for every implementation
+                input.
 
 )doc";
 
@@ -30416,6 +30489,9 @@ logic network or a placed gate-level layout. Layout logic is extracted
 before SAT checking. Interfaces match by names unique on both sides,
 then by remaining declared positions. Unequal interface sizes, missing
 required inputs, and required dependency cycles return `NO`.
+`ps.input_mapping` replaces the input matching with an explicit one,
+under which the implementation may have more inputs than the
+specification, as a layout with duplicated inputs does.
 
 This implementation enables the comparison of two logic networks, a
 logic network and a gate-level layout or two gate-level layouts. Since
@@ -30441,6 +30517,30 @@ Große, and R. Drechsler in DAC 2020.
 Args:
     spec: The specification.
     impl: The implementation.
+    ps: Parameters.
+    pst: Statistics.
+
+Template Args:
+    Spec: Specification type.
+    Impl: Implementation type.
+
+Returns:
+    The equivalence type of `spec` and `impl`.
+
+Raises:
+    ValueError: If `ps.input_mapping` is non-empty and does not name
+                one specification input for every implementation
+                input.
+
+)doc";
+
+static const char *mkd_doc_fiction_verification_equivalence_checking_2 =
+R"doc(Same as the other `equivalence_checking` function with default
+parameters.
+
+Args:
+    spec: The specification.
+    impl: The implementation.
     pst: Statistics.
 
 Template Args:
@@ -30451,6 +30551,20 @@ Returns:
     The equivalence type of `spec` and `impl`.
 
 )doc";
+
+static const char *mkd_doc_fiction_verification_equivalence_checking_params = R"doc(Parameters for equivalence checking.)doc";
+
+static const char *mkd_doc_fiction_verification_equivalence_checking_params_input_mapping =
+R"doc(Specification input that every implementation input reads, in declared
+order.
+
+Empty: the inputs match by names unique on both sides, then by
+       remaining declared positions, which requires equal
+input counts. Otherwise, entry `i` names the specification input that
+implementation input `i` reads, and the input counts may differ:
+several implementation inputs read the same specification input, as
+the duplicated inputs of a planarized layout do. The outputs match by
+names and positions either way.)doc";
 
 static const char *mkd_doc_fiction_verification_equivalence_checking_stats = R"doc(Physical equivalence result, throughput, and diagnostics.)doc";
 
@@ -30686,7 +30800,7 @@ static const char *mkd_doc_std_hash_7 = R"doc(Hash for SiDB layouts, over the Si
 
 static const char *mkd_doc_std_hash_8 = R"doc(Provides a hash implementation for `fiction::defect`.)doc";
 
-static const char *mkd_doc_std_hash_9 = R"doc(Hashes parameter points on the equality comparison grid.)doc";
+static const char *mkd_doc_std_hash_9 = R"doc(Hashes parameter points by their equality identities.)doc";
 
 static const char *mkd_doc_std_hash_operator_call = R"doc(Returns the identity's hash.)doc";
 
@@ -30744,14 +30858,14 @@ Returns:
 )doc";
 
 static const char *mkd_doc_std_hash_operator_call_9 =
-R"doc(Mixes the quantized parameter values across the hash bits for
-partitioned processing.
+R"doc(Mixes parameter value identities across the hash bits for partitioned
+processing.
 
 Args:
     pp: Parameter point to hash.
 
 Returns:
-    Hash of the quantized parameter values.
+    Hash of the parameter value identities.
 
 )doc";
 
