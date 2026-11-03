@@ -43,3 +43,41 @@ for (const checked of [true, false]) {
     assert.equal(scrolled, true);
   });
 }
+
+test("hash changes reveal an encoded target inside nested tabs", () => {
+  const inputs = { inner: { checked: false }, outer: { checked: false } };
+  let scrolled = false;
+  const outer = {
+    previousElementSibling: {
+      htmlFor: "outer",
+      click: () => (inputs.outer.checked = true),
+    },
+    parentElement: { closest: () => null },
+  };
+  const inner = {
+    previousElementSibling: {
+      htmlFor: "inner",
+      click: () => (inputs.inner.checked = true),
+    },
+    parentElement: { closest: () => outer },
+  };
+  const target = {
+    closest: () => inner,
+    scrollIntoView: () => (scrolled = true),
+  };
+  const listeners = {};
+  runInNewContext(script, {
+    window: {
+      location: { hash: "#topic%20name" },
+      addEventListener: (event, callback) => (listeners[event] = callback),
+    },
+    document: {
+      getElementById: (id) => (id === "topic name" ? target : inputs[id]),
+      addEventListener() {},
+    },
+  });
+  listeners.hashchange();
+  assert.equal(inputs.inner.checked, true);
+  assert.equal(inputs.outer.checked, true);
+  assert.equal(scrolled, true);
+});
