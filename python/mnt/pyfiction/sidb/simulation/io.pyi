@@ -152,10 +152,10 @@ def write_location_and_ground_state(
     sim_result: mnt.pyfiction.sidb.simulation.sidb_simulation_result, filename: str
 ) -> None:
     """
-    Writes the SiDB positions of a simulation result and the charge states
-    of its ground states as CSV.
+    Writes SiDB positions and minimum-energy charge distributions as CSV.
 
-    Invalid input preserves an existing file.
+    Preserves input order and duplicate minimum-energy entries. Invalid
+    input preserves an existing file.
 
     Args:
         sim_result: Result to write.
@@ -165,5 +165,5 @@ def write_location_and_ground_state(
         RuntimeError: If creating, writing, closing, or replacing the
                       output file fails.
         ValueError: If a distribution has different sites from the result
-                    layout.
+                    layout or a nonfinite energy.
     """

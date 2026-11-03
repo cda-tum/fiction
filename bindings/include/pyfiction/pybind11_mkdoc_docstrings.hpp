@@ -21416,12 +21416,15 @@ Args:
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_location_and_ground_state_writer_os = R"doc(Destination of the CSV output.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_detail_location_and_ground_state_writer_run =
-R"doc(Writes positions in nanometers and one column per ground state; writes
-nothing for an empty result.
+R"doc(Writes positions in nanometers and one column per minimum-energy
+entry.
+
+Preserves input order and duplicates; writes nothing for an empty
+result.
 
 Raises:
     ValueError: If a distribution has different sites from the result
-                layout.
+                layout or a nonfinite energy.
 
 )doc";
 
@@ -21571,9 +21574,11 @@ R"doc(The tag used to represent the non-influential value of a defect
 position.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_write_location_and_ground_state =
-R"doc(Writes the SiDB positions of a simulation result and the charge states
-of its ground states as CSV to a stream. Invalid input leaves the
-stream unchanged.
+R"doc(Writes SiDB positions and minimum-energy charge distributions as CSV
+to a stream.
+
+Preserves input order and duplicate minimum-energy entries. Invalid
+input leaves the stream unchanged.
 
 Args:
     sim_result: Result to write.
@@ -21581,15 +21586,15 @@ Args:
 
 Raises:
     ValueError: If a distribution has different sites from the result
-                layout.
+                layout or a nonfinite energy.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_write_location_and_ground_state_2 =
-R"doc(Writes the SiDB positions of a simulation result and the charge states
-of its ground states as CSV.
+R"doc(Writes SiDB positions and minimum-energy charge distributions as CSV.
 
-Invalid input preserves an existing file.
+Preserves input order and duplicate minimum-energy entries. Invalid
+input preserves an existing file.
 
 Args:
     sim_result: Result to write.
@@ -21599,7 +21604,7 @@ Raises:
     RuntimeError: If creating, writing, closing, or replacing the
                   output file fails.
     ValueError: If a distribution has different sites from the result
-                layout.
+                layout or a nonfinite energy.
 
 )doc";
 
