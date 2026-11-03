@@ -71,6 +71,39 @@ void check_contract(const Spec& spec, const Impl& impl, const uint32_t degree = 
     check_virtual_eq(spec, impl);
 }
 
+/**
+ * Checks that a flattened network computes the functions of the original network under every input assignment, with
+ * each copied input tied to the original input it stands for.
+ */
+template <typename Spec, typename Flat>
+void check_flat_eq(const Spec& spec, const Flat& flat, const std::vector<uint32_t>& original_input)
+{
+    REQUIRE(original_input.size() == flat.num_pis());
+    REQUIRE(flat.num_pos() == spec.num_pos());
+
+    for (uint64_t assignment = 0; assignment < (uint64_t{1} << spec.num_pis()); ++assignment)
+    {
+        CAPTURE(assignment);
+
+        std::vector<bool> original_values(spec.num_pis());
+        for (std::size_t i = 0; i < original_values.size(); ++i)
+        {
+            original_values[i] = ((assignment >> i) & 1u) != 0;
+        }
+
+        std::vector<bool> flat_values(flat.num_pis());
+        for (std::size_t i = 0; i < flat_values.size(); ++i)
+        {
+            flat_values[i] = original_values[original_input[i]];
+        }
+
+        const auto expected = mockturtle::simulate<bool>(spec, mockturtle::default_simulator<bool>{original_values});
+        const auto actual   = mockturtle::simulate<bool>(flat, mockturtle::default_simulator<bool>{flat_values});
+
+        CHECK(actual == expected);
+    }
+}
+
 }  // namespace
 
 TEST_CASE("Planarization defaults to the hybrid strategy", "[planarization]")
@@ -611,27 +644,59 @@ TEST_CASE("Flattening keeps the functions and the rank order of a planar network
         CHECK(ranked.rank_width(level) == planar.rank_width(level));
     }
 
-    // every input assignment of the original network, with each copied input tied to the input it stands for
-    for (uint64_t assignment = 0; assignment < (uint64_t{1} << ntk.num_pis()); ++assignment)
+    check_flat_eq(ntk, flat, original_input);
+}
+
+TEST_CASE("Flattening keeps the polarity of fanins and outputs and the constants", "[planarization]")
+{
+    SECTION("planar AIG with complemented signals and shared constant node")
     {
-        CAPTURE(assignment);
+        // the pipeline needs a technology network, so an AIG reaches the flattening only as a hand-built planar network
+        virtual_pi_network<mutable_rank_view<mockturtle::aig_network>> planar{};
 
-        std::vector<bool> original_values(ntk.num_pis());
-        for (std::size_t i = 0; i < original_values.size(); ++i)
-        {
-            original_values[i] = ((assignment >> i) & 1u) != 0;
-        }
+        const auto a  = planar.create_pi();
+        const auto b  = planar.create_pi();
+        const auto c  = planar.create_pi();
+        const auto a2 = planar.create_virtual_pi(a);
+        planar.create_po(!planar.create_and(a, b));
+        planar.create_po(planar.create_and(!a2, c));
+        planar.create_po(planar.get_constant(true));
+        planar.create_po(planar.get_constant(false));
+        planar.update_ranks();
 
-        std::vector<bool> flat_values(flat.num_pis());
-        for (std::size_t i = 0; i < flat_values.size(); ++i)
-        {
-            flat_values[i] = original_values[original_input[i]];
-        }
+        mockturtle::aig_network spec{};
 
-        const auto expected = mockturtle::simulate<bool>(ntk, mockturtle::default_simulator<bool>{original_values});
-        const auto actual   = mockturtle::simulate<bool>(flat, mockturtle::default_simulator<bool>{flat_values});
+        const auto x = spec.create_pi();
+        const auto y = spec.create_pi();
+        const auto z = spec.create_pi();
+        spec.create_po(!spec.create_and(x, y));
+        spec.create_po(spec.create_and(!x, z));
+        spec.create_po(spec.get_constant(true));
+        spec.create_po(spec.get_constant(false));
 
-        CHECK(actual == expected);
+        const auto [flat, original_input] = flatten_planarization(planar);
+
+        CHECK(original_input == std::vector<uint32_t>{0, 1, 2, 0});
+        CHECK(flat.constant_value(flat.get_node(flat.po_at(2))));
+        CHECK(!flat.constant_value(flat.get_node(flat.po_at(3))));
+        check_flat_eq(spec, flat, original_input);
+    }
+    SECTION("technology network with constant outputs and an inverter")
+    {
+        technology_network tec{};
+
+        const auto a = tec.create_pi();
+        const auto b = tec.create_pi();
+        tec.create_po(tec.create_nand(a, b));
+        tec.create_po(tec.create_and(tec.create_not(a), b));
+        tec.create_po(tec.get_constant(true));
+        tec.create_po(tec.get_constant(false));
+
+        const auto [flat, original_input] = flatten_planarization(planarization(rank(tec)));
+
+        CHECK(flat.constant_value(flat.get_node(flat.po_at(2))));
+        CHECK(!flat.constant_value(flat.get_node(flat.po_at(3))));
+        check_flat_eq(tec, flat, original_input);
     }
 }
 
