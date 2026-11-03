@@ -735,6 +735,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Non-strict comparison truth tables now match LE and GE gates, restoring Bestagon skeleton lookup.
   - Technology mapping now respects the selected LT, GT, LE, and GE gate types.
   - `parameter_point` now distinguishes extreme values and consistently hashes NaN values; `quantize` rejects
     values outside its integer grid.

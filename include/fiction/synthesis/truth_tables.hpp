@@ -178,7 +178,7 @@ namespace fiction::synthesis
  */
 [[nodiscard]] inline kitty::dynamic_truth_table create_le_tt() noexcept
 {
-    constexpr const uint64_t lit = 0x11;
+    constexpr const uint64_t lit = 0xb;
 
     kitty::dynamic_truth_table table{2};
     kitty::create_from_words(table, &lit, &lit + 1);
@@ -192,7 +192,7 @@ namespace fiction::synthesis
  */
 [[nodiscard]] inline kitty::dynamic_truth_table create_ge_tt() noexcept
 {
-    constexpr const uint64_t lit = 0x13;
+    constexpr const uint64_t lit = 0xd;
 
     kitty::dynamic_truth_table table{2};
     kitty::create_from_words(table, &lit, &lit + 1);
