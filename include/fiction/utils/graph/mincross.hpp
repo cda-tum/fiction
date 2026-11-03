@@ -93,6 +93,10 @@ struct mincross_stats
     uint64_t num_crossings = std::numeric_limits<uint64_t>::max();
 };
 
+/** @brief Counts the edge crossings of a balanced ranked network. */
+template <typename Ntk>
+[[nodiscard]] uint64_t count_crossings(const Ntk& ntk);
+
 /**
  * Implements the crossing minimization algorithm inspired by Graphviz's `mincross`.
  * This algorithm reorders nodes in ranks to reduce edge crossings in a leveled graph representation of the logic
@@ -151,6 +155,7 @@ class mincross_impl
      */
     void minimize_crossings()
     {
+        build_neighbors();
         ncross();
         auto cur_cross  = total_crossings;
         auto best_cross = cur_cross;
@@ -275,15 +280,16 @@ class mincross_impl
                 if (r1 > r0)
                 {
                     // Go forward: fanouts
-                    neighbor_positions.reserve(fanout_ntk.fanout_size(n));
-                    fanout_ntk.foreach_fanout(n,
-                                              [this, &r1, &neighbor_positions](auto const& fo)
-                                              {
-                                                  if (fanout_ntk.level(fo) == r1)
-                                                  {
-                                                      neighbor_positions.push_back(fanout_ntk.rank_position(fo));
-                                                  }
-                                              });
+                    const auto idx = index_of(n);
+                    neighbor_positions.reserve(out_begin[idx + 1] - out_begin[idx]);
+                    for (auto i = out_begin[idx]; i < out_begin[idx + 1]; ++i)
+                    {
+                        const auto fo = fanout_ntk.index_to_node(out_nodes[i]);
+                        if (fanout_ntk.level(fo) == r1)
+                        {
+                            neighbor_positions.push_back(fanout_ntk.rank_position(fo));
+                        }
+                    }
                 }
                 else
                 {
@@ -514,6 +520,21 @@ class mincross_impl
 
         in_begin.assign(size + 1, 0);
         out_begin.assign(size + 1, 0);
+        std::vector<std::vector<uint32_t>> outgoing(size);
+        fanout_ntk.foreach_gate(
+            [this, &outgoing](const auto& target)
+            {
+                fanout_ntk.foreach_fanin(target,
+                                         [this, &outgoing, &target](const auto& f)
+                                         {
+                                             const auto src = fanout_ntk.get_node(f);
+                                             if (!fanout_ntk.is_constant(src))
+                                             {
+                                                 outgoing[index_of(src)].push_back(
+                                                     static_cast<uint32_t>(index_of(target)));
+                                             }
+                                         });
+            });
 
         for (std::size_t i = 0; i < size; ++i)
         {
@@ -530,8 +551,7 @@ class mincross_impl
                                                  in_nodes.push_back(static_cast<uint32_t>(index_of(src)));
                                              }
                                          });
-                fanout_ntk.foreach_fanout(n, [this](auto const& tgt)
-                                          { out_nodes.push_back(static_cast<uint32_t>(index_of(tgt))); });
+                out_nodes.insert(out_nodes.end(), outgoing[i].begin(), outgoing[i].end());
             }
 
             in_begin[i + 1]  = static_cast<uint32_t>(in_nodes.size());
@@ -573,42 +593,7 @@ class mincross_impl
      */
     void ncross()
     {
-        total_crossings = 0;
-
-        for (uint32_t r = 0; r < fanout_ntk.depth(); ++r)
-        {
-            std::vector<uint64_t> penalty_array(fanout_ntk.rank_width(r + 1) + 1, 0);
-            uint64_t              max_pos = 0;
-
-            fanout_ntk.foreach_node_in_rank(r,
-                                            [this, &penalty_array, &max_pos](auto const& n)
-                                            {
-                                                std::vector<uint64_t> targets{};
-                                                targets.reserve(fanout_ntk.fanout_size(n));
-
-                                                fanout_ntk.foreach_fanout(n,
-                                                                          [this, &targets](auto const& fanout)
-                                                                          {
-                                                                              uint64_t pos =
-                                                                                  fanout_ntk.rank_position(fanout);
-                                                                              targets.push_back(pos);
-                                                                          });
-
-                                                for (const auto pos : targets)
-                                                {
-                                                    for (auto k = pos + 1; k <= max_pos; ++k)
-                                                    {
-                                                        total_crossings += penalty_array[k];
-                                                    }
-                                                }
-
-                                                for (const auto pos : targets)
-                                                {
-                                                    max_pos = std::max(max_pos, pos);
-                                                    penalty_array[pos]++;
-                                                }
-                                            });
-        }
+        total_crossings = fiction::utils::graph::count_crossings(fanout_ntk);
     }
 
     /**

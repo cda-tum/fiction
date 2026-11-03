@@ -267,6 +267,40 @@ TEST_CASE("Counting crossings rejects unbalanced networks", "[mincross]")
     CHECK_THROWS_AS(count_crossings(mutable_rank_view(tec)), std::invalid_argument);
 }
 
+TEST_CASE("Count crossings for parallel edges", "[mincross]")
+{
+    technology_network tec{};
+    const auto         a = tec.create_pi();
+    const auto         b = tec.create_pi();
+    const auto         x = tec.create_and(b, b);
+    const auto         y = tec.create_and(a, b);
+    tec.create_po(x);
+    tec.create_po(y);
+    auto ranked = mutable_rank_view(tec);
+
+    SECTION("Parallel edges cross a third edge")
+    {
+        mincross_stats st{};
+        const auto     result = mincross(ranked, mincross_params{.optimize = false}, &st);
+        CHECK(st.num_crossings == 2);
+        CHECK(count_crossings(result) == 2);
+    }
+    SECTION("Edges sharing an endpoint do not cross")
+    {
+        ranked.set_ranks(1, {ranked.get_node(y), ranked.get_node(x)});
+        mincross_stats st{};
+        const auto     result = mincross(ranked, mincross_params{.optimize = false}, &st);
+        CHECK(st.num_crossings == 0);
+        CHECK(count_crossings(result) == 0);
+    }
+    SECTION("Optimized statistics count every edge")
+    {
+        mincross_stats st{};
+        const auto     result = mincross(ranked, {}, &st);
+        CHECK(st.num_crossings == count_crossings(result));
+    }
+}
+
 TEST_CASE("Crossing minimization rejects unbalanced networks", "[mincross]")
 {
     technology_network tec{};
@@ -284,4 +318,21 @@ TEST_CASE("Crossing minimization rejects unbalanced networks", "[mincross]")
 
     CHECK_THROWS_AS(mincross(ranked, mincross_params{.optimize = false}), std::invalid_argument);
     CHECK_THROWS_AS(mincross(ranked), std::invalid_argument);
+}
+
+TEST_CASE("Optimized parallel-edge networks report remaining crossings", "[mincross]")
+{
+    technology_network tec{};
+    const auto         a = tec.create_pi();
+    const auto         b = tec.create_pi();
+    tec.create_po(tec.create_and(a, a));
+    tec.create_po(tec.create_and(a, b));
+    tec.create_po(tec.create_and(a, b));
+    tec.create_po(tec.create_and(b, b));
+    auto           ranked = mutable_rank_view(tec);
+    mincross_stats st{};
+    const auto     result = mincross(ranked, {}, &st);
+
+    CHECK(count_crossings(result) >= 1);
+    CHECK(st.num_crossings == count_crossings(result));
 }
