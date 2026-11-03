@@ -272,6 +272,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Modernized utility tests with named data rows, direct result checks, and complete progress observations.
   - Modernized physical-design helper tests with complete routing collections and independent solver rows.
   - Streamlined BDL iterator, pair, wire, and logic-match tests with complete physical expectations.
+  - Streamlined SiDB analysis tests while preserving energy, degeneracy, parameter-sweep, and timeout checks.
   - Streamlined synthesis tests and strengthened clone, conversion, and gate-library checks.
   - Modernized path-finding tests with shared data rows, complete path comparisons, and cache reuse checks.
   - Geometry tests now compare complete coordinate and visitor results and share arrangement cases.
@@ -728,6 +729,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - C++ critical-temperature analysis now rejects negative, non-finite, and out-of-range temperature limits before simulation.
   - Graph coloring now preserves the selected color type and reports zero colors for empty results.
     Color frequencies use vertex-sized counts.
   - Graph coloring now propagates allocation failures from graph and identifier translation.
@@ -930,6 +932,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
 
+  - Time-to-solution confidence documentation now names the target probability of at least one success.
   - ExGS Python documentation now describes all physically valid charge distributions.
   - Graph coloring documents TabuCol's bounded search and empty-result contract. SiDB printing documents its
     bounding-box cost, and progress reporting documents callback exception handling.

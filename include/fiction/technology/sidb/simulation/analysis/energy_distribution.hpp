@@ -75,7 +75,7 @@ class energy_distribution
      */
     energy_distribution() = default;
     /**
-     * Returns the nth state (energy + degeneracy) in the energy distribution.
+     * Returns the nth state (energy + degeneracy) in ascending energy order.
      *
      * @param state_index The index of the state to be retrieved.
      * @return Energy state, or `std::nullopt` (`None` in Python) if the index is out of range.

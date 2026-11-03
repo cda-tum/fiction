@@ -16685,8 +16685,9 @@ Returns:
     The critical temperature (unit: K).
 
 Raises:
-    ValueError: if `spec` is empty or truth-table variable counts
-                differ.
+    ValueError: If `spec` is empty, truth-table variable counts
+                differ, or `max_temperature` is negative, non-finite,
+                or exceeds the centikelvin iteration range.
 
 )doc";
 
@@ -16722,11 +16723,12 @@ Returns:
     The critical temperature (unit: K).
 
 Raises:
-    ValueError: if `spec` is empty, truth-table variable counts
+    ValueError: If `spec` is empty, truth-table variable counts
                 differ, the number of input pattern layouts does not
                 match the number of input combinations, or the number
                 of output BDL pairs does not match the number of truth
-                tables.
+                tables, or `max_temperature` is negative, non-finite,
+                or exceeds the centikelvin iteration range.
 
 )doc";
 
@@ -16743,7 +16745,11 @@ Args:
     pst: Statistics.
 
 Returns:
-    The critical temperature (unit: K)
+    The critical temperature (unit: K).
+
+Raises:
+    ValueError: If `max_temperature` is negative, non-finite, or
+                exceeds the centikelvin iteration range.
 
 )doc";
 
@@ -16768,7 +16774,8 @@ applicable if engine == QUICKSIM).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_params_max_temperature =
 R"doc(Maximum simulation temperature beyond which no simulation will be
-conducted (~ 126 °C by default) (unit: K).)doc";
+conducted (~ 126 °C by default) (unit: K). Must be nonnegative and fit
+the centikelvin iteration range.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_params_on_progress =
 R"doc(Callback that receives the number of simulated input patterns (gate-
@@ -16807,6 +16814,23 @@ Args:
 static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_stats_sim_params = R"doc(All parameters for physical SiDB simulations.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_stats_time_total = R"doc(The total runtime of the critical temperature computation.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_checked_parameters =
+R"doc(Starts the shared budget and validates the centikelvin iteration
+range.
+
+Args:
+    params: Critical temperature parameters.
+
+Returns:
+    Parameters with a validated shared deadline and temperature range.
+
+Raises:
+    utils::timeout_error: If the deadline expires.
+    ValueError: If the operational parameters or temperature range are
+                invalid.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl =
 R"doc(Computes the temperature limit for SiDB ground-state occupation or
@@ -17065,8 +17089,7 @@ Template Args:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_energy_distribution_get_nth_state =
-R"doc(Returns the nth state (energy + degeneracy) in the energy
-distribution.
+R"doc(Returns the nth state (energy + degeneracy) in ascending energy order.
 
 Args:
     state_index: The index of the state to be retrieved.
@@ -17326,10 +17349,11 @@ Args:
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_for_given_simulation_results =
 R"doc(Computes the time-to-solution (TTS) of *QuickSim* from an exact result
-and a series of heuristic results: the accuracy is the share of
-heuristic runs that found the ground state, and TTS is the mean
-heuristic runtime scaled to reach the given confidence level, `t ·
-log(1 - c) / log(1 - acc)`. An empty sample yields zero accuracy, zero
+and a series of heuristic results: the success fraction `p` is the
+fraction of heuristic runs that found the ground state, and TTS is the
+mean heuristic runtime scaled to reach the given confidence level, `t
+· log(1 - c) / log(1 - p)`. The `acc` statistic reports the success
+fraction as a percentage. An empty sample yields zero accuracy, zero
 mean heuristic runtime, and infinite time-to-solution.
 
 Args:
@@ -17344,11 +17368,9 @@ Args:
 static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_params = R"doc(Parameters for measuring heuristic accuracy and time-to-solution.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_params_confidence_level =
-R"doc(The confidence level represents the probability that the confidence
-interval calculated from the simulation contains the true value. For
-example, a 99.7 % (0.997) confidence level means that if the
-simulation were repeated many times, approximately 997 out of 1000 of
-the calculated confidence intervals would contain the true value.)doc";
+R"doc(Target probability of finding the ground state at least once across
+repeated heuristic attempts. For example, 0.997 requests a 99.7 %
+probability of at least one success.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_params_deadline =
 R"doc(Shared caller deadline. `time_point::max()` leaves the enclosing
