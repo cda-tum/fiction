@@ -80,7 +80,7 @@ class qca_one_library : public fcn::gate_library<qca::layout, 5, 5>
                 }
                 if (p.out.size() == 2)
                 {
-                    return FANOUT_MAP.at(p);
+                    return fcn::detail::checked_lookup(FANOUT_MAP, p);
                 }
                 if (p.out.size() == 3)
                 {
@@ -90,22 +90,22 @@ class qca_one_library : public fcn::gate_library<qca::layout, 5, 5>
 
             if (lyt.is_buf(n))
             {
-                return WIRE_MAP.at(p);
+                return fcn::detail::checked_lookup(WIRE_MAP, p);
             }
 
             if (lyt.is_inv(n))
             {
-                return INVERTER_MAP.at(p);
+                return fcn::detail::checked_lookup(INVERTER_MAP, p);
             }
 
             if (lyt.is_and(n))
             {
-                return CONJUNCTION_MAP.at(p);
+                return fcn::detail::checked_lookup(CONJUNCTION_MAP, p);
             }
 
             if (lyt.is_or(n))
             {
-                return DISJUNCTION_MAP.at(p);
+                return fcn::detail::checked_lookup(DISJUNCTION_MAP, p);
             }
 
             if (lyt.is_maj(n))
@@ -173,37 +173,37 @@ class qca_one_library : public fcn::gate_library<qca::layout, 5, 5>
         // determine incoming connector ports
         if (lyt.has_northern_incoming_signal(t))
         {
-            p.inp.insert(fcn::port_position{2u, 0u});
+            p.inp.insert({2u, 0u});
         }
         if (lyt.has_eastern_incoming_signal(t))
         {
-            p.inp.insert(fcn::port_position{4u, 2u});
+            p.inp.insert({4u, 2u});
         }
         if (lyt.has_southern_incoming_signal(t))
         {
-            p.inp.insert(fcn::port_position{2u, 4u});
+            p.inp.insert({2u, 4u});
         }
         if (lyt.has_western_incoming_signal(t))
         {
-            p.inp.insert(fcn::port_position{0u, 2u});
+            p.inp.insert({0u, 2u});
         }
 
         // determine outgoing connector ports
         if (lyt.has_northern_outgoing_signal(t))
         {
-            p.out.insert(fcn::port_position{2u, 0u});
+            p.out.insert({2u, 0u});
         }
         if (lyt.has_eastern_outgoing_signal(t))
         {
-            p.out.insert(fcn::port_position{4u, 2u});
+            p.out.insert({4u, 2u});
         }
         if (lyt.has_southern_outgoing_signal(t))
         {
-            p.out.insert(fcn::port_position{2u, 4u});
+            p.out.insert({2u, 4u});
         }
         if (lyt.has_western_outgoing_signal(t))
         {
-            p.out.insert(fcn::port_position{0u, 2u});
+            p.out.insert({0u, 2u});
         }
 
         // has no connector ports
@@ -211,12 +211,12 @@ class qca_one_library : public fcn::gate_library<qca::layout, 5, 5>
         {
             if (lyt.has_no_incoming_signal(t))
             {
-                p.inp.insert(fcn::port_position{0u, 2u});
+                p.inp.insert({0u, 2u});
             }
 
             if (lyt.has_no_outgoing_signal(t))
             {
-                p.out.insert(fcn::port_position{4u, 2u});
+                p.out.insert({4u, 2u});
             }
         }
 

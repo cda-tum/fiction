@@ -34,6 +34,7 @@
 #include <type_traits>
 #include <utility>
 
+#if defined(__GNUC__) || defined(__clang__)
 // data types cannot properly be converted to bit field types
 #pragma GCC diagnostic push
 #ifndef __clang__
@@ -41,6 +42,7 @@
 #endif
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
 
 namespace fiction::physical_design
 {
@@ -419,4 +421,6 @@ apply_parameterized_gate_library_to_defective_surface(const fiction::layouts::ga
 }
 
 }  // namespace fiction::physical_design
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
+#endif

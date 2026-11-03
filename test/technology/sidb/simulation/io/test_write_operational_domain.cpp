@@ -21,14 +21,40 @@
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 
-#include <cstddef>
-#include <set>
+#include <algorithm>
 #include <sstream>
 #include <string>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::sidb::simulation::io;
 using namespace fiction::sidb::simulation::logic;
+
+namespace
+{
+
+/**
+ * @brief Checks the CSV header and every data row without imposing sample order.
+ *
+ * @param output Serialized domain.
+ * @param expected Expected header followed by every sample, including multiplicity.
+ */
+void check_csv_output(const std::string& output, std::vector<std::string> expected)
+{
+    std::istringstream       is{output};
+    std::vector<std::string> emitted{};
+    for (std::string line{}; std::getline(is, line);)
+    {
+        emitted.push_back(line);
+    }
+    REQUIRE_FALSE(emitted.empty());
+    CHECK(emitted.front() == expected.front());
+    std::ranges::sort(emitted);
+    std::ranges::sort(expected);
+    CHECK(emitted == expected);
+}
+
+}  // namespace
 
 TEST_CASE("Write empty operational domain", "[write-operational-domain]")
 {
@@ -102,34 +128,20 @@ TEST_CASE("Write simple operational domain", "[write-operational-domain]")
 
     SECTION("default operational tags")
     {
-        const std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0,0,1", "0,1,0"};
+        const std::vector<std::string> expected{"epsilon_r,lambda_tf,operational status", "0,0,1", "0,1,0"};
 
         write_operational_domain(opdom, os);
-        const auto os_str = os.str();
-
-        std::istringstream is{os_str};
-
-        for (std::string line{}; std::getline(is, line);)
-        {
-            CHECK(expected.contains(line));
-        }
+        check_csv_output(os.str(), expected);
     }
 
     SECTION("custom operational tags")
     {
         const write_operational_domain_params params{.operational_tag = "True", .non_operational_tag = "False"};
 
-        const std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0,0,True", "0,1,False"};
+        const std::vector<std::string> expected{"epsilon_r,lambda_tf,operational status", "0,0,True", "0,1,False"};
 
         write_operational_domain(opdom, os, params);
-        const auto os_str = os.str();
-
-        std::istringstream is{os_str};
-
-        for (std::string line{}; std::getline(is, line);)
-        {
-            CHECK(expected.contains(line));
-        }
+        check_csv_output(os.str(), expected);
     }
 
     SECTION("skip non-operational samples")
@@ -137,17 +149,10 @@ TEST_CASE("Write simple operational domain", "[write-operational-domain]")
         write_operational_domain_params const params{
             .writing_mode = write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY};
 
-        const std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0,0,1"};
+        const std::vector<std::string> expected{"epsilon_r,lambda_tf,operational status", "0,0,1"};
 
         write_operational_domain(opdom, os, params);
-        const auto os_str = os.str();
-
-        std::istringstream is{os_str};
-
-        for (std::string line{}; std::getline(is, line);)
-        {
-            CHECK(expected.contains(line));
-        }
+        check_csv_output(os.str(), expected);
     }
 }
 
@@ -162,26 +167,12 @@ TEST_CASE("Write operational domain with one and three sweep dimensions", "[writ
         opdom.add_value(parameter_point{{0.1}}, {operational_status::OPERATIONAL});
         opdom.add_value(parameter_point{{0.3}}, {operational_status::NON_OPERATIONAL});
 
-        const std::set<std::string> expected{"epsilon_r,operational status", "0.1,1", "0.3,0"};
+        const std::vector<std::string> expected{"epsilon_r,operational status", "0.1,1", "0.3,0"};
 
         std::ostringstream os{};
         write_operational_domain(opdom, os);
 
-        std::istringstream is{os.str()};
-
-        std::set<std::string> emitted{};
-
-        std::size_t num_lines = 0;
-
-        for (std::string line{}; std::getline(is, line); ++num_lines)
-        {
-            emitted.insert(line);
-        }
-
-        // the emitted rows must be exactly the expected ones, and the line count must match so that a duplicated
-        // row cannot mask a missing one
-        CHECK(emitted == expected);
-        CHECK(num_lines == expected.size());
+        check_csv_output(os.str(), expected);
     }
 
     SECTION("three sweep dimensions")
@@ -195,27 +186,13 @@ TEST_CASE("Write operational domain with one and three sweep dimensions", "[writ
         opdom.add_value(parameter_point{{0.1, 0.2, -0.3}}, {operational_status::OPERATIONAL});
         opdom.add_value(parameter_point{{0.4, 0.5, -0.6}}, {operational_status::NON_OPERATIONAL});
 
-        const std::set<std::string> expected{"epsilon_r,lambda_tf,mu_minus,operational status", "0.1,0.2,-0.3,1",
-                                             "0.4,0.5,-0.6,0"};
+        const std::vector<std::string> expected{"epsilon_r,lambda_tf,mu_minus,operational status", "0.1,0.2,-0.3,1",
+                                                "0.4,0.5,-0.6,0"};
 
         std::ostringstream os{};
         write_operational_domain(opdom, os);
 
-        std::istringstream is{os.str()};
-
-        std::set<std::string> emitted{};
-
-        std::size_t num_lines = 0;
-
-        for (std::string line{}; std::getline(is, line); ++num_lines)
-        {
-            emitted.insert(line);
-        }
-
-        // the emitted rows must be exactly the expected ones, and the line count must match so that a duplicated
-        // row cannot mask a missing one
-        CHECK(emitted == expected);
-        CHECK(num_lines == expected.size());
+        check_csv_output(os.str(), expected);
     }
 
     SECTION("three sweep dimensions with critical temperature")
@@ -229,27 +206,13 @@ TEST_CASE("Write operational domain with one and three sweep dimensions", "[writ
         opdom.add_value(parameter_point{{0.1, 0.2, -0.3}}, {operational_status::OPERATIONAL, 50.3});
         opdom.add_value(parameter_point{{0.4, 0.5, -0.6}}, {operational_status::NON_OPERATIONAL, 0.0});
 
-        const std::set<std::string> expected{"epsilon_r,lambda_tf,mu_minus,operational status,critical temperature",
-                                             "0.1,0.2,-0.3,1,50.3", "0.4,0.5,-0.6,0,0"};
+        const std::vector<std::string> expected{"epsilon_r,lambda_tf,mu_minus,operational status,critical temperature",
+                                                "0.1,0.2,-0.3,1,50.3", "0.4,0.5,-0.6,0,0"};
 
         std::ostringstream os{};
         write_operational_domain(opdom, os);
 
-        std::istringstream is{os.str()};
-
-        std::set<std::string> emitted{};
-
-        std::size_t num_lines = 0;
-
-        for (std::string line{}; std::getline(is, line); ++num_lines)
-        {
-            emitted.insert(line);
-        }
-
-        // the emitted rows must be exactly the expected ones, and the line count must match so that a duplicated
-        // row cannot mask a missing one
-        CHECK(emitted == expected);
-        CHECK(num_lines == expected.size());
+        check_csv_output(os.str(), expected);
     }
 }
 
@@ -269,37 +232,23 @@ TEST_CASE("Write operational domain with floating-point parameter values", "[wri
 
     SECTION("default operational tags")
     {
-        const std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0.1,0.2,1", "0.3,0.4,0",
-                                             "1.2,1.4,1", "2.4,5.75,0"};
+        const std::vector<std::string> expected{"epsilon_r,lambda_tf,operational status", "0.1,0.2,1", "0.3,0.4,0",
+                                                "1.2,1.4,1", "2.4,5.75,0"};
 
         write_operational_domain(opdom, os);
-        const auto os_str = os.str();
-
-        std::istringstream is{os_str};
-
-        for (std::string line{}; std::getline(is, line);)
-        {
-            CHECK(expected.contains(line));
-        }
+        check_csv_output(os.str(), expected);
     }
     SECTION("custom operational tags")
     {
         const write_operational_domain_params params{.operational_tag     = "operational",
                                                      .non_operational_tag = "non-operational"};
 
-        const std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0.1,0.2,operational",
-                                             "0.3,0.4,non-operational", "1.2,1.4,operational",
-                                             "2.4,5.75,non-operational"};
+        const std::vector<std::string> expected{"epsilon_r,lambda_tf,operational status", "0.1,0.2,operational",
+                                                "0.3,0.4,non-operational", "1.2,1.4,operational",
+                                                "2.4,5.75,non-operational"};
 
         write_operational_domain(opdom, os, params);
-        const auto os_str = os.str();
-
-        std::istringstream is{os_str};
-
-        for (std::string line{}; std::getline(is, line);)
-        {
-            CHECK(expected.contains(line));
-        }
+        check_csv_output(os.str(), expected);
     }
 
     SECTION("skip non-operational samples")
@@ -307,17 +256,10 @@ TEST_CASE("Write operational domain with floating-point parameter values", "[wri
         write_operational_domain_params const params{
             .writing_mode = write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY};
 
-        const std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0.1,0.2,1", "1.2,1.4,1"};
+        const std::vector<std::string> expected{"epsilon_r,lambda_tf,operational status", "0.1,0.2,1", "1.2,1.4,1"};
 
         write_operational_domain(opdom, os, params);
-        const auto os_str = os.str();
-
-        std::istringstream is{os_str};
-
-        for (std::string line{}; std::getline(is, line);)
-        {
-            CHECK(expected.contains(line));
-        }
+        check_csv_output(os.str(), expected);
     }
 }
 
@@ -338,37 +280,23 @@ TEST_CASE("Write operational domain with floating-point parameter and temperatur
 
         SECTION("default operational tags")
         {
-            const std::set<std::string> expected{"epsilon_r,operational status,critical temperature", "0.1,1,50.3",
-                                                 "0.3,0,0", "1.2,1,400", "2.4,0,0"};
+            const std::vector<std::string> expected{"epsilon_r,operational status,critical temperature", "0.1,1,50.3",
+                                                    "0.3,0,0", "1.2,1,400", "2.4,0,0"};
 
             write_operational_domain(opdom, os);
-            const auto os_str = os.str();
-
-            std::istringstream is{os_str};
-
-            for (std::string line{}; std::getline(is, line);)
-            {
-                CHECK(expected.contains(line));
-            }
+            check_csv_output(os.str(), expected);
         }
         SECTION("custom operational tags")
         {
             const write_operational_domain_params params{.operational_tag     = "operational",
                                                          .non_operational_tag = "non-operational"};
 
-            const std::set<std::string> expected{"epsilon_r,operational status,critical temperature",
-                                                 "0.1,operational,50.3", "0.3,non-operational,0", "1.2,operational,400",
-                                                 "2.4,non-operational,0"};
+            const std::vector<std::string> expected{"epsilon_r,operational status,critical temperature",
+                                                    "0.1,operational,50.3", "0.3,non-operational,0",
+                                                    "1.2,operational,400", "2.4,non-operational,0"};
 
             write_operational_domain(opdom, os, params);
-            const auto os_str = os.str();
-
-            std::istringstream is{os_str};
-
-            for (std::string line{}; std::getline(is, line);)
-            {
-                CHECK(expected.contains(line));
-            }
+            check_csv_output(os.str(), expected);
         }
 
         SECTION("skip non-operational samples")
@@ -376,18 +304,11 @@ TEST_CASE("Write operational domain with floating-point parameter and temperatur
             write_operational_domain_params const params{
                 .writing_mode = write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY};
 
-            const std::set<std::string> expected{"epsilon_r,operational status,critical temperature", "0.1,1,50.3",
-                                                 "1.2,1,400"};
+            const std::vector<std::string> expected{"epsilon_r,operational status,critical temperature", "0.1,1,50.3",
+                                                    "1.2,1,400"};
 
             write_operational_domain(opdom, os, params);
-            const auto os_str = os.str();
-
-            std::istringstream is{os_str};
-
-            for (std::string line{}; std::getline(is, line);)
-            {
-                CHECK(expected.contains(line));
-            }
+            check_csv_output(os.str(), expected);
         }
     }
     SECTION("Two sweep parameters")
@@ -406,37 +327,23 @@ TEST_CASE("Write operational domain with floating-point parameter and temperatur
 
         SECTION("default operational tags")
         {
-            const std::set<std::string> expected{"epsilon_r,lambda_tf,operational status,critical temperature",
-                                                 "0.1,0.2,1,50.3", "0.3,0.4,0,0", "1.2,1.4,1,400", "2.4,5.75,0,0"};
+            const std::vector<std::string> expected{"epsilon_r,lambda_tf,operational status,critical temperature",
+                                                    "0.1,0.2,1,50.3", "0.3,0.4,0,0", "1.2,1.4,1,400", "2.4,5.75,0,0"};
 
             write_operational_domain(opdom, os);
-            const auto os_str = os.str();
-
-            std::istringstream is{os_str};
-
-            for (std::string line{}; std::getline(is, line);)
-            {
-                CHECK(expected.contains(line));
-            }
+            check_csv_output(os.str(), expected);
         }
         SECTION("custom operational tags")
         {
             const write_operational_domain_params params{.operational_tag     = "operational",
                                                          .non_operational_tag = "non-operational"};
 
-            const std::set<std::string> expected{"epsilon_r,lambda_tf,operational status,critical temperature",
-                                                 "0.1,0.2,operational,50.3", "0.3,0.4,non-operational,0",
-                                                 "1.2,1.4,operational,400", "2.4,5.75,non-operational,0"};
+            const std::vector<std::string> expected{"epsilon_r,lambda_tf,operational status,critical temperature",
+                                                    "0.1,0.2,operational,50.3", "0.3,0.4,non-operational,0",
+                                                    "1.2,1.4,operational,400", "2.4,5.75,non-operational,0"};
 
             write_operational_domain(opdom, os, params);
-            const auto os_str = os.str();
-
-            std::istringstream is{os_str};
-
-            for (std::string line{}; std::getline(is, line);)
-            {
-                CHECK(expected.contains(line));
-            }
+            check_csv_output(os.str(), expected);
         }
 
         SECTION("skip non-operational samples")
@@ -444,18 +351,11 @@ TEST_CASE("Write operational domain with floating-point parameter and temperatur
             write_operational_domain_params const params{
                 .writing_mode = write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY};
 
-            const std::set<std::string> expected{"epsilon_r,lambda_tf,operational status,critical temperature",
-                                                 "0.1,0.2,1,50.3", "1.2,1.4,1,400"};
+            const std::vector<std::string> expected{"epsilon_r,lambda_tf,operational status,critical temperature",
+                                                    "0.1,0.2,1,50.3", "1.2,1.4,1,400"};
 
             write_operational_domain(opdom, os, params);
-            const auto os_str = os.str();
-
-            std::istringstream is{os_str};
-
-            for (std::string line{}; std::getline(is, line);)
-            {
-                CHECK(expected.contains(line));
-            }
+            check_csv_output(os.str(), expected);
         }
     }
 }
