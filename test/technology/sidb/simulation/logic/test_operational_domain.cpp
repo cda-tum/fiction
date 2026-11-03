@@ -1710,6 +1710,24 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
             check_op_domain_params_and_operational_status(op_domain, one_dimensional_params,
                                                           operational_status::OPERATIONAL);
         }
+        SECTION("grid search with multiple points")
+        {
+            /** @brief Three-point sweep in one dimension. */
+            auto params                    = one_dimensional_params;
+            params.sweep_dimensions[0].min = 5.5;
+            params.sweep_dimensions[0].max = 5.7;
+            /** @brief Computed operational domain. */
+            const auto op_domain = operational_domain_grid_search(lat, std::vector{create_and_tt()}, params);
+            REQUIRE(op_domain.size() == 3);
+            for (const auto value : {5.5, 5.6, 5.7})
+            {
+                CAPTURE(value);
+                /** @brief Status at the expected parameter point. */
+                const auto result = op_domain.contains(parameter_point{{value}});
+                REQUIRE(result.has_value());
+                CHECK(std::get<0>(*result) == operational_status::OPERATIONAL);
+            }
+        }
         SECTION("random sampling")
         {
             /** @brief Sampled one-dimensional operational domain. */
