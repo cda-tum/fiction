@@ -72,10 +72,35 @@
 #include <tuple>
 #include <type_traits>
 #include <utility>
+#include <variant>
 #include <vector>
 
 namespace fiction::sidb::simulation::logic
 {
+
+namespace detail
+{
+/**
+ * Returns the identity of a parameter value. Finite values within the integer grid use cells of width `ERROR_MARGIN`;
+ * values outside the grid compare exactly, and all NaNs share one identity.
+ *
+ * @param value Parameter value.
+ * @return Grid cell, exact value, or NaN identity.
+ */
+[[nodiscard]] inline std::variant<int64_t, double, std::monostate> parameter_value_identity(const double value) noexcept
+{
+    if (std::isnan(value))
+    {
+        return std::monostate{};
+    }
+    const auto scaled = value / fiction::utils::math::ERROR_MARGIN;
+    if (scaled >= -0x1p63 && scaled < 0x1p63)
+    {
+        return static_cast<int64_t>(std::llround(scaled));
+    }
+    return value;
+}
+}  // namespace detail
 
 /**
  * The parameter point holds one parameter value per sweep dimension.
@@ -93,16 +118,17 @@ struct parameter_point
      */
     explicit parameter_point(std::vector<double> values) : parameters{std::move(values)} {}
     /**
-     * Equality operator. Checks if this parameter point is equal to another point within a specified tolerance.
-     * The tolerance is defined by `constants::ERROR_MARGIN`.
+     * Equality operator. Finite values within the integer grid use cells of width `ERROR_MARGIN`. Values outside the
+     * grid compare exactly, and all NaN values compare equal.
      *
      * @param other Other parameter point to compare with.
      * @return `true` iff the parameter points are equal.
      */
     [[nodiscard]] bool operator==(const parameter_point& other) const noexcept
     {
-        return std::ranges::equal(parameters, other.parameters, [](const auto lhs, const auto rhs) noexcept
-                                  { return quantize(lhs) == quantize(rhs); });
+        return std::ranges::equal(
+            parameters, other.parameters, [](const auto lhs, const auto rhs) noexcept
+            { return detail::parameter_value_identity(lhs) == detail::parameter_value_identity(rhs); });
     }
     /**
      * Maps a parameter value onto the grid of `constants::ERROR_MARGIN`-wide cells that both this type's equality and
@@ -115,10 +141,16 @@ struct parameter_point
      *
      * @param value Parameter value to quantize.
      * @return The index of the cell `value` falls into.
+     * @throws std::out_of_range If the value is non-finite or its cell index does not fit in `int64_t`.
      */
-    [[nodiscard]] static int64_t quantize(const double value) noexcept
+    [[nodiscard]] static int64_t quantize(const double value)
     {
-        return std::llround(value / fiction::utils::math::ERROR_MARGIN);
+        const auto key = detail::parameter_value_identity(value);
+        if (const auto* cell = std::get_if<int64_t>(&key); cell != nullptr)
+        {
+            return *cell;
+        }
+        throw std::out_of_range{"parameter value is outside the quantization grid"};
     }
     /**
      * Returns the parameter values for each dimension.
@@ -159,11 +191,8 @@ struct hash<fiction::sidb::simulation::logic::parameter_point>
         size_t hash_value = 0;
         for (const auto& parameter : pp.get_parameters())
         {
-            // hash the cell the parameter value falls into, which is what `parameter_point::operator==` compares.
-            // Casting the quotient straight to `size_t` would be undefined for the negative values that a `MU_MINUS`
-            // sweep produces
-            fiction::utils::stl::hash_combine(hash_value,
-                                              fiction::sidb::simulation::logic::parameter_point::quantize(parameter));
+            fiction::utils::stl::hash_combine(
+                hash_value, fiction::sidb::simulation::logic::detail::parameter_value_identity(parameter));
         }
 
         return phmap::phmap_mix<sizeof(size_t)>{}(hash_value);
@@ -1427,7 +1456,7 @@ class operational_domain_impl
                 const auto value =
                     params.sweep_dimensions.at(d).min + (static_cast<double>(i) * params.sweep_dimensions.at(d).step);
                 if (!values.at(d).empty() &&
-                    parameter_point::quantize(values.at(d).back()) == parameter_point::quantize(value))
+                    parameter_value_identity(values.at(d).back()) == parameter_value_identity(value))
                 {
                     throw std::invalid_argument(
                         "Sweep coordinates must occupy distinct parameter-point identity cells");

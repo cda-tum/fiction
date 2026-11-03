@@ -44,6 +44,7 @@
 #include <array>
 #include <barrier>
 #include <chrono>
+#include <cmath>
 #include <cstddef>
 #include <functional>
 #include <future>
@@ -201,6 +202,38 @@ TEST_CASE("Test parameter point", "[operational-domain]")
         CHECK(points.size() == 2);
         CHECK(points.count(negative) == 1);
     }
+}
+
+TEST_CASE("Parameter point identity covers extreme values", "[operational-domain]")
+{
+    const auto                       nan = std::numeric_limits<double>::quiet_NaN();
+    const auto                       inf = std::numeric_limits<double>::infinity();
+    const parameter_point            large{{1e300}};
+    const parameter_point            larger{{2e300}};
+    const parameter_point            not_a_number{{nan}};
+    const std::hash<parameter_point> hash{};
+
+    CHECK(large != larger);
+    CHECK(not_a_number == not_a_number);
+    CHECK(hash(not_a_number) == hash(parameter_point{{nan}}));
+    const std::unordered_set<parameter_point> points{
+        large, larger, parameter_point{{-1e300}}, parameter_point{{inf}}, parameter_point{{-inf}}, not_a_number};
+    CHECK(points.size() == 6);
+    CHECK(points.contains(not_a_number));
+    CHECK(parameter_point{{0.0}} == parameter_point{{-0.0}});
+    CHECK(hash(parameter_point{{0.0}}) == hash(parameter_point{{-0.0}}));
+    const auto boundary = 0x1p63 * ERROR_MARGIN;
+    const auto inside   = std::nextafter(boundary, 0.0);
+    const auto outside  = std::nextafter(boundary, inf);
+    CHECK_NOTHROW(parameter_point::quantize(inside));
+    CHECK_THROWS_AS(parameter_point::quantize(outside), std::out_of_range);
+    CHECK(parameter_point{{inside}} != parameter_point{{outside}});
+    CHECK_NOTHROW(parameter_point::quantize(-inside));
+    CHECK_THROWS_AS(parameter_point::quantize(-outside), std::out_of_range);
+    CHECK(parameter_point::quantize(0.0) == 0);
+    CHECK_THROWS_AS(parameter_point::quantize(1e300), std::out_of_range);
+    CHECK_THROWS_AS(parameter_point::quantize(inf), std::out_of_range);
+    CHECK_THROWS_AS(parameter_point::quantize(nan), std::out_of_range);
 }
 
 TEST_CASE("operational_domain class member functions", "[operational-domain]")
