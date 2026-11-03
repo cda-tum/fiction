@@ -23,7 +23,8 @@ namespace fiction_experiments
 {
 
 /**
- * Reproduces an original comparison table, including its unmasked high bit.
+ * The historical LE word 0x11 has NOR in its four valid bits. The historical GE word 0x13 has !b,
+ * where b is variable 1. Both words retain bit 4 to preserve the published experiments.
  * @param word Original truth-table word.
  * @return Two-variable truth table with the original stored word.
  */
