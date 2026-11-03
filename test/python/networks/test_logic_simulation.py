@@ -54,7 +54,7 @@ def test_duplicate_output_names_preserve_order(tmp_path: Path) -> None:
     assert outputs == [("same", [True, False]), ("same", [False, True])]
 
 
-def test_layout_simulation_preserves_input_slots_and_unused_inputs() -> None:
+def test_layout_simulation_preserves_input_slots_and_unused_inputs(tmp_path: Path) -> None:
     """Extract ordered logic while ignoring incomplete dangling objects."""
     layout = cartesian_gate_layout((5, 2))
     left = layout.create_pi("left", (0, 0))
@@ -68,6 +68,18 @@ def test_layout_simulation_preserves_input_slots_and_unused_inputs() -> None:
     assert [name for name, _ in outputs] == ["same", "same"]
     assert outputs[0][1] == [False, True, False, False, False, True, False, False]
     assert outputs[1][1] == [True, False, True, False, True, False, True, False]
+    path = tmp_path / "asymmetric.v"
+    path.write_text(
+        "module top(left,right,unused,f,g);\ninput left,right,unused;\noutput f,g;\n"
+        "assign f = right & ~left;\nassign g = left & ~right;\nendmodule\n",
+        encoding="utf-8",
+    )
+    reference = simulate_outputs(read_network(str(path)))
+    assert reference == [
+        ("f", [False, True, False, False, False, True, False, False]),
+        ("g", [False, False, True, False, False, False, True, False]),
+    ]
+    assert outputs[0][1] == reference[0][1]
     layout.disconnect(layout_input_port(less, 0))
     with pytest.raises(ValueError, match="disconnected input"):
         simulate_outputs(layout)

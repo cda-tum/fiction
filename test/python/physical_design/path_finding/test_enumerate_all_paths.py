@@ -105,11 +105,18 @@ def test_unclocked_cartesian_detours() -> None:
     assert [len(path) for path in shortest_paths] == sorted(len(path) for path in shortest_paths)
 
 
-def test_unreachable_target_with_clock_cycle() -> None:
-    """A clock cycle cannot cause repeated traversal while seeking an unreachable target."""
+def test_clock_cycle_paths() -> None:
+    """Search a clock cycle without repeating coordinates."""
     layout = cartesian_gate_layout((3, 2), "OPEN")
     for site, phase in [((0, 0), 0), ((1, 0), 1), ((1, 1), 2), ((0, 1), 3)]:
         layout.assign_clock_number(site, phase)
+    layout.assign_clock_number((2, 0), 0)
+    layout.assign_clock_number((2, 1), 0)
+    path = [[(0, 0), (1, 0), (1, 1), (0, 1)]]
+    assert enumerate_all_paths(layout, (0, 0), (0, 1)) == path
+    assert yen_k_shortest_paths(layout, (0, 0), (0, 1), 2) == path
+    assert enumerate_all_paths(layout, (0, 0), (0, 0)) == [[(0, 0)]]
+    assert yen_k_shortest_paths(layout, (0, 0), (0, 0), 2) == [[(0, 0)]]
     assert enumerate_all_paths(layout, (0, 0), (2, 0)) == []
     assert yen_k_shortest_paths(layout, (0, 0), (2, 0), 2) == []
 
