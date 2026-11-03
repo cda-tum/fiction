@@ -1758,7 +1758,10 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
                 /** @brief Status at the expected parameter point. */
                 const auto result = op_domain.contains(parameter_point{{value}});
                 REQUIRE(result.has_value());
-                CHECK(std::get<0>(*result) == operational_status::OPERATIONAL);
+                if (result.has_value())
+                {
+                    CHECK(std::get<0>(*result) == operational_status::OPERATIONAL);
+                }
             }
         }
         SECTION("random sampling")

@@ -23582,6 +23582,19 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_parameter_value_identity =
+R"doc(Returns the identity of a parameter value. Finite values within the
+integer grid use cells of width `ERROR_MARGIN`; values outside the
+grid compare exactly, and all NaNs share one identity.
+
+Args:
+    value: Parameter value.
+
+Returns:
+    Grid cell, exact value, or NaN identity.
+
+)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_validate_operational_domain_params =
 R"doc(Validates the sweep count, finite ordered bounds, positive finite
 steps, point counts, and the preconditions of the operational domain
@@ -24364,9 +24377,9 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_parameter_point_operator_eq =
-R"doc(Equality operator. Checks if this parameter point is equal to another
-point within a specified tolerance. The tolerance is defined by
-`constants::ERROR_MARGIN`.
+R"doc(Equality operator. Finite values within the integer grid use cells of
+width `ERROR_MARGIN`. Values outside the grid compare exactly, and all
+NaN values compare equal.
 
 Args:
     other: Other parameter point to compare with.
@@ -24389,9 +24402,9 @@ Args:
 static const char *mkd_doc_fiction_sidb_simulation_logic_parameter_point_parameters = R"doc(Parameter values for each dimension.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_parameter_point_quantize =
-R"doc(Maps a parameter value onto the grid of `constants::ERROR_MARGIN`-wide
-cells that both this type's equality and its `std::hash`
-specialization are defined on.
+R"doc(Maps a parameter value onto the grid of `ERROR_MARGIN`-wide cells used
+by equality and hashing for values whose cell indices fit in
+`int64_t`.
 
 Comparing parameter values with a tolerance, as in `std::fabs(lhs -
 rhs) < constants::ERROR_MARGIN`, does not yield an equivalence
@@ -24406,6 +24419,10 @@ Args:
 
 Returns:
     The index of the cell `value` falls into.
+
+Raises:
+    IndexError: If the value is non-finite or its cell index does not
+                fit in `int64_t`.
 
 )doc";
 

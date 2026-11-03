@@ -127,7 +127,7 @@ struct parameter_point
     [[nodiscard]] bool operator==(const parameter_point& other) const noexcept
     {
         return std::ranges::equal(
-            parameters, other.parameters, [](const auto lhs, const auto rhs) noexcept
+            parameters, other.parameters, [](const auto lhs, const auto rhs)
             { return detail::parameter_value_identity(lhs) == detail::parameter_value_identity(rhs); });
     }
     /**
