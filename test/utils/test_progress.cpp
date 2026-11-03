@@ -25,7 +25,6 @@
 #include <algorithm>
 #include <chrono>
 #include <cstddef>
-#include <iterator>
 #include <mutex>
 #include <stdexcept>
 #include <string>
