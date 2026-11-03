@@ -366,6 +366,29 @@ TEST_CASE("Minimize crossings in depth-zero and constant-fanin networks", "[minc
     }
 }
 
+TEST_CASE("Ignore constant fanins while minimizing crossings", "[mincross]")
+{
+    technology_network tec{};
+    const auto         a = tec.create_pi();
+    const auto         b = tec.create_pi();
+    const auto         c = tec.create_pi();
+    const auto         x = tec.create_and(a, b);
+    const auto         y = tec.create_and(b, c);
+    const auto         z = tec.create_and(c, tec.get_constant(false));
+    tec.create_po(x);
+    tec.create_po(y);
+    tec.create_po(z);
+    auto ranked = mutable_rank_view(tec);
+    ranked.set_ranks(1, {ranked.get_node(y), ranked.get_node(x), ranked.get_node(z)});
+
+    CHECK(count_crossings(ranked) == 3);
+    mincross_stats st{};
+    const auto     result = mincross(ranked, mincross_params{.fixed_pis = true}, &st);
+    CHECK(st.num_crossings == 0);
+    CHECK(count_crossings(result) == 0);
+    check_rank_permutations(ranked, result);
+}
+
 TEST_CASE("Count parallel edges between internal ranks", "[mincross]")
 {
     technology_network tec{};
