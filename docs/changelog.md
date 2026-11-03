@@ -273,7 +273,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Modernized utility tests with named data rows, direct result checks, and complete progress observations.
   - SiDB simulation tests check complete CSV rows and degenerate ground states.
   - Modernized physical-design helper tests with complete routing collections and independent solver rows.
-  - Operational-domain tests cover every invalid-range row and compare complete thread-count results.
+  - Operational-domain tests cover invalid ranges and compare complete thread-count results.
   - Streamlined BDL iterator, pair, wire, and logic-match tests with complete physical expectations.
   - Streamlined SiDB analysis tests while preserving energy, degeneracy, parameter-sweep, and timeout checks.
   - Streamlined synthesis tests and strengthened clone, conversion, and gate-library checks.
