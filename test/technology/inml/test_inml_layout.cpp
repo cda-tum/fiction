@@ -47,4 +47,5 @@ TEST_CASE("iNML layouts hold planar, clocked magnets", "[inml-layout]")
     copy.assign_cell_type({1, 1}, magnet_type::NORMAL);
     CHECK(copy.get_cell_type({1, 1}) == magnet_type::NORMAL);
     CHECK(lyt.get_cell_type({1, 1}) == magnet_type::INVERTER_MAGNET);
+    CHECK(copy != lyt);
 }
