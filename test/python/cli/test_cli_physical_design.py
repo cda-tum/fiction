@@ -78,6 +78,7 @@ def test_plane_maps_duplicated_inputs(shell: Shell, resource: Callable[[str], st
     assert sorted(set(mapping)) == list(range(network.num_pis()))
     input_names = [network.get_name(n) for n in network.pis()]
     assert [layout.get_input_name(i) for i in range(layout.num_pis())] == [input_names[j] for j in mapping]
+    assert shell.session.gate_layouts.attached("input_mapping") == mapping
 
 
 def test_gold(mux21_shell: Shell) -> None:

@@ -47,16 +47,21 @@ def _equiv_arguments(parser: Parser) -> None:
 def equiv(session: Session, args: argparse.Namespace) -> Result:
     """Check the active gate-level layout against the active network, or two store elements against each other.
 
-    With -n and -g, the network is the specification and the layout the implementation. With only
-    -n or only -g, the two most recent elements of that store are compared. Strong equivalence
-    means the same function at full throughput; weak equivalence means the same function with a
-    delay, reported in clock cycles.
+    With -n and -g, the network is the specification and the layout the implementation; a layout
+    that `plane` added is checked through the mapping of its inputs to the network inputs, so its
+    duplicated inputs verify. With only -n or only -g, the two most recent elements of that store are
+    compared. Strong equivalence means the same function at full throughput; weak equivalence means
+    the same function with a delay, reported in clock cycles.
     """
     specification: technology_network | GateLayout
     implementation: technology_network | GateLayout
+    input_mapping: list[int] = []
     if args.network and args.gate_layout:
         specification = session.as_technology_network(session.networks.current())
         implementation = session.gate_layouts.current()
+        attached = session.gate_layouts.attached("input_mapping")
+        if isinstance(attached, list):
+            input_mapping = attached
     elif args.network:
         specification, implementation = (
             session.as_technology_network(n) for n in _last_two(session.networks.items, "network")
@@ -68,7 +73,11 @@ def equiv(session: Session, args: argparse.Namespace) -> Result:
         raise CommandError(msg)
 
     stats = equivalence_checking_stats()
-    result = equivalence_checking(specification, implementation, stats)
+    try:
+        result = equivalence_checking(specification, implementation, stats, input_mapping=input_mapping)
+    except ValueError as error:
+        msg = f"the input mapping of the layout does not fit the network: {error}"
+        raise CommandError(msg) from error
     spec_name, impl_name = get_name(specification), get_name(implementation)
     blocked = [
         operand
@@ -93,7 +102,12 @@ def equiv(session: Session, args: argparse.Namespace) -> Result:
         )
     else:
         session.output(f"{spec_name} and {impl_name} are strongly equivalent")
-    return {"specification": spec_name, "implementation": impl_name, **stats_to_dict(stats)}
+    return {
+        "specification": spec_name,
+        "implementation": impl_name,
+        **({"input_mapping": input_mapping} if input_mapping else {}),
+        **stats_to_dict(stats),
+    }
 
 
 def _last_two(items: Sequence[T], store: str) -> tuple[T, T]:

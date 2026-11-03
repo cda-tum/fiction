@@ -189,6 +189,22 @@ def test_pop_selects_predecessor() -> None:
     assert store.current() == 1
 
 
+def test_attachments_follow_their_element() -> None:
+    """Data attached on `add` stays with its element through selection, pop, and clear."""
+    store: Store[str] = Store("layout")
+    assert store.attached("input_mapping") is None
+    store.add("mapped", input_mapping=[0, 1, 1])
+    store.add("plain")
+    assert store.attached("input_mapping") is None
+    store.select(1)
+    assert store.attached("input_mapping") == [0, 1, 1]
+    store.select(2)
+    store.pop()
+    assert store.attached("input_mapping") == [0, 1, 1]
+    store.clear()
+    assert store.attached("input_mapping") is None
+
+
 def test_decoding_failure_reports_file_and_line(shell: Shell, tmp_path: Path) -> None:
     path = tmp_path / "bad.fiction"
     path.write_bytes(b"version\n\xff")

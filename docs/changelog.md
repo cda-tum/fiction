@@ -50,7 +50,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     candidate extents on one aggregate row. Quiet mode and redirected output suppress displays.
   - `plane` balances and planarizes the active network and places and routes it without wire crossings. Duplicated
     inputs carry the names of the inputs they copy, and `input_mapping` in the result ties every layout input to its
-    network input.
+    network input. The layout keeps the mapping in the store, and `equiv -n -g` checks the layout through it.
 
 - Code quality:
 

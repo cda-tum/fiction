@@ -44,6 +44,19 @@ def test_equiv_network_against_layout(mux21_shell: Shell) -> None:
     assert mux21_shell.session.log[-1]["result"]["eq"] == "STRONG"
 
 
+def test_equiv_checks_a_plane_layout_through_its_input_mapping(shell: Shell, resource: Callable[[str], str]) -> None:
+    """The full adder's planarization duplicates inputs; the stored mapping ties them back to the network."""
+    shell.ok(f'read "{resource("FA.v")}"; plane; equiv -n -g')
+    assert "not equivalent" not in shell.output
+    assert "equivalent" in shell.output
+    result = shell.session.log[-1]["result"]
+    assert isinstance(result, dict)
+    assert result["eq"] in {"STRONG", "WEAK"}
+    assert result["input_mapping"] == shell.session.gate_layouts.attached("input_mapping")
+    # a network the mapping does not fit is a usage error, not a verdict
+    assert "input mapping" in shell.fails(f'read "{resource("xor2.v")}"; equiv -n -g')
+
+
 def test_equiv_two_layouts(mux21_shell: Shell) -> None:
     mux21_shell.ok("ortho; optimize; equiv -g")
     assert "equivalent" in mux21_shell.output
