@@ -12,10 +12,10 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from mnt.pyfiction import physical_design
 from mnt.pyfiction.layouts import cartesian_gate_layout, layout_input_port
 from mnt.pyfiction.networks import simulate, simulate_outputs
 from mnt.pyfiction.networks.io import read_network
-from mnt.pyfiction.physical_design import exact
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -31,7 +31,12 @@ def test_logic_simulation(resources_dir):
     xnor_sim = simulate(xnor2_net)
     assert xnor_sim["out"] == [True, False, False, True]
 
-    xor_lyt = exact(xor2_net, crossings=True)
+
+def test_layout_logic_simulation(resources_dir):
+    if not hasattr(physical_design, "exact"):
+        pytest.skip("pyfiction was built without Z3")
+    xor2_net = read_network(str(resources_dir / "xor2.v"))
+    xor_lyt = physical_design.exact(xor2_net, crossings=True)
     assert xor_lyt is not None
     xor_lyt_sim = simulate(xor_lyt)
     assert xor_lyt_sim["out"] == [False, True, True, False]

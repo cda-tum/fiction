@@ -68,9 +68,23 @@ def test_clocking_paths(make_lyt: Callable[[], GateLayout]) -> None:
 
     paths = enumerate_all_paths(lyt, coordinate(0, 0), coordinate(1, 1))
 
+    assert len(paths) == 2
     assert [(0, 0), (0, 1), (1, 1)] in paths
     assert [(0, 0), (1, 0), (1, 1)] in paths
-    assert len(paths) == len({tuple(path) for path in paths})
+
+
+def test_unclocked_cartesian_paths() -> None:
+    """Enumerate both simple routes across a two-by-two Cartesian layout."""
+    paths = enumerate_all_paths(cartesian_layout((2, 2)), (0, 0), (1, 1))
+    assert len(paths) == 2
+    assert [(0, 0), (0, 1), (1, 1)] in paths
+    assert [(0, 0), (1, 0), (1, 1)] in paths
+
+
+def test_hexagonal_clocking_path() -> None:
+    """Hexagonal clocking permits the direct diagonal connection."""
+    layout = hexagonal_gate_layout(arrangement.EVEN_ROW, (3, 3), "2DDWAVEHEX", "Layout")
+    assert enumerate_all_paths(layout, (0, 0), (1, 1)) == [[(0, 0), (1, 1)]]
 
 
 @pytest.mark.parametrize(
