@@ -70,6 +70,7 @@ def test_clocking_paths(make_lyt: Callable[[], GateLayout]) -> None:
 
     assert [(0, 0), (0, 1), (1, 1)] in paths
     assert [(0, 0), (1, 0), (1, 1)] in paths
+    assert len(paths) == len({tuple(path) for path in paths})
 
 
 @pytest.mark.parametrize(

@@ -46,8 +46,7 @@ def test_duplicate_output_names_preserve_order(tmp_path: Path) -> None:
     network.set_output_name(0, "same")
     network.set_output_name(1, "same")
     outputs = simulate_outputs(network)
-    assert [name for name, bits in outputs] == ["same", "same"]
-    assert outputs[0][1] != outputs[1][1]
+    assert outputs == [("same", [True, False]), ("same", [False, True])]
 
 
 def test_layout_simulation_preserves_input_slots_and_unused_inputs() -> None:

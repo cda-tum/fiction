@@ -68,6 +68,7 @@ def test_clocked_yen_paths(make_lyt: Callable[[], GateLayout]) -> None:
 
     paths = yen_k_shortest_paths(lyt, coordinate(0, 0), coordinate(1, 1), 2)
 
+    assert len(paths) == 2
     assert [(0, 0), (0, 1), (1, 1)] in paths
     assert [(0, 0), (1, 0), (1, 1)] in paths
 
