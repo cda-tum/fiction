@@ -21,6 +21,9 @@
 #include <fiction/types.hpp>
 #include <fiction/verification/equivalence_checking.hpp>
 
+#include <cstdint>
+#include <vector>
+
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>   // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/chrono.h>  // NOLINT(misc-include-cleaner)
@@ -49,11 +52,12 @@ void register_equivalence_checking_impl(nb::module_& m)
 {
     m.def(
         "equivalence_checking",
-        [](const Spec& spec, const Impl& impl,
-           fiction::verification::equivalence_checking_stats* pst = nullptr) -> fiction::verification::eq_type
+        [](const Spec& spec, const Impl& impl, fiction::verification::equivalence_checking_stats* pst,
+           const std::vector<uint32_t>& input_mapping) -> fiction::verification::eq_type
         {
-            fiction::verification::equivalence_checking_stats stats{};
-            fiction::verification::equivalence_checking(spec, impl, &stats);
+            const fiction::verification::equivalence_checking_params parameters{.input_mapping = input_mapping};
+            fiction::verification::equivalence_checking_stats        stats{};
+            fiction::verification::equivalence_checking(spec, impl, parameters, &stats);
 
             if (pst != nullptr)
             {
@@ -62,10 +66,32 @@ void register_equivalence_checking_impl(nb::module_& m)
 
             return stats.eq;
         },
-        nb::arg("specification"), nb::arg("implementation"), nb::arg("statistics") = nullptr,
-        parameter_doc(DOC(fiction_verification_equivalence_checking),
-                      {{"spec", "specification"}, {"impl", "implementation"}, {"pst", "statistics"}})
-            .c_str(),
+        nb::arg("specification"), nb::arg("implementation"), nb::arg("statistics") = nullptr, nb::kw_only(),
+        nb::arg("input_mapping") = std::vector<uint32_t>{},
+        R"doc(Check a specification against an implementation by SAT, taking layout timing into account.
+Each operand is a logic network or a gate-level layout; layout logic is extracted first. The inputs match by names
+unique on both sides, then by remaining declared positions, unless `input_mapping` names the specification input of
+every implementation input. The outputs match by names and positions either way. The approach was first proposed in
+"Verification for Field-coupled Nanocomputing Circuits" by M. Walter, R. Wille, F. Sill Torres, D. Große, and
+R. Drechsler in DAC 2020.
+
+Args:
+    specification: The specification.
+    implementation: The implementation.
+    statistics: Statistics object filled by the check; None discards statistics.
+    input_mapping: For every implementation input in declared order, the index of the specification input it reads.
+        Empty matches the inputs by names and positions, which requires equal input counts. With a mapping, several
+        implementation inputs may read the same specification input, as the duplicated inputs of a planarized layout
+        do.
+
+Returns:
+    `eq_type.NO` when the functions differ, the interfaces do not match, or a layout has design rule violations;
+    `eq_type.STRONG` when the functions agree at equal throughput; `eq_type.WEAK` when they agree with different
+    throughput.
+
+Raises:
+    ValueError: If `input_mapping` is non-empty and does not name one specification input for every implementation
+        input.)doc",
         nb::call_guard<nb::gil_scoped_release>());
 }
 
