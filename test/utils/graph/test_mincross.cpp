@@ -297,7 +297,8 @@ TEST_CASE("Count crossings for parallel edges", "[mincross]")
     {
         mincross_stats st{};
         const auto     result = mincross(ranked, {}, &st);
-        CHECK(st.num_crossings == count_crossings(result));
+        CHECK(st.num_crossings == 0);
+        CHECK(count_crossings(result) == 0);
     }
 }
 
