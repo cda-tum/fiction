@@ -59,6 +59,8 @@ class sim7_mol_library : public fcn::gate_library<mol_qca::layout, 10, 10>
      * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a molQCA gate.
      * @return molQCA gate representation of `t` including I/Os, rotation, const cells, etc.
+     * @throws fcn::unsupported_gate_type_exception If `t` has no gate or its gate type is unsupported.
+     * @throws fcn::unsupported_gate_orientation_exception If the gate's physical port orientation is unsupported.
      */
     [[nodiscard]] static gate set_up_gate(const layouts::cartesian_gate_layout&            lyt,
                                           const fiction::layouts::layout_base::coordinate& t)

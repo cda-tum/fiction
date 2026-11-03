@@ -180,8 +180,9 @@ TEST_CASE("Defect-aware circuit design propagates gate errors", "[on-the-fly-cir
 TEMPLATE_TEST_CASE("Circuit-design exceptions copy the supplied message view", "[on-the-fly-circuit-design]",
                    unsuccessful_pr_error, unsuccessful_gate_design_error)
 {
-    const std::array<char, 7> message{'e', 'r', 'r', 'o', 'r', '!', '\0'};
-    const TestType            error{std::string_view{message.data(), 5}};
+    std::array<char, 7> message{'e', 'r', 'r', 'o', 'r', '!', '\0'};
+    const TestType      error{std::string_view{message.data(), 5}};
+    message.fill('x');
     CHECK(std::string_view{error.what()} == "error");
 
     const TestType empty{std::string_view{}};
