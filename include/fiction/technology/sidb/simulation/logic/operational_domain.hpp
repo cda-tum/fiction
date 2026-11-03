@@ -117,6 +117,7 @@ struct parameter_point
      * @param values Parameter values for each dimension.
      */
     explicit parameter_point(std::vector<double> values) : parameters{std::move(values)} {}
+    // The variant holds only non-throwing scalar alternatives; its comparison lacks a noexcept declaration.
     /**
      * Equality operator. Finite values within the integer grid use cells of width `ERROR_MARGIN`. Values outside the
      * grid compare exactly, and all NaN values compare equal.
@@ -124,7 +125,7 @@ struct parameter_point
      * @param other Other parameter point to compare with.
      * @return `true` iff the parameter points are equal.
      */
-    [[nodiscard]] bool operator==(const parameter_point& other) const noexcept
+    [[nodiscard]] bool operator==(const parameter_point& other) const noexcept  // NOLINT(bugprone-exception-escape)
     {
         return std::ranges::equal(
             parameters, other.parameters, [](const auto lhs, const auto rhs)
