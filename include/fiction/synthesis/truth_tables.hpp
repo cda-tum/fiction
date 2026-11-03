@@ -145,6 +145,7 @@ namespace fiction::synthesis
 }
 /**
  * Creates and returns a truth table that implements the less-than function in two variables.
+ * Variable 0 is a and variable 1 is b; the function is `a & !b`.
  *
  * @return Less-than function in two variables.
  */
@@ -159,6 +160,7 @@ namespace fiction::synthesis
 }
 /**
  * Creates and returns a truth table that implements the greater-than function in two variables.
+ * Variable 0 is a and variable 1 is b; the function is `!a & b`.
  *
  * @return Greater-than function in two variables.
  */
@@ -173,6 +175,7 @@ namespace fiction::synthesis
 }
 /**
  * Creates and returns a truth table that implements the less-than-or-equal function in two variables.
+ * Variable 0 is a and variable 1 is b; the function is `a | !b`.
  *
  * @return Less-than-or-equal function in two variables.
  */
@@ -187,6 +190,7 @@ namespace fiction::synthesis
 }
 /**
  * Creates and returns a truth table that implements the greater-than-or-equal function in two variables.
+ * Variable 0 is a and variable 1 is b; the function is `!a | b`.
  *
  * @return Greater-than-or-equal function in two variables.
  */

@@ -195,7 +195,7 @@ class technology_network : public mockturtle::klut_network
         return _create_node({a, b}, 7);
     }
 
-    /** @brief Creates an LT gate with the supplied signals. */
+    /** @brief Creates an LT gate with the function `a & !b`. */
     signal create_lt(signal a, signal b)
     {
         return _create_node({a, b}, 8);
@@ -213,7 +213,7 @@ class technology_network : public mockturtle::klut_network
         return _create_node({a, b}, 10);
     }
 
-    /** @brief Creates an LE gate with the supplied signals. */
+    /** @brief Creates an LE gate with the function `a | !b`. */
     signal create_le(signal a, signal b)
     {
         return _create_node({a, b}, 11);
