@@ -382,12 +382,14 @@ TEST_CASE("Ignore constant fanins while minimizing crossings", "[mincross]")
     tec.create_po(z);
     auto ranked = mutable_rank_view(tec);
     ranked.set_ranks(1, {ranked.get_node(y), ranked.get_node(x), ranked.get_node(z)});
+    const auto original_pis = ranked.get_ranks(0);
 
     CHECK(count_crossings(ranked) == 3);
     mincross_stats st{};
     const auto     result = mincross(ranked, mincross_params{.fixed_pis = true}, &st);
     CHECK(st.num_crossings <= 3);
     CHECK(count_crossings(result) == st.num_crossings);
+    CHECK(result.get_ranks(0) == original_pis);
     check_rank_permutations(ranked, result);
 }
 
@@ -457,11 +459,13 @@ TEST_CASE("Minimize crossings when primary inputs and gates are interleaved", "[
     tec.create_po(y);
     auto ranked = mutable_rank_view(tec);
     ranked.set_ranks(1, {ranked.get_node(y), ranked.get_node(x)});
+    const auto original_pis = ranked.get_ranks(0);
 
     CHECK(count_crossings(ranked) == 3);
     mincross_stats st{};
     const auto     result = mincross(ranked, mincross_params{.fixed_pis = true}, &st);
     CHECK(st.num_crossings <= 3);
     CHECK(count_crossings(result) == st.num_crossings);
+    CHECK(result.get_ranks(0) == original_pis);
     check_rank_permutations(ranked, result);
 }
