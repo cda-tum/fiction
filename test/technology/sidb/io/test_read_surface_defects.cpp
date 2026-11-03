@@ -151,9 +151,20 @@ TEST_CASE("Surface defect files preserve every parsed row", "[read-sidb-surface-
     CHECK(expected.get_defect(site_at_row(0, 0)).type == defect_type::DB);
     CHECK(expected.get_defect(site_at_row(0, 1)).type == defect_type::SI_VACANCY);
     /** @brief Exclusively created directory containing the test file. */
-    const auto directory =
-        std::filesystem::temp_directory_path() / ("fiction-surface-input-" + std::to_string(std::random_device{}()));
-    REQUIRE(std::filesystem::create_directory(directory));
+    const auto            prefix = "fiction-surface-input-" + std::to_string(std::random_device{}());
+    std::filesystem::path directory{};
+    bool                  created = false;
+    for (auto attempt = 0; attempt < 16 && !created; ++attempt)
+    {
+        directory = std::filesystem::temp_directory_path() / (prefix + "-" + std::to_string(attempt));
+        std::error_code error{};
+        created = std::filesystem::create_directory(directory, error);
+        if (error && error != std::errc::file_exists)
+        {
+            throw std::filesystem::filesystem_error{"Cannot create temporary directory", directory, error};
+        }
+    }
+    REQUIRE(created);
     const auto filename = directory / "surface";
     /** @brief Remove the temporary file during stack unwinding as well. */
     struct file_cleanup
