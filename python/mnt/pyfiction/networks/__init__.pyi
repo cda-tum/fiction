@@ -380,5 +380,5 @@ def simulate(layout: mnt.pyfiction.layouts.shifted_cartesian_gate_layout) -> dic
 @overload
 def simulate(layout: mnt.pyfiction.layouts.hexagonal_gate_layout) -> dict[str, list[bool]]:
     """
-    Return output truth tables by name; later outputs replace earlier ones with the same name. Bits run from the highest input assignment to the lowest, with the first primary input as the least significant bit of each assignment.
+    Return output truth tables by name; later outputs replace earlier ones with the same name. Key order is unspecified; use simulate_outputs for declaration order. Bits run from the highest input assignment to the lowest, with the first primary input as the least significant bit of each assignment.
     """

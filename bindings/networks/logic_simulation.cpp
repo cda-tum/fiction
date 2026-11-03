@@ -116,10 +116,9 @@ void register_logic_simulation_impl(nb::module_& m, const std::string& type_name
             return result;
         },
         nb::arg(type_name.c_str()),
-        "Return output truth tables by name; later outputs replace earlier ones with the same name. "
-        "Bits run from the highest input assignment to the lowest, with the first primary input as the least "
-        "significant "
-        "bit of each assignment.",
+        "Return output truth tables by name; later outputs replace earlier ones with the same name. Key order is "
+        "unspecified; use simulate_outputs for declaration order. Bits run from the highest input assignment to the "
+        "lowest, with the first primary input as the least significant bit of each assignment.",
         nb::call_guard<nb::gil_scoped_release>());
 }
 
