@@ -736,7 +736,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Algorithms:
 
   - Non-strict comparison truth tables now match LE and GE gates, restoring Bestagon skeleton lookup.
-  - Technology mapping now respects the selected LT, GT, LE, and GE gate types.
+    Earlier experiment results may use the incorrect truth tables.
+  - Technology mapping now respects the selected LT, GT, LE, and GE gate types. Previously mapped networks may
+    contain unselected gate types.
   - `parameter_point` now distinguishes extreme values and consistently hashes NaN values; `quantize` rejects
     values outside its integer grid.
   - Ground-state CSV output now rejects nonfinite energies before changing output and preserves finite
@@ -985,6 +987,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Corrected test, benchmark, experiment, and documentation build instructions.
 
 - Experiments:
+  - Published standard-cell experiments retain their original LE and GE truth-table words.
   - Layout experiments now reject failed GENLIB and Verilog reads in Release builds.
   - Clock-number assignment and color-routing experiments copy clocking names into string columns.
   - Layout experiments preserve their wire-count columns with physical wire counts that exclude terminals.
