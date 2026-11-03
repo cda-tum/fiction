@@ -333,6 +333,84 @@ TEST_CASE("Optimized parallel-edge networks report remaining crossings", "[mincr
     mincross_stats st{};
     const auto     result = mincross(ranked, {}, &st);
 
-    CHECK(count_crossings(result) >= 1);
+    CHECK(count_crossings(result) == 1);
     CHECK(st.num_crossings == count_crossings(result));
+}
+
+TEST_CASE("Minimize crossings in depth-zero and constant-fanin networks", "[mincross]")
+{
+    technology_network tec{};
+    const auto         a = tec.create_pi();
+    SECTION("Input-only network")
+    {
+        tec.create_po(a);
+        auto           ranked = mutable_rank_view(tec);
+        mincross_stats st{};
+        const auto     result = mincross(ranked, {}, &st);
+        CHECK(st.num_crossings == 0);
+        CHECK(count_crossings(result) == 0);
+        CHECK(result.get_all_ranks() == ranked.get_all_ranks());
+    }
+    SECTION("Constant input is not an edge between ranks")
+    {
+        tec.create_po(tec.create_and(a, tec.get_constant(false)));
+        auto           ranked = mutable_rank_view(tec);
+        mincross_stats st{};
+        const auto     result = mincross(ranked, {}, &st);
+        CHECK(st.num_crossings == 0);
+        CHECK(count_crossings(result) == 0);
+        check_rank_permutations(ranked, result);
+    }
+}
+
+TEST_CASE("Count parallel edges between internal ranks", "[mincross]")
+{
+    technology_network tec{};
+    const auto         a = tec.create_pi();
+    const auto         b = tec.create_pi();
+    const auto         x = tec.create_buf(a);
+    const auto         y = tec.create_buf(b);
+    tec.create_po(tec.create_and(y, y));
+    tec.create_po(tec.create_and(x, y));
+    auto ranked = mutable_rank_view(tec);
+
+    SECTION("Count without optimization")
+    {
+        mincross_stats st{};
+        const auto     result = mincross(ranked, mincross_params{.optimize = false}, &st);
+        CHECK(st.num_crossings == 2);
+        CHECK(count_crossings(result) == 2);
+    }
+    SECTION("Minimize crossings")
+    {
+        mincross_stats st{};
+        const auto     result = mincross(ranked, {}, &st);
+        CHECK(st.num_crossings == 0);
+        CHECK(count_crossings(result) == 0);
+        check_rank_permutations(ranked, result);
+    }
+}
+
+TEST_CASE("Minimize crossings with repeated internal fanins", "[mincross]")
+{
+    technology_network tec{};
+    const auto         a = tec.create_pi();
+    const auto         b = tec.create_pi();
+    const auto         c = tec.create_pi();
+    const auto         d = tec.create_pi();
+    const auto         w = tec.create_and(d, a);
+    const auto         x = tec.create_and(b, b);
+    const auto         y = tec.create_and(a, a);
+    const auto         z = tec.create_and(a, c);
+    tec.create_po(tec.create_and(w, x));
+    tec.create_po(tec.create_and(x, y));
+    tec.create_po(tec.create_and(y, z));
+    tec.create_po(tec.create_and(z, w));
+    auto           ranked = mutable_rank_view(tec);
+    mincross_stats st{};
+    const auto     result = mincross(ranked, {}, &st);
+
+    // Exhaustive permutations of the three four-node ranks have a minimum of three crossings.
+    CHECK(st.num_crossings == 3);
+    CHECK(count_crossings(result) == 3);
 }
