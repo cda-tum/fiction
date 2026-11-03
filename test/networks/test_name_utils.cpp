@@ -27,6 +27,7 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/networks/name_utils.hpp>
+#include <fiction/networks/views/mutable_rank_view.hpp>
 #include <fiction/physical_design/placement_utils.hpp>
 #include <fiction/types.hpp>
 
@@ -190,6 +191,29 @@ TEST_CASE("Signal names transfer without constant lookup", "[name-utils]")
     mapping[source.get_node(input)] = target;
     restore_signal_names(source, destination, mapping);
     CHECK(destination.get_name(target) == "input");
+}
+
+TEST_CASE("Input names of a ranked source follow the creation order", "[name-utils]")
+{
+    // the rank order of the inputs differs from their creation order, which `pi_at` counts in
+    named_technology_network source{};
+    const auto               a = source.create_pi("a");
+    const auto               b = source.create_pi("b");
+    const auto               c = source.create_pi("c");
+    source.create_po(source.create_and(a, b));
+    source.create_po(c);
+
+    views::mutable_rank_view ranked{source};
+    ranked.set_ranks(0, {ranked.get_node(c), ranked.get_node(a), ranked.get_node(b)});
+
+    named_technology_network destination{};
+    ranked.foreach_pi_unranked([&destination](const auto&) { static_cast<void>(destination.create_pi()); });
+
+    restore_input_names(ranked, destination);
+
+    CHECK(destination.get_name(destination.make_signal(destination.pi_at(0))) == "a");
+    CHECK(destination.get_name(destination.make_signal(destination.pi_at(1))) == "b");
+    CHECK(destination.get_name(destination.make_signal(destination.pi_at(2))) == "c");
 }
 
 TEST_CASE("Unnamed network name transfers clear names and remain optional", "[name-utils]")

@@ -757,6 +757,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     and propagate iterator failures.
   - Branching name restoration now skips unmapped routes. Placement reduces an explicit third constant without
     changing the other inputs' truth-table order.
+  - `restore_input_names` now pairs the inputs of a ranked source by creation order, so a rank order that differs from
+    it no longer permutes the names.
   - Energy-distribution extrema now reject empty distributions with `std::invalid_argument` (`ValueError` in Python).
   - `energy_distribution::degeneracy` now returns the number of states at an energy, preserving excited-state indices
     in physical-parameter analysis.

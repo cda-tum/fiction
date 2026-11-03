@@ -258,7 +258,10 @@ flatten_planarization(const networks::virtual_pi_network<Ntk>& planar)
 
     planar.foreach_po([&planar, &dest, &old2new](const auto& po) { dest.create_po(old2new[planar.get_node(po)]); });
 
-    networks::restore_names(planar, dest, old2new);
+    // the inputs of the copy follow the rank order, not the creation order, so their names come via `old2new`
+    networks::restore_network_name(planar, dest);
+    networks::restore_signal_names(planar, dest, old2new);
+    networks::restore_output_names(planar, dest);
 
     return {dest, original_input};
 }

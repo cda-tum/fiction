@@ -641,8 +641,10 @@ TEST_CASE("Duplicated inputs carry the names of their originals", "[planarizatio
 
     ntk.foreach_pi([&ntk](const auto& pi, const auto i) { ntk.set_name(ntk.make_signal(pi), fmt::format("in{}", i)); });
 
-    const mutable_rank_view ranked{
-        network_balancing<named_technology_network>(ntk, {.unify_outputs = true, .buffer_constant_outputs = false})};
+    // the node order after the cleanup is the one the Python flow ranks; the duplicated inputs then come out in
+    // another order than the originals
+    const mutable_rank_view ranked{mockturtle::cleanup_dangling(
+        network_balancing<named_technology_network>(ntk, {.unify_outputs = true, .buffer_constant_outputs = false}))};
 
     const auto planar = planarization(ranked);
     REQUIRE(planar.num_virtual_pis() > 0);
@@ -662,9 +664,9 @@ TEST_CASE("Duplicated inputs carry the names of their originals", "[planarizatio
     REQUIRE(original_input.size() == flat.num_pis());
 
     flat.foreach_pi(
-        [&flat, &original_input = original_input](const auto& pi, const auto i)
+        [&flat, &origin = original_input](const auto& pi, const auto i)
         {
-            CAPTURE(i, original_input[i]);
-            CHECK(flat.get_name(flat.make_signal(pi)) == fmt::format("in{}", original_input[i]));
+            CAPTURE(i, origin[i]);
+            CHECK(flat.get_name(flat.make_signal(pi)) == fmt::format("in{}", origin[i]));
         });
 }
