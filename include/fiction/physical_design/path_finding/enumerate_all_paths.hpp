@@ -80,7 +80,8 @@ class enumerate_all_paths_impl
             throw std::invalid_argument("Routing endpoints must lie within the layout extent");
         }
 
-        recursively_enumerate_all_paths(objective.source, objective.target, layout_coordinate_path{});
+        layout_coordinate_path path{};
+        recursively_enumerate_all_paths(objective.source, objective.target, path);
 
         // The public search consumes this implementation's result.
         return std::move(collection);
@@ -147,7 +148,8 @@ class enumerate_all_paths_impl
      * @param p Current path to extend.
      */
     void recursively_enumerate_all_paths(const fiction::layouts::layout_base::coordinate& src,
-                                         const fiction::layouts::layout_base::coordinate& tgt, layout_coordinate_path p)
+                                         const fiction::layouts::layout_base::coordinate& tgt,
+                                         layout_coordinate_path&                          p)
     {
         // mark source coordinate as visited and append it to the path
         mark_visited(src);
@@ -156,7 +158,7 @@ class enumerate_all_paths_impl
         // if source and target are identical, a path has been found
         if (src == tgt)
         {
-            collection.push_back(std::move(p));
+            collection.push_back(p);
         }
         else  // destination is not reached yet
         {
@@ -194,6 +196,7 @@ class enumerate_all_paths_impl
         }
 
         // allow the current coordinate in other paths after recursion
+        p.pop_back();
         mark_unvisited(src);
     }
 };
