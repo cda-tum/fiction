@@ -265,8 +265,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Modernized iNML and molecular QCA tests with complete SVG file checks, cell-type rows, and independent
     gate-orientation cases.
   - SiDB generator tests share timeout and backend rows and check complete layouts, defects, and timeout statistics.
-  - Name lookup and on-the-fly circuit design avoid MSVC warnings about unreachable code and integer conversions.
-  - Gate-library connector construction avoids implicit integer conversions.
   - Streamlined SiDB operational tests and clarified ratio and parameter-row diagnostics.
   - Streamlined QuickExact and QuickSim tests while preserving physical inputs, charge configurations, and timeout coverage.
   - Modernized QCA tests with shared format expectations and SVG detail multiplicity checks.
