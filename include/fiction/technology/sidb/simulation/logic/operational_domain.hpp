@@ -176,16 +176,16 @@ namespace std
 {
 
 /**
- * @brief Hashes parameter points on the equality comparison grid.
+ * @brief Hashes parameter points by their equality identities.
  */
 template <>
 struct hash<fiction::sidb::simulation::logic::parameter_point>
 {
     /**
-     * @brief Mixes the quantized parameter values across the hash bits for partitioned processing.
+     * @brief Mixes parameter value identities across the hash bits for partitioned processing.
      *
      * @param pp Parameter point to hash.
-     * @return Hash of the quantized parameter values.
+     * @return Hash of the parameter value identities.
      */
     [[nodiscard]] size_t operator()(const fiction::sidb::simulation::logic::parameter_point& pp) const noexcept
     {
