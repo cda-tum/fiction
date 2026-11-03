@@ -14,7 +14,10 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_predicate.hpp>
 
 #include <fiction/technology/sidb/io/read_surface_defects.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
@@ -27,6 +30,7 @@
 #include <random>
 #include <sstream>
 #include <string>
+#include <system_error>
 
 using namespace fiction;
 using namespace fiction::sidb;
@@ -39,6 +43,7 @@ TEST_CASE("Read surface defects into an sidb::layout", "[read-sidb-surface-defec
     {
         for (const auto* const surface : {"[]", "[[]]", "[[][][]]"})
         {
+            CAPTURE(surface);
             std::istringstream surface_stream{surface};
 
             const auto lyt = read_surface_defects(surface_stream);
@@ -87,6 +92,7 @@ TEST_CASE("Read surface defects into an sidb::layout", "[read-sidb-surface-defec
              {"[[0 1 0 0] [0 -5 0 0] [0 1 0 0]]", "[[0 1 0 0] [0 Z 0 0] [0 1 0 0]]",
               "[[0 1 0 0] [1111111111111111111111111111111111111111111111111111111111111111x] [0 1 0 0]]"})
         {
+            CAPTURE(surface);
             std::istringstream surface_stream{surface};
             const auto         lyt = read_surface_defects(surface_stream);
             // the ignored line does not count as a row, so the third line lands on row 1
@@ -110,13 +116,24 @@ TEST_CASE("Read surface defects into an sidb::layout", "[read-sidb-surface-defec
     SECTION("exceptions")
     {
         std::istringstream unsupported{"[[0 1 2 3] [4 5 6 7] [8 9 10 11]]"};
-        CHECK_THROWS_AS(read_surface_defects(unsupported), unsupported_defect_index_exception);
+        CHECK_THROWS_MATCHES(read_surface_defects(unsupported), unsupported_defect_index_exception,
+                             Catch::Matchers::Predicate<unsupported_defect_index_exception>(
+                                 [](const auto& e) { return e.which() == 11; }, "unsupported index is 11"));
 
         std::istringstream oversized{"[[999999999999999999999999]]"};
-        CHECK_THROWS_AS(read_surface_defects(oversized), unsupported_defect_index_exception);
+        CHECK_THROWS_MATCHES(read_surface_defects(oversized), unsupported_defect_index_exception,
+                             Catch::Matchers::Predicate<unsupported_defect_index_exception>(
+                                 [](const auto& e) { return e.which() == -1; }, "oversized index is reported as -1"));
 
         std::istringstream missing{"[[0 1 2 3] [4 5 6] [8 9 10 0]]"};
-        CHECK_THROWS_AS(read_surface_defects(missing), missing_position_exception);
+        CHECK_THROWS_MATCHES(read_surface_defects(missing), missing_position_exception,
+                             Catch::Matchers::Predicate<missing_position_exception>(
+                                 [](const auto& e) { return e.where() == 1; }, "missing position is on row 1"));
+
+        std::istringstream ignored_line{"[1 2]\n[invalid]\n[1]"};
+        CHECK_THROWS_MATCHES(read_surface_defects(ignored_line), missing_position_exception,
+                             Catch::Matchers::Predicate<missing_position_exception>(
+                                 [](const auto& e) { return e.where() == 1; }, "ignored lines do not count as rows"));
 
         CHECK_THROWS_AS(read_surface_defects("/this/file/does/not/exist.txt"), std::ifstream::failure);
     }
@@ -131,9 +148,51 @@ TEST_CASE("Surface defect files preserve every parsed row", "[read-sidb-surface-
     /** @brief Expected defects after parsing the complete input. */
     const auto expected = read_surface_defects(stream);
     REQUIRE(expected.num_defects() == 2);
-    /** @brief File containing the same bytes as the stream. */
-    const auto filename =
-        std::filesystem::temp_directory_path() / ("fiction-surface-input-" + std::to_string(std::random_device{}()));
+    CHECK(expected.get_defect(site_at_row(0, 0)).type == defect_type::DB);
+    CHECK(expected.get_defect(site_at_row(0, 1)).type == defect_type::SI_VACANCY);
+    /** @brief Exclusively created directory containing the test file. */
+    const auto            prefix = "fiction-surface-input-" + std::to_string(std::random_device{}());
+    std::filesystem::path directory{};
+    bool                  created = false;
+    for (auto attempt = 0; attempt < 16 && !created; ++attempt)
+    {
+        directory = std::filesystem::temp_directory_path() / (prefix + "-" + std::to_string(attempt));
+        std::error_code error{};
+        created = std::filesystem::create_directory(directory, error);
+        if (error && error != std::errc::file_exists)
+        {
+            throw std::filesystem::filesystem_error{"Cannot create temporary directory", directory, error};
+        }
+    }
+    REQUIRE(created);
+    const auto filename = directory / "surface";
+    /** @brief Remove the temporary file during stack unwinding as well. */
+    struct file_cleanup
+    {
+        /** @brief Path to the temporary file. */
+        const std::filesystem::path& path;
+        /** @brief Path to the owned directory. */
+        const std::filesystem::path& directory;
+        /** @brief Keep the owned file and directory until cleanup. */
+        file_cleanup(const std::filesystem::path& file, const std::filesystem::path& dir) : path{file}, directory{dir}
+        {}
+        /** @brief Cleanup ownership cannot be copied. */
+        file_cleanup(const file_cleanup&) = delete;
+        /** @brief Cleanup ownership cannot be assigned. */
+        file_cleanup& operator=(const file_cleanup&) = delete;
+        /** @brief Cleanup ownership cannot be moved. */
+        file_cleanup(file_cleanup&&) = delete;
+        /** @brief Cleanup ownership cannot be move-assigned. */
+        file_cleanup& operator=(file_cleanup&&) = delete;
+        /** @brief Remove the file without throwing during stack unwinding. */
+        ~file_cleanup()
+        {
+            std::error_code error{};
+            std::filesystem::remove(path, error);
+            std::filesystem::remove(directory, error);
+        }
+    };
+    const file_cleanup cleanup{filename, directory};
     {
         /** @brief Binary output preserves the separator. */
         std::ofstream output{filename, std::ios::binary};
@@ -141,5 +200,4 @@ TEST_CASE("Surface defect files preserve every parsed row", "[read-sidb-surface-
         output << surface;
     }
     CHECK(read_surface_defects(filename.string()) == expected);
-    std::filesystem::remove(filename);
 }

@@ -15113,21 +15113,21 @@ static const char *mkd_doc_fiction_sidb_io_missing_position_exception =
 R"doc(Exception thrown when a missing SiDB position is encountered in the
 parsed file.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_missing_position_exception_line = R"doc(Line number in the input file.)doc";
+static const char *mkd_doc_fiction_sidb_io_missing_position_exception_line = R"doc(Zero-based index among recognized rows.)doc";
 
 static const char *mkd_doc_fiction_sidb_io_missing_position_exception_missing_position_exception =
-R"doc(Record the input line that lacks a SiDB position.
+R"doc(Record the recognized row that lacks a SiDB position.
 
 Args:
-    n: Line number in the input file.
+    n: Zero-based index among recognized rows.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_io_missing_position_exception_where =
-R"doc(Return the input line that lacks a SiDB position.
+R"doc(Return the recognized row that lacks a SiDB position.
 
 Returns:
-    Line number in the input file.
+    Zero-based index among recognized rows.
 
 )doc";
 

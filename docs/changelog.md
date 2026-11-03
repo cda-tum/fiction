@@ -949,6 +949,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
 
+  - Surface-defect errors document zero-based recognized row indices instead of input line numbers.
   - Time-to-solution confidence documentation now names the target probability of at least one success.
   - ExGS Python documentation now describes all physically valid charge distributions.
   - Graph coloring documents TabuCol's bounded search and empty-result contract. SiDB printing documents its
