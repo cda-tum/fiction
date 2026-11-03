@@ -629,9 +629,6 @@ def convert_network(
 
     Returns:
         A logically equivalent network of the selected type.
-
-    Raises:
-        ValueError: A gate has neither a supported implementation nor a truth table.
     """
 
 @overload

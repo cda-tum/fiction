@@ -185,14 +185,16 @@ TEST_CASE("Potential landscapes reject invalid basis indices without pair intera
     SECTION("one SiDB")
     {
         lyt.assign_sidb(invalid, dot_tag::NORMAL);
+        CHECK_THROWS_AS(potential_landscape{lyt}, std::out_of_range);
     }
     SECTION("one charged defect")
     {
         lyt.assign_defect(invalid, defect{defect_type::SI_VACANCY, -1, 5.6, 5.0});
+        CHECK_THROWS_AS(potential_landscape{lyt}, std::out_of_range);
     }
     SECTION("one neutral defect")
     {
         lyt.assign_defect(invalid, defect{defect_type::SILOXANE, 0});
+        CHECK_THROWS_AS(potential_landscape{lyt}, std::out_of_range);
     }
-    CHECK_THROWS_AS(potential_landscape{lyt}, std::out_of_range);
 }

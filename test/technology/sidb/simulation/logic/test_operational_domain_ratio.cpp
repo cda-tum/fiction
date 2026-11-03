@@ -15,6 +15,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
@@ -102,7 +103,7 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
                                      parameter_point({5.5, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size (1.0)
-        CHECK_THAT(op_domain_ratio - 1.0, Catch::Matchers::WithinAbs(0.0, ERROR_MARGIN));
+        CHECK_THAT(op_domain_ratio, Catch::Matchers::WithinAbs(1.0, ERROR_MARGIN));
     }
 
     SECTION("semi-operational domain")
@@ -123,7 +124,7 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
             operational_domain_ratio(lat, std::vector<kitty::dynamic_truth_table>{create_id_tt()},
                                      parameter_point({4.25, 4.25}), op_ratio_params);
 
-        CHECK_THAT(op_domain_ratio - (80.0 / 256.0), Catch::Matchers::WithinAbs(0.0, ERROR_MARGIN));
+        CHECK_THAT(op_domain_ratio, Catch::Matchers::WithinAbs(80.0 / 256.0, ERROR_MARGIN));
     }
 }
 
@@ -195,7 +196,7 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
                                      parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size
-        CHECK_THAT(op_domain_ratio - (23.0 / 121.0), Catch::Matchers::WithinAbs(0.0, ERROR_MARGIN));
+        CHECK_THAT(op_domain_ratio, Catch::Matchers::WithinAbs(23.0 / 121.0, ERROR_MARGIN));
     }
 
     SECTION("semi-operational domain, reject kinks")
@@ -210,7 +211,7 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
                                      parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size
-        CHECK_THAT(op_domain_ratio - (23.0 / 121.0), Catch::Matchers::WithinAbs(0.0, ERROR_MARGIN));
+        CHECK_THAT(op_domain_ratio, Catch::Matchers::WithinAbs(23.0 / 121.0, ERROR_MARGIN));
     }
 
     SECTION(
@@ -260,6 +261,7 @@ TEST_CASE("Operational-domain ratios reject malformed seeds", "[compute-operatio
                                                              {4.9, 5.0},
                                                              {5.0, 6.1}})
     {
+        CAPTURE(seed);
         CHECK_THROWS_AS(operational_domain_ratio(layout{}, std::vector<kitty::dynamic_truth_table>{create_id_tt()},
                                                  parameter_point{seed}, params),
                         std::invalid_argument);
