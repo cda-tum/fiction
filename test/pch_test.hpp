@@ -16,7 +16,7 @@
 
 //
 // Pre-compiled header for the fiction test suite
-// Included automatically in every test translation unit when FICTION_ENABLE_PCH is on
+// Included automatically in eligible test translation units when FICTION_ENABLE_PCH is on
 //
 // Only headers that are stable, expensive, and common to the test translation units belong here. `fiction/types.hpp`
 // supplies the shared network presets.
@@ -24,7 +24,7 @@
 
 #pragma once
 
-// NOLINTBEGIN(misc-include-cleaner)
+// NOLINTBEGIN(misc-include-cleaner): PCH intentionally supplies headers without using their symbols.
 
 // ============================================================================
 // Catch2 (stable, included by every test)
