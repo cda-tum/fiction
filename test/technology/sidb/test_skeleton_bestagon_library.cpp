@@ -17,6 +17,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <fiction/networks/technology_network.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/skeleton_bestagon_library.hpp>
@@ -38,4 +39,14 @@ TEST_CASE("Bestagon supports non-strict comparison functions", "[sidb-dynamic-ga
     CHECK(fiction::synthesis::create_ge_tt() == ~fiction::synthesis::create_lt_tt());
     CHECK(implementations.contains(~fiction::synthesis::create_gt_tt()));
     CHECK(implementations.contains(~fiction::synthesis::create_lt_tt()));
+
+    fiction::networks::technology_network network{};
+    const auto                            a = network.create_pi();
+    const auto                            b = network.create_pi();
+    CHECK(network.node_function(network.get_node(network.create_le(a, b))) == fiction::synthesis::create_le_tt());
+    CHECK(network.node_function(network.get_node(network.create_ge(a, b))) == fiction::synthesis::create_ge_tt());
+    for (const auto& entry : implementations)
+    {
+        CHECK(entry.first == ~(~entry.first));
+    }
 }
