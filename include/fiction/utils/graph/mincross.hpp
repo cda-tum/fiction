@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "fiction/synthesis/network_balancing.hpp"  // NOLINT(misc-include-cleaner): is_balanced is used in debug assertions.
+#include "fiction/synthesis/network_balancing.hpp"
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/views/fanout_view.hpp>
@@ -676,13 +676,16 @@ class mincross_impl
  * @param ps Configuration parameters for the minimization algorithm.
  * @param pst Optional pointer to a statistics structure for storing the resulting number of crossings.
  * @return A copy of the input network with reordered ranks to reduce edge crossings.
+ * @throws std::invalid_argument If the network is not balanced.
  */
 template <typename Ntk>
     requires mockturtle::is_network_type_v<Ntk> && mockturtle::has_rank_position_v<Ntk>
 Ntk mincross(Ntk& ntk, const mincross_params& ps = {}, mincross_stats* pst = nullptr)
 {
-    assert(fiction::synthesis::is_balanced(ntk) &&
-           "Networks have to be balanced for level-by-level crossing minimization");
+    if (!fiction::synthesis::is_balanced(ntk))
+    {
+        throw std::invalid_argument("Networks have to be balanced for level-by-level crossing minimization");
+    }
 
     mincross_stats st{};
     mincross_impl  p{ntk, ps, st};

@@ -735,6 +735,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - `utils::graph::mincross` now rejects unbalanced networks instead of accessing ranks out of bounds.
   - `parameter_point` now distinguishes extreme values and consistently hashes NaN values; `quantize` rejects
     values outside its integer grid.
   - Ground-state CSV output now rejects nonfinite energies before changing output and preserves finite

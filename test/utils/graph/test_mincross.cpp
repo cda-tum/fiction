@@ -266,3 +266,22 @@ TEST_CASE("Counting crossings rejects unbalanced networks", "[mincross]")
 
     CHECK_THROWS_AS(count_crossings(mutable_rank_view(tec)), std::invalid_argument);
 }
+
+TEST_CASE("Crossing minimization rejects unbalanced networks", "[mincross]")
+{
+    technology_network tec{};
+    const auto         a = tec.create_pi();
+    const auto         b = tec.create_pi();
+    const auto         c = tec.create_pi();
+    const auto         d = tec.create_pi();
+    const auto         e = tec.create_pi();
+    const auto         g = tec.create_and(a, b);
+    tec.create_po(tec.create_and(g, b));
+    tec.create_po(tec.create_and(g, c));
+    tec.create_po(tec.create_and(g, d));
+    tec.create_po(tec.create_and(g, e));
+    auto ranked = mutable_rank_view(tec);
+
+    CHECK_THROWS_AS(mincross(ranked, mincross_params{.optimize = false}), std::invalid_argument);
+    CHECK_THROWS_AS(mincross(ranked), std::invalid_argument);
+}
