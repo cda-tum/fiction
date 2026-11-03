@@ -131,8 +131,8 @@ struct parameter_point
             { return detail::parameter_value_identity(lhs) == detail::parameter_value_identity(rhs); });
     }
     /**
-     * Maps a parameter value onto the grid of `constants::ERROR_MARGIN`-wide cells that both this type's equality and
-     * its `std::hash` specialization are defined on.
+     * Maps a parameter value onto the grid of `ERROR_MARGIN`-wide cells used by equality and hashing for values whose
+     * cell indices fit in `int64_t`.
      *
      * Comparing parameter values with a tolerance, as in `std::fabs(lhs - rhs) < constants::ERROR_MARGIN`, does not
      * yield an equivalence relation: it is not transitive, and two values that compare equal can still fall on
