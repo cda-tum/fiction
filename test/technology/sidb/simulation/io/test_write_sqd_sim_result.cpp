@@ -563,7 +563,7 @@ TEST_CASE("test_write_sqd_sim_result rejects mismatched distribution sites", "[s
 TEST_CASE("SQD simulation metadata preserves XML text", "[sqd-sim-result]")
 {
     result res{};
-    res.algorithm_name = "a & <simulation> \"quoted\" 'name'\t\n\rend \xc3\xa9 \xe4\xb8\xad \xf0\x90\x80\x80";
+    res.algorithm_name = "a & <simulation> \"quoted\" 'name' ~\x7f \t\n\rend \xc3\xa9 \xe4\xb8\xad \xf0\x90\x80\x80";
     const std::string text{
         "a & <value> \"quoted\" 'text'\t\n\rend \xed\x9f\xbf \xee\x80\x80 \xef\xbf\xbd \xf4\x8f\xbf\xbf"};
     res.additional_simulation_parameters.emplace("string_parameter", text);
