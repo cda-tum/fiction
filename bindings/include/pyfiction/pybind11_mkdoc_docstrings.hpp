@@ -15113,21 +15113,21 @@ static const char *mkd_doc_fiction_sidb_io_missing_position_exception =
 R"doc(Exception thrown when a missing SiDB position is encountered in the
 parsed file.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_missing_position_exception_line = R"doc(Line number in the input file.)doc";
+static const char *mkd_doc_fiction_sidb_io_missing_position_exception_line = R"doc(Zero-based index among recognized rows.)doc";
 
 static const char *mkd_doc_fiction_sidb_io_missing_position_exception_missing_position_exception =
-R"doc(Record the input line that lacks a SiDB position.
+R"doc(Record the recognized row that lacks a SiDB position.
 
 Args:
-    n: Line number in the input file.
+    n: Zero-based index among recognized rows.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_io_missing_position_exception_where =
-R"doc(Return the input line that lacks a SiDB position.
+R"doc(Return the recognized row that lacks a SiDB position.
 
 Returns:
-    Line number in the input file.
+    Zero-based index among recognized rows.
 
 )doc";
 
@@ -28022,6 +28022,9 @@ Returns:
     A copy of the input network with reordered ranks to reduce edge
     crossings.
 
+Raises:
+    ValueError: If the network is not balanced.
+
 )doc";
 
 static const char *mkd_doc_fiction_utils_graph_mincross_impl =
@@ -28039,7 +28042,7 @@ arrays, once.
 
 )doc";
 
-static const char *mkd_doc_fiction_utils_graph_mincross_impl_count_crossings =
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_count_pair_crossings =
 R"doc(Adds the crossings between the edges of two nodes to a pair of
 counters, for both orders of the nodes.
 
@@ -28055,10 +28058,6 @@ Args:
     swapped: Receives the crossings with the nodes swapped.
 
 )doc";
-
-static const char *mkd_doc_fiction_utils_graph_mincross_impl_fanout_ntk =
-R"doc(Fanout-augmented view of the network for efficient traversal and
-connectivity queries.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_mincross_impl_in_begin =
 R"doc(Offsets of the fanin lists in `in_nodes`: node `i` has the entries

@@ -164,7 +164,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     with `convert_network<networks::named_technology_network>` before placement; names survive conversion and extraction.
   - `verification::virtual_miter` is no longer `noexcept`, since the rank view it builds can throw.
   - `synthesis::node_duplication_planarization` skips unused cone-weight traversals when ranking duplication choices.
-  - `utils::graph::mincross` with optimization runs about 10x faster and returns the same rank order.
+  - `utils::graph::mincross` with optimization runs about 10x faster and returns the same rank order for networks
+    without parallel edges.
   - Path enumeration moves completed results and selected candidates. Completed graph results transfer their owned storage.
   - `potential_to_distance_conversion` now uses a bounded inverse search and avoids intermediate underflow.
     Zero potential returns infinity; invalid potentials, physical parameters, or precision above 15 decimal places
@@ -739,6 +740,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     Published standard-cell experiment rows labeled `le` and `ge` use NOR and `!b`, respectively.
   - Technology mapping now respects the selected LT, GT, LE, and GE gate types. Previously mapped networks may
     contain unselected gate types.
+  - `utils::graph::mincross` now counts each parallel edge and uses 64-bit crossing counts during minimization.
+  - `utils::graph::mincross` now rejects unbalanced networks instead of accessing ranks out of bounds.
   - `parameter_point` now distinguishes extreme values and consistently hashes NaN values; `quantize` rejects
     values outside its integer grid.
   - Ground-state CSV output now rejects nonfinite energies before changing output and preserves finite
@@ -950,6 +953,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
 
+  - Surface-defect errors document zero-based recognized row indices instead of input line numbers.
   - Time-to-solution confidence documentation now names the target probability of at least one success.
   - ExGS Python documentation now describes all physically valid charge distributions.
   - Graph coloring documents TabuCol's bounded search and empty-result contract. SiDB printing documents its
