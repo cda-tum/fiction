@@ -39,7 +39,7 @@
 ```
 
 Four strategies sample the parameter space. Grid search and random sampling place their samples
-independently and accept any number of sweep dimensions. Flood fill and contour tracing follow the
+independently and accept one or more sweep dimensions. Flood fill and contour tracing follow the
 shape of the operational region and therefore need a neighborhood to expand over, which requires at
 least two dimensions. In two dimensions, contour tracing walks the boundary as a closed curve; in
 three or more, where the boundary is a surface, it collects the boundary instead.
@@ -99,7 +99,7 @@ flood fill or contour tracing in three dimensions.
 :::{tab-item} Python
 :sync: python
 
-The same four strategies are available here. Grid search and random sampling accept any number of
+The same four strategies are available here. Grid search and random sampling accept one or more
 sweep dimensions; flood fill and contour tracing follow the shape of the operational region and
 therefore need at least two. In two dimensions, contour tracing walks the boundary as a closed
 curve; in three or more, where the boundary is a surface, it collects the boundary instead.

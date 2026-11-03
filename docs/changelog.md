@@ -273,6 +273,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Modernized utility tests with named data rows, direct result checks, and complete progress observations.
   - SiDB simulation tests check complete CSV rows and degenerate ground states.
   - Modernized physical-design helper tests with complete routing collections and independent solver rows.
+  - Operational-domain tests cover invalid ranges and compare complete thread-count results.
   - Streamlined BDL iterator, pair, wire, and logic-match tests with complete physical expectations.
   - Streamlined SiDB analysis tests while preserving energy, degeneracy, parameter-sweep, and timeout checks.
   - Streamlined synthesis tests and strengthened clone, conversion, and gate-library checks.
@@ -732,6 +733,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - `parameter_point` now distinguishes extreme values and consistently hashes NaN values; `quantize` rejects
+    values outside its integer grid.
   - Ground-state CSV output now rejects nonfinite energies before changing output and preserves finite
     minimum-energy states when six-decimal rounding overflows.
   - `is_ground_state` now returns `false` for extra heuristic ground states in Debug and Release.
@@ -946,6 +949,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `integral_abs` documents that signed minimum values are outside its representable-result domain.
   - Potential-landscape energy complexity includes charged-defect interactions.
   - Timing documentation now states the throughput formula and input hold time in clock cycles.
+  - Operational-domain documentation now states that grid search and random sampling require at least one sweep dimension.
   - BDL pair-detection documentation clarifies per-tag sorting and no longer implies a distance-bound performance guarantee.
   - Binding docstring instructions now use the generator wrapper that CI runs.
   - Hexagonal layout documentation now names the eastern border and `is_adjacent_of` correctly.
