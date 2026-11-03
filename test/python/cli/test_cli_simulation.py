@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import csv
 from typing import TYPE_CHECKING
 
 import pytest
@@ -113,16 +114,20 @@ def test_temp(shell: Shell, resource: Callable[[str], str]) -> None:
 @pytest.mark.parametrize("algorithm", ["", "--grid-search", "--sketch"])
 def test_opdom_grid_search(xor_gate: Shell, tmp_path: Path, algorithm: str) -> None:
     """Grid and sketch requests write one CSV row per sweep point."""
-    csv = tmp_path / "opdom.csv"
-    xor_gate.ok(f'opdom "{csv}" {algorithm} --x-min 5.6 --x-max 5.8 --x-step 0.1 --y-min 5 --y-max 5.2 --y-step 0.1')
+    path = tmp_path / "opdom.csv"
+    xor_gate.ok(f'opdom "{path}" {algorithm} --x-min 5.6 --x-max 5.8 --x-step 0.1 --y-min 5 --y-max 5.2 --y-step 0.1')
     result = xor_gate.session.log[-1]["result"]
     assert isinstance(result, dict)
     assert result["grid_search"] is True
     assert result["sketch"] is (algorithm == "--sketch")
     assert result["num_evaluated_parameter_combinations"] == 9
-    rows = csv.read_text(encoding="utf-8").splitlines()
-    assert rows[0].startswith("epsilon_r,lambda_tf")
-    assert len(rows) == 10
+    with path.open(encoding="utf-8", newline="") as stream:
+        rows = list(csv.reader(stream))
+    assert rows[0] == ["epsilon_r", "lambda_tf", "operational status"]
+    assert sorted((float(row[0]), float(row[1])) for row in rows[1:]) == [
+        (x, y) for x in (5.6, 5.7, 5.8) for y in (5.0, 5.1, 5.2)
+    ]
+    assert all(row[2] in {"0", "1"} for row in rows[1:])
 
 
 def test_opdom_sampling_and_errors(xor_gate: Shell, tmp_path: Path) -> None:
@@ -181,8 +186,10 @@ def test_opdom_sampling_methods_filter_nonoperational_points(xor_gate: Shell, tm
         f'opdom "{path}" {sampling} --operational-only --x-min 5.6 --x-max 5.7 --x-step 0.1'
         " --y-min 5 --y-max 5.1 --y-step 0.1"
     )
-    rows = path.read_text(encoding="utf-8").splitlines()
-    assert rows[0].startswith("epsilon_r,lambda_tf")
+    with path.open(encoding="utf-8", newline="") as stream:
+        rows = list(csv.reader(stream))
+    assert rows[0] == ["epsilon_r", "lambda_tf", "operational status"]
+    assert all(row[2] == "1" for row in rows[1:])
     result = xor_gate.session.log[-1]["result"]
     assert isinstance(result, dict)
     assert len(rows) - 1 == result["num_operational_parameter_combinations"]
