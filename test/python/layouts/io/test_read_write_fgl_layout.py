@@ -119,6 +119,44 @@ def test_fgl_failure_preserves_file(tmp_path: Path) -> None:
     assert path.read_text(encoding="utf-8") == "sentinel"
 
 
+@pytest.mark.parametrize("location", ["layout", "input", "wire", "output"])
+def test_fgl_rejects_illegal_unicode_before_replacing_file(tmp_path: Path, location: str) -> None:
+    """Reject forbidden XML characters in every name without replacing a file."""
+    layout = cartesian_gate_layout((3, 1, 1), "2DDWave", "valid")
+    source = layout.create_pi("a", (0, 0))
+    wire = layout.create_buf(source, (1, 0))
+    output = layout.create_po(wire, "f", (2, 0))
+    label = "first\ufffesecond"
+    if location == "layout":
+        layout.set_layout_name(label)
+    else:
+        layout.set_name({"input": source, "wire": wire, "output": output}[location], label)
+    path = tmp_path / "kept.fgl"
+    path.write_bytes(b"sentinel")
+    with pytest.raises(ValueError):  # ruff: ignore[pytest-raises-too-broad] - The API promises the exception type, not diagnostic wording.
+        write_fgl_layout(layout, str(path))
+    assert path.read_bytes() == b"sentinel"
+
+
+def test_fgl_preserves_unicode_names(tmp_path: Path) -> None:
+    """Preserve accented, CJK, and supplementary characters in every name."""
+    label = "Caf\u00e9 \u6c34 \U0001f600"
+    layout = cartesian_gate_layout((3, 1, 1), "2DDWave", label)
+    source = layout.create_pi(label, (0, 0))
+    wire = layout.create_buf(source, (1, 0))
+    layout.set_name(wire, label)
+    layout.create_po(wire, label, (2, 0))
+    path = tmp_path / "unicode.fgl"
+    write_fgl_layout(layout, str(path))
+    restored = read_fgl_layout(str(path))
+    assert restored.get_layout_name() == label
+    for position in [(0, 0), (1, 0), (2, 0)]:
+        object_id = restored.find_object(position)
+        assert object_id is not None
+        assert restored.get_name(object_id) == label
+    assert equivalence_checking(restored, layout) == eq_type.STRONG
+
+
 def test_fgl_preserves_manual_obstructions(tmp_path: Path) -> None:
     """Preserve signed manual constraints independently of occupied objects."""
     layout = cartesian_gate_layout((3, 2, 1), "2DDWave", "manual")

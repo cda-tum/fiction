@@ -28,6 +28,7 @@
 #include <fiction/technology/sidb/simulation/potential_landscape.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
 
+#include <algorithm>
 #include <stdexcept>
 
 using namespace fiction;
@@ -99,6 +100,8 @@ TEST_CASE("Determine the groundstate from simulation results", "[sidb-simulation
 
         const auto ground_states = results.groundstates();
         REQUIRE(ground_states.size() == 2);
+        CHECK(std::ranges::count_if(ground_states, [&cd1](const auto& cd) { return cd.same_charge_states(cd1); }) == 1);
+        CHECK(std::ranges::count_if(ground_states, [&cd2](const auto& cd) { return cd.same_charge_states(cd2); }) == 1);
         CHECK_THAT(ground_states[0].energy() - ground_states[1].energy(), Catch::Matchers::WithinAbs(0.0, 0.00001));
     }
     SECTION("Empty result")

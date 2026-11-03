@@ -75,6 +75,7 @@ struct critical_temperature_params
     double confidence_level{0.99};
     /**
      * Maximum simulation temperature beyond which no simulation will be conducted (~ 126 °C by default) (unit: K).
+     * Must be nonnegative and fit the centikelvin iteration range.
      */
     double max_temperature{400};
     /**
@@ -145,6 +146,25 @@ namespace detail
 {
 
 /**
+ * @brief Starts the shared budget and validates the centikelvin iteration range.
+ *
+ * @param params Critical temperature parameters.
+ * @return Parameters with a validated shared deadline and temperature range.
+ * @throws utils::timeout_error If the deadline expires.
+ * @throws std::invalid_argument If the operational parameters or temperature range are invalid.
+ */
+[[nodiscard]] inline critical_temperature_params checked_parameters(critical_temperature_params params)
+{
+    params = logic::detail::checked_parameters(std::move(params));
+    if (std::isnan(params.max_temperature) || params.max_temperature < 0 ||
+        params.max_temperature >= static_cast<double>(std::numeric_limits<uint64_t>::max()) / 100)
+    {
+        throw std::invalid_argument("max_temperature must be nonnegative and fit the centikelvin iteration range");
+    }
+    return params;
+}
+
+/**
  * @brief Computes the temperature limit for SiDB ground-state occupation or gate operation.
  */
 class critical_temperature_impl
@@ -160,7 +180,7 @@ class critical_temperature_impl
     critical_temperature_impl(layout source_layout, const critical_temperature_params& ps,
                               critical_temperature_stats& st) :
             sidb_layout{std::move(source_layout)},
-            params{logic::detail::checked_parameters(ps)},
+            params{checked_parameters(ps)},
             stats{st},
             bii(logic::bdl_input_iterator{sidb_layout, params.operational_params.input_bdl_iterator_params}),
             critical_temperature{ps.max_temperature}
@@ -191,7 +211,7 @@ class critical_temperature_impl
                               const std::vector<logic::bdl_wire>& output_wires) :
             // a shallow copy, so that the `is_empty()`, `num_pos()` and `num_dots()` guards keep working
             sidb_layout{input_pattern_lyts.front()},
-            params{logic::detail::checked_parameters(ps)},
+            params{checked_parameters(ps)},
             stats{st},
             // the input pattern layouts make the iterator redundant; this is the same no-op instantiation that
             // `is_operational_impl` uses on its pre-generated-layouts path
@@ -643,7 +663,8 @@ class critical_temperature_impl
  * @param params Simulation and physical parameters.
  * @param pst Statistics.
  * @return The critical temperature (unit: K).
- * @throws std::invalid_argument if `spec` is empty or truth-table variable counts differ.
+ * @throws std::invalid_argument If `spec` is empty, truth-table variable counts differ, or `max_temperature` is
+ * negative, non-finite, or exceeds the centikelvin iteration range.
  */
 inline double critical_temperature_gate_based(const layout& lyt, const std::vector<kitty::dynamic_truth_table>& spec,
                                               const critical_temperature_params& params = {},
@@ -687,9 +708,9 @@ inline double critical_temperature_gate_based(const layout& lyt, const std::vect
  * @param output_bdl_wires BDL output wires of the layout.
  * @param pst Statistics.
  * @return The critical temperature (unit: K).
- * @throws std::invalid_argument if `spec` is empty, truth-table variable counts differ, the number of input pattern
+ * @throws std::invalid_argument If `spec` is empty, truth-table variable counts differ, the number of input pattern
  * layouts does not match the number of input combinations, or the number of output BDL pairs does not match the
- * number of truth tables.
+ * number of truth tables, or `max_temperature` is negative, non-finite, or exceeds the centikelvin iteration range.
  */
 inline double critical_temperature_gate_based(const std::vector<layout>&                     input_pattern_layouts,
                                               const std::vector<kitty::dynamic_truth_table>& spec,
@@ -739,7 +760,9 @@ inline double critical_temperature_gate_based(const std::vector<layout>&        
  * @param lyt The layout to simulate.
  * @param params Simulation and physical parameters.
  * @param pst Statistics.
- * @return The critical temperature (unit: K)
+ * @return The critical temperature (unit: K).
+ * @throws std::invalid_argument If `max_temperature` is negative, non-finite, or exceeds the centikelvin iteration
+ * range.
  */
 inline double critical_temperature_non_gate_based(const layout& lyt, const critical_temperature_params& params = {},
                                                   critical_temperature_stats* pst = nullptr)
