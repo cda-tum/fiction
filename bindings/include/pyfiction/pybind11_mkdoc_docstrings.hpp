@@ -29991,7 +29991,7 @@ static const char *mkd_doc_std_hash_7 = R"doc(Hash for SiDB layouts, over the Si
 
 static const char *mkd_doc_std_hash_8 = R"doc(Provides a hash implementation for `fiction::defect`.)doc";
 
-static const char *mkd_doc_std_hash_9 = R"doc(Hashes parameter points on the equality comparison grid.)doc";
+static const char *mkd_doc_std_hash_9 = R"doc(Hashes parameter points by their equality identities.)doc";
 
 static const char *mkd_doc_std_hash_operator_call = R"doc(Returns the identity's hash.)doc";
 
@@ -30049,14 +30049,14 @@ Returns:
 )doc";
 
 static const char *mkd_doc_std_hash_operator_call_9 =
-R"doc(Mixes the quantized parameter values across the hash bits for
-partitioned processing.
+R"doc(Mixes parameter value identities across the hash bits for partitioned
+processing.
 
 Args:
     pp: Parameter point to hash.
 
 Returns:
-    Hash of the quantized parameter values.
+    Hash of the parameter value identities.
 
 )doc";
 
