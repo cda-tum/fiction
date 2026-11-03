@@ -33,6 +33,8 @@
 #include <mockturtle/networks/xmg.hpp>
 #include <mockturtle/views/names_view.hpp>
 
+#include <cstdint>
+
 using namespace fiction;
 using namespace fiction::networks;
 using namespace fiction::synthesis;
@@ -46,9 +48,10 @@ namespace
  * @tparam Ntk Source network type.
  * @param ntk Source network.
  * @param params Selected gate library.
+ * @return Counts of mapped gate types.
  */
 template <typename Ntk>
-void map_and_check(const Ntk& ntk, const technology_mapping_params& params)
+count_gate_types_stats map_and_check(const Ntk& ntk, const technology_mapping_params& params)
 {
     technology_mapping_stats stats{};
     const auto               mapped = technology_mapping(ntk, params, &stats);
@@ -78,6 +81,7 @@ void map_and_check(const Ntk& ntk, const technology_mapping_params& params)
     CHECK((params.mux || gates.num_mux == 0));
     CHECK((params.and_xor || gates.num_and_xor == 0));
     CHECK(gates.num_other == 0);
+    return gates;
 }
 
 }  // namespace
@@ -110,7 +114,11 @@ TEST_CASE("Asymmetric gate selection", "[technology-mapping]")
         ntk.create_po(ntk.create_ge(a, b));
         params.ge2 = true;
     }
-    map_and_check(ntk, params);
+    const auto gates = map_and_check(ntk, params);
+    CHECK(gates.num_lt2 == static_cast<uint32_t>(params.lt2));
+    CHECK(gates.num_gt2 == static_cast<uint32_t>(params.gt2));
+    CHECK(gates.num_le2 == static_cast<uint32_t>(params.le2));
+    CHECK(gates.num_ge2 == static_cast<uint32_t>(params.ge2));
 }
 
 TEST_CASE("Simple AOI network mapping", "[technology-mapping]")
