@@ -41,7 +41,6 @@
 #include <cstdint>
 #include <iostream>
 #include <iterator>
-#include <numeric>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -492,16 +491,36 @@ template <typename E>
     return static_cast<uint64_t>(south.y) - static_cast<uint64_t>(north.y) - 1;
 }
 /**
+ * @brief Whether a node drives a primary output, indexed by node.
+ */
+using output_flags = std::vector<bool>;
+/**
+ * @brief Marks the nodes that drive a primary output.
+ *
+ * @param ntk Network.
+ * @return Flags, indexed by node.
+ */
+[[nodiscard]] inline output_flags output_drivers(const placement_network& ntk)
+{
+    output_flags drives_output(ntk.size(), false);
+
+    ntk.foreach_po([&ntk, &drives_output](const auto& po) { drives_output[ntk.get_node(po)] = true; });
+
+    return drives_output;
+}
+/**
  * @brief How the two consumers of a fanout node connect.
  *
  * @param ntk Network.
  * @param n Fanout node.
+ * @param drives_output Nodes that drive a primary output.
  * @return Connection type; `BOTH_SINGLE` for a fanout that drives an output.
  * @throws std::logic_error If `n` does not drive exactly two nodes.
  */
-[[nodiscard]] inline fanout_connection fanout_connection_of(const placement_network& ntk, const placement_node& n)
+[[nodiscard]] inline fanout_connection fanout_connection_of(const placement_network& ntk, const placement_node& n,
+                                                            const output_flags& drives_output)
 {
-    if (ntk.is_po(n))
+    if (drives_output[n])
     {
         return fanout_connection::BOTH_SINGLE;
     }
@@ -536,11 +555,13 @@ template <typename E>
  *
  * @param ntk Network.
  * @param n Single-fanin node.
+ * @param drives_output Nodes that drive a primary output.
  * @return Connection type.
  */
-[[nodiscard]] inline buffer_connection buffer_connection_of(const placement_network& ntk, const placement_node& n)
+[[nodiscard]] inline buffer_connection buffer_connection_of(const placement_network& ntk, const placement_node& n,
+                                                            const output_flags& drives_output)
 {
-    if (ntk.is_po(n))
+    if (drives_output[n])
     {
         return buffer_connection::UNCONNECTED;
     }
@@ -682,75 +703,77 @@ struct level_variables
  * @param lyt Layout.
  * @param node2pos Positions of the placed nodes.
  * @param lvl Level.
+ * @param drives_output Nodes that drive a primary output.
  * @return Orientations and new lines, aligned with the rank order of the level.
  */
 [[nodiscard]] inline level_variables compute_level_variables(const placement_network&              ntk,
                                                              const layouts::cartesian_gate_layout& lyt,
-                                                             const placement_map& node2pos, const uint32_t lvl)
+                                                             const placement_map& node2pos, const uint32_t lvl,
+                                                             const output_flags& drives_output)
 {
     level_variables vars{.orientations = std::vector<orientation>(ntk.rank_width(lvl), orientation::EAST),
                          .new_lines    = std::vector<uint64_t>(ntk.rank_width(lvl), 0)};
 
-    ntk.foreach_node_in_rank(lvl,
-                             [&ntk, &lyt, &node2pos, lvl, &vars](const auto& n, const auto i)
-                             {
-                                 const auto gap = predecessor_gap(ntk, lyt, node2pos, lvl, n);
+    ntk.foreach_node_in_rank(
+        lvl,
+        [&ntk, &lyt, &node2pos, lvl, &vars, &drives_output](const auto& n, const auto i)
+        {
+            const auto gap = predecessor_gap(ntk, lyt, node2pos, lvl, n);
 
-                                 if (num_fanins(ntk, n) == MAX_DEGREE)
-                                 {
-                                     // a gate after a south-oriented node without room between their predecessors turns
-                                     // east
-                                     if (i != 0 && vars.orientations[i - 1] == orientation::SOUTH && gap == 0)
-                                     {
-                                         vars.orientations[i] = orientation::EAST_SECOND;
-                                     }
+            if (num_fanins(ntk, n) == MAX_DEGREE)
+            {
+                // a gate after a south-oriented node without room between their predecessors turns
+                // east
+                if (i != 0 && vars.orientations[i - 1] == orientation::SOUTH && gap == 0)
+                {
+                    vars.orientations[i] = orientation::EAST_SECOND;
+                }
 
-                                     return;
-                                 }
+                return;
+            }
 
-                                 if (num_fanins(ntk, n) != 1)
-                                 {
-                                     return;
-                                 }
+            if (num_fanins(ntk, n) != 1)
+            {
+                return;
+            }
 
-                                 const auto allowed = allowed_orientation_of(ntk, n);
+            const auto allowed = allowed_orientation_of(ntk, n);
 
-                                 if (ntk.is_fanout(n))
-                                 {
-                                     const auto connection = fanout_connection_of(ntk, n);
+            if (ntk.is_fanout(n))
+            {
+                const auto connection = fanout_connection_of(ntk, n, drives_output);
 
-                                     if (i != 0)
-                                     {
-                                         const auto& rule     = FANOUT_RULES.at(index_of(connection))
-                                                                    .at(index_of(allowed))
-                                                                    .at(gap)
-                                                                    .at(index_of(vars.orientations[i - 1]));
-                                         vars.orientations[i] = rule.direction;
-                                         vars.new_lines[i]    = rule.new_lines;
-                                     }
-                                     else if (connection == fanout_connection::BOTH_SINGLE ||
-                                              connection == fanout_connection::SECOND_SINGLE)
-                                     {
-                                         vars.orientations[i] = orientation::EAST_SECOND;
-                                     }
+                if (i != 0)
+                {
+                    const auto& rule     = FANOUT_RULES.at(index_of(connection))
+                                               .at(index_of(allowed))
+                                               .at(gap)
+                                               .at(index_of(vars.orientations[i - 1]));
+                    vars.orientations[i] = rule.direction;
+                    vars.new_lines[i]    = rule.new_lines;
+                }
+                else if (connection == fanout_connection::BOTH_SINGLE || connection == fanout_connection::SECOND_SINGLE)
+                {
+                    vars.orientations[i] = orientation::EAST_SECOND;
+                }
 
-                                     return;
-                                 }
+                return;
+            }
 
-                                 if (i != 0)
-                                 {
-                                     const auto& rule     = BUFFER_RULES.at(index_of(buffer_connection_of(ntk, n)))
-                                                                .at(index_of(allowed))
-                                                                .at(gap)
-                                                                .at(index_of(vars.orientations[i - 1]));
-                                     vars.orientations[i] = rule.direction;
-                                     vars.new_lines[i]    = rule.new_lines;
-                                 }
-                                 else
-                                 {
-                                     vars.orientations[i] = start_orientation(ntk, lvl);
-                                 }
-                             });
+            if (i != 0)
+            {
+                const auto& rule     = BUFFER_RULES.at(index_of(buffer_connection_of(ntk, n, drives_output)))
+                                           .at(index_of(allowed))
+                                           .at(gap)
+                                           .at(index_of(vars.orientations[i - 1]));
+                vars.orientations[i] = rule.direction;
+                vars.new_lines[i]    = rule.new_lines;
+            }
+            else
+            {
+                vars.orientations[i] = start_orientation(ntk, lvl);
+            }
+        });
 
     return vars;
 }
@@ -934,14 +957,19 @@ inline void lift_to_common_diagonal(level_wiring& wiring, const std::vector<std:
     auto&        x = wiring.x;
     auto&        y = wiring.y;
 
-    // the lines of a cluster: those right of a node go east, those left of it go south
+    // the lines of a cluster: those right of a node go east, those left of it go south; both are running sums
     const auto cluster_sums =
         [&x, &y, &new_lines](const std::size_t begin, const std::size_t end, const uint64_t south_offset)
     {
+        uint64_t right = 0;
+        for (auto j = end; j > begin; --j)
+        {
+            x[j - 1] = right;
+            right += new_lines[j - 1];
+        }
+
         for (auto j = begin; j < end; ++j)
         {
-            x[j] = std::accumulate(new_lines.cbegin() + static_cast<std::ptrdiff_t>(j + 1),
-                                   new_lines.cbegin() + static_cast<std::ptrdiff_t>(end), uint64_t{0});
             y[j] = (j == 0 ? uint64_t{0} : y[j - 1]) + new_lines[j] + (j == begin ? south_offset : uint64_t{0});
         }
     };
@@ -1224,6 +1252,7 @@ class plane_impl
     plane_impl(const networks::views::mutable_rank_view<networks::named_technology_network>& src, const plane_params& p,
                plane_stats& st) :
             ntk{src},
+            drives_output{output_drivers(ntk)},
             ps{p},
             pst{st},
             node2pos{ntk},
@@ -1278,7 +1307,7 @@ class plane_impl
      */
     void place_level(const uint32_t lvl)
     {
-        const auto vars   = compute_level_variables(ntk, layout, node2pos, lvl);
+        const auto vars   = compute_level_variables(ntk, layout, node2pos, lvl, drives_output);
         const auto wiring = compute_wiring(ntk, layout, node2pos, vars.new_lines, lvl);
 
         std::optional<uint64_t> diagonal{};
@@ -1542,6 +1571,10 @@ class plane_impl
      * @brief The network.
      */
     const placement_network ntk;
+    /**
+     * @brief Nodes that drive a primary output.
+     */
+    const output_flags drives_output;
     /**
      * @brief Parameters.
      */
