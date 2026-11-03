@@ -39,6 +39,7 @@
 
 #include <kitty/dynamic_truth_table.hpp>
 
+#include <algorithm>
 #include <chrono>
 #include <cstddef>
 #include <stdexcept>
@@ -383,13 +384,18 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
     {
         params.canvas                 = {{4, 2, 0}, {14, 8, 1}};
         params.number_of_canvas_sidbs = 2;
-        params.design_mode            = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
-
-        // The defect overlaps an output SiDB; this scenario checks skeleton metadata.
+        params.design_mode            = design_gates_params::design_gates_mode::QUICKCELL;
+        params.termination_cond       = design_gates_params::termination_condition::ALL_COMBINATIONS_ENUMERATED;
+        const auto baseline = design_gates(lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, params);
+        CHECK(std::ranges::any_of(baseline, [](const auto& candidate)
+                                  { return candidate.get_dot_tag({12, 8, 0}) == dot_tag::LOGIC; }));
+        params.design_mode      = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+        params.termination_cond = design_gates_params::termination_condition::AFTER_FIRST_SOLUTION;
         layout defect_layout{lyt};
-        defect_layout.assign_defect({10, 6, 0},
-                                    defect{defect_type::DB, -1, params.operational_params.sim_params.epsilon_r,
-                                           params.operational_params.sim_params.lambda_tf});
+        REQUIRE(defect_layout.get_dot_tag({12, 8, 0}) == dot_tag::EMPTY);
+        defect_layout.assign_defect({12, 8, 0}, defect{defect_type::SINGLE_DIHYDRIDE, 0,
+                                                       params.operational_params.sim_params.epsilon_r,
+                                                       params.operational_params.sim_params.lambda_tf});
 
         const auto found_gate_layouts_exhaustive =
             design_gates(defect_layout, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, params);
@@ -402,6 +408,8 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
         {
             CAPTURE(i);
             CHECK(found_gate_layouts_quickcell[i].defects() == defect_layout.defects());
+            CHECK(found_gate_layouts_quickcell[i].get_dot_tag({12, 8, 0}) == dot_tag::EMPTY);
+            CHECK(found_gate_layouts_quickcell[i].get_dot_tag({10, 6, 0}) == dot_tag::OUTPUT);
         }
     }
 }

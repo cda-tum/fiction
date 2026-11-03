@@ -261,6 +261,7 @@ TEST_CASE("Random SiDB layout generation with defects", "[random-sidb-layout-gen
 
         auto defect_layout = layout{};
         defect_layout.assign_defect({2, 2, 0}, defect{defect_type::DB, -1, 5.6, 5});
+        // Neutral defects retain their default affected-site spacing.
         defect_layout.assign_defect({4, 1, 0}, defect{defect_type::SINGLE_DIHYDRIDE, 0, 7.6, 7});
 
         const auto result_lyts = generate_multiple_random_layouts(params, std::optional{defect_layout});
