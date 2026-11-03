@@ -35,8 +35,12 @@ TEST_CASE("Bestagon traits", "[sidb-dynamic-gate-library]")
 TEST_CASE("Bestagon supports non-strict comparison functions", "[sidb-dynamic-gate-library]")
 {
     const auto implementations = skeleton_bestagon_library::get_functional_implementations();
-    CHECK(fiction::synthesis::create_le_tt() == ~fiction::synthesis::create_gt_tt());
-    CHECK(fiction::synthesis::create_ge_tt() == ~fiction::synthesis::create_lt_tt());
+    const auto le              = fiction::synthesis::create_le_tt();
+    const auto ge              = fiction::synthesis::create_ge_tt();
+    CHECK(*le.cbegin() == 0xbu);
+    CHECK(*ge.cbegin() == 0xdu);
+    CHECK(le == ~fiction::synthesis::create_gt_tt());
+    CHECK(ge == ~fiction::synthesis::create_lt_tt());
     CHECK(implementations.contains(~fiction::synthesis::create_gt_tt()));
     CHECK(implementations.contains(~fiction::synthesis::create_lt_tt()));
 
