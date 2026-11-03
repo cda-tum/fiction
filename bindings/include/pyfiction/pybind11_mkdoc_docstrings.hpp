@@ -28022,6 +28022,9 @@ Returns:
     A copy of the input network with reordered ranks to reduce edge
     crossings.
 
+Raises:
+    ValueError: If the network is not balanced.
+
 )doc";
 
 static const char *mkd_doc_fiction_utils_graph_mincross_impl =
@@ -28039,7 +28042,7 @@ arrays, once.
 
 )doc";
 
-static const char *mkd_doc_fiction_utils_graph_mincross_impl_count_crossings =
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_count_pair_crossings =
 R"doc(Adds the crossings between the edges of two nodes to a pair of
 counters, for both orders of the nodes.
 
@@ -28055,10 +28058,6 @@ Args:
     swapped: Receives the crossings with the nodes swapped.
 
 )doc";
-
-static const char *mkd_doc_fiction_utils_graph_mincross_impl_fanout_ntk =
-R"doc(Fanout-augmented view of the network for efficient traversal and
-connectivity queries.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_mincross_impl_in_begin =
 R"doc(Offsets of the fanin lists in `in_nodes`: node `i` has the entries
