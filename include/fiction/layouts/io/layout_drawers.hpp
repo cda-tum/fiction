@@ -137,7 +137,10 @@ class simple_gate_layout_tile_drawer
         {
             return fmt::format("{}:{}: {}", id.index, id.generation, label);
         }
-        return std::string{label};
+        else
+        {
+            return std::string{label};
+        }
     }
 
     /** @brief Return the tile color. */
@@ -263,7 +266,7 @@ class simple_gate_layout_tile_drawer
                 row.emplace_back(tile_id({x, y}));
             }
 
-            rows.push_back(row);
+            rows.push_back(std::move(row));
         }
 
         return rows;
@@ -285,7 +288,7 @@ class simple_gate_layout_tile_drawer
                 col.emplace_back(tile_id({x, y}));
             }
 
-            columns.push_back(col);
+            columns.push_back(std::move(col));
         }
 
         return columns;

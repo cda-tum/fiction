@@ -84,6 +84,9 @@ inline constexpr auto NO_COLOR = fmt::text_style{};
  * H-Si(111)-1x1 surface. Inputs, outputs, normal SiDBs, defects, and empty sites differ by color and symbol. With a
  * charge distribution, a charged SiDB is a filled circle colored by its sign and a neutral one a hollow circle.
  *
+ * The printer visits every site in the bounding box and emits output for empty sites. Runtime and output size grow
+ * with bounding-box area even for sparse layouts.
+ *
  * @param os Output stream to print into.
  * @param lyt Layout to print.
  * @param cd Charge distribution over the layout's SiDBs, or `nullptr` to print dot tags only.
@@ -162,40 +165,42 @@ inline void print_sidb_layout(std::ostream& os, const layout& lyt, const charge_
             }
         }
 
-        if (const auto d = lyt.get_defect(s); d.type != model::defect_type::NONE && !printed)
+        if (!printed)
         {
-            if (model::is_negatively_charged_defect(d))
+            if (const auto d = lyt.get_defect(s); d.type != model::defect_type::NONE)
             {
-                paint(detail::NEGATIVE_DEFECT_COLOR, " ⊟ ");
-            }
-            else if (model::is_positively_charged_defect(d))
-            {
-                paint(detail::POSITIVE_DEFECT_COLOR, " ⊞ ");
-            }
-            else
-            {
-                paint(detail::NORMAL_COLOR, " ⊡ ");
-            }
+                if (model::is_negatively_charged_defect(d))
+                {
+                    paint(detail::NEGATIVE_DEFECT_COLOR, " ⊟ ");
+                }
+                else if (model::is_positively_charged_defect(d))
+                {
+                    paint(detail::POSITIVE_DEFECT_COLOR, " ⊞ ");
+                }
+                else
+                {
+                    paint(detail::NORMAL_COLOR, " ⊡ ");
+                }
 
-            printed = true;
-        }
+                printed = true;
+            }
+            else if (const auto ct = lyt.get_dot_tag(s); ct != dot_tag::EMPTY)
+            {
+                if (ct == dot_tag::INPUT)
+                {
+                    paint(detail::INPUT_COLOR, " ◯ ");
+                }
+                else if (ct == dot_tag::OUTPUT)
+                {
+                    paint(detail::OUTPUT_COLOR, " ◯ ");
+                }
+                else
+                {
+                    paint(detail::NORMAL_COLOR, " ◯ ");
+                }
 
-        if (const auto ct = lyt.get_dot_tag(s); ct != dot_tag::EMPTY && !printed)
-        {
-            if (ct == dot_tag::INPUT)
-            {
-                paint(detail::INPUT_COLOR, " ◯ ");
+                printed = true;
             }
-            else if (ct == dot_tag::OUTPUT)
-            {
-                paint(detail::OUTPUT_COLOR, " ◯ ");
-            }
-            else
-            {
-                paint(detail::NORMAL_COLOR, " ◯ ");
-            }
-
-            printed = true;
         }
 
         if (!printed)
