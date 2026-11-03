@@ -26,6 +26,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     the diagonals of a 2DDWave layout without wire crossings (PLANE)
   - `synthesis::flatten_planarization` copies a planar network into a named technology network whose node order
     encodes the rank order, the input form of `physical_design::plane`
+  - `verification::equivalence_checking_params::input_mapping` names the specification input that every
+    implementation input reads, so that an implementation with duplicated inputs, such as a layout from
+    `physical_design::plane`, verifies against its source network; `networks::match_outputs` matches the outputs
+    alone
   - `fcn::area` computes the bounding-box area of a `sidb::layout`, including defects
   - `physical_design::cell_grid_extent` returns the extent of the cell grid that a gate library spans on a
     gate-level layout

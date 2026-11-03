@@ -34,6 +34,7 @@
 #include <fiction/synthesis/planarization.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/types.hpp>
+#include <fiction/verification/equivalence_checking.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
@@ -49,6 +50,7 @@ using namespace fiction::networks;
 using namespace fiction::networks::views;
 using namespace fiction::physical_design;
 using namespace fiction::synthesis;
+using namespace fiction::verification;
 
 static_assert(std::same_as<decltype(&plane), cartesian_gate_layout (*)(const named_technology_network&,
                                                                        const plane_params&, plane_stats*)>);
@@ -138,6 +140,18 @@ TEST_CASE("Layouts are crossing-free and equivalent to the planar network", "[pl
     CAPTURE(name, xor_gates, static_cast<int>(phases));
 
     static_cast<void>(check_plane(ranked, xor_gates, phases));
+}
+
+TEST_CASE("The input mapping ties the layout to its source network", "[plane]")
+{
+    const auto source            = blueprints::full_adder_network<mockturtle::mig_network>();
+    const auto [planar, mapping] = flatten_planarization(planarization(rank(source)));
+    const auto layout            = plane(planar);
+
+    // the planarization duplicates inputs, so the declared interfaces differ in size
+    REQUIRE(layout.num_pis() > source.num_pis());
+    CHECK(equivalence_checking(source, layout) == eq_type::NO);
+    CHECK(equivalence_checking(source, layout, {.input_mapping = mapping}) != eq_type::NO);
 }
 
 TEST_CASE("Gate library applies to the layout", "[plane]")

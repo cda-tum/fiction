@@ -30,6 +30,7 @@
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <algorithm>
 #include <concepts>
 #include <cstdint>
 #include <cstdlib>
@@ -58,6 +59,20 @@ enum class eq_type
      * `Spec` and `Impl` are logically equivalent and have equal throughput denominators.
      */
     STRONG
+};
+
+/** @brief Parameters for equivalence checking. */
+struct equivalence_checking_params
+{
+    /**
+     * @brief Specification input that every implementation input reads, in declared order.
+     *
+     * Empty: the inputs match by names unique on both sides, then by remaining declared positions, which requires equal
+     * input counts. Otherwise, entry `i` names the specification input that implementation input `i` reads, and the
+     * input counts may differ: several implementation inputs read the same specification input, as the duplicated
+     * inputs of a planarized layout do. The outputs match by names and positions either way.
+     */
+    std::vector<uint32_t> input_mapping{};
 };
 
 /** @brief Physical equivalence result, throughput, and diagnostics. */
@@ -101,19 +116,34 @@ class equivalence_checking_impl
      *
      * @param specification Logical specification of intended functionality.
      * @param implementation Implementation of specified functionality.
+     * @param p Parameters.
      * @param st Statistics.
      */
     explicit equivalence_checking_impl(const Spec& specification, const Impl& implementation,
-                                       equivalence_checking_stats& st) :
+                                       const equivalence_checking_params& p, equivalence_checking_stats& st) :
             spec{specification},
             impl{implementation},
+            ps{p},
             pst{st}
     {}
 
-    /** @brief Checks design rules, aligned logic, and throughput. @return Physical equivalence type. */
+    /**
+     * @brief Checks design rules, aligned logic, and throughput.
+     * @return Physical equivalence type.
+     * @throws std::invalid_argument If the input mapping is non-empty and does not name one specification input for
+     * every implementation input.
+     */
     eq_type run()
     {
         mockturtle::stopwatch stop{pst.runtime};
+
+        if (!ps.input_mapping.empty() &&
+            (ps.input_mapping.size() != impl.num_pis() ||
+             std::ranges::any_of(ps.input_mapping, [this](const auto input) { return input >= spec.num_pis(); })))
+        {
+            throw std::invalid_argument(
+                "The input mapping must name one specification input for every implementation input");
+        }
 
         if constexpr (requires { requires std::same_as<typename Spec::object_id, fiction::layouts::layout_object_id>; })
         {
@@ -130,7 +160,7 @@ class equivalence_checking_impl
             }
         }
 
-        if (spec.num_pis() != impl.num_pis() || spec.num_pos() != impl.num_pos())
+        if ((ps.input_mapping.empty() && spec.num_pis() != impl.num_pis()) || spec.num_pos() != impl.num_pos())
         {
             return eq_type::NO;
         }
@@ -170,17 +200,36 @@ class equivalence_checking_impl
     /** @brief Compares aligned logical interfaces and retains physical throughput. @return Equivalence type. */
     eq_type compare_logic()
     {
-        const auto                                    matching = networks::match_interfaces(spec, impl);
-        const auto&                                   spec_ntk = logical_network(spec);
-        const auto&                                   impl_ntk = logical_network(impl);
-        mockturtle::klut_network                      aligned{};
-        std::vector<mockturtle::klut_network::signal> inputs(impl_ntk.num_pis());
-        for (uint32_t input{}; input < spec_ntk.num_pis(); ++input)
+        const auto&              spec_ntk = logical_network(spec);
+        const auto&              impl_ntk = logical_network(impl);
+        mockturtle::klut_network aligned{};
+        // the aligned copy of the implementation reads the specification inputs in their declared order
+        std::vector<mockturtle::klut_network::signal> spec_inputs(spec_ntk.num_pis());
+        for (auto& input : spec_inputs)
         {
-            inputs[matching.inputs[input]] = aligned.create_pi();
+            input = aligned.create_pi();
+        }
+        std::vector<mockturtle::klut_network::signal> inputs(impl_ntk.num_pis());
+        std::vector<uint32_t>                         output_order{};
+        if (ps.input_mapping.empty())
+        {
+            const auto matching = networks::match_interfaces(spec, impl);
+            for (uint32_t input{}; input < spec_ntk.num_pis(); ++input)
+            {
+                inputs[matching.inputs[input]] = spec_inputs[input];
+            }
+            output_order = matching.outputs;
+        }
+        else
+        {
+            for (uint32_t input{}; input < impl_ntk.num_pis(); ++input)
+            {
+                inputs[input] = spec_inputs[ps.input_mapping[input]];
+            }
+            output_order = networks::match_outputs(spec, impl);
         }
         const auto outputs = mockturtle::cleanup_dangling(impl_ntk, aligned, inputs.begin(), inputs.end());
-        for (const auto output : matching.outputs)
+        for (const auto output : output_order)
         {
             aligned.create_po(outputs[output]);
         }
@@ -257,6 +306,10 @@ class equivalence_checking_impl
      * Implementation.
      */
     const Impl& impl;
+    /**
+     * Parameters.
+     */
+    const equivalence_checking_params& ps;
 
     /** @brief Result statistics. */
     equivalence_checking_stats& pst;
@@ -282,7 +335,9 @@ class equivalence_checking_impl
  * Performs SAT-based equivalence checking between a specification of type `Spec` and an implementation of type `Impl`.
  * Each operand is a logic network or a placed gate-level layout. Layout logic is extracted before SAT checking.
  * Interfaces match by names unique on both sides, then by remaining declared positions. Unequal interface sizes,
- * missing required inputs, and required dependency cycles return `NO`.
+ * missing required inputs, and required dependency cycles return `NO`. `ps.input_mapping` replaces the input
+ * matching with an explicit one, under which the implementation may have more inputs than the specification, as a
+ * layout with duplicated inputs does.
  *
  * This implementation enables the comparison of two logic networks, a logic network and a gate-level layout or two
  * gate-level layouts. Since gate-level layouts have a notion of timing that logic networks do not, this function does
@@ -303,18 +358,22 @@ class equivalence_checking_impl
  * @tparam Impl Implementation type.
  * @param spec The specification.
  * @param impl The implementation.
+ * @param ps Parameters.
  * @param pst Statistics.
  * @return The equivalence type of `spec` and `impl`.
+ * @throws std::invalid_argument If `ps.input_mapping` is non-empty and does not name one specification input for
+ * every implementation input.
  */
 template <typename Spec, typename Impl>
     requires(mockturtle::is_network_type_v<Spec> ||
              requires { requires std::same_as<typename Spec::object_id, layouts::layout_object_id>; }) &&
             (mockturtle::is_network_type_v<Impl> ||
              requires { requires std::same_as<typename Impl::object_id, layouts::layout_object_id>; })
-eq_type equivalence_checking(const Spec& spec, const Impl& impl, equivalence_checking_stats* pst = nullptr)
+eq_type equivalence_checking(const Spec& spec, const Impl& impl, const equivalence_checking_params& ps = {},
+                             equivalence_checking_stats* pst = nullptr)
 {
     equivalence_checking_stats        st{};
-    detail::equivalence_checking_impl p{spec, impl, st};
+    detail::equivalence_checking_impl p{spec, impl, ps, st};
 
     const auto result = p.run();
 
@@ -324,6 +383,25 @@ eq_type equivalence_checking(const Spec& spec, const Impl& impl, equivalence_che
     }
 
     return result;
+}
+/**
+ * Same as the other `equivalence_checking` function with default parameters.
+ *
+ * @tparam Spec Specification type.
+ * @tparam Impl Implementation type.
+ * @param spec The specification.
+ * @param impl The implementation.
+ * @param pst Statistics.
+ * @return The equivalence type of `spec` and `impl`.
+ */
+template <typename Spec, typename Impl>
+    requires(mockturtle::is_network_type_v<Spec> ||
+             requires { requires std::same_as<typename Spec::object_id, layouts::layout_object_id>; }) &&
+            (mockturtle::is_network_type_v<Impl> ||
+             requires { requires std::same_as<typename Impl::object_id, layouts::layout_object_id>; })
+eq_type equivalence_checking(const Spec& spec, const Impl& impl, equivalence_checking_stats* pst)
+{
+    return equivalence_checking(spec, impl, {}, pst);
 }
 
 }  // namespace fiction::verification
