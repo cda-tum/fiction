@@ -10,11 +10,16 @@
 
 from __future__ import annotations
 
+from collections import Counter
 from typing import Any
 
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.model import sidb_charge_state
-from mnt.pyfiction.sidb.simulation.engines import clustercomplete, ground_state_space_reporting
+from mnt.pyfiction.sidb.simulation.engines import (
+    clustercomplete,
+    exhaustive_ground_state_simulation,
+    ground_state_space_reporting,
+)
 
 
 def test_three_sidbs() -> None:
@@ -34,21 +39,35 @@ def test_three_sidbs() -> None:
     options["available_threads"] = 4
     options["report_gss_stats"] = ground_state_space_reporting.ON
 
+    def check_distributions(result: Any, base: int, epsilon_r: float = 5.6, lambda_tf: float = 5.0) -> None:
+        """Compare every charge configuration with exhaustive simulation, ignoring order."""
+        reference = exhaustive_ground_state_simulation(
+            layout, base=base, mu_minus=-0.25, epsilon_r=epsilon_r, lambda_tf=lambda_tf
+        )
+        sites = [lattice_site(x, 0, 0) for x in range(3)]
+        expected = Counter(tuple(cd.get_charge_state(site) for site in sites) for cd in reference.charge_distributions)
+        actual = Counter(tuple(cd.get_charge_state(site) for site in sites) for cd in result.charge_distributions)
+        assert expected
+        assert actual == expected
+
     result = clustercomplete(layout, **options)
 
     assert result.algorithm_name == "ClusterComplete"
     assert result.layout == layout
     assert len(result.charge_distributions) <= 3
+    check_distributions(result, 2)
 
     options["base"] = 3
 
     result = clustercomplete(layout, **options)
     assert len(result.charge_distributions) <= 4
+    check_distributions(result, 3)
 
     options["epsilon_r"] = 2
     options["lambda_tf"] = 2
     result = clustercomplete(layout, **options)
     assert len(result.charge_distributions) <= 2
+    check_distributions(result, 3, epsilon_r=2, lambda_tf=2)
 
 
 def test_perturber_and_sidb_pair_111() -> None:

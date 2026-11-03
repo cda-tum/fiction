@@ -10,12 +10,17 @@
 
 from __future__ import annotations
 
+from collections import Counter
 from typing import TYPE_CHECKING, Any
 
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.io import read_sqd_layout
 from mnt.pyfiction.sidb.model import sidb_charge_state
-from mnt.pyfiction.sidb.simulation.engines import automatic_base_number_detection, quickexact
+from mnt.pyfiction.sidb.simulation.engines import (
+    automatic_base_number_detection,
+    exhaustive_ground_state_simulation,
+    quickexact,
+)
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -35,21 +40,35 @@ def test_three_sidbs() -> None:
         "base_number_detection": automatic_base_number_detection.OFF,
     }
 
+    def check_distributions(result: Any, base: int, epsilon_r: float = 5.6, lambda_tf: float = 5.0) -> None:
+        """Compare every charge configuration with exhaustive simulation, ignoring order."""
+        reference = exhaustive_ground_state_simulation(
+            layout, base=base, mu_minus=-0.25, epsilon_r=epsilon_r, lambda_tf=lambda_tf
+        )
+        sites = [lattice_site(x, 0, 0) for x in range(3)]
+        expected = Counter(tuple(cd.get_charge_state(site) for site in sites) for cd in reference.charge_distributions)
+        actual = Counter(tuple(cd.get_charge_state(site) for site in sites) for cd in result.charge_distributions)
+        assert expected
+        assert actual == expected
+
     result = quickexact(layout, **options)
 
     assert result.algorithm_name == "QuickExact"
     assert result.layout == layout
     assert len(result.charge_distributions) <= 3
+    check_distributions(result, 2)
 
     options["base_number_detection"] = automatic_base_number_detection.ON
 
     result = quickexact(layout, **options)
     assert len(result.charge_distributions) <= 4
+    check_distributions(result, 3)
 
     options["epsilon_r"] = 2
     options["lambda_tf"] = 2
     result = quickexact(layout, **options)
     assert len(result.charge_distributions) <= 2
+    check_distributions(result, 3, epsilon_r=2, lambda_tf=2)
 
 
 def test_perturber_and_sidb_pair_111() -> None:
