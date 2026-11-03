@@ -22,7 +22,7 @@ for (const checked of [true, false]) {
       parentElement: { closest: () => null },
     };
     const target = {
-      closest: () => panel,
+      closest: (selector) => (selector === ".sd-tab-content" ? panel : null),
       scrollIntoView() {
         scrolled = true;
       },
@@ -44,40 +44,77 @@ for (const checked of [true, false]) {
   });
 }
 
-test("hash changes reveal an encoded target inside nested tabs", () => {
-  const inputs = { inner: { checked: false }, outer: { checked: false } };
-  let scrolled = false;
-  const outer = {
-    previousElementSibling: {
-      htmlFor: "outer",
-      click: () => (inputs.outer.checked = true),
-    },
-    parentElement: { closest: () => null },
-  };
-  const inner = {
-    previousElementSibling: {
-      htmlFor: "inner",
-      click: () => (inputs.inner.checked = true),
-    },
-    parentElement: { closest: () => outer },
-  };
-  const target = {
-    closest: () => inner,
-    scrollIntoView: () => (scrolled = true),
-  };
+for (const outerChecked of [false, true]) {
+  test(`hash changes reveal an encoded nested target with the outer tab ${outerChecked ? "active" : "hidden"}`, () => {
+    const inputs = {
+      inner: { checked: false },
+      outer: { checked: outerChecked },
+    };
+    let scrolled = false;
+    let outerClicks = 0;
+    const outer = {
+      previousElementSibling: {
+        htmlFor: "outer",
+        click() {
+          outerClicks++;
+          inputs.outer.checked = !inputs.outer.checked;
+        },
+      },
+      parentElement: { closest: () => null },
+    };
+    const inner = {
+      previousElementSibling: {
+        htmlFor: "inner",
+        click() {
+          inputs.inner.checked = true;
+        },
+      },
+      parentElement: {
+        closest: (selector) => (selector === ".sd-tab-content" ? outer : null),
+      },
+    };
+    const target = {
+      closest: (selector) => (selector === ".sd-tab-content" ? inner : null),
+      scrollIntoView() {
+        assert.equal(inputs.inner.checked, true);
+        assert.equal(inputs.outer.checked, true);
+        scrolled = true;
+      },
+    };
+    const listeners = {};
+    runInNewContext(script, {
+      window: {
+        location: { hash: "#topic%20name" },
+        addEventListener: (event, callback) => (listeners[event] = callback),
+      },
+      document: {
+        getElementById: (id) => (id === "topic name" ? target : inputs[id]),
+        addEventListener() {},
+      },
+    });
+    listeners.hashchange();
+    assert.equal(inputs.inner.checked, true);
+    assert.equal(inputs.outer.checked, true);
+    assert.equal(outerClicks, outerChecked ? 0 : 1);
+    assert.equal(scrolled, true);
+  });
+}
+
+test("malformed fragments do not look up or scroll a target", () => {
   const listeners = {};
+  let lookedUp = false;
   runInNewContext(script, {
     window: {
-      location: { hash: "#topic%20name" },
+      location: { hash: "#%E0%A4%A" },
       addEventListener: (event, callback) => (listeners[event] = callback),
     },
     document: {
-      getElementById: (id) => (id === "topic name" ? target : inputs[id]),
+      getElementById() {
+        lookedUp = true;
+      },
       addEventListener() {},
     },
   });
-  listeners.hashchange();
-  assert.equal(inputs.inner.checked, true);
-  assert.equal(inputs.outer.checked, true);
-  assert.equal(scrolled, true);
+  assert.doesNotThrow(() => listeners.hashchange());
+  assert.equal(lookedUp, false);
 });
