@@ -44,7 +44,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `show` supports optional Graphviz SVG rendering, explicit viewers, and temporary-file cleanup.
   - Long-running CLI commands show responsive progress. Counted phases use real bars; searches show
     candidate extents on one aggregate row. Quiet mode and redirected output suppress displays.
-  - `plane` balances and planarizes the active network and places and routes it without wire crossings.
+  - `plane` balances and planarizes the active network and places and routes it without wire crossings. Duplicated
+    inputs carry the names of the inputs they copy, and `input_mapping` in the result ties every layout input to its
+    network input.
 
 - Code quality:
 

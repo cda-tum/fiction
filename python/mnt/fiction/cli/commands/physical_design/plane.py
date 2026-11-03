@@ -62,14 +62,16 @@ def plane(session: Session, args: argparse.Namespace) -> Result:
     The network is balanced, planarized by node duplication and crossing gates, fanout-substituted,
     and rebalanced; the Planar Layout from Network Embedding (PLANE) algorithm then places every
     level on one diagonal of a 2DDWave-clocked Cartesian layout. Duplicated inputs appear as
-    separate layout inputs. The network must not have gates with more than two inputs.
+    separate layout inputs that carry the name of the network input they copy; ``input_mapping``
+    in the result lists, for every layout input, the index of that network input. The network must
+    not have gates with more than two inputs.
     """
     network = session.as_technology_network(session.networks.current())
 
     balanced = network_balancing(network, unify_outputs=True, buffer_constant_outputs=False)
 
     planarization_statistics = planarization_stats()
-    planar, _original_inputs = planarization(
+    planar, original_inputs = planarization(
         balanced,
         on_progress=session.report_progress,
         xor_gates=args.xor_gates,
@@ -87,5 +89,6 @@ def plane(session: Session, args: argparse.Namespace) -> Result:
 
     return {
         **(_added(session, layout, stats, verbose=args.verbose) or {}),
+        "input_mapping": list(original_inputs),
         "planarization": stats_to_dict(planarization_statistics),
     }

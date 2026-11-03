@@ -66,6 +66,20 @@ def test_plane_options(mux21_shell: Shell) -> None:
     assert layout.num_crossings() == 0
 
 
+def test_plane_maps_duplicated_inputs(shell: Shell, resource: Callable[[str], str]) -> None:
+    """Planarizing the full adder duplicates inputs; every layout input names and maps to its network input."""
+    shell.ok(f'read "{resource("FA.v")}"; plane')
+    network = shell.session.networks.current()
+    layout = shell.session.gate_layouts.current()
+    mapping = shell.session.log[-1]["result"]["input_mapping"]
+    assert isinstance(mapping, list)
+    assert layout.num_pis() > network.num_pis()
+    assert len(mapping) == layout.num_pis()
+    assert sorted(set(mapping)) == list(range(network.num_pis()))
+    input_names = [network.get_name(n) for n in network.pis()]
+    assert [layout.get_input_name(i) for i in range(layout.num_pis())] == [input_names[j] for j in mapping]
+
+
 def test_gold(mux21_shell: Shell) -> None:
     """Timed GOLD creates a layout that implements the active network."""
     mux21_shell.ok("gold -r -e high_efficiency -c wires --seed 1 -t 60")
