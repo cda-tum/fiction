@@ -362,7 +362,7 @@ def simulate_outputs(layout: mnt.pyfiction.layouts.shifted_cartesian_gate_layout
 @overload
 def simulate_outputs(layout: mnt.pyfiction.layouts.hexagonal_gate_layout) -> list[tuple[str, list[bool]]]:
     """
-    Return (name, bits) pairs in output declaration order, preserving duplicate labels. Truth-table storage grows exponentially with the input count; fewer than 38 inputs is a representation bound, not a memory guarantee.
+    Return (name, bits) pairs in output declaration order, preserving duplicate labels. Each truth table lists bits from the highest input assignment to the lowest. Truth-table storage grows exponentially with the input count; fewer than 38 inputs is a representation bound, not a memory guarantee.
     """
 
 @overload
