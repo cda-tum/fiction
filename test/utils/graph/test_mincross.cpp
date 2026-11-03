@@ -30,6 +30,7 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/traits.hpp>
 
+#include <cstdint>
 #include <stdexcept>
 #include <vector>
 
@@ -38,6 +39,25 @@ using namespace fiction::networks;
 using namespace fiction::networks::views;
 using namespace fiction::synthesis;
 using namespace fiction::utils::graph;
+
+/**
+ * Checks that each output rank contains the input rank's nodes.
+ *
+ * @tparam Ntk Ranked network type.
+ * @param input Original network.
+ * @param result Reordered network.
+ */
+template <typename Ntk>
+void check_rank_permutations(const Ntk& input, const Ntk& result)
+{
+    CHECK(result.check_validity());
+    REQUIRE(result.depth() == input.depth());
+    for (uint32_t level = 0; level <= input.depth(); ++level)
+    {
+        CAPTURE(level);
+        CHECK_THAT(result.get_ranks(level), Catch::Matchers::UnorderedRangeEquals(input.get_ranks(level)));
+    }
+}
 
 TEST_CASE("Minimize crossings in an XOR network", "[mincross]")
 {
@@ -78,12 +98,14 @@ TEST_CASE("Keep primary inputs in rank order when requested", "[mincross]")
     CHECK(st.num_crossings == 0);
     CHECK(count_crossings(ntk) == 0);
 
+    st          = {};
     p.fixed_pis = true;
     ntk         = mincross(aig_r, p, &st);
     CHECK(st.num_crossings == 1);
     CHECK(count_crossings(ntk) == 1);
     CHECK(ntk.get_ranks(0) == original_pis);
     CHECK(aig_r.get_ranks(0) == original_pis);
+    check_rank_permutations(aig_r, ntk);
 }
 
 TEST_CASE("Minimize crossings without changing network connectivity", "[mincross]")
@@ -112,11 +134,14 @@ TEST_CASE("Minimize crossings without changing network connectivity", "[mincross
     CHECK(st.num_crossings == 3);
     CHECK(ntk.get_all_ranks() == aig_r.get_all_ranks());
 
+    st         = {};
     p.optimize = true;
     ntk        = mincross(aig_r, p, &st);
     CHECK(st.num_crossings == 0);
     CHECK(count_crossings(ntk) == 0);
+    check_rank_permutations(aig_r, ntk);
 
+    st          = {};
     p.fixed_pis = true;
     ntk         = mincross(aig_r, p, &st);
     CHECK(st.num_crossings == 0);
@@ -126,6 +151,7 @@ TEST_CASE("Minimize crossings without changing network connectivity", "[mincross
     const std::vector<mockturtle::node<mockturtle::aig_network>> expected_rank{aig.get_node(f1), aig.get_node(f2)};
     CHECK(ntk.get_ranks(1) == expected_rank);
     CHECK(aig_r.get_ranks(1) == rank1);
+    check_rank_permutations(aig_r, ntk);
     CHECK(ntk.po_at(0) == f1);
     CHECK(ntk.po_at(1) == f2);
     std::vector<mockturtle::signal<mockturtle::aig_network>> fanins1{};
@@ -163,10 +189,12 @@ TEST_CASE("Minimize crossings in a majority network", "[mincross]")
     CHECK(st.num_crossings == 2);
     CHECK(ntk.get_all_ranks() == tec_r.get_all_ranks());
 
+    st         = {};
     p.optimize = true;
     ntk        = mincross(tec_r, p, &st);
     CHECK(st.num_crossings == 0);
     CHECK(count_crossings(ntk) == 0);
+    check_rank_permutations(tec_r, ntk);
 }
 
 TEST_CASE("Minimize crossings in a full adder", "[mincross]")
@@ -186,10 +214,12 @@ TEST_CASE("Minimize crossings in a full adder", "[mincross]")
     CHECK(st.num_crossings == 4);
     CHECK(ntk.get_all_ranks() == tec_r.get_all_ranks());
 
+    st         = {};
     p.optimize = true;
     ntk        = mincross(tec_r, p, &st);
     CHECK(st.num_crossings == 2);
     CHECK(count_crossings(ntk) == 2);
+    check_rank_permutations(tec_r, ntk);
 }
 
 TEST_CASE("Counting crossings agrees with mincross without optimization", "[mincross]")
@@ -198,6 +228,7 @@ TEST_CASE("Counting crossings agrees with mincross without optimization", "[minc
          {blueprints::full_adder_network<technology_network>(), blueprints::mux21_network<technology_network>(),
           blueprints::maj4_network<technology_network>()})
     {
+        INFO("Network size: " << tec.size());
         const auto tec_r = mutable_rank_view(network_balancing<technology_network>(tec));
 
         mincross_stats        st{};
