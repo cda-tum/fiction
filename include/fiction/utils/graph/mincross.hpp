@@ -549,12 +549,12 @@ class mincross_impl
 
             if (has_fanins)
             {
-                count_crossings(in_begin, in_nodes, v, w, c0, c1);
+                count_pair_crossings(in_begin, in_nodes, v, w, c0, c1);
             }
 
             if (has_fanouts)
             {
-                count_crossings(out_begin, out_nodes, v, w, c0, c1);
+                count_pair_crossings(out_begin, out_nodes, v, w, c0, c1);
             }
 
             if (c1 < c0 || (c0 > 0 && order == median_sorting::DESCENDING && c1 == c0))
@@ -651,8 +651,8 @@ class mincross_impl
      * @param kept Receives the crossings with `left` left of `right`.
      * @param swapped Receives the crossings with the nodes swapped.
      */
-    void count_crossings(const std::vector<uint32_t>& begin, const std::vector<uint32_t>& neighbors,
-                         const std::size_t left, const std::size_t right, uint64_t& kept, uint64_t& swapped) const
+    void count_pair_crossings(const std::vector<uint32_t>& begin, const std::vector<uint32_t>& neighbors,
+                              const std::size_t left, const std::size_t right, uint64_t& kept, uint64_t& swapped) const
     {
         for (auto a = begin[left]; a < begin[left + 1]; ++a)
         {
