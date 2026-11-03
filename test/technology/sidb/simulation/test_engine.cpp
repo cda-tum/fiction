@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/technology/sidb/simulation/engine.hpp>
@@ -47,6 +48,7 @@ TEST_CASE("Look up SiDB simulation engines by case-insensitive name", "[sidb-sim
 
     for (unsigned int value = 0; value <= 255; ++value)
     {
+        CAPTURE(value);
         CHECK_FALSE(get_engine(std::string(1, static_cast<char>(value))).has_value());
     }
 }

@@ -210,6 +210,7 @@ TEST_CASE("Determine the probability of fabricating an operational Bestagon AND 
         const auto result = determine_probability_of_fabricating_operational_gate(
             lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, params, 0.1);
         CHECK(result >= -std::numeric_limits<double>::epsilon());
+        CHECK(result <= 1.0 + std::numeric_limits<double>::epsilon());
     }
 }
 

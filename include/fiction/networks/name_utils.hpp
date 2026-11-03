@@ -115,8 +115,10 @@ std::string get_name(const NtkOrLyt& ntk_or_lyt)
     {
         return ntk_or_lyt.get_layout_name();
     }
-
-    return {};
+    else
+    {
+        return {};
+    }
 }
 /**
  * Helper function to conveniently assign a name to a layout or network as they use different function names for the

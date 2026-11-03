@@ -54,7 +54,7 @@ Args:
 
 Raises:
     ValueError: If the layout is incomplete, cyclic, physically invalid, uses an unsupported scheme,
-        or contains illegal XML text controls.
+        or contains invalid UTF-8 or illegal XML characters in a name.
     RuntimeError: If the output file cannot be created, written, closed, or replaced.
 )doc",
         nb::call_guard<nb::gil_scoped_release>());

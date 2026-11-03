@@ -177,9 +177,6 @@ Args:
 
 Returns:
     A logically equivalent network of the selected type.
-
-Raises:
-    ValueError: A gate has neither a supported implementation nor a truth table.
 )doc");
     detail::register_convert_network_to<detail::network_target::AIG>(
         m, "def convert_network(network: mnt.pyfiction.networks.technology_network | "

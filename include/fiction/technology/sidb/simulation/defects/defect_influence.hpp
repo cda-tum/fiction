@@ -617,20 +617,15 @@ class defect_influence_impl
     {
         const auto row = row_of(starting_defect_position);
 
-        auto latest_non_influential = starting_defect_position;
-        auto previous               = starting_defect_position;
-        auto current                = starting_defect_position;
+        auto previous = starting_defect_position;
+        auto current  = starting_defect_position;
 
         for (auto x = starting_defect_position.x;; ++x)
         {
             previous = current;
             current  = site_at_row(x, row);
 
-            if (is_defect_influential(spec, current) == defect_influence_status::NON_INFLUENTIAL)
-            {
-                latest_non_influential = current;
-            }
-            else
+            if (is_defect_influential(spec, current) != defect_influence_status::NON_INFLUENTIAL)
             {
                 return previous;
             }
@@ -641,12 +636,7 @@ class defect_influence_impl
             }
         }
 
-        if (current == latest_non_influential)
-        {
-            return std::nullopt;
-        }
-
-        return latest_non_influential;
+        return std::nullopt;
     }
     /**
      * @brief Writes the counters into the statistics.

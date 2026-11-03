@@ -72,6 +72,13 @@ def wire_with_canvas() -> sidb_layout:
     return lyt
 
 
+def test_parameter_point_extreme_values() -> None:
+    nan = float("nan")
+    points = {parameter_point([value]) for value in (1e300, 2e300, -1e300, float("inf"), -float("inf"), nan)}
+    assert len(points) == 6
+    assert parameter_point([nan]) in points
+
+
 def test_operational_domain_siqad_or_100_lattice(resources_dir):
     lyt = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
 

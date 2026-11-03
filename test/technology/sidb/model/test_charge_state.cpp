@@ -45,16 +45,16 @@ TEST_CASE("sign_to_charge_state returns the correct charge state for each sign",
 {
     /** @brief Valid signs and invalid values on both sides of the valid range. */
     const auto [sign, expected] =
-        GENERATE(table<int8_t, charge_state>({{-1, charge_state::NEGATIVE},
-                                              {0, charge_state::NEUTRAL},
-                                              {1, charge_state::POSITIVE},
-                                              {2, charge_state::NONE},
-                                              {3, charge_state::NONE},
-                                              {4, charge_state::NONE},
+        GENERATE(table<int8_t, charge_state>({{int8_t{-1}, charge_state::NEGATIVE},
+                                              {int8_t{0}, charge_state::NEUTRAL},
+                                              {int8_t{1}, charge_state::POSITIVE},
+                                              {int8_t{2}, charge_state::NONE},
+                                              {int8_t{3}, charge_state::NONE},
+                                              {int8_t{4}, charge_state::NONE},
                                               {std::numeric_limits<int8_t>::max(), charge_state::NONE},
-                                              {-2, charge_state::NONE},
-                                              {-3, charge_state::NONE},
-                                              {-4, charge_state::NONE},
+                                              {int8_t{-2}, charge_state::NONE},
+                                              {int8_t{-3}, charge_state::NONE},
+                                              {int8_t{-4}, charge_state::NONE},
                                               {std::numeric_limits<int8_t>::min(), charge_state::NONE}}));
     CAPTURE(static_cast<int>(sign));
     CHECK(sign_to_charge_state(sign) == expected);
