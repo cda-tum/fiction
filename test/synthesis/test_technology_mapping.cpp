@@ -82,6 +82,37 @@ void map_and_check(const Ntk& ntk, const technology_mapping_params& params)
 
 }  // namespace
 
+TEST_CASE("Asymmetric gate selection", "[technology-mapping]")
+{
+    technology_network        ntk{};
+    const auto                a = ntk.create_pi();
+    const auto                b = ntk.create_pi();
+    technology_mapping_params params{};
+    params.inv = true;
+
+    SECTION("LT")
+    {
+        ntk.create_po(ntk.create_lt(a, b));
+        params.lt2 = true;
+    }
+    SECTION("GT")
+    {
+        ntk.create_po(ntk.create_gt(a, b));
+        params.gt2 = true;
+    }
+    SECTION("LE")
+    {
+        ntk.create_po(ntk.create_le(a, b));
+        params.le2 = true;
+    }
+    SECTION("GE")
+    {
+        ntk.create_po(ntk.create_ge(a, b));
+        params.ge2 = true;
+    }
+    map_and_check(ntk, params);
+}
+
 TEST_CASE("Simple AOI network mapping", "[technology-mapping]")
 {
     map_and_check(blueprints::maj1_network<mockturtle::aig_network>(), and_or_not());
