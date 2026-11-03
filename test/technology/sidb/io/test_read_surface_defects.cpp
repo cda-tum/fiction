@@ -162,6 +162,17 @@ TEST_CASE("Surface defect files preserve every parsed row", "[read-sidb-surface-
         const std::filesystem::path& path;
         /** @brief Path to the owned directory. */
         const std::filesystem::path& directory;
+        /** @brief Keep the owned file and directory until cleanup. */
+        file_cleanup(const std::filesystem::path& file, const std::filesystem::path& dir) : path{file}, directory{dir}
+        {}
+        /** @brief Cleanup ownership cannot be copied. */
+        file_cleanup(const file_cleanup&) = delete;
+        /** @brief Cleanup ownership cannot be assigned. */
+        file_cleanup& operator=(const file_cleanup&) = delete;
+        /** @brief Cleanup ownership cannot be moved. */
+        file_cleanup(file_cleanup&&) = delete;
+        /** @brief Cleanup ownership cannot be move-assigned. */
+        file_cleanup& operator=(file_cleanup&&) = delete;
         /** @brief Remove the file without throwing during stack unwinding. */
         ~file_cleanup()
         {
@@ -169,7 +180,8 @@ TEST_CASE("Surface defect files preserve every parsed row", "[read-sidb-surface-
             std::filesystem::remove(path, error);
             std::filesystem::remove(directory, error);
         }
-    } cleanup{filename, directory};
+    };
+    const file_cleanup cleanup{filename, directory};
     {
         /** @brief Binary output preserves the separator. */
         std::ofstream output{filename, std::ios::binary};
