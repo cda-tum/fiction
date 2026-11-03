@@ -4,8 +4,6 @@ foreach(FILE IN LISTS FILENAMES)
   get_filename_component(NAME ${FILE} NAME_WE)
   set(BENCH_NAME bench_${NAME})
   add_executable(${BENCH_NAME} ${FILE})
-  target_compile_definitions(${BENCH_NAME}
-                             INTERFACE CATCH_CONFIG_NO_POSIX_SIGNALS)
   target_link_libraries(
     ${BENCH_NAME} PRIVATE fiction::fiction_warnings fiction::fiction_options
                           libfiction Catch2::Catch2WithMain)
