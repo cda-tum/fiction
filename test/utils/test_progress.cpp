@@ -415,5 +415,18 @@ TEST_CASE("Progress recorder checks task histories", "[progress]")
 
     CHECK(rec.is_consistent("items") == consistent);
     CHECK(rec.final_count("items") == final);
-    CHECK(std::ssize(rec.reports_of("items")) == std::ranges::count(reports, "items", &progress_record::task));
+    const auto  filtered = rec.reports_of("items");
+    std::size_t index{};
+    for (const auto& report : reports)
+    {
+        if (report.task == "items")
+        {
+            REQUIRE(index < filtered.size());
+            CHECK(filtered[index].task == report.task);
+            CHECK(filtered[index].done == report.done);
+            CHECK(filtered[index].total == report.total);
+            ++index;
+        }
+    }
+    CHECK(index == filtered.size());
 }

@@ -215,6 +215,8 @@ TEST_CASE("Half-adder blueprint names its sum and carry functions", "[mockturtle
         network, mockturtle::default_simulator<kitty::dynamic_truth_table>{2});
     REQUIRE(network.num_pos() == 2);
     REQUIRE(functions.size() == 2);
+    CHECK(network.get_output_name(0) == "carry");
+    CHECK(network.get_output_name(1) == "sum");
 
     /** @brief Output names sorted only to check completeness and uniqueness. */
     std::array names{network.get_output_name(0), network.get_output_name(1)};

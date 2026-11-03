@@ -153,7 +153,7 @@ mockturtle::names_view<Ntk> constant_gate_input_maj_network()
 }
 
 /**
- * @brief Creates a half-adder network with named sum and carry outputs.
+ * @brief Creates a half-adder network with carry as output 0 and sum as output 1.
  * @tparam Ntk Network type.
  * @return The named half-adder network.
  */
