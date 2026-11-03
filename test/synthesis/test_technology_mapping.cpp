@@ -121,6 +121,27 @@ TEST_CASE("Asymmetric gate selection", "[technology-mapping]")
     CHECK(gates.num_ge2 == static_cast<uint32_t>(params.ge2));
 }
 
+TEST_CASE("Single comparison gate without an inverter", "[technology-mapping]")
+{
+    technology_network network{};
+    const auto         a = network.create_pi();
+    const auto         b = network.create_pi();
+    network.create_po(network.create_lt(a, b));
+
+    SECTION("The matching gate maps successfully")
+    {
+        const auto gates = map_and_check(network, technology_mapping_params{.lt2 = true});
+        CHECK(gates.num_lt2 == 1);
+    }
+    SECTION("A gate from the complementary class reports failure")
+    {
+        technology_mapping_stats stats{};
+        const auto               mapped = technology_mapping(network, technology_mapping_params{.le2 = true}, &stats);
+        CHECK(stats.mapper_stats.mapping_error);
+        CHECK(mapped.num_pos() == 0);
+    }
+}
+
 TEST_CASE("Simple AOI network mapping", "[technology-mapping]")
 {
     map_and_check(blueprints::maj1_network<mockturtle::aig_network>(), and_or_not());
