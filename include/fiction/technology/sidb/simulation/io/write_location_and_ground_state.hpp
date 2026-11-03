@@ -18,6 +18,7 @@
 #pragma once
 
 #include "fiction/technology/sidb/charge_distribution.hpp"
+#include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/simulation/analysis/minimum_energy.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
@@ -29,6 +30,7 @@
 #include <cstddef>
 #include <ostream>
 #include <ranges>
+#include <stdexcept>
 #include <string_view>
 #include <vector>
 
@@ -53,21 +55,39 @@ class location_and_ground_state_writer
     location_and_ground_state_writer(const sidb::simulation::result& src, std::ostream& s) : sim_result{src}, os{s} {}
 
     /**
-     * @brief Writes positions in nanometers and one column per ground state; writes nothing for an empty result.
+     * @brief Writes positions in nanometers and one column per minimum-energy entry.
+     *
+     * Preserves input order and duplicates; writes nothing for an empty result.
+     * @throws std::invalid_argument If a distribution has different sites from the result layout or a nonfinite energy.
      */
     void run()
     {
-        const auto min_energy = fiction::utils::math::round_to_n_decimal_places(
-            simulation::analysis::minimum_energy(sim_result.charge_distributions.cbegin(),
-                                                 sim_result.charge_distributions.cend()),
-            6);
+        /** @brief Last validated site vector; shared site storage is immutable. */
+        const std::vector<lattice_site>* previous_sites{nullptr};
+        for (const auto& cd : sim_result.charge_distributions)
+        {
+            if (!std::isfinite(cd.energy()))
+            {
+                throw std::invalid_argument("Charge distribution energies must be finite");
+            }
+            const auto* sites = &cd.sites();
+            if (sites != previous_sites && *sites != sim_result.lyt.sidbs())
+            {
+                throw std::invalid_argument("Charge distribution sites do not match the result layout");
+            }
+            previous_sites = sites;
+        }
+        const auto min_energy = simulation::analysis::minimum_energy(sim_result.charge_distributions.cbegin(),
+                                                                     sim_result.charge_distributions.cend());
+        /** @brief Minimum energy rounded to six decimal places. */
+        const auto rounded_min_energy = fiction::utils::math::round_to_n_decimal_places(min_energy, 6);
 
         std::vector<const charge_distribution*> ground_states{};
 
         for (const auto& cd : sim_result.charge_distributions)
         {
-            if (std::fabs(fiction::utils::math::round_to_n_decimal_places(cd.energy(), 6) - min_energy) <
-                utils::math::ERROR_MARGIN)
+            if (cd.energy() == min_energy || std::fabs(fiction::utils::math::round_to_n_decimal_places(cd.energy(), 6) -
+                                                       rounded_min_energy) < utils::math::ERROR_MARGIN)
             {
                 ground_states.push_back(&cd);
             }
@@ -113,11 +133,13 @@ class location_and_ground_state_writer
 }  // namespace detail
 
 /**
- * @brief Writes the SiDB positions of a simulation result and the charge states of its ground states as CSV to a
- * stream.
+ * @brief Writes SiDB positions and minimum-energy charge distributions as CSV to a stream.
+ *
+ * Preserves input order and duplicate minimum-energy entries. Invalid input leaves the stream unchanged.
  *
  * @param sim_result Result to write.
  * @param os Output stream to write into.
+ * @throws std::invalid_argument If a distribution has different sites from the result layout or a nonfinite energy.
  */
 inline void write_location_and_ground_state(const sidb::simulation::result& sim_result, std::ostream& os)
 {
@@ -126,11 +148,14 @@ inline void write_location_and_ground_state(const sidb::simulation::result& sim_
     p.run();
 }
 /**
- * @brief Writes the SiDB positions of a simulation result and the charge states of its ground states as CSV.
+ * @brief Writes SiDB positions and minimum-energy charge distributions as CSV.
+ *
+ * Preserves input order and duplicate minimum-energy entries. Invalid input preserves an existing file.
  *
  * @param sim_result Result to write.
  * @param filename File to write into.
  * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
+ * @throws std::invalid_argument If a distribution has different sites from the result layout or a nonfinite energy.
  */
 inline void write_location_and_ground_state(const sidb::simulation::result& sim_result,
                                             const std::string_view&         filename)

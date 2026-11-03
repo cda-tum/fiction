@@ -130,6 +130,25 @@ TEST_CASE("Defect influence grid-search edge cases", "[defect-influence]")
         CHECK(domain.size() == 4);
     }
 
+    SECTION("QuickTrace exhausts a non-influential row")
+    {
+        layout lyt{};
+        lyt.assign_sidb(site_at_row(0, 0), dot_tag::NORMAL);
+
+        // Bound a broken contour traversal.
+        const defect_influence_params contour_params{.operational_params       = {.timeout = 5000},
+                                                     .additional_scanning_area = {2, 0}};
+        const auto                    domain = defect_influence_quicktrace(lyt, 1, contour_params);
+        const auto non_influential           = std::optional{std::tuple{defect_influence_status::NON_INFLUENTIAL}};
+
+        CHECK(domain.size() == 5);
+        CHECK(domain.contains(site_at_row(-2, 0)) == non_influential);
+        CHECK(domain.contains(site_at_row(-1, 0)) == non_influential);
+        CHECK(domain.contains(site_at_row(0, 0)) == non_influential);
+        CHECK(domain.contains(site_at_row(1, 0)) == non_influential);
+        CHECK(domain.contains(site_at_row(2, 0)) == non_influential);
+    }
+
     SECTION("QuickTrace at the maximum lattice column")
     {
         auto lyt = layout{};
@@ -365,28 +384,11 @@ TEST_CASE("Defect influence when considering the change of the ground state", "[
                        Catch::Matchers::WithinAbs(0.665060, ERROR_MARGIN));
             CHECK((((clearance_result.defect_position.x == -1) && (clearance_result.defect_position.y == -1)) ||
                    ((clearance_result.defect_position.x == 1) && (clearance_result.defect_position.y == -1))));
+            CHECK_THAT(
+                round_to_n_decimal_places(clearance_result.defect_clearance_distance, 4) -
+                    round_to_n_decimal_places(lyt.get_lattice().nm_distance(site_at_row(0, 0), site_at_row(1, -1)), 4),
+                Catch::Matchers::WithinAbs(0.0, ERROR_MARGIN));
         }
-    }
-
-    SECTION("layout with one SiDB, negative defect, smaller lambda_tf")
-    {
-        const auto defect_operational_params = defect_influence_params{
-            .defect =
-                defect{defect_type::UNKNOWN, -1, simulation_parameters{}.epsilon_r, simulation_parameters{}.lambda_tf},
-            .operational_params       = is_operational_params{.sim_params = simulation_parameters{2, -0.32}},
-            .additional_scanning_area = {2, 2},
-            .influence_def            = defect_influence_params::influence_definition::GROUND_STATE_CHANGE};
-
-        layout lyt{};
-        lyt.assign_sidb(site_at_row(0, 0), dot_tag::NORMAL);
-
-        const auto defect_operational_domain = defect_influence_grid_search(lyt, defect_operational_params);
-        const auto defect_clearance          = calculate_defect_clearance(lyt, defect_operational_domain);
-
-        CHECK_THAT(
-            round_to_n_decimal_places(defect_clearance.defect_clearance_distance, 4) -
-                round_to_n_decimal_places(lyt.get_lattice().nm_distance(site_at_row(0, 0), site_at_row(1, -1)), 4),
-            Catch::Matchers::WithinAbs(0.0, ERROR_MARGIN));
     }
 
     SECTION("layout with one SiDB, negative defect, large lambda_tf")
