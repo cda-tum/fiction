@@ -20,10 +20,8 @@
 #include "fiction/synthesis/network_balancing.hpp"
 
 #include <mockturtle/traits.hpp>
-#include <mockturtle/views/fanout_view.hpp>
 
 #include <algorithm>
-#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
@@ -120,7 +118,7 @@ class mincross_impl
      */
     mincross_impl(const Ntk& src, const mincross_params p, mincross_stats& st) :
             ntk(src),
-            fanout_ntk(src),
+
             ps(p),
             pst{st}
     {}
@@ -160,7 +158,7 @@ class mincross_impl
         auto cur_cross  = total_crossings;
         auto best_cross = cur_cross;
 
-        auto best_ranks = fanout_ntk.get_all_ranks();
+        auto best_ranks = ntk.get_all_ranks();
 
         // Passes: 0 = init, 1 = refinement, 2 = full optimization
         for (uint64_t pass = 0; pass <= 2; ++pass)
@@ -184,7 +182,7 @@ class mincross_impl
 
                 if (cur_cross <= best_cross)
                 {
-                    best_ranks = fanout_ntk.get_all_ranks();
+                    best_ranks = ntk.get_all_ranks();
                     // Note: Conversion to double is safe here since best_cross < 2^53 in all practical cases.
                     if (static_cast<double>(cur_cross) < ps.convergence * static_cast<double>(best_cross))
                     {
@@ -195,7 +193,7 @@ class mincross_impl
             }
 
             // After the pass, restore best found ordering
-            fanout_ntk.set_all_ranks(best_ranks);
+            ntk.set_all_ranks(best_ranks);
             if (cur_cross == 0)
             {
                 break;
@@ -209,10 +207,9 @@ class mincross_impl
             cur_cross = total_crossings;
             if (cur_cross < best_cross)
             {
-                best_ranks = fanout_ntk.get_all_ranks();
+                best_ranks = ntk.get_all_ranks();
             }
         }
-        fanout_ntk.set_all_ranks(best_ranks);
         ntk.set_all_ranks(best_ranks);
     }
 
@@ -225,7 +222,7 @@ class mincross_impl
     {
         // Graphviz toggles the sorting direction depending on the pass number
         const auto order    = (pass % 4 < 2) ? median_sorting::ASCENDING : median_sorting::DESCENDING;
-        const auto max_rank = fanout_ntk.depth();
+        const auto max_rank = ntk.depth();
 
         if (pass % 2 == 0)
         {
@@ -272,84 +269,85 @@ class mincross_impl
         median_map.clear();
 
         // Loop over all nodes in rank r0
-        fanout_ntk.foreach_node_in_rank(
-            r0,
-            [this, &r0, &r1](auto const& n)
-            {
-                std::vector<uint32_t> neighbor_positions{};
-                if (r1 > r0)
-                {
-                    // Go forward: fanouts
-                    const auto idx = index_of(n);
-                    neighbor_positions.reserve(out_begin[idx + 1] - out_begin[idx]);
-                    for (auto i = out_begin[idx]; i < out_begin[idx + 1]; ++i)
-                    {
-                        const auto fo = fanout_ntk.index_to_node(out_nodes[i]);
-                        if (fanout_ntk.level(fo) == r1)
-                        {
-                            neighbor_positions.push_back(fanout_ntk.rank_position(fo));
-                        }
-                    }
-                }
-                else
-                {
-                    // Go backward: fanins
-                    neighbor_positions.reserve(fanout_ntk.fanin_size(n));
-                    fanout_ntk.foreach_fanin(n,
-                                             [this, &r1, &neighbor_positions](auto const& fi)
+        ntk.foreach_node_in_rank(r0,
+                                 [this, &r0, &r1](auto const& n)
+                                 {
+                                     std::vector<uint32_t> neighbor_positions{};
+                                     if (r1 > r0)
+                                     {
+                                         // Go forward: fanouts
+                                         const auto idx = index_of(n);
+                                         neighbor_positions.reserve(out_begin[idx + 1] - out_begin[idx]);
+                                         for (auto i = out_begin[idx]; i < out_begin[idx + 1]; ++i)
+                                         {
+                                             const auto fo = ntk.index_to_node(out_nodes[i]);
+                                             if (ntk.level(fo) == r1)
                                              {
-                                                 const auto src = fanout_ntk.get_node(fi);
-                                                 if (fanout_ntk.level(src) == r1 && !fanout_ntk.is_constant(src))
-                                                 {
-                                                     neighbor_positions.push_back(fanout_ntk.rank_position(src));
-                                                 }
-                                             });
-                }
+                                                 neighbor_positions.push_back(ntk.rank_position(fo));
+                                             }
+                                         }
+                                     }
+                                     else
+                                     {
+                                         // Go backward: fanins
+                                         neighbor_positions.reserve(ntk.fanin_size(n));
+                                         ntk.foreach_fanin(n,
+                                                           [this, &r1, &neighbor_positions](auto const& fi)
+                                                           {
+                                                               const auto src = ntk.get_node(fi);
+                                                               if (ntk.level(src) == r1 && !ntk.is_constant(src))
+                                                               {
+                                                                   neighbor_positions.push_back(ntk.rank_position(src));
+                                                               }
+                                                           });
+                                     }
 
-                if (neighbor_positions.empty())
-                {
-                    median_map[n] = -1;  // No connections
-                    return;
-                }
+                                     if (neighbor_positions.empty())
+                                     {
+                                         median_map[n] = -1;  // No connections
+                                         return;
+                                     }
 
-                std::ranges::sort(neighbor_positions);
+                                     std::ranges::sort(neighbor_positions);
 
-                if (neighbor_positions.size() == 1)
-                {
-                    median_map[n] = neighbor_positions[0];
-                }
-                else if (neighbor_positions.size() == 2)
-                {
-                    median_map[n] = (neighbor_positions[0] + neighbor_positions[1]) / 2.0;
-                }
-                else
-                {
-                    const std::size_t j = neighbor_positions.size();
-                    if (j % 2 == 1)
-                    {
-                        median_map[n] = neighbor_positions[j / 2];
-                    }
-                    else
-                    {
-                        // Weighted median
-                        const std::size_t rm    = j / 2;
-                        const std::size_t lm    = rm - 1;
-                        const uint32_t    lspan = neighbor_positions[lm] - neighbor_positions.front();
-                        const uint32_t    rspan = neighbor_positions.back() - neighbor_positions[rm];
+                                     if (neighbor_positions.size() == 1)
+                                     {
+                                         median_map[n] = neighbor_positions[0];
+                                     }
+                                     else if (neighbor_positions.size() == 2)
+                                     {
+                                         median_map[n] = (neighbor_positions[0] + neighbor_positions[1]) / 2.0;
+                                     }
+                                     else
+                                     {
+                                         const std::size_t j = neighbor_positions.size();
+                                         if (j % 2 == 1)
+                                         {
+                                             median_map[n] = neighbor_positions[j / 2];
+                                         }
+                                         else
+                                         {
+                                             // Weighted median
+                                             const std::size_t rm = j / 2;
+                                             const std::size_t lm = rm - 1;
+                                             const uint32_t lspan = neighbor_positions[lm] - neighbor_positions.front();
+                                             const uint32_t rspan = neighbor_positions.back() - neighbor_positions[rm];
 
-                        if (lspan == rspan)
-                        {
-                            median_map[n] = (neighbor_positions[lm] + neighbor_positions[rm]) / 2.0;
-                        }
-                        else
-                        {
-                            const double w = (neighbor_positions[lm] * static_cast<double>(rspan)) +
-                                             (neighbor_positions[rm] * static_cast<double>(lspan));
-                            median_map[n]  = w / (lspan + rspan);
-                        }
-                    }
-                }
-            });
+                                             if (lspan == rspan)
+                                             {
+                                                 median_map[n] =
+                                                     (neighbor_positions[lm] + neighbor_positions[rm]) / 2.0;
+                                             }
+                                             else
+                                             {
+                                                 const double w =
+                                                     (neighbor_positions[lm] * static_cast<double>(rspan)) +
+                                                     (neighbor_positions[rm] * static_cast<double>(lspan));
+                                                 median_map[n] = w / (lspan + rspan);
+                                             }
+                                         }
+                                     }
+                                 });
     }
 
     /**
@@ -361,7 +359,7 @@ class mincross_impl
     void reorder(const uint32_t r, const median_sorting order)
     {
         // Get the nodes at rank r
-        auto rank = fanout_ntk.get_ranks(r);
+        auto rank = ntk.get_ranks(r);
 
         // Sort by median value
         std::ranges::sort(rank,
@@ -384,7 +382,7 @@ class mincross_impl
                           });
 
         // Re-assign sorted rank and update rank positions
-        fanout_ntk.set_ranks(r, rank);
+        ntk.set_ranks(r, rank);
     }
 
     /**
@@ -399,9 +397,9 @@ class mincross_impl
     {
         build_neighbors();
 
-        ranks = fanout_ntk.get_all_ranks();
+        ranks = ntk.get_all_ranks();
 
-        positions.assign(fanout_ntk.size(), 0);
+        positions.assign(ntk.size(), 0);
         for (const auto& rank : ranks)
         {
             for (std::size_t i = 0; i < rank.size(); ++i)
@@ -410,7 +408,7 @@ class mincross_impl
             }
         }
 
-        std::vector<uint8_t> candidate(fanout_ntk.depth() + 1, 1);
+        std::vector<uint8_t> candidate(ntk.depth() + 1, 1);
         uint32_t             delta          = 0;
         uint32_t             max_iterations = 0;
 
@@ -418,7 +416,7 @@ class mincross_impl
         {
             delta = 0;
 
-            for (uint32_t l = 0; l <= fanout_ntk.depth(); ++l)
+            for (uint32_t l = 0; l <= ntk.depth(); ++l)
             {
                 if (l == 0 && ps.fixed_pis)
                 {
@@ -441,7 +439,7 @@ class mincross_impl
             }
         }
 
-        fanout_ntk.set_all_ranks(ranks);
+        ntk.set_all_ranks(ranks);
     }
 
     /**
@@ -462,7 +460,7 @@ class mincross_impl
         }
 
         const bool has_fanins  = r > 0;
-        const bool has_fanouts = r + 1 < fanout_ntk.depth();
+        const bool has_fanouts = r + 1 < ntk.depth();
 
         uint32_t rv = 0;
 
@@ -503,7 +501,7 @@ class mincross_impl
      */
     [[nodiscard]] std::size_t index_of(const node& n) const
     {
-        return static_cast<std::size_t>(fanout_ntk.node_to_index(n));
+        return static_cast<std::size_t>(ntk.node_to_index(n));
     }
 
     /**
@@ -516,47 +514,49 @@ class mincross_impl
             return;
         }
 
-        const auto size = static_cast<std::size_t>(fanout_ntk.size());
+        const auto size = static_cast<std::size_t>(ntk.size());
 
         in_begin.assign(size + 1, 0);
         out_begin.assign(size + 1, 0);
-        std::vector<std::vector<uint32_t>> outgoing(size);
-        fanout_ntk.foreach_gate(
-            [this, &outgoing](const auto& target)
-            {
-                fanout_ntk.foreach_fanin(target,
-                                         [this, &outgoing, &target](const auto& f)
-                                         {
-                                             const auto src = fanout_ntk.get_node(f);
-                                             if (!fanout_ntk.is_constant(src))
-                                             {
-                                                 outgoing[index_of(src)].push_back(
-                                                     static_cast<uint32_t>(index_of(target)));
-                                             }
-                                         });
-            });
-
         for (std::size_t i = 0; i < size; ++i)
         {
-            const node n = fanout_ntk.index_to_node(static_cast<uint32_t>(i));
+            const node n = ntk.index_to_node(static_cast<uint32_t>(i));
 
-            if (!fanout_ntk.is_constant(n))
+            if (!ntk.is_constant(n))
             {
-                fanout_ntk.foreach_fanin(n,
-                                         [this](auto const& f)
-                                         {
-                                             const auto src = fanout_ntk.get_node(f);
-                                             if (!fanout_ntk.is_constant(src))
-                                             {
-                                                 in_nodes.push_back(static_cast<uint32_t>(index_of(src)));
-                                             }
-                                         });
-                out_nodes.insert(out_nodes.end(), outgoing[i].begin(), outgoing[i].end());
+                ntk.foreach_fanin(n,
+                                  [this](auto const& f)
+                                  {
+                                      const auto src = ntk.get_node(f);
+                                      if (!ntk.is_constant(src))
+                                      {
+                                          in_nodes.push_back(static_cast<uint32_t>(index_of(src)));
+                                      }
+                                  });
             }
 
-            in_begin[i + 1]  = static_cast<uint32_t>(in_nodes.size());
-            out_begin[i + 1] = static_cast<uint32_t>(out_nodes.size());
+            in_begin[i + 1] = static_cast<uint32_t>(in_nodes.size());
         }
+
+        for (const auto src : in_nodes)
+        {
+            ++out_begin[src + 1];
+        }
+        for (std::size_t i = 0; i < size; ++i)
+        {
+            out_begin[i + 1] += out_begin[i];
+        }
+        out_nodes.resize(in_nodes.size());
+        auto next = out_begin;
+        ntk.foreach_gate(
+            [this, &next](const auto& target)
+            {
+                const auto idx = index_of(target);
+                for (auto i = in_begin[idx]; i < in_begin[idx + 1]; ++i)
+                {
+                    out_nodes[next[in_nodes[i]]++] = static_cast<uint32_t>(idx);
+                }
+            });
     }
 
     /**
@@ -593,17 +593,13 @@ class mincross_impl
      */
     void ncross()
     {
-        total_crossings = fiction::utils::graph::count_crossings(fanout_ntk);
+        total_crossings = fiction::utils::graph::count_crossings(ntk);
     }
 
     /**
      * Logic network being reordered.
      */
     Ntk ntk;
-    /**
-     * Fanout-augmented view of the network for efficient traversal and connectivity queries.
-     */
-    mockturtle::fanout_view<Ntk> fanout_ntk;
     /**
      * Current total number of edge crossings in the network.
      */
