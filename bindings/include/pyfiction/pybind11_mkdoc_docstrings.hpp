@@ -27742,7 +27742,13 @@ order encodes the rank order.
 
 The result lists the primary inputs in the order of level 0, then the
 gates level by level in rank order. Virtual primary inputs become
-ordinary primary inputs of the result; all names are kept.
+ordinary primary inputs of the result; all names are kept. A
+complemented fanin or output signal reads its node through an inverter
+node that sits right before the node that reads it, and a complemented
+constant becomes the other constant. Such inverters leave the copy
+unbalanced; they occur only in a planar network built by hand over a
+type with complemented signals, such as an AIG, because
+`planarization` works on technology networks.
 
 Args:
     planar: Planar network, the result of `planarization`.
@@ -28232,8 +28238,10 @@ Args:
     pst: Statistics.
 
 Template Args:
-    Ntk: Ranked, balanced network type (see `mutable_rank_view`)
-         without virtual primary inputs.
+    Ntk: Ranked, balanced technology network type (see
+         `mutable_rank_view` and `technology_network`) without virtual
+         primary inputs; the stages need `create_node`, `is_buf`, and
+         `is_po`.
 
 Returns:
     Planar `virtual_pi_network` with unified outputs and fanout nodes
