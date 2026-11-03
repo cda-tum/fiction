@@ -24,6 +24,7 @@ for (const checked of [true, false]) {
     const target = {
       closest: (selector) => (selector === ".sd-tab-content" ? panel : null),
       scrollIntoView() {
+        assert.equal(input.checked, true);
         scrolled = true;
       },
     };
@@ -34,7 +35,8 @@ for (const checked of [true, false]) {
         addEventListener: (event, callback) => (listeners[event] = callback),
       },
       document: {
-        getElementById: (id) => (id === "target" ? target : input),
+        getElementById: (id) =>
+          id === "target" ? target : id === "tab" ? input : null,
         addEventListener() {},
       },
     });
@@ -44,14 +46,19 @@ for (const checked of [true, false]) {
   });
 }
 
-for (const outerChecked of [false, true]) {
-  test(`hash changes reveal an encoded nested target with the outer tab ${outerChecked ? "active" : "hidden"}`, () => {
+for (const [innerChecked, outerChecked] of [
+  [false, false],
+  [false, true],
+  [true, false],
+]) {
+  test(`hash changes reveal an encoded nested target with inner=${innerChecked} outer=${outerChecked}`, () => {
     const inputs = {
-      inner: { checked: false },
+      inner: { checked: innerChecked },
       outer: { checked: outerChecked },
     };
     let scrolled = false;
     let outerClicks = 0;
+    let innerClicks = 0;
     const outer = {
       previousElementSibling: {
         htmlFor: "outer",
@@ -66,7 +73,8 @@ for (const outerChecked of [false, true]) {
       previousElementSibling: {
         htmlFor: "inner",
         click() {
-          inputs.inner.checked = true;
+          innerClicks++;
+          inputs.inner.checked = !inputs.inner.checked;
         },
       },
       parentElement: {
@@ -96,6 +104,7 @@ for (const outerChecked of [false, true]) {
     assert.equal(inputs.inner.checked, true);
     assert.equal(inputs.outer.checked, true);
     assert.equal(outerClicks, outerChecked ? 0 : 1);
+    assert.equal(innerClicks, innerChecked ? 0 : 1);
     assert.equal(scrolled, true);
   });
 }
