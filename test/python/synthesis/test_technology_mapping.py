@@ -33,12 +33,20 @@ if TYPE_CHECKING:
 
 
 @pytest.mark.parametrize(
-    ("gate", "expression"),
-    [("lt2", "a & ~b"), ("gt2", "~a & b"), ("le2", "~(a & ~b)"), ("ge2", "~(~a & b)")],
+    ("source_gate", "expression", "expected"),
+    [
+        ("lt2", "a & ~b", [False, False, True, False]),
+        ("gt2", "~a & b", [False, True, False, False]),
+        ("le2", "~(~a & b)", [True, False, True, True]),
+        ("ge2", "~(a & ~b)", [True, True, False, True]),
+    ],
 )
-def test_mapping_respects_asymmetric_gate_selection(tmp_path: Path, gate: str, expression: str) -> None:
+@pytest.mark.parametrize("gate", ["lt2", "gt2", "le2", "ge2"])
+def test_mapping_respects_asymmetric_gate_selection(
+    tmp_path: Path, source_gate: str, gate: str, expression: str, expected: list[bool]
+) -> None:
     """The mapped network uses the selected gate and preserves the truth table."""
-    path = tmp_path / "gate.v"
+    path = tmp_path / f"{source_gate}.v"
     path.write_text(
         f"module top(a,b,f);\ninput a,b;\noutput f;\nassign f = {expression};\nendmodule\n", encoding="utf-8"
     )
@@ -47,7 +55,9 @@ def test_mapping_respects_asymmetric_gate_selection(tmp_path: Path, gate: str, e
     mapped = technology_mapping(network, **options)
     counts = count_gate_types(mapped)
     assert getattr(counts, f"num_{gate}") == 1
-    assert simulate_outputs(mapped) == simulate_outputs(network)
+    assert all(getattr(counts, f"num_{other}") == 0 for other in ("lt2", "gt2", "le2", "ge2") if other != gate)
+    assert simulate_outputs(network) == [("f", expected)]
+    assert simulate_outputs(mapped) == [("f", expected)]
 
 
 GATE_LIBRARIES = [
