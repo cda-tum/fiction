@@ -1571,8 +1571,8 @@ class plane_impl
 }  // namespace detail
 
 /**
- * @brief Places and routes a planar, balanced, fanout-substituted logic network as a 2DDWave-clocked gate-level
- * layout without wire crossings (PLANE, Planar Layout from Network Embedding).
+ * @brief Places and routes a planar, balanced, fanout-substituted logic network with unified outputs as a
+ * 2DDWave-clocked gate-level layout without wire crossings (PLANE, Planar Layout from Network Embedding).
  *
  * The approach was originally proposed in \"A Fully Planar Approach to Field-coupled Nanocomputing: Scalable Placement
  * and Routing Without Wire Crossings\" by B. Hien, M. Walter, S. Hofmann, and R. Wille in IEEE NANO 2025.
@@ -1584,7 +1584,8 @@ class plane_impl
  * constant outputs take rows of their own below the others.
  *
  * The node order of the input is its rank order. The input must be planar in that order with at most two non-constant
- * fanins and at most two fanouts per node, primary outputs included. `synthesis::flatten_planarization` turns the
+ * fanins and at most two fanouts per node, primary outputs included, and every non-constant output must be driven from
+ * the last level (unified outputs, see `synthesis::network_balancing`). `synthesis::flatten_planarization` turns the
  * result of `synthesis::planarization` into such a network.
  *
  * @param ntk Network to place and route.
@@ -1594,7 +1595,8 @@ class plane_impl
  * @throws networks::high_degree_fanin_exception If a node has more than two non-constant fanins.
  * @throws std::invalid_argument If `ntk` has no primary inputs, if a node drives more than two fanouts, if no output
  * reaches a gate, if a gate has only constant fanins or a constant fanin next to a single non-constant one, if `ntk` is
- * not balanced, or if the rank order of `ntk` has crossings.
+ * not balanced, if a non-constant output is driven from above the last level, or if the rank order of `ntk` has
+ * crossings.
  * @throws std::logic_error If placement or routing cannot keep the layout planar; such an input is a defect.
  */
 [[nodiscard]] inline layouts::cartesian_gate_layout plane(const networks::named_technology_network& ntk,
@@ -1663,6 +1665,23 @@ class plane_impl
     if (unbalanced)
     {
         throw std::invalid_argument("The network is not balanced; every fanin must sit on the previous level");
+    }
+
+    // the output routing reads every non-constant output from the last diagonal
+    bool early_output = false;
+    ranked.foreach_po(
+        [&ranked, &early_output](const auto& po)
+        {
+            if (const auto drv = ranked.get_node(po); !ranked.is_constant(drv) && ranked.level(drv) != ranked.depth())
+            {
+                early_output = true;
+            }
+        });
+
+    if (early_output)
+    {
+        throw std::invalid_argument(
+            "An output is driven from above the last level; unify the outputs before placement");
     }
 
     if (const auto crossings = utils::graph::count_crossings(ranked); crossings != 0)

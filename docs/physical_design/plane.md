@@ -3,8 +3,8 @@
 # Planar Placement and Routing
 
 Planar Layout from Network Embedding (PLANE) places and routes a planar, balanced, fanout-substituted logic network
-(see {ref}`planarization <planarization>`), whose node order is its rank order, as a 2DDWave-clocked gate-level layout without wire crossings
-{cite:p}`nano_2025_3`. Every level of the network is placed on one anti-diagonal of the layout in rank order, so the
+with unified outputs (see {ref}`planarization <planarization>`), whose node order is its rank order, as a
+2DDWave-clocked gate-level layout without wire crossings {cite:p}`nano_2025_3`. Every level of the network is placed on one anti-diagonal of the layout in rank order, so the
 planar embedding of the network is preserved; lookup tables decide for every node whether it sits east or south of its
 predecessor's wire and how many routing lines the level needs.
 

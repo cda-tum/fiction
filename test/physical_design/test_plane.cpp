@@ -363,6 +363,17 @@ TEST_CASE("Invalid inputs are rejected", "[plane]")
 
         CHECK_THROWS_AS(plane(tec), std::invalid_argument);
     }
+    SECTION("an output driven above the last level")
+    {
+        // balanced gates, but the first output is driven by an input while the second one sits on level 1
+        const auto x1 = tec.create_pi();
+        const auto x2 = tec.create_pi();
+        const auto x3 = tec.create_pi();
+        tec.create_po(x1);
+        tec.create_po(tec.create_and(x2, x3));
+
+        CHECK_THROWS_AS(plane(tec), std::invalid_argument);
+    }
 }
 
 TEST_CASE("Shared wires and routing conflicts", "[plane]")
