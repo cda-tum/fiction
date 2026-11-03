@@ -37,6 +37,10 @@ namespace fiction::utils::io::detail
     /** @brief First encoded byte of the character. */
     const auto leading = static_cast<unsigned char>(remaining.front());
     remaining.remove_prefix(1);
+    if (leading >= 0x20 && leading <= 0x7e)
+    {
+        return leading;
+    }
     /** @brief Decoded Unicode character. */
     uint32_t character{leading};
     /** @brief Smallest character encoded in this sequence length. */
