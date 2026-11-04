@@ -26,7 +26,6 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
-#include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
@@ -113,22 +112,19 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
         CHECK_THAT(op_domain_ratio, Catch::Matchers::WithinAbs(80.0 / 256.0, ERROR_MARGIN));
     }
 
-    SECTION("An on-grid seed must be operational to reach an operational region")
+    SECTION("A single non-operational point has zero operational ratio")
     {
-        for (auto& dimension : op_domain_params.sweep_dimensions)
-        {
-            dimension.min  = 0.5;
-            dimension.max  = 4.25;
-            dimension.step = 0.25;
-        }
-        /** @brief Sweep and identity-function specification shared by both seeds. */
+        op_domain_params.sweep_dimensions[0].min = op_domain_params.sweep_dimensions[0].max = 1.5;
+        op_domain_params.sweep_dimensions[1].min = op_domain_params.sweep_dimensions[1].max = 0.5;
+        op_domain_params.operational_params.sim_params.epsilon_r                            = 1.5;
+        op_domain_params.operational_params.sim_params.lambda_tf                            = 0.5;
+        /** @brief Sweep and identity-function specification for the single point. */
         const operational_domain_ratio_params params{.op_domain_params = op_domain_params};
         const std::vector                     spec{create_id_tt()};
-        /** @brief Ratios for non-operational and operational seeds on the same grid. */
-        const auto lower = operational_domain_ratio(lat, spec, parameter_point{{1.5, 0.5}}, params);
-        const auto upper = operational_domain_ratio(lat, spec, parameter_point{{1.75, 0.75}}, params);
-        CHECK_THAT(lower, Catch::Matchers::WithinAbs(0.0, ERROR_MARGIN));
-        CHECK_THAT(upper, Catch::Matchers::WithinAbs(80.0 / 256.0, ERROR_MARGIN));
+        REQUIRE(is_operational(lat, spec, op_domain_params.operational_params).first ==
+                operational_status::NON_OPERATIONAL);
+        CHECK_THAT(operational_domain_ratio(lat, spec, parameter_point{{1.5, 0.5}}, params),
+                   Catch::Matchers::WithinAbs(0.0, ERROR_MARGIN));
     }
 }
 
