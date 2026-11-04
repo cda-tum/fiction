@@ -31,6 +31,7 @@
 #include <fiction/layouts/layout_base.hpp>
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <string_view>
 #include <utility>
@@ -80,7 +81,8 @@ TEST_CASE("Coordinate obstruction: Cartesian layout", "[obstruction-layout]")
 
 TEST_CASE("Coordinate obstruction: Gate-level layout", "[obstruction-layout]")
 {
-    auto obstr_lyt = blueprints::xor_maj_gate_layout<cartesian_gate_layout>();
+    const auto lyt       = blueprints::xor_maj_gate_layout<cartesian_gate_layout>();
+    auto       obstr_lyt = lyt.clone();
 
     /** @brief Expected obstruction states in y-major order for the blueprint's 4-by-3 frame. */
     using state = std::array<std::array<bool, 4>, 3>;
@@ -91,12 +93,13 @@ TEST_CASE("Coordinate obstruction: Gate-level layout", "[obstruction-layout]")
     /** @brief Check every coordinate against an independent expected state. */
     const auto check_state = [&obstr_lyt](const std::string_view stage, const state& expected)
     {
-        for (int32_t y = 0; y < 3; ++y)
+        for (std::size_t y = 0; y < 3; ++y)
         {
-            for (int32_t x = 0; x < 4; ++x)
+            for (std::size_t x = 0; x < 4; ++x)
             {
                 CAPTURE(stage, x, y);
-                CHECK(obstr_lyt.is_obstructed_coordinate({x, y}) == expected[y][x]);
+                CHECK(obstr_lyt.is_obstructed_coordinate({static_cast<int32_t>(x), static_cast<int32_t>(y)}) ==
+                      expected[y][x]);
             }
         }
     };
