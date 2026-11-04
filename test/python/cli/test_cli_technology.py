@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from mnt.pyfiction.fcn import area
 from mnt.pyfiction.layouts import arrangement, hexagonal_gate_layout, shifted_cartesian_gate_layout
 from mnt.pyfiction.mol_qca import mol_qca_layout
 from mnt.pyfiction.qca import qca_layout
@@ -49,7 +50,7 @@ def test_cell_topology_mismatch(mux21_shell: Shell) -> None:
 
 @pytest.mark.parametrize("commands", ["cell", "cell -l sim7-mol", "hex; cell -l bestagon"])
 def test_area(mux21_shell: Shell, commands: str) -> None:
-    """Every technology has an area model, and every one of them honors the cell dimensions."""
+    """Selected gate libraries honor the requested cell dimensions."""
     mux21_shell.ok(f"ortho; {commands}")
     mux21_shell.ok("area")
     default = mux21_shell.session.log[-1]["result"]
@@ -58,10 +59,18 @@ def test_area(mux21_shell: Shell, commands: str) -> None:
     # only the overrides the user gave are reported; the rest are the technology's own
     assert set(default) == {"area_nm2"}
 
-    mux21_shell.ok("area -x 20 -y 20 --hspace 1 --vspace 1")
+    mux21_shell.ok("area -x 17 -y 23 --hspace 2 --vspace 3")
     overridden = mux21_shell.session.log[-1]["result"]
     assert isinstance(overridden, dict)
-    assert overridden["width_nm"] == 20.0
+    assert {key: overridden[key] for key in ("width_nm", "height_nm", "hspace_nm", "vspace_nm")} == {
+        "width_nm": 17.0,
+        "height_nm": 23.0,
+        "hspace_nm": 2.0,
+        "vspace_nm": 3.0,
+    }
+    assert overridden["area_nm2"] == pytest.approx(
+        area(mux21_shell.session.cell_layouts.current().layout, width=17, height=23, hspace=2, vspace=3)
+    )
     assert overridden["area_nm2"] != default["area_nm2"]
 
 
