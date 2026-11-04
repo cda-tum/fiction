@@ -42,7 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
-  - QCA ONE tests check port and OR-gate orientations against independent cell patterns.
+  - QCA ONE tests check selected port and OR-gate orientations against independent cell patterns.
   - SiDB operational checks reuse the BDL wire fixture and test a non-operational single-point domain.
   - CLI tests check operational-domain exports and area parameter overrides.
   - Python SiDB engine tests check complete charge-state configurations.
