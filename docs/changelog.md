@@ -42,6 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - CLI tests check operational-domain exports and area parameter overrides.
   - Python BDL wire tests verify pair identities and wire endpoints.
   - Documentation tab tests cover nested fragments and repeated same-page navigation.
   - Crossing-cost sweeps avoid repeated edge-counter lookups.
