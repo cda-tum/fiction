@@ -10,15 +10,16 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import pytest
+
+from mnt.pyfiction import physical_design
 from mnt.pyfiction.layouts import arrangement, hexagonal_gate_layout, shifted_cartesian_gate_layout
 from mnt.pyfiction.physical_design import (
     apply_bestagon_library,
     apply_qca_one_library,
     apply_sim7_mol_library,
     apply_topolinano_library,
-    exact,
     orthogonal,
-    technology_constraints,
 )
 
 if TYPE_CHECKING:
@@ -45,10 +46,11 @@ def test_apply_sim7_mol_library(mux21: technology_network) -> None:
     assert cell_layout.num_cells() > 0
 
 
+@pytest.mark.skipif(not hasattr(physical_design, "exact"), reason="pyfiction was built without Z3")
 def test_apply_bestagon_library(mux21: technology_network) -> None:
     """Map the library and report every processed source gate."""
 
-    layout = exact(
+    layout = physical_design.exact(
         mux21,
         layout_type=hexagonal_gate_layout,
         scheme="ROW",
@@ -63,16 +65,17 @@ def test_apply_bestagon_library(mux21: technology_network) -> None:
     assert reports[-1][1] == reports[-1][2] > 0
 
 
+@pytest.mark.skipif(not hasattr(physical_design, "exact"), reason="pyfiction was built without Z3")
 def test_apply_topolinano_library(mux21: technology_network) -> None:
     """Map the library and report every processed source gate."""
 
-    layout = exact(
+    layout = physical_design.exact(
         mux21,
         layout_type=shifted_cartesian_gate_layout,
         scheme="COLUMNAR3",
         crossings=True,
         border_io=True,
-        technology_specifics=technology_constraints.TOPOLINANO,
+        technology_specifics=physical_design.technology_constraints.TOPOLINANO,
         layout_arrangement=arrangement.ODD_COLUMN,
     )
     assert layout is not None

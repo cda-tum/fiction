@@ -85,6 +85,7 @@ void register_enumerate_all_paths_impl(nb::module_& m)
         nb::arg("crossings") = enumerate_all_paths_options{}.crossings, nb::arg("obstructions") = nb::none(),
         nb::call_guard<nb::gil_scoped_release>(),
         R"doc(Enumerate all loop-free paths from source to target in the layout.
+The number of paths, runtime, and memory use can grow exponentially with layout size.
 The keyword options select obstructions and crossing constraints.
 Raises ValueError when source or target lies outside the layout extent.
 

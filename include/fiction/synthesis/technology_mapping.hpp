@@ -637,7 +637,9 @@ class technology_mapping_impl
  * @param ntk Input logic network.
  * @param params Technology mapping parameters.
  * @param pst Technology mapping statistics.
- * @return Mapped network exclusively using gates from the provided library.
+ * @return Mapped network exclusively using gates from the provided library, or an empty network on mapping failure.
+ * The mapper requires a library match for each source gate and can reject a network whose overall function is
+ * representable by the library. Check `pst->mapper_stats.mapping_error` when statistics are supplied.
  * @throws missing_required_gates_exception if the technology library does not contain required gates for the base
  *         network type (e.g., AIG requires INV and AND; XAG requires INV, AND, and XOR; MIG requires INV and MAJ).
  */

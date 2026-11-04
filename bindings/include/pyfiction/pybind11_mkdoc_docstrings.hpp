@@ -7484,15 +7484,15 @@ Returns:
 
 static const char *mkd_doc_fiction_networks_technology_network_create_dot = R"doc(Creates a DOT gate with the supplied signals.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_create_ge = R"doc(Creates a GE gate with the supplied signals.)doc";
+static const char *mkd_doc_fiction_networks_technology_network_create_ge = R"doc(Creates a GE gate with the function `!a | b`.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_create_gt = R"doc(Creates a GT gate with the supplied signals.)doc";
+static const char *mkd_doc_fiction_networks_technology_network_create_gt = R"doc(Creates a GT gate with the function `!a & b`.)doc";
 
 static const char *mkd_doc_fiction_networks_technology_network_create_ite = R"doc(Creates an ITE gate with the supplied signals.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_create_le = R"doc(Creates an LE gate with the supplied signals.)doc";
+static const char *mkd_doc_fiction_networks_technology_network_create_le = R"doc(Creates an LE gate with the function `a | !b`.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_create_lt = R"doc(Creates an LT gate with the supplied signals.)doc";
+static const char *mkd_doc_fiction_networks_technology_network_create_lt = R"doc(Creates an LT gate with the function `a & !b`.)doc";
 
 static const char *mkd_doc_fiction_networks_technology_network_create_maj = R"doc(Creates a MAJ gate with the supplied signals.)doc";
 
@@ -12623,7 +12623,9 @@ interface (see `gate_layout`) and respects the underlying information
 flow imposed by `layout`'s clocking scheme. This algorithm does
 neither generate duplicate nor looping paths, even in a cyclic
 clocking scheme. That is, along each path, each coordinate can occur
-at maximum once.
+at maximum once. The number of paths can grow exponentially with the
+layout size, as can the time and memory needed to enumerate and store
+them.
 
 Paths do not pass obstructed coordinates or connections, except that
 the target is never obstructed. A coordinate or connection is
@@ -15113,21 +15115,21 @@ static const char *mkd_doc_fiction_sidb_io_missing_position_exception =
 R"doc(Exception thrown when a missing SiDB position is encountered in the
 parsed file.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_missing_position_exception_line = R"doc(Line number in the input file.)doc";
+static const char *mkd_doc_fiction_sidb_io_missing_position_exception_line = R"doc(Zero-based index among recognized rows.)doc";
 
 static const char *mkd_doc_fiction_sidb_io_missing_position_exception_missing_position_exception =
-R"doc(Record the input line that lacks a SiDB position.
+R"doc(Record the recognized row that lacks a SiDB position.
 
 Args:
-    n: Line number in the input file.
+    n: Zero-based index among recognized rows.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_io_missing_position_exception_where =
-R"doc(Return the input line that lacks a SiDB position.
+R"doc(Return the recognized row that lacks a SiDB position.
 
 Returns:
-    Line number in the input file.
+    Zero-based index among recognized rows.
 
 )doc";
 
@@ -25225,7 +25227,8 @@ Returns:
 
 static const char *mkd_doc_fiction_synthesis_create_ge_tt =
 R"doc(Creates and returns a truth table that implements the greater-than-or-
-equal function in two variables.
+equal function in two variables. Variable 0 is a and variable 1 is b;
+the function is `!a | b`.
 
 Returns:
     Greater-than-or-equal function in two variables.
@@ -25234,7 +25237,8 @@ Returns:
 
 static const char *mkd_doc_fiction_synthesis_create_gt_tt =
 R"doc(Creates and returns a truth table that implements the greater-than
-function in two variables.
+function in two variables. Variable 0 is a and variable 1 is b; the
+function is `!a & b`.
 
 Returns:
     Greater-than function in two variables.
@@ -25275,7 +25279,8 @@ Returns:
 
 static const char *mkd_doc_fiction_synthesis_create_le_tt =
 R"doc(Creates and returns a truth table that implements the less-than-or-
-equal function in two variables.
+equal function in two variables. Variable 0 is a and variable 1 is b;
+the function is `a | !b`.
 
 Returns:
     Less-than-or-equal function in two variables.
@@ -25284,7 +25289,8 @@ Returns:
 
 static const char *mkd_doc_fiction_synthesis_create_lt_tt =
 R"doc(Creates and returns a truth table that implements the less-than
-function in two variables.
+function in two variables. Variable 0 is a and variable 1 is b; the
+function is `a & !b`.
 
 Returns:
     Less-than function in two variables.
@@ -27570,7 +27576,11 @@ Template Args:
     Ntk: Input logic network type.
 
 Returns:
-    Mapped network exclusively using gates from the provided library.
+    Mapped network exclusively using gates from the provided library,
+    or an empty network on mapping failure. The mapper requires a
+    library match for each source gate and can reject a network whose
+    overall function is representable by the library. Check
+    `pst->mapper_stats.mapping_error` when statistics are supplied.
 
 Raises:
     missing_required_gates_exception: if the technology library does
@@ -28022,6 +28032,9 @@ Returns:
     A copy of the input network with reordered ranks to reduce edge
     crossings.
 
+Raises:
+    ValueError: If the network is not balanced.
+
 )doc";
 
 static const char *mkd_doc_fiction_utils_graph_mincross_impl =
@@ -28039,7 +28052,7 @@ arrays, once.
 
 )doc";
 
-static const char *mkd_doc_fiction_utils_graph_mincross_impl_count_crossings =
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_count_pair_crossings =
 R"doc(Adds the crossings between the edges of two nodes to a pair of
 counters, for both orders of the nodes.
 
@@ -28055,10 +28068,6 @@ Args:
     swapped: Receives the crossings with the nodes swapped.
 
 )doc";
-
-static const char *mkd_doc_fiction_utils_graph_mincross_impl_fanout_ntk =
-R"doc(Fanout-augmented view of the network for efficient traversal and
-connectivity queries.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_mincross_impl_in_begin =
 R"doc(Offsets of the fanin lists in `in_nodes`: node `i` has the entries

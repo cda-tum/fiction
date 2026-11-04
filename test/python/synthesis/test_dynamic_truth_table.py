@@ -15,7 +15,13 @@ import sys
 
 import pytest
 
-from mnt.pyfiction.synthesis import create_maj_tt, dynamic_truth_table
+from mnt.pyfiction.synthesis import create_ge_tt, create_le_tt, create_maj_tt, dynamic_truth_table
+
+
+def test_comparison_truth_tables() -> None:
+    """Non-strict comparisons contain the expected four output bits."""
+    assert create_le_tt().to_binary() == "1011"
+    assert create_ge_tt().to_binary() == "1101"
 
 
 def test_binary_and_hex_strings() -> None:
