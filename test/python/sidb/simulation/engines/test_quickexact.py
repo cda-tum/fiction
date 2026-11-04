@@ -51,13 +51,15 @@ def test_three_sidbs() -> None:
         expected = Counter(tuple(cd.get_charge_state(site) for site in sites) for cd in reference.charge_distributions)
         actual = Counter(tuple(cd.get_charge_state(site) for site in sites) for cd in result.charge_distributions)
         assert expected
+        negative, neutral, positive = sidb_charge_state.NEGATIVE, sidb_charge_state.NEUTRAL, sidb_charge_state.POSITIVE
+        singles = [(negative, neutral, neutral), (neutral, negative, neutral), (neutral, neutral, negative)]
         if base == 2:
-            negative, neutral = sidb_charge_state.NEGATIVE, sidb_charge_state.NEUTRAL
-            assert expected == Counter({
-                (negative, neutral, neutral): 1,
-                (neutral, negative, neutral): 1,
-                (neutral, neutral, negative): 1,
-            })
+            known = singles
+        elif options["epsilon_r"] == 5.6:
+            known = [*singles, (negative, positive, negative)]
+        else:
+            known = [(negative, positive, negative), (positive, negative, positive)]
+        assert expected == Counter(known)
         assert any(sidb_charge_state.POSITIVE in state for state in expected) is expect_positive
         assert actual == expected
 
