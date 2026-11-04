@@ -608,6 +608,11 @@ TEST_CASE("Override clocking", "[clocking-scheme]")
             CHECK(twoddwave4(x, y) == untouched[x - 1][y]);
         }
     }
+
+    // A different phase confirms that lookups use the override instead of the periodic cutout.
+    twoddwave4.override_clock_number(0, 1, 3);
+    CHECK(twoddwave4(0, 1) == 3);
+    CHECK(twoddwave4(1, 1) == 2);
 }
 
 TEST_CASE("Linear schemes", "[clocking-scheme]")
