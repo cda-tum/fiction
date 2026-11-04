@@ -17,6 +17,9 @@
  * @author Simon Hofmann (simon1hofmann)
  */
 
+#include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
+
+// Test dependencies follow the defining header to expose missing direct includes.
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
@@ -31,7 +34,6 @@
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
-#include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/potential_landscape.hpp>
 #include <fiction/utils/execution_timeout.hpp>
 
