@@ -20,6 +20,7 @@
 // Test dependencies follow the defining header to expose missing direct includes.
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
 
@@ -332,6 +333,9 @@ TEST_CASE("Surface analysis rejects affected gates without ports", "[sidb-surfac
 TEST_CASE("Surface analysis propagates allocation failure and recovers", "[sidb-surface-analysis]")
 {
     require_allocation_failure_support();
+    const auto extent = GENERATE(uint16_t{1}, uint16_t{4});
+    CAPTURE(extent);
+    const auto spacing = std::pair{extent, extent};
     /** @brief Single tile with both dummy-library gates obstructed at their center cell. */
     const cartesian_gate_layout gates{{1, 1, 1}};
     /** @brief Defect canary that must survive every failed and successful analysis. */
@@ -343,7 +347,7 @@ TEST_CASE("Surface analysis propagates allocation failure and recovers", "[sidb-
          {{create_id_tt(), {{{port_position(0, 1)}, {port_position(2, 1)}}}},
           {create_and_tt(), {{{port_position(0, 0), port_position(0, 2)}, {port_position(2, 1)}}}}}}};
     // Initialize the test library's static fixtures before injecting allocation failures.
-    CHECK(surface_analysis<dummy_gate_library>(gates, surface) == expected);
+    CHECK(surface_analysis<dummy_gate_library>(gates, surface, std::nullopt, spacing) == expected);
     for (std::size_t failure{};; ++failure)
     {
         CAPTURE(failure);
@@ -351,7 +355,7 @@ TEST_CASE("Surface analysis propagates allocation failure and recovers", "[sidb-
         try
         {
             allocation_budget = failure;
-            const auto result = surface_analysis<dummy_gate_library>(gates, surface);
+            const auto result = surface_analysis<dummy_gate_library>(gates, surface, std::nullopt, spacing);
             allocation_budget.reset();
             CHECK(result == expected);
             break;
@@ -370,7 +374,7 @@ TEST_CASE("Surface analysis propagates allocation failure and recovers", "[sidb-
             throw;
         }
     }
-    CHECK(surface_analysis<dummy_gate_library>(gates, surface) == expected);
+    CHECK(surface_analysis<dummy_gate_library>(gates, surface, std::nullopt, spacing) == expected);
     CHECK(surface.num_defects() == 1);
     CHECK(surface.get_defect(site_at_row(1, 1)).type == defect_type::SILOXANE);
     CHECK(gates.is_empty());
@@ -420,11 +424,12 @@ TEST_CASE("Surface analysis agrees with materialized defect influence", "[sidb-s
         }
         surface.assign_defect(site_at_row(-1, 1), defect{defect_type::SILOXANE});
         surface.assign_defect(site_at_row(-1, 1), defect{defect_type::SILOXANE, -1});
-        if (trial < 2)
+        if (trial < 4)
         {
             for (auto i = 0; i < 512; ++i)
             {
-                surface.assign_defect(site_at_row(i - 256, trial == 0 ? i - 256 : 0), defect{defect_type::SILOXANE});
+                surface.assign_defect(site_at_row(i - 256, trial % 2 == 0 ? i - 256 : 0),
+                                      defect{defect_type::SILOXANE});
             }
         }
         surface.assign_defect({std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::min(), 0},
@@ -433,11 +438,26 @@ TEST_CASE("Surface analysis agrees with materialized defect influence", "[sidb-s
                               defect{defect_type::SILOXANE});
         auto charged = std::pair{static_cast<uint16_t>(spacing(rng)), static_cast<uint16_t>(spacing(rng))};
         auto neutral = std::pair{static_cast<uint16_t>(spacing(rng)), static_cast<uint16_t>(spacing(rng))};
-        if (trial < 2)
+        if (trial < 4)
         {
             const auto boundary = static_cast<uint16_t>(trial + 1);
             charged             = {boundary, boundary};
             neutral             = {boundary, boundary};
+        }
+        else if (trial == 4)
+        {
+            charged = {1, 0};
+            neutral = {0, 26};
+        }
+        else if (trial == 5)
+        {
+            charged = {0, 26};
+            neutral = {1, 0};
+        }
+        else if (trial == 6)
+        {
+            charged = {0, 250};
+            neutral = {0, 1};
         }
         const auto                        affected = surface.all_affected_sidbs(charged, neutral);
         surface_black_list<port_position> expected{};

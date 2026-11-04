@@ -89,9 +89,11 @@ surface_analysis(const fiction::layouts::gate_layout<Geometry>& gate_lyt, const 
 
     surface_black_list<port_type> black_list{};
 
-    const auto& defects = surface.defects();
-    uint16_t    max_vertical_extent{};
-    bool        small_extents{true};
+    /** @brief Heuristic bound on cached influence sites per defect. */
+    constexpr uint64_t max_cached_sites_per_defect{64};
+    const auto&        defects = surface.defects();
+    uint16_t           max_vertical_extent{};
+    bool               bounded_rectangles{true};
     for (const auto& [site, defect] : defects)
     {
         if (site.z != 0 && site.z != 1)
@@ -101,10 +103,12 @@ surface_analysis(const fiction::layouts::gate_layout<Geometry>& gate_lyt, const 
         const auto extent =
             sidb::model::defect_extent(defect, charged_defect_spacing_overwrite, neutral_defect_spacing_overwrite);
         max_vertical_extent = std::max(max_vertical_extent, extent.second);
-        small_extents       = small_extents && extent.first <= 1 && extent.second <= 1;
+        const auto width    = uint64_t{2} * extent.first + 1;
+        const auto height   = uint64_t{2} * extent.second + 1;
+        bounded_rectangles  = bounded_rectangles && width * height <= max_cached_sites_per_defect;
     }
-    // At most 3x3 sites per defect bounds the cache to nine sites per defect and avoids repeated scans.
-    const auto affected_sites = small_extents ?
+    // At most 64 sites per defect bounds the cache while avoiding repeated scans for small rectangles.
+    const auto affected_sites = bounded_rectangles ?
                                     std::optional{surface.all_affected_sidbs(charged_defect_spacing_overwrite,
                                                                              neutral_defect_spacing_overwrite)} :
                                     std::nullopt;
