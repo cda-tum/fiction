@@ -183,6 +183,19 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
         REQUIRE(black_list.contains({0, 0}));
         CHECK(black_list.at({0, 0}) == expected);
     }
+    SECTION("localized charged and neutral defects")
+    {
+        defect_layout.assign_defect(site_at_row(1, 1), defect{defect_type::SI_VACANCY});
+        defect_layout.assign_defect(site_at_row(4, 4), defect{defect_type::SILOXANE});
+
+        const auto black_list = surface_analysis<dummy_gate_library>(gate_lyt, defect_layout, {{0, 0}});
+
+        CHECK(black_list.size() == 2);
+        REQUIRE(black_list.contains({0, 0}));
+        REQUIRE(black_list.contains({1, 1}));
+        CHECK(black_list.at({0, 0}) == expected);
+        CHECK(black_list.at({1, 1}) == expected);
+    }
     SECTION("multi-defect")
     {
         defect_layout.assign_defect(site_at_row(6, 2), defect{defect_type::DB});
