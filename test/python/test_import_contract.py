@@ -11,6 +11,7 @@
 from __future__ import annotations
 
 import importlib
+import os
 import shutil
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- runs the lazy-loading check in a fresh interpreter
 import sys
@@ -52,6 +53,20 @@ NESTED_SUBMODULES = [
     "sidb.simulation.io",
     "sidb.simulation.logic",
 ]
+
+
+@pytest.mark.parametrize(
+    ("requirement", "module", "name"),
+    [
+        ("FICTION_REQUIRE_Z3", "mnt.pyfiction.physical_design", "exact"),
+        ("FICTION_REQUIRE_ALGLIB", "mnt.pyfiction.sidb.simulation.engines", "clustercomplete"),
+    ],
+)
+def test_required_optional_export(requirement: str, module: str, name: str) -> None:
+    """Full-feature builds expose the optional algorithms they require."""
+    if os.getenv(requirement) != "1":
+        pytest.skip(f"{requirement} is not required")
+    assert hasattr(importlib.import_module(module), name)
 
 
 def test_root_exposes_only_submodules() -> None:
