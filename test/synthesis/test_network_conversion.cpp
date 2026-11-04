@@ -54,49 +54,6 @@ static_assert(technology_convertible<mockturtle::aig_network>);
 static_assert(!technology_convertible<int>);
 
 /**
- * @brief Checks Boolean behavior in every supported destination type.
- * @tparam Ntk Source network type.
- * @param ntk Source network.
- */
-template <typename Ntk>
-void to_x(const Ntk& ntk)
-{
-    {
-        INFO("MIG destination");
-        const auto converted_mig = convert_network<mockturtle::mig_network>(ntk);
-
-        check_eq(ntk, converted_mig);
-    }
-
-    {
-        INFO("AIG destination");
-        const auto converted_aig = convert_network<mockturtle::aig_network>(ntk);
-
-        check_eq(ntk, converted_aig);
-    }
-
-    {
-        INFO("XAG destination");
-        const auto converted_xag = convert_network<mockturtle::xag_network>(ntk);
-
-        check_eq(ntk, converted_xag);
-    }
-
-    {
-        INFO("TEC destination");
-        const auto converted_tec = convert_network<technology_network>(ntk);
-
-        check_eq(ntk, converted_tec);
-    }
-}
-
-TEMPLATE_TEST_CASE("Simple network conversion", "[network-conversion]", mockturtle::mig_network,
-                   mockturtle::aig_network, mockturtle::xag_network, technology_network)
-{
-    to_x(blueprints::maj1_network<TestType>());
-}
-
-/**
  * @brief Compares every output truth table for networks with the same inputs.
  * @tparam Spec Specification network type.
  * @tparam Impl Implementation network type.
@@ -111,6 +68,53 @@ void check_simulated_eq(const Spec& spec, const Impl& impl)
     const auto expected = mockturtle::simulate<kitty::dynamic_truth_table>(spec, simulator);
     const auto actual   = mockturtle::simulate<kitty::dynamic_truth_table>(impl, simulator);
     CHECK(actual == expected);
+}
+
+/**
+ * @brief Checks Boolean behavior in every supported destination type.
+ * @tparam Ntk Source network type.
+ * @param ntk Source network.
+ */
+template <typename Ntk>
+void to_x(const Ntk& ntk)
+{
+    {
+        INFO("MIG destination");
+        const auto converted_mig = convert_network<mockturtle::mig_network>(ntk);
+
+        check_eq(ntk, converted_mig);
+        check_simulated_eq(ntk, converted_mig);
+    }
+
+    {
+        INFO("AIG destination");
+        const auto converted_aig = convert_network<mockturtle::aig_network>(ntk);
+
+        check_eq(ntk, converted_aig);
+        check_simulated_eq(ntk, converted_aig);
+    }
+
+    {
+        INFO("XAG destination");
+        const auto converted_xag = convert_network<mockturtle::xag_network>(ntk);
+
+        check_eq(ntk, converted_xag);
+        check_simulated_eq(ntk, converted_xag);
+    }
+
+    {
+        INFO("TEC destination");
+        const auto converted_tec = convert_network<technology_network>(ntk);
+
+        check_eq(ntk, converted_tec);
+        check_simulated_eq(ntk, converted_tec);
+    }
+}
+
+TEMPLATE_TEST_CASE("Simple network conversion", "[network-conversion]", mockturtle::mig_network,
+                   mockturtle::aig_network, mockturtle::xag_network, technology_network)
+{
+    to_x(blueprints::maj1_network<TestType>());
 }
 
 TEST_CASE("Name conservation after network conversion", "[network-conversion]")
@@ -133,7 +137,6 @@ TEST_CASE("Name conservation after network conversion", "[network-conversion]")
     CHECK(converted_maj.get_output_name(0) == "f");
 }
 
-// Technology networks represent inverters as nodes rather than complemented signals.
 TEMPLATE_TEST_CASE("Constant inverted signal recovery conversion", "[network-conversion]", mockturtle::mig_network,
                    mockturtle::aig_network, mockturtle::xag_network)
 {
@@ -195,11 +198,12 @@ TEST_CASE("Conversion preserves size and logic after fanout substitution", "[net
     check_simulated_eq(substituted_aig, converted_substituted_aig);
     check_simulated_eq(aig, converted_substituted_aig);
 
-    const auto substituted_tec = fanout_substitution<technology_network>(
-        blueprints::fanout_substitution_corner_case_network<technology_network>());
+    const auto tec                       = blueprints::fanout_substitution_corner_case_network<technology_network>();
+    const auto substituted_tec           = fanout_substitution<technology_network>(tec);
     const auto converted_substituted_tec = convert_network<technology_network>(substituted_tec);
     CHECK(substituted_tec.size() == converted_substituted_tec.size());
     check_simulated_eq(substituted_tec, converted_substituted_tec);
+    check_simulated_eq(tec, converted_substituted_tec);
 }
 
 TEST_CASE("Conversion preserves size and logic after balancing", "[network-conversion]")
@@ -211,11 +215,12 @@ TEST_CASE("Conversion preserves size and logic after balancing", "[network-conve
     check_simulated_eq(balanced_aig, converted_balanced_aig);
     check_simulated_eq(aig, converted_balanced_aig);
 
-    const auto balanced_tec = network_balancing<technology_network>(
-        blueprints::fanout_substitution_corner_case_network<technology_network>());
+    const auto tec                    = blueprints::fanout_substitution_corner_case_network<technology_network>();
+    const auto balanced_tec           = network_balancing<technology_network>(tec);
     const auto converted_balanced_tec = convert_network<technology_network>(balanced_tec);
     CHECK(balanced_tec.size() == converted_balanced_tec.size());
     check_simulated_eq(balanced_tec, converted_balanced_tec);
+    check_simulated_eq(tec, converted_balanced_tec);
 }
 
 TEST_CASE("Convert every two- and three-input function without losing the interface", "[network-conversion]")
