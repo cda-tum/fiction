@@ -47,7 +47,6 @@
 
 #include <cstdint>
 #include <stdexcept>
-#include <tuple>
 #include <vector>
 
 using namespace fiction;
