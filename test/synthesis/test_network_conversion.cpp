@@ -96,6 +96,23 @@ TEMPLATE_TEST_CASE("Simple network conversion", "[network-conversion]", mockturt
     to_x(blueprints::maj1_network<TestType>());
 }
 
+/**
+ * @brief Compares every output truth table for networks with the same inputs.
+ * @tparam Spec Specification network type.
+ * @tparam Impl Implementation network type.
+ * @param spec Specification network.
+ * @param impl Implementation network.
+ */
+template <typename Spec, typename Impl>
+void check_simulated_eq(const Spec& spec, const Impl& impl)
+{
+    REQUIRE(spec.num_pis() == impl.num_pis());
+    const mockturtle::default_simulator<kitty::dynamic_truth_table> simulator{spec.num_pis()};
+    const auto expected = mockturtle::simulate<kitty::dynamic_truth_table>(spec, simulator);
+    const auto actual   = mockturtle::simulate<kitty::dynamic_truth_table>(impl, simulator);
+    CHECK(actual == expected);
+}
+
 TEST_CASE("Name conservation after network conversion", "[network-conversion]")
 {
     auto maj = blueprints::maj1_network<named_mig_network>();
@@ -148,7 +165,7 @@ TEMPLATE_TEST_CASE("Complex network conversion", "[network-conversion]", mocktur
     to_x(blueprints::nary_operation_network<TestType>());
 }
 
-TEST_CASE("Consistent network size after multiple conversions", "[network-conversion]")
+TEST_CASE("Multiple conversions preserve network size and logic", "[network-conversion]")
 {
     const auto tec = blueprints::se_coloring_corner_case_network<technology_network>();
 
@@ -156,45 +173,49 @@ TEST_CASE("Consistent network size after multiple conversions", "[network-conver
         convert_network<technology_network>(convert_network<technology_network>(tec)));
 
     CHECK(tec.size() == converted.size());
-    check_eq(tec, converted);
+    check_simulated_eq(tec, converted);
 
-    const auto converted_aig = convert_network<technology_network>(blueprints::maj4_network<mockturtle::aig_network>());
+    const auto aig           = blueprints::maj4_network<mockturtle::aig_network>();
+    const auto converted_aig = convert_network<technology_network>(aig);
 
     const auto converted_converted_aig = convert_network<technology_network>(
         convert_network<technology_network>(convert_network<technology_network>(converted_aig)));
 
     CHECK(converted_aig.size() == converted_converted_aig.size());
-    check_eq(converted_aig, converted_converted_aig);
+    check_simulated_eq(converted_aig, converted_converted_aig);
+    check_simulated_eq(aig, converted_converted_aig);
 }
 
-TEST_CASE("Consistent network size after fanout substitution and conversion", "[network-conversion]")
+TEST_CASE("Conversion preserves size and logic after fanout substitution", "[network-conversion]")
 {
-    const auto substituted_aig =
-        fanout_substitution<technology_network>(blueprints::maj4_network<mockturtle::aig_network>());
+    const auto aig                       = blueprints::maj4_network<mockturtle::aig_network>();
+    const auto substituted_aig           = fanout_substitution<technology_network>(aig);
     const auto converted_substituted_aig = convert_network<technology_network>(substituted_aig);
     CHECK(substituted_aig.size() == converted_substituted_aig.size());
-    check_eq(substituted_aig, converted_substituted_aig);
+    check_simulated_eq(substituted_aig, converted_substituted_aig);
+    check_simulated_eq(aig, converted_substituted_aig);
 
     const auto substituted_tec = fanout_substitution<technology_network>(
         blueprints::fanout_substitution_corner_case_network<technology_network>());
     const auto converted_substituted_tec = convert_network<technology_network>(substituted_tec);
     CHECK(substituted_tec.size() == converted_substituted_tec.size());
-    check_eq(substituted_tec, converted_substituted_tec);
+    check_simulated_eq(substituted_tec, converted_substituted_tec);
 }
 
-TEST_CASE("Consistent network size after balancing and conversion", "[network-conversion]")
+TEST_CASE("Conversion preserves size and logic after balancing", "[network-conversion]")
 {
-    const auto balanced_aig =
-        network_balancing<technology_network>(blueprints::maj4_network<mockturtle::aig_network>());
+    const auto aig                    = blueprints::maj4_network<mockturtle::aig_network>();
+    const auto balanced_aig           = network_balancing<technology_network>(aig);
     const auto converted_balanced_aig = convert_network<technology_network>(balanced_aig);
     CHECK(balanced_aig.size() == converted_balanced_aig.size());
-    check_eq(balanced_aig, converted_balanced_aig);
+    check_simulated_eq(balanced_aig, converted_balanced_aig);
+    check_simulated_eq(aig, converted_balanced_aig);
 
     const auto balanced_tec = network_balancing<technology_network>(
         blueprints::fanout_substitution_corner_case_network<technology_network>());
     const auto converted_balanced_tec = convert_network<technology_network>(balanced_tec);
     CHECK(balanced_tec.size() == converted_balanced_tec.size());
-    check_eq(balanced_tec, converted_balanced_tec);
+    check_simulated_eq(balanced_tec, converted_balanced_tec);
 }
 
 TEST_CASE("Convert every two- and three-input function without losing the interface", "[network-conversion]")
