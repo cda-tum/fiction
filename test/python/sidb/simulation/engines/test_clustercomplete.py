@@ -33,21 +33,31 @@ def test_three_sidbs() -> None:
     options: dict[str, Any] = {
         "base": 2,
         "mu_minus": -0.25,
+        "epsilon_r": 5.6,
+        "lambda_tf": 5.0,
     }
     options["validity_witness_partitioning_max_cluster_size_gss"] = 15
     options["num_overlapping_witnesses_limit_gss"] = 8
     options["available_threads"] = 4
     options["report_gss_stats"] = ground_state_space_reporting.ON
 
-    def check_distributions(result: Any, base: int, epsilon_r: float = 5.6, lambda_tf: float = 5.0) -> None:
+    def check_distributions(result: Any, base: int, *, expect_positive: bool = False) -> None:
         """Compare every charge configuration with exhaustive simulation, ignoring order."""
         reference = exhaustive_ground_state_simulation(
-            layout, base=base, mu_minus=-0.25, epsilon_r=epsilon_r, lambda_tf=lambda_tf
+            layout, base=base, **{key: options[key] for key in ("mu_minus", "epsilon_r", "lambda_tf")}
         )
         sites = [lattice_site(x, 0, 0) for x in range(3)]
         expected = Counter(tuple(cd.get_charge_state(site) for site in sites) for cd in reference.charge_distributions)
         actual = Counter(tuple(cd.get_charge_state(site) for site in sites) for cd in result.charge_distributions)
         assert expected
+        if base == 2:
+            negative, neutral = sidb_charge_state.NEGATIVE, sidb_charge_state.NEUTRAL
+            assert expected == Counter({
+                (negative, neutral, neutral): 1,
+                (neutral, negative, neutral): 1,
+                (neutral, neutral, negative): 1,
+            })
+        assert any(sidb_charge_state.POSITIVE in state for state in expected) is expect_positive
         assert actual == expected
 
     result = clustercomplete(layout, **options)
@@ -61,13 +71,13 @@ def test_three_sidbs() -> None:
 
     result = clustercomplete(layout, **options)
     assert len(result.charge_distributions) <= 4
-    check_distributions(result, 3)
+    check_distributions(result, 3, expect_positive=True)
 
     options["epsilon_r"] = 2
     options["lambda_tf"] = 2
     result = clustercomplete(layout, **options)
     assert len(result.charge_distributions) <= 2
-    check_distributions(result, 3, epsilon_r=2, lambda_tf=2)
+    check_distributions(result, 3, expect_positive=True)
 
 
 def test_perturber_and_sidb_pair_111() -> None:
