@@ -99,6 +99,8 @@ void register_logic_simulation_impl(nb::module_& m, const std::string& type_name
     };
     m.def("simulate_outputs", outputs, nb::arg(type_name.c_str()),
           "Return (name, bits) pairs in output declaration order, preserving duplicate labels. "
+          "Each truth table lists bits from the highest input assignment to the lowest. "
+          "The first primary input is the least significant bit of each assignment. "
           "Truth-table storage grows exponentially with the input count; fewer than 38 inputs "
           "is a representation bound, not a memory guarantee.",
           nb::call_guard<nb::gil_scoped_release>());
@@ -113,7 +115,11 @@ void register_logic_simulation_impl(nb::module_& m, const std::string& type_name
             }
             return result;
         },
-        nb::arg(type_name.c_str()), nb::call_guard<nb::gil_scoped_release>());
+        nb::arg(type_name.c_str()),
+        "Return output truth tables by name; later outputs replace earlier ones with the same name. Key order is "
+        "unspecified; use simulate_outputs for declaration order. Bits run from the highest input assignment to the "
+        "lowest, with the first primary input as the least significant bit of each assignment.",
+        nb::call_guard<nb::gil_scoped_release>());
 }
 
 }  // namespace detail

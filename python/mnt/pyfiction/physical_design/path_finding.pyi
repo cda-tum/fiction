@@ -385,6 +385,7 @@ def enumerate_all_paths(
 ) -> list[list[mnt.pyfiction.layouts.coordinate]]:
     """
     Enumerate all loop-free paths from source to target in the layout.
+    The number of paths, runtime, and memory use can grow exponentially with layout size.
     The keyword options select obstructions and crossing constraints.
     Raises ValueError when source or target lies outside the layout extent.
 
