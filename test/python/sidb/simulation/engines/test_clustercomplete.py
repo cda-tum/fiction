@@ -42,7 +42,7 @@ def test_three_sidbs() -> None:
     options["report_gss_stats"] = engines.ground_state_space_reporting.ON
 
     def check_distributions(result: Any, base: int, *, expect_positive: bool = False) -> None:
-        """Compare every charge configuration with exhaustive simulation, ignoring order."""
+        """Compare engine and exhaustive charge configurations with derived literals."""
         reference = engines.exhaustive_ground_state_simulation(
             layout, base=base, **{key: options[key] for key in ("mu_minus", "epsilon_r", "lambda_tf")}
         )
