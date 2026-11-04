@@ -40,8 +40,10 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <new>
 #include <optional>
+#include <random>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -373,4 +375,99 @@ TEST_CASE("Surface analysis propagates allocation failure and recovers", "[sidb-
     CHECK(surface.get_defect(site_at_row(1, 1)).type == defect_type::SILOXANE);
     CHECK(gates.is_empty());
     CHECK(gates.get_extent() == layout_base::extent{1, 1, 1});
+}
+
+TEST_CASE("Surface analysis handles maximum defect spacing", "[sidb-surface-analysis]")
+{
+    const cartesian_gate_layout gates{{2, 2, 1}};
+    sidb::layout                surface{};
+    surface.assign_defect(site_at_row(-3, 1), defect{defect_type::SI_VACANCY});
+    constexpr auto maximum    = std::numeric_limits<uint16_t>::max();
+    const auto     black_list = surface_analysis<dummy_gate_library>(gates, surface, std::pair{maximum, maximum});
+    const port_list<port_position> line_ports{{port_position(0, 1)}, {port_position(2, 1)}};
+    const port_list<port_position> y_ports{{port_position(0, 0), port_position(0, 2)}, {port_position(2, 1)}};
+    const surface_black_list<port_position>::mapped_type expected{{create_id_tt(), {line_ports}},
+                                                                  {create_and_tt(), {y_ports}}};
+    CHECK(black_list.size() == 4);
+    for (auto y = 0; y < 2; ++y)
+    {
+        for (auto x = 0; x < 2; ++x)
+        {
+            const layout_base::coordinate tile{x, y};
+            CAPTURE(tile);
+            REQUIRE(black_list.contains(tile));
+            CHECK(black_list.at(tile) == expected);
+        }
+    }
+}
+
+TEST_CASE("Surface analysis agrees with materialized defect influence", "[sidb-surface-analysis]")
+{
+    const cartesian_gate_layout        gates{{2, 2, 1}};
+    const port_list<port_position>     line_ports{{port_position(0, 1)}, {port_position(2, 1)}};
+    const port_list<port_position>     y_ports{{port_position(0, 0), port_position(0, 2)}, {port_position(2, 1)}};
+    std::mt19937                       rng{1937};
+    std::uniform_int_distribution<int> coordinate{-4, 8};
+    std::uniform_int_distribution<int> spacing{0, 3};
+    for (auto trial = 0; trial < 40; ++trial)
+    {
+        CAPTURE(trial);
+        sidb::layout surface{};
+        for (auto i = 0; i < 6; ++i)
+        {
+            surface.assign_defect(site_at_row(coordinate(rng), coordinate(rng)),
+                                  defect{i % 2 == 0 ? defect_type::SI_VACANCY : defect_type::SILOXANE});
+        }
+        surface.assign_defect(site_at_row(-1, 1), defect{defect_type::SILOXANE});
+        surface.assign_defect(site_at_row(-1, 1), defect{defect_type::SILOXANE, -1});
+        if (trial < 2)
+        {
+            for (auto i = 0; i < 512; ++i)
+            {
+                surface.assign_defect(site_at_row(i - 256, trial == 0 ? i - 256 : 0), defect{defect_type::SILOXANE});
+            }
+        }
+        surface.assign_defect({std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::min(), 0},
+                              defect{defect_type::DB});
+        surface.assign_defect({std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::max(), 1},
+                              defect{defect_type::SILOXANE});
+        auto charged = std::pair{static_cast<uint16_t>(spacing(rng)), static_cast<uint16_t>(spacing(rng))};
+        auto neutral = std::pair{static_cast<uint16_t>(spacing(rng)), static_cast<uint16_t>(spacing(rng))};
+        if (trial < 2)
+        {
+            const auto boundary = static_cast<uint16_t>(trial + 1);
+            charged             = {boundary, boundary};
+            neutral             = {boundary, boundary};
+        }
+        const auto                        affected = surface.all_affected_sidbs(charged, neutral);
+        surface_black_list<port_position> expected{};
+        for (auto y = 0; y < 2; ++y)
+        {
+            for (auto x = 0; x < 2; ++x)
+            {
+                const layout_base::coordinate tile{x, y};
+                const auto                    hit = [&](const int col, const int row)
+                { return affected.contains(site_at_row(3 * x + col, 3 * y + row)); };
+                if (hit(1, 0) || hit(1, 1) || hit(1, 2))
+                {
+                    expected[tile][create_id_tt()].push_back(line_ports);
+                }
+                if (hit(0, 0) || hit(2, 0) || hit(1, 1) || hit(1, 2))
+                {
+                    expected[tile][create_and_tt()].push_back(y_ports);
+                }
+            }
+        }
+        CHECK(surface_analysis<dummy_gate_library>(gates, surface, charged, neutral) == expected);
+    }
+}
+
+TEST_CASE("Surface analysis rejects an invalid defect basis", "[sidb-surface-analysis]")
+{
+    const cartesian_gate_layout gates{{1, 1, 1}};
+    sidb::layout                surface{};
+    lattice_site                invalid{};
+    invalid.z = 2;
+    surface.assign_defect(invalid, defect{defect_type::SI_VACANCY});
+    CHECK_THROWS_AS(surface_analysis<dummy_gate_library>(gates, surface), std::out_of_range);
 }

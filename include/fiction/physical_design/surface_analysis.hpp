@@ -23,13 +23,16 @@
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
+#include "fiction/technology/sidb/model/defect.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <kitty/hash.hpp>
 
+#include <algorithm>
 #include <concepts>
 #include <cstdint>
 #include <optional>
+#include <stdexcept>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -86,8 +89,55 @@ surface_analysis(const fiction::layouts::gate_layout<Geometry>& gate_lyt, const 
 
     surface_black_list<port_type> black_list{};
 
-    const auto sidbs_affected_by_defects =
-        surface.all_affected_sidbs(charged_defect_spacing_overwrite, neutral_defect_spacing_overwrite);
+    const auto& defects = surface.defects();
+    uint16_t    max_vertical_extent{};
+    bool        small_extents{true};
+    for (const auto& [site, defect] : defects)
+    {
+        if (site.z != 0 && site.z != 1)
+        {
+            throw std::out_of_range("Invalid lattice basis index");
+        }
+        const auto extent =
+            sidb::model::defect_extent(defect, charged_defect_spacing_overwrite, neutral_defect_spacing_overwrite);
+        max_vertical_extent = std::max(max_vertical_extent, extent.second);
+        small_extents       = small_extents && extent.first <= 1 && extent.second <= 1;
+    }
+    // At most 3x3 sites per defect bounds the cache to nine sites per defect and avoids repeated scans.
+    const auto affected_sites = small_extents ?
+                                    std::optional{surface.all_affected_sidbs(charged_defect_spacing_overwrite,
+                                                                             neutral_defect_spacing_overwrite)} :
+                                    std::nullopt;
+
+    const auto affected = [&](const sidb::lattice_site& site)
+    {
+        if (affected_sites.has_value())
+        {
+            return affected_sites->contains(site);
+        }
+        // Dense rows can require scanning every defect per gate cell; index rectangles if that becomes costly.
+        const auto lower_y = int64_t{site.y} - max_vertical_extent;
+        const auto upper_y = int64_t{site.y} + max_vertical_extent;
+        auto       it =
+            std::ranges::lower_bound(defects, lower_y, {}, [](const auto& entry) { return int64_t{entry.first.y}; });
+        for (; it != defects.cend() && int64_t{it->first.y} <= upper_y; ++it)
+        {
+            const auto& [defect_site, defect] = *it;
+            if (defect_site.z != site.z)
+            {
+                continue;
+            }
+            const auto [horizontal, vertical] =
+                sidb::model::defect_extent(defect, charged_defect_spacing_overwrite, neutral_defect_spacing_overwrite);
+            const auto dx = int64_t{site.x} - defect_site.x;
+            const auto dy = int64_t{site.y} - defect_site.y;
+            if (dx >= -int64_t{horizontal} && dx <= horizontal && dy >= -int64_t{vertical} && dy <= vertical)
+            {
+                return true;
+            }
+        }
+        return false;
+    };
 
     const auto gate_implementations = GateLibrary::get_functional_implementations();
     const auto gate_ports           = GateLibrary::get_gate_ports();
@@ -111,7 +161,7 @@ surface_analysis(const fiction::layouts::gate_layout<Geometry>& gate_lyt, const 
                                                                         GateLibrary::gate_y_size()>(
                                 gate_lyt, t, layouts::layout_base::coordinate{x, y, t.z}));
 
-                        if (sidbs_affected_by_defects.contains(sidb_pos))
+                        if (affected(sidb_pos))
                         {
                             for (const auto& port : gate_ports.at(gate))
                             {
