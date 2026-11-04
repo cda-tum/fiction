@@ -38,18 +38,19 @@ CLOCKED_LAYOUTS = [
 @pytest.mark.parametrize("make_layout", CLOCKED_LAYOUTS)
 def test_layout_coordinate_access(make_layout):
     layout = make_layout()
-    assert sorted((t.x, t.y, t.z) for t in layout.coordinates()) == sorted(
+    assert [(t.x, t.y, t.z) for t in layout.coordinates()] == [
         (x, y, z) for z in range(2) for y in range(3) for x in range(4)
-    )
-    assert sorted((t.x, t.y, t.z) for t in layout.ground_coordinates()) == sorted(
-        (x, y, 0) for y in range(3) for x in range(4)
-    )
+    ]
+    assert [(t.x, t.y, t.z) for t in layout.ground_coordinates()] == [(x, y, 0) for y in range(3) for x in range(4)]
     neighbors = {
         cartesian_gate_layout: [(0, 1, 0), (1, 0, 0), (1, 2, 0), (2, 1, 0)],
         shifted_cartesian_gate_layout: [(0, 1, 0), (0, 2, 0), (1, 0, 0), (1, 2, 0), (2, 1, 0), (2, 2, 0)],
         hexagonal_gate_layout: [(0, 0, 0), (0, 1, 0), (0, 2, 0), (1, 0, 0), (1, 2, 0), (2, 1, 0)],
     }
     assert sorted((t.x, t.y, t.z) for t in layout.adjacent_coordinates((1, 1))) == neighbors[type(layout)]
+    assert sorted((t.x, t.y, t.z) for t in layout.adjacent_coordinates((1, 1, 1))) == [
+        (x, y, 1) for x, y, _ in neighbors[type(layout)]
+    ]
 
 
 @pytest.mark.parametrize(
