@@ -70,14 +70,14 @@ class missing_position_exception : public std::exception
 {
   public:
     /**
-     * @brief Record the input line that lacks a SiDB position.
-     * @param n Line number in the input file.
+     * @brief Record the recognized row that lacks a SiDB position.
+     * @param n Zero-based index among recognized rows.
      */
     explicit missing_position_exception(const uint32_t n) noexcept : line{n} {}
 
     /**
-     * @brief Return the input line that lacks a SiDB position.
-     * @return Line number in the input file.
+     * @brief Return the recognized row that lacks a SiDB position.
+     * @return Zero-based index among recognized rows.
      */
     [[nodiscard]] uint32_t where() const noexcept
     {
@@ -86,7 +86,7 @@ class missing_position_exception : public std::exception
 
   private:
     /**
-     * @brief Line number in the input file.
+     * @brief Zero-based index among recognized rows.
      */
     const uint32_t line;
 };

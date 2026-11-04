@@ -12,10 +12,10 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from mnt.pyfiction import physical_design
 from mnt.pyfiction.layouts import cartesian_gate_layout, layout_input_port
 from mnt.pyfiction.networks import simulate, simulate_outputs
 from mnt.pyfiction.networks.io import read_network
-from mnt.pyfiction.physical_design import exact
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -31,7 +31,12 @@ def test_logic_simulation(resources_dir):
     xnor_sim = simulate(xnor2_net)
     assert xnor_sim["out"] == [True, False, False, True]
 
-    xor_lyt = exact(xor2_net, crossings=True)
+
+def test_layout_logic_simulation(resources_dir):
+    if not hasattr(physical_design, "exact"):
+        pytest.skip("pyfiction was built without Z3")
+    xor2_net = read_network(str(resources_dir / "xor2.v"))
+    xor_lyt = physical_design.exact(xor2_net, crossings=True)
     assert xor_lyt is not None
     xor_lyt_sim = simulate(xor_lyt)
     assert xor_lyt_sim["out"] == [False, True, True, False]
@@ -46,11 +51,11 @@ def test_duplicate_output_names_preserve_order(tmp_path: Path) -> None:
     network.set_output_name(0, "same")
     network.set_output_name(1, "same")
     outputs = simulate_outputs(network)
-    assert [name for name, bits in outputs] == ["same", "same"]
-    assert outputs[0][1] != outputs[1][1]
+    assert outputs == [("same", [True, False]), ("same", [False, True])]
+    assert simulate(network) == {"same": [False, True]}
 
 
-def test_layout_simulation_preserves_input_slots_and_unused_inputs() -> None:
+def test_layout_simulation_preserves_input_slots_and_unused_inputs(tmp_path: Path) -> None:
     """Extract ordered logic while ignoring incomplete dangling objects."""
     layout = cartesian_gate_layout((5, 2))
     left = layout.create_pi("left", (0, 0))
@@ -64,6 +69,18 @@ def test_layout_simulation_preserves_input_slots_and_unused_inputs() -> None:
     assert [name for name, _ in outputs] == ["same", "same"]
     assert outputs[0][1] == [False, True, False, False, False, True, False, False]
     assert outputs[1][1] == [True, False, True, False, True, False, True, False]
+    path = tmp_path / "asymmetric.v"
+    path.write_text(
+        "module top(left,right,unused,f,g);\ninput left,right,unused;\noutput f,g;\n"
+        "assign f = right & ~left;\nassign g = left & ~right;\nendmodule\n",
+        encoding="utf-8",
+    )
+    reference = simulate_outputs(read_network(str(path)))
+    assert reference == [
+        ("f", [False, True, False, False, False, True, False, False]),
+        ("g", [False, False, True, False, False, False, True, False]),
+    ]
+    assert outputs[0][1] == reference[0][1]
     layout.disconnect(layout_input_port(less, 0))
     with pytest.raises(ValueError, match="disconnected input"):
         simulate_outputs(layout)

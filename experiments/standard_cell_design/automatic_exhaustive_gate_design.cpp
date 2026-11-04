@@ -16,6 +16,7 @@
  */
 
 #include "fiction_experiments.hpp"
+#include "historical_comparison_table.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/generators/design_gates.hpp>
@@ -78,8 +79,8 @@ try
          {std::vector<kitty::dynamic_truth_table>{create_xnor_tt()}, "xnor"},
          {std::vector<kitty::dynamic_truth_table>{create_lt_tt()}, "lt"},
          {std::vector<kitty::dynamic_truth_table>{create_gt_tt()}, "gt"},
-         {std::vector<kitty::dynamic_truth_table>{create_le_tt()}, "le"},
-         {std::vector<kitty::dynamic_truth_table>{create_ge_tt()}, "ge"},
+         {std::vector<kitty::dynamic_truth_table>{fiction_experiments::historical_comparison_table(0x11)}, "le"},
+         {std::vector<kitty::dynamic_truth_table>{fiction_experiments::historical_comparison_table(0x13)}, "ge"},
          {std::vector<kitty::dynamic_truth_table>{create_crossing_wire_tt()}, "cx"},
          {std::vector<kitty::dynamic_truth_table>{create_half_adder_tt()}, "ha"},
          {std::vector<kitty::dynamic_truth_table>{create_double_wire_tt()}, "hourglass"}}};

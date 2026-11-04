@@ -33,6 +33,8 @@
 #include <mockturtle/networks/xmg.hpp>
 #include <mockturtle/views/names_view.hpp>
 
+#include <cstdint>
+
 using namespace fiction;
 using namespace fiction::networks;
 using namespace fiction::synthesis;
@@ -46,9 +48,10 @@ namespace
  * @tparam Ntk Source network type.
  * @param ntk Source network.
  * @param params Selected gate library.
+ * @return Counts of mapped gate types.
  */
 template <typename Ntk>
-void map_and_check(const Ntk& ntk, const technology_mapping_params& params)
+count_gate_types_stats map_and_check(const Ntk& ntk, const technology_mapping_params& params)
 {
     technology_mapping_stats stats{};
     const auto               mapped = technology_mapping(ntk, params, &stats);
@@ -78,9 +81,66 @@ void map_and_check(const Ntk& ntk, const technology_mapping_params& params)
     CHECK((params.mux || gates.num_mux == 0));
     CHECK((params.and_xor || gates.num_and_xor == 0));
     CHECK(gates.num_other == 0);
+    return gates;
 }
 
 }  // namespace
+
+TEST_CASE("Asymmetric gate selection", "[technology-mapping]")
+{
+    technology_network        ntk{};
+    const auto                a = ntk.create_pi();
+    const auto                b = ntk.create_pi();
+    technology_mapping_params params{};
+    params.inv = true;
+
+    SECTION("LT")
+    {
+        ntk.create_po(ntk.create_lt(a, b));
+        params.lt2 = true;
+    }
+    SECTION("GT")
+    {
+        ntk.create_po(ntk.create_gt(a, b));
+        params.gt2 = true;
+    }
+    SECTION("LE")
+    {
+        ntk.create_po(ntk.create_le(a, b));
+        params.le2 = true;
+    }
+    SECTION("GE")
+    {
+        ntk.create_po(ntk.create_ge(a, b));
+        params.ge2 = true;
+    }
+    const auto gates = map_and_check(ntk, params);
+    CHECK(gates.num_lt2 == static_cast<uint32_t>(params.lt2));
+    CHECK(gates.num_gt2 == static_cast<uint32_t>(params.gt2));
+    CHECK(gates.num_le2 == static_cast<uint32_t>(params.le2));
+    CHECK(gates.num_ge2 == static_cast<uint32_t>(params.ge2));
+}
+
+TEST_CASE("Single comparison gate without an inverter", "[technology-mapping]")
+{
+    technology_network network{};
+    const auto         a = network.create_pi();
+    const auto         b = network.create_pi();
+    network.create_po(network.create_lt(a, b));
+
+    SECTION("The matching gate maps successfully")
+    {
+        const auto gates = map_and_check(network, technology_mapping_params{.lt2 = true});
+        CHECK(gates.num_lt2 == 1);
+    }
+    SECTION("A gate from the complementary class reports failure")
+    {
+        technology_mapping_stats stats{};
+        const auto               mapped = technology_mapping(network, technology_mapping_params{.le2 = true}, &stats);
+        CHECK(stats.mapper_stats.mapping_error);
+        CHECK(mapped.num_pos() == 0);
+    }
+}
 
 TEST_CASE("Simple AOI network mapping", "[technology-mapping]")
 {

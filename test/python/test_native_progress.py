@@ -28,17 +28,14 @@ from mnt.pyfiction.physical_design import (
     apply_qca_one_library,
     apply_sim7_mol_library,
     apply_topolinano_library,
-    exact,
     graph_oriented_layout_design,
     orthogonal,
-    technology_constraints,
 )
 from mnt.pyfiction.qca import io as qca_io
 from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.io import read_sqd_layout, write_sidb_layout_svg, write_sqd_layout
-from mnt.pyfiction.sidb.simulation import sidb_simulation_engine
+from mnt.pyfiction.sidb.simulation import engines, sidb_simulation_engine
 from mnt.pyfiction.sidb.simulation.analysis import critical_temperature_gate_based
-from mnt.pyfiction.sidb.simulation.engines import clustercomplete
 from mnt.pyfiction.synthesis import create_not_tt, fanout_substitution, network_balancing
 from mnt.pyfiction.verification import (
     critical_path_length_and_throughput,
@@ -54,6 +51,7 @@ if TYPE_CHECKING:
 
 
 @pytest.mark.parametrize("threads", [1, 4])
+@pytest.mark.skipif(not hasattr(physical_design, "exact"), reason="pyfiction was built without Z3")
 def test_exact_candidate_lifecycle(mux21: technology_network, threads: int) -> None:
     """Solver candidates use tile dimensions and leave no active worker after success."""
     options: dict[str, Any] = {
@@ -61,7 +59,7 @@ def test_exact_candidate_lifecycle(mux21: technology_network, threads: int) -> N
     }
     reports: list[tuple[int, int, str, int, int, bool]] = []
     options["on_worker_progress"] = lambda *report: reports.append(report)
-    layout = exact(mux21, **options)
+    layout = physical_design.exact(mux21, **options)
     assert layout is not None
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
     assert reports
@@ -198,6 +196,7 @@ def test_writer_counts_and_output(mux21: technology_network, tmp_path: Path, kin
 
 
 @pytest.mark.parametrize("threads", [1, 4])
+@pytest.mark.skipif(not hasattr(engines, "clustercomplete"), reason="pyfiction was built without ALGLIB")
 def test_clustercomplete_worker_counts(resources_dir: Path, threads: int) -> None:
     """Serial and stolen compositions contribute to the same aggregate count."""
     layout = read_sqd_layout(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
@@ -209,7 +208,7 @@ def test_clustercomplete_worker_counts(resources_dir: Path, threads: int) -> Non
     counts: list[tuple[str, int, int]] = []
     options["on_worker_progress"] = lambda *report: reports.append(report)
     options["on_progress"] = lambda *report: counts.append(report)
-    result = clustercomplete(layout, **options)
+    result = engines.clustercomplete(layout, **options)
     assert result.charge_distributions
     assert reports
     final = {worker: done for worker, count, description, done, total, active in reports if not active}
@@ -217,6 +216,7 @@ def test_clustercomplete_worker_counts(resources_dir: Path, threads: int) -> Non
     assert sum(final.values()) == next(done for task, done, _ in reversed(counts) if task == "compositions")
 
 
+@pytest.mark.skipif(not hasattr(physical_design, "exact"), reason="pyfiction was built without Z3")
 def test_exact_skips_candidates_outside_area_bound(mux21: technology_network) -> None:
     """Candidates rejected by the area bound never appear as active solvers."""
     options: dict[str, Any] = {
@@ -224,10 +224,11 @@ def test_exact_skips_candidates_outside_area_bound(mux21: technology_network) ->
     }
     reports: list[tuple[int, int, str, int, int, bool]] = []
     options["on_worker_progress"] = lambda *report: reports.append(report)
-    assert exact(mux21, **options) is None
+    assert physical_design.exact(mux21, **options) is None
     assert not reports
 
 
+@pytest.mark.skipif(not hasattr(physical_design, "exact"), reason="pyfiction was built without Z3")
 def test_exact_clears_candidates_on_timeout(mux21: technology_network) -> None:
     """A timeout leaves no active candidate, whether it interrupts a solver or prevents its start."""
     options: dict[str, Any] = {
@@ -236,11 +237,12 @@ def test_exact_clears_candidates_on_timeout(mux21: technology_network) -> None:
     }
     reports: list[tuple[int, int, str, int, int, bool]] = []
     options["on_worker_progress"] = lambda *report: reports.append(report)
-    exact(mux21, **options)
+    physical_design.exact(mux21, **options)
     active = {worker: running for worker, count, description, done, total, running in reports}
     assert not any(active.values())
 
 
+@pytest.mark.skipif(not hasattr(engines, "clustercomplete"), reason="pyfiction was built without ALGLIB")
 def test_temperature_forwards_simulation_workers(resources_dir: Path) -> None:
     """Temperature analysis keeps outer phases and forwards the active simulation's workers."""
     layout = read_sqd_layout(str(resources_dir / "hex_11_inputsdbp_inv_straight_v0_manual.sqd"))
@@ -297,16 +299,17 @@ def test_failed_mapping_retains_completed_count() -> None:
     assert reports[-1][1] < reports[-1][2]
 
 
+@pytest.mark.skipif(not hasattr(physical_design, "exact"), reason="pyfiction was built without Z3")
 def test_qcc_writer_counts_and_output(mux21: technology_network, tmp_path: Path) -> None:
     """QCC callbacks count rows without changing the serialized layout."""
     placement: dict[str, Any] = {
         "scheme": "COLUMNAR3",
         "crossings": True,
         "border_io": True,
-        "technology_specifics": technology_constraints.TOPOLINANO,
+        "technology_specifics": physical_design.technology_constraints.TOPOLINANO,
         "layout_arrangement": arrangement.ODD_COLUMN,
     }
-    gate_layout = exact(mux21, layout_type=shifted_cartesian_gate_layout, **placement)
+    gate_layout = physical_design.exact(mux21, layout_type=shifted_cartesian_gate_layout, **placement)
     assert gate_layout is not None
     layout = apply_topolinano_library(gate_layout)
     before = tmp_path / "before.qcc"
@@ -324,6 +327,8 @@ def test_qcc_writer_counts_and_output(mux21: technology_network, tmp_path: Path)
 @pytest.mark.parametrize("raises", [False, True])
 def test_progress_callbacks_are_released(mux21: technology_network, kind: str, *, raises: bool) -> None:
     """Native calls release callback objects after success and callback exceptions."""
+    if kind != "balance" and not hasattr(physical_design, "exact"):
+        pytest.skip("pyfiction was built without Z3")
 
     def invoke() -> weakref.ReferenceType[Any]:
         """Call an algorithm and release its callback.
@@ -355,7 +360,7 @@ def test_progress_callbacks_are_released(mux21: technology_network, kind: str, *
             options["on_worker_progress"] = callback
         if kind != "worker":
             options["on_progress"] = callback
-        algorithm: Any = network_balancing if kind == "balance" else exact
+        algorithm: Any = network_balancing if kind == "balance" else physical_design.exact
         if kind != "balance":
             options["num_threads"] = 2
         if raises:
