@@ -15,12 +15,14 @@
  * @author Simon Hofmann (simon1hofmann)
  */
 
+#include <fiction/layouts/clocking_scheme.hpp>
+
+// Test dependencies follow the defining header to expose missing direct includes.
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
 #include <fiction/layouts/arrangement.hpp>
-#include <fiction/layouts/clocking_scheme.hpp>
 
 #include <array>
 #include <cstddef>
