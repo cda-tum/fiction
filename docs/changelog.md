@@ -42,6 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Network utility tests check fanins through network interfaces instead of fixed node indices.
   - Python SiDB engine tests check complete charge-state configurations.
   - Python layout tests cover rectangular iteration bounds and clock zones.
   - Python BDL wire tests verify pair identities and wire endpoints.

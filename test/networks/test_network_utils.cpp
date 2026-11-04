@@ -15,11 +15,14 @@
  * @author Benjamin Hien (hibenj)
  */
 
+#include <fiction/networks/network_utils.hpp>
+
+// Test dependencies follow the defining header to expose missing direct includes.
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
 
-#include <fiction/networks/network_utils.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>
 #include <fiction/networks/virtual_pi_network.hpp>
@@ -41,11 +44,17 @@ TEST_CASE("Number of constant fanins", "[network-utils]")
 {
     const auto maj4 = blueprints::maj4_network<mockturtle::mig_network>();
 
-    maj4.foreach_node([&maj4](const auto& n) { CHECK(num_constant_fanins(maj4, n) == 0ul); });
+    maj4.foreach_node(
+        [&maj4](const auto& n)
+        {
+            CAPTURE(n);
+            CHECK(num_constant_fanins(maj4, n) == 0ul);
+        });
 
     const auto and_inv = blueprints::unbalanced_and_inv_network<mockturtle::mig_network>();
 
-    CHECK(num_constant_fanins(and_inv, 3) == 1ul);
+    REQUIRE(and_inv.num_pos() == 1);
+    CHECK(num_constant_fanins(and_inv, and_inv.get_node(and_inv.po_at(0))) == 1ul);
 }
 
 TEST_CASE("High-degree fanin nodes", "[network-utils]")
@@ -69,23 +78,18 @@ TEST_CASE("Incoming primary input", "[network-utils]")
 {
     const auto maj4 = blueprints::maj4_network<mockturtle::mig_network>();
 
-    // constant node
-    CHECK_FALSE(has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{0}));
+    CHECK_FALSE(has_incoming_primary_input(maj4, maj4.get_node(maj4.get_constant(false))));
 
-    // PI nodes
-    CHECK_FALSE(has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{1}));
-    CHECK_FALSE(has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{2}));
-    CHECK_FALSE(has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{3}));
-    CHECK_FALSE(has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{4}));
-    CHECK_FALSE(has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{5}));
+    /** @brief Direct-PI results for all five declared inputs. */
+    std::vector<bool> input_results{};
+    maj4.foreach_pi([&](const auto& n) { input_results.push_back(has_incoming_primary_input(maj4, n)); });
+    CHECK(input_results == std::vector<bool>{false, false, false, false, false});
 
-    // MAJ nodes with incoming PIs
-    CHECK(has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{6}));
-    CHECK(has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{7}));
-    CHECK(has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{8}));
-
-    // MAJ node without incoming PIs
-    CHECK_FALSE(has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{9}));
+    /** @brief Direct-PI results for all four output drivers in declared order. */
+    std::vector<bool> output_results{};
+    maj4.foreach_po([&](const auto& f)
+                    { output_results.push_back(has_incoming_primary_input(maj4, maj4.get_node(f))); });
+    CHECK(output_results == std::vector<bool>{true, true, true, false});
 }
 
 TEST_CASE("Inverse levels", "[network-utils]")
