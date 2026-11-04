@@ -560,23 +560,8 @@ TEST_CASE(
 
 TEST_CASE("BDL wire", "[is-operational]")
 {
-
-    layout lyt{lattice::si_100_2x1(), "BDL wire"};
-
-    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_sidb({3, 0, 0}, dot_tag::INPUT);
-
-    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({14, 0, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({18, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_sidb({20, 0, 0}, dot_tag::OUTPUT);
-
-    // output perturber
-    lyt.assign_sidb({24, 0, 0}, dot_tag::NORMAL);
+    /** @brief BDL wire with an output perturber. */
+    const auto lyt = blueprints::bdl_wire();
 
     simulation_parameters sim_params{};
 

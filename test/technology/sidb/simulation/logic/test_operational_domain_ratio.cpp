@@ -15,6 +15,9 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <fiction/technology/sidb/simulation/logic/operational_domain_ratio.hpp>
+
+// Test dependencies follow the defining header to expose missing direct includes.
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
@@ -29,7 +32,6 @@
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
-#include <fiction/technology/sidb/simulation/logic/operational_domain_ratio.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
 #include <kitty/dynamic_truth_table.hpp>
@@ -48,24 +50,8 @@ using namespace fiction::utils::math;
 TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio]")
 {
 
-    layout lyt{lattice::si_100_2x1(), "BDL wire"};
-
-    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_sidb({3, 0, 0}, dot_tag::INPUT);
-
-    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({14, 0, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({18, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_sidb({20, 0, 0}, dot_tag::OUTPUT);
-
-    // output perturber
-    lyt.assign_sidb({24, 0, 0}, dot_tag::NORMAL);
-
-    const auto& lat = lyt;
+    /** @brief BDL wire with an output perturber. */
+    const auto lat = blueprints::bdl_wire();
 
     simulation_parameters sim_params{};
     sim_params.base = 2;
@@ -125,6 +111,24 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
                                      parameter_point({4.25, 4.25}), op_ratio_params);
 
         CHECK_THAT(op_domain_ratio, Catch::Matchers::WithinAbs(80.0 / 256.0, ERROR_MARGIN));
+    }
+
+    SECTION("An on-grid seed must be operational to reach an operational region")
+    {
+        for (auto& dimension : op_domain_params.sweep_dimensions)
+        {
+            dimension.min  = 0.5;
+            dimension.max  = 4.25;
+            dimension.step = 0.25;
+        }
+        /** @brief Sweep and identity-function specification shared by both seeds. */
+        const operational_domain_ratio_params params{.op_domain_params = op_domain_params};
+        const std::vector                     spec{create_id_tt()};
+        /** @brief Ratios for non-operational and operational seeds on the same grid. */
+        const auto lower = operational_domain_ratio(lat, spec, parameter_point{{1.5, 0.5}}, params);
+        const auto upper = operational_domain_ratio(lat, spec, parameter_point{{1.75, 0.75}}, params);
+        CHECK_THAT(lower, Catch::Matchers::WithinAbs(0.0, ERROR_MARGIN));
+        CHECK_THAT(upper, Catch::Matchers::WithinAbs(80.0 / 256.0, ERROR_MARGIN));
     }
 }
 
