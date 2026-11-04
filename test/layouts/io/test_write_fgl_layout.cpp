@@ -557,6 +557,16 @@ TEST_CASE("FGL rejects invalid XML text before changing output", "[write-fgl-lay
         {
             /** @brief Exclusively created directory. */
             const std::filesystem::path& path;
+            /** @brief Keep the owned directory until cleanup. */
+            explicit cleanup_directory(const std::filesystem::path& directory) : path{directory} {}
+            /** @brief Cleanup ownership cannot be copied. */
+            cleanup_directory(const cleanup_directory&) = delete;
+            /** @brief Cleanup ownership cannot be assigned. */
+            cleanup_directory& operator=(const cleanup_directory&) = delete;
+            /** @brief Cleanup ownership cannot be moved. */
+            cleanup_directory(cleanup_directory&&) = delete;
+            /** @brief Cleanup ownership cannot be move-assigned. */
+            cleanup_directory& operator=(cleanup_directory&&) = delete;
             /** @brief Remove the test file and its directory without throwing. */
             ~cleanup_directory()
             {
