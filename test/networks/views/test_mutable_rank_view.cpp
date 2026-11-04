@@ -513,14 +513,20 @@ TEST_CASE("Check PI order for equivalence checking", "[mutable-rank-view]")
     // the swap changes the order in which `foreach_pi` visits the inputs; the miter pairs them by creation order, so
     // the equivalence is unaffected
     vpi_r.swap(tec.get_node(a), tec.get_node(b));
+    /** @brief Input nodes in rank order. */
+    std::vector<technology_network::node> inputs{};
+    vpi_r.foreach_pi([&](const auto n) { inputs.push_back(n); });
+    CHECK(inputs == std::vector<technology_network::node>{tec.get_node(b), tec.get_node(a), tec.get_node(c)});
 
     auto maybe_cec_m = virtual_miter_equivalent(tec, vpi_r);
     REQUIRE(maybe_cec_m.has_value());
     CHECK(maybe_cec_m.value_or(false));
 
-    // this rearranges the order of the PI as stored in the underlying static_depth_view (corresponds to the order in
-    // _storage)
+    // Restore the underlying input order in rank zero.
     vpi_r.rearrange_pis();
+    inputs.clear();
+    vpi_r.foreach_pi([&](const auto n) { inputs.push_back(n); });
+    CHECK(inputs == std::vector<technology_network::node>{tec.get_node(a), tec.get_node(b), tec.get_node(c)});
 
     maybe_cec_m = virtual_miter_equivalent(tec, vpi_r);
     REQUIRE(maybe_cec_m.has_value());

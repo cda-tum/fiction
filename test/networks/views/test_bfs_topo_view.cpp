@@ -163,8 +163,8 @@ TEST_CASE("BFS preserves an existing topological traversal", "[bfs-topo-view]")
     const auto deep = ntk.create_and(shallow, c);
     /** @brief Independent gate at depth one. */
     const auto independent = ntk.create_and(c, d);
-    ntk.create_po(deep);
     ntk.create_po(independent);
+    ntk.create_po(deep);
 
     /** @brief Output-driven depth-first topological order. */
     const mockturtle::topo_view depth_first{ntk};
@@ -178,21 +178,25 @@ TEST_CASE("BFS preserves an existing topological traversal", "[bfs-topo-view]")
                                                               ntk.get_node(b),
                                                               ntk.get_node(c),
                                                               ntk.get_node(d),
+                                                              ntk.get_node(independent),
                                                               ntk.get_node(shallow),
-                                                              ntk.get_node(deep),
-                                                              ntk.get_node(independent)};
+                                                              ntk.get_node(deep)};
     /** @brief Original topological view's nodes. */
     std::vector<mockturtle::aig_network::node> original{};
     /** @brief Pass-through view's nodes. */
     std::vector<mockturtle::aig_network::node> preserved{};
     /** @brief Computed breadth-first nodes. */
     std::vector<mockturtle::aig_network::node> breadth{};
+    /** @brief Underlying network's node order. */
+    std::vector<mockturtle::aig_network::node> storage{};
     depth_first.foreach_node([&](const auto n) { original.push_back(n); });
     passthrough.foreach_node([&](const auto n) { preserved.push_back(n); });
     breadth_first.foreach_node([&](const auto n) { breadth.push_back(n); });
+    ntk.foreach_node([&](const auto n) { storage.push_back(n); });
     REQUIRE(original == expected);
     CHECK(preserved == expected);
     CHECK(breadth != expected);
+    CHECK(storage != expected);
 }
 
 TEST_CASE("BFS visits repeated fanins and dangling gates", "[bfs-topo-view]")
