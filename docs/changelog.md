@@ -43,6 +43,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Code quality:
 
   - SiDB operational checks reuse the BDL wire fixture and test a non-operational single-point domain.
+  - CLI tests check operational-domain exports and area parameter overrides.
   - Python SiDB engine tests check complete charge-state configurations.
   - Python layout tests cover rectangular iteration bounds and clock zones.
   - Python BDL wire tests verify pair identities and wire endpoints.

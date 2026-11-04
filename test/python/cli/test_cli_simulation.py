@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import csv
 from typing import TYPE_CHECKING
 
 import pytest
@@ -17,7 +18,14 @@ import pytest
 from mnt.fiction.cli.registry import REGISTRY
 from mnt.fiction.cli.stores import CellEntry
 from mnt.pyfiction.sidb import sidb_layout
-from mnt.pyfiction.sidb.simulation import engines
+from mnt.pyfiction.sidb.simulation import engines, sidb_simulation_engine
+from mnt.pyfiction.sidb.simulation.logic import (
+    operational_condition,
+    operational_domain_grid_search,
+    operational_domain_value_range,
+    operational_status,
+    sweep_parameter,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -113,28 +121,72 @@ def test_temp(shell: Shell, resource: Callable[[str], str]) -> None:
 @pytest.mark.parametrize("algorithm", ["", "--grid-search", "--sketch"])
 def test_opdom_grid_search(xor_gate: Shell, tmp_path: Path, algorithm: str) -> None:
     """Grid and sketch requests write one CSV row per sweep point."""
-    csv = tmp_path / "opdom.csv"
-    xor_gate.ok(f'opdom "{csv}" {algorithm} --x-min 5.6 --x-max 5.8 --x-step 0.1 --y-min 5 --y-max 5.2 --y-step 0.1')
+    path = tmp_path / "opdom.csv"
+    xor_gate.ok(f'opdom "{path}" {algorithm} --x-min 5.6 --x-max 5.8 --x-step 0.1 --y-min 5 --y-max 5.2 --y-step 0.1')
     result = xor_gate.session.log[-1]["result"]
     assert isinstance(result, dict)
     assert result["grid_search"] is True
     assert result["sketch"] is (algorithm == "--sketch")
     assert result["num_evaluated_parameter_combinations"] == 9
-    rows = csv.read_text(encoding="utf-8").splitlines()
-    assert rows[0].startswith("epsilon_r,lambda_tf")
-    assert len(rows) == 10
+    with path.open(encoding="utf-8", newline="") as stream:
+        rows = list(csv.reader(stream))
+    assert rows[0] == ["epsilon_r", "lambda_tf", "operational status"]
+    points = sorted((float(row[0]), float(row[1])) for row in rows[1:])
+    expected = [(x, y) for x in (5.6, 5.7, 5.8) for y in (5.0, 5.1, 5.2)]
+    assert len(points) == len(expected)
+    for point, target in zip(points, expected, strict=True):
+        assert point == pytest.approx(target, rel=0, abs=1e-6)
+    assert all(row[2] in {"0", "1"} for row in rows[1:])
+    if algorithm == "--sketch":
+        layout = xor_gate.session.cell_layouts.current().layout
+        assert isinstance(layout, sidb_layout)
+        full = operational_domain_grid_search(
+            layout,
+            [xor_gate.session.truth_tables.current()],
+            base=2,
+            sim_engine=sidb_simulation_engine.QUICKEXACT,
+            op_condition=operational_condition.REJECT_KINKS,
+            sweep_dimensions=[
+                operational_domain_value_range(sweep_parameter.EPSILON_R, 5.6, 5.8, 0.1),
+                operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.0, 5.2, 0.1),
+            ],
+        )
+        operational = {
+            tuple(point.get_parameters()) for point, status in full.items() if status == operational_status.OPERATIONAL
+        }
+        assert operational
+        sketch_operational = [(float(row[0]), float(row[1])) for row in rows[1:] if row[2] == "1"]
+        for point in operational:
+            assert any(candidate == pytest.approx(point, rel=0, abs=1e-6) for candidate in sketch_operational)
+
+
+def test_opdom_operational_only_filters_grid(xor_gate: Shell, tmp_path: Path) -> None:
+    """The filtered export keeps exactly the operational points of a mixed grid."""
+    full = tmp_path / "full.csv"
+    filtered = tmp_path / "filtered.csv"
+    sweep = "--x-min 7 --x-max 8 --x-step 1 --y-min 7 --y-max 8 --y-step 1"
+    xor_gate.ok(f'opdom "{full}" {sweep}')
+    xor_gate.ok(f'opdom "{filtered}" {sweep} --operational-only')
+    with full.open(encoding="utf-8", newline="") as stream:
+        full_rows = list(csv.reader(stream))
+    with filtered.open(encoding="utf-8", newline="") as stream:
+        filtered_rows = list(csv.reader(stream))
+    assert full_rows[0] == filtered_rows[0] == ["epsilon_r", "lambda_tf", "operational status"]
+    assert {row[2] for row in full_rows[1:]} == {"0", "1"}
+    assert sorted(filtered_rows[1:]) == sorted(row for row in full_rows[1:] if row[2] == "1")
 
 
 def test_opdom_sampling_and_errors(xor_gate: Shell, tmp_path: Path) -> None:
-    csv = tmp_path / "opdom.csv"
-    xor_gate.ok(f'opdom "{csv}" -r 4 -o --x-min 5.6 --x-max 5.8 --x-step 0.1 --y-min 5 --y-max 5.2 --y-step 0.1')
+    """Check random sampling and reject invalid sweep options."""
+    path = tmp_path / "opdom.csv"
+    xor_gate.ok(f'opdom "{path}" -r 4 -o --x-min 5.6 --x-max 5.8 --x-step 0.1 --y-min 5 --y-max 5.2 --y-step 0.1')
     result = xor_gate.session.log[-1]["result"]
     assert isinstance(result, dict)
     assert result["grid_search"] is False
-    assert "usage" in xor_gate.fails(f'opdom "{csv}" -r 2 -f 2')
-    assert "at least 1" in xor_gate.fails(f'opdom "{csv}" -f 0')
-    assert "positive step" in xor_gate.fails(f'opdom "{csv}" --x-step 0')
-    assert "usage" in xor_gate.fails(f'opdom "{csv}" -x foo')
+    assert "usage" in xor_gate.fails(f'opdom "{path}" -r 2 -f 2')
+    assert "at least 1" in xor_gate.fails(f'opdom "{path}" -f 0')
+    assert "positive step" in xor_gate.fails(f'opdom "{path}" --x-step 0')
+    assert "usage" in xor_gate.fails(f'opdom "{path}" -x foo')
 
 
 def test_clustercomplete_defaults_to_base_three() -> None:
@@ -174,15 +226,42 @@ def test_opdom_rejects_a_repeated_sweep(shell: Shell, resource: Callable[[str], 
     assert "more than one axis" in shell.fails(f'opdom "{tmp_path / "domain.csv"}" -x epsilon_r -y epsilon_r')
 
 
+@pytest.mark.parametrize("sampling", ["-r 4", "-f 4", "-c 4"])
+def test_opdom_sampling_methods_export_an_operational_point(xor_gate: Shell, tmp_path: Path, sampling: str) -> None:
+    """Each sampler exports the operational point of a single-point grid."""
+    path = tmp_path / "domain.csv"
+    sweep = "--x-min 5.6 --x-max 5.6 --x-step 0.1 --y-min 5 --y-max 5 --y-step 0.1"
+    grid_path = tmp_path / "grid.csv"
+    xor_gate.ok(f'opdom "{grid_path}" {sweep}')
+    with grid_path.open(encoding="utf-8", newline="") as stream:
+        grid = list(csv.reader(stream))
+    assert len(grid) == 2
+    assert grid[1][2] == "1"
+    xor_gate.ok(f'opdom "{path}" {sampling} --operational-only {sweep}')
+    with path.open(encoding="utf-8", newline="") as stream:
+        rows = list(csv.reader(stream))
+    assert rows[0] == ["epsilon_r", "lambda_tf", "operational status"]
+    assert len(rows) == 2
+    assert (float(rows[1][0]), float(rows[1][1])) == pytest.approx((5.6, 5.0), rel=0, abs=1e-6)
+    assert all(row[2] == "1" for row in rows[1:])
+    result = xor_gate.session.log[-1]["result"]
+    assert isinstance(result, dict)
+    assert len(rows) - 1 == result["num_operational_parameter_combinations"]
+    assert result["num_evaluated_parameter_combinations"] == 1
+
+
 @pytest.mark.parametrize("sampling", ["-f 4", "-c 4"])
 def test_opdom_sampling_methods_filter_nonoperational_points(xor_gate: Shell, tmp_path: Path, sampling: str) -> None:
+    """Filtered multi-point samples contain only operational points."""
     path = tmp_path / "domain.csv"
     xor_gate.ok(
         f'opdom "{path}" {sampling} --operational-only --x-min 5.6 --x-max 5.7 --x-step 0.1'
         " --y-min 5 --y-max 5.1 --y-step 0.1"
     )
-    rows = path.read_text(encoding="utf-8").splitlines()
-    assert rows[0].startswith("epsilon_r,lambda_tf")
+    with path.open(encoding="utf-8", newline="") as stream:
+        rows = list(csv.reader(stream))
+    assert rows[0] == ["epsilon_r", "lambda_tf", "operational status"]
+    assert all(row[2] == "1" for row in rows[1:])
     result = xor_gate.session.log[-1]["result"]
     assert isinstance(result, dict)
     assert len(rows) - 1 == result["num_operational_parameter_combinations"]
