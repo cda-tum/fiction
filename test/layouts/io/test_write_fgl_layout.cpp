@@ -56,6 +56,7 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <system_error>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -537,20 +538,48 @@ TEST_CASE("FGL rejects invalid XML text before changing output", "[write-fgl-lay
         CHECK_THROWS_AS(write_fgl_layout(layout, stream), std::invalid_argument);
         CHECK(stream.str() == "sentinel");
 
-        const auto filename =
-            std::filesystem::temp_directory_path() / ("fiction-fgl-text-" + std::to_string(std::random_device{}()));
+        const auto            prefix = "fiction-fgl-text-" + std::to_string(std::random_device{}());
+        std::filesystem::path directory{};
+        bool                  created = false;
+        for (auto attempt = 0; attempt < 16 && !created; ++attempt)
+        {
+            directory = std::filesystem::temp_directory_path() / (prefix + "-" + std::to_string(attempt));
+            std::error_code error{};
+            created = std::filesystem::create_directory(directory, error);
+            if (error && error != std::errc::file_exists)
+            {
+                throw std::filesystem::filesystem_error{"Cannot create temporary directory", directory, error};
+            }
+        }
+        REQUIRE(created);
+        /** @brief Removes only the directory owned by this test during unwinding. */
+        struct cleanup_directory
+        {
+            /** @brief Exclusively created directory. */
+            const std::filesystem::path& path;
+            /** @brief Remove the test file and its directory without throwing. */
+            ~cleanup_directory()
+            {
+                std::error_code ignored{};
+                std::filesystem::remove(path / "layout.fgl", ignored);
+                std::filesystem::remove(path, ignored);
+            }
+        };
+        const cleanup_directory cleanup{directory};
+        const auto              filename = directory / "layout.fgl";
         {
             std::ofstream original{filename};
+            REQUIRE(original.is_open());
             original << "sentinel";
+            REQUIRE(original.good());
         }
         CHECK_THROWS_AS(write_fgl_layout(layout, filename.string()), std::invalid_argument);
         std::ifstream original{filename, std::ios::binary};
+        REQUIRE(original.is_open());
         /** @brief Complete destination bytes after a rejected write. */
         std::stringstream contents{};
         contents << original.rdbuf();
         CHECK(contents.str() == "sentinel");
-        original.close();
-        std::filesystem::remove(filename);
     };
     SECTION("Layout name")
     {
