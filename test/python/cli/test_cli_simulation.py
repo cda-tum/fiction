@@ -199,6 +199,7 @@ def test_opdom_rejects_a_repeated_sweep(shell: Shell, resource: Callable[[str], 
 
 @pytest.mark.parametrize("sampling", ["-f 4", "-c 4"])
 def test_opdom_sampling_methods_filter_nonoperational_points(xor_gate: Shell, tmp_path: Path, sampling: str) -> None:
+    """Check that filtered samples contain only operational points."""
     path = tmp_path / "domain.csv"
     xor_gate.ok(
         f'opdom "{path}" {sampling} --operational-only --x-min 5.6 --x-max 5.7 --x-step 0.1'
