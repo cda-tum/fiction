@@ -596,7 +596,7 @@ TEST_CASE("Override clocking", "[clocking-scheme]")
     for (uint32_t y = 0; y < overridden.size(); ++y)
     {
         CAPTURE(y);
-        CHECK(twoddwave4(0, y) == overridden[y]);
+        CHECK(twoddwave4(0, y) == overridden.at(y));
     }
     /** @brief Expected values at coordinates outside the overridden column. */
     static constexpr std::array<std::array<uint8_t, 4>, 3> untouched{{{1, 2, 3, 0}, {2, 3, 0, 1}, {3, 0, 1, 2}}};
@@ -605,7 +605,7 @@ TEST_CASE("Override clocking", "[clocking-scheme]")
         for (uint32_t y = 0; y < 4; ++y)
         {
             CAPTURE(x, y);
-            CHECK(twoddwave4(x, y) == untouched[x - 1][y]);
+            CHECK(twoddwave4(x, y) == untouched.at(x - 1).at(y));
         }
     }
 
