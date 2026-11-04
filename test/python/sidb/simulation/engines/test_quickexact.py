@@ -10,12 +10,17 @@
 
 from __future__ import annotations
 
+from collections import Counter
 from typing import TYPE_CHECKING, Any
 
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.io import read_sqd_layout
 from mnt.pyfiction.sidb.model import sidb_charge_state
-from mnt.pyfiction.sidb.simulation.engines import automatic_base_number_detection, quickexact
+from mnt.pyfiction.sidb.simulation.engines import (
+    automatic_base_number_detection,
+    exhaustive_ground_state_simulation,
+    quickexact,
+)
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -32,24 +37,50 @@ def test_three_sidbs() -> None:
     options: dict[str, Any] = {
         "base": 2,
         "mu_minus": -0.25,
+        "epsilon_r": 5.6,
+        "lambda_tf": 5.0,
         "base_number_detection": automatic_base_number_detection.OFF,
     }
+
+    def check_distributions(result: Any, base: int, *, expect_positive: bool = False) -> None:
+        """Compare engine and exhaustive charge configurations with derived literals."""
+        reference = exhaustive_ground_state_simulation(
+            layout, base=base, **{key: options[key] for key in ("mu_minus", "epsilon_r", "lambda_tf")}
+        )
+        sites = [lattice_site(x, 0, 0) for x in range(3)]
+        expected = Counter(tuple(cd.get_charge_state(site) for site in sites) for cd in reference.charge_distributions)
+        actual = Counter(tuple(cd.get_charge_state(site) for site in sites) for cd in result.charge_distributions)
+        assert expected
+        negative, neutral, positive = sidb_charge_state.NEGATIVE, sidb_charge_state.NEUTRAL, sidb_charge_state.POSITIVE
+        singles = [(negative, neutral, neutral), (neutral, negative, neutral), (neutral, neutral, negative)]
+        if base == 2:
+            known = singles
+        elif options["epsilon_r"] == 5.6:
+            known = [*singles, (negative, positive, negative)]
+        else:
+            known = [(negative, positive, negative), (positive, negative, positive)]
+        assert expected == Counter(known)
+        assert any(sidb_charge_state.POSITIVE in state for state in expected) is expect_positive
+        assert actual == expected
 
     result = quickexact(layout, **options)
 
     assert result.algorithm_name == "QuickExact"
     assert result.layout == layout
     assert len(result.charge_distributions) <= 3
+    check_distributions(result, 2)
 
     options["base_number_detection"] = automatic_base_number_detection.ON
 
     result = quickexact(layout, **options)
     assert len(result.charge_distributions) <= 4
+    check_distributions(result, 3, expect_positive=True)
 
     options["epsilon_r"] = 2
     options["lambda_tf"] = 2
     result = quickexact(layout, **options)
     assert len(result.charge_distributions) <= 2
+    check_distributions(result, 3, expect_positive=True)
 
 
 def test_perturber_and_sidb_pair_111() -> None:
