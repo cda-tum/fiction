@@ -17,6 +17,7 @@
 
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
@@ -188,82 +189,45 @@ TEST_CASE("Clocking lookup by phase count and hexagonal arrangement", "[clocking
           clocking::twoddwave_hex(arrangement::ODD_COLUMN, clocking::num_clks::THREE));
 }
 
-TEST_CASE("3-phase open clocking", "[clocking-scheme]")
+TEST_CASE("Open clocking supports both phase counts", "[clocking-scheme]")
 {
-    auto open3 = clocking::open(clocking::num_clks::THREE);
+    const auto [phase_kind, phase_count] = GENERATE((Catch::Generators::table<clocking::num_clks, unsigned>(
+        {{clocking::num_clks::THREE, 3u}, {clocking::num_clks::FOUR, 4u}})));
+    CAPTURE(phase_count);
+    auto open = clocking::open(phase_kind);
 
-    CHECK(open3.num_clocks() == 3u);
-    CHECK(open3.max_in_degree() == clocking::scheme::UNBOUNDED);
-    CHECK(open3.max_out_degree() == clocking::scheme::UNBOUNDED);
-    CHECK(!open3.is_regular());
+    CHECK(open.num_clocks() == phase_count);
+    CHECK(open.max_in_degree() == clocking::scheme::UNBOUNDED);
+    CHECK(open.max_out_degree() == clocking::scheme::UNBOUNDED);
+    CHECK_FALSE(open.is_regular());
 
     for (uint32_t x = 0; x < 4; ++x)
     {
         for (uint32_t y = 0; y < 4; ++y)
         {
             CAPTURE(x, y);
-            CHECK(open3(x, y) == 0);
+            CHECK(open(x, y) == 0);
         }
     }
 
     for (uint8_t y = 0; y < 7; ++y)
     {
-        open3.override_clock_number(0, y, y);
+        open.override_clock_number(0, y, y);
     }
 
-    CHECK(!open3.is_regular());
+    CHECK_FALSE(open.is_regular());
 
     for (uint32_t y = 0; y < 7; ++y)
     {
         CAPTURE(y);
-        CHECK(open3(0, y) == y % 3);
+        CHECK(open(0, y) == y % phase_count);
     }
     for (uint32_t x = 1; x < 4; ++x)
     {
         for (uint32_t y = 0; y < 4; ++y)
         {
             CAPTURE(x, y);
-            CHECK(open3(x, y) == 0);
-        }
-    }
-}
-
-TEST_CASE("4-phase open clocking", "[clocking-scheme]")
-{
-    auto open4 = clocking::open(clocking::num_clks::FOUR);
-
-    CHECK(open4.num_clocks() == 4u);
-    CHECK(open4.max_in_degree() == clocking::scheme::UNBOUNDED);
-    CHECK(open4.max_out_degree() == clocking::scheme::UNBOUNDED);
-    CHECK(!open4.is_regular());
-
-    for (uint32_t x = 0; x < 4; ++x)
-    {
-        for (uint32_t y = 0; y < 4; ++y)
-        {
-            CAPTURE(x, y);
-            CHECK(open4(x, y) == 0);
-        }
-    }
-
-    for (uint8_t y = 0; y < 7; ++y)
-    {
-        open4.override_clock_number(0, y, y);
-    }
-
-    CHECK(!open4.is_regular());
-
-    for (uint32_t y = 0; y < 7; ++y)
-    {
-        CAPTURE(y);
-        CHECK(open4(0, y) == y % 4);
-    }
-    for (uint32_t x = 1; x < 4; ++x)
-    {
-        for (uint32_t y = 0; y < 4; ++y)
-        {
-            CAPTURE(x, y);
-            CHECK(open4(x, y) == 0);
+            CHECK(open(x, y) == 0);
         }
     }
 }
@@ -620,32 +584,28 @@ TEST_CASE("Override clocking", "[clocking-scheme]")
 
     CHECK(!twoddwave4.is_regular());
 
-    twoddwave4.override_clock_number(0, 1, 1);
-    twoddwave4.override_clock_number(0, 2, 2);
-    twoddwave4.override_clock_number(0, 3, 3);
-    twoddwave4.override_clock_number(0, 4, 4);
-    twoddwave4.override_clock_number(0, 5, 5);
-    twoddwave4.override_clock_number(0, 6, 6);
+    for (uint8_t y = 1; y < 7; ++y)
+    {
+        twoddwave4.override_clock_number(0, y, y);
+    }
 
-    CHECK(twoddwave4(0, 0) == 0);
-    CHECK(twoddwave4(0, 1) == 1);
-    CHECK(twoddwave4(0, 2) == 2);
-    CHECK(twoddwave4(0, 3) == 3);
-    CHECK(twoddwave4(0, 4) == 0);
-    CHECK(twoddwave4(0, 5) == 1);
-    CHECK(twoddwave4(0, 6) == 2);
-    CHECK(twoddwave4(1, 0) == 1);
-    CHECK(twoddwave4(1, 1) == 2);
-    CHECK(twoddwave4(1, 2) == 3);
-    CHECK(twoddwave4(1, 3) == 0);
-    CHECK(twoddwave4(2, 0) == 2);
-    CHECK(twoddwave4(2, 1) == 3);
-    CHECK(twoddwave4(2, 2) == 0);
-    CHECK(twoddwave4(2, 3) == 1);
-    CHECK(twoddwave4(3, 0) == 3);
-    CHECK(twoddwave4(3, 1) == 0);
-    CHECK(twoddwave4(3, 2) == 1);
-    CHECK(twoddwave4(3, 3) == 2);
+    /** @brief Expected values at the seven overridden coordinates. */
+    static constexpr std::array<uint8_t, 7> overridden{0, 1, 2, 3, 0, 1, 2};
+    for (uint32_t y = 0; y < overridden.size(); ++y)
+    {
+        CAPTURE(y);
+        CHECK(twoddwave4(0, y) == overridden[y]);
+    }
+    /** @brief Expected values at coordinates outside the overridden column. */
+    static constexpr std::array<std::array<uint8_t, 4>, 3> untouched{{{1, 2, 3, 0}, {2, 3, 0, 1}, {3, 0, 1, 2}}};
+    for (uint32_t x = 1; x < 4; ++x)
+    {
+        for (uint32_t y = 0; y < 4; ++y)
+        {
+            CAPTURE(x, y);
+            CHECK(twoddwave4(x, y) == untouched[x - 1][y]);
+        }
+    }
 }
 
 TEST_CASE("Linear schemes", "[clocking-scheme]")
