@@ -164,6 +164,14 @@ TEST_CASE("Out-of-place edge color view", "[edge-color-view]")
         CHECK(aig_ecv.eval_edge_color({aig_ecv.get_node(f1), aig_ecv.get_node(f5)},
                                       [yellow](const auto color) { return color != yellow; }));
     }
+    SECTION("paints an edge with the current color")
+    {
+        CHECK(aig_ecv.edge_color({aig_ecv.get_node(f1), aig_ecv.get_node(f3)}) == 0u);
+        CHECK(aig_ecv.edge_color({aig_ecv.get_node(f1), aig_ecv.get_node(f5)}) == 0u);
+        aig_ecv.paint_edge({aig_ecv.get_node(f1), aig_ecv.get_node(f3)});
+        CHECK(aig_ecv.edge_color({aig_ecv.get_node(f1), aig_ecv.get_node(f3)}) == red);
+        CHECK(aig_ecv.edge_color({aig_ecv.get_node(f1), aig_ecv.get_node(f5)}) == 0u);
+    }
     SECTION("clears current colors while preserving explicit node-color calls")
     {
         /** Const access to the mutable color storage. */

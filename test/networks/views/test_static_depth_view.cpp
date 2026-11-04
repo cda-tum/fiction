@@ -139,9 +139,9 @@ TEST_CASE("Update Levels Technology Network", "[static-depth-view]")
     tec_d.create_po(a1_r);
     tec_d.update_levels();
 
-    CHECK(tec_d.level(2) == 0u);
-    CHECK(tec_d.level(3) == 0u);
-    CHECK(tec_d.level(4) == 1u);
+    CHECK(tec_d.level(tec_d.get_node(x1_r)) == 0u);
+    CHECK(tec_d.level(tec_d.get_node(x2_r)) == 0u);
+    CHECK(tec_d.level(tec_d.get_node(a1_r)) == 1u);
     CHECK(tec_d.depth() == 1u);
 }
 
