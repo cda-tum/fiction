@@ -26,29 +26,33 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
 CLOCKED_LAYOUTS = [
-    pytest.param(lambda: cartesian_gate_layout((2, 2, 0), "2DDWave"), id="cartesian_gate_layout"),
+    pytest.param(lambda: cartesian_gate_layout((4, 3, 2), "2DDWave"), id="cartesian_gate_layout"),
     pytest.param(
-        lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (2, 2, 0), "2DDWave"),
+        lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (4, 3, 2), "2DDWave"),
         id="shifted_cartesian_gate_layout",
     ),
-    pytest.param(lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (2, 2, 0), "2DDWave"), id="hexagonal_gate_layout"),
+    pytest.param(lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (4, 3, 2), "2DDWave"), id="hexagonal_gate_layout"),
 ]
 
 
 @pytest.mark.parametrize("make_layout", CLOCKED_LAYOUTS)
-def test_layout_coordinate_access(make_layout):
+def test_layout_coordinate_access(make_layout: Callable[[], Any]) -> None:
+    """Check gate-layout coordinate order and neighbors on both layers."""
     layout = make_layout()
-    for t in layout.coordinates():
-        assert t <= (9, 9, 1)
-        assert layout.is_within_bounds(t)
-
-    for t in layout.ground_coordinates():
-        assert t.z == 0
-        assert t <= (9, 9, 0)
-        assert layout.is_within_bounds(t)
-
-    for t in layout.adjacent_coordinates((2, 2)):
-        assert t in [(1, 1), (1, 2), (2, 1), (3, 2), (2, 3)]
+    assert [(t.x, t.y, t.z) for t in layout.coordinates()] == [
+        (x, y, z) for z in range(2) for y in range(3) for x in range(4)
+    ]
+    assert [(t.x, t.y, t.z) for t in layout.ground_coordinates()] == [(x, y, 0) for y in range(3) for x in range(4)]
+    neighbors = {
+        cartesian_gate_layout: [(0, 1, 0), (1, 0, 0), (1, 2, 0), (2, 1, 0)],
+        shifted_cartesian_gate_layout: [(0, 1, 0), (0, 2, 0), (1, 0, 0), (1, 2, 0), (2, 1, 0), (2, 2, 0)],
+        hexagonal_gate_layout: [(0, 0, 0), (0, 1, 0), (0, 2, 0), (1, 0, 0), (1, 2, 0), (2, 1, 0)],
+    }
+    assert sorted((t.x, t.y, t.z) for t in layout.adjacent_coordinates((1, 1))) == neighbors[type(layout)]
+    assert sorted((t.x, t.y, t.z) for t in layout.adjacent_coordinates((1, 1, 1))) == [
+        (x, y, 1) for x, y, _ in neighbors[type(layout)]
+    ]
+    assert sorted((t.x, t.y, t.z) for t in layout.adjacent_coordinates((3, 2))) == [(2, 2, 0), (3, 1, 0)]
 
 
 @pytest.mark.parametrize(
@@ -85,7 +89,6 @@ def test_clocking_scheme_name(layout_type: Callable[..., Any], scheme: str) -> N
     assert name == scheme.upper()
     assert layout.is_clocking_scheme(name)
     layout.replace_clocking_scheme("RES")
-    assert name == scheme.upper()
     assert not layout.is_clocking_scheme(name)
     assert layout.get_clocking_scheme_name() == "RES"
 
@@ -101,16 +104,14 @@ def test_clock_number_applies_to_every_layer(make_layout: Callable[[], Any]) -> 
 
 
 @pytest.mark.parametrize("make_layout", CLOCKED_LAYOUTS)
-def test_clock_zone_iteration(make_layout):
+def test_clock_zone_iteration(make_layout: Callable[[], Any]) -> None:
+    """Check clocked neighbors and boundary clipping."""
     layout = make_layout()
     assert layout.incoming_clocked_zones((0, 0)) == []
-    assert layout.outgoing_clocked_zones((2, 2)) == []
+    assert layout.outgoing_clocked_zones((3, 2)) == []
 
-    for icz in layout.incoming_clocked_zones((1, 1)):
-        assert icz in [layout.coord(1, 0), layout.coord(0, 1)]
-
-    for icz in layout.outgoing_clocked_zones((1, 1)):
-        assert icz in [layout.coord(1, 2), layout.coord(2, 1)]
+    assert sorted((t.x, t.y, t.z) for t in layout.incoming_clocked_zones((1, 1))) == [(0, 1, 0), (1, 0, 0)]
+    assert sorted((t.x, t.y, t.z) for t in layout.outgoing_clocked_zones((1, 1))) == [(1, 2, 0), (2, 1, 0)]
 
 
 @pytest.mark.parametrize("make_layout", CLOCKED_LAYOUTS)

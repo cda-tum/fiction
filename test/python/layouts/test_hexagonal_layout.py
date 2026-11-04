@@ -24,18 +24,30 @@ def test_arrangement_is_required():
         hexagonal_layout((3, 3))  # ty: ignore[invalid-argument-type]  # deliberately missing arrangement
 
 
-def test_coordinate_iteration():
-    layout = hexagonal_layout(arrangement.EVEN_ROW, (10, 10, 2))
+def test_coordinate_iteration() -> None:
+    """Check coordinate order, bounds, and hexagonal neighbors."""
+    layout = hexagonal_layout(arrangement.EVEN_ROW, (10, 8, 2))
 
-    for t in layout.coordinates():
-        assert t <= (9, 9, 1)
-        assert layout.is_within_bounds(t)
+    coordinates = layout.coordinates()
+    assert [(t.x, t.y, t.z) for t in coordinates] == [(x, y, z) for z in range(2) for y in range(8) for x in range(10)]
+    assert all(layout.is_within_bounds(t) for t in coordinates)
+    assert not layout.is_within_bounds((10, 0, 0))
+    assert not layout.is_within_bounds((0, 8, 0))
+    assert not layout.is_within_bounds((0, 0, 2))
 
-    for t in layout.ground_coordinates():
-        assert t.z == 0
-        assert t <= (9, 9, 0)
-        assert layout.is_within_bounds(t)
+    ground_coordinates = layout.ground_coordinates()
+    assert [(t.x, t.y, t.z) for t in ground_coordinates] == [(x, y, 0) for y in range(8) for x in range(10)]
+    assert all(layout.is_within_bounds(t) for t in ground_coordinates)
 
-    # comparing the whole set rather than each element also catches a missing neighbor
-    neighbors = {(t.x, t.y, t.z) for t in layout.adjacent_coordinates((2, 2))}
-    assert neighbors == {(2, 1, 0), (3, 1, 0), (3, 2, 0), (3, 3, 0), (2, 3, 0), (1, 2, 0)}
+    neighbors = layout.adjacent_coordinates((2, 2))
+    assert sorted((t.x, t.y, t.z) for t in neighbors) == [
+        (1, 2, 0),
+        (2, 1, 0),
+        (2, 3, 0),
+        (3, 1, 0),
+        (3, 2, 0),
+        (3, 3, 0),
+    ]
+
+    assert sorted((t.x, t.y, t.z) for t in layout.adjacent_coordinates((0, 0))) == [(0, 1, 0), (1, 0, 0), (1, 1, 0)]
+    assert sorted((t.x, t.y, t.z) for t in layout.adjacent_coordinates((9, 7))) == [(8, 6, 0), (8, 7, 0), (9, 6, 0)]
