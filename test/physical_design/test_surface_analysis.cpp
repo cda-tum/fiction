@@ -37,7 +37,9 @@
 #include <kitty/dynamic_truth_table.hpp>
 
 #include <cstddef>
+#include <cstdint>
 #include <new>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
@@ -186,15 +188,20 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
     SECTION("localized charged and neutral defects")
     {
         defect_layout.assign_defect(site_at_row(1, 1), defect{defect_type::SI_VACANCY});
-        defect_layout.assign_defect(site_at_row(4, 4), defect{defect_type::SILOXANE});
+        defect_layout.assign_defect(site_at_row(7, 4), defect{defect_type::SILOXANE});
 
-        const auto black_list = surface_analysis<dummy_gate_library>(gate_lyt, defect_layout, {{0, 0}});
+        const auto charged_spacing = std::pair<uint16_t, uint16_t>{3, 0};
+        const auto neutral_spacing = std::pair<uint16_t, uint16_t>{0, 0};
+        const auto black_list =
+            surface_analysis<dummy_gate_library>(gate_lyt, defect_layout, charged_spacing, neutral_spacing);
 
-        CHECK(black_list.size() == 2);
+        CHECK(black_list.size() == 3);
         REQUIRE(black_list.contains({0, 0}));
-        REQUIRE(black_list.contains({1, 1}));
+        REQUIRE(black_list.contains({1, 0}));
+        REQUIRE(black_list.contains({2, 1}));
         CHECK(black_list.at({0, 0}) == expected);
-        CHECK(black_list.at({1, 1}) == expected);
+        CHECK(black_list.at({1, 0}) == expected);
+        CHECK(black_list.at({2, 1}) == expected);
     }
     SECTION("multi-defect")
     {
