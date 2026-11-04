@@ -15,6 +15,9 @@
  * @author Jan Drewniok (Drewniok)
  */
 
+#include <fiction/technology/qca/qca_one_library.hpp>
+
+// Test dependencies follow the defining header to expose missing direct includes.
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
@@ -27,7 +30,6 @@
 #include <fiction/technology/fcn/cell_ports.hpp>
 #include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/qca/layout.hpp>
-#include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/verification/design_rule_violations.hpp>
 
 #include <kitty/constructors.hpp>
@@ -45,21 +47,45 @@ using namespace fiction::qca;
 
 // clang-format off
 
-/** @brief Expected input port with its connector on the north edge. */
-static constexpr const qca_one_library::gate PRIMARY_INPUT_PORT{
-    qca_one_library::cell_list_to_gate<char>({{{' ', ' ', 'x', ' ', ' '},
-                                               {' ', ' ', 'x', ' ', ' '},
-                                               {' ', ' ', 'i', ' ', ' '},
+/** @brief Expected input port with its connector on the east edge. */
+static constexpr const qca_one_library::gate PRIMARY_INPUT_EAST{
+    qca_one_library::cell_list_to_gate<char>({{{' ', ' ', ' ', ' ', ' '},
+                                               {' ', ' ', ' ', ' ', ' '},
+                                               {' ', ' ', 'i', 'x', 'x'},
                                                {' ', ' ', ' ', ' ', ' '},
                                                {' ', ' ', ' ', ' ', ' '}}})};
 
-/** @brief Expected output port with its connector on the north edge. */
-static constexpr const qca_one_library::gate PRIMARY_OUTPUT_PORT{
-    qca_one_library::cell_list_to_gate<char>({{{' ', ' ', 'x', ' ', ' '},
+/** @brief Expected input port with its connector on the south edge. */
+static constexpr const qca_one_library::gate PRIMARY_INPUT_SOUTH{
+    qca_one_library::cell_list_to_gate<char>({{{' ', ' ', ' ', ' ', ' '},
+                                               {' ', ' ', ' ', ' ', ' '},
+                                               {' ', ' ', 'i', ' ', ' '},
                                                {' ', ' ', 'x', ' ', ' '},
-                                               {' ', ' ', 'o', ' ', ' '},
+                                               {' ', ' ', 'x', ' ', ' '}}})};
+
+/** @brief Expected output port with its connector on the west edge. */
+static constexpr const qca_one_library::gate PRIMARY_OUTPUT_WEST{
+    qca_one_library::cell_list_to_gate<char>({{{' ', ' ', ' ', ' ', ' '},
+                                               {' ', ' ', ' ', ' ', ' '},
+                                               {'x', 'x', 'o', ' ', ' '},
                                                {' ', ' ', ' ', ' ', ' '},
                                                {' ', ' ', ' ', ' ', ' '}}})};
+
+/** @brief Expected output port with its connector on the east edge. */
+static constexpr const qca_one_library::gate PRIMARY_OUTPUT_EAST{
+    qca_one_library::cell_list_to_gate<char>({{{' ', ' ', ' ', ' ', ' '},
+                                               {' ', ' ', ' ', ' ', ' '},
+                                               {' ', ' ', 'o', 'x', 'x'},
+                                               {' ', ' ', ' ', ' ', ' '},
+                                               {' ', ' ', ' ', ' ', ' '}}})};
+
+/** @brief Expected output port with its connector on the south edge. */
+static constexpr const qca_one_library::gate PRIMARY_OUTPUT_SOUTH{
+    qca_one_library::cell_list_to_gate<char>({{{' ', ' ', ' ', ' ', ' '},
+                                               {' ', ' ', ' ', ' ', ' '},
+                                               {' ', ' ', 'o', ' ', ' '},
+                                               {' ', ' ', 'x', ' ', ' '},
+                                               {' ', ' ', 'x', ' ', ' '}}})};
 
 // clang-format on
 
@@ -74,10 +100,10 @@ TEST_CASE("Setting up input ports and gates", "[qca-one-library]")
 
     // clang-format off
 
-    static constexpr const qca_one_library::gate disjunction{
-        qca_one_library::cell_list_to_gate<char>({{{' ', ' ', '1', ' ', ' '},
+    static constexpr const qca_one_library::gate disjunction_east{
+        qca_one_library::cell_list_to_gate<char>({{{' ', ' ', 'x', ' ', ' '},
                                                    {' ', ' ', 'x', ' ', ' '},
-                                                   {'x', 'x', 'x', 'x', 'x'},
+                                                   {'x', 'x', 'x', 'x', '1'},
                                                    {' ', ' ', 'x', ' ', ' '},
                                                    {' ', ' ', 'x', ' ', ' '}}})};
 
@@ -90,11 +116,11 @@ TEST_CASE("Setting up input ports and gates", "[qca-one-library]")
 
     // clang-format on
 
-    CHECK(qca_one_library::set_up_gate(layout, {0, 1}) == qca_one_library::rotate_90(PRIMARY_INPUT_PORT));
-    CHECK(qca_one_library::set_up_gate(layout, {1, 0}) == qca_one_library::rotate_180(PRIMARY_INPUT_PORT));
-    CHECK(qca_one_library::set_up_gate(layout, {1, 1}) == qca_one_library::rotate_90(disjunction));
+    CHECK(qca_one_library::set_up_gate(layout, {0, 1}) == PRIMARY_INPUT_EAST);
+    CHECK(qca_one_library::set_up_gate(layout, {1, 0}) == PRIMARY_INPUT_SOUTH);
+    CHECK(qca_one_library::set_up_gate(layout, {1, 1}) == disjunction_east);
     CHECK(qca_one_library::set_up_gate(layout, {1, 2}) == bent_inverter);
-    CHECK(qca_one_library::set_up_gate(layout, {2, 2}) == qca_one_library::rotate_270(PRIMARY_OUTPUT_PORT));
+    CHECK(qca_one_library::set_up_gate(layout, {2, 2}) == PRIMARY_OUTPUT_WEST);
 }
 
 TEST_CASE("Setting up wires", "[qca-one-library]")
@@ -119,17 +145,17 @@ TEST_CASE("Setting up wires", "[qca-one-library]")
 
     // clang-format on
 
-    CHECK(qca_one_library::set_up_gate(layout, {0, 1}) == qca_one_library::rotate_90(PRIMARY_INPUT_PORT));
-    CHECK(qca_one_library::set_up_gate(layout, {0, 2}) == qca_one_library::rotate_90(PRIMARY_INPUT_PORT));
-    CHECK(qca_one_library::set_up_gate(layout, {1, 0}) == qca_one_library::rotate_180(PRIMARY_INPUT_PORT));
-    CHECK(qca_one_library::set_up_gate(layout, {2, 0}) == qca_one_library::rotate_180(PRIMARY_INPUT_PORT));
+    CHECK(qca_one_library::set_up_gate(layout, {0, 1}) == PRIMARY_INPUT_EAST);
+    CHECK(qca_one_library::set_up_gate(layout, {0, 2}) == PRIMARY_INPUT_EAST);
+    CHECK(qca_one_library::set_up_gate(layout, {1, 0}) == PRIMARY_INPUT_SOUTH);
+    CHECK(qca_one_library::set_up_gate(layout, {2, 0}) == PRIMARY_INPUT_SOUTH);
     CHECK(qca_one_library::set_up_gate(layout, {1, 1}) == qca_one_library::rotate_180(conjunction));
     CHECK(qca_one_library::set_up_gate(layout, {2, 2}) == qca_one_library::rotate_180(conjunction));
     CHECK(qca_one_library::set_up_gate(layout, {2, 1}) == wire);
     CHECK(qca_one_library::set_up_gate(layout, {1, 2}) == qca_one_library::rotate_90(wire));
     CHECK(qca_one_library::set_up_gate(layout, {2, 1, 1}) == qca_one_library::rotate_90(wire));
-    CHECK(qca_one_library::set_up_gate(layout, {3, 1}) == qca_one_library::rotate_270(PRIMARY_OUTPUT_PORT));
-    CHECK(qca_one_library::set_up_gate(layout, {3, 2}) == qca_one_library::rotate_270(PRIMARY_OUTPUT_PORT));
+    CHECK(qca_one_library::set_up_gate(layout, {3, 1}) == PRIMARY_OUTPUT_WEST);
+    CHECK(qca_one_library::set_up_gate(layout, {3, 2}) == PRIMARY_OUTPUT_WEST);
 }
 
 TEST_CASE("Setting up fanouts", "[qca-one-library]")
@@ -154,10 +180,10 @@ TEST_CASE("Setting up fanouts", "[qca-one-library]")
 
     // clang-format on
 
-    CHECK(qca_one_library::set_up_gate(layout, {0, 1}) == qca_one_library::rotate_90(PRIMARY_INPUT_PORT));
-    CHECK(qca_one_library::set_up_gate(layout, {1, 0}) == qca_one_library::rotate_180(PRIMARY_OUTPUT_PORT));
-    CHECK(qca_one_library::set_up_gate(layout, {2, 0}) == qca_one_library::rotate_180(PRIMARY_OUTPUT_PORT));
-    CHECK(qca_one_library::set_up_gate(layout, {1, 2}) == qca_one_library::rotate_90(PRIMARY_OUTPUT_PORT));
+    CHECK(qca_one_library::set_up_gate(layout, {0, 1}) == PRIMARY_INPUT_EAST);
+    CHECK(qca_one_library::set_up_gate(layout, {1, 0}) == PRIMARY_OUTPUT_SOUTH);
+    CHECK(qca_one_library::set_up_gate(layout, {2, 0}) == PRIMARY_OUTPUT_SOUTH);
+    CHECK(qca_one_library::set_up_gate(layout, {1, 2}) == PRIMARY_OUTPUT_EAST);
     CHECK(qca_one_library::set_up_gate(layout, {1, 1}) == qca_one_library::rotate_180(fanout));
     CHECK(qca_one_library::set_up_gate(layout, {2, 1}) == qca_one_library::rotate_90(fanout));
     CHECK(qca_one_library::set_up_gate(layout, {2, 2}) == qca_one_library::rotate_270(bent_wire));
