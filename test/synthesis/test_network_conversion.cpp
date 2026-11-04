@@ -15,6 +15,7 @@
  */
 
 #include <catch2/catch_message.hpp>
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
@@ -89,32 +90,10 @@ void to_x(const Ntk& ntk)
     }
 }
 
-TEST_CASE("Simple network conversion", "[network-conversion]")
+TEMPLATE_TEST_CASE("Simple network conversion", "[network-conversion]", mockturtle::mig_network,
+                   mockturtle::aig_network, mockturtle::xag_network, technology_network)
 {
-    SECTION("MIG to X")
-    {
-        const auto mig = blueprints::maj1_network<mockturtle::mig_network>();
-
-        to_x(mig);
-    }
-    SECTION("AIG to X")
-    {
-        const auto aig = blueprints::maj1_network<mockturtle::aig_network>();
-
-        to_x(aig);
-    }
-    SECTION("XAG to X")
-    {
-        const auto xag = blueprints::maj1_network<mockturtle::xag_network>();
-
-        to_x(xag);
-    }
-    SECTION("TEC to X")
-    {
-        const auto tec = blueprints::maj1_network<technology_network>();
-
-        to_x(tec);
-    }
+    to_x(blueprints::maj1_network<TestType>());
 }
 
 TEST_CASE("Name conservation after network conversion", "[network-conversion]")
@@ -137,21 +116,11 @@ TEST_CASE("Name conservation after network conversion", "[network-conversion]")
     CHECK(converted_maj.get_output_name(0) == "f");
 }
 
-TEST_CASE("Constant inverted signal recovery conversion", "[network-conversion]")
+// Technology networks represent inverters as nodes rather than complemented signals.
+TEMPLATE_TEST_CASE("Constant inverted signal recovery conversion", "[network-conversion]", mockturtle::mig_network,
+                   mockturtle::aig_network, mockturtle::xag_network)
 {
-    SECTION("MIG to X")
-    {
-        to_x(blueprints::constant_gate_input_maj_network<mockturtle::mig_network>());
-    }
-    SECTION("AIG to X")
-    {
-        to_x(blueprints::constant_gate_input_maj_network<mockturtle::aig_network>());
-    }
-    SECTION("XAG to X")
-    {
-        to_x(blueprints::constant_gate_input_maj_network<mockturtle::xag_network>());
-    }
-    // no test for technology_network because it does not support inverted signals
+    to_x(blueprints::constant_gate_input_maj_network<TestType>());
 }
 
 TEST_CASE("Technology network inverters and buffers survive conversion", "[network-conversion]")
@@ -172,28 +141,11 @@ TEST_CASE("Technology network inverters and buffers survive conversion", "[netwo
     to_x(tec);
 }
 
-TEST_CASE("Complex network conversion", "[network-conversion]")
+TEMPLATE_TEST_CASE("Complex network conversion", "[network-conversion]", mockturtle::mig_network,
+                   mockturtle::aig_network, mockturtle::xag_network, technology_network)
 {
-    SECTION("MIG to X")
-    {
-        to_x(blueprints::maj4_network<mockturtle::mig_network>());
-        to_x(blueprints::nary_operation_network<mockturtle::mig_network>());
-    }
-    SECTION("AIG to X")
-    {
-        to_x(blueprints::maj4_network<mockturtle::aig_network>());
-        to_x(blueprints::nary_operation_network<mockturtle::aig_network>());
-    }
-    SECTION("XAG to X")
-    {
-        to_x(blueprints::maj4_network<mockturtle::xag_network>());
-        to_x(blueprints::nary_operation_network<mockturtle::xag_network>());
-    }
-    SECTION("TEC to X")
-    {
-        to_x(blueprints::maj4_network<technology_network>());
-        to_x(blueprints::nary_operation_network<technology_network>());
-    }
+    to_x(blueprints::maj4_network<TestType>());
+    to_x(blueprints::nary_operation_network<TestType>());
 }
 
 TEST_CASE("Consistent network size after multiple conversions", "[network-conversion]")
@@ -204,6 +156,7 @@ TEST_CASE("Consistent network size after multiple conversions", "[network-conver
         convert_network<technology_network>(convert_network<technology_network>(tec)));
 
     CHECK(tec.size() == converted.size());
+    check_eq(tec, converted);
 
     const auto converted_aig = convert_network<technology_network>(blueprints::maj4_network<mockturtle::aig_network>());
 
@@ -211,6 +164,7 @@ TEST_CASE("Consistent network size after multiple conversions", "[network-conver
         convert_network<technology_network>(convert_network<technology_network>(converted_aig)));
 
     CHECK(converted_aig.size() == converted_converted_aig.size());
+    check_eq(converted_aig, converted_converted_aig);
 }
 
 TEST_CASE("Consistent network size after fanout substitution and conversion", "[network-conversion]")
@@ -219,11 +173,13 @@ TEST_CASE("Consistent network size after fanout substitution and conversion", "[
         fanout_substitution<technology_network>(blueprints::maj4_network<mockturtle::aig_network>());
     const auto converted_substituted_aig = convert_network<technology_network>(substituted_aig);
     CHECK(substituted_aig.size() == converted_substituted_aig.size());
+    check_eq(substituted_aig, converted_substituted_aig);
 
     const auto substituted_tec = fanout_substitution<technology_network>(
         blueprints::fanout_substitution_corner_case_network<technology_network>());
     const auto converted_substituted_tec = convert_network<technology_network>(substituted_tec);
     CHECK(substituted_tec.size() == converted_substituted_tec.size());
+    check_eq(substituted_tec, converted_substituted_tec);
 }
 
 TEST_CASE("Consistent network size after balancing and conversion", "[network-conversion]")
@@ -232,11 +188,13 @@ TEST_CASE("Consistent network size after balancing and conversion", "[network-co
         network_balancing<technology_network>(blueprints::maj4_network<mockturtle::aig_network>());
     const auto converted_balanced_aig = convert_network<technology_network>(balanced_aig);
     CHECK(balanced_aig.size() == converted_balanced_aig.size());
+    check_eq(balanced_aig, converted_balanced_aig);
 
     const auto balanced_tec = network_balancing<technology_network>(
         blueprints::fanout_substitution_corner_case_network<technology_network>());
     const auto converted_balanced_tec = convert_network<technology_network>(balanced_tec);
     CHECK(balanced_tec.size() == converted_balanced_tec.size());
+    check_eq(balanced_tec, converted_balanced_tec);
 }
 
 TEST_CASE("Convert every two- and three-input function without losing the interface", "[network-conversion]")
