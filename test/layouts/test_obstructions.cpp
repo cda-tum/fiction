@@ -99,7 +99,7 @@ TEST_CASE("Coordinate obstruction: Gate-level layout", "[obstruction-layout]")
             {
                 CAPTURE(stage, x, y);
                 CHECK(obstr_lyt.is_obstructed_coordinate({static_cast<int32_t>(x), static_cast<int32_t>(y)}) ==
-                      expected[y][x]);
+                      expected.at(y).at(x));
             }
         }
     };
