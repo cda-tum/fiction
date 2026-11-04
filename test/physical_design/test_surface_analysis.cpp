@@ -459,6 +459,17 @@ TEST_CASE("Surface analysis agrees with materialized defect influence", "[sidb-s
             charged = {0, 250};
             neutral = {0, 1};
         }
+        else if (trial == 7)
+        {
+            surface = sidb::layout{};
+            for (auto i = 0; i < 101; ++i)
+            {
+                surface.assign_defect(site_at_row(i - 50, i % 8),
+                                      defect{i == 0 ? defect_type::SI_VACANCY : defect_type::SILOXANE});
+            }
+            charged = {0, 250};
+            neutral = {1, 0};
+        }
         const auto                        affected = surface.all_affected_sidbs(charged, neutral);
         surface_black_list<port_position> expected{};
         for (auto y = 0; y < 2; ++y)
