@@ -26,12 +26,12 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
 CLOCKED_LAYOUTS = [
-    pytest.param(lambda: cartesian_gate_layout((3, 3, 2), "2DDWave"), id="cartesian_gate_layout"),
+    pytest.param(lambda: cartesian_gate_layout((4, 3, 2), "2DDWave"), id="cartesian_gate_layout"),
     pytest.param(
-        lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (3, 3, 2), "2DDWave"),
+        lambda: shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (4, 3, 2), "2DDWave"),
         id="shifted_cartesian_gate_layout",
     ),
-    pytest.param(lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (3, 3, 2), "2DDWave"), id="hexagonal_gate_layout"),
+    pytest.param(lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (4, 3, 2), "2DDWave"), id="hexagonal_gate_layout"),
 ]
 
 
@@ -39,10 +39,10 @@ CLOCKED_LAYOUTS = [
 def test_layout_coordinate_access(make_layout):
     layout = make_layout()
     assert sorted((t.x, t.y, t.z) for t in layout.coordinates()) == sorted(
-        (x, y, z) for z in range(2) for y in range(3) for x in range(3)
+        (x, y, z) for z in range(2) for y in range(3) for x in range(4)
     )
     assert sorted((t.x, t.y, t.z) for t in layout.ground_coordinates()) == sorted(
-        (x, y, 0) for y in range(3) for x in range(3)
+        (x, y, 0) for y in range(3) for x in range(4)
     )
     neighbors = {
         cartesian_gate_layout: [(0, 1, 0), (1, 0, 0), (1, 2, 0), (2, 1, 0)],
@@ -105,7 +105,7 @@ def test_clock_number_applies_to_every_layer(make_layout: Callable[[], Any]) -> 
 def test_clock_zone_iteration(make_layout):
     layout = make_layout()
     assert layout.incoming_clocked_zones((0, 0)) == []
-    assert layout.outgoing_clocked_zones((2, 2)) == []
+    assert layout.outgoing_clocked_zones((3, 2)) == []
 
     assert sorted((t.x, t.y, t.z) for t in layout.incoming_clocked_zones((1, 1))) == [(0, 1, 0), (1, 0, 0)]
     assert sorted((t.x, t.y, t.z) for t in layout.outgoing_clocked_zones((1, 1))) == [(1, 2, 0), (2, 1, 0)]
