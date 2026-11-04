@@ -227,8 +227,8 @@ def test_opdom_rejects_a_repeated_sweep(shell: Shell, resource: Callable[[str], 
 
 
 @pytest.mark.parametrize("sampling", ["-r 4", "-f 4", "-c 4"])
-def test_opdom_sampling_methods_filter_nonoperational_points(xor_gate: Shell, tmp_path: Path, sampling: str) -> None:
-    """Check that filtered samples contain only operational points."""
+def test_opdom_sampling_methods_export_an_operational_point(xor_gate: Shell, tmp_path: Path, sampling: str) -> None:
+    """Each sampler exports the operational point of a single-point grid."""
     path = tmp_path / "domain.csv"
     sweep = "--x-min 5.6 --x-max 5.6 --x-step 0.1 --y-min 5 --y-max 5 --y-step 0.1"
     grid_path = tmp_path / "grid.csv"
@@ -248,3 +248,21 @@ def test_opdom_sampling_methods_filter_nonoperational_points(xor_gate: Shell, tm
     assert isinstance(result, dict)
     assert len(rows) - 1 == result["num_operational_parameter_combinations"]
     assert result["num_evaluated_parameter_combinations"] == 1
+
+
+@pytest.mark.parametrize("sampling", ["-f 4", "-c 4"])
+def test_opdom_sampling_methods_filter_nonoperational_points(xor_gate: Shell, tmp_path: Path, sampling: str) -> None:
+    """Filtered multi-point samples contain only operational points."""
+    path = tmp_path / "domain.csv"
+    xor_gate.ok(
+        f'opdom "{path}" {sampling} --operational-only --x-min 5.6 --x-max 5.7 --x-step 0.1'
+        " --y-min 5 --y-max 5.1 --y-step 0.1"
+    )
+    with path.open(encoding="utf-8", newline="") as stream:
+        rows = list(csv.reader(stream))
+    assert rows[0] == ["epsilon_r", "lambda_tf", "operational status"]
+    assert all(row[2] == "1" for row in rows[1:])
+    result = xor_gate.session.log[-1]["result"]
+    assert isinstance(result, dict)
+    assert len(rows) - 1 == result["num_operational_parameter_combinations"]
+    assert 0 < result["num_evaluated_parameter_combinations"] <= 4
