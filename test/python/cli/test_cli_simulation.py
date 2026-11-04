@@ -124,10 +124,28 @@ def test_opdom_grid_search(xor_gate: Shell, tmp_path: Path, algorithm: str) -> N
     with path.open(encoding="utf-8", newline="") as stream:
         rows = list(csv.reader(stream))
     assert rows[0] == ["epsilon_r", "lambda_tf", "operational status"]
-    assert sorted((float(row[0]), float(row[1])) for row in rows[1:]) == [
-        (x, y) for x in (5.6, 5.7, 5.8) for y in (5.0, 5.1, 5.2)
-    ]
+    points = sorted((float(row[0]), float(row[1])) for row in rows[1:])
+    expected = [(x, y) for x in (5.6, 5.7, 5.8) for y in (5.0, 5.1, 5.2)]
+    assert len(points) == len(expected)
+    for point, target in zip(points, expected, strict=True):
+        assert point == pytest.approx(target, rel=0, abs=1e-6)
     assert all(row[2] in {"0", "1"} for row in rows[1:])
+
+
+def test_opdom_operational_only_filters_grid(xor_gate: Shell, tmp_path: Path) -> None:
+    """The filtered export keeps exactly the operational points of a mixed grid."""
+    full = tmp_path / "full.csv"
+    filtered = tmp_path / "filtered.csv"
+    sweep = "--x-min 7 --x-max 8 --x-step 1 --y-min 7 --y-max 8 --y-step 1"
+    xor_gate.ok(f'opdom "{full}" {sweep}')
+    xor_gate.ok(f'opdom "{filtered}" {sweep} --operational-only')
+    with full.open(encoding="utf-8", newline="") as stream:
+        full_rows = list(csv.reader(stream))
+    with filtered.open(encoding="utf-8", newline="") as stream:
+        filtered_rows = list(csv.reader(stream))
+    assert full_rows[0] == filtered_rows[0] == ["epsilon_r", "lambda_tf", "operational status"]
+    assert {row[2] for row in full_rows[1:]} == {"0", "1"}
+    assert sorted(filtered_rows[1:]) == sorted(row for row in full_rows[1:] if row[2] == "1")
 
 
 def test_opdom_sampling_and_errors(xor_gate: Shell, tmp_path: Path) -> None:
