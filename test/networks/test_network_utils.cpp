@@ -54,7 +54,10 @@ TEST_CASE("Number of constant fanins", "[network-utils]")
     const auto and_inv = blueprints::unbalanced_and_inv_network<mockturtle::mig_network>();
 
     REQUIRE(and_inv.num_pos() == 1);
-    CHECK(num_constant_fanins(and_inv, and_inv.get_node(and_inv.po_at(0))) == 1ul);
+    /** @brief AND output with one constant fanin and two primary-input fanins. */
+    const auto output = and_inv.get_node(and_inv.po_at(0));
+    CHECK(num_constant_fanins(and_inv, output) == 1ul);
+    CHECK(has_incoming_primary_input(and_inv, output));
 }
 
 TEST_CASE("High-degree fanin nodes", "[network-utils]")
