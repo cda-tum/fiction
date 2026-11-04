@@ -42,6 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - SiDB surface tests check complete blocked gate lists across every tile.
   - CLI tests check operational-domain exports and area parameter overrides.
   - Python SiDB engine tests check complete charge-state configurations.
   - Python layout tests cover rectangular iteration bounds and clock zones.

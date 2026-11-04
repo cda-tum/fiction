@@ -37,7 +37,6 @@
 #include <kitty/dynamic_truth_table.hpp>
 
 #include <cstddef>
-#include <initializer_list>
 #include <new>
 #include <vector>
 
@@ -141,14 +140,19 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
     /** @brief Complete function and port lists for each checked dummy-library tile. */
     const surface_black_list<port_position>::mapped_type expected{{create_id_tt(), {line_ports}},
                                                                   {create_and_tt(), {y_ports}}};
-    /** @brief Checks the original tile samples without discarding repeated port lists. */
-    const auto check_tiles = [&](const auto& black_list, const std::initializer_list<layout_base::coordinate> tiles)
+    /** @brief Checks both blocked gates and ports on every tile of the four-by-three grid. */
+    const auto check_all_tiles = [&](const auto& black_list)
     {
-        for (const auto& tile : tiles)
+        CHECK(black_list.size() == 12);
+        for (auto y = 0; y < 3; ++y)
         {
-            CAPTURE(tile);
-            REQUIRE(black_list.contains(tile));
-            CHECK(black_list.at(tile) == expected);
+            for (auto x = 0; x < 4; ++x)
+            {
+                const layout_base::coordinate tile{x, y};
+                CAPTURE(tile);
+                REQUIRE(black_list.contains(tile));
+                CHECK(black_list.at(tile) == expected);
+            }
         }
     };
 
@@ -166,9 +170,7 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
 
         const auto black_list = surface_analysis<dummy_gate_library>(gate_lyt, defect_layout);
 
-        CHECK(black_list.size() == 12);
-
-        check_tiles(black_list, {{1, 0}, {2, 0}, {1, 1}, {2, 1}, {3, 1}});
+        check_all_tiles(black_list);
     }
     SECTION("single uncharged defect")
     {
@@ -178,7 +180,8 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
 
         CHECK(black_list.size() == 1);
 
-        check_tiles(black_list, {{0, 0}});
+        REQUIRE(black_list.contains({0, 0}));
+        CHECK(black_list.at({0, 0}) == expected);
     }
     SECTION("multi-defect")
     {
@@ -190,9 +193,7 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
 
         const auto black_list = surface_analysis<dummy_gate_library>(gate_lyt, defect_layout);
 
-        CHECK(black_list.size() == 12);
-
-        check_tiles(black_list, {{1, 0}, {2, 0}, {3, 0}, {1, 1}, {2, 1}, {3, 1}, {0, 2}, {1, 2}, {2, 2}});
+        check_all_tiles(black_list);
     }
 }
 
