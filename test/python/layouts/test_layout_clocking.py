@@ -36,7 +36,8 @@ CLOCKED_LAYOUTS = [
 
 
 @pytest.mark.parametrize("make_layout", CLOCKED_LAYOUTS)
-def test_layout_coordinate_access(make_layout):
+def test_layout_coordinate_access(make_layout: Callable[[], Any]) -> None:
+    """Check gate-layout coordinate order and neighbors on both layers."""
     layout = make_layout()
     assert [(t.x, t.y, t.z) for t in layout.coordinates()] == [
         (x, y, z) for z in range(2) for y in range(3) for x in range(4)
@@ -102,7 +103,8 @@ def test_clock_number_applies_to_every_layer(make_layout: Callable[[], Any]) -> 
 
 
 @pytest.mark.parametrize("make_layout", CLOCKED_LAYOUTS)
-def test_clock_zone_iteration(make_layout):
+def test_clock_zone_iteration(make_layout: Callable[[], Any]) -> None:
+    """Check clocked neighbors and boundary clipping."""
     layout = make_layout()
     assert layout.incoming_clocked_zones((0, 0)) == []
     assert layout.outgoing_clocked_zones((3, 2)) == []

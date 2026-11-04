@@ -11,7 +11,8 @@ from __future__ import annotations
 from mnt.pyfiction.layouts import cartesian_layout
 
 
-def test_coordinate_iteration():
+def test_coordinate_iteration() -> None:
+    """Check coordinate order, bounds, and Cartesian neighbors."""
     layout = cartesian_layout((10, 8, 2))
 
     coordinates = layout.coordinates()

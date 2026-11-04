@@ -24,7 +24,8 @@ def test_arrangement_is_required():
         hexagonal_layout((3, 3))  # ty: ignore[invalid-argument-type]  # deliberately missing arrangement
 
 
-def test_coordinate_iteration():
+def test_coordinate_iteration() -> None:
+    """Check coordinate order, bounds, and hexagonal neighbors."""
     layout = hexagonal_layout(arrangement.EVEN_ROW, (10, 8, 2))
 
     coordinates = layout.coordinates()
