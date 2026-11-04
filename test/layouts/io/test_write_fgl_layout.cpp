@@ -567,37 +567,42 @@ TEST_CASE("FGL rejects invalid XML text before changing output", "[write-fgl-lay
             cleanup_directory(cleanup_directory&&) = delete;
             /** @brief Cleanup ownership cannot be move-assigned. */
             cleanup_directory& operator=(cleanup_directory&&) = delete;
-            /** @brief Remove the test file and its directory without throwing. */
+            /** @brief Remove the owned directory and its contents without throwing. */
             ~cleanup_directory()
             {
                 std::error_code ignored{};
-                std::filesystem::remove(path / "layout.fgl", ignored);
-                std::filesystem::remove(path, ignored);
+                std::filesystem::remove_all(path, ignored);
             }
         };
-        const cleanup_directory cleanup{directory};
-        const auto              filename = directory / "layout.fgl";
         {
-            std::ofstream original{filename};
+            const cleanup_directory cleanup{directory};
+            const auto              filename = directory / "layout.fgl";
+            {
+                std::ofstream original{filename};
+                REQUIRE(original.is_open());
+                original << "sentinel";
+                REQUIRE(original.good());
+            }
+            CHECK_THROWS_AS(write_fgl_layout(layout, filename.string()), std::invalid_argument);
+            std::ifstream original{filename, std::ios::binary};
             REQUIRE(original.is_open());
-            original << "sentinel";
-            REQUIRE(original.good());
+            /** @brief Complete destination bytes after a rejected write. */
+            std::stringstream contents{};
+            contents << original.rdbuf();
+            CHECK(contents.str() == "sentinel");
+            /** @brief Only the original file remains after the rejected write. */
+            auto entries = 0u;
+            for (const auto& entry : std::filesystem::directory_iterator{directory})
+            {
+                CHECK(entry.path().filename() == filename.filename());
+                ++entries;
+            }
+            CHECK(entries == 1);
+            /** @brief Controlled debris exercises cleanup of an unexpected file. */
+            std::ofstream debris{directory / "debris"};
+            REQUIRE(debris.is_open());
         }
-        CHECK_THROWS_AS(write_fgl_layout(layout, filename.string()), std::invalid_argument);
-        std::ifstream original{filename, std::ios::binary};
-        REQUIRE(original.is_open());
-        /** @brief Complete destination bytes after a rejected write. */
-        std::stringstream contents{};
-        contents << original.rdbuf();
-        CHECK(contents.str() == "sentinel");
-        /** @brief Only the original file remains after the rejected write. */
-        auto entries = 0u;
-        for (const auto& entry : std::filesystem::directory_iterator{directory})
-        {
-            CHECK(entry.path().filename() == filename.filename());
-            ++entries;
-        }
-        CHECK(entries == 1);
+        CHECK_FALSE(std::filesystem::exists(directory));
     };
     SECTION("Layout name")
     {
