@@ -145,6 +145,7 @@ namespace fiction::synthesis
 }
 /**
  * Creates and returns a truth table that implements the less-than function in two variables.
+ * Variable 0 is a and variable 1 is b; the function is `a & !b`.
  *
  * @return Less-than function in two variables.
  */
@@ -159,6 +160,7 @@ namespace fiction::synthesis
 }
 /**
  * Creates and returns a truth table that implements the greater-than function in two variables.
+ * Variable 0 is a and variable 1 is b; the function is `!a & b`.
  *
  * @return Greater-than function in two variables.
  */
@@ -173,12 +175,13 @@ namespace fiction::synthesis
 }
 /**
  * Creates and returns a truth table that implements the less-than-or-equal function in two variables.
+ * Variable 0 is a and variable 1 is b; the function is `a | !b`.
  *
  * @return Less-than-or-equal function in two variables.
  */
 [[nodiscard]] inline kitty::dynamic_truth_table create_le_tt() noexcept
 {
-    constexpr const uint64_t lit = 0x11;
+    constexpr const uint64_t lit = 0xb;
 
     kitty::dynamic_truth_table table{2};
     kitty::create_from_words(table, &lit, &lit + 1);
@@ -187,12 +190,13 @@ namespace fiction::synthesis
 }
 /**
  * Creates and returns a truth table that implements the greater-than-or-equal function in two variables.
+ * Variable 0 is a and variable 1 is b; the function is `!a | b`.
  *
  * @return Greater-than-or-equal function in two variables.
  */
 [[nodiscard]] inline kitty::dynamic_truth_table create_ge_tt() noexcept
 {
-    constexpr const uint64_t lit = 0x13;
+    constexpr const uint64_t lit = 0xd;
 
     kitty::dynamic_truth_table table{2};
     kitty::create_from_words(table, &lit, &lit + 1);

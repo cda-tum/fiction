@@ -13,13 +13,13 @@ from __future__ import annotations
 from collections import Counter
 from typing import Any
 
+import pytest
+
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.model import sidb_charge_state
-from mnt.pyfiction.sidb.simulation.engines import (
-    clustercomplete,
-    exhaustive_ground_state_simulation,
-    ground_state_space_reporting,
-)
+from mnt.pyfiction.sidb.simulation import engines
+
+pytestmark = pytest.mark.skipif(not hasattr(engines, "clustercomplete"), reason="pyfiction was built without ALGLIB")
 
 
 def test_three_sidbs() -> None:
@@ -39,11 +39,11 @@ def test_three_sidbs() -> None:
     options["validity_witness_partitioning_max_cluster_size_gss"] = 15
     options["num_overlapping_witnesses_limit_gss"] = 8
     options["available_threads"] = 4
-    options["report_gss_stats"] = ground_state_space_reporting.ON
+    options["report_gss_stats"] = engines.ground_state_space_reporting.ON
 
     def check_distributions(result: Any, base: int, *, expect_positive: bool = False) -> None:
         """Compare every charge configuration with exhaustive simulation, ignoring order."""
-        reference = exhaustive_ground_state_simulation(
+        reference = engines.exhaustive_ground_state_simulation(
             layout, base=base, **{key: options[key] for key in ("mu_minus", "epsilon_r", "lambda_tf")}
         )
         sites = [lattice_site(x, 0, 0) for x in range(3)]
@@ -62,7 +62,7 @@ def test_three_sidbs() -> None:
         assert any(sidb_charge_state.POSITIVE in state for state in expected) is expect_positive
         assert actual == expected
 
-    result = clustercomplete(layout, **options)
+    result = engines.clustercomplete(layout, **options)
 
     assert result.algorithm_name == "ClusterComplete"
     assert result.layout == layout
@@ -71,13 +71,13 @@ def test_three_sidbs() -> None:
 
     options["base"] = 3
 
-    result = clustercomplete(layout, **options)
+    result = engines.clustercomplete(layout, **options)
     assert len(result.charge_distributions) <= 4
     check_distributions(result, 3, expect_positive=True)
 
     options["epsilon_r"] = 2
     options["lambda_tf"] = 2
-    result = clustercomplete(layout, **options)
+    result = engines.clustercomplete(layout, **options)
     assert len(result.charge_distributions) <= 2
     check_distributions(result, 3, expect_positive=True)
 
@@ -91,7 +91,7 @@ def test_perturber_and_sidb_pair_111() -> None:
     layout.assign_sidb(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(3, 0, 0), sidb_dot_tag.NORMAL)
 
-    result = clustercomplete(layout, base=2, mu_minus=-0.32)
+    result = engines.clustercomplete(layout, base=2, mu_minus=-0.32)
 
     assert result.algorithm_name == "ClusterComplete"
 

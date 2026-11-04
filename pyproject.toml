@@ -209,7 +209,10 @@ build = "cp3*"
 skip = [ "*-musllinux*", "cp3*t-*" ]
 archs = "auto64"
 build-frontend = "build[uv]"
-test-command = "pytest"
+test-command = """\
+    python -c \"from mnt.pyfiction import physical_design as p; from mnt.pyfiction.sidb.simulation import engines as \
+    e; assert hasattr(p, 'exact') and hasattr(e, 'clustercomplete')\" && pytest\
+    """
 # The wheel does not ship its own tests, so the suite is copied in next to the installed
 # wheel. `test-sources` keeps the relative path, and copying `pyproject.toml` along with it
 # gives pytest its configuration file, so the wheel runs the same suite under the same
