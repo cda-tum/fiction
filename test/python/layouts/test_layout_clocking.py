@@ -86,7 +86,6 @@ def test_clocking_scheme_name(layout_type: Callable[..., Any], scheme: str) -> N
     assert name == scheme.upper()
     assert layout.is_clocking_scheme(name)
     layout.replace_clocking_scheme("RES")
-    assert name == scheme.upper()
     assert not layout.is_clocking_scheme(name)
     assert layout.get_clocking_scheme_name() == "RES"
 
