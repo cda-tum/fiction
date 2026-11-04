@@ -130,6 +130,14 @@ def test_opdom_grid_search(xor_gate: Shell, tmp_path: Path, algorithm: str) -> N
     for point, target in zip(points, expected, strict=True):
         assert point == pytest.approx(target, rel=0, abs=1e-6)
     assert all(row[2] in {"0", "1"} for row in rows[1:])
+    if algorithm == "--sketch":
+        full = tmp_path / "full.csv"
+        xor_gate.ok(f'opdom "{full}" --x-min 5.6 --x-max 5.8 --x-step 0.1 --y-min 5 --y-max 5.2 --y-step 0.1')
+        with full.open(encoding="utf-8", newline="") as stream:
+            full_rows = list(csv.reader(stream))
+        operational = {(float(row[0]), float(row[1])) for row in full_rows[1:] if row[2] == "1"}
+        assert operational
+        assert operational <= {(float(row[0]), float(row[1])) for row in rows[1:] if row[2] == "1"}
 
 
 def test_opdom_operational_only_filters_grid(xor_gate: Shell, tmp_path: Path) -> None:
@@ -202,15 +210,20 @@ def test_opdom_rejects_a_repeated_sweep(shell: Shell, resource: Callable[[str], 
 def test_opdom_sampling_methods_filter_nonoperational_points(xor_gate: Shell, tmp_path: Path, sampling: str) -> None:
     """Check that filtered samples contain only operational points."""
     path = tmp_path / "domain.csv"
-    xor_gate.ok(
-        f'opdom "{path}" {sampling} --operational-only --x-min 5.6 --x-max 5.7 --x-step 0.1'
-        " --y-min 5 --y-max 5.1 --y-step 0.1"
-    )
+    sweep = "--x-min 5.6 --x-max 5.6 --x-step 0.1 --y-min 5 --y-max 5 --y-step 0.1"
+    xor_gate.ok(f'opdom "{path}" {sweep}')
+    with path.open(encoding="utf-8", newline="") as stream:
+        grid = list(csv.reader(stream))
+    assert len(grid) == 2
+    assert grid[1][2] == "1"
+    xor_gate.ok(f'opdom "{path}" {sampling} --operational-only {sweep}')
     with path.open(encoding="utf-8", newline="") as stream:
         rows = list(csv.reader(stream))
     assert rows[0] == ["epsilon_r", "lambda_tf", "operational status"]
+    assert len(rows) == 2
+    assert (float(rows[1][0]), float(rows[1][1])) == pytest.approx((5.6, 5.0), rel=0, abs=1e-6)
     assert all(row[2] == "1" for row in rows[1:])
     result = xor_gate.session.log[-1]["result"]
     assert isinstance(result, dict)
     assert len(rows) - 1 == result["num_operational_parameter_combinations"]
-    assert 0 < result["num_evaluated_parameter_combinations"] <= 4
+    assert result["num_evaluated_parameter_combinations"] == 1
