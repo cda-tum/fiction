@@ -580,6 +580,14 @@ TEST_CASE("FGL rejects invalid XML text before changing output", "[write-fgl-lay
         std::stringstream contents{};
         contents << original.rdbuf();
         CHECK(contents.str() == "sentinel");
+        /** @brief Only the original file remains after the rejected write. */
+        auto entries = 0u;
+        for (const auto& entry : std::filesystem::directory_iterator{directory})
+        {
+            CHECK(entry.path().filename() == filename.filename());
+            ++entries;
+        }
+        CHECK(entries == 1);
     };
     SECTION("Layout name")
     {
