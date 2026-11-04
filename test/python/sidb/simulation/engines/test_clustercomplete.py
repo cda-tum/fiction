@@ -12,9 +12,13 @@ from __future__ import annotations
 
 from typing import Any
 
+import pytest
+
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.model import sidb_charge_state
-from mnt.pyfiction.sidb.simulation.engines import clustercomplete, ground_state_space_reporting
+from mnt.pyfiction.sidb.simulation import engines
+
+pytestmark = pytest.mark.skipif(not hasattr(engines, "clustercomplete"), reason="pyfiction was built without ALGLIB")
 
 
 def test_three_sidbs() -> None:
@@ -32,9 +36,9 @@ def test_three_sidbs() -> None:
     options["validity_witness_partitioning_max_cluster_size_gss"] = 15
     options["num_overlapping_witnesses_limit_gss"] = 8
     options["available_threads"] = 4
-    options["report_gss_stats"] = ground_state_space_reporting.ON
+    options["report_gss_stats"] = engines.ground_state_space_reporting.ON
 
-    result = clustercomplete(layout, **options)
+    result = engines.clustercomplete(layout, **options)
 
     assert result.algorithm_name == "ClusterComplete"
     assert result.layout == layout
@@ -42,12 +46,12 @@ def test_three_sidbs() -> None:
 
     options["base"] = 3
 
-    result = clustercomplete(layout, **options)
+    result = engines.clustercomplete(layout, **options)
     assert len(result.charge_distributions) <= 4
 
     options["epsilon_r"] = 2
     options["lambda_tf"] = 2
-    result = clustercomplete(layout, **options)
+    result = engines.clustercomplete(layout, **options)
     assert len(result.charge_distributions) <= 2
 
 
@@ -60,7 +64,7 @@ def test_perturber_and_sidb_pair_111() -> None:
     layout.assign_sidb(lattice_site(2, 0, 0), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(3, 0, 0), sidb_dot_tag.NORMAL)
 
-    result = clustercomplete(layout, base=2, mu_minus=-0.32)
+    result = engines.clustercomplete(layout, base=2, mu_minus=-0.32)
 
     assert result.algorithm_name == "ClusterComplete"
 
