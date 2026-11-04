@@ -30,3 +30,4 @@ def test_coordinate_iteration() -> None:
     assert sorted((t.x, t.y, t.z) for t in neighbors) == [(1, 2, 0), (2, 1, 0), (2, 3, 0), (3, 2, 0)]
 
     assert sorted((t.x, t.y, t.z) for t in layout.adjacent_coordinates((0, 0))) == [(0, 1, 0), (1, 0, 0)]
+    assert sorted((t.x, t.y, t.z) for t in layout.adjacent_coordinates((9, 7))) == [(8, 7, 0), (9, 6, 0)]

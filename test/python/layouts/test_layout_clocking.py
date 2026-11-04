@@ -52,6 +52,7 @@ def test_layout_coordinate_access(make_layout: Callable[[], Any]) -> None:
     assert sorted((t.x, t.y, t.z) for t in layout.adjacent_coordinates((1, 1, 1))) == [
         (x, y, 1) for x, y, _ in neighbors[type(layout)]
     ]
+    assert sorted((t.x, t.y, t.z) for t in layout.adjacent_coordinates((3, 2))) == [(2, 2, 0), (3, 1, 0)]
 
 
 @pytest.mark.parametrize(
