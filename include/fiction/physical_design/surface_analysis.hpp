@@ -62,6 +62,8 @@ using surface_black_list =
  * @param charged_defect_spacing_overwrite Overrides the spacing charged defects keep SiDBs at.
  * @param neutral_defect_spacing_overwrite Overrides the spacing neutral defects keep SiDBs at.
  * @return The black list.
+ * @throws std::out_of_range If a defect has an invalid basis or an affected gate has no port entry.
+ * @throws std::overflow_error If an absolute gate cell exceeds the coordinate range.
  * @throws std::bad_alloc If allocation fails while preparing or building the black list.
  */
 template <typename GateLibrary, typename Geometry>

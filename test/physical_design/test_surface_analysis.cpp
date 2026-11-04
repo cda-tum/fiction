@@ -42,6 +42,7 @@
 #include <cstdint>
 #include <new>
 #include <optional>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -103,6 +104,16 @@ class dummy_gate_library : public gate_library<sidb::layout, 3, 3>
 /** @brief SiDB gate library without implementation or port lookup. */
 struct empty_gate_library : gate_library<sidb::layout, 3, 3>
 {};
+
+/** @brief Gate library whose implementations have no port entries. */
+struct missing_gate_ports_library : dummy_gate_library
+{
+    /** @brief Returns an empty port map. @return Empty port map. */
+    static gate_ports<port_position> get_gate_ports()
+    {
+        return {};
+    }
+};
 
 /** @brief Gate library with an incompatible implementation lookup result. */
 struct wrong_implementations_library : dummy_gate_library
@@ -305,6 +316,15 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
                        create_id_tt(), create_not_tt(), create_and_tt(), create_or_tt(), create_nand_tt(),
                        create_nor_tt(), create_xor_tt(), create_xnor_tt()}));
     }
+}
+
+TEST_CASE("Surface analysis rejects affected gates without ports", "[sidb-surface-analysis]")
+{
+    const cartesian_gate_layout gates{{1, 1, 1}};
+    sidb::layout                surface{};
+    surface.assign_defect(site_at_row(1, 1), defect{defect_type::SILOXANE});
+
+    CHECK_THROWS_AS(surface_analysis<missing_gate_ports_library>(gates, surface), std::out_of_range);
 }
 
 TEST_CASE("Surface analysis propagates allocation failure and recovers", "[sidb-surface-analysis]")
