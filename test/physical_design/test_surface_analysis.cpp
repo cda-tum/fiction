@@ -15,6 +15,9 @@
  * @author Jan Drewniok (Drewniok)
  */
 
+#include <fiction/physical_design/surface_analysis.hpp>
+
+// Test dependencies follow the defining header to expose missing direct includes.
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
@@ -25,7 +28,6 @@
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
-#include <fiction/physical_design/surface_analysis.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/fcn/cell_ports.hpp>
 #include <fiction/technology/fcn/gate_library.hpp>
@@ -39,6 +41,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <new>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -185,22 +188,35 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
         REQUIRE(black_list.contains({0, 0}));
         CHECK(black_list.at({0, 0}) == expected);
     }
+    SECTION("one obstructed function")
+    {
+        defect_layout.assign_defect(site_at_row(0, 0), defect{defect_type::SILOXANE});
+        const auto neutral_spacing = std::pair<uint16_t, uint16_t>{0, 0};
+        const auto black_list =
+            surface_analysis<dummy_gate_library>(gate_lyt, defect_layout, std::nullopt, neutral_spacing);
+        CHECK(black_list.size() == 1);
+        REQUIRE(black_list.contains({0, 0}));
+        const surface_black_list<port_position>::mapped_type blocked{{create_and_tt(), {y_ports}}};
+        CHECK(black_list.at({0, 0}) == blocked);
+    }
     SECTION("localized charged and neutral defects")
     {
         defect_layout.assign_defect(site_at_row(1, 1), defect{defect_type::SI_VACANCY});
-        defect_layout.assign_defect(site_at_row(7, 4), defect{defect_type::SILOXANE});
+        defect_layout.assign_defect(site_at_row(5, 4), defect{defect_type::SILOXANE});
 
         const auto charged_spacing = std::pair<uint16_t, uint16_t>{3, 0};
-        const auto neutral_spacing = std::pair<uint16_t, uint16_t>{0, 0};
+        const auto neutral_spacing = std::pair<uint16_t, uint16_t>{2, 0};
         const auto black_list =
             surface_analysis<dummy_gate_library>(gate_lyt, defect_layout, charged_spacing, neutral_spacing);
 
-        CHECK(black_list.size() == 3);
+        CHECK(black_list.size() == 4);
         REQUIRE(black_list.contains({0, 0}));
         REQUIRE(black_list.contains({1, 0}));
+        REQUIRE(black_list.contains({1, 1}));
         REQUIRE(black_list.contains({2, 1}));
         CHECK(black_list.at({0, 0}) == expected);
         CHECK(black_list.at({1, 0}) == expected);
+        CHECK(black_list.at({1, 1}) == expected);
         CHECK(black_list.at({2, 1}) == expected);
     }
     SECTION("multi-defect")
