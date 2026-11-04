@@ -42,7 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
-  - Layout optimization tests name each corner-case equivalence check.
+  - Layout optimization tests share corner-case checks and identify failing fixtures.
   - SiDB operational checks reuse the BDL wire fixture and test a non-operational single-point domain.
   - CLI tests check operational-domain exports and area parameter overrides.
   - Python SiDB engine tests check complete charge-state configurations.

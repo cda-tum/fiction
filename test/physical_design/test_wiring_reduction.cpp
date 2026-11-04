@@ -152,18 +152,24 @@ TEST_CASE("Layout equivalence", "[wiring-reduction]")
         check_layout_equiv_all<cartesian_gate_layout>();
     }
 
-    SECTION("Corner cases")
+    SECTION("Corner Cases")
     {
         /** @brief Blueprint factory for a Cartesian gate layout. */
         using factory = cartesian_gate_layout (*)(arrangement);
         /** @brief Named blueprint and its independent reference factory. */
         const auto [name, make_layout] = GENERATE(Catch::Generators::table<const char*, factory>(
-            {{"outputs 1", &blueprints::optimization_layout_corner_case_outputs_1<cartesian_gate_layout>},
-             {"outputs 2", &blueprints::optimization_layout_corner_case_outputs_2<cartesian_gate_layout>},
-             {"outputs 3", &blueprints::optimization_layout_corner_case_outputs_3<cartesian_gate_layout>},
-             {"outputs 4", &blueprints::optimization_layout_corner_case_outputs_4<cartesian_gate_layout>},
-             {"outputs 5", &blueprints::optimization_layout_corner_case_outputs_5<cartesian_gate_layout>},
-             {"inputs", &blueprints::optimization_layout_corner_case_inputs<cartesian_gate_layout>}}));
+            {{"optimization_layout_corner_case_outputs_1",
+              &blueprints::optimization_layout_corner_case_outputs_1<cartesian_gate_layout>},
+             {"optimization_layout_corner_case_outputs_2",
+              &blueprints::optimization_layout_corner_case_outputs_2<cartesian_gate_layout>},
+             {"optimization_layout_corner_case_outputs_3",
+              &blueprints::optimization_layout_corner_case_outputs_3<cartesian_gate_layout>},
+             {"optimization_layout_corner_case_outputs_4",
+              &blueprints::optimization_layout_corner_case_outputs_4<cartesian_gate_layout>},
+             {"optimization_layout_corner_case_outputs_5",
+              &blueprints::optimization_layout_corner_case_outputs_5<cartesian_gate_layout>},
+             {"optimization_layout_corner_case_inputs",
+              &blueprints::optimization_layout_corner_case_inputs<cartesian_gate_layout>}}));
         CAPTURE(name);
         auto                   layout = make_layout(arrangement::EVEN_ROW);
         wiring_reduction_stats stats{};

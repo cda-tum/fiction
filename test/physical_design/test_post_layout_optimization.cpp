@@ -163,19 +163,38 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
     {
         /** @brief Blueprint factory for a Cartesian gate layout. */
         using factory = cartesian_gate_layout (*)(arrangement);
-        /** @brief Named blueprint and its independent reference factory. */
-        const auto [name, make_layout] = GENERATE(Catch::Generators::table<const char*, factory>(
-            {{"outputs 1", &blueprints::optimization_layout_corner_case_outputs_1<cartesian_gate_layout>},
-             {"outputs 2", &blueprints::optimization_layout_corner_case_outputs_2<cartesian_gate_layout>},
-             {"outputs 3", &blueprints::optimization_layout_corner_case_outputs_3<cartesian_gate_layout>},
-             {"outputs 4", &blueprints::optimization_layout_corner_case_outputs_4<cartesian_gate_layout>},
-             {"outputs 5", &blueprints::optimization_layout_corner_case_outputs_5<cartesian_gate_layout>},
-             {"inputs", &blueprints::optimization_layout_corner_case_inputs<cartesian_gate_layout>}}));
-        CAPTURE(name);
-        auto                           layout = make_layout(arrangement::EVEN_ROW);
-        post_layout_optimization_stats stats{};
-        post_layout_optimization(layout, {}, &stats);
-        check_eq(make_layout(arrangement::EVEN_ROW), layout);
+        /** @brief Optimize a fresh layout and compare it with an independent blueprint. */
+        const auto check_corner = [](const factory make_layout)
+        {
+            auto                           layout = make_layout(arrangement::EVEN_ROW);
+            post_layout_optimization_stats stats{};
+            post_layout_optimization(layout, {}, &stats);
+            check_eq(make_layout(arrangement::EVEN_ROW), layout);
+        };
+        SECTION("optimization_layout_corner_case_outputs_1")
+        {
+            check_corner(&blueprints::optimization_layout_corner_case_outputs_1<cartesian_gate_layout>);
+        }
+        SECTION("optimization_layout_corner_case_outputs_2")
+        {
+            check_corner(&blueprints::optimization_layout_corner_case_outputs_2<cartesian_gate_layout>);
+        }
+        SECTION("optimization_layout_corner_case_outputs_3")
+        {
+            check_corner(&blueprints::optimization_layout_corner_case_outputs_3<cartesian_gate_layout>);
+        }
+        SECTION("optimization_layout_corner_case_outputs_4")
+        {
+            check_corner(&blueprints::optimization_layout_corner_case_outputs_4<cartesian_gate_layout>);
+        }
+        SECTION("optimization_layout_corner_case_outputs_5")
+        {
+            check_corner(&blueprints::optimization_layout_corner_case_outputs_5<cartesian_gate_layout>);
+        }
+        SECTION("optimization_layout_corner_case_inputs")
+        {
+            check_corner(&blueprints::optimization_layout_corner_case_inputs<cartesian_gate_layout>);
+        }
     }
 
     SECTION("Maximum gate relocations")
