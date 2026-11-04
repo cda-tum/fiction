@@ -149,15 +149,16 @@ def test_opdom_operational_only_filters_grid(xor_gate: Shell, tmp_path: Path) ->
 
 
 def test_opdom_sampling_and_errors(xor_gate: Shell, tmp_path: Path) -> None:
-    csv = tmp_path / "opdom.csv"
-    xor_gate.ok(f'opdom "{csv}" -r 4 -o --x-min 5.6 --x-max 5.8 --x-step 0.1 --y-min 5 --y-max 5.2 --y-step 0.1')
+    """Check random sampling and reject invalid sweep options."""
+    path = tmp_path / "opdom.csv"
+    xor_gate.ok(f'opdom "{path}" -r 4 -o --x-min 5.6 --x-max 5.8 --x-step 0.1 --y-min 5 --y-max 5.2 --y-step 0.1')
     result = xor_gate.session.log[-1]["result"]
     assert isinstance(result, dict)
     assert result["grid_search"] is False
-    assert "usage" in xor_gate.fails(f'opdom "{csv}" -r 2 -f 2')
-    assert "at least 1" in xor_gate.fails(f'opdom "{csv}" -f 0')
-    assert "positive step" in xor_gate.fails(f'opdom "{csv}" --x-step 0')
-    assert "usage" in xor_gate.fails(f'opdom "{csv}" -x foo')
+    assert "usage" in xor_gate.fails(f'opdom "{path}" -r 2 -f 2')
+    assert "at least 1" in xor_gate.fails(f'opdom "{path}" -f 0')
+    assert "positive step" in xor_gate.fails(f'opdom "{path}" --x-step 0')
+    assert "usage" in xor_gate.fails(f'opdom "{path}" -x foo')
 
 
 def test_clustercomplete_defaults_to_base_three() -> None:

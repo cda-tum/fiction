@@ -50,7 +50,7 @@ def test_cell_topology_mismatch(mux21_shell: Shell) -> None:
 
 @pytest.mark.parametrize("commands", ["cell", "cell -l sim7-mol", "hex; cell -l bestagon"])
 def test_area(mux21_shell: Shell, commands: str) -> None:
-    """Every technology has an area model, and every one of them honors the cell dimensions."""
+    """Selected gate libraries honor the requested cell dimensions."""
     mux21_shell.ok(f"ortho; {commands}")
     mux21_shell.ok("area")
     default = mux21_shell.session.log[-1]["result"]
