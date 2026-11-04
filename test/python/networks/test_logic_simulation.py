@@ -52,6 +52,7 @@ def test_duplicate_output_names_preserve_order(tmp_path: Path) -> None:
     network.set_output_name(1, "same")
     outputs = simulate_outputs(network)
     assert outputs == [("same", [True, False]), ("same", [False, True])]
+    assert simulate(network) == {"same": [False, True]}
 
 
 def test_layout_simulation_preserves_input_slots_and_unused_inputs(tmp_path: Path) -> None:
