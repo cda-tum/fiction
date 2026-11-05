@@ -405,6 +405,28 @@ TEST_CASE("Surface analysis handles maximum defect spacing", "[sidb-surface-anal
     }
 }
 
+TEST_CASE("Surface analysis scans defects beyond the row budget", "[sidb-surface-analysis]")
+{
+    const cartesian_gate_layout gates{{2, 2, 1}};
+    sidb::layout                surface{};
+    surface.assign_defect({0, -1000, 0}, defect{defect_type::SI_VACANCY});
+    // These 1,040 rectangles and the charged defect consume 65,521 of 65,536 cached rows.
+    for (int32_t x = -1041; x <= -2; ++x)
+    {
+        surface.assign_defect({x, 0, 0}, defect{defect_type::SILOXANE});
+    }
+    surface.assign_defect({1, 0, 0}, defect{defect_type::SILOXANE});
+
+    const port_list<port_position> line_ports{{port_position(0, 1)}, {port_position(2, 1)}};
+    const port_list<port_position> y_ports{{port_position(0, 0), port_position(0, 2)}, {port_position(2, 1)}};
+    const surface_black_list<port_position>::mapped_type blocked{{create_id_tt(), {line_ports}},
+                                                                 {create_and_tt(), {y_ports}}};
+    const surface_black_list<port_position>              expected{{{0, 0}, blocked}, {{0, 1}, blocked}};
+
+    CHECK(surface_analysis<dummy_gate_library>(gates, surface, std::pair<uint16_t, uint16_t>{2000, 0},
+                                               std::pair<uint16_t, uint16_t>{0, 31}) == expected);
+}
+
 TEST_CASE("Surface analysis agrees with materialized defect influence", "[sidb-surface-analysis]")
 {
     const cartesian_gate_layout        gates{{2, 2, 1}};
