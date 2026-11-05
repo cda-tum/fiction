@@ -633,6 +633,10 @@ class sidb_layout:
         Returns:
             Sites influenced by the defect at `site`; empty if `site` holds no
             defect.
+
+        Note:
+            The result materializes every influenced site and may require
+            substantial memory.
         """
 
     def all_affected_sidbs(
@@ -653,6 +657,10 @@ class sidb_layout:
 
         Returns:
             Sites influenced by any defect.
+
+        Note:
+            The result materializes every influenced site and may require
+            substantial memory.
         """
 
     def bounding_box(self) -> tuple[lattice_site, lattice_site]:
