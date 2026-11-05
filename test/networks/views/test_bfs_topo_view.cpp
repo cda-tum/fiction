@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -52,7 +53,7 @@ struct sorted_pass_through
     static constexpr bool is_topologically_sorted = true;
 };
 
-/** @brief AIG fixture with a supplied topological node order. */
+/** @brief AIG fixture with a supplied node order for testing foreach_node only. */
 struct sorted_aig_fixture : mockturtle::aig_network
 {
     /** @brief Selects the pass-through specialization. */
@@ -205,8 +206,13 @@ TEST_CASE("BFS preserves an existing topological traversal", "[bfs-topo-view]")
                                                               ntk.get_node(deep),
                                                               ntk.get_node(independent)};
     const sorted_aig_fixture                         source{ntk, expected};
+    for (auto it = expected.cbegin(); it != expected.cend(); ++it)
+    {
+        ntk.foreach_fanin(*it, [&](const auto f) { CHECK(std::find(expected.cbegin(), it, ntk.get_node(f)) != it); });
+    }
     /** @brief View of a network already marked topologically sorted. */
     const bfs_topo_view passthrough{source};
+    STATIC_REQUIRE(std::is_base_of_v<sorted_aig_fixture, decltype(passthrough)>);
     /** @brief Pass-through view's nodes. */
     std::vector<mockturtle::aig_network::node> preserved{};
     passthrough.foreach_node([&](const auto n) { preserved.push_back(n); });
