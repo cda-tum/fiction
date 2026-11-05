@@ -206,9 +206,7 @@ surface_analysis(const fiction::layouts::gate_layout<Geometry>& gate_lyt, const 
             spans.resize(n);
         }
     }
-    /** @brief Checks whether any defect influences the lattice site.
-     * @param site Lattice site to check. @return Whether a defect influences the site.
-     */
+    /** @brief Checks whether any defect influences the lattice site. */
     const auto affected = [&](const sidb::lattice_site& site)
     {
         if (affected_sites.has_value())
