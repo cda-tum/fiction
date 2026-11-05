@@ -18,6 +18,8 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
@@ -80,7 +82,14 @@ TEST_CASE("Temporary test directories preserve occupied names and clean up", "[n
         REQUIRE(std::filesystem::create_directory(root.path() / ("candidate-" + std::to_string(index))));
     }
     CHECK_THROWS_AS((fiction::test::scoped_temp_directory{root.path(), "candidate"}), std::runtime_error);
+    CHECK_THROWS_WITH((fiction::test::scoped_temp_directory{root.path(), "candidate"}),
+                      Catch::Matchers::ContainsSubstring("Temporary directory candidates occupied:"));
     CHECK(std::filesystem::exists(sentinel));
+    for (auto index = 0; index < 16; ++index)
+    {
+        CAPTURE(index);
+        CHECK(std::filesystem::is_directory(root.path() / ("candidate-" + std::to_string(index))));
+    }
     CHECK_THROWS_AS((fiction::test::scoped_temp_directory{root.path() / "missing", "candidate"}),
                     std::filesystem::filesystem_error);
     std::filesystem::path unwound{};
@@ -94,6 +103,24 @@ TEST_CASE("Temporary test directories preserve occupied names and clean up", "[n
                     std::runtime_error);
     REQUIRE(unwound == root.path() / "unwound-0");
     CHECK_FALSE(std::filesystem::exists(unwound));
+
+    const auto occupied_file = root.path() / "file-candidate-0";
+    {
+        std::ofstream output{occupied_file};
+        REQUIRE(output.is_open());
+        output << "kept";
+        output.close();
+        REQUIRE_FALSE(output.fail());
+    }
+    {
+        const fiction::test::scoped_temp_directory child{root.path(), "file-candidate"};
+        CHECK(child.path() == root.path() / "file-candidate-1");
+    }
+    std::ifstream occupied_input{occupied_file};
+    REQUIRE(occupied_input.is_open());
+    std::string retained{};
+    occupied_input >> retained;
+    CHECK(retained == "kept");
 }
 
 TEMPLATE_TEST_CASE("Read Verilog", "[network-reader]", named_aig_network, named_xag_network, named_mig_network,
