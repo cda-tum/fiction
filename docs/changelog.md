@@ -42,6 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - QCA ONE tests check selected port and OR-gate orientations against independent cell patterns.
   - Network utility tests check fanins through network interfaces instead of fixed node indices.
   - Hexagonal layout tests share conversion checks and cover negative coordinates.
   - Network conversion tests check Boolean equivalence after repeated synthesis passes.
