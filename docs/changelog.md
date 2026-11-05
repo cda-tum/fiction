@@ -42,6 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Network-view tests use node handles and cover sorted traversal and current edge colors.
   - SiDB surface tests check blocked dummy-library gates and ports across tiles.
   - Surface analysis documents its coordinate and missing-port exceptions.
   - QCA writer tests use exclusively created temporary directories.
