@@ -23,7 +23,7 @@
 namespace fiction::test
 {
 
-/** @brief Owns an exclusively created directory until destruction. */
+/** @brief Owns an exclusively created directory until destruction. Close files before the owner is destroyed. */
 class scoped_temp_directory
 {
   public:
@@ -49,7 +49,7 @@ class scoped_temp_directory
                 throw std::filesystem::filesystem_error{"Cannot create temporary directory", directory, error};
             }
         }
-        throw std::runtime_error{"Cannot create temporary directory: candidates occupied"};
+        throw std::runtime_error{"Temporary directory candidates occupied: " + (root / prefix).string()};
     }
     /** @brief Directory ownership cannot be copied. */
     scoped_temp_directory(const scoped_temp_directory&) = delete;

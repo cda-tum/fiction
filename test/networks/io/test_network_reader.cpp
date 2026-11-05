@@ -57,7 +57,8 @@ TEST_CASE("Temporary test directories preserve occupied names and clean up", "[n
         std::ofstream output{sentinel};
         REQUIRE(output.is_open());
         output << "kept";
-        REQUIRE(output.good());
+        output.close();
+        REQUIRE_FALSE(output.fail());
     }
     std::filesystem::path created{};
     {
@@ -91,6 +92,7 @@ TEST_CASE("Temporary test directories preserve occupied names and clean up", "[n
                             throw std::runtime_error{"test"};
                         }()),
                     std::runtime_error);
+    REQUIRE(unwound == root.path() / "unwound-0");
     CHECK_FALSE(std::filesystem::exists(unwound));
 }
 
@@ -154,7 +156,8 @@ TEST_CASE("BLIF readers accept empty lines without changing logic", "[network-re
              << whitespace << "\n0 1\n.names a b xor\n01 1\n"
              << whitespace << "\n# between cover rows\n10 1\n.names a b \\\n lut\n01 1\n.names a copy\n1 1\n.end\n"
              << whitespace << '\n';
-        REQUIRE(file.good());
+        file.close();
+        REQUIRE_FALSE(file.fail());
     }
     std::ostringstream                                        diagnostics{};
     network_reader<std::shared_ptr<named_technology_network>> reader{path.string(), diagnostics};
@@ -198,7 +201,8 @@ TEST_CASE("BLIF readers report invalid declarations after empty lines", "[networ
         std::ofstream file{path};
         REQUIRE(file.is_open());
         file << "\n.model invalid\n \t\n.unsupported declaration\n\n.end\n";
-        REQUIRE(file.good());
+        file.close();
+        REQUIRE_FALSE(file.fail());
     }
     std::ostringstream                                        diagnostics{};
     network_reader<std::shared_ptr<named_technology_network>> reader{path.string(), diagnostics};
