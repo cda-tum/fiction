@@ -69,7 +69,7 @@ struct sorted_aig_fixture : mockturtle::aig_network
 
     /** @brief Visits the supplied node order. @tparam Fn Callback type. @param fn Visitor. */
     template <typename Fn>
-    void foreach_node(Fn fn) const
+    void foreach_node(const Fn& fn) const
     {
         for (const auto n : order)
         {
