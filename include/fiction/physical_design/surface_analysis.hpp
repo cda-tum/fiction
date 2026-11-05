@@ -92,14 +92,19 @@ surface_analysis(const fiction::layouts::gate_layout<Geometry>& gate_lyt, const 
 
     surface_black_list<port_type> black_list{};
 
-    /** @brief Heuristic bounds on the number of influence sites to cache. */
+    /** @brief Pooled influence-site budget per defect. */
     constexpr uint64_t max_cached_sites_per_defect{64};
+    /** @brief Maximum number of influence sites to cache. */
     constexpr uint64_t max_cached_sites{1'000'000};
+    /** @brief Maximum number of influence-row entries to cache. */
     constexpr uint64_t max_cached_rows{65'536};
-    const auto&        defects  = surface.defects();
+    /** @brief Defects in lattice order. */
+    const auto& defects = surface.defects();
+    /** @brief Remaining pooled influence-site budget. */
     auto remaining_cache_budget = std::min<uint64_t>(defects.size(), max_cached_sites / max_cached_sites_per_defect) *
                                   max_cached_sites_per_defect;
 
+    /** @brief Whether every influence rectangle fits the site budget. */
     bool bounded_rectangles{true};
     for (const auto& [site, defect] : defects)
     {
@@ -107,12 +112,16 @@ surface_analysis(const fiction::layouts::gate_layout<Geometry>& gate_lyt, const 
         {
             throw std::out_of_range("Invalid lattice basis index");
         }
+        /** @brief Effective horizontal and vertical influence extents. */
         const auto extent =
             sidb::model::defect_extent(defect, charged_defect_spacing_overwrite, neutral_defect_spacing_overwrite);
 
-        const auto width  = (uint64_t{2} * extent.first) + 1;
+        /** @brief Influence width in lattice sites. */
+        const auto width = (uint64_t{2} * extent.first) + 1;
+        /** @brief Influence height in lattice sites. */
         const auto height = (uint64_t{2} * extent.second) + 1;
-        const auto sites  = width * height;
+        /** @brief Number of sites in the unclipped influence rectangle. */
+        const auto sites = width * height;
         if (sites > remaining_cache_budget)
         {
             bounded_rectangles = false;
@@ -123,6 +132,7 @@ surface_analysis(const fiction::layouts::gate_layout<Geometry>& gate_lyt, const 
         }
     }
     // Bound total cached sites while allowing a small number of wider rectangles.
+    /** @brief Materialized influence sites when the site budget permits. */
     const auto affected_sites = bounded_rectangles ?
                                     std::optional{surface.all_affected_sidbs(charged_defect_spacing_overwrite,
                                                                              neutral_defect_spacing_overwrite)} :
@@ -132,22 +142,30 @@ surface_analysis(const fiction::layouts::gate_layout<Geometry>& gate_lyt, const 
     using entry_type = std::pair<sidb::lattice_site, sidb::model::defect>;
     /** @brief Inclusive horizontal influence interval. */
     using interval = std::pair<int64_t, int64_t>;
+    /** @brief Cached horizontal intervals keyed by lattice row and basis. */
     std::unordered_map<sidb::lattice_site, std::vector<interval>> rows{};
-    std::vector<entry_type>                                       uncached{};
-    uint16_t                                                      uncached_max_y{};
-    auto                                                          row_budget =
+    /** @brief Defects whose influence is checked by scanning. */
+    std::vector<entry_type> uncached{};
+    /** @brief Largest vertical extent among scanned defects. */
+    uint16_t uncached_max_y{};
+    /** @brief Remaining pooled influence-row budget. */
+    auto row_budget =
         std::min<uint64_t>(defects.size(), max_cached_rows / max_cached_sites_per_defect) * max_cached_sites_per_defect;
-    // Every tile starts at a nonnegative x; shifted rows add at most half a gate width.
+    /** @brief Conservative rightmost gate-cell coordinate, including shifted rows. */
     const auto max_gate_x = (int64_t{gate_lyt.width()} * GateLibrary::gate_x_size()) + (GateLibrary::gate_x_size() / 2);
     // Bound row allocations and leave tall rectangles for the scan; dense uncached bands still cost O(QD).
     if (!bounded_rectangles)
     {
         for (const auto& [site, defect] : defects)
         {
+            /** @brief Effective horizontal and vertical influence extents. */
             const auto [x, y] =
                 sidb::model::defect_extent(defect, charged_defect_spacing_overwrite, neutral_defect_spacing_overwrite);
-            const auto lo    = std::max<int64_t>(int64_t{site.y} - y, std::numeric_limits<int32_t>::min());
-            const auto hi    = std::min<int64_t>(int64_t{site.y} + y, std::numeric_limits<int32_t>::max());
+            /** @brief First representable influenced row. */
+            const auto lo = std::max<int64_t>(int64_t{site.y} - y, std::numeric_limits<int32_t>::min());
+            /** @brief Last representable influenced row. */
+            const auto hi = std::min<int64_t>(int64_t{site.y} + y, std::numeric_limits<int32_t>::max());
+            /** @brief Number of influenced rows. */
             const auto count = static_cast<uint64_t>(hi - lo + 1);
             if (count <= max_cached_sites_per_defect && count <= row_budget)
             {
@@ -172,6 +190,7 @@ surface_analysis(const fiction::layouts::gate_layout<Geometry>& gate_lyt, const 
         for (auto& [row, spans] : rows)
         {
             std::ranges::sort(spans);
+            /** @brief Number of merged intervals. */
             std::size_t n{};
             for (const auto span : spans)
             {
@@ -187,6 +206,9 @@ surface_analysis(const fiction::layouts::gate_layout<Geometry>& gate_lyt, const 
             spans.resize(n);
         }
     }
+    /** @brief Checks whether any defect influences the lattice site.
+     * @param site Lattice site to check. @return Whether a defect influences the site.
+     */
     const auto affected = [&](const sidb::lattice_site& site)
     {
         if (affected_sites.has_value())
@@ -195,17 +217,22 @@ surface_analysis(const fiction::layouts::gate_layout<Geometry>& gate_lyt, const 
         }
         if (const auto found = rows.find(sidb::lattice_site{0, site.y, site.z}); found != rows.end())
         {
+            /** @brief Merged influence intervals for the queried row. */
             const auto& spans = found->second;
-            const auto  it    = std::upper_bound(spans.begin(), spans.end(), int64_t{site.x},
-                                                 [](const auto x, const auto& span) { return x < span.first; });
+            /** @brief First interval starting after the queried column. */
+            const auto it = std::upper_bound(spans.begin(), spans.end(), int64_t{site.x},
+                                             [](const auto x, const auto& span) { return x < span.first; });
             if (it != spans.begin() && std::prev(it)->second >= site.x)
             {
                 return true;
             }
         }
+        /** @brief First defect row that can influence the site. */
         const auto lower_y = int64_t{site.y} - uncached_max_y;
+        /** @brief Last defect row that can influence the site. */
         const auto upper_y = int64_t{site.y} + uncached_max_y;
-        auto       it =
+        /** @brief First uncached defect in the candidate row band. */
+        auto it =
             std::ranges::lower_bound(uncached, lower_y, {}, [](const auto& entry) { return int64_t{entry.first.y}; });
         for (; it != uncached.cend() && int64_t{it->first.y} <= upper_y; ++it)
         {
@@ -214,9 +241,12 @@ surface_analysis(const fiction::layouts::gate_layout<Geometry>& gate_lyt, const 
             {
                 continue;
             }
+            /** @brief Effective horizontal and vertical influence extents. */
             const auto [horizontal, vertical] =
                 sidb::model::defect_extent(defect, charged_defect_spacing_overwrite, neutral_defect_spacing_overwrite);
+            /** @brief Horizontal displacement from the defect. */
             const auto dx = int64_t{site.x} - defect_site.x;
+            /** @brief Vertical displacement from the defect. */
             const auto dy = int64_t{site.y} - defect_site.y;
             if (dx >= -int64_t{horizontal} && dx <= horizontal && dy >= -int64_t{vertical} && dy <= vertical)
             {

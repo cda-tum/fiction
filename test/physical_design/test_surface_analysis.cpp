@@ -642,7 +642,8 @@ TEST_CASE("Surface analysis agrees with materialized defect influence", "[sidb-s
             for (auto x = 0; x < 2; ++x)
             {
                 const layout_base::coordinate tile{x, y};
-                const auto                    hit = [&](const int col, const int row)
+                /** @brief Checks a gate cell against the materialized influence sites. */
+                const auto hit = [&](const int col, const int row)
                 { return affected.contains(site_at_row((3 * x) + col, (3 * y) + row)); };
                 if (hit(1, 0) || hit(1, 1) || hit(1, 2))
                 {
