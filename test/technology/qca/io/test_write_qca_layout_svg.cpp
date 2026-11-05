@@ -36,6 +36,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iterator>
+#include <random>
 #include <sstream>
 #include <string>
 
@@ -154,7 +155,8 @@ TEST_CASE("Write QCA SVG files with the selected detail level", "[write-qca-layo
     std::ostringstream                expected{};
     write_qca_layout_svg(layout, expected, params);
 
-    const fiction::test::scoped_temp_directory directory{std::filesystem::temp_directory_path(), "fiction-qca-svg"};
+    const fiction::test::scoped_temp_directory directory{std::filesystem::temp_directory_path(),
+                                                         "fiction-qca-svg-" + std::to_string(std::random_device{}())};
     const auto                                 filename = directory.path() / "layout.svg";
     write_qca_layout_svg(layout, filename.string(), params);
     std::ifstream file{filename};
@@ -162,8 +164,7 @@ TEST_CASE("Write QCA SVG files with the selected detail level", "[write-qca-layo
     const std::string svg{std::istreambuf_iterator<char>{file}, std::istreambuf_iterator<char>{}};
     CHECK(svg == expected.str());
 
-    CHECK_THROWS_AS(write_qca_layout_svg(layout, std::filesystem::temp_directory_path().string(), params),
-                    std::ofstream::failure);
+    CHECK_THROWS_AS(write_qca_layout_svg(layout, directory.path().string(), params), std::ofstream::failure);
 }
 
 TEST_CASE("Render synchronized QCA cells in tiled SVG", "[write-qca-layout-svg]")
@@ -282,9 +283,9 @@ TEST_CASE("QCA SVG reports unsupported cell types and preserves files", "[write-
     }
     SECTION("file")
     {
-        const fiction::test::scoped_temp_directory directory{std::filesystem::temp_directory_path(),
-                                                             "fiction-qca-svg-error"};
-        const auto                                 filename = directory.path() / "layout.svg";
+        const fiction::test::scoped_temp_directory directory{
+            std::filesystem::temp_directory_path(), "fiction-qca-svg-error-" + std::to_string(std::random_device{}())};
+        const auto filename = directory.path() / "layout.svg";
         {
             std::ofstream original{filename};
             REQUIRE(original.is_open());
