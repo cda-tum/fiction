@@ -30,7 +30,10 @@
 
 #include <algorithm>
 #include <concepts>
+#include <cstddef>
 #include <cstdint>
+#include <iterator>
+#include <limits>
 #include <optional>
 #include <stdexcept>
 #include <unordered_map>
@@ -95,8 +98,8 @@ surface_analysis(const fiction::layouts::gate_layout<Geometry>& gate_lyt, const 
     const auto&        defects  = surface.defects();
     auto remaining_cache_budget = std::min<uint64_t>(defects.size(), max_cached_sites / max_cached_sites_per_defect) *
                                   max_cached_sites_per_defect;
-    uint16_t max_vertical_extent{};
-    bool     bounded_rectangles{true};
+
+    bool bounded_rectangles{true};
     for (const auto& [site, defect] : defects)
     {
         if (site.z != 0 && site.z != 1)
@@ -105,10 +108,10 @@ surface_analysis(const fiction::layouts::gate_layout<Geometry>& gate_lyt, const 
         }
         const auto extent =
             sidb::model::defect_extent(defect, charged_defect_spacing_overwrite, neutral_defect_spacing_overwrite);
-        max_vertical_extent = std::max(max_vertical_extent, extent.second);
-        const auto width    = uint64_t{2} * extent.first + 1;
-        const auto height   = uint64_t{2} * extent.second + 1;
-        const auto sites    = width * height;
+
+        const auto width  = uint64_t{2} * extent.first + 1;
+        const auto height = uint64_t{2} * extent.second + 1;
+        const auto sites  = width * height;
         if (sites > remaining_cache_budget)
         {
             bounded_rectangles = false;
@@ -124,18 +127,80 @@ surface_analysis(const fiction::layouts::gate_layout<Geometry>& gate_lyt, const 
                                                                              neutral_defect_spacing_overwrite)} :
                                     std::nullopt;
 
+    /** @brief A defect and its lattice site. */
+    using entry_type = std::pair<sidb::lattice_site, sidb::model::defect>;
+    /** @brief Inclusive horizontal influence interval. */
+    using interval = std::pair<int64_t, int64_t>;
+    std::unordered_map<sidb::lattice_site, std::vector<interval>> rows{};
+    std::vector<entry_type>                                       uncached{};
+    uint16_t                                                      uncached_max_y{};
+    auto row_budget = std::min<uint64_t>(defects.size(), max_cached_sites / max_cached_sites_per_defect) *
+                      max_cached_sites_per_defect;
+    // Bound row entries as well as cached sites; uncached defects still cost O(QD) in dense bands.
+    if (!bounded_rectangles)
+    {
+        for (const auto& [site, defect] : defects)
+        {
+            const auto [x, y] =
+                sidb::model::defect_extent(defect, charged_defect_spacing_overwrite, neutral_defect_spacing_overwrite);
+            const auto lo    = std::max<int64_t>(int64_t{site.y} - y, std::numeric_limits<int32_t>::min());
+            const auto hi    = std::min<int64_t>(int64_t{site.y} + y, std::numeric_limits<int32_t>::max());
+            const auto count = static_cast<uint64_t>(hi - lo + 1);
+            if (count <= row_budget)
+            {
+                row_budget -= count;
+                for (auto row = lo; row <= hi; ++row)
+                {
+                    rows[sidb::lattice_site{0, static_cast<int32_t>(row), site.z}].emplace_back(int64_t{site.x} - x,
+                                                                                                int64_t{site.x} + x);
+                }
+            }
+            else
+            {
+                uncached.emplace_back(site, defect);
+                uncached_max_y = std::max(uncached_max_y, y);
+            }
+        }
+        // Merge overlapping or adjacent intervals so one binary search tests each row.
+        for (auto& [row, spans] : rows)
+        {
+            std::ranges::sort(spans);
+            std::size_t n{};
+            for (const auto span : spans)
+            {
+                if (n && span.first <= spans.at(n - 1).second + 1)
+                {
+                    spans.at(n - 1).second = std::max(spans.at(n - 1).second, span.second);
+                }
+                else
+                {
+                    spans.at(n++) = span;
+                }
+            }
+            spans.resize(n);
+        }
+    }
     const auto affected = [&](const sidb::lattice_site& site)
     {
         if (affected_sites.has_value())
         {
             return affected_sites->contains(site);
         }
-        // Dense rows can require scanning every defect per gate cell; index rectangles if that becomes costly.
-        const auto lower_y = int64_t{site.y} - max_vertical_extent;
-        const auto upper_y = int64_t{site.y} + max_vertical_extent;
+        if (const auto found = rows.find(sidb::lattice_site{0, site.y, site.z}); found != rows.end())
+        {
+            const auto& spans = found->second;
+            const auto  it    = std::upper_bound(spans.begin(), spans.end(), int64_t{site.x},
+                                                 [](const auto x, const auto& span) { return x < span.first; });
+            if (it != spans.begin() && std::prev(it)->second >= site.x)
+            {
+                return true;
+            }
+        }
+        const auto lower_y = int64_t{site.y} - uncached_max_y;
+        const auto upper_y = int64_t{site.y} + uncached_max_y;
         auto       it =
-            std::ranges::lower_bound(defects, lower_y, {}, [](const auto& entry) { return int64_t{entry.first.y}; });
-        for (; it != defects.cend() && int64_t{it->first.y} <= upper_y; ++it)
+            std::ranges::lower_bound(uncached, lower_y, {}, [](const auto& entry) { return int64_t{entry.first.y}; });
+        for (; it != uncached.cend() && int64_t{it->first.y} <= upper_y; ++it)
         {
             const auto& [defect_site, defect] = *it;
             if (defect_site.z != site.z)
