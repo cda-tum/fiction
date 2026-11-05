@@ -43,6 +43,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Code quality:
 
   - Cell-grid tests check complete occupied-cell traversal without repeating unrelated queries.
+  - FGL writer tests use exclusively created temporary directories.
+  - Layout optimization tests share corner-case checks and identify failing fixtures.
+  - Clocking-scheme tests share phase cases and retain independent override checks.
   - SiDB operational checks reuse the BDL wire fixture and test a non-operational single-point domain.
   - CLI tests check operational-domain exports and area parameter overrides.
   - Python SiDB engine tests check complete charge-state configurations.
