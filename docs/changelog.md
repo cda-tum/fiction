@@ -42,6 +42,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Routing tests compare complete retained-object visits after clearing wires.
+  - QCA ONE tests check selected port and OR-gate orientations against independent cell patterns.
+  - Network utility tests check fanins through network interfaces instead of fixed node indices.
+  - Hexagonal layout tests share conversion checks and cover negative coordinates.
+  - Network conversion tests check Boolean equivalence after repeated synthesis passes.
+  - Network-view tests use node handles and cover sorted traversal and current edge colors.
+  - SiDB surface tests check blocked dummy-library gates and ports across tiles.
+  - Surface analysis documents its coordinate and missing-port exceptions.
+  - QCA writer tests use exclusively created temporary directories.
+  - Network reader tests use exclusively created temporary directories.
+  - Obstruction tests check complete gate-layout coordinate states after each change.
   - Cell-grid tests check complete occupied-cell traversal without repeating unrelated queries.
   - FGL writer tests use exclusively created temporary directories.
   - Layout optimization tests share corner-case checks and identify failing fixtures.
@@ -265,7 +276,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
-  - Routing tests compare complete retained-object visits after clearing wires.
   - SiDB ground-state tests share parameter rows and check complete enumeration and clustered results.
   - Template dispatch and compiler-specific diagnostics avoid MSVC warnings.
   - Technology tests, gate libraries, and exporters avoid MSVC diagnostics.
@@ -770,6 +780,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     TabuCol rejects effective color counts above `INT_MAX`.
   - `on_the_fly_gate_library` now honors `DESIGN_ON_THE_FLY` for crossings and double wires on defective surfaces.
   - Node-duplication planarization reports bounded progress for outputs driven directly by inputs.
+  - `surface_analysis` now handles large defect spacings without materializing their full influence areas.
   - `surface_analysis` now propagates allocation failure while building its blacklist.
   - `is_balanced` now propagates allocation failures instead of terminating.
   - `is_fanout_substituted` now accepts progress callbacks whose copies can throw.
