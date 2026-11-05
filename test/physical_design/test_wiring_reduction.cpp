@@ -16,7 +16,13 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <fiction/physical_design/wiring_reduction.hpp>
+
+// Test dependencies follow the defining header to expose missing direct includes.
+
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
 
@@ -27,13 +33,13 @@
 // Catch2 selects this specialization through its diagnostic templates.
 #include "utils/routing_objective_string_maker.hpp"  // IWYU pragma: keep
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
-#include <fiction/physical_design/wiring_reduction.hpp>
 #include <fiction/synthesis/network_conversion.hpp>
 #include <fiction/types.hpp>
 
@@ -147,36 +153,27 @@ TEST_CASE("Layout equivalence", "[wiring-reduction]")
 
     SECTION("Corner Cases")
     {
-        auto layout_corner_case_1 = blueprints::optimization_layout_corner_case_outputs_1<cartesian_gate_layout>();
-        wiring_reduction_stats stats_corner_case_1{};
-        wiring_reduction(layout_corner_case_1, {}, &stats_corner_case_1);
-        check_eq(blueprints::optimization_layout_corner_case_outputs_1<cartesian_gate_layout>(), layout_corner_case_1);
-
-        auto layout_corner_case_2 = blueprints::optimization_layout_corner_case_outputs_2<cartesian_gate_layout>();
-        wiring_reduction_stats stats_corner_case_2{};
-        wiring_reduction(layout_corner_case_2, {}, &stats_corner_case_2);
-        check_eq(blueprints::optimization_layout_corner_case_outputs_2<cartesian_gate_layout>(), layout_corner_case_2);
-
-        auto layout_corner_case_3 = blueprints::optimization_layout_corner_case_outputs_3<cartesian_gate_layout>();
-        wiring_reduction_stats stats_corner_case_3{};
-        wiring_reduction(layout_corner_case_3, {}, &stats_corner_case_3);
-        check_eq(blueprints::optimization_layout_corner_case_outputs_3<cartesian_gate_layout>(), layout_corner_case_3);
-
-        auto layout_corner_case_4 = blueprints::optimization_layout_corner_case_outputs_4<cartesian_gate_layout>();
-        wiring_reduction_stats stats_corner_case_4{};
-        wiring_reduction(layout_corner_case_4, {}, &stats_corner_case_4);
-        check_eq(blueprints::optimization_layout_corner_case_outputs_4<cartesian_gate_layout>(), layout_corner_case_4);
-
-        auto layout_corner_case_5 = blueprints::optimization_layout_corner_case_outputs_5<cartesian_gate_layout>();
-        wiring_reduction_stats stats_corner_case_5{};
-        wiring_reduction(layout_corner_case_5, {}, &stats_corner_case_5);
-        check_eq(blueprints::optimization_layout_corner_case_outputs_5<cartesian_gate_layout>(), layout_corner_case_5);
-
-        auto layout_corner_case_inputs = blueprints::optimization_layout_corner_case_inputs<cartesian_gate_layout>();
-        wiring_reduction_stats stats_corner_case_inputs{};
-        wiring_reduction(layout_corner_case_inputs, {}, &stats_corner_case_inputs);
-        check_eq(blueprints::optimization_layout_corner_case_inputs<cartesian_gate_layout>(),
-                 layout_corner_case_inputs);
+        /** @brief Blueprint factory for a Cartesian gate layout. */
+        using factory = cartesian_gate_layout (*)(arrangement);
+        /** @brief Named blueprint and its independent reference factory. */
+        const auto [name, make_layout] = GENERATE(Catch::Generators::table<const char*, factory>(
+            {{"optimization_layout_corner_case_outputs_1",
+              &blueprints::optimization_layout_corner_case_outputs_1<cartesian_gate_layout>},
+             {"optimization_layout_corner_case_outputs_2",
+              &blueprints::optimization_layout_corner_case_outputs_2<cartesian_gate_layout>},
+             {"optimization_layout_corner_case_outputs_3",
+              &blueprints::optimization_layout_corner_case_outputs_3<cartesian_gate_layout>},
+             {"optimization_layout_corner_case_outputs_4",
+              &blueprints::optimization_layout_corner_case_outputs_4<cartesian_gate_layout>},
+             {"optimization_layout_corner_case_outputs_5",
+              &blueprints::optimization_layout_corner_case_outputs_5<cartesian_gate_layout>},
+             {"optimization_layout_corner_case_inputs",
+              &blueprints::optimization_layout_corner_case_inputs<cartesian_gate_layout>}}));
+        CAPTURE(name);
+        auto                   layout = make_layout(arrangement::EVEN_ROW);
+        wiring_reduction_stats stats{};
+        wiring_reduction(layout, {}, &stats);
+        check_eq(make_layout(arrangement::EVEN_ROW), layout);
     }
 
     SECTION("Timeout")
