@@ -333,7 +333,7 @@ TEST_CASE("Surface analysis rejects affected gates without ports", "[sidb-surfac
 TEST_CASE("Surface analysis propagates allocation failure and recovers", "[sidb-surface-analysis]")
 {
     require_allocation_failure_support();
-    const auto extent = GENERATE(uint16_t{1}, uint16_t{4});
+    const auto extent = GENERATE(uint16_t{1}, uint16_t{4}, uint16_t{32});
     CAPTURE(extent);
     const auto spacing = std::pair{extent, extent};
     /** @brief Single tile with both dummy-library gates obstructed at their center cell. */
@@ -402,6 +402,48 @@ TEST_CASE("Surface analysis handles maximum defect spacing", "[sidb-surface-anal
             REQUIRE(black_list.contains(tile));
             CHECK(black_list.at(tile) == expected);
         }
+    }
+}
+
+TEST_CASE("Surface analysis retains outside defects whose influence reaches a tile", "[sidb-surface-analysis]")
+{
+    sidb::layout surface{};
+    surface.assign_defect({-10, 0, 0}, defect{defect_type::SI_VACANCY});
+    const port_list<port_position>          line_ports{{port_position(0, 1)}, {port_position(2, 1)}};
+    const port_list<port_position>          y_ports{{port_position(0, 0), port_position(0, 2)}, {port_position(2, 1)}};
+    const surface_black_list<port_position> expected{
+        {{0, 0}, {{create_id_tt(), {line_ports}}, {create_and_tt(), {y_ports}}}}};
+    const auto check = [&](const auto& gates)
+    { CHECK(surface_analysis<dummy_gate_library>(gates, surface, std::pair<uint16_t, uint16_t>{12, 32}) == expected); };
+    SECTION("Cartesian")
+    {
+        check(cartesian_gate_layout{{1, 1, 1}});
+    }
+    SECTION("Shifted Cartesian")
+    {
+        check(shifted_cartesian_gate_layout{arrangement::EVEN_ROW, {1, 1, 1}});
+    }
+    SECTION("Hexagonal")
+    {
+        check(hexagonal_gate_layout{arrangement::EVEN_ROW, {1, 1, 1}});
+    }
+}
+
+TEST_CASE("Surface analysis retains defects reaching shifted rightmost cells", "[sidb-surface-analysis]")
+{
+    sidb::layout surface{};
+    surface.assign_defect({18, 0, 0}, defect{defect_type::SI_VACANCY});
+    const port_list<port_position>          y_ports{{port_position(0, 0), port_position(0, 2)}, {port_position(2, 1)}};
+    const surface_black_list<port_position> expected{{{1, 0}, {{create_and_tt(), {y_ports}}}}};
+    const auto                              check = [&](const auto& gates)
+    { CHECK(surface_analysis<dummy_gate_library>(gates, surface, std::pair<uint16_t, uint16_t>{12, 32}) == expected); };
+    SECTION("Shifted Cartesian")
+    {
+        check(shifted_cartesian_gate_layout{arrangement::EVEN_ROW, {2, 2, 1}});
+    }
+    SECTION("Hexagonal")
+    {
+        check(hexagonal_gate_layout{arrangement::EVEN_ROW, {2, 2, 1}});
     }
 }
 

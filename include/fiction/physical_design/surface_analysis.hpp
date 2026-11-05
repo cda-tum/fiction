@@ -137,6 +137,8 @@ surface_analysis(const fiction::layouts::gate_layout<Geometry>& gate_lyt, const 
     uint16_t                                                      uncached_max_y{};
     auto                                                          row_budget =
         std::min<uint64_t>(defects.size(), max_cached_rows / max_cached_sites_per_defect) * max_cached_sites_per_defect;
+    // Every tile starts at a nonnegative x; shifted rows add at most half a gate width.
+    const auto max_gate_x = (int64_t{gate_lyt.width()} * GateLibrary::gate_x_size()) + (GateLibrary::gate_x_size() / 2);
     // Bound row allocations and leave tall rectangles for the scan; dense uncached bands still cost O(QD).
     if (!bounded_rectangles)
     {
@@ -158,6 +160,10 @@ surface_analysis(const fiction::layouts::gate_layout<Geometry>& gate_lyt, const 
             }
             else
             {
+                if ((int64_t{site.x} + x < 0) || (int64_t{site.x} - x > max_gate_x))
+                {
+                    continue;
+                }
                 uncached.emplace_back(site, defect);
                 uncached_max_y = std::max(uncached_max_y, y);
             }
