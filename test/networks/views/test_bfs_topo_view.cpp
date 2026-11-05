@@ -157,14 +157,14 @@ TEST_CASE("BFS preserves an existing topological traversal", "[bfs-topo-view]")
     const auto c = ntk.create_pi();
     /** @brief Second input of the shallow cone. */
     const auto d = ntk.create_pi();
+    /** @brief Independent gate at depth one. */
+    const auto independent = ntk.create_and(c, d);
     /** @brief First gate of the deeper cone. */
     const auto shallow = ntk.create_and(a, b);
     /** @brief Gate at depth two. */
     const auto deep = ntk.create_and(shallow, c);
-    /** @brief Independent gate at depth one. */
-    const auto independent = ntk.create_and(c, d);
-    ntk.create_po(independent);
     ntk.create_po(deep);
+    ntk.create_po(independent);
 
     /** @brief Output-driven depth-first topological order. */
     const mockturtle::topo_view depth_first{ntk};
@@ -178,9 +178,9 @@ TEST_CASE("BFS preserves an existing topological traversal", "[bfs-topo-view]")
                                                               ntk.get_node(b),
                                                               ntk.get_node(c),
                                                               ntk.get_node(d),
-                                                              ntk.get_node(independent),
                                                               ntk.get_node(shallow),
-                                                              ntk.get_node(deep)};
+                                                              ntk.get_node(deep),
+                                                              ntk.get_node(independent)};
     /** @brief Original topological view's nodes. */
     std::vector<mockturtle::aig_network::node> original{};
     /** @brief Pass-through view's nodes. */
