@@ -110,8 +110,8 @@ surface_analysis(const fiction::layouts::gate_layout<Geometry>& gate_lyt, const 
         const auto extent =
             sidb::model::defect_extent(defect, charged_defect_spacing_overwrite, neutral_defect_spacing_overwrite);
 
-        const auto width  = uint64_t{2} * extent.first + 1;
-        const auto height = uint64_t{2} * extent.second + 1;
+        const auto width  = (uint64_t{2} * extent.first) + 1;
+        const auto height = (uint64_t{2} * extent.second) + 1;
         const auto sites  = width * height;
         if (sites > remaining_cache_budget)
         {

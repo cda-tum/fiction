@@ -410,7 +410,7 @@ TEST_CASE("Surface analysis agrees with materialized defect influence", "[sidb-s
     const cartesian_gate_layout        gates{{2, 2, 1}};
     const port_list<port_position>     line_ports{{port_position(0, 1)}, {port_position(2, 1)}};
     const port_list<port_position>     y_ports{{port_position(0, 0), port_position(0, 2)}, {port_position(2, 1)}};
-    std::mt19937                       rng{1937};
+    std::mt19937                       rng{1937};  // NOLINT(cert-msc32-c): Reproduce differential cases.
     std::uniform_int_distribution<int> coordinate{-4, 8};
     std::uniform_int_distribution<int> spacing{0, 3};
     for (auto trial = 0; trial < 40; ++trial)
@@ -492,7 +492,7 @@ TEST_CASE("Surface analysis agrees with materialized defect influence", "[sidb-s
             {
                 const layout_base::coordinate tile{x, y};
                 const auto                    hit = [&](const int col, const int row)
-                { return affected.contains(site_at_row(3 * x + col, 3 * y + row)); };
+                { return affected.contains(site_at_row((3 * x) + col, (3 * y) + row)); };
                 if (hit(1, 0) || hit(1, 1) || hit(1, 2))
                 {
                     expected[tile][create_id_tt()].push_back(line_ports);
