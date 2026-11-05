@@ -53,7 +53,16 @@ template <typename Lyt>
 void check_retained_tiles(const Lyt& lyt, const std::vector<fiction::layouts::layout_base::coordinate>& expected)
 {
     std::vector<fiction::layouts::layout_base::coordinate> actual{};
-    lyt.foreach_object([&](const auto id) { actual.push_back(lyt.get_tile(id)); });
+    lyt.foreach_object(
+        [&](const auto id)
+        {
+            actual.push_back(lyt.get_tile(id));
+            for (auto input = 0u; input < lyt.input_count(id); ++input)
+            {
+                CHECK_FALSE(lyt.source({id, input}));
+            }
+            CHECK(lyt.fanout_size(id) == 0);
+        });
     CHECK_THAT(actual, Catch::Matchers::UnorderedRangeEquals(expected));
     for (const auto& t : expected)
     {
