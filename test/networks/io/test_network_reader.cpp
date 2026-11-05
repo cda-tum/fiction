@@ -18,9 +18,12 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
+#include "utils/scoped_temp_directory.hpp"
 
 #include <fiction/networks/io/network_reader.hpp>
 #include <fiction/types.hpp>
@@ -37,12 +40,88 @@
 #include <memory>
 #include <random>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
 using namespace fiction;
 using namespace fiction::networks;
 using namespace fiction::networks::io;
+
+TEST_CASE("Temporary test directories preserve occupied names and clean up", "[network-reader]")
+{
+    const fiction::test::scoped_temp_directory root{std::filesystem::temp_directory_path(),
+                                                    "fiction-temp-test-" + std::to_string(std::random_device{}())};
+    const auto                                 occupied = root.path() / "candidate-0";
+    REQUIRE(std::filesystem::create_directory(occupied));
+    const auto sentinel = occupied / "sentinel";
+    {
+        std::ofstream output{sentinel};
+        REQUIRE(output.is_open());
+        output << "kept";
+        output.close();
+        REQUIRE_FALSE(output.fail());
+    }
+    std::filesystem::path created{};
+    {
+        const fiction::test::scoped_temp_directory child{root.path(), "candidate"};
+        created = child.path();
+        CHECK(created == root.path() / "candidate-1");
+        std::ofstream debris{created / "debris"};
+        REQUIRE(debris.is_open());
+    }
+    CHECK_FALSE(std::filesystem::exists(created));
+    std::ifstream input{sentinel};
+    REQUIRE(input.is_open());
+    std::string contents{};
+    input >> contents;
+    CHECK(contents == "kept");
+
+    for (auto index = 1; index < 16; ++index)
+    {
+        REQUIRE(std::filesystem::create_directory(root.path() / ("candidate-" + std::to_string(index))));
+    }
+    CHECK_THROWS_AS((fiction::test::scoped_temp_directory{root.path(), "candidate"}), std::runtime_error);
+    CHECK_THROWS_WITH((fiction::test::scoped_temp_directory{root.path(), "candidate"}),
+                      Catch::Matchers::ContainsSubstring("Temporary directory candidates occupied:"));
+    CHECK(std::filesystem::exists(sentinel));
+    for (auto index = 0; index < 16; ++index)
+    {
+        CAPTURE(index);
+        CHECK(std::filesystem::is_directory(root.path() / ("candidate-" + std::to_string(index))));
+    }
+    CHECK_THROWS_AS((fiction::test::scoped_temp_directory{root.path() / "missing", "candidate"}),
+                    std::filesystem::filesystem_error);
+    std::filesystem::path unwound{};
+    CHECK_THROWS_AS((
+                        [&]
+                        {
+                            const fiction::test::scoped_temp_directory child{root.path(), "unwound"};
+                            unwound = child.path();
+                            throw std::runtime_error{"test"};
+                        }()),
+                    std::runtime_error);
+    REQUIRE(unwound == root.path() / "unwound-0");
+    CHECK_FALSE(std::filesystem::exists(unwound));
+
+    const auto occupied_file = root.path() / "file-candidate-0";
+    {
+        std::ofstream output{occupied_file};
+        REQUIRE(output.is_open());
+        output << "kept";
+        output.close();
+        REQUIRE_FALSE(output.fail());
+    }
+    {
+        const fiction::test::scoped_temp_directory child{root.path(), "file-candidate"};
+        CHECK(child.path() == root.path() / "file-candidate-1");
+    }
+    std::ifstream occupied_input{occupied_file};
+    REQUIRE(occupied_input.is_open());
+    std::string retained{};
+    occupied_input >> retained;
+    CHECK(retained == "kept");
+}
 
 TEMPLATE_TEST_CASE("Read Verilog", "[network-reader]", named_aig_network, named_xag_network, named_mig_network,
                    named_technology_network)
@@ -89,10 +168,12 @@ TEST_CASE("BLIF readers accept empty lines without changing logic", "[network-re
 {
     const auto whitespace = GENERATE(std::string{}, std::string{" \t\r"});
     CAPTURE(whitespace);
-    const auto path = std::filesystem::temp_directory_path() /
-                      ("fiction-blif-whitespace-" + std::to_string(std::random_device{}()) + ".blif");
+    const fiction::test::scoped_temp_directory directory{
+        std::filesystem::temp_directory_path(), "fiction-blif-whitespace-" + std::to_string(std::random_device{}())};
+    const auto path = directory.path() / "whitespace.blif";
     {
         std::ofstream file{path};
+        REQUIRE(file.is_open());
         file << whitespace << "\n# before model\n.model whitespace\n"
              << whitespace << "\n.inputs a b \\\n"
              << whitespace << "\n unused\n.outputs zero one inverted xor lut copy\n"
@@ -102,10 +183,11 @@ TEST_CASE("BLIF readers accept empty lines without changing logic", "[network-re
              << whitespace << "\n0 1\n.names a b xor\n01 1\n"
              << whitespace << "\n# between cover rows\n10 1\n.names a b \\\n lut\n01 1\n.names a copy\n1 1\n.end\n"
              << whitespace << '\n';
+        file.close();
+        REQUIRE_FALSE(file.fail());
     }
     std::ostringstream                                        diagnostics{};
     network_reader<std::shared_ptr<named_technology_network>> reader{path.string(), diagnostics};
-    std::filesystem::remove(path);
     REQUIRE(diagnostics.str().empty());
     REQUIRE(reader.get_networks().size() == 1);
     REQUIRE(reader.get_networks().front());
@@ -139,15 +221,18 @@ TEST_CASE("BLIF readers accept empty lines without changing logic", "[network-re
 
 TEST_CASE("BLIF readers report invalid declarations after empty lines", "[network-reader]")
 {
-    const auto path = std::filesystem::temp_directory_path() /
-                      ("fiction-blif-invalid-" + std::to_string(std::random_device{}()) + ".blif");
+    const fiction::test::scoped_temp_directory directory{
+        std::filesystem::temp_directory_path(), "fiction-blif-invalid-" + std::to_string(std::random_device{}())};
+    const auto path = directory.path() / "invalid.blif";
     {
         std::ofstream file{path};
+        REQUIRE(file.is_open());
         file << "\n.model invalid\n \t\n.unsupported declaration\n\n.end\n";
+        file.close();
+        REQUIRE_FALSE(file.fail());
     }
     std::ostringstream                                        diagnostics{};
     network_reader<std::shared_ptr<named_technology_network>> reader{path.string(), diagnostics};
-    std::filesystem::remove(path);
     CHECK(reader.get_networks().empty());
     CHECK(diagnostics.str().find("parsing error in " + path.string()) != std::string::npos);
 }
