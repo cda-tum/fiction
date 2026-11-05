@@ -84,6 +84,9 @@ TEST_CASE("Coordinate obstruction: Gate-level layout", "[obstruction-layout]")
     const auto lyt       = blueprints::xor_maj_gate_layout<cartesian_gate_layout>();
     auto       obstr_lyt = lyt.clone();
 
+    REQUIRE(lyt.width() == 4);
+    REQUIRE(lyt.height() == 3);
+
     /** @brief Expected obstruction states in y-major order for the blueprint's 4-by-3 frame. */
     using state = std::array<std::array<bool, 4>, 3>;
     const state occupied{{{{true, true, true, false}}, {{false, true, true, true}}, {{false, false, true, false}}}};
