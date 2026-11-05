@@ -95,6 +95,7 @@ surface_analysis(const fiction::layouts::gate_layout<Geometry>& gate_lyt, const 
     /** @brief Heuristic bounds on the number of influence sites to cache. */
     constexpr uint64_t max_cached_sites_per_defect{64};
     constexpr uint64_t max_cached_sites{1'000'000};
+    constexpr uint64_t max_cached_rows{65'536};
     const auto&        defects  = surface.defects();
     auto remaining_cache_budget = std::min<uint64_t>(defects.size(), max_cached_sites / max_cached_sites_per_defect) *
                                   max_cached_sites_per_defect;
@@ -134,9 +135,9 @@ surface_analysis(const fiction::layouts::gate_layout<Geometry>& gate_lyt, const 
     std::unordered_map<sidb::lattice_site, std::vector<interval>> rows{};
     std::vector<entry_type>                                       uncached{};
     uint16_t                                                      uncached_max_y{};
-    auto row_budget = std::min<uint64_t>(defects.size(), max_cached_sites / max_cached_sites_per_defect) *
-                      max_cached_sites_per_defect;
-    // Bound row entries as well as cached sites; uncached defects still cost O(QD) in dense bands.
+    auto                                                          row_budget =
+        std::min<uint64_t>(defects.size(), max_cached_rows / max_cached_sites_per_defect) * max_cached_sites_per_defect;
+    // Bound row allocations and leave tall rectangles for the scan; dense uncached bands still cost O(QD).
     if (!bounded_rectangles)
     {
         for (const auto& [site, defect] : defects)
@@ -146,7 +147,7 @@ surface_analysis(const fiction::layouts::gate_layout<Geometry>& gate_lyt, const 
             const auto lo    = std::max<int64_t>(int64_t{site.y} - y, std::numeric_limits<int32_t>::min());
             const auto hi    = std::min<int64_t>(int64_t{site.y} + y, std::numeric_limits<int32_t>::max());
             const auto count = static_cast<uint64_t>(hi - lo + 1);
-            if (count <= row_budget)
+            if (count <= max_cached_sites_per_defect && count <= row_budget)
             {
                 row_budget -= count;
                 for (auto row = lo; row <= hi; ++row)
