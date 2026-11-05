@@ -173,15 +173,15 @@ TEST_CASE("Test constructors", "[mutable-rank-view]")
     const auto                                                           tec_r_cpy(tec_r);
     const auto                                                           tec_r_eq     = tec_r;
     const auto                                                           tec_r_create = mutable_rank_view(tec);
-    const std::vector<std::vector<mockturtle::node<technology_network>>> ranks = {{tec.get_node(x1), tec.get_node(x2)},
+    const std::vector<std::vector<mockturtle::node<technology_network>>> ranks = {{tec.get_node(x2), tec.get_node(x1)},
                                                                                   {tec.get_node(a1)}};
     const auto                                                           tec_r_vector = mutable_rank_view(tec, ranks);
-    CHECK(tec_r_vector.rank_position(tec.get_node(x1)) == 0);
-    CHECK(tec_r_vector.rank_position(tec.get_node(x2)) == 1);
-    CHECK(tec_r_vector.rank_position(tec.get_node(a1)) == 0);
-    CHECK(tec_r.rank_position(tec_r.get_node(x1_r)) == 0);
-    CHECK(tec_r.rank_position(tec_r.get_node(x2_r)) == 1);
-    CHECK(tec_r.rank_position(tec_r.get_node(a1_r)) == 0);
+    CHECK(tec_r_vector.rank_position(tec.get_node(x1)) == 1u);
+    CHECK(tec_r_vector.rank_position(tec.get_node(x2)) == 0u);
+    CHECK(tec_r_vector.rank_position(tec.get_node(a1)) == 0u);
+    CHECK(tec_r.rank_position(tec_r.get_node(x1_r)) == 0u);
+    CHECK(tec_r.rank_position(tec_r.get_node(x2_r)) == 1u);
+    CHECK(tec_r.rank_position(tec_r.get_node(a1_r)) == 0u);
 
     CHECK(tec_r_create.check_validity());
     CHECK(tec_r_vector.check_validity());

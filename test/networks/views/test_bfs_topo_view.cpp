@@ -206,13 +206,14 @@ TEST_CASE("BFS preserves an existing topological traversal", "[bfs-topo-view]")
                                                               ntk.get_node(deep),
                                                               ntk.get_node(independent)};
     const sorted_aig_fixture                         source{ntk, expected};
+    REQUIRE(expected.size() == ntk.size());
     for (auto it = expected.cbegin(); it != expected.cend(); ++it)
     {
         ntk.foreach_fanin(*it, [&](const auto f) { CHECK(std::find(expected.cbegin(), it, ntk.get_node(f)) != it); });
     }
     /** @brief View of a network already marked topologically sorted. */
     const bfs_topo_view passthrough{source};
-    STATIC_REQUIRE(std::is_base_of_v<sorted_aig_fixture, decltype(passthrough)>);
+    STATIC_REQUIRE(std::is_same_v<std::remove_cvref_t<decltype(passthrough)>, bfs_topo_view<sorted_aig_fixture, true>>);
     /** @brief Pass-through view's nodes. */
     std::vector<mockturtle::aig_network::node> preserved{};
     passthrough.foreach_node([&](const auto n) { preserved.push_back(n); });

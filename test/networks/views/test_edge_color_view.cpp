@@ -166,6 +166,7 @@ TEST_CASE("Out-of-place edge color view", "[edge-color-view]")
     }
     SECTION("paints an edge with the current color")
     {
+        REQUIRE(aig_ecv.current_color() == red);
         CHECK(aig_ecv.edge_color({aig_ecv.get_node(f1), aig_ecv.get_node(f3)}) == 0u);
         CHECK(aig_ecv.edge_color({aig_ecv.get_node(f1), aig_ecv.get_node(f5)}) == 0u);
         aig_ecv.paint_edge({aig_ecv.get_node(f1), aig_ecv.get_node(f3)});
