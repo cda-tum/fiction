@@ -42,6 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Network reader tests use exclusively created temporary directories.
   - Obstruction tests check complete gate-layout coordinate states after each change.
   - Cell-grid tests check complete occupied-cell traversal without repeating unrelated queries.
   - FGL writer tests use exclusively created temporary directories.

@@ -25,6 +25,7 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
+#include "utils/scoped_temp_directory.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/bounding_box.hpp>
@@ -56,7 +57,6 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
-#include <system_error>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -538,45 +538,12 @@ TEST_CASE("FGL rejects invalid XML text before changing output", "[write-fgl-lay
         CHECK_THROWS_AS(write_fgl_layout(layout, stream), std::invalid_argument);
         CHECK(stream.str() == "sentinel");
 
-        const auto            prefix = "fiction-fgl-text-" + std::to_string(std::random_device{}());
         std::filesystem::path directory{};
-        bool                  created = false;
-        for (auto attempt = 0; attempt < 16 && !created; ++attempt)
         {
-            directory = std::filesystem::temp_directory_path() / (prefix + "-" + std::to_string(attempt));
-            std::error_code error{};
-            created = std::filesystem::create_directory(directory, error);
-            if (error && error != std::errc::file_exists)
-            {
-                throw std::filesystem::filesystem_error{"Cannot create temporary directory", directory, error};
-            }
-        }
-        REQUIRE(created);
-        /** @brief Removes only the directory owned by this test during unwinding. */
-        struct cleanup_directory
-        {
-            /** @brief Exclusively created directory. */
-            const std::filesystem::path& path;
-            /** @brief Keep the owned directory until cleanup. */
-            explicit cleanup_directory(const std::filesystem::path& directory) : path{directory} {}
-            /** @brief Cleanup ownership cannot be copied. */
-            cleanup_directory(const cleanup_directory&) = delete;
-            /** @brief Cleanup ownership cannot be assigned. */
-            cleanup_directory& operator=(const cleanup_directory&) = delete;
-            /** @brief Cleanup ownership cannot be moved. */
-            cleanup_directory(cleanup_directory&&) = delete;
-            /** @brief Cleanup ownership cannot be move-assigned. */
-            cleanup_directory& operator=(cleanup_directory&&) = delete;
-            /** @brief Remove the owned directory and its contents without throwing. */
-            ~cleanup_directory()
-            {
-                std::error_code ignored{};
-                std::filesystem::remove_all(path, ignored);
-            }
-        };
-        {
-            const cleanup_directory cleanup{directory};
-            const auto              filename = directory / "layout.fgl";
+            const fiction::test::scoped_temp_directory cleanup{
+                std::filesystem::temp_directory_path(), "fiction-fgl-text-" + std::to_string(std::random_device{}())};
+            directory           = cleanup.path();
+            const auto filename = directory / "layout.fgl";
             {
                 std::ofstream original{filename};
                 REQUIRE(original.is_open());
