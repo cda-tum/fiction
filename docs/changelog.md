@@ -42,6 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Hexagonal layout tests share conversion checks and cover negative coordinates.
   - FGL writer tests use exclusively created temporary directories.
   - Layout optimization tests share corner-case checks and identify failing fixtures.
   - Clocking-scheme tests share phase cases and retain independent override checks.
