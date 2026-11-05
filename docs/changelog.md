@@ -42,6 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Network reader tests use exclusively created temporary directories.
   - FGL writer tests use exclusively created temporary directories.
   - Layout optimization tests share corner-case checks and identify failing fixtures.
   - Clocking-scheme tests share phase cases and retain independent override checks.
