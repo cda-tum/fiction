@@ -539,6 +539,7 @@ class layout
      * @param neutral_defect_spacing_overwrite Horizontal and vertical extent to use for neutral defects instead of the
      * default.
      * @return Sites influenced by the defect at `s`; empty if `s` holds no defect.
+     * @note The result materializes every influenced site and may require substantial memory.
      */
     [[nodiscard]] std::unordered_set<lattice_site> affected_sidbs(
         const lattice_site&                                 s,
@@ -576,6 +577,7 @@ class layout
      * @param neutral_defect_spacing_overwrite Horizontal and vertical extent to use for neutral defects instead of the
      * default.
      * @return Sites influenced by any defect.
+     * @note The result materializes every influenced site and may require substantial memory.
      */
     [[nodiscard]] std::unordered_set<lattice_site> all_affected_sidbs(
         const std::optional<std::pair<uint16_t, uint16_t>>& charged_defect_spacing_overwrite = std::nullopt,

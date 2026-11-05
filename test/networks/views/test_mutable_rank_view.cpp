@@ -173,11 +173,15 @@ TEST_CASE("Test constructors", "[mutable-rank-view]")
     const auto                                                           tec_r_cpy(tec_r);
     const auto                                                           tec_r_eq     = tec_r;
     const auto                                                           tec_r_create = mutable_rank_view(tec);
-    const std::vector<std::vector<mockturtle::node<technology_network>>> ranks        = {{2, 3}, {4}};
+    const std::vector<std::vector<mockturtle::node<technology_network>>> ranks = {{tec.get_node(x2), tec.get_node(x1)},
+                                                                                  {tec.get_node(a1)}};
     const auto                                                           tec_r_vector = mutable_rank_view(tec, ranks);
-    CHECK(tec_r_vector.rank_position(2) == tec_r.rank_position(2));
-    CHECK(tec_r_vector.rank_position(3) == tec_r.rank_position(3));
-    CHECK(tec_r_vector.rank_position(4) == tec_r.rank_position(4));
+    CHECK(tec_r_vector.rank_position(tec.get_node(x1)) == 1u);
+    CHECK(tec_r_vector.rank_position(tec.get_node(x2)) == 0u);
+    CHECK(tec_r_vector.rank_position(tec.get_node(a1)) == 0u);
+    CHECK(tec_r.rank_position(tec_r.get_node(x1_r)) == 0u);
+    CHECK(tec_r.rank_position(tec_r.get_node(x2_r)) == 1u);
+    CHECK(tec_r.rank_position(tec_r.get_node(a1_r)) == 0u);
 
     CHECK(tec_r_create.check_validity());
     CHECK(tec_r_vector.check_validity());
@@ -508,15 +512,21 @@ TEST_CASE("Check PI order for equivalence checking", "[mutable-rank-view]")
 
     // the swap changes the order in which `foreach_pi` visits the inputs; the miter pairs them by creation order, so
     // the equivalence is unaffected
-    vpi_r.swap(2, 3);
+    vpi_r.swap(tec.get_node(a), tec.get_node(b));
+    /** @brief Input nodes in rank order. */
+    std::vector<technology_network::node> inputs{};
+    vpi_r.foreach_pi([&](const auto n) { inputs.push_back(n); });
+    CHECK(inputs == std::vector<technology_network::node>{tec.get_node(b), tec.get_node(a), tec.get_node(c)});
 
     auto maybe_cec_m = virtual_miter_equivalent(tec, vpi_r);
     REQUIRE(maybe_cec_m.has_value());
     CHECK(maybe_cec_m.value_or(false));
 
-    // this rearranges the order of the PI as stored in the underlying static_depth_view (corresponds to the order in
-    // _storage)
+    // Restore the underlying input order in rank zero.
     vpi_r.rearrange_pis();
+    inputs.clear();
+    vpi_r.foreach_pi([&](const auto n) { inputs.push_back(n); });
+    CHECK(inputs == std::vector<technology_network::node>{tec.get_node(a), tec.get_node(b), tec.get_node(c)});
 
     maybe_cec_m = virtual_miter_equivalent(tec, vpi_r);
     REQUIRE(maybe_cec_m.has_value());
