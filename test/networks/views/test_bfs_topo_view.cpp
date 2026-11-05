@@ -26,10 +26,10 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/klut.hpp>
 #include <mockturtle/traits.hpp>
-#include <mockturtle/views/topo_view.hpp>
 
 #include <algorithm>
 #include <cstdint>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
@@ -52,6 +52,34 @@ struct sorted_pass_through
     static constexpr bool is_topologically_sorted = true;
 };
 
+/** @brief AIG fixture with a supplied topological node order. */
+struct sorted_aig_fixture : mockturtle::aig_network
+{
+    /** @brief Selects the pass-through specialization. */
+    // NOLINTNEXTLINE(readability-identifier-naming): mockturtle requires this marker.
+    static constexpr bool is_topologically_sorted = true;
+
+    /** @brief Creates a fixture from a network and its topological order. @param ntk Source network. @param nodes Node
+     * order. */
+    sorted_aig_fixture(const mockturtle::aig_network& ntk, std::vector<node> nodes) :
+            mockturtle::aig_network{ntk},
+            order{std::move(nodes)}
+    {}
+
+    /** @brief Visits the supplied node order. @tparam Fn Callback type. @param fn Visitor. */
+    template <typename Fn>
+    void foreach_node(Fn&& fn) const
+    {
+        for (const auto n : order)
+        {
+            fn(n);
+        }
+    }
+
+    /** @brief Supplied topological node order. */
+    std::vector<node> order;
+};
+
 /** @brief Unsorted network without combinational-input traversal. */
 struct bfs_without_ci_traversal : mockturtle::aig_network
 {
@@ -64,6 +92,7 @@ static_assert(!bfs_viewable<bfs_without_ci_traversal>);
 static_assert(bfs_viewable<mockturtle::aig_network>);
 static_assert(!bfs_viewable<int>);
 static_assert(requires(const sorted_pass_through& ntk) { bfs_topo_view{ntk}; });
+static_assert(mockturtle::is_topologically_sorted_v<sorted_aig_fixture>);
 
 TEMPLATE_TEST_CASE("Breadth-first views provide topological traits", "[bfs-topo-view]", mockturtle::aig_network,
                    technology_network)
@@ -166,27 +195,22 @@ TEST_CASE("BFS preserves an existing topological traversal", "[bfs-topo-view]")
     ntk.create_po(deep);
     ntk.create_po(independent);
 
-    /** @brief Output-driven depth-first topological order. */
-    const mockturtle::topo_view depth_first{ntk};
+    /** @brief A valid topological order with the deeper output cone first. */
+    const std::vector<mockturtle::aig_network::node> expected{ntk.get_node(ntk.get_constant(false)),
+                                                              ntk.get_node(a),
+                                                              ntk.get_node(b),
+                                                              ntk.get_node(c),
+                                                              ntk.get_node(d),
+                                                              ntk.get_node(shallow),
+                                                              ntk.get_node(deep),
+                                                              ntk.get_node(independent)};
+    const sorted_aig_fixture                         source{ntk, expected};
     /** @brief View of a network already marked topologically sorted. */
-    const bfs_topo_view passthrough{depth_first};
-    /** @brief Breadth-first traversal of the underlying network. */
-    const bfs_topo_view breadth_first{ntk};
-    /** @brief Original topological view's nodes. */
-    std::vector<mockturtle::aig_network::node> original{};
+    const bfs_topo_view passthrough{source};
     /** @brief Pass-through view's nodes. */
     std::vector<mockturtle::aig_network::node> preserved{};
-    /** @brief Computed breadth-first nodes. */
-    std::vector<mockturtle::aig_network::node> breadth{};
-    /** @brief Underlying network's node order. */
-    std::vector<mockturtle::aig_network::node> storage{};
-    depth_first.foreach_node([&](const auto n) { original.push_back(n); });
     passthrough.foreach_node([&](const auto n) { preserved.push_back(n); });
-    breadth_first.foreach_node([&](const auto n) { breadth.push_back(n); });
-    ntk.foreach_node([&](const auto n) { storage.push_back(n); });
-    REQUIRE(original != breadth);
-    REQUIRE(original != storage);
-    CHECK(preserved == original);
+    CHECK(preserved == expected);
 }
 
 TEST_CASE("BFS visits repeated fanins and dangling gates", "[bfs-topo-view]")
