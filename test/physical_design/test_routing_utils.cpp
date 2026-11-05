@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
@@ -155,6 +156,12 @@ TEST_CASE("Clear routing", "[routing-utils]")
         clear_routing(layout);
 
         check_retained_tiles(layout, {{1, 1}, {2, 0}, {3, 1}, {2, 1}, {1, 0}, {2, 2}, {0, 0}});
+        const auto majority = layout.find_object({2, 1});
+        REQUIRE(majority.has_value());
+        if (majority)  // The optional-access check does not model REQUIRE.
+        {
+            CHECK(layout.input_count(*majority) == 3);
+        }
     }
     SECTION("Crossings")
     {
