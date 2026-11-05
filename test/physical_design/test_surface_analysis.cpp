@@ -105,6 +105,27 @@ class dummy_gate_library : public gate_library<sidb::layout, 3, 3>
     }})};
 };
 
+/** @brief Test library with a cell at the right edge of a five-column tile. */
+struct wide_gate_library : gate_library<sidb::layout, 5, 3>
+{
+    /** @brief Returns the test gate. @return Gate implementations by function. */
+    static gate_functions get_functional_implementations()
+    {
+        return {{create_id_tt(), {WIRE}}};
+    }
+
+    /** @brief Returns the test gate's ports. @return Ports by gate. */
+    static gate_ports<port_position> get_gate_ports()
+    {
+        return {{WIRE, {{{port_position(0, 0)}, {port_position(4, 0)}}}}};
+    }
+
+  private:
+    /** @brief One occupied cell at the tile's right edge. */
+    static constexpr gate WIRE{
+        cell_list_to_gate<char>({{{' ', ' ', ' ', ' ', 'x'}, {' ', ' ', ' ', ' ', ' '}, {' ', ' ', ' ', ' ', ' '}}})};
+};
+
 /** @brief SiDB gate library without implementation or port lookup. */
 struct empty_gate_library : gate_library<sidb::layout, 3, 3>
 {};
@@ -477,6 +498,25 @@ TEST_CASE("Surface analysis retains defects reaching shifted rightmost cells", "
     }
 }
 
+TEST_CASE("Surface analysis keeps the shifted edge of wide gates", "[sidb-surface-analysis]")
+{
+    sidb::layout surface{};
+    surface.assign_defect({11, 0, 0}, defect{defect_type::SI_VACANCY});
+    const port_list<port_position>          ports{{port_position(0, 0)}, {port_position(4, 0)}};
+    const surface_black_list<port_position> expected{{{1, 0}, {{create_id_tt(), {ports}}}}};
+    /** @brief Checks the shifted edge for one layout geometry. */
+    const auto check = [&](const auto& gates)
+    { CHECK(surface_analysis<wide_gate_library>(gates, surface, std::pair<uint16_t, uint16_t>{0, 32}) == expected); };
+    SECTION("Shifted Cartesian")
+    {
+        check(shifted_cartesian_gate_layout{arrangement::EVEN_ROW, {2, 1, 1}});
+    }
+    SECTION("Hexagonal")
+    {
+        check(hexagonal_gate_layout{arrangement::EVEN_ROW, {2, 1, 1}});
+    }
+}
+
 TEST_CASE("Surface analysis scans defects beyond the row budget", "[sidb-surface-analysis]")
 {
     const cartesian_gate_layout gates{{2, 2, 1}};
@@ -577,6 +617,23 @@ TEST_CASE("Surface analysis agrees with materialized defect influence", "[sidb-s
             surface = sidb::layout{};
             surface.assign_defect(site_at_row(-39, 0), defect{defect_type::SILOXANE});
             neutral = {40, 0};
+        }
+        else if (trial == 10)
+        {
+            surface = sidb::layout{};
+            surface.assign_defect({0, 0, 0}, defect{defect_type::SILOXANE});
+            surface.assign_defect({1, 0, 0}, defect{defect_type::SI_VACANCY});
+            charged = {4, 0};
+            neutral = {2, 31};
+        }
+        else if (trial == 11)
+        {
+            surface = sidb::layout{};
+            surface.assign_defect({0, -1000, 0}, defect{defect_type::SI_VACANCY});
+            surface.assign_defect({0, 0, 0}, defect{defect_type::SILOXANE});
+            surface.assign_defect({2, 0, 0}, defect{defect_type::SILOXANE});
+            charged = {2000, 0};
+            neutral = {0, 31};
         }
         const auto                        affected = surface.all_affected_sidbs(charged, neutral);
         surface_black_list<port_position> expected{};
