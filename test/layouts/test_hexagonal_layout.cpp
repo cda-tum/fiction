@@ -69,44 +69,74 @@ TEST_CASE("Coordinate creation", "[hexagonal-layout]")
 TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
 {
     using layout = hexagonal_layout;
-    /** @brief Offset coordinates for each independently specified cube-coordinate row. */
-    const std::array<layout::coordinate, 8> offsets{
-        {{0, 0}, {1, 0}, {2, 0}, {0, 1}, {1, 1}, {2, 1}, {-1, -1}, {-2, -2}}};
+    /** @brief Offset coordinates; cube literals follow the cited Red Blob row and column conversion formulas. */
+    const std::array<layout::coordinate, 10> offsets{
+        {{0, 0}, {1, 0}, {2, 0}, {0, 1}, {1, 1}, {2, 1}, {-1, -1}, {-2, -2}, {-1, -2}, {-2, -1}}};
     /** @brief Checks a complete set of literal conversions for one arrangement. */
-    const auto check_conversion = [&](const arrangement arr, const std::array<layout::cube_coordinate, 8>& expected)
+    const auto check_conversion = [&](const arrangement arr, const std::array<layout::cube_coordinate, 10>& expected)
     {
         check_identity_conversion(arr);
         const layout lyt{arr, {3, 3}};
         for (std::size_t i = 0; i < offsets.size(); ++i)
         {
-            CAPTURE(i, offsets.at(i));
-            CHECK(lyt.to_cube_coordinate(offsets.at(i)) == expected.at(i));
+            const auto  actual = lyt.to_cube_coordinate(offsets.at(i));
+            const auto& wanted = expected.at(i);
+            CAPTURE(i, offsets.at(i), actual.x, actual.y, actual.z, wanted.x, wanted.y, wanted.z);
+            CHECK(actual == wanted);
         }
     };
 
     SECTION("odd row")
     {
-        check_conversion(
-            arrangement::ODD_ROW,
-            {{{0, 0, 0}, {1, -1, 0}, {2, -2, 0}, {0, -1, 1}, {1, -2, 1}, {2, -3, 1}, {0, 1, -1}, {-1, 3, -2}}});
+        check_conversion(arrangement::ODD_ROW, {{{0, 0, 0},
+                                                 {1, -1, 0},
+                                                 {2, -2, 0},
+                                                 {0, -1, 1},
+                                                 {1, -2, 1},
+                                                 {2, -3, 1},
+                                                 {0, 1, -1},
+                                                 {-1, 3, -2},
+                                                 {0, 2, -2},
+                                                 {-1, 2, -1}}});
     }
     SECTION("even row")
     {
-        check_conversion(
-            arrangement::EVEN_ROW,
-            {{{0, 0, 0}, {1, -1, 0}, {2, -2, 0}, {-1, 0, 1}, {0, -1, 1}, {1, -2, 1}, {-1, 2, -1}, {-1, 3, -2}}});
+        check_conversion(arrangement::EVEN_ROW, {{{0, 0, 0},
+                                                  {1, -1, 0},
+                                                  {2, -2, 0},
+                                                  {-1, 0, 1},
+                                                  {0, -1, 1},
+                                                  {1, -2, 1},
+                                                  {-1, 2, -1},
+                                                  {-1, 3, -2},
+                                                  {0, 2, -2},
+                                                  {-2, 3, -1}}});
     }
     SECTION("odd column")
     {
-        check_conversion(
-            arrangement::ODD_COLUMN,
-            {{{0, 0, 0}, {1, -1, 0}, {2, -1, -1}, {0, -1, 1}, {1, -2, 1}, {2, -2, 0}, {-1, 1, 0}, {-2, 3, -1}}});
+        check_conversion(arrangement::ODD_COLUMN, {{{0, 0, 0},
+                                                    {1, -1, 0},
+                                                    {2, -1, -1},
+                                                    {0, -1, 1},
+                                                    {1, -2, 1},
+                                                    {2, -2, 0},
+                                                    {-1, 1, 0},
+                                                    {-2, 3, -1},
+                                                    {-1, 2, -1},
+                                                    {-2, 2, 0}}});
     }
     SECTION("even column")
     {
-        check_conversion(
-            arrangement::EVEN_COLUMN,
-            {{{0, 0, 0}, {1, 0, -1}, {2, -1, -1}, {0, -1, 1}, {1, -1, 0}, {2, -2, 0}, {-1, 2, -1}, {-2, 3, -1}}});
+        check_conversion(arrangement::EVEN_COLUMN, {{{0, 0, 0},
+                                                     {1, 0, -1},
+                                                     {2, -1, -1},
+                                                     {0, -1, 1},
+                                                     {1, -1, 0},
+                                                     {2, -2, 0},
+                                                     {-1, 2, -1},
+                                                     {-2, 3, -1},
+                                                     {-1, 3, -2},
+                                                     {-2, 2, 0}}});
     }
 }
 
