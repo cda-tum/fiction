@@ -265,6 +265,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Routing tests compare complete retained-object visits after clearing wires.
   - SiDB ground-state tests share parameter rows and check complete enumeration and clustered results.
   - Template dispatch and compiler-specific diagnostics avoid MSVC warnings.
   - Technology tests, gate libraries, and exporters avoid MSVC diagnostics.

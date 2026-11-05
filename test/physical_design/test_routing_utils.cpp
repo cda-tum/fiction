@@ -46,15 +46,22 @@ void check_objectives(const std::vector<routing_objective>& objectives,
     CHECK_THAT(objectives, Catch::Matchers::UnorderedRangeEquals(expected_objectives));
 }
 
-/** @brief Checks a retained tile after clearing its connections. @tparam Lyt Layout type.
- * @param lyt Layout. @param t Retained tile.
+/** @brief Checks all retained tiles and their disconnected signals.
+ * @tparam Lyt Layout type. @param lyt Layout. @param expected Expected retained tiles.
  */
 template <typename Lyt>
-void check_non_empty_tile(const Lyt& lyt, const fiction::layouts::layout_base::coordinate& t)
+void check_retained_tiles(const Lyt& lyt, const std::vector<fiction::layouts::layout_base::coordinate>& expected)
 {
-    CHECK_FALSE(lyt.is_empty_tile(t));
-    CHECK(lyt.has_no_incoming_signal(t));
-    CHECK(lyt.has_no_outgoing_signal(t));
+    std::vector<fiction::layouts::layout_base::coordinate> actual{};
+    lyt.foreach_object([&](const auto id) { actual.push_back(lyt.get_tile(id)); });
+    CHECK_THAT(actual, Catch::Matchers::UnorderedRangeEquals(expected));
+    for (const auto& t : expected)
+    {
+        CAPTURE(t.x, t.y, t.z);
+        CHECK_FALSE(lyt.is_empty_tile(t));
+        CHECK(lyt.has_no_incoming_signal(t));
+        CHECK(lyt.has_no_outgoing_signal(t));
+    }
 }
 
 TEST_CASE("Coordinate paths expose construction and edits", "[routing-utils]")
@@ -130,8 +137,7 @@ TEST_CASE("Clear routing", "[routing-utils]")
         clear_routing(layout);
 
         CHECK(layout.is_empty_tile({1, 1}));
-        check_non_empty_tile(layout, {0, 1});
-        check_non_empty_tile(layout, {2, 1});
+        check_retained_tiles(layout, {{0, 1}, {2, 1}});
     }
     SECTION("Direct gate connections")
     {
@@ -139,13 +145,7 @@ TEST_CASE("Clear routing", "[routing-utils]")
 
         clear_routing(layout);
 
-        check_non_empty_tile(layout, {1, 1});
-        check_non_empty_tile(layout, {2, 0});
-        check_non_empty_tile(layout, {3, 1});
-        check_non_empty_tile(layout, {2, 1});
-        check_non_empty_tile(layout, {1, 0});
-        check_non_empty_tile(layout, {2, 2});
-        check_non_empty_tile(layout, {0, 0});
+        check_retained_tiles(layout, {{1, 1}, {2, 0}, {3, 1}, {2, 1}, {1, 0}, {2, 2}, {0, 0}});
     }
     SECTION("Crossings")
     {
@@ -153,14 +153,7 @@ TEST_CASE("Clear routing", "[routing-utils]")
 
         clear_routing(layout);
 
-        check_non_empty_tile(layout, {1, 0});
-        check_non_empty_tile(layout, {0, 1});
-        check_non_empty_tile(layout, {2, 0});
-        check_non_empty_tile(layout, {0, 2});
-        check_non_empty_tile(layout, {1, 1});
-        check_non_empty_tile(layout, {2, 2});
-        check_non_empty_tile(layout, {3, 1});
-        check_non_empty_tile(layout, {3, 2});
+        check_retained_tiles(layout, {{1, 0}, {0, 1}, {2, 0}, {0, 2}, {1, 1}, {2, 2}, {3, 1}, {3, 2}});
 
         CHECK(layout.is_empty_tile({2, 1}));
         CHECK(layout.is_empty_tile({1, 2}));
@@ -172,12 +165,7 @@ TEST_CASE("Clear routing", "[routing-utils]")
 
         clear_routing(layout);
 
-        check_non_empty_tile(layout, {0, 1});
-        check_non_empty_tile(layout, {1, 1});
-        check_non_empty_tile(layout, {2, 1});
-        check_non_empty_tile(layout, {1, 0});
-        check_non_empty_tile(layout, {2, 0});
-        check_non_empty_tile(layout, {1, 2});
+        check_retained_tiles(layout, {{0, 1}, {1, 1}, {2, 1}, {1, 0}, {2, 0}, {1, 2}});
 
         CHECK(layout.is_empty_tile({2, 2}));
     }
