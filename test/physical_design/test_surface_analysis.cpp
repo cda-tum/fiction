@@ -39,6 +39,7 @@
 
 #include <kitty/dynamic_truth_table.hpp>
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
@@ -413,6 +414,7 @@ TEST_CASE("Surface analysis retains outside defects whose influence reaches a ti
     const port_list<port_position>          y_ports{{port_position(0, 0), port_position(0, 2)}, {port_position(2, 1)}};
     const surface_black_list<port_position> expected{
         {{0, 0}, {{create_id_tt(), {line_ports}}, {create_and_tt(), {y_ports}}}}};
+    /** @brief Checks the complete blacklist for one layout geometry. */
     const auto check = [&](const auto& gates)
     { CHECK(surface_analysis<dummy_gate_library>(gates, surface, std::pair<uint16_t, uint16_t>{12, 32}) == expected); };
     SECTION("Cartesian")
@@ -421,11 +423,38 @@ TEST_CASE("Surface analysis retains outside defects whose influence reaches a ti
     }
     SECTION("Shifted Cartesian")
     {
-        check(shifted_cartesian_gate_layout{arrangement::EVEN_ROW, {1, 1, 1}});
+        for (const auto a :
+             std::array{arrangement::EVEN_ROW, arrangement::ODD_ROW, arrangement::EVEN_COLUMN, arrangement::ODD_COLUMN})
+        {
+            CAPTURE(static_cast<int>(a));
+            check(shifted_cartesian_gate_layout{a, {1, 1, 1}});
+        }
     }
     SECTION("Hexagonal")
     {
-        check(hexagonal_gate_layout{arrangement::EVEN_ROW, {1, 1, 1}});
+        for (const auto a :
+             std::array{arrangement::EVEN_ROW, arrangement::ODD_ROW, arrangement::EVEN_COLUMN, arrangement::ODD_COLUMN})
+        {
+            CAPTURE(static_cast<int>(a));
+            check(hexagonal_gate_layout{a, {1, 1, 1}});
+        }
+    }
+}
+
+TEST_CASE("Surface analysis excludes defects beyond the layout", "[sidb-surface-analysis]")
+{
+    sidb::layout surface{};
+    surface.assign_defect({20, 0, 0}, defect{defect_type::SI_VACANCY});
+    /** @brief Checks that a distant defect blocks no gates. */
+    const auto check = [&](const auto& gates)
+    { CHECK(surface_analysis<dummy_gate_library>(gates, surface, std::pair<uint16_t, uint16_t>{12, 32}).empty()); };
+    check(cartesian_gate_layout{{2, 2, 1}});
+    for (const auto a :
+         std::array{arrangement::EVEN_ROW, arrangement::ODD_ROW, arrangement::EVEN_COLUMN, arrangement::ODD_COLUMN})
+    {
+        CAPTURE(static_cast<int>(a));
+        check(shifted_cartesian_gate_layout{a, {2, 2, 1}});
+        check(hexagonal_gate_layout{a, {2, 2, 1}});
     }
 }
 
@@ -435,7 +464,8 @@ TEST_CASE("Surface analysis retains defects reaching shifted rightmost cells", "
     surface.assign_defect({18, 0, 0}, defect{defect_type::SI_VACANCY});
     const port_list<port_position>          y_ports{{port_position(0, 0), port_position(0, 2)}, {port_position(2, 1)}};
     const surface_black_list<port_position> expected{{{1, 0}, {{create_and_tt(), {y_ports}}}}};
-    const auto                              check = [&](const auto& gates)
+    /** @brief Checks the shifted rightmost-cell blacklist. */
+    const auto check = [&](const auto& gates)
     { CHECK(surface_analysis<dummy_gate_library>(gates, surface, std::pair<uint16_t, uint16_t>{12, 32}) == expected); };
     SECTION("Shifted Cartesian")
     {
