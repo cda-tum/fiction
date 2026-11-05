@@ -13353,6 +13353,10 @@ Returns:
     The black list.
 
 Raises:
+    IndexError: If a defect has an invalid basis or an affected gate
+                has no port entry.
+    OverflowError: If an absolute gate cell exceeds the coordinate
+                   range.
     MemoryError: If allocation fails while preparing or building the
                  black list.
 
@@ -14759,6 +14763,8 @@ Raises:
     fcn::unsupported_gate_orientation_exception: If a gate orientation
                                                  has no
                                                  implementation.
+    IndexError: If a surface defect has an invalid lattice basis.
+    OverflowError: If a placed gate cell exceeds the coordinate range.
     unsuccessful_pr_error: If placement and routing cannot satisfy the
                            blacklist.
 
@@ -15650,6 +15656,10 @@ Returns:
     Sites influenced by the defect at `s`; empty if `s` holds no
     defect.
 
+Note:
+    The result materializes every influenced site and may require
+    substantial memory.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_layout_all_affected_sidbs =
@@ -15665,6 +15675,10 @@ Args:
 
 Returns:
     Sites influenced by any defect.
+
+Note:
+    The result materializes every influenced site and may require
+    substantial memory.
 
 )doc";
 

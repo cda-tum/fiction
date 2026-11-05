@@ -14,11 +14,14 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <fiction/layouts/cell_grid.hpp>
+
+// Test dependencies follow the defining header to expose missing direct includes.
+
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
 
-#include <fiction/layouts/cell_grid.hpp>
 #include <fiction/layouts/layout_base.hpp>
 
 #include <cstdint>
@@ -67,27 +70,36 @@ TEST_CASE("Cell type and name assignment", "[cell-grid]")
     g.assign_cell_name({2, 4}, "b");
     g.assign_cell_name({4, 2}, "f");
 
-    CHECK_FALSE(g.is_empty());
-    CHECK(g.num_cells() == 4);
-    CHECK(g.num_pis() == 2);
-    CHECK(g.num_pos() == 1);
-    CHECK(g.is_pi({0, 2}));
-    CHECK(g.is_po({4, 2}));
-    CHECK_FALSE(g.is_pi({2, 2}));
-    CHECK(g.get_cell_type({2, 2}) == test_cell::NORMAL);
-    CHECK(g.get_cell_type({1, 1}) == test_cell::EMPTY);
-    CHECK(g.is_empty_cell({1, 1}));
-    CHECK_FALSE(g.is_empty_cell({2, 2}));
-    CHECK(g.get_cell_name({2, 4}) == "b");
-    CHECK(g.get_cell_name({2, 2}).empty());
+    SECTION("queries and traversals describe the occupied cells")
+    {
+        CHECK_FALSE(g.is_empty());
+        CHECK(g.num_cells() == 4);
+        CHECK(g.num_pis() == 2);
+        CHECK(g.num_pos() == 1);
+        CHECK(g.is_pi({0, 2}));
+        CHECK(g.is_po({4, 2}));
+        CHECK_FALSE(g.is_pi({2, 2}));
+        CHECK(g.get_cell_type({2, 2}) == test_cell::NORMAL);
+        CHECK(g.get_cell_type({1, 1}) == test_cell::EMPTY);
+        CHECK(g.is_empty_cell({1, 1}));
+        CHECK_FALSE(g.is_empty_cell({2, 2}));
+        CHECK(g.get_cell_name({2, 4}) == "b");
+        CHECK(g.get_cell_name({2, 2}).empty());
 
-    std::vector<layout_base::coordinate> pis{};
-    g.foreach_pi([&pis](const auto& c) { pis.push_back(c); });
-    CHECK_THAT(pis, Catch::Matchers::UnorderedRangeEquals(std::vector<layout_base::coordinate>{{0, 2}, {2, 4}}));
+        /** @brief Complete occupied-cell traversal, including positions outside the frame. */
+        std::vector<layout_base::coordinate> cells{};
+        g.foreach_cell([&cells](const auto& c) { cells.push_back(c); });
+        CHECK_THAT(cells, Catch::Matchers::UnorderedRangeEquals(
+                              std::vector<layout_base::coordinate>{{0, 2}, {2, 4}, {2, 2}, {4, 2}}));
 
-    std::vector<layout_base::coordinate> pos{};
-    g.foreach_po([&pos](const auto& c) { pos.push_back(c); });
-    CHECK_THAT(pos, Catch::Matchers::UnorderedRangeEquals(std::vector<layout_base::coordinate>{{4, 2}}));
+        std::vector<layout_base::coordinate> pis{};
+        g.foreach_pi([&pis](const auto& c) { pis.push_back(c); });
+        CHECK_THAT(pis, Catch::Matchers::UnorderedRangeEquals(std::vector<layout_base::coordinate>{{0, 2}, {2, 4}}));
+
+        std::vector<layout_base::coordinate> pos{};
+        g.foreach_po([&pos](const auto& c) { pos.push_back(c); });
+        CHECK_THAT(pos, Catch::Matchers::UnorderedRangeEquals(std::vector<layout_base::coordinate>{{4, 2}}));
+    }
 
     SECTION("empty type removes the cell and its name")
     {
