@@ -102,6 +102,24 @@ TEST_CASE("Temporary test directories preserve occupied names and clean up", "[n
                     std::runtime_error);
     REQUIRE(unwound == root.path() / "unwound-0");
     CHECK_FALSE(std::filesystem::exists(unwound));
+
+    const auto occupied_file = root.path() / "file-candidate-0";
+    {
+        std::ofstream output{occupied_file};
+        REQUIRE(output.is_open());
+        output << "kept";
+        output.close();
+        REQUIRE_FALSE(output.fail());
+    }
+    {
+        const fiction::test::scoped_temp_directory child{root.path(), "file-candidate"};
+        CHECK(child.path() == root.path() / "file-candidate-1");
+    }
+    std::ifstream occupied_input{occupied_file};
+    REQUIRE(occupied_input.is_open());
+    std::string retained{};
+    occupied_input >> retained;
+    CHECK(retained == "kept");
 }
 
 TEMPLATE_TEST_CASE("Read Verilog", "[network-reader]", named_aig_network, named_xag_network, named_mig_network,
