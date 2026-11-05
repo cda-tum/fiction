@@ -19,6 +19,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "utils/scoped_temp_directory.hpp"
+
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/technology/qca/io/write_qca_layout.hpp>
 #include <fiction/technology/qca/layout.hpp>
@@ -30,7 +32,6 @@
 #include <filesystem>
 #include <fstream>
 #include <iterator>
-#include <random>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -55,8 +56,8 @@ TEST_CASE("QCAD names must fit one text record", "[qcad]")
     CHECK_THROWS_AS(write_qca_layout(layout, stream), std::invalid_argument);
     CHECK(stream.str() == "sentinel");
 
-    const auto filename =
-        std::filesystem::temp_directory_path() / ("fiction-qca-name-" + std::to_string(std::random_device{}()));
+    const fiction::test::scoped_temp_directory directory{std::filesystem::temp_directory_path(), "fiction-qca-name"};
+    const auto                                 filename = directory.path() / "layout.qca";
     {
         std::ofstream original{filename};
         REQUIRE(original.is_open());
@@ -66,8 +67,6 @@ TEST_CASE("QCAD names must fit one text record", "[qcad]")
     std::ifstream     original{filename};
     const std::string contents{std::istreambuf_iterator<char>{original}, std::istreambuf_iterator<char>{}};
     CHECK(contents == "sentinel");
-    original.close();
-    std::filesystem::remove(filename);
 }
 
 TEST_CASE("QCAD preserves representable names and clips cells to the frame", "[qcad]")
