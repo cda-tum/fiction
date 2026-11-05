@@ -67,7 +67,12 @@ void check_simulated_eq(const Spec& spec, const Impl& impl)
     const mockturtle::default_simulator<kitty::dynamic_truth_table> simulator{spec.num_pis()};
     const auto expected = mockturtle::simulate<kitty::dynamic_truth_table>(spec, simulator);
     const auto actual   = mockturtle::simulate<kitty::dynamic_truth_table>(impl, simulator);
-    CHECK(actual == expected);
+    REQUIRE(actual.size() == expected.size());
+    for (auto i = 0u; i < actual.size(); ++i)
+    {
+        CAPTURE(i);
+        CHECK(actual[i] == expected[i]);
+    }
 }
 
 /**
@@ -137,6 +142,7 @@ TEST_CASE("Name conservation after network conversion", "[network-conversion]")
     CHECK(converted_maj.get_output_name(0) == "f");
 }
 
+// technology_network uses explicit inverter nodes instead of complemented signals.
 TEMPLATE_TEST_CASE("Constant inverted signal recovery conversion", "[network-conversion]", mockturtle::mig_network,
                    mockturtle::aig_network, mockturtle::xag_network)
 {
