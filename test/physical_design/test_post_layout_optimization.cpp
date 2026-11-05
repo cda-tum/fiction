@@ -16,6 +16,10 @@
  * @author Jan Drewniok (Drewniok)
  */
 
+#include <fiction/physical_design/post_layout_optimization.hpp>
+
+// Test dependencies follow the defining header to expose missing direct includes.
+
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
@@ -29,13 +33,13 @@
 // Catch2 selects this specialization through its diagnostic templates.
 #include "utils/routing_objective_string_maker.hpp"  // IWYU pragma: keep
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
-#include <fiction/physical_design/post_layout_optimization.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
 #include <fiction/synthesis/network_conversion.hpp>
 #include <fiction/types.hpp>
@@ -156,57 +160,39 @@ TEST_CASE("Layout equivalence", "[post-layout-optimization]")
 
     SECTION("Corner cases")
     {
+        /** @brief Blueprint factory for a Cartesian gate layout. */
+        using factory = cartesian_gate_layout (*)(arrangement);
+        /** @brief Optimize a fresh layout and compare it with an independent blueprint. */
+        const auto check_corner = [](const factory make_layout)
+        {
+            auto                           layout = make_layout(arrangement::EVEN_ROW);
+            post_layout_optimization_stats stats{};
+            post_layout_optimization(layout, {}, &stats);
+            check_eq(make_layout(arrangement::EVEN_ROW), layout);
+        };
         SECTION("optimization_layout_corner_case_outputs_1")
         {
-            auto layout_corner_case_1 = blueprints::optimization_layout_corner_case_outputs_1<cartesian_gate_layout>();
-            post_layout_optimization_stats stats_corner_case_1{};
-            post_layout_optimization(layout_corner_case_1, {}, &stats_corner_case_1);
-            check_eq(blueprints::optimization_layout_corner_case_outputs_1<cartesian_gate_layout>(),
-                     layout_corner_case_1);
+            check_corner(&blueprints::optimization_layout_corner_case_outputs_1<cartesian_gate_layout>);
         }
-
         SECTION("optimization_layout_corner_case_outputs_2")
         {
-            auto layout_corner_case_2 = blueprints::optimization_layout_corner_case_outputs_2<cartesian_gate_layout>();
-            post_layout_optimization_stats stats_corner_case_2{};
-            post_layout_optimization(layout_corner_case_2, {}, &stats_corner_case_2);
-            check_eq(blueprints::optimization_layout_corner_case_outputs_2<cartesian_gate_layout>(),
-                     layout_corner_case_2);
+            check_corner(&blueprints::optimization_layout_corner_case_outputs_2<cartesian_gate_layout>);
         }
-
         SECTION("optimization_layout_corner_case_outputs_3")
         {
-            auto layout_corner_case_3 = blueprints::optimization_layout_corner_case_outputs_3<cartesian_gate_layout>();
-            post_layout_optimization_stats stats_corner_case_3{};
-            post_layout_optimization(layout_corner_case_3, {}, &stats_corner_case_3);
-            check_eq(blueprints::optimization_layout_corner_case_outputs_3<cartesian_gate_layout>(),
-                     layout_corner_case_3);
+            check_corner(&blueprints::optimization_layout_corner_case_outputs_3<cartesian_gate_layout>);
         }
-
         SECTION("optimization_layout_corner_case_outputs_4")
         {
-            auto layout_corner_case_4 = blueprints::optimization_layout_corner_case_outputs_4<cartesian_gate_layout>();
-            post_layout_optimization_stats stats_corner_case_4{};
-            post_layout_optimization(layout_corner_case_4, {}, &stats_corner_case_4);
-            check_eq(blueprints::optimization_layout_corner_case_outputs_4<cartesian_gate_layout>(),
-                     layout_corner_case_4);
+            check_corner(&blueprints::optimization_layout_corner_case_outputs_4<cartesian_gate_layout>);
         }
-
         SECTION("optimization_layout_corner_case_outputs_5")
         {
-            auto layout_corner_case_5 = blueprints::optimization_layout_corner_case_outputs_5<cartesian_gate_layout>();
-            post_layout_optimization_stats stats_corner_case_5{};
-            post_layout_optimization(layout_corner_case_5, {}, &stats_corner_case_5);
-            check_eq(blueprints::optimization_layout_corner_case_outputs_5<cartesian_gate_layout>(),
-                     layout_corner_case_5);
+            check_corner(&blueprints::optimization_layout_corner_case_outputs_5<cartesian_gate_layout>);
         }
-
         SECTION("optimization_layout_corner_case_inputs")
         {
-            auto layout_corner_case_3 = blueprints::optimization_layout_corner_case_inputs<cartesian_gate_layout>();
-            post_layout_optimization_stats stats_corner_case_3{};
-            post_layout_optimization(layout_corner_case_3, {}, &stats_corner_case_3);
-            check_eq(blueprints::optimization_layout_corner_case_inputs<cartesian_gate_layout>(), layout_corner_case_3);
+            check_corner(&blueprints::optimization_layout_corner_case_inputs<cartesian_gate_layout>);
         }
     }
 
