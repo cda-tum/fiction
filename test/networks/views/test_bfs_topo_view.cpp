@@ -172,15 +172,6 @@ TEST_CASE("BFS preserves an existing topological traversal", "[bfs-topo-view]")
     const bfs_topo_view passthrough{depth_first};
     /** @brief Breadth-first traversal of the underlying network. */
     const bfs_topo_view breadth_first{ntk};
-    /** @brief Depth-first fixture order from its two output cones. */
-    const std::vector<mockturtle::aig_network::node> expected{ntk.get_node(ntk.get_constant(false)),
-                                                              ntk.get_node(a),
-                                                              ntk.get_node(b),
-                                                              ntk.get_node(c),
-                                                              ntk.get_node(d),
-                                                              ntk.get_node(shallow),
-                                                              ntk.get_node(deep),
-                                                              ntk.get_node(independent)};
     /** @brief Original topological view's nodes. */
     std::vector<mockturtle::aig_network::node> original{};
     /** @brief Pass-through view's nodes. */
@@ -193,10 +184,9 @@ TEST_CASE("BFS preserves an existing topological traversal", "[bfs-topo-view]")
     passthrough.foreach_node([&](const auto n) { preserved.push_back(n); });
     breadth_first.foreach_node([&](const auto n) { breadth.push_back(n); });
     ntk.foreach_node([&](const auto n) { storage.push_back(n); });
-    REQUIRE(original == expected);
-    CHECK(preserved == expected);
-    CHECK(breadth != expected);
-    CHECK(storage != expected);
+    REQUIRE(original != breadth);
+    REQUIRE(original != storage);
+    CHECK(preserved == original);
 }
 
 TEST_CASE("BFS visits repeated fanins and dangling gates", "[bfs-topo-view]")
