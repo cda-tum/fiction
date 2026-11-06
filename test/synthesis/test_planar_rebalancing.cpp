@@ -332,7 +332,7 @@ TEST_CASE("Primary inputs without fanout are kept", "[planar-rebalancing]")
     const auto rebalanced = planar_rebalancing(planar_fanout_substitution(ranked));
 
     check_contract(tec, rebalanced);
-    CHECK(rebalanced.num_pis() == 3);
+    REQUIRE(rebalanced.num_pis() == 3);
     CHECK(rebalanced.rank_width(0) == 3);
     CHECK(rebalanced.fanout_size(rebalanced.pi_at(0)) == 0);
     CHECK(tec.fanout_size(tec.get_node(unused)) == 0);
