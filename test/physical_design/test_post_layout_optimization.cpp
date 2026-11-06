@@ -447,6 +447,8 @@ TEST_CASE("Post-layout optimization preserves rectangular layouts", "[post-layou
                                                   {layout.get_tile(b), layout.get_tile(gate), 1},
                                                   {layout.get_tile(gate), layout.get_tile(output), 0}};
     CHECK_THAT(extract_routing_objectives(layout), Catch::Matchers::UnorderedRangeEquals(expected));
+    REQUIRE(layout.num_pis() == 2);
+    REQUIRE(layout.num_pos() == 1);
     CHECK(layout.get_input_name(0) == "a");
     CHECK(layout.get_input_name(1) == "b");
     CHECK(layout.get_output_name(0) == "f");
