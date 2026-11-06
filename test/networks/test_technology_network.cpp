@@ -559,12 +559,9 @@ TEST_CASE("substitute node by another", "[technology-network]")
 
     CHECK(nodes == std::vector<technology_network::node>{c0, c1, a, b, n1, n2, n3, n4});
     CHECK(tec.fanout_size(n4) == 1);
-    tec.foreach_po(
-        [&](auto f)
-        {
-            CHECK(f == n4);
-            return false;
-        });
+    std::vector<technology_network::signal> outputs{};
+    tec.foreach_po([&](const auto f) { outputs.push_back(f); });
+    CHECK(outputs == std::vector<technology_network::signal>{n4});
 
     // XOR with AND and OR
     const auto n5 = tec.create_node({a, b}, tt_le);
@@ -583,12 +580,9 @@ TEST_CASE("substitute node by another", "[technology-network]")
     CHECK(tec.size() == 11);
     CHECK(tec.fanout_size(n4) == 0);
     CHECK(tec.fanout_size(n7) == 1);
-    tec.foreach_po(
-        [&](auto f)
-        {
-            CHECK(f == n7);
-            return false;
-        });
+    outputs.clear();
+    tec.foreach_po([&](const auto f) { outputs.push_back(f); });
+    CHECK(outputs == std::vector<technology_network::signal>{n7});
 }
 
 TEST_CASE("structural properties of a technology network", "[technology-network]")
