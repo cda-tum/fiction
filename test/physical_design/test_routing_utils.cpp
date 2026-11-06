@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
@@ -46,15 +47,34 @@ void check_objectives(const std::vector<routing_objective>& objectives,
     CHECK_THAT(objectives, Catch::Matchers::UnorderedRangeEquals(expected_objectives));
 }
 
-/** @brief Checks a retained tile after clearing its connections. @tparam Lyt Layout type.
- * @param lyt Layout. @param t Retained tile.
+/** @brief Checks all retained tiles and their disconnected signals.
+ * @param lyt Layout. @param expected Expected retained tiles.
  */
-template <typename Lyt>
-void check_non_empty_tile(const Lyt& lyt, const fiction::layouts::layout_base::coordinate& t)
+void check_retained_tiles(const cartesian_gate_layout& lyt, const std::vector<layout_base::coordinate>& expected)
 {
-    CHECK_FALSE(lyt.is_empty_tile(t));
-    CHECK(lyt.has_no_incoming_signal(t));
-    CHECK(lyt.has_no_outgoing_signal(t));
+    std::vector<layout_base::coordinate> actual{};
+    lyt.foreach_object(
+        [&](const auto id)
+        {
+            const auto t = lyt.get_tile(id);
+            CAPTURE(t.x, t.y, t.z);
+            actual.push_back(t);
+            for (auto input = 0u; input < lyt.input_count(id); ++input)
+            {
+                CAPTURE(input);
+                CHECK_FALSE(lyt.source({id, input}));
+            }
+            CHECK(lyt.fanout_size(id) == 0);
+        });
+    CHECK_THAT(actual, Catch::Matchers::UnorderedRangeEquals(expected));
+    CHECK(lyt.size() == expected.size());
+    for (const auto& t : expected)
+    {
+        CAPTURE(t.x, t.y, t.z);
+        CHECK_FALSE(lyt.is_empty_tile(t));
+        CHECK(lyt.has_no_incoming_signal(t));
+        CHECK(lyt.has_no_outgoing_signal(t));
+    }
 }
 
 TEST_CASE("Coordinate paths expose construction and edits", "[routing-utils]")
@@ -130,8 +150,7 @@ TEST_CASE("Clear routing", "[routing-utils]")
         clear_routing(layout);
 
         CHECK(layout.is_empty_tile({1, 1}));
-        check_non_empty_tile(layout, {0, 1});
-        check_non_empty_tile(layout, {2, 1});
+        check_retained_tiles(layout, {{0, 1}, {2, 1}});
     }
     SECTION("Direct gate connections")
     {
@@ -139,13 +158,13 @@ TEST_CASE("Clear routing", "[routing-utils]")
 
         clear_routing(layout);
 
-        check_non_empty_tile(layout, {1, 1});
-        check_non_empty_tile(layout, {2, 0});
-        check_non_empty_tile(layout, {3, 1});
-        check_non_empty_tile(layout, {2, 1});
-        check_non_empty_tile(layout, {1, 0});
-        check_non_empty_tile(layout, {2, 2});
-        check_non_empty_tile(layout, {0, 0});
+        check_retained_tiles(layout, {{1, 1}, {2, 0}, {3, 1}, {2, 1}, {1, 0}, {2, 2}, {0, 0}});
+        const auto majority = layout.find_object({2, 1});
+        REQUIRE(majority.has_value());
+        if (majority)  // The optional-access check does not model REQUIRE.
+        {
+            CHECK(layout.input_count(*majority) == 3);
+        }
     }
     SECTION("Crossings")
     {
@@ -153,14 +172,7 @@ TEST_CASE("Clear routing", "[routing-utils]")
 
         clear_routing(layout);
 
-        check_non_empty_tile(layout, {1, 0});
-        check_non_empty_tile(layout, {0, 1});
-        check_non_empty_tile(layout, {2, 0});
-        check_non_empty_tile(layout, {0, 2});
-        check_non_empty_tile(layout, {1, 1});
-        check_non_empty_tile(layout, {2, 2});
-        check_non_empty_tile(layout, {3, 1});
-        check_non_empty_tile(layout, {3, 2});
+        check_retained_tiles(layout, {{1, 0}, {0, 1}, {2, 0}, {0, 2}, {1, 1}, {2, 2}, {3, 1}, {3, 2}});
 
         CHECK(layout.is_empty_tile({2, 1}));
         CHECK(layout.is_empty_tile({1, 2}));
@@ -172,12 +184,7 @@ TEST_CASE("Clear routing", "[routing-utils]")
 
         clear_routing(layout);
 
-        check_non_empty_tile(layout, {0, 1});
-        check_non_empty_tile(layout, {1, 1});
-        check_non_empty_tile(layout, {2, 1});
-        check_non_empty_tile(layout, {1, 0});
-        check_non_empty_tile(layout, {2, 0});
-        check_non_empty_tile(layout, {1, 2});
+        check_retained_tiles(layout, {{0, 1}, {1, 1}, {2, 1}, {1, 0}, {2, 0}, {1, 2}});
 
         CHECK(layout.is_empty_tile({2, 2}));
     }
@@ -220,11 +227,16 @@ TEST_CASE("Routing preserves duplicate destination ports and retained identities
     check_objectives(objectives, {{{0, 0}, {4, 2}, 0}, {{0, 0}, {4, 2}, 1}, {{4, 2}, {5, 2}, 0}});
     CHECK((routing_objective{{0, 0}, {4, 2}, 0} != routing_objective{{0, 0}, {4, 2}, 1}));
     clear_routing(layout);
-    CHECK(layout.contains(a));
-    CHECK(layout.contains(gate));
-    CHECK(layout.contains(po));
+    REQUIRE(layout.contains(a));
+    REQUIRE(layout.contains(gate));
+    REQUIRE(layout.contains(po));
+    REQUIRE(layout.input_count(gate) == 2);
+    REQUIRE(layout.input_count(po) == 1);
     CHECK_FALSE(layout.source({gate, 0}));
     CHECK_FALSE(layout.source({gate, 1}));
+    CHECK_FALSE(layout.source({po, 0}));
+    CHECK(layout.fanout_size(a) == 0);
+    CHECK(layout.fanout_size(gate) == 0);
     const layout_coordinate_path second{{0, 0}, {1, 0}, {4, 2}};
     route_path(layout, second, {gate, 1});
     CHECK_FALSE(layout.source({gate, 0}));
