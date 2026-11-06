@@ -27,6 +27,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <map>
 #include <optional>
 #include <stdexcept>
 #include <vector>
@@ -275,6 +276,37 @@ TEST_CASE("EPG on 4x4 layouts with obstruction", "[generate-edge-intersection-gr
             CHECK(graph.size_edges() == 0);     // a complete graph has (n(n-1))/2 edges
         }
     }
+}
+
+TEST_CASE("Intersection graph connects only conflicting routes", "[generate-edge-intersection-graph]")
+{
+    const cartesian_gate_layout                   layout{{4, 4}, clocking::twoddwave()};
+    const std::vector<routing_objective>          objectives{{.source = {0, 1}, .target = {2, 1}},
+                                                             {.source = {1, 0}, .target = {1, 2}},
+                                                             {.source = {0, 3}, .target = {1, 3}}};
+    const auto                                    graph = generate_edge_intersection_graph(layout, objectives);
+    const layout_coordinate_path                  horizontal{{{0, 1}, {1, 1}, {2, 1}}};
+    const layout_coordinate_path                  vertical{{{1, 0}, {1, 1}, {1, 2}}};
+    const layout_coordinate_path                  disjoint{{{0, 3}, {1, 3}}};
+    std::map<layout_coordinate_path, std::size_t> vertices{};
+    for (auto it = graph.begin_vertices(); it != graph.end_vertices(); ++it)
+    {
+        vertices.emplace(it->second, it->first);
+    }
+    REQUIRE(graph.size_vertices() == 3);
+    REQUIRE(vertices.size() == 3);
+    REQUIRE(vertices.contains(horizontal));
+    REQUIRE(vertices.contains(vertical));
+    REQUIRE(vertices.contains(disjoint));
+    const auto connected = [&](const auto& first, const auto& second)
+    {
+        return graph.find_edge(edge_intersection_graph::make_edge_id(vertices.at(first), vertices.at(second))) !=
+               graph.end_edges();
+    };
+    CHECK(connected(horizontal, vertical));
+    CHECK_FALSE(connected(horizontal, disjoint));
+    CHECK_FALSE(connected(vertical, disjoint));
+    CHECK(graph.size_edges() == 1);
 }
 
 TEST_CASE("Limited paths retain interior conflicts", "[generate-edge-intersection-graph]")

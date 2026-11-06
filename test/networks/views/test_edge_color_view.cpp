@@ -146,6 +146,10 @@ TEST_CASE("Out-of-place edge color view", "[edge-color-view]")
         aig_ecv.paint_edge({aig_ecv.get_node(f1), aig_ecv.get_node(f3)}, yellow);
         aig_ecv.paint_edge({aig_ecv.get_node(f3), aig_ecv.get_node(f6)}, {aig_ecv.get_node(f1), aig_ecv.get_node(f3)});
 
+        CHECK(aig_ecv.edge_color({aig_ecv.get_node(f1), aig_ecv.get_node(f5)}) == white);
+        CHECK(aig_ecv.edge_color({aig_ecv.get_node(f1), aig_ecv.get_node(f3)}) == yellow);
+        CHECK(aig_ecv.edge_color({aig_ecv.get_node(f3), aig_ecv.get_node(f6)}) == yellow);
+
         /* (f1, f3) and (f3, f6) have the same color */
         CHECK(aig_ecv.eval_edge_color({aig_ecv.get_node(f1), aig_ecv.get_node(f3)},
                                       {aig_ecv.get_node(f3), aig_ecv.get_node(f6)},

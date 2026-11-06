@@ -35,7 +35,7 @@ using namespace fiction::sidb;
 using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation;
 
-TEST_CASE("Several tests", "[equivalence-check-for-simulation-results]")
+TEST_CASE("Simulation equivalence compares distributions and layout", "[equivalence-check-for-simulation-results]")
 {
     layout lyt1{};
     lyt1.assign_sidb(site_at_row(0, 0), dot_tag::NORMAL);
@@ -65,20 +65,20 @@ TEST_CASE("Several tests", "[equivalence-check-for-simulation-results]")
     {
         cd1.assign_charge_state(site_at_row(0, 0), charge_state::POSITIVE);
         results1.charge_distributions = {cd1, cd2};
-        CHECK(!check_simulation_results_for_equivalence(results1, results2));
+        CHECK_FALSE(check_simulation_results_for_equivalence(results1, results2));
     }
 
     SECTION("non-equivalence with respect to distributions with same charge state but different energy")
     {
         cd1.assign_energy(0.0);
         results1.charge_distributions = {cd1, cd2};
-        CHECK(!check_simulation_results_for_equivalence(results1, results2));
+        CHECK_FALSE(check_simulation_results_for_equivalence(results1, results2));
     }
 
     SECTION("non-equivalence due to different number of solutions")
     {
         results1.charge_distributions = {cd1};
-        CHECK(!check_simulation_results_for_equivalence(results1, results2));
+        CHECK_FALSE(check_simulation_results_for_equivalence(results1, results2));
     }
 
     SECTION("non-equivalence due to different number of SiDBs")
@@ -89,25 +89,25 @@ TEST_CASE("Several tests", "[equivalence-check-for-simulation-results]")
         results2.lyt                  = lyt2;
         results2.charge_distributions = {charge_distribution{lyt2, charge_state::NEUTRAL},
                                          charge_distribution{lyt2, charge_state::NEGATIVE}};
-        CHECK(!check_simulation_results_for_equivalence(results1, results2));
+        CHECK_FALSE(check_simulation_results_for_equivalence(results1, results2));
     }
 
     SECTION("non-equivalence due to duplication in first solution")
     {
         results1.charge_distributions = {charge_distribution{lyt1}, charge_distribution{lyt1}};
-        CHECK(!check_simulation_results_for_equivalence(results1, results2));
+        CHECK_FALSE(check_simulation_results_for_equivalence(results1, results2));
     }
     SECTION("non-equivalence due to duplication in second solution")
     {
         results2.charge_distributions = {charge_distribution{lyt1}, charge_distribution{lyt1}};
-        CHECK(!check_simulation_results_for_equivalence(results1, results2));
+        CHECK_FALSE(check_simulation_results_for_equivalence(results1, results2));
     }
     SECTION("non-equivalence due to different charge states of the first and the second solution")
     {
         results1.charge_distributions = {charge_distribution{lyt1}};
         results2.charge_distributions = {charge_distribution{lyt1}};
         results2.charge_distributions.at(0).assign_charge_state(site_at_row(0, 0), charge_state::POSITIVE);
-        CHECK(!check_simulation_results_for_equivalence(results1, results2));
+        CHECK_FALSE(check_simulation_results_for_equivalence(results1, results2));
     }
 }
 
@@ -135,7 +135,7 @@ TEST_CASE("Simulation equivalence beyond the charge-index range", "[equivalence-
     reordered.charge_distributions = {wrapped, zero};
     CHECK(check_simulation_results_for_equivalence(res, reordered));
     reordered.charge_distributions = {zero, zero};
-    CHECK(!check_simulation_results_for_equivalence(res, reordered));
+    CHECK_FALSE(check_simulation_results_for_equivalence(res, reordered));
 }
 
 TEST_CASE("Simulation equivalence compares distribution sites", "[equivalence-check-for-simulation-results]")
@@ -148,5 +148,5 @@ TEST_CASE("Simulation equivalence compares distribution sites", "[equivalence-ch
     first.charge_distributions  = {charge_distribution{lyt}};
     auto second                 = first;
     second.charge_distributions = {charge_distribution{shifted}};
-    CHECK(!check_simulation_results_for_equivalence(first, second));
+    CHECK_FALSE(check_simulation_results_for_equivalence(first, second));
 }
