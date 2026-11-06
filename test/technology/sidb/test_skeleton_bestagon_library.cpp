@@ -15,6 +15,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/networks/technology_network.hpp>
@@ -22,7 +23,10 @@
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/skeleton_bestagon_library.hpp>
 
+#include <algorithm>
+#include <array>
 #include <type_traits>
+#include <utility>
 
 using namespace fiction;
 using namespace fiction::sidb;
@@ -35,6 +39,7 @@ TEST_CASE("Bestagon traits", "[sidb-dynamic-gate-library]")
 TEST_CASE("Bestagon supports non-strict comparison functions", "[sidb-dynamic-gate-library]")
 {
     const auto implementations = skeleton_bestagon_library::get_functional_implementations();
+    const auto ports           = skeleton_bestagon_library::get_gate_ports();
     const auto le              = fiction::synthesis::create_le_tt();
     const auto ge              = fiction::synthesis::create_ge_tt();
     CHECK(*le.cbegin() == 0xbu);
@@ -49,8 +54,34 @@ TEST_CASE("Bestagon supports non-strict comparison functions", "[sidb-dynamic-ga
     const auto                            b = network.create_pi();
     CHECK(network.node_function(network.get_node(network.create_le(a, b))) == fiction::synthesis::create_le_tt());
     CHECK(network.node_function(network.get_node(network.create_ge(a, b))) == fiction::synthesis::create_ge_tt());
-    for (const auto& entry : implementations)
+    const std::array supported{std::pair{"ID", fiction::synthesis::create_id_tt()},
+                               std::pair{"NOT", fiction::synthesis::create_not_tt()},
+                               std::pair{"AND", fiction::synthesis::create_and_tt()},
+                               std::pair{"OR", fiction::synthesis::create_or_tt()},
+                               std::pair{"NAND", fiction::synthesis::create_nand_tt()},
+                               std::pair{"NOR", fiction::synthesis::create_nor_tt()},
+                               std::pair{"XOR", fiction::synthesis::create_xor_tt()},
+                               std::pair{"XNOR", fiction::synthesis::create_xnor_tt()},
+                               std::pair{"LE", fiction::synthesis::create_le_tt()},
+                               std::pair{"GE", fiction::synthesis::create_ge_tt()},
+                               std::pair{"LT", fiction::synthesis::create_lt_tt()},
+                               std::pair{"GT", fiction::synthesis::create_gt_tt()}};
+    for (const auto& [name, function] : supported)
     {
-        CHECK(entry.first == ~(~entry.first));
+        CAPTURE(name);
+        const auto implementation = implementations.find(function);
+        REQUIRE(implementation != implementations.end());
+        CHECK_FALSE(implementation->second.empty());
+        for (const auto& gate : implementation->second)
+        {
+            const auto gate_ports = ports.find(gate);
+            REQUIRE(gate_ports != ports.end());
+            CHECK_FALSE(gate_ports->second.empty());
+            if (function.num_vars() == 2)
+            {
+                CHECK(std::ranges::any_of(gate_ports->second,
+                                          [](const auto& p) { return p.inp.size() == 2 && !p.out.empty(); }));
+            }
+        }
     }
 }

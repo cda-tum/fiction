@@ -933,6 +933,7 @@ TEST_CASE("Operational checks reject charged defects with QuickSim", "[is-operat
 
     SECTION("A charged defect occurs only in a later supplied layout")
     {
+        REQUIRE(layouts.size() == 4);
         /** @brief Input-pattern layout with its charged defect removed. */
         for (auto& pattern : layouts)
         {
@@ -953,7 +954,8 @@ TEST_CASE("An empty simulation result cannot establish an operational pattern", 
     const auto output_wires = detect_bdl_wires(lyt, {}, bdl_wire_selection::OUTPUT);
     /** @brief Layouts with the Boolean input patterns applied. */
     auto layouts = generate_bdl_input_pattern_layouts(lyt, {}, input_wires);
-    layouts[1]   = layout{};
+    REQUIRE(layouts.size() == 4);
+    layouts[1] = layout{};
     /** @brief AND truth-table specification. */
     const std::vector<kitty::dynamic_truth_table> spec{create_and_tt()};
     /** @brief Physical and simulation settings for the operational check. */
