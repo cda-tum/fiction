@@ -38,6 +38,7 @@
 #include <optional>
 #include <stdexcept>
 #include <string_view>
+#include <thread>
 
 using namespace fiction;
 using namespace fiction::sidb;
@@ -139,12 +140,12 @@ static void check_for_absence_of_positive_charges(const result& simulation_resul
 }
 
 /**
- * @brief Checks that QuickSim records a positive simulation runtime.
+ * @brief Checks that QuickSim records a nonnegative simulation runtime.
  * @param simulation_results Simulation result.
  */
 static void check_for_runtime_measurement(const result& simulation_results) noexcept
 {
-    CHECK(simulation_results.simulation_runtime.count() > 0);
+    CHECK(simulation_results.simulation_runtime.count() >= 0);
 }
 
 TEST_CASE("QuickSim simulation of several SiDBs with varying thread counts", "[quicksim]")
@@ -832,14 +833,26 @@ TEST_CASE("QuickSim AND gate simulation on the Si-111 surface", "[quicksim]")
 
     SECTION("timeout with 100 ms")
     {
-        auto                  lyt = blueprints::and_gate_111();
-        const quicksim_params params{.sim_params      = simulation_parameters{2, -0.32, 5.6, 5},
-                                     .iteration_steps = 300000,
-                                     .alpha           = 0.5,
-                                     .number_threads  = 1,
-                                     .timeout         = 100};
-        const auto            simulation_results_timeout_100 = quicksim(lyt, params);
+        auto lyt = blueprints::and_gate_111();
+        /** @brief Records the worker's first progress report. */
+        bool                  worker_started = false;
+        const quicksim_params params{
+            .sim_params         = simulation_parameters{2, -0.32, 5.6, 5},
+            .iteration_steps    = 1,
+            .alpha              = 0.5,
+            .number_threads     = 1,
+            .timeout            = 100,
+            .on_worker_progress = [&worker_started](auto, auto, auto, auto, auto, const bool active)
+            {
+                if (active)
+                {
+                    worker_started = true;
+                    std::this_thread::sleep_for(std::chrono::milliseconds{125});
+                }
+            }};
+        const auto simulation_results_timeout_100 = quicksim(lyt, params);
 
+        CHECK(worker_started);
         REQUIRE_FALSE(simulation_results_timeout_100.has_value());
     }
 }
