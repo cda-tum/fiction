@@ -384,8 +384,9 @@ TEST_CASE("three DBs next to each other, small mu-", "[clustercomplete]")
 
     const auto simulation_results = clustercomplete(lyt, params);
 
-    REQUIRE(!simulation_results.charge_distributions.empty());
+    REQUIRE(simulation_results.charge_distributions.size() == 1);
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+    CHECK(charge_lyt_first.get_charge_state({-1, 3, 0}) == charge_state::NEGATIVE);
     CHECK(charge_lyt_first.get_charge_state({1, 3, 0}) == charge_state::NEGATIVE);
     CHECK(charge_lyt_first.get_charge_state({2, 3, 0}) == charge_state::POSITIVE);
     CHECK(charge_lyt_first.get_charge_state({3, 3, 0}) == charge_state::NEGATIVE);

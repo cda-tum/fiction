@@ -744,7 +744,14 @@ TEST_CASE("Seven randomly distributed DBs, test if dependent dot calculation wor
 
     const auto simulation_results_exgs = exhaustive_ground_state_simulation(lyt, params.sim_params);
 
-    REQUIRE(simulation_results.charge_distributions.size() == simulation_results_exgs.charge_distributions.size());
+    CHECK_THAT(simulation_results.charge_distributions,
+               Catch::Matchers::UnorderedRangeEquals(simulation_results_exgs.charge_distributions,
+                                                     [](const auto& lhs, const auto& rhs)
+                                                     {
+                                                         return lhs.sites() == rhs.sites() &&
+                                                                lhs.same_charge_states(rhs) &&
+                                                                std::abs(lhs.energy() - rhs.energy()) <= ERROR_MARGIN;
+                                                     }));
 
     REQUIRE_FALSE(simulation_results.charge_distributions.empty());
 
@@ -799,8 +806,9 @@ TEST_CASE("three DBs next to each other, small mu-", "[quickexact]")
 
     const auto simulation_results = quickexact(lyt, params);
 
-    REQUIRE_FALSE(simulation_results.charge_distributions.empty());
+    REQUIRE(simulation_results.charge_distributions.size() == 1);
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+    CHECK(charge_lyt_first.get_charge_state({-1, 3, 0}) == charge_state::NEGATIVE);
     CHECK(charge_lyt_first.get_charge_state({1, 3, 0}) == charge_state::NEGATIVE);
     CHECK(charge_lyt_first.get_charge_state({2, 3, 0}) == charge_state::POSITIVE);
     CHECK(charge_lyt_first.get_charge_state({3, 3, 0}) == charge_state::NEGATIVE);
