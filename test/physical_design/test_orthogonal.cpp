@@ -280,11 +280,13 @@ TEST_CASE("Name conservation after orthogonal physical design", "[orthogonal]")
     CHECK(layout.get_layout_name() == "maj");
 
     // PI names
+    REQUIRE(layout.num_pis() == 3);
     CHECK(layout.get_name(layout.pi_at(0)) == "a");  // first PI
     CHECK(layout.get_name(layout.pi_at(1)) == "b");  // second PI
     CHECK(layout.get_name(layout.pi_at(2)) == "c");  // third PI
 
     // PO names
+    REQUIRE(layout.num_pos() == 1);
     CHECK(layout.get_output_name(0) == "f");
 }
 
