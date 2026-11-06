@@ -136,7 +136,6 @@ TEST_CASE("BDL wire without I/O BDL pairs", "[detect-bdl-wires]")
     layout lyt{};
 
     lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
 
     lyt.assign_sidb({4, 0, 0}, dot_tag::NORMAL);
     lyt.assign_sidb({5, 0, 0}, dot_tag::NORMAL);
