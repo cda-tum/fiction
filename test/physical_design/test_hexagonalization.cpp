@@ -112,7 +112,10 @@ static void check_mapping_equiv(const Ntk& ntk)
         for (auto i = 0u; i < hex_layout.num_pis(); ++i)
         {
             CAPTURE(i);
-            CHECK(hex_layout.get_tile(hex_layout.pi_at(i)).y == 0);
+            /** @brief Primary input position. */
+            const auto tile = hex_layout.get_tile(hex_layout.pi_at(i));
+            CAPTURE(tile);
+            CHECK(tile.y == 0);
         }
     }
     if (outputs != mode::NONE)
@@ -121,7 +124,10 @@ static void check_mapping_equiv(const Ntk& ntk)
         for (auto i = 0u; i < hex_layout.num_pos(); ++i)
         {
             CAPTURE(i);
-            CHECK(hex_layout.get_tile(hex_layout.po_at(i)).y == static_cast<int32_t>(hex_layout.height() - 1));
+            /** @brief Primary output position. */
+            const auto tile = hex_layout.get_tile(hex_layout.po_at(i));
+            CAPTURE(tile);
+            CHECK(tile.y == static_cast<int32_t>(hex_layout.height() - 1));
         }
     }
 }
@@ -159,7 +165,10 @@ static void check_mapping_equiv_layout(const Lyt& lyt)
         for (auto i = 0u; i < hex_layout.num_pis(); ++i)
         {
             CAPTURE(i);
-            CHECK(hex_layout.get_tile(hex_layout.pi_at(i)).y == 0);
+            /** @brief Primary input position. */
+            const auto tile = hex_layout.get_tile(hex_layout.pi_at(i));
+            CAPTURE(tile);
+            CHECK(tile.y == 0);
         }
     }
     if (outputs != mode::NONE)
@@ -167,7 +176,10 @@ static void check_mapping_equiv_layout(const Lyt& lyt)
         for (auto i = 0u; i < hex_layout.num_pos(); ++i)
         {
             CAPTURE(i);
-            CHECK(hex_layout.get_tile(hex_layout.po_at(i)).y == static_cast<int32_t>(hex_layout.height() - 1));
+            /** @brief Primary output position. */
+            const auto tile = hex_layout.get_tile(hex_layout.po_at(i));
+            CAPTURE(tile);
+            CHECK(tile.y == static_cast<int32_t>(hex_layout.height() - 1));
         }
     }
 }
@@ -313,6 +325,14 @@ TEST_CASE("Hexagonalization preserves declared input holes and terminal order", 
     CHECK(hex.get_input_name(0) == "a");
     CHECK(hex.get_input_name(1) == "b");
     CHECK(hex.get_output_name(0) == "f");
+    /** @brief Primary inputs in visitor order. */
+    std::vector<layout_object_id> inputs{};
+    /** @brief Primary outputs in visitor order. */
+    std::vector<layout_object_id> outputs{};
+    hex.foreach_pi([&](const auto id) { inputs.push_back(id); });
+    hex.foreach_po([&](const auto id) { outputs.push_back(id); });
+    CHECK(inputs == std::vector{hex.pi_at(0), hex.pi_at(1)});
+    CHECK(outputs == std::vector{hex.po_at(0)});
     hex.foreach_gate(
         [&](const auto id)
         {

@@ -326,12 +326,14 @@ TEST_CASE("Optimization accepts interior terminals", "[post-layout-optimization]
         {
             CAPTURE(i);
             const auto tile = layout.get_tile(layout.pi_at(i));
+            CAPTURE(tile);
             CHECK((layout.is_at_northern_border(tile) || layout.is_at_western_border(tile)));
         }
         for (auto i = 0u; i < layout.num_pos(); ++i)
         {
             CAPTURE(i);
             const auto tile = layout.get_tile(layout.po_at(i));
+            CAPTURE(tile);
             CHECK((layout.is_at_eastern_border(tile) || layout.is_at_southern_border(tile)));
         }
     }
