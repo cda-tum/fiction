@@ -48,9 +48,11 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
 #include <optional>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
@@ -629,13 +631,23 @@ TEST_CASE("Gate-library application assigns synchronization to clock zones", "[a
 {
     const auto check_zone_delay = [](const auto& cells, const fiction::layouts::layout_base::coordinate& delayed_tile)
     {
-        cells.foreach_coordinate(
-            [&cells, &delayed_tile](const auto& c)
+        REQUIRE(cells.width() > 0);
+        REQUIRE(cells.height() > 0);
+        REQUIRE(cells.layers() > 0);
+        for (int32_t z = 0; std::cmp_less(z, cells.layers()); ++z)
+        {
+            for (int32_t y = 0; std::cmp_less(y, cells.height()); ++y)
             {
-                const auto delayed = c.x / qca_one_library::gate_x_size() == delayed_tile.x &&
-                                     c.y / qca_one_library::gate_y_size() == delayed_tile.y;
-                CHECK(cells.get_synchronization_element(c) == (delayed ? 2 : 0));
-            });
+                for (int32_t x = 0; std::cmp_less(x, cells.width()); ++x)
+                {
+                    const layout_base::coordinate c{x, y, z};
+                    CAPTURE(c);
+                    const auto delayed = c.x / qca_one_library::gate_x_size() == delayed_tile.x &&
+                                         c.y / qca_one_library::gate_y_size() == delayed_tile.y;
+                    CHECK(cells.get_synchronization_element(c) == (delayed ? 2 : 0));
+                }
+            }
+        }
         CHECK(cells.num_se() == 1);
     };
 
