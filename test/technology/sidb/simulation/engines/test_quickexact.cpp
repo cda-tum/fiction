@@ -1572,6 +1572,20 @@ TEST_CASE("QuickExact simulation of positively charged SiDBs", "[quickexact]")
     lyt.assign_sidb({18, 0, 0}, dot_tag::NORMAL);
     lyt.assign_sidb({20, 0, 0}, dot_tag::NORMAL);
 
+    /** @brief Checks all valid three-state assignments for this layout. */
+    const auto check_distributions = [&lyt](const result& simulation_results)
+    {
+        std::vector<uint64_t> indices{};
+        for (const auto& distribution : simulation_results.charge_distributions)
+        {
+            REQUIRE(distribution.sites() == lyt.sidbs());
+            CHECK(distribution.num_positive_sidbs() == 2);
+            indices.push_back(distribution.charge_index(3));
+        }
+        std::ranges::sort(indices);
+        CHECK(indices == std::vector<uint64_t>{2195, 2355, 2675, 2835});
+    };
+
     SECTION("automatic base number detection is off, base number is 3")
     {
         const quickexact_params params{.sim_params = simulation_parameters{3, -0.32},
@@ -1581,6 +1595,7 @@ TEST_CASE("QuickExact simulation of positively charged SiDBs", "[quickexact]")
         const auto simulation_results = quickexact(lyt, params);
 
         CHECK(simulation_results.charge_distributions.size() == 4);
+        check_distributions(simulation_results);
     }
 
     SECTION("automatic base number detection is on, base number is 2")
@@ -1591,6 +1606,7 @@ TEST_CASE("QuickExact simulation of positively charged SiDBs", "[quickexact]")
         const auto simulation_results = quickexact(lyt, params);
 
         CHECK(simulation_results.charge_distributions.size() == 4);
+        check_distributions(simulation_results);
     }
 }
 

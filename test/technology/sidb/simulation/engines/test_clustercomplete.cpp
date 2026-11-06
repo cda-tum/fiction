@@ -1053,6 +1053,16 @@ TEST_CASE("ClusterComplete simulation of positively charged SiDBs", "[clustercom
     const auto simulation_results = clustercomplete(lyt, params);
 
     CHECK(simulation_results.charge_distributions.size() == 4);
+    /** @brief Base-3 charge indices retain all assignments, including duplicates. */
+    std::vector<uint64_t> indices{};
+    for (const auto& distribution : simulation_results.charge_distributions)
+    {
+        REQUIRE(distribution.sites() == lyt.sidbs());
+        CHECK(distribution.num_positive_sidbs() == 2);
+        indices.push_back(distribution.charge_index(3));
+    }
+    std::ranges::sort(indices);
+    CHECK(indices == std::vector<uint64_t>{2195, 2355, 2675, 2835});
 }
 
 TEST_CASE("ClusterComplete simulation of a Y-shape SiDB arrangement", "[clustercomplete]")
