@@ -337,9 +337,15 @@ TEMPLATE_TEST_CASE("FGL preserves clock phases and zone assignments", "[write-fg
         CHECK(restored.num_clocks() == original.num_clocks());
         CHECK(restored.get_clocking_scheme().name() == original.get_clocking_scheme().name());
         CHECK(restored.get_clocking_scheme().is_regular() == original.get_clocking_scheme().is_regular());
-        original.foreach_coordinate(
-            [&](const auto& coordinate)
-            { CHECK(restored.get_clock_number(coordinate) == original.get_clock_number(coordinate)); });
+        for (int32_t y = 0; y < 3; ++y)
+        {
+            for (int32_t x = 0; x < 4; ++x)
+            {
+                const layout_base::coordinate coordinate{x, y};
+                CAPTURE(coordinate);
+                CHECK(restored.get_clock_number(coordinate) == original.get_clock_number(coordinate));
+            }
+        }
         compare_written_and_read_layout(original, restored);
     }
 }
