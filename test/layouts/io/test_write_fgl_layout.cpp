@@ -467,6 +467,24 @@ TEST_CASE("FGL validates every object before changing the stream", "[write-fgl-l
     CHECK(stream.str() == "sentinel");
 }
 
+TEST_CASE("FGL rejects partially connected gate inputs before changing the stream", "[write-fgl-layout]")
+{
+    cartesian_gate_layout layout{{2, 2, 1}, clocking::twoddwave()};
+    const auto            first  = layout.create_pi("a", {1, 0});
+    const auto            second = layout.create_pi("b", {0, 1});
+    const auto            gate   = layout.create_and(first, second, {1, 1});
+    std::stringstream     complete{};
+    CHECK_NOTHROW(write_fgl_layout(layout, complete));
+
+    const auto missing = GENERATE(0u, 1u);
+    CAPTURE(missing);
+    layout.disconnect({gate, missing});
+    std::stringstream stream{};
+    stream << "sentinel";
+    CHECK_THROWS_AS(write_fgl_layout(layout, stream), std::invalid_argument);
+    CHECK(stream.str() == "sentinel");
+}
+
 TEST_CASE("FGL rejects invalid finished placement and metadata", "[write-fgl-layout]")
 {
     cartesian_gate_layout layout{{3, 1, 1}, clocking::twoddwave()};

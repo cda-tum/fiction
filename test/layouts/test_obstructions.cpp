@@ -42,13 +42,15 @@ using namespace fiction::layouts;
 
 TEST_CASE("Coordinate obstruction: Cartesian layout", "[obstruction-layout]")
 {
-    using layout = cartesian_layout;
-
-    const layout lyt{{4, 4}};
-
     obstructions obstr_lyt{};
-
-    lyt.foreach_coordinate([&obstr_lyt](const auto& c) { CHECK_FALSE(obstr_lyt.is_obstructed_coordinate(c)); });
+    for (int32_t y = 0; y < 4; ++y)
+    {
+        for (int32_t x = 0; x < 4; ++x)
+        {
+            CAPTURE(x, y);
+            CHECK_FALSE(obstr_lyt.is_obstructed_coordinate({x, y}));
+        }
+    }
 
     // The last coordinate lies outside the layout: explicit obstructions have no layout bounds.
     for (int32_t x = 0; x < 5; ++x)
@@ -139,18 +141,21 @@ TEST_CASE("Connection obstruction", "[obstruction-layout]")
 {
     SECTION("Cartesian layout")
     {
-        using layout = cartesian_layout;
-
-        const layout lyt{{4, 4}};
-
         obstructions obstr_lyt{};
-
-        lyt.foreach_coordinate(
-            [&obstr_lyt, &lyt](const auto& c)
+        for (int32_t y = 0; y < 4; ++y)
+        {
+            for (int32_t x = 0; x < 4; ++x)
             {
-                lyt.foreach_adjacent_coordinate(c, [&obstr_lyt, &c](const auto& ac)
-                                                { CHECK_FALSE(obstr_lyt.is_obstructed_connection(c, ac)); });
-            });
+                for (int32_t target_y = 0; target_y < 4; ++target_y)
+                {
+                    for (int32_t target_x = 0; target_x < 4; ++target_x)
+                    {
+                        CAPTURE(x, y, target_x, target_y);
+                        CHECK_FALSE(obstr_lyt.is_obstructed_connection({x, y}, {target_x, target_y}));
+                    }
+                }
+            }
+        }
 
         // add artificial obstruction
         obstr_lyt.obstruct_connection({0, 0}, {0, 1});
