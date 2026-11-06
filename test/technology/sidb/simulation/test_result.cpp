@@ -29,7 +29,9 @@
 #include <fiction/technology/sidb/simulation/result.hpp>
 
 #include <algorithm>
+#include <cstdint>
 #include <stdexcept>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::sidb;
@@ -154,6 +156,14 @@ TEST_CASE("Determine the groundstate of a two BDL pair wire with input 1 applied
 
     const auto ground_state = results.groundstates();
     REQUIRE(ground_state.size() == 2);
+    std::vector<uint64_t> indices{};
+    for (const auto& distribution : ground_state)
+    {
+        REQUIRE(distribution.sites() == lyt.sidbs());
+        indices.push_back(distribution.charge_index(2));
+    }
+    std::ranges::sort(indices);
+    CHECK(indices == std::vector<uint64_t>{10, 20});
 }
 
 TEST_CASE("Simulation-result distribution index boundaries", "[sidb-simulation-result]")

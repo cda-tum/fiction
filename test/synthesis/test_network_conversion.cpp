@@ -139,6 +139,7 @@ TEST_CASE("Name conservation after network conversion", "[network-conversion]")
     CHECK(converted_maj.get_name(converted_maj.make_signal(converted_maj.pi_at(2))) == "c");
 
     // PO names
+    REQUIRE(converted_maj.num_pos() == 1u);
     CHECK(converted_maj.get_output_name(0) == "f");
 }
 

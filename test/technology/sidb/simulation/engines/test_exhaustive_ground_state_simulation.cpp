@@ -29,14 +29,17 @@
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
+#include <fiction/technology/sidb/simulation/potential_landscape.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/utils/execution_timeout.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
+#include <algorithm>
 #include <array>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::sidb;
@@ -252,6 +255,19 @@ TEST_CASE("ExGS simulation of positively charged SiDBs", "[exhaustive-ground-sta
     const auto simulation_results = exhaustive_ground_state_simulation(lyt, params);
 
     CHECK(simulation_results.charge_distributions.size() == 4);
+    /** @brief Independent physical-validity check for each returned assignment. */
+    const simulation::potential_landscape land{lyt, params};
+    /** @brief Base-3 charge indices retain all assignments, including duplicates. */
+    std::vector<uint64_t> indices{};
+    for (const auto& distribution : simulation_results.charge_distributions)
+    {
+        REQUIRE(distribution.sites() == lyt.sidbs());
+        CHECK(land.is_physically_valid(distribution));
+        CHECK(distribution.num_positive_sidbs() == 2);
+        indices.push_back(distribution.charge_index(3));
+    }
+    std::ranges::sort(indices);
+    CHECK(indices == std::vector<uint64_t>{2195, 2355, 2675, 2835});
 }
 
 TEST_CASE("ExGS gate simulation of Si-111 surface", "[exhaustive-ground-state-simulation]")
