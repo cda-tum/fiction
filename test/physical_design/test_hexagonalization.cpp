@@ -338,8 +338,12 @@ TEST_CASE("Hexagonalization preserves declared input holes and terminal order", 
     REQUIRE(gates.size() == 1);
     CHECK(hex.is_lt(gates.front()));
     CHECK_FALSE(hex.source({gates.front(), 0}));
-    REQUIRE(hex.source({gates.front(), 1}));
-    CHECK(hex.get_name(*hex.source({gates.front(), 1})) == "b");
+    const auto source = hex.source({gates.front(), 1});
+    REQUIRE(source);
+    if (source)
+    {
+        CHECK(hex.get_name(*source) == "b");
+    }
 }
 
 TEST_CASE("Hexagonalization reports progress", "[hexagonalization]")
