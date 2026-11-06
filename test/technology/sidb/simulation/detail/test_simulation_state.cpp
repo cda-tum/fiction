@@ -18,6 +18,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <catch2/matchers/catch_matchers_range.hpp>
 
 #include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/layout.hpp>
@@ -26,7 +27,6 @@
 #include <fiction/technology/sidb/simulation/detail/simulation_state.hpp>
 #include <fiction/technology/sidb/simulation/potential_landscape.hpp>
 
-#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
@@ -201,8 +201,7 @@ TEST_CASE("Simulation state over a landscape", "[simulation-state]")
         CHECK(state.three_state_sidbs().size() + state.two_state_sidbs().size() == 3);
         auto classified = state.three_state_sidbs();
         classified.insert(classified.end(), state.two_state_sidbs().cbegin(), state.two_state_sidbs().cend());
-        std::ranges::sort(classified);
-        CHECK(classified == std::vector<std::size_t>{0, 1, 2});
+        CHECK_THAT(classified, UnorderedRangeEquals(std::vector<std::size_t>{0, 1, 2}));
         CHECK(state.max_charge_index() == (uint64_t{1} << state.two_state_sidbs().size()) - 1);
     }
     SECTION("large charge indices saturate")
