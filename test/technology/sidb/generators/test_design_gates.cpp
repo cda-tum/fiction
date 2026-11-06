@@ -21,6 +21,8 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/progress_recorder.hpp"
@@ -42,8 +44,10 @@
 #include <algorithm>
 #include <chrono>
 #include <cstddef>
+#include <cstdint>
 #include <stdexcept>
 #include <thread>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
@@ -232,6 +236,18 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
             design_gates(lyt, std::vector<kitty::dynamic_truth_table>{create_xnor_tt()}, params);
 
         REQUIRE(found_gate_layouts.size() == 4);
+        /** @brief Every candidate places the only canvas SiDB at a distinct site. */
+        std::vector<layout> expected{};
+        for (int32_t x = 10; x <= 13; ++x)
+        {
+            CAPTURE(x);
+            auto candidate = lyt;
+            candidate.assign_sidb({x, 4, 0}, dot_tag::LOGIC);
+            CHECK(is_operational(candidate, std::vector{create_xnor_tt()}, params.operational_params).first ==
+                  operational_status::OPERATIONAL);
+            expected.push_back(std::move(candidate));
+        }
+        CHECK_THAT(found_gate_layouts, Catch::Matchers::UnorderedRangeEquals(expected));
     }
     SECTION("Occupied canvas sites are excluded from exhaustive combinations")
     {
