@@ -23,6 +23,7 @@
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/skeleton_bestagon_library.hpp>
 
+#include <algorithm>
 #include <array>
 #include <type_traits>
 #include <utility>
@@ -38,6 +39,7 @@ TEST_CASE("Bestagon traits", "[sidb-dynamic-gate-library]")
 TEST_CASE("Bestagon supports non-strict comparison functions", "[sidb-dynamic-gate-library]")
 {
     const auto implementations = skeleton_bestagon_library::get_functional_implementations();
+    const auto ports           = skeleton_bestagon_library::get_gate_ports();
     const auto le              = fiction::synthesis::create_le_tt();
     const auto ge              = fiction::synthesis::create_ge_tt();
     CHECK(*le.cbegin() == 0xbu);
@@ -70,5 +72,16 @@ TEST_CASE("Bestagon supports non-strict comparison functions", "[sidb-dynamic-ga
         const auto implementation = implementations.find(function);
         REQUIRE(implementation != implementations.end());
         CHECK_FALSE(implementation->second.empty());
+        for (const auto& gate : implementation->second)
+        {
+            const auto gate_ports = ports.find(gate);
+            REQUIRE(gate_ports != ports.end());
+            CHECK_FALSE(gate_ports->second.empty());
+            if (function.num_vars() == 2)
+            {
+                CHECK(std::ranges::any_of(gate_ports->second,
+                                          [](const auto& p) { return p.inp.size() == 2 && !p.out.empty(); }));
+            }
+        }
     }
 }

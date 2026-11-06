@@ -1426,6 +1426,7 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
     const auto second_gate = gate_lyt.create_gate({}, nand_function, {2, 2});
 
     REQUIRE(gate_lyt.num_gates() == 2);
+    REQUIRE(first_gate != second_gate);
     for (const auto id : std::array{first_gate, second_gate})
     {
         REQUIRE(gate_lyt.is_nand(id));
