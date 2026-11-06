@@ -22,6 +22,7 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/obstructions.hpp>
 #include <fiction/physical_design/path_finding/enumerate_all_paths.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
@@ -435,8 +436,8 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruc
             check_four_by_four_paths(obstr_lyt, collection);
             for (const auto& path : collection)
             {
-                CHECK(std::adjacent_find(
-                          path.cbegin(), path.cend(), [](const auto from, const auto to)
+                CHECK(std::ranges::adjacent_find(
+                          path, [](const auto from, const auto to)
                           { return from == layout_base::coordinate{2, 0} && to == layout_base::coordinate{3, 0}; }) ==
                       path.cend());
             }
@@ -463,12 +464,12 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruc
                 check_four_by_four_paths(obstr_lyt, collection);
                 for (const auto& path : collection)
                 {
-                    CHECK(std::adjacent_find(path.cbegin(), path.cend(),
-                                             [](const auto from, const auto to)
-                                             {
-                                                 return from == layout_base::coordinate{2, 0} &&
-                                                        to == layout_base::coordinate{3, 0};
-                                             }) == path.cend());
+                    CHECK(std::ranges::adjacent_find(path,
+                                                     [](const auto from, const auto to)
+                                                     {
+                                                         return from == layout_base::coordinate{2, 0} &&
+                                                                to == layout_base::coordinate{3, 0};
+                                                     }) == path.cend());
                 }
             }
         }

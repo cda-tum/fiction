@@ -299,7 +299,10 @@ TEST_CASE("Intersection graph connects only conflicting routes", "[generate-edge
     REQUIRE(vertices.contains(vertical));
     REQUIRE(vertices.contains(disjoint));
     const auto connected = [&](const auto& first, const auto& second)
-    { return graph.find_edge(graph.make_edge_id(vertices.at(first), vertices.at(second))) != graph.end_edges(); };
+    {
+        return graph.find_edge(edge_intersection_graph::make_edge_id(vertices.at(first), vertices.at(second))) !=
+               graph.end_edges();
+    };
     CHECK(connected(horizontal, vertical));
     CHECK_FALSE(connected(horizontal, disjoint));
     CHECK_FALSE(connected(vertical, disjoint));
