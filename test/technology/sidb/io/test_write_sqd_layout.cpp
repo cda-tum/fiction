@@ -20,6 +20,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
+#include "utils/scoped_temp_directory.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/gate_layout.hpp>
@@ -82,11 +83,10 @@ TEST_CASE("SQD export preserves output when lattice geometry is non-finite", "[s
     SECTION("file")
     {
         /** @brief Newly owned directory isolates destination and atomic-write temporary files. */
-        const auto directory =
-            std::filesystem::temp_directory_path() / ("fiction-sqd-test-" + std::to_string(std::random_device{}()));
-        REQUIRE(std::filesystem::create_directory(directory));
+        const fiction::test::scoped_temp_directory directory{
+            std::filesystem::temp_directory_path(), "fiction-sqd-test-" + std::to_string(std::random_device{}())};
         /** @brief Existing output that a failed export must preserve. */
-        const auto destination = directory / "output.sqd";
+        const auto destination = directory.path() / "output.sqd";
         {
             /** @brief Original file contents. */
             std::ofstream original{destination, std::ios::binary};
@@ -101,7 +101,6 @@ TEST_CASE("SQD export preserves output when lattice geometry is non-finite", "[s
             const std::string content{std::istreambuf_iterator<char>{stream}, std::istreambuf_iterator<char>{}};
             CHECK(content == "original");
         }
-        std::filesystem::remove_all(directory);
     }
 }
 
@@ -142,11 +141,10 @@ TEST_CASE("SQD export preserves output when charged-defect parameters are invali
     SECTION("file")
     {
         /** @brief Owned directory isolates the existing destination. */
-        const auto directory =
-            std::filesystem::temp_directory_path() / ("fiction-sqd-test-" + std::to_string(std::random_device{}()));
-        REQUIRE(std::filesystem::create_directory(directory));
+        const fiction::test::scoped_temp_directory directory{
+            std::filesystem::temp_directory_path(), "fiction-sqd-test-" + std::to_string(std::random_device{}())};
         /** @brief Existing output that a failed export must preserve. */
-        const auto destination = directory / "output.sqd";
+        const auto destination = directory.path() / "output.sqd";
         {
             /** @brief Original file contents. */
             std::ofstream stream{destination, std::ios::binary};
@@ -162,7 +160,6 @@ TEST_CASE("SQD export preserves output when charged-defect parameters are invali
             CHECK(content == original);
         }
         CHECK(callbacks == 0);
-        std::filesystem::remove_all(directory);
     }
 }
 
@@ -335,12 +332,17 @@ TEST_CASE("Write and read back an sidb::layout", "[sqd]")
         write_sqd_layout(lyt, stream);
         tinyxml2::XMLDocument document{};
         REQUIRE(document.Parse(stream.str().c_str()) == tinyxml2::XML_SUCCESS);
-        const auto* name = document.FirstChildElement("siqad")
-                               ->FirstChildElement("layers")
-                               ->FirstChildElement("layer_prop")
-                               ->FirstChildElement("lat_vec")
-                               ->FirstChildElement("name");
+        const auto* siqad = document.FirstChildElement("siqad");
+        REQUIRE(siqad != nullptr);
+        const auto* layers = siqad->FirstChildElement("layers");
+        REQUIRE(layers != nullptr);
+        const auto* layer = layers->FirstChildElement("layer_prop");
+        REQUIRE(layer != nullptr);
+        const auto* vectors = layer->FirstChildElement("lat_vec");
+        REQUIRE(vectors != nullptr);
+        const auto* name = vectors->FirstChildElement("name");
         REQUIRE(name != nullptr);
+        REQUIRE(name->GetText() != nullptr);
         CHECK(std::string{name->GetText()} == lat.name);
         CHECK(read_sqd_layout(stream) == lyt);
     }

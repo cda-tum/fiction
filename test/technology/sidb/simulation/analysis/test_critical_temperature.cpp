@@ -798,6 +798,7 @@ TEST_CASE("Pre-generated input pattern layouts reject mismatched BDL data", "[cr
     }
     SECTION("too few input pattern layouts")
     {
+        REQUIRE(input_pattern_layouts.size() == 4);
         const std::vector<layout> too_few{input_pattern_layouts.front()};
 
         CHECK_THROWS_AS(critical_temperature_gate_based(too_few,
@@ -807,6 +808,7 @@ TEST_CASE("Pre-generated input pattern layouts reject mismatched BDL data", "[cr
     }
     SECTION("more output BDL pairs than truth tables")
     {
+        REQUIRE(output_pairs.size() == 1);
         auto too_many = output_pairs;
         too_many.push_back(output_pairs.front());
 

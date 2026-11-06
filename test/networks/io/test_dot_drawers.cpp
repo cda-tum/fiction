@@ -20,6 +20,7 @@
 
 #include "fiction/utils/version_info.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
+#include "utils/scoped_temp_directory.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -1071,10 +1072,10 @@ TEST_CASE("Layout DOT progress retains areas above the unsigned 32-bit range", "
 
 TEST_CASE("Network DOT export preserves files and symbolic links", "[dot-drawers]")
 {
-    const auto directory =
-        std::filesystem::temp_directory_path() / ("fiction-dot-test-" + std::to_string(std::random_device{}()));
-    REQUIRE(std::filesystem::create_directory(directory));
-    const auto target = directory / "network.dot";
+    const fiction::test::scoped_temp_directory cleanup{std::filesystem::temp_directory_path(),
+                                                       "fiction-dot-test-" + std::to_string(std::random_device{}())};
+    const auto&                                directory = cleanup.path();
+    const auto                                 target    = directory / "network.dot";
     {
         std::ofstream stream{target};
         stream << "original";
@@ -1090,13 +1091,11 @@ TEST_CASE("Network DOT export preserves files and symbolic links", "[dot-drawers
 #ifdef _WIN32
         if (link_error.value() == 1314)  // Windows requires symbolic-link creation privileges.
         {
-            std::filesystem::remove_all(directory);
             SKIP("Windows did not grant symbolic-link creation privileges");
         }
 #endif
         if (link_error == std::errc::function_not_supported)
         {
-            std::filesystem::remove_all(directory);
             SKIP("The filesystem runtime does not implement symbolic links");
         }
         REQUIRE_FALSE(link_error);
@@ -1132,7 +1131,6 @@ TEST_CASE("Network DOT export preserves files and symbolic links", "[dot-drawers
         CHECK(std::filesystem::is_symlink(destination));
         CHECK_FALSE(std::filesystem::exists(target));
     }
-    std::filesystem::remove_all(directory);
 }
 
 TEST_CASE("Colored DOT drawers preserve node and edge palettes", "[dot-drawers]")

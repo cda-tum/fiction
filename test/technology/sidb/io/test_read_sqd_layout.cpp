@@ -19,6 +19,8 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include "utils/scoped_temp_directory.hpp"
+
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
@@ -1229,11 +1231,12 @@ TEST_CASE("SQD readers reject incomplete document consumption", "[sqd]")
     std::istringstream valid{"<?xml version=\"1.0\"?><!-- before -->\r\n" + xml + "\r\n<!-- after -->"};
     CHECK(read_sqd_layout(valid).is_empty());
 
+    const fiction::test::scoped_temp_directory directory{std::filesystem::temp_directory_path(),
+                                                         "fiction-sqd-input-" + std::to_string(std::random_device{}())};
     for (const auto control : {char{0}, char{26}})
     {
         /** @brief Temporary SQD file containing the complete byte sequence. */
-        const auto filename =
-            std::filesystem::temp_directory_path() / ("fiction-sqd-input-" + std::to_string(std::random_device{}()));
+        const auto filename = directory.path() / "input.sqd";
         {
             /** @brief Binary output preserves control bytes. */
             std::ofstream output{filename, std::ios::binary};
@@ -1241,6 +1244,5 @@ TEST_CASE("SQD readers reject incomplete document consumption", "[sqd]")
             output << xml << control << "<invalid>";
         }
         CHECK_THROWS_AS(read_sqd_layout(filename.string()), sqd_parsing_error);
-        std::filesystem::remove(filename);
     }
 }
