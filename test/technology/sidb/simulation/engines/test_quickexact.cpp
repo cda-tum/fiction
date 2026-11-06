@@ -23,6 +23,7 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #ifdef NDEBUG
 #include "utils/blueprints/layout_blueprints.hpp"
@@ -140,7 +141,7 @@ TEST_CASE("Empty layout QuickExact simulation", "[quickexact]")
     const auto simulation_results = quickexact(lyt, params);
 
     CHECK(simulation_results.charge_distributions.empty());
-    CHECK(simulation_results.algorithm_name == "QuickExact");
+    CHECK_THAT(simulation_results.algorithm_name, Catch::Matchers::Equals("QuickExact"));
 }
 
 TEST_CASE("Single SiDB QuickExact simulation", "[quickexact]")
@@ -1607,8 +1608,7 @@ TEST_CASE("QuickExact simulation of positively charged SiDBs", "[quickexact]")
             CHECK(distribution.num_positive_sidbs() == 2);
             indices.push_back(distribution.charge_index(3));
         }
-        std::ranges::sort(indices);
-        CHECK(indices == std::vector<uint64_t>{2195, 2355, 2675, 2835});
+        CHECK_THAT(indices, Catch::Matchers::UnorderedRangeEquals(std::vector<uint64_t>{2195, 2355, 2675, 2835}));
     };
 
     SECTION("automatic base number detection is off, base number is 3")

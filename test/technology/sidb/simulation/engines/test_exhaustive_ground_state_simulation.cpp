@@ -21,6 +21,8 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/progress_recorder.hpp"
 
@@ -34,7 +36,6 @@
 #include <fiction/utils/execution_timeout.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
-#include <algorithm>
 #include <array>
 #include <chrono>
 #include <cstddef>
@@ -79,7 +80,7 @@ TEST_CASE("Empty layout ExGS simulation", "[exhaustive-ground-state-simulation]"
 
     CHECK(simulation_results.charge_distributions.empty());
     CHECK(simulation_results.additional_simulation_parameters.empty());
-    CHECK(simulation_results.algorithm_name == "ExGS");
+    CHECK_THAT(simulation_results.algorithm_name, Catch::Matchers::Equals("ExGS"));
 }
 
 TEST_CASE("Single SiDB ExGS simulation", "[exhaustive-ground-state-simulation]")
@@ -266,8 +267,7 @@ TEST_CASE("ExGS simulation of positively charged SiDBs", "[exhaustive-ground-sta
         CHECK(distribution.num_positive_sidbs() == 2);
         indices.push_back(distribution.charge_index(3));
     }
-    std::ranges::sort(indices);
-    CHECK(indices == std::vector<uint64_t>{2195, 2355, 2675, 2835});
+    CHECK_THAT(indices, Catch::Matchers::UnorderedRangeEquals(std::vector<uint64_t>{2195, 2355, 2675, 2835}));
 }
 
 TEST_CASE("ExGS gate simulation of Si-111 surface", "[exhaustive-ground-state-simulation]")

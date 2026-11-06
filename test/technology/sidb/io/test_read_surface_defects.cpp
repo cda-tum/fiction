@@ -18,6 +18,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_predicate.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/scoped_temp_directory.hpp"
 
@@ -63,7 +64,7 @@ TEST_CASE("Read surface defects into an sidb::layout", "[read-sidb-surface-defec
 
         const auto lyt = read_surface_defects(surface_stream, "surface");
 
-        CHECK(lyt.get_layout_name() == "surface");
+        CHECK_THAT(lyt.get_layout_name(), Catch::Matchers::Equals("surface"));
         CHECK(lyt.is_empty());
         CHECK(lyt.num_defects() == 10);
 

@@ -18,6 +18,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
@@ -189,7 +190,7 @@ TEST_CASE("Signal names transfer without constant lookup", "[name-utils]")
     mockturtle::node_map<mockturtle::aig_network::signal, named_without_constant> mapping{source};
     mapping[source.get_node(input)] = target;
     restore_signal_names(source, destination, mapping);
-    CHECK(destination.get_name(target) == "input");
+    CHECK_THAT((destination.get_name(target)), Catch::Matchers::Equals("input"));
 }
 
 TEST_CASE("Unnamed network name transfers clear names and remain optional", "[name-utils]")
@@ -218,16 +219,16 @@ TEMPLATE_TEST_CASE("Name transfer respects interface order and string-view bound
     const auto placed = lyt.create_pi("", {0, 0});
     lyt.create_po(placed, "", {1, 0});
     restore_names(ntk, lyt);
-    CHECK(lyt.get_layout_name() == "prefix");
-    CHECK(lyt.get_input_name(0) == "a");
-    CHECK(lyt.get_output_name(0) == "f");
+    CHECK_THAT((lyt.get_layout_name()), Catch::Matchers::Equals("prefix"));
+    CHECK_THAT((lyt.get_input_name(0)), Catch::Matchers::Equals("a"));
+    CHECK_THAT((lyt.get_output_name(0)), Catch::Matchers::Equals("f"));
 
     named_technology_network copied{};
     copied.create_po(copied.create_pi());
     restore_names(lyt, copied);
-    CHECK(copied.get_network_name() == "prefix");
-    CHECK(copied.get_name(copied.make_signal(copied.pi_at(0))) == "a");
-    CHECK(copied.get_output_name(0) == "f");
+    CHECK_THAT((copied.get_network_name()), Catch::Matchers::Equals("prefix"));
+    CHECK_THAT((copied.get_name(copied.make_signal(copied.pi_at(0)))), Catch::Matchers::Equals("a"));
+    CHECK_THAT((copied.get_output_name(0)), Catch::Matchers::Equals("f"));
 }
 
 TEMPLATE_TEST_CASE("Signal names transfer from a logic network to placed objects", "[name-utils]", cartesian_layout,
@@ -261,9 +262,9 @@ TEMPLATE_TEST_CASE("Signal names transfer from a logic network to placed objects
 
     restore_signal_names(ntk, lyt, mapping);
 
-    CHECK(lyt.get_name(placed_input) == "input");
-    CHECK(lyt.get_name(placed_internal) == "internal");
-    CHECK(lyt.get_name(placed_output) == "terminal");
+    CHECK_THAT((lyt.get_name(placed_input)), Catch::Matchers::Equals("input"));
+    CHECK_THAT((lyt.get_name(placed_internal)), Catch::Matchers::Equals("internal"));
+    CHECK_THAT((lyt.get_name(placed_output)), Catch::Matchers::Equals("terminal"));
 }
 
 TEMPLATE_TEST_CASE("Signal name restoration covers output drivers and mapped unused inputs", "[name-utils]",
@@ -299,9 +300,9 @@ TEMPLATE_TEST_CASE("Signal name restoration covers output drivers and mapped unu
     SECTION("Live and absent native mappings")
     {
         CHECK_NOTHROW(restore_signal_names(ntk, lyt, mapping));
-        CHECK(lyt.get_name(placed_driver) == "driver");
-        CHECK(lyt.get_name(placed_unused) == "unused");
-        CHECK(lyt.get_name(placed_output) == "terminal");
+        CHECK_THAT((lyt.get_name(placed_driver)), Catch::Matchers::Equals("driver"));
+        CHECK_THAT((lyt.get_name(placed_unused)), Catch::Matchers::Equals("unused"));
+        CHECK_THAT((lyt.get_name(placed_output)), Catch::Matchers::Equals("terminal"));
     }
     SECTION("Stale native mappings reject")
     {
@@ -341,5 +342,5 @@ TEST_CASE("Signal name restoration retains used complemented names", "[name-util
     restore_signal_names(source, target, mapping);
 
     REQUIRE(target.has_name(mapped));
-    CHECK(target.get_name(mapped) == "inverted");
+    CHECK_THAT((target.get_name(mapped)), Catch::Matchers::Equals("inverted"));
 }

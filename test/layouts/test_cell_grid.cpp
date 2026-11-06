@@ -21,6 +21,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include <fiction/layouts/layout_base.hpp>
 
@@ -60,7 +61,7 @@ TEST_CASE("Cell type and name assignment", "[cell-grid]")
     grid g{{4, 4}, "AND"};
 
     CHECK(g.is_empty());
-    CHECK(g.get_layout_name() == "AND");
+    CHECK_THAT((g.get_layout_name()), Catch::Matchers::Equals("AND"));
 
     g.assign_cell_type({0, 2}, test_cell::INPUT);
     g.assign_cell_type({2, 4}, test_cell::INPUT);
@@ -83,7 +84,7 @@ TEST_CASE("Cell type and name assignment", "[cell-grid]")
         CHECK(g.get_cell_type({1, 1}) == test_cell::EMPTY);
         CHECK(g.is_empty_cell({1, 1}));
         CHECK_FALSE(g.is_empty_cell({2, 2}));
-        CHECK(g.get_cell_name({2, 4}) == "b");
+        CHECK_THAT((g.get_cell_name({2, 4})), Catch::Matchers::Equals("b"));
         CHECK(g.get_cell_name({2, 2}).empty());
 
         /** @brief Complete occupied-cell traversal, including positions outside the frame. */
@@ -160,7 +161,7 @@ TEST_CASE("Cell grid copies are independent", "[cell-grid]")
     CHECK(copy != original);
     CHECK(original.width() == 5);
     CHECK(original.layers() == 1);
-    CHECK(original.get_layout_name() == "original");
+    CHECK_THAT((original.get_layout_name()), Catch::Matchers::Equals("original"));
     CHECK(original.get_cell_type({0, 2}) == test_cell::NORMAL);
     CHECK(original.get_cell_name({0, 2}).empty());
 

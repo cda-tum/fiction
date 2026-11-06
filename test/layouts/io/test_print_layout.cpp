@@ -19,6 +19,7 @@
 
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/technology/mol_qca/layout.hpp"
@@ -50,13 +51,13 @@ TEST_CASE("Print empty gate-level layout", "[print-gate-level-layout]")
 
     print_gate_level_layout(print_stream, layout, false, false);
 
-    CHECK(print_stream.str() == layout_print);
+    CHECK_THAT(print_stream.str(), Catch::Matchers::Equals(layout_print));
 
     print_stream = {};
 
     print_layout(layout, print_stream);
 
-    CHECK(print_stream.str() == layout_print);
+    CHECK_THAT(print_stream.str(), Catch::Matchers::Equals(layout_print));
 }
 
 TEST_CASE("Print terminal-only gate-level layout", "[print-gate-level-layout]")
@@ -66,7 +67,7 @@ TEST_CASE("Print terminal-only gate-level layout", "[print-gate-level-layout]")
     layout.create_po(input, "f", {1, 0});
     std::stringstream print_stream{};
     print_gate_level_layout(print_stream, layout, false, false);
-    CHECK(print_stream.str().find("I O") != std::string::npos);
+    CHECK_THAT(print_stream.str(), Catch::Matchers::ContainsSubstring("I O"));
 }
 
 TEST_CASE("Print unsupported nonempty gate-level layouts", "[print-gate-level-layout]")
@@ -82,7 +83,7 @@ TEST_CASE("Print unsupported nonempty gate-level layouts", "[print-gate-level-la
 
         print_gate_level_layout(print_stream, layout, false, false);
 
-        CHECK(print_stream.str() == "[e] hexagonal layout printing is not supported\n");
+        CHECK_THAT(print_stream.str(), Catch::Matchers::Equals("[e] hexagonal layout printing is not supported\n"));
     }
     SECTION("Shifted Cartesian layout")
     {
@@ -92,7 +93,8 @@ TEST_CASE("Print unsupported nonempty gate-level layouts", "[print-gate-level-la
 
         print_gate_level_layout(print_stream, layout, false, false);
 
-        CHECK(print_stream.str() == "[e] shifted cartesian layout printing is not supported\n");
+        CHECK_THAT(print_stream.str(),
+                   Catch::Matchers::Equals("[e] shifted cartesian layout printing is not supported\n"));
     }
 }
 
@@ -119,7 +121,7 @@ TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
 
         print_gate_level_layout(print_stream, layout, false, false);
 
-        CHECK(print_stream.str() == layout_print);
+        CHECK_THAT(print_stream.str(), Catch::Matchers::Equals(layout_print));
     }
 
     SECTION("Irregular clocking")
@@ -141,7 +143,7 @@ TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
 
         print_gate_level_layout(print_stream, layout, false, false);
 
-        CHECK(print_stream.str() == layout_print);
+        CHECK_THAT(print_stream.str(), Catch::Matchers::Equals(layout_print));
     }
 }
 
@@ -165,16 +167,16 @@ TEST_CASE("Print object and tile assignments with fanins and fanouts", "[print-g
         std::stringstream print_stream{};
         print_object_to_tile_assignments(layout, print_stream);
 
-        CHECK(print_stream.str().find(fanin_record) != std::string::npos);
-        CHECK(print_stream.str().find(fanout_record) != std::string::npos);
+        CHECK_THAT(print_stream.str(), Catch::Matchers::ContainsSubstring(fanin_record));
+        CHECK_THAT(print_stream.str(), Catch::Matchers::ContainsSubstring(fanout_record));
     }
     SECTION("Tiles to nodes")
     {
         std::stringstream print_stream{};
         print_tile_to_object_assignments(layout, print_stream);
 
-        CHECK(print_stream.str().find(fanin_record) != std::string::npos);
-        CHECK(print_stream.str().find(fanout_record) != std::string::npos);
+        CHECK_THAT(print_stream.str(), Catch::Matchers::ContainsSubstring(fanin_record));
+        CHECK_THAT(print_stream.str(), Catch::Matchers::ContainsSubstring(fanout_record));
     }
 }
 
@@ -194,7 +196,7 @@ TEST_CASE("Print crossing gate-level layout", "[print-gate-level-layout]")
 
     print_gate_level_layout(print_stream, layout, false, false);
 
-    CHECK(print_stream.str() == layout_print);
+    CHECK_THAT(print_stream.str(), Catch::Matchers::Equals(layout_print));
 }
 
 TEST_CASE("Print gate symbols and terminal colors", "[print-gate-level-layout]")
@@ -215,17 +217,17 @@ TEST_CASE("Print gate symbols and terminal colors", "[print-gate-level-layout]")
     /** @brief Uncolored picture with the public gate symbols. */
     std::stringstream plain{};
     print_gate_level_layout(plain, layout, false, false);
-    CHECK(plain.str().find('|') != std::string::npos);
-    CHECK(plain.str().find('M') != std::string::npos);
-    CHECK(plain.str().find('X') != std::string::npos);
-    CHECK(plain.str().find('F') != std::string::npos);
+    CHECK_THAT(plain.str(), Catch::Matchers::ContainsSubstring("|"));
+    CHECK_THAT(plain.str(), Catch::Matchers::ContainsSubstring("M"));
+    CHECK_THAT(plain.str(), Catch::Matchers::ContainsSubstring("X"));
+    CHECK_THAT(plain.str(), Catch::Matchers::ContainsSubstring("F"));
     CHECK(plain.str().find('|') < plain.str().find('M'));
     CHECK(plain.str().find('M') < plain.str().find('X'));
 
     /** @brief Terminal colors use ANSI escape sequences. */
     std::stringstream colored{};
     print_gate_level_layout(colored, layout, true, false);
-    CHECK(colored.str().find("\x1b[") != std::string::npos);
+    CHECK_THAT(colored.str(), Catch::Matchers::ContainsSubstring("\x1b["));
 }
 
 TEST_CASE("Print empty cell-level layout", "[print-cell-level-layout]")
@@ -240,13 +242,13 @@ TEST_CASE("Print empty cell-level layout", "[print-cell-level-layout]")
 
     print_cell_level_layout(print_stream, layout, false, false);
 
-    CHECK(print_stream.str() == layout_print);
+    CHECK_THAT(print_stream.str(), Catch::Matchers::Equals(layout_print));
 
     print_stream = {};
 
     print_layout(layout, print_stream);
 
-    CHECK(print_stream.str() == layout_print);
+    CHECK_THAT(print_stream.str(), Catch::Matchers::Equals(layout_print));
 }
 
 TEST_CASE("Print AND gate cell-level layout", "[print-cell-level-layout]")
@@ -280,7 +282,7 @@ TEST_CASE("Print AND gate cell-level layout", "[print-cell-level-layout]")
 
     print_cell_level_layout(print_stream, layout, false, false);
 
-    CHECK(print_stream.str() == layout_print);
+    CHECK_THAT(print_stream.str(), Catch::Matchers::Equals(layout_print));
 }
 
 TEST_CASE("Print wire crossing cell-level layout", "[print-cell-level-layout]")
@@ -320,7 +322,7 @@ TEST_CASE("Print wire crossing cell-level layout", "[print-cell-level-layout]")
 
     print_cell_level_layout(print_stream, layout, false, false);
 
-    CHECK(print_stream.str() == layout_print);
+    CHECK_THAT(print_stream.str(), Catch::Matchers::Equals(layout_print));
 }
 
 TEST_CASE("Print molQCA layout with clock phases", "[print-cell-level-layout]")
@@ -336,5 +338,5 @@ TEST_CASE("Print molQCA layout with clock phases", "[print-cell-level-layout]")
 
     print_cell_level_layout(print_stream, layout, false, false);
 
-    CHECK(print_stream.str() == "iabo\n\n");
+    CHECK_THAT(print_stream.str(), Catch::Matchers::Equals("iabo\n\n"));
 }

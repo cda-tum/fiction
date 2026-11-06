@@ -18,6 +18,7 @@
 
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/scoped_temp_directory.hpp"
 
@@ -118,7 +119,7 @@ TEST_CASE("Read single-dot SQD layout", "[sqd]")
 
     const auto lyt = read_sqd_layout(layout_stream);
 
-    CHECK(lyt.get_lattice().name == "Si(111) 1x1");
+    CHECK_THAT(lyt.get_lattice().name, Catch::Matchers::Equals("Si(111) 1x1"));
     CHECK(lyt.num_dots() == 1);
     CHECK(lyt.get_dot_tag({0, 0, 0}) == dot_tag::NORMAL);
     CHECK(lyt.bounding_box() == std::pair{lattice_site{0, 0, 0}, lattice_site{0, 0, 0}});
@@ -1028,7 +1029,7 @@ TEST_CASE("Read SQD layout into an sidb::layout", "[sqd]")
 
     const auto lyt = read_sqd_layout(layout_stream, "gate");
 
-    CHECK(lyt.get_layout_name() == "gate");
+    CHECK_THAT(lyt.get_layout_name(), Catch::Matchers::Equals("gate"));
     CHECK(lyt.get_lattice() == sidb::lattice::si_111_1x1());
     CHECK(lyt.num_dots() == 4);
     CHECK(lyt.get_dot_tag({0, 0, 0}) == dot_tag::INPUT);

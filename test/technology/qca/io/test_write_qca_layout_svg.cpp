@@ -162,7 +162,7 @@ TEST_CASE("Write QCA SVG files with the selected detail level", "[write-qca-layo
     std::ifstream file{filename};
     REQUIRE(file.is_open());
     const std::string svg{std::istreambuf_iterator<char>{file}, std::istreambuf_iterator<char>{}};
-    CHECK(svg == expected.str());
+    CHECK_THAT(svg, Catch::Matchers::Equals(expected.str()));
 
     CHECK_THROWS_AS(write_qca_layout_svg(layout, directory.path().string(), params), std::ofstream::failure);
 }
@@ -230,7 +230,8 @@ TEST_CASE("QCA SVG synchronization preserves cell positions", "[write-qca-layout
     REQUIRE(synchronized_cell != nullptr);
     REQUIRE(original_cell->Attribute("transform") != nullptr);
     REQUIRE(synchronized_cell->Attribute("transform") != nullptr);
-    CHECK(std::string{original_cell->Attribute("transform")} == synchronized_cell->Attribute("transform"));
+    CHECK_THAT(std::string{synchronized_cell->Attribute("transform")},
+               Catch::Matchers::Equals(original_cell->Attribute("transform")));
 }
 
 TEST_CASE("QCA SVG includes partial boundary tiles", "[write-qca-layout-svg]")
@@ -260,7 +261,7 @@ TEST_CASE("QCA SVG includes partial boundary tiles", "[write-qca-layout-svg]")
     REQUIRE(full_svg != nullptr);
     REQUIRE(partial_svg->Attribute("viewBox") != nullptr);
     REQUIRE(full_svg->Attribute("viewBox") != nullptr);
-    CHECK(std::string{partial_svg->Attribute("viewBox")} == full_svg->Attribute("viewBox"));
+    CHECK_THAT(std::string{partial_svg->Attribute("viewBox")}, Catch::Matchers::Equals(full_svg->Attribute("viewBox")));
     CHECK(count_svg_elements(partial_document, "rect") == rectangles);
     CHECK(count_svg_elements(full_document, "rect") == rectangles);
     CHECK(count_svg_elements(partial_document, "circle") == (simple ? 0 : dots));
@@ -296,7 +297,7 @@ TEST_CASE("QCA SVG reports unsupported cell types and preserves files", "[write-
         std::ifstream original{filename};
         REQUIRE(original.is_open());
         const std::string contents{std::istreambuf_iterator<char>{original}, std::istreambuf_iterator<char>{}};
-        CHECK(contents == "sentinel");
+        CHECK_THAT(contents, Catch::Matchers::Equals("sentinel"));
     }
 }
 
@@ -317,7 +318,7 @@ TEST_CASE("QCA SVG clips cells to the frame in both render modes", "[write-qca-l
     layout.assign_cell_type({1, 1, 2}, qca::cell_type::NORMAL);
     std::ostringstream actual{};
     write_qca_layout_svg(layout, actual, {.simple = simple});
-    CHECK(actual.str() == expected.str());
+    CHECK_THAT(actual.str(), Catch::Matchers::Equals(expected.str()));
 }
 
 TEST_CASE("QCA SVG paints lower layers before upper layers", "[write-qca-layout-svg]")
@@ -331,7 +332,7 @@ TEST_CASE("QCA SVG paints lower layers before upper layers", "[write-qca-layout-
     std::ostringstream stream{};
     write_qca_layout_svg(layout, stream, {.simple = simple});
     const auto svg = stream.str();
-    REQUIRE(svg.find("fill:#008dc8") != std::string::npos);
-    REQUIRE(svg.find("fill:#e28686") != std::string::npos);
+    REQUIRE_THAT(svg, Catch::Matchers::ContainsSubstring("fill:#008dc8"));
+    REQUIRE_THAT(svg, Catch::Matchers::ContainsSubstring("fill:#e28686"));
     CHECK(svg.find("fill:#008dc8") < svg.find("fill:#e28686"));
 }

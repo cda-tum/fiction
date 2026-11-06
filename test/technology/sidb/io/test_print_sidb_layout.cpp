@@ -15,6 +15,7 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/io/print_sidb_layout.hpp>
@@ -39,7 +40,7 @@ TEST_CASE("Print empty SiDB layout", "[print-sidb-layout]")
 
     print_sidb_layout(print_stream, layout{});
 
-    CHECK(print_stream.str() == "[i] empty layout\n");
+    CHECK_THAT(print_stream.str(), Catch::Matchers::Equals("[i] empty layout\n"));
 }
 
 TEST_CASE("Print SiDBs and defects on the H-Si(100)-2x1 surface", "[print-sidb-layout]")
@@ -69,7 +70,7 @@ TEST_CASE("Print SiDBs and defects on the H-Si(100)-2x1 surface", "[print-sidb-l
                                              " ·  ·  ·  ·  ·  ·  ·  ·  · \n"
                                              " ·  ·  ·  ·  ·  ·  ·  ·  · \n";
 
-        CHECK(layout_print == print_stream.str());
+        CHECK_THAT(print_stream.str(), Catch::Matchers::Equals(layout_print));
     }
     SECTION("crop_layout option deactivated")
     {
@@ -78,7 +79,7 @@ TEST_CASE("Print SiDBs and defects on the H-Si(100)-2x1 surface", "[print-sidb-l
         constexpr const char* layout_print = " ⊞  ·  ·  ·  · \n"
                                              " ·  ⊡  ·  ·  ⊟ \n";
 
-        CHECK(layout_print == print_stream.str());
+        CHECK_THAT(print_stream.str(), Catch::Matchers::Equals(layout_print));
     }
     SECTION("inputs, outputs, and hidden lattice")
     {
@@ -89,7 +90,7 @@ TEST_CASE("Print SiDBs and defects on the H-Si(100)-2x1 surface", "[print-sidb-l
 
         print_sidb_layout(print_stream, gate, false, false, false);
 
-        CHECK(print_stream.str() == " ◯    ◯    ◯ \n");
+        CHECK_THAT(print_stream.str(), Catch::Matchers::Equals(" ◯    ◯    ◯ \n"));
     }
 }
 
@@ -122,7 +123,7 @@ TEST_CASE("Print six SiDBs on the H-Si(111)-1x1 surface", "[print-sidb-layout]")
 
     print_sidb_layout(print_stream, lyt, false, true, true);
 
-    CHECK(layout_print == print_stream.str());
+    CHECK_THAT(print_stream.str(), Catch::Matchers::Equals(layout_print));
 }
 
 TEST_CASE("Text padding rejects unrepresentable lattice sites", "[print-sidb-layout]")
@@ -159,7 +160,7 @@ TEST_CASE("Print SiDBs with a charge distribution", "[print-sidb-layout]")
     constexpr const char* layout_print = " ●  ·  ◯  ·  ·  ·  · \n"
                                          " ·  ·  ·  ·  ●  ·  ⊟ \n";
 
-    CHECK(layout_print == print_stream.str());
+    CHECK_THAT(print_stream.str(), Catch::Matchers::Equals(layout_print));
 }
 
 TEST_CASE("SiDB charge states take priority over defects and dot tags", "[print-sidb-layout]")
@@ -180,7 +181,7 @@ TEST_CASE("SiDB charge states take priority over defects and dot tags", "[print-
     std::stringstream os{};
     print_sidb_layout(os, lyt, cd, false, false, true);
 
-    CHECK(os.str() == " ●  ⊟  ◯ \n");
+    CHECK_THAT(os.str(), Catch::Matchers::Equals(" ●  ⊟  ◯ \n"));
 }
 
 TEST_CASE("test_print_sidb_layout rejects mismatched distribution sites", "[print-sidb-layout]")

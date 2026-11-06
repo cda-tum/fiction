@@ -16,6 +16,7 @@
 
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
@@ -103,8 +104,8 @@ TEST_CASE("Extracted layout simulation", "[mockturtle]")
         const auto tables = mockturtle::simulate<kitty::dynamic_truth_table>(
             extract_layout_network(lyt), mockturtle::default_simulator<kitty::dynamic_truth_table>{lyt.num_pis()});
         REQUIRE(tables.size() == 2);
-        CHECK(kitty::to_hex(tables[0]) == "8");
-        CHECK(kitty::to_hex(tables[1]) == "e");
+        CHECK_THAT((kitty::to_hex(tables[0])), Catch::Matchers::Equals("8"));
+        CHECK_THAT((kitty::to_hex(tables[1])), Catch::Matchers::Equals("e"));
     }
     SECTION("Majority and XOR outputs")
     {
@@ -112,8 +113,8 @@ TEST_CASE("Extracted layout simulation", "[mockturtle]")
         const auto tables = mockturtle::simulate<kitty::dynamic_truth_table>(
             extract_layout_network(lyt), mockturtle::default_simulator<kitty::dynamic_truth_table>{lyt.num_pis()});
         REQUIRE(tables.size() == 2);
-        CHECK(kitty::to_hex(tables[0]) == "e8");
-        CHECK(kitty::to_hex(tables[1]) == "66");  // Two-input XOR in three variables.
+        CHECK_THAT((kitty::to_hex(tables[0])), Catch::Matchers::Equals("e8"));
+        CHECK_THAT((kitty::to_hex(tables[1])), Catch::Matchers::Equals("66"));  // Two-input XOR in three variables.
     }
     SECTION("Crossing outputs")
     {
@@ -121,8 +122,8 @@ TEST_CASE("Extracted layout simulation", "[mockturtle]")
         const auto tables = mockturtle::simulate<kitty::dynamic_truth_table>(
             extract_layout_network(lyt), mockturtle::default_simulator<kitty::dynamic_truth_table>{lyt.num_pis()});
         REQUIRE(tables.size() == 2);
-        CHECK(kitty::to_hex(tables[0]) == "8888");  // AND of the first two inputs.
-        CHECK(kitty::to_hex(tables[1]) == "f000");  // AND of the last two inputs.
+        CHECK_THAT((kitty::to_hex(tables[0])), Catch::Matchers::Equals("8888"));  // AND of the first two inputs.
+        CHECK_THAT((kitty::to_hex(tables[1])), Catch::Matchers::Equals("f000"));  // AND of the last two inputs.
     }
     SECTION("Synchronization elements")
     {
@@ -130,7 +131,7 @@ TEST_CASE("Extracted layout simulation", "[mockturtle]")
         const auto tables = mockturtle::simulate<kitty::dynamic_truth_table>(
             extract_layout_network(lyt), mockturtle::default_simulator<kitty::dynamic_truth_table>{lyt.num_pis()});
         REQUIRE(tables.size() == 1);
-        CHECK(kitty::to_hex(tables[0]) == "e");
+        CHECK_THAT((kitty::to_hex(tables[0])), Catch::Matchers::Equals("e"));
     }
 }
 
@@ -213,8 +214,8 @@ TEST_CASE("Half-adder blueprint names its sum and carry functions", "[mockturtle
         network, mockturtle::default_simulator<kitty::dynamic_truth_table>{2});
     REQUIRE(network.num_pos() == 2);
     REQUIRE(functions.size() == 2);
-    CHECK(network.get_output_name(0) == "carry");
-    CHECK(network.get_output_name(1) == "sum");
+    CHECK_THAT((network.get_output_name(0)), Catch::Matchers::Equals("carry"));
+    CHECK_THAT((network.get_output_name(1)), Catch::Matchers::Equals("sum"));
 
     for (uint32_t input{}; input < 4; ++input)
     {

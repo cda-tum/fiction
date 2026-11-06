@@ -17,6 +17,7 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "fiction/utils/version_info.hpp"
 
@@ -382,7 +383,7 @@ TEST_CASE("Generate SVG for an sidb::layout", "[write-sidb-layout-svg]")
 
         write_sidb_layout_svg(lyt, os, {.color_background = write_sidb_layout_svg_params::color_mode::LIGHT});
 
-        CHECK(normalize_svg(os.str()) == normalize_svg(EXPECTED_SVG_LIGHT_CELL_LEVEL));
+        CHECK_THAT(normalize_svg(os.str()), Catch::Matchers::Equals(normalize_svg(EXPECTED_SVG_LIGHT_CELL_LEVEL)));
     }
     SECTION("dark mode")
     {
@@ -390,7 +391,7 @@ TEST_CASE("Generate SVG for an sidb::layout", "[write-sidb-layout-svg]")
 
         write_sidb_layout_svg(lyt, os, {.color_background = write_sidb_layout_svg_params::color_mode::DARK});
 
-        CHECK(normalize_svg(os.str()) == normalize_svg(EXPECTED_SVG_DARK_CELL_LEVEL));
+        CHECK_THAT(normalize_svg(os.str()), Catch::Matchers::Equals(normalize_svg(EXPECTED_SVG_DARK_CELL_LEVEL)));
     }
     SECTION("dark mode and hidden lattice")
     {
@@ -400,7 +401,8 @@ TEST_CASE("Generate SVG for an sidb::layout", "[write-sidb-layout-svg]")
                               {.color_background = write_sidb_layout_svg_params::color_mode::DARK,
                                .lattice_mode     = write_sidb_layout_svg_params::sidb_lattice_mode::HIDE_LATTICE});
 
-        CHECK(normalize_svg(os.str()) == normalize_svg(EXPECTED_SVG_DARK_CELL_LEVEL_HIDE_LATTICE));
+        CHECK_THAT(normalize_svg(os.str()),
+                   Catch::Matchers::Equals(normalize_svg(EXPECTED_SVG_DARK_CELL_LEVEL_HIDE_LATTICE)));
     }
 }
 
@@ -419,7 +421,7 @@ TEST_CASE("Generate SVG for an sidb::layout on the H-Si(111)-1x1 surface", "[wri
 
         write_sidb_layout_svg(lyt, os, {.color_background = write_sidb_layout_svg_params::color_mode::LIGHT});
 
-        CHECK(normalize_svg(os.str()) == normalize_svg(EXPECTED_SVG_LIGHT_CELL_LEVEL_111));
+        CHECK_THAT(normalize_svg(os.str()), Catch::Matchers::Equals(normalize_svg(EXPECTED_SVG_LIGHT_CELL_LEVEL_111)));
     }
     SECTION("dark mode")
     {
@@ -427,7 +429,7 @@ TEST_CASE("Generate SVG for an sidb::layout on the H-Si(111)-1x1 surface", "[wri
 
         write_sidb_layout_svg(lyt, os, {.color_background = write_sidb_layout_svg_params::color_mode::DARK});
 
-        CHECK(normalize_svg(os.str()) == normalize_svg(EXPECTED_SVG_DARK_CELL_LEVEL_111));
+        CHECK_THAT(normalize_svg(os.str()), Catch::Matchers::Equals(normalize_svg(EXPECTED_SVG_DARK_CELL_LEVEL_111)));
     }
 }
 
@@ -470,7 +472,8 @@ TEST_CASE("Generate SVG for an sidb::layout with a charge distribution", "[write
 
         write_sidb_layout_svg(lyt, cd, os, {.color_background = write_sidb_layout_svg_params::color_mode::LIGHT});
 
-        CHECK(normalize_svg(os.str()) == normalize_svg(EXPECTED_SVG_LIGHT_CHARGE_DISTRIBUTION));
+        CHECK_THAT(normalize_svg(os.str()),
+                   Catch::Matchers::Equals(normalize_svg(EXPECTED_SVG_LIGHT_CHARGE_DISTRIBUTION)));
     }
     SECTION("dark mode")
     {
@@ -478,7 +481,8 @@ TEST_CASE("Generate SVG for an sidb::layout with a charge distribution", "[write
 
         write_sidb_layout_svg(lyt, cd, os, {.color_background = write_sidb_layout_svg_params::color_mode::DARK});
 
-        CHECK(normalize_svg(os.str()) == normalize_svg(EXPECTED_SVG_DARK_CHARGE_DISTRIBUTION));
+        CHECK_THAT(normalize_svg(os.str()),
+                   Catch::Matchers::Equals(normalize_svg(EXPECTED_SVG_DARK_CHARGE_DISTRIBUTION)));
     }
 }
 

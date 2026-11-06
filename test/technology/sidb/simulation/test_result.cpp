@@ -18,6 +18,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
@@ -162,8 +163,7 @@ TEST_CASE("Determine the groundstate of a two BDL pair wire with input 1 applied
         REQUIRE(distribution.sites() == lyt.sidbs());
         indices.push_back(distribution.charge_index(2));
     }
-    std::ranges::sort(indices);
-    CHECK(indices == std::vector<uint64_t>{10, 20});
+    CHECK_THAT(indices, Catch::Matchers::UnorderedRangeEquals(std::vector<uint64_t>{10, 20}));
 }
 
 TEST_CASE("Simulation-result distribution index boundaries", "[sidb-simulation-result]")

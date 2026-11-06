@@ -18,6 +18,7 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
@@ -151,98 +152,98 @@ TEST_CASE("Utility function: any_to_string", "[sqd-sim-result]")
         constexpr int8_t value  = -42;
         const auto       result = sidb::simulation::io::detail::any_to_string(value);
 
-        CHECK(result == "-42");
+        CHECK_THAT(result, Catch::Matchers::Equals("-42"));
     }
     SECTION("uint8_t")
     {
         constexpr uint8_t value  = 42;
         const auto        result = sidb::simulation::io::detail::any_to_string(value);
 
-        CHECK(result == "42");
+        CHECK_THAT(result, Catch::Matchers::Equals("42"));
     }
     SECTION("int16_t")
     {
         constexpr int16_t value  = -32768;
         const auto        result = sidb::simulation::io::detail::any_to_string(value);
 
-        CHECK(result == "-32768");
+        CHECK_THAT(result, Catch::Matchers::Equals("-32768"));
     }
     SECTION("uint16_t")
     {
         constexpr uint16_t value  = 65535;
         const auto         result = sidb::simulation::io::detail::any_to_string(value);
 
-        CHECK(result == "65535");
+        CHECK_THAT(result, Catch::Matchers::Equals("65535"));
     }
     SECTION("int32_t")
     {
         constexpr int32_t value  = -2'147'483'648;
         const auto        result = sidb::simulation::io::detail::any_to_string(value);
 
-        CHECK(result == "-2147483648");
+        CHECK_THAT(result, Catch::Matchers::Equals("-2147483648"));
     }
     SECTION("uint32_t")
     {
         constexpr uint32_t value  = 4'294'967'295ul;
         const auto         result = sidb::simulation::io::detail::any_to_string(value);
 
-        CHECK(result == "4294967295");
+        CHECK_THAT(result, Catch::Matchers::Equals("4294967295"));
     }
     SECTION("int64_t")
     {
         constexpr int64_t value  = -9'223'372'036'854'775'807;
         const auto        result = sidb::simulation::io::detail::any_to_string(value);
 
-        CHECK(result == "-9223372036854775807");
+        CHECK_THAT(result, Catch::Matchers::Equals("-9223372036854775807"));
     }
     SECTION("uint64_t")
     {
         constexpr uint64_t value  = 18'446'744'073'709'551'615ull;
         const auto         result = sidb::simulation::io::detail::any_to_string(value);
 
-        CHECK(result == "18446744073709551615");
+        CHECK_THAT(result, Catch::Matchers::Equals("18446744073709551615"));
     }
     SECTION("float")
     {
         constexpr float value  = -std::numbers::pi_v<float>;
         const auto      result = sidb::simulation::io::detail::any_to_string(value);
 
-        CHECK(result == "-3.141593");
+        CHECK_THAT(result, Catch::Matchers::Equals("-3.141593"));
     }
     SECTION("double")
     {
         constexpr double value  = std::numbers::pi;
         const auto       result = sidb::simulation::io::detail::any_to_string(value);
 
-        CHECK(result == "3.141593");  // will be rounded by std::to_string
+        CHECK_THAT(result, Catch::Matchers::Equals("3.141593"));  // will be rounded by std::to_string
     }
     SECTION("long double")
     {
         constexpr long double value  = std::numbers::e_v<long double>;
         const auto            result = sidb::simulation::io::detail::any_to_string(value);
 
-        CHECK(result == "2.718282");  // will be rounded by std::to_string
+        CHECK_THAT(result, Catch::Matchers::Equals("2.718282"));  // will be rounded by std::to_string
     }
     SECTION("std::string")
     {
         const std::string value  = "hello, world!";
         const auto        result = sidb::simulation::io::detail::any_to_string(value);
 
-        CHECK(result == "hello, world!");
+        CHECK_THAT(result, Catch::Matchers::Equals("hello, world!"));
     }
     SECTION("const char*")
     {
         const char* value  = "hello, world!";
         const auto  result = sidb::simulation::io::detail::any_to_string(value);
 
-        CHECK(result == "hello, world!");
+        CHECK_THAT(result, Catch::Matchers::Equals("hello, world!"));
     }
     SECTION("char")
     {
         constexpr char value  = 'X';
         const auto     result = sidb::simulation::io::detail::any_to_string(value);
 
-        CHECK(result == "X");
+        CHECK_THAT(result, Catch::Matchers::Equals("X"));
     }
     SECTION("unsupported type")
     {
@@ -256,14 +257,14 @@ TEST_CASE("Utility function: any_to_string", "[sqd-sim-result]")
         const std::any value  = std::string{"hello, world!"};
         const auto     result = sidb::simulation::io::detail::any_to_string(value);
 
-        CHECK(result == "hello, world!");
+        CHECK_THAT(result, Catch::Matchers::Equals("hello, world!"));
     }
     SECTION("const char* in std::any")
     {
         const std::any value  = "hello, world!";
         const auto     result = sidb::simulation::io::detail::any_to_string(value);
 
-        CHECK(result == "hello, world!");
+        CHECK_THAT(result, Catch::Matchers::Equals("hello, world!"));
     }
 }
 
@@ -305,7 +306,7 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
                         FICTION_VERSION, FICTION_REPO, timestamp, sim_result.sim_params.lambda_tf,
                         sim_result.sim_params.epsilon_r, sim_result.sim_params.mu_minus);
 
-        CHECK(simulation_stream.str() == sim_result_str);
+        CHECK_THAT(simulation_stream.str(), Catch::Matchers::Equals(sim_result_str));
     }
     SECTION("with additional parameter (string)")
     {
@@ -336,7 +337,7 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
                         FICTION_VERSION, FICTION_REPO, timestamp, sim_result.sim_params.lambda_tf,
                         sim_result.sim_params.epsilon_r, sim_result.sim_params.mu_minus);
 
-        CHECK(simulation_stream.str() == sim_result_str);
+        CHECK_THAT(simulation_stream.str(), Catch::Matchers::Equals(sim_result_str));
     }
 
     SECTION("with additional parameters (double)")
@@ -368,7 +369,7 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
                         FICTION_VERSION, FICTION_REPO, timestamp, sim_result.sim_params.lambda_tf,
                         sim_result.sim_params.epsilon_r, sim_result.sim_params.mu_minus);
 
-        CHECK(simulation_stream.str() == sim_result_str);
+        CHECK_THAT(simulation_stream.str(), Catch::Matchers::Equals(sim_result_str));
     }
 }
 
@@ -430,7 +431,7 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
                     FICTION_VERSION, FICTION_REPO, timestamp, sim_result.simulation_runtime.count(),
                     sim_result.sim_params.lambda_tf, sim_result.sim_params.epsilon_r, sim_result.sim_params.mu_minus);
 
-    CHECK(simulation_stream.str() == sim_result_str);
+    CHECK_THAT(simulation_stream.str(), Catch::Matchers::Equals(sim_result_str));
 }
 
 TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd-sim-result]")
@@ -480,7 +481,7 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
         FICTION_VERSION, FICTION_REPO, timestamp, sim_result.simulation_runtime.count(),
         sim_result.sim_params.lambda_tf, sim_result.sim_params.epsilon_r, sim_result.sim_params.mu_minus);
 
-    CHECK(simulation_stream.str() == sim_result_str);
+    CHECK_THAT(simulation_stream.str(), Catch::Matchers::Equals(sim_result_str));
 }
 
 TEST_CASE("SQD simulation orders mixed finite and non-finite energies", "[sqd-sim-result]")
@@ -525,7 +526,7 @@ TEST_CASE("SQD simulation orders mixed finite and non-finite energies", "[sqd-si
         CAPTURE(configuration);
         REQUIRE(distribution != nullptr);
         REQUIRE(distribution->GetText() != nullptr);
-        CHECK(std::string{distribution->GetText()} == configuration);
+        CHECK_THAT(std::string{distribution->GetText()}, Catch::Matchers::Equals(configuration));
         /** @brief Parsed numeric energy without depending on a NaN or infinity spelling. */
         double actual{};
         REQUIRE(distribution->QueryDoubleAttribute("energy", &actual) == tinyxml2::XML_SUCCESS);
@@ -582,7 +583,7 @@ TEST_CASE("SQD simulation metadata preserves XML text", "[sqd-sim-result]")
     const auto* engine = engine_info->FirstChildElement("engine");
     REQUIRE(engine != nullptr);
     REQUIRE(engine->GetText() != nullptr);
-    CHECK(std::string{engine->GetText()} == res.algorithm_name);
+    CHECK_THAT(std::string{engine->GetText()}, Catch::Matchers::Equals(res.algorithm_name));
     const auto* parameters = root->FirstChildElement("sim_params");
     REQUIRE(parameters != nullptr);
     for (const auto* name : {"string_parameter", "cstring_parameter", "char_parameter"})
@@ -591,7 +592,8 @@ TEST_CASE("SQD simulation metadata preserves XML text", "[sqd-sim-result]")
         const auto* parameter = parameters->FirstChildElement(name);
         REQUIRE(parameter != nullptr);
         REQUIRE(parameter->GetText() != nullptr);
-        CHECK(std::string{parameter->GetText()} == (std::string{name} == "char_parameter" ? "<" : text));
+        CHECK_THAT(std::string{parameter->GetText()},
+                   Catch::Matchers::Equals(std::string{name} == "char_parameter" ? "<" : text));
     }
 }
 
@@ -606,7 +608,7 @@ TEST_CASE("SQD simulation metadata rejects invalid XML names before output", "[s
         std::stringstream os{};
         os << "original";
         CHECK_THROWS_AS(write_sqd_sim_result(res, os), std::invalid_argument);
-        CHECK(os.str() == "original");
+        CHECK_THAT(os.str(), Catch::Matchers::Equals("original"));
     }
 }
 
@@ -629,7 +631,7 @@ TEST_CASE("SQD simulation metadata accepts XML Unicode names", "[sqd-sim-result]
         const auto* parameter = parameters->FirstChildElement(name.c_str());
         REQUIRE(parameter != nullptr);
         REQUIRE(parameter->GetText() != nullptr);
-        CHECK(std::string{parameter->GetText()} == "value");
+        CHECK_THAT(std::string{parameter->GetText()}, Catch::Matchers::Equals("value"));
     }
 }
 
@@ -656,7 +658,7 @@ TEST_CASE("SQD simulation metadata rejects invalid Unicode before output", "[sqd
         std::stringstream os{};
         os << "original";
         CHECK_THROWS_AS(write_sqd_sim_result(res, os), std::invalid_argument);
-        CHECK(os.str() == "original");
+        CHECK_THAT(os.str(), Catch::Matchers::Equals("original"));
     };
     SECTION("engine name")
     {
@@ -682,7 +684,7 @@ TEST_CASE("SQD simulation metadata rejects null strings before output", "[sqd-si
     std::stringstream os{};
     os << "original";
     CHECK_THROWS_AS(write_sqd_sim_result(res, os), std::invalid_argument);
-    CHECK(os.str() == "original");
+    CHECK_THAT(os.str(), Catch::Matchers::Equals("original"));
 }
 
 TEST_CASE("SQD simulation metadata rejects illegal XML controls before output", "[sqd-sim-result]")
@@ -697,7 +699,7 @@ TEST_CASE("SQD simulation metadata rejects illegal XML controls before output", 
         std::stringstream os{};
         os << "original";
         CHECK_THROWS_AS(write_sqd_sim_result(res, os), std::invalid_argument);
-        CHECK(os.str() == "original");
+        CHECK_THAT(os.str(), Catch::Matchers::Equals("original"));
     };
     SECTION("engine name")
     {

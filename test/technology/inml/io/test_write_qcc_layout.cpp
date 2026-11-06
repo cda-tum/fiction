@@ -17,6 +17,7 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include <fiction/technology/inml/io/write_qcc_layout.hpp>
 #include <fiction/technology/inml/layout.hpp>
@@ -37,8 +38,8 @@ TEST_CASE("QCC dimensions retain their maximum-index schema", "[qcc]")
     layout.assign_cell_type({2, 0}, inml::magnet_type::OUTPUT);
     std::ostringstream stream{};
     inml::io::write_qcc_layout(layout, stream);
-    CHECK(stream.str().find("maxX=\"2\" maxY=\"0\"") != std::string::npos);
-    CHECK(stream.str().find("x=\"2\" y=\"0\"") != std::string::npos);
+    CHECK_THAT(stream.str(), Catch::Matchers::ContainsSubstring("maxX=\"2\" maxY=\"0\""));
+    CHECK_THAT(stream.str(), Catch::Matchers::ContainsSubstring("x=\"2\" y=\"0\""));
 }
 
 TEST_CASE("QCC rejects misplaced terminals before writing", "[qcc]")
@@ -59,5 +60,5 @@ TEST_CASE("QCC rejects misplaced terminals before writing", "[qcc]")
 
     lyt.assign_cell_type({x, 0}, magnet_type::NORMAL);
     CHECK_NOTHROW(write_qcc_layout(lyt, stream));
-    CHECK(stream.str().find("</qcacomponent>") != std::string::npos);
+    CHECK_THAT(stream.str(), Catch::Matchers::ContainsSubstring("</qcacomponent>"));
 }

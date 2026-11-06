@@ -15,6 +15,7 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/layout_base.hpp>
@@ -45,7 +46,7 @@ TEST_CASE("QCA layout construction", "[qca-layout]")
 
     CHECK(lyt.width() == 5);
     CHECK(lyt.layers() == 2);
-    CHECK(lyt.get_layout_name() == "crossing");
+    CHECK_THAT(lyt.get_layout_name(), Catch::Matchers::Equals("crossing"));
     CHECK(lyt.is_clocking_scheme(clocking::USE_NAME));
     CHECK(lyt.get_tile_size_x() == 5);
     CHECK(lyt.get_tile_size_y() == 5);
