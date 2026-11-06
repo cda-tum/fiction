@@ -26,6 +26,7 @@
 #include <fiction/technology/sidb/simulation/detail/simulation_state.hpp>
 #include <fiction/technology/sidb/simulation/potential_landscape.hpp>
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
@@ -164,6 +165,15 @@ TEST_CASE("Simulation state over a landscape", "[simulation-state]")
         state.adjacent_search(0.7, negatives);
         CHECK(negatives.size() == 2);
         CHECK(state.num_negative_sidbs() == 2);
+        std::vector<std::size_t> expected_negatives{};
+        for (std::size_t i = 0; i < state.num_sidbs(); ++i)
+        {
+            if (state.get_charge_state_by_index(i) == charge_state::NEGATIVE)
+            {
+                expected_negatives.push_back(i);
+            }
+        }
+        CHECK(negatives == expected_negatives);
 
         // the incremental energy equals the internal-only energy of the new charges
         double collect = 0.0;
@@ -189,6 +199,10 @@ TEST_CASE("Simulation state over a landscape", "[simulation-state]")
         CHECK(state.index_base() == 2);
         CHECK(!state.three_state_sidbs().empty());
         CHECK(state.three_state_sidbs().size() + state.two_state_sidbs().size() == 3);
+        auto classified = state.three_state_sidbs();
+        classified.insert(classified.end(), state.two_state_sidbs().cbegin(), state.two_state_sidbs().cend());
+        std::ranges::sort(classified);
+        CHECK(classified == std::vector<std::size_t>{0, 1, 2});
         CHECK(state.max_charge_index() == (uint64_t{1} << state.two_state_sidbs().size()) - 1);
     }
     SECTION("large charge indices saturate")
