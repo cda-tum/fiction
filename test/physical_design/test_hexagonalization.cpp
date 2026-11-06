@@ -333,14 +333,13 @@ TEST_CASE("Hexagonalization preserves declared input holes and terminal order", 
     hex.foreach_po([&](const auto id) { outputs.push_back(id); });
     CHECK(inputs == std::vector{hex.pi_at(0), hex.pi_at(1)});
     CHECK(outputs == std::vector{hex.po_at(0)});
-    hex.foreach_gate(
-        [&](const auto id)
-        {
-            CHECK(hex.is_lt(id));
-            CHECK_FALSE(hex.source({id, 0}));
-            REQUIRE(hex.source({id, 1}));
-            CHECK(hex.get_name(*hex.source({id, 1})) == "b");
-        });
+    std::vector<layout_object_id> gates{};
+    hex.foreach_gate([&](const auto id) { gates.push_back(id); });
+    REQUIRE(gates.size() == 1);
+    CHECK(hex.is_lt(gates.front()));
+    CHECK_FALSE(hex.source({gates.front(), 0}));
+    REQUIRE(hex.source({gates.front(), 1}));
+    CHECK(hex.get_name(*hex.source({gates.front(), 1})) == "b");
 }
 
 TEST_CASE("Hexagonalization reports progress", "[hexagonalization]")
