@@ -150,6 +150,9 @@ TEMPLATE_TEST_CASE("Read Verilog", "[network-reader]", named_aig_network, named_
     }
     SECTION("Name conservation")
     {
+        REQUIRE(mux21.num_pis() == 3);
+        REQUIRE(mux21.num_pos() == 1);
+
         // network name
         CHECK(mux21.get_network_name() == "mux21");
 
