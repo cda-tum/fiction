@@ -44,6 +44,7 @@
 #include <algorithm>
 #include <any>
 #include <chrono>
+#include <cmath>
 #include <cstdint>
 #include <set>
 #include <stdexcept>
@@ -102,14 +103,15 @@ TEST_CASE("QuickExact returns completed results after a slow final callback", "[
     layout lyt{};
     for (int32_t i = 0; i < 8; ++i)
     {
-        lyt.assign_sidb({i, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({i * 4, 0, 0}, dot_tag::NORMAL);
     }
     quickexact_params params{.sim_params            = simulation_parameters{2, -0.32},
                              .base_number_detection = quickexact_params::automatic_base_number_detection::OFF};
     const auto        expected = quickexact(lyt, params);
-    params.deadline            = std::chrono::steady_clock::now() + std::chrono::seconds{1};
-    bool completed             = false;
-    params.on_progress         = [&](auto, auto done, auto total)
+    REQUIRE_FALSE(expected.charge_distributions.empty());
+    params.deadline    = std::chrono::steady_clock::now() + std::chrono::seconds{1};
+    bool completed     = false;
+    params.on_progress = [&](auto, auto done, auto total)
     {
         if (done == total)
         {
@@ -119,7 +121,14 @@ TEST_CASE("QuickExact returns completed results after a slow final callback", "[
     };
     const auto actual = quickexact(lyt, params);
     CHECK(completed);
-    CHECK(actual.charge_distributions.size() == expected.charge_distributions.size());
+    CHECK_THAT(actual.charge_distributions,
+               Catch::Matchers::UnorderedRangeEquals(expected.charge_distributions,
+                                                     [](const auto& lhs, const auto& rhs)
+                                                     {
+                                                         return lhs.sites() == rhs.sites() &&
+                                                                lhs.same_charge_states(rhs) &&
+                                                                std::abs(lhs.energy() - rhs.energy()) <= ERROR_MARGIN;
+                                                     }));
 }
 
 TEST_CASE("Empty layout QuickExact simulation", "[quickexact]")
