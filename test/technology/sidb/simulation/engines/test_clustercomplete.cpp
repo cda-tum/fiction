@@ -945,9 +945,12 @@ TEST_CASE("seven DBs next to each other, small mu-", "[clustercomplete]")
     const auto simulation_results = clustercomplete(lyt, params);
 
     REQUIRE(simulation_results.charge_distributions.size() == 10);
-    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-    CHECK(charge_lyt_first.energy() < 0.08);
-    CHECK(charge_lyt_first.energy() > -2.74);
+    for (const auto& distribution : simulation_results.charge_distributions)
+    {
+        CAPTURE(distribution.charge_index(3));
+        CHECK(distribution.energy() < 0.08);
+        CHECK(distribution.energy() > -2.74);
+    }
 }
 
 TEST_CASE("7 DBs next to each other (positively charged DBs occur)", "[clustercomplete]")
