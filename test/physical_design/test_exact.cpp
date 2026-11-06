@@ -19,8 +19,6 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include "fiction/layouts/layout_base.hpp"
-
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
@@ -63,7 +61,6 @@
 #include <optional>
 #include <sstream>
 #include <stdexcept>
-#include <utility>
 #include <vector>
 
 using namespace fiction;
