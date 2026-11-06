@@ -260,7 +260,14 @@ TEST_CASE("Simulated Annealing for optimizing the 1D Schwefel function", "[sim-a
 
     const auto init_cost = schwefel_function_1d(init_state);
     const auto initial   = [] { return 0.0; };
-    const auto next = [](const double state) { return state < 200.0 ? 200.0 : (state < 400.0 ? 400.0 : 420.9687); };
+    const auto next      = [](const double state)
+    {
+        if (state < 200.0)
+        {
+            return 200.0;
+        }
+        return state < 400.0 ? 400.0 : 420.9687;
+    };
 
     SECTION("Linear temperature schedule")
     {
