@@ -371,12 +371,14 @@ TEST_CASE("QuickSim simulation of an SiDB BDL pair with varying thread counts", 
 
         REQUIRE_FALSE(calculate_energy_distribution(sim_result.charge_distributions).empty());
 
-        const auto& charge_lyt_first = sim_result.charge_distributions.front();
-
-        CHECK((((charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE) &&
-                (charge_lyt_first.get_charge_state({8, 2, 0}) == charge_state::NEUTRAL)) ||
-               ((charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEUTRAL) &&
-                (charge_lyt_first.get_charge_state({8, 2, 0}) == charge_state::NEGATIVE))));
+        for (const auto& distribution : sim_result.charge_distributions)
+        {
+            CAPTURE(distribution.charge_index(3));
+            CHECK((((distribution.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE) &&
+                    (distribution.get_charge_state({8, 2, 0}) == charge_state::NEUTRAL)) ||
+                   ((distribution.get_charge_state({6, 2, 0}) == charge_state::NEUTRAL) &&
+                    (distribution.get_charge_state({8, 2, 0}) == charge_state::NEGATIVE))));
+        }
     };
 
     const auto [thread_case, number_threads] =

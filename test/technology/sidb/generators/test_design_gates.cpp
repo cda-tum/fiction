@@ -580,19 +580,23 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
         const auto found_gate_layouts =
             design_gates(defect_layout, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, params);
         REQUIRE(!found_gate_layouts.empty());
-        CHECK(found_gate_layouts.front().num_defects() == 1);
-        CHECK(found_gate_layouts.front().num_dots() == lyt.num_dots() + 2);
-
-        CHECK(found_gate_layouts.front().is_empty_site({14, 10, 0}));
+        for (const auto& gate : found_gate_layouts)
+        {
+            CHECK(gate.defects() == defect_layout.defects());
+            CHECK(gate.num_dots() == lyt.num_dots() + 2);
+            CHECK(gate.is_empty_site({14, 10, 0}));
+        }
 
         params.design_mode = design_gates_params::design_gates_mode::QUICKCELL;
         const auto found_gate_layouts_quickcell =
             design_gates(defect_layout, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, params);
         REQUIRE(!found_gate_layouts_quickcell.empty());
-        CHECK(found_gate_layouts_quickcell.front().num_defects() == 1);
-        CHECK(found_gate_layouts_quickcell.front().num_dots() == lyt.num_dots() + 2);
-
-        CHECK(found_gate_layouts_quickcell.front().is_empty_site({14, 10, 0}));
+        for (const auto& gate : found_gate_layouts_quickcell)
+        {
+            CHECK(gate.defects() == defect_layout.defects());
+            CHECK(gate.num_dots() == lyt.num_dots() + 2);
+            CHECK(gate.is_empty_site({14, 10, 0}));
+        }
     }
 
     SECTION("Random design with defect blocking canvas SiDB placement")
