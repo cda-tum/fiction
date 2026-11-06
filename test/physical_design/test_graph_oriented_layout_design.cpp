@@ -19,6 +19,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "fiction/layouts/layout_base.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
@@ -499,15 +500,15 @@ TEST_CASE("Name conservation after graph-oriented layout design", "[graph-orient
 
     // network name
     const auto& checked_layout = required_value(layout);
-    CHECK(checked_layout.get_layout_name() == "maj");
+    CHECK_THAT(checked_layout.get_layout_name(), Catch::Matchers::Equals("maj"));
 
     // PI names
-    CHECK(checked_layout.get_name(checked_layout.pi_at(0)) == "a");  // first PI
-    CHECK(checked_layout.get_name(checked_layout.pi_at(1)) == "b");  // second PI
-    CHECK(checked_layout.get_name(checked_layout.pi_at(2)) == "c");  // third PI
+    CHECK_THAT(checked_layout.get_name(checked_layout.pi_at(0)), Catch::Matchers::Equals("a"));  // first PI
+    CHECK_THAT(checked_layout.get_name(checked_layout.pi_at(1)), Catch::Matchers::Equals("b"));  // second PI
+    CHECK_THAT(checked_layout.get_name(checked_layout.pi_at(2)), Catch::Matchers::Equals("c"));  // third PI
 
     // PO names
-    CHECK(checked_layout.get_output_name(0) == "f");
+    CHECK_THAT(checked_layout.get_output_name(0), Catch::Matchers::Equals("f"));
 }
 
 TEST_CASE("High fanin exception", "[graph-oriented-layout-design]")
@@ -641,11 +642,11 @@ TEST_CASE("GOLD preserves declared PI order and noncommutative input ports", "[g
     REQUIRE(result.has_value());
     const auto& layout = required_value(result);
     CHECK(layout.num_pis() == 3);
-    CHECK(layout.get_name(layout.pi_at(0)) == "unused");
-    CHECK(layout.get_name(layout.pi_at(1)) == "a");
-    CHECK(layout.get_name(layout.pi_at(2)) == "b");
-    CHECK(layout.get_output_name(0) == "less");
-    CHECK(layout.get_layout_name() == "ordered");
+    CHECK_THAT(layout.get_name(layout.pi_at(0)), Catch::Matchers::Equals("unused"));
+    CHECK_THAT(layout.get_name(layout.pi_at(1)), Catch::Matchers::Equals("a"));
+    CHECK_THAT(layout.get_name(layout.pi_at(2)), Catch::Matchers::Equals("b"));
+    CHECK_THAT(layout.get_output_name(0), Catch::Matchers::Equals("less"));
+    CHECK_THAT(layout.get_layout_name(), Catch::Matchers::Equals("ordered"));
     const mockturtle::default_simulator<kitty::dynamic_truth_table> simulator{3};
     const auto                                                      extracted = extract_layout_network(layout);
     CHECK(mockturtle::simulate<kitty::dynamic_truth_table>(extracted, simulator) ==
@@ -689,9 +690,9 @@ TEST_CASE("GOLD preserves mixed constant and logic output order", "[graph-orient
                                                      .enable_multithreading = false};
     const auto                                result = graph_oriented_layout_design(ntk, params);
     REQUIRE(result.has_value());
-    CHECK(required_value(result).get_output_name(0) == "input_copy");
-    CHECK(required_value(result).get_output_name(1) == "one");
-    CHECK(required_value(result).get_output_name(2) == "zero");
+    CHECK_THAT(required_value(result).get_output_name(0), Catch::Matchers::Equals("input_copy"));
+    CHECK_THAT(required_value(result).get_output_name(1), Catch::Matchers::Equals("one"));
+    CHECK_THAT(required_value(result).get_output_name(2), Catch::Matchers::Equals("zero"));
     const mockturtle::default_simulator<kitty::dynamic_truth_table> simulator{1};
     CHECK(mockturtle::simulate<kitty::dynamic_truth_table>(extract_layout_network(required_value(result)), simulator) ==
           mockturtle::simulate<kitty::dynamic_truth_table>(ntk, simulator));
@@ -706,23 +707,23 @@ TEMPLATE_TEST_CASE("Named specification conversion for graph_oriented_layout_des
     const auto b = source.create_pi("right");
     source.create_po(source.create_and(a, b), "result");
     const auto ntk = fiction::synthesis::convert_network<named_technology_network>(source);
-    CHECK(ntk.get_network_name() == "named_spec");
-    CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(0))) == "left");
-    CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(1))) == "right");
-    CHECK(ntk.get_output_name(0) == "result");
+    CHECK_THAT(ntk.get_network_name(), Catch::Matchers::Equals("named_spec"));
+    CHECK_THAT(ntk.get_name(ntk.make_signal(ntk.pi_at(0))), Catch::Matchers::Equals("left"));
+    CHECK_THAT(ntk.get_name(ntk.make_signal(ntk.pi_at(1))), Catch::Matchers::Equals("right"));
+    CHECK_THAT(ntk.get_output_name(0), Catch::Matchers::Equals("result"));
     const graph_oriented_layout_design_params ps{.return_first = true};
     const auto                                result = graph_oriented_layout_design(ntk, ps);
     REQUIRE(result.has_value());
     const auto& lyt = required_value(result);
-    CHECK(lyt.get_layout_name() == "named_spec");
-    CHECK(lyt.get_name(lyt.pi_at(0)) == "left");
-    CHECK(lyt.get_name(lyt.pi_at(1)) == "right");
-    CHECK(lyt.get_output_name(0) == "result");
+    CHECK_THAT(lyt.get_layout_name(), Catch::Matchers::Equals("named_spec"));
+    CHECK_THAT(lyt.get_name(lyt.pi_at(0)), Catch::Matchers::Equals("left"));
+    CHECK_THAT(lyt.get_name(lyt.pi_at(1)), Catch::Matchers::Equals("right"));
+    CHECK_THAT(lyt.get_output_name(0), Catch::Matchers::Equals("result"));
     const auto extracted = extract_layout_network(lyt);
-    CHECK(extracted.get_network_name() == "named_spec");
-    CHECK(extracted.get_name(extracted.make_signal(extracted.pi_at(0))) == "left");
-    CHECK(extracted.get_name(extracted.make_signal(extracted.pi_at(1))) == "right");
-    CHECK(extracted.get_output_name(0) == "result");
+    CHECK_THAT(extracted.get_network_name(), Catch::Matchers::Equals("named_spec"));
+    CHECK_THAT(extracted.get_name(extracted.make_signal(extracted.pi_at(0))), Catch::Matchers::Equals("left"));
+    CHECK_THAT(extracted.get_name(extracted.make_signal(extracted.pi_at(1))), Catch::Matchers::Equals("right"));
+    CHECK_THAT(extracted.get_output_name(0), Catch::Matchers::Equals("result"));
     check_eq(source, extracted);
 }
 

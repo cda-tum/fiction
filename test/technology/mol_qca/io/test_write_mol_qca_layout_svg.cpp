@@ -17,6 +17,7 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "fiction/utils/version_info.hpp"
 #include "utils/scoped_temp_directory.hpp"
@@ -314,7 +315,7 @@ TEST_CASE("Generate MolQCA layout in SVG", "[write-mol-qca-layout-svg]")
 
         if (!simple)
         {
-            CHECK(svg.find("C0") != std::string::npos);
+            CHECK_THAT(svg, Catch::Matchers::ContainsSubstring("C0"));
         }
 
         CHECK(normalize_svg(svg) ==
@@ -368,6 +369,6 @@ TEST_CASE("MolQCA SVG reports unsupported cell types and preserves files", "[wri
         std::ifstream original{filename};
         REQUIRE(original.is_open());
         const std::string contents{std::istreambuf_iterator<char>{original}, std::istreambuf_iterator<char>{}};
-        CHECK(contents == "sentinel");
+        CHECK_THAT(contents, Catch::Matchers::Equals("sentinel"));
     }
 }

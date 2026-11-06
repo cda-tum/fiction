@@ -17,6 +17,7 @@
 
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
@@ -153,7 +154,7 @@ TEST_CASE("Fanout-substituted inputs are accepted", "[planarization]")
 
     std::ostringstream os{};
     st.report(os);
-    CHECK(os.str().find("num. nodes") != std::string::npos);
+    CHECK_THAT(os.str(), Catch::Matchers::ContainsSubstring("num. nodes"));
 }
 
 TEST_CASE("Progress is reported for every stage", "[planarization]")
@@ -224,7 +225,7 @@ TEST_CASE("Statistics report the runtime and progress reaches every stage", "[pl
 
     std::ostringstream os{};
     st.report(os);
-    CHECK(os.str().find("total time") != std::string::npos);
+    CHECK_THAT(os.str(), Catch::Matchers::ContainsSubstring("total time"));
 }
 
 TEST_CASE("Kept crossings run through the crossing gates for both crossing gate types", "[planarization]")

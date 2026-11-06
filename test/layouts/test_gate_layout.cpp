@@ -24,6 +24,7 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/allocation_failure.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
@@ -39,7 +40,6 @@
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
 
-#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -438,7 +438,7 @@ TEMPLATE_TEST_CASE("Moved layouts leave reusable empty sources", "[gate-layout]"
     // NOLINTNEXTLINE(*-use-after-move,*.Move,*-invalid-access-moved)
     REQUIRE(destination.is_empty());
     CHECK(destination.create_pi("new", {2, 0}).generation != 0);
-    CHECK(source.get_input_name(0) == "kept");
+    CHECK_THAT((source.get_input_name(0)), Catch::Matchers::Equals("kept"));
 }
 
 TEST_CASE("Clock zone assignment", "[gate-layout]")
@@ -1003,8 +1003,7 @@ TEMPLATE_TEST_CASE("Object iteration preserves sparse membership through reuse a
                 CHECK(index == count++);
                 visited.push_back(id);
             });
-        std::ranges::sort(visited);
-        CHECK_THAT(visited, RangeEquals(expected));
+        CHECK_THAT(visited, UnorderedRangeEquals(expected));
         CHECK(count == layout.size());
         count = 0;
         layout.foreach_object([&](const auto) { return ++count < 2; });
@@ -1114,11 +1113,11 @@ TEST_CASE("Geometry clone failures preserve layout move operands", "[gate-layout
     // A failed geometry clone preserves the source before ownership transfer.
     REQUIRE(source.contains(input));  // NOLINT(*-use-after-move,*-invalid-access-moved)
     CHECK(source.get_tile(input) == layout_base::coordinate{0, 0});
-    CHECK(source.get_name(input) == "source");
+    CHECK_THAT((source.get_name(input)), Catch::Matchers::Equals("source"));
     CHECK(source.num_pis() == 1);
     REQUIRE(destination.contains(retained));
     CHECK(destination.get_tile(retained) == layout_base::coordinate{1, 0});
-    CHECK(destination.get_name(retained) == "destination");
+    CHECK_THAT((destination.get_name(retained)), Catch::Matchers::Equals("destination"));
     CHECK(destination.num_pis() == 1);
 }
 
@@ -1163,12 +1162,12 @@ TEST_CASE("Geometry assignment failures preserve owned layout state", "[gate-lay
     REQUIRE_THROWS_AS(destination = std::move(source), std::runtime_error);
     // A failed geometry assignment restores the source's owned state.
     REQUIRE(source.contains(input));  // NOLINT(*-use-after-move,*-invalid-access-moved)
-    CHECK(source.get_name(input) == "source");
+    CHECK_THAT((source.get_name(input)), Catch::Matchers::Equals("source"));
     CHECK(source.get_tile(input) == layout_base::coordinate{0, 0});
     CHECK(source.get_synchronization_element({0, 0}) == 2);
     CHECK(source.num_pis() == 1);
     REQUIRE(destination.contains(retained));
-    CHECK(destination.get_name(retained) == "destination");
+    CHECK_THAT((destination.get_name(retained)), Catch::Matchers::Equals("destination"));
     CHECK(destination.get_tile(retained) == layout_base::coordinate{1, 0});
     CHECK(destination.get_synchronization_element({1, 0}) == 1);
     CHECK(destination.num_pis() == 1);
@@ -1297,7 +1296,7 @@ TEST_CASE("Moved-from layouts remain reusable after allocation failure", "[gate-
         CHECK(source.object_function(gate).num_vars() == 2);
         CHECK(kitty::get_bit(source.object_function(gate), 3));
         CHECK_FALSE(kitty::get_bit(source.object_function(gate), 0));
-        CHECK(destination.get_name(original) == "original");
+        CHECK_THAT((destination.get_name(original)), Catch::Matchers::Equals("original"));
         if (created)
         {
             break;
@@ -1344,8 +1343,7 @@ TEST_CASE("Failed creation preserves object iteration across storage growth", "[
         }
         std::vector<layout_object_id> visited{};
         lyt.foreach_object([&](const auto id) { visited.push_back(id); });
-        std::ranges::sort(visited);
-        CHECK_THAT(visited, RangeEquals(expected));
+        CHECK_THAT(visited, UnorderedRangeEquals(expected));
         CHECK(lyt.size() == expected.size());
         if (created)
         {
@@ -1357,8 +1355,7 @@ TEST_CASE("Failed creation preserves object iteration across storage growth", "[
         expected.insert(recovered);
         visited.clear();
         lyt.foreach_object([&](const auto id) { visited.push_back(id); });
-        std::ranges::sort(visited);
-        CHECK_THAT(visited, RangeEquals(expected));
+        CHECK_THAT(visited, UnorderedRangeEquals(expected));
     }
 }
 
@@ -1395,7 +1392,7 @@ TEST_CASE("Failed name assignment preserves name presence", "[gate-layout]")
         allocation_budget.reset();
         CHECK(layout.has_name(input) == named);
         CHECK(layout.has_input_name(0) == named);
-        CHECK(layout.get_name(input) == (named ? name : std::string{}));
+        CHECK_THAT((layout.get_name(input)), Catch::Matchers::Equals((named ? name : std::string{})));
         if (named)
         {
             break;

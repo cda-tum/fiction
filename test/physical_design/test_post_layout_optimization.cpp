@@ -25,6 +25,7 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
@@ -446,9 +447,9 @@ TEST_CASE("Post-layout optimization preserves rectangular layouts", "[post-layou
                                                   {layout.get_tile(b), layout.get_tile(gate), 1},
                                                   {layout.get_tile(gate), layout.get_tile(output), 0}};
     CHECK_THAT(extract_routing_objectives(layout), Catch::Matchers::UnorderedRangeEquals(expected));
-    CHECK(layout.get_input_name(0) == "a");
-    CHECK(layout.get_input_name(1) == "b");
-    CHECK(layout.get_output_name(0) == "f");
+    CHECK_THAT(layout.get_input_name(0), Catch::Matchers::Equals("a"));
+    CHECK_THAT(layout.get_input_name(1), Catch::Matchers::Equals("b"));
+    CHECK_THAT(layout.get_output_name(0), Catch::Matchers::Equals("f"));
     CHECK(stats.x_size_before == static_cast<uint64_t>(width));
     CHECK(stats.y_size_before == static_cast<uint64_t>(height));
     CHECK(stats.x_size_after == layout.width());

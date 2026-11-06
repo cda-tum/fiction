@@ -74,7 +74,7 @@ TEST_CASE("Empty layout ClusterComplete simulation", "[clustercomplete]")
     const auto simulation_results = clustercomplete(lyt, params);
 
     CHECK(simulation_results.charge_distributions.empty());
-    CHECK(simulation_results.algorithm_name == "ClusterComplete");
+    CHECK_THAT(simulation_results.algorithm_name, Catch::Matchers::Equals("ClusterComplete"));
     CHECK(std::any_cast<uint64_t>(
               simulation_results.additional_simulation_parameters.at("validity_witness_partitioning_limit")) == 3);
     CHECK(std::any_cast<uint64_t>(
@@ -1070,8 +1070,7 @@ TEST_CASE("ClusterComplete simulation of positively charged SiDBs", "[clustercom
         CHECK(distribution.num_positive_sidbs() == 2);
         indices.push_back(distribution.charge_index(3));
     }
-    std::ranges::sort(indices);
-    CHECK(indices == std::vector<uint64_t>{2195, 2355, 2675, 2835});
+    CHECK_THAT(indices, Catch::Matchers::UnorderedRangeEquals(std::vector<uint64_t>{2195, 2355, 2675, 2835}));
 }
 
 TEST_CASE("ClusterComplete simulation of a Y-shape SiDB arrangement", "[clustercomplete]")
@@ -1844,6 +1843,7 @@ TEST_CASE("ClusterComplete reports progress", "[clustercomplete]")
 #else  // FICTION_ALGLIB_ENABLED
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 TEST_CASE("ClusterComplete", "[clustercomplete]")
 {

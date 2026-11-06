@@ -18,6 +18,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers_contains.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
@@ -31,7 +32,6 @@
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/layouts/tile_clocking.hpp>
 
-#include <algorithm>
 #include <concepts>
 #include <cstdint>
 #include <limits>
@@ -77,7 +77,7 @@ void check_border_contract(const Lyt& lyt)
                 CHECK(lyt.contains_coordinate(n));
 
                 const auto back = lyt.adjacent_coordinates(n);
-                CHECK(std::find(back.cbegin(), back.cend(), c) != back.cend());
+                CHECK_THAT(back, Catch::Matchers::Contains(c));
             }
         });
 }

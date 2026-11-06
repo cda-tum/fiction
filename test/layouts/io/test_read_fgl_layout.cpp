@@ -18,6 +18,7 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -94,7 +95,7 @@ TEST_CASE("Read empty FGL layout", "[read-fgl-layout]")
         CHECK(lyt.width() == 1);
         CHECK(lyt.height() == 1);
         CHECK(lyt.area() == 1);
-        CHECK(lyt.get_layout_name() == "Test");
+        CHECK_THAT((lyt.get_layout_name()), Catch::Matchers::Equals("Test"));
         CHECK(lyt.is_clocking_scheme(clocking::TWODDWAVE_NAME));
     };
 
@@ -186,7 +187,7 @@ TEST_CASE("Read simple FGL layout", "[read-fgl-layout]")
         CHECK(lyt.width() == 3);
         CHECK(lyt.height() == 2);
         CHECK(lyt.area() == 6);
-        CHECK(lyt.get_layout_name() == "Test");
+        CHECK_THAT((lyt.get_layout_name()), Catch::Matchers::Equals("Test"));
         CHECK(lyt.is_clocking_scheme(clocking::TWODDWAVE_NAME));
         CHECK(lyt.is_pi_tile({0, 1}));
         /** @brief Object whose label is checked at the expected position. */
@@ -293,7 +294,7 @@ TEST_CASE("Read FGL layout with hexadecimal gate type", "[read-fgl-layout]")
         CHECK(lyt.width() == 3);
         CHECK(lyt.height() == 2);
         CHECK(lyt.area() == 6);
-        CHECK(lyt.get_layout_name() == "Test");
+        CHECK_THAT((lyt.get_layout_name()), Catch::Matchers::Equals("Test"));
         CHECK(lyt.is_clocking_scheme(clocking::TWODDWAVE_NAME));
         CHECK(lyt.is_pi_tile({0, 1}));
         /** @brief Object whose label is checked at the expected position. */
@@ -342,7 +343,7 @@ TEST_CASE("Read FGL layout without topology", "[read-fgl-layout]")
         const auto         lyt = read_fgl_layout<cartesian_layout>(layout_stream);
         CHECK(lyt.width() == 1);
         CHECK(lyt.height() == 1);
-        CHECK(lyt.get_layout_name() == "Test");
+        CHECK_THAT((lyt.get_layout_name()), Catch::Matchers::Equals("Test"));
         CHECK(lyt.is_clocking_scheme(clocking::TWODDWAVE_NAME));
     }
 
@@ -399,7 +400,7 @@ TEST_CASE("FGL preserves synchronization elements and labels", "[read-fgl-layout
     std::stringstream stream{};
     write_fgl_layout(original, stream);
     const auto restored = read_fgl_layout<cartesian_layout>(stream);
-    CHECK(restored.get_layout_name() == original.get_layout_name());
+    CHECK_THAT((restored.get_layout_name()), Catch::Matchers::Equals(original.get_layout_name()));
     CHECK(restored.num_pis() == 1);
     CHECK(restored.num_pos() == 1);
     /** @brief Object whose label is checked at the expected position. */
@@ -1155,7 +1156,7 @@ TEST_CASE("FGL rejects invalid numeric metadata", "[read-fgl-layout]")
         const auto valid = read_numeric_document("0", "0", "0", "0");
         CHECK(valid.get_extent() == layout_base::extent{1, 1, 1});
         REQUIRE(valid.num_pis() == 1);
-        CHECK(valid.get_input_name(0) == "input");
+        CHECK_THAT((valid.get_input_name(0)), Catch::Matchers::Equals("input"));
     }
     SECTION("Invalid numeric metadata")
     {
@@ -1190,9 +1191,9 @@ TEST_CASE("FGL failed connection read leaves target unchanged", "[read-fgl-layou
       <loc><x>1</x><y>0</y><z>0</z></loc><incoming><signal><source>999</source><index>0</index>
       <input>0</input></signal></incoming></gate></gates></fgl>)"};
     CHECK_THROWS_AS(read_fgl_layout(layout, stream), fgl_parsing_error);
-    CHECK(layout.get_layout_name() == "original");
+    CHECK_THAT((layout.get_layout_name()), Catch::Matchers::Equals("original"));
     CHECK(layout.num_pis() == 1);
-    CHECK(layout.get_input_name(0) == "kept");
+    CHECK_THAT((layout.get_input_name(0)), Catch::Matchers::Equals("kept"));
 }
 
 TEST_CASE("Version-2 FGL validates the selected layout name", "[read-fgl-layout]")
@@ -1206,13 +1207,13 @@ TEST_CASE("Version-2 FGL validates the selected layout name", "[read-fgl-layout]
         const std::string name{"M\xc3\xbcnchen"};
         /** @brief Returning-reader input. */
         std::stringstream stream{xml};
-        CHECK(read_fgl_layout<cartesian_layout>(stream, name).get_layout_name() == name);
+        CHECK_THAT((read_fgl_layout<cartesian_layout>(stream, name).get_layout_name()), Catch::Matchers::Equals(name));
         /** @brief Existing layout whose name supplies the fallback. */
         cartesian_gate_layout target{{2, 1, 1}, clocking::twoddwave(), name};
         /** @brief In-place-reader input. */
         std::stringstream inplace{xml};
         read_fgl_layout(target, inplace);
-        CHECK(target.get_layout_name() == name);
+        CHECK_THAT((target.get_layout_name()), Catch::Matchers::Equals(name));
         CHECK(target.width() == 1);
     }
     SECTION("Missing name validates the fallback before replacing the target")
@@ -1229,10 +1230,10 @@ TEST_CASE("Version-2 FGL validates the selected layout name", "[read-fgl-layout]
         /** @brief In-place-reader input. */
         std::stringstream inplace{xml};
         CHECK_THROWS_AS(read_fgl_layout(target, inplace), fgl_parsing_error);
-        CHECK(target.get_layout_name() == name);
+        CHECK_THAT((target.get_layout_name()), Catch::Matchers::Equals(name));
         CHECK(target.width() == 2);
         CHECK(target.num_pis() == 1);
-        CHECK(target.get_input_name(0) == "kept");
+        CHECK_THAT((target.get_input_name(0)), Catch::Matchers::Equals("kept"));
     }
     SECTION("Present name overrides an unused invalid fallback")
     {
@@ -1244,13 +1245,14 @@ TEST_CASE("Version-2 FGL validates the selected layout name", "[read-fgl-layout]
         const std::string name(1, static_cast<char>(0x80));
         /** @brief Returning-reader input. */
         std::stringstream stream{xml};
-        CHECK(read_fgl_layout<cartesian_layout>(stream, name).get_layout_name() == expected);
+        CHECK_THAT((read_fgl_layout<cartesian_layout>(stream, name).get_layout_name()),
+                   Catch::Matchers::Equals(expected));
         /** @brief Existing layout whose invalid name the file replaces. */
         cartesian_gate_layout target{{2, 1, 1}, clocking::twoddwave(), name};
         /** @brief In-place-reader input. */
         std::stringstream inplace{xml};
         read_fgl_layout(target, inplace);
-        CHECK(target.get_layout_name() == expected);
+        CHECK_THAT((target.get_layout_name()), Catch::Matchers::Equals(expected));
     }
 }
 
@@ -1389,7 +1391,7 @@ TEST_CASE("FGL rejects more than two layers", "[read-fgl-layout]")
     std::stringstream stream{xml};
     CHECK_THROWS_AS(read_fgl_layout(target, stream), fgl_parsing_error);
     CHECK(target.get_extent() == layout_base::extent{2, 3, 1});
-    CHECK(target.get_layout_name() == "kept");
+    CHECK_THAT((target.get_layout_name()), Catch::Matchers::Equals("kept"));
 }
 
 TEST_CASE("Malformed manual FGL obstructions leave the target unchanged", "[read-fgl-layout]")
@@ -1411,7 +1413,7 @@ TEST_CASE("Malformed manual FGL obstructions leave the target unchanged", "[read
     xml.insert(xml.find("</layout>"), "<obstructions>" + invalid + "</obstructions>");
     std::stringstream malformed{xml};
     CHECK_THROWS_AS(read_fgl_layout(target, malformed), fgl_parsing_error);
-    CHECK(target.get_layout_name() == "kept");
+    CHECK_THAT((target.get_layout_name()), Catch::Matchers::Equals("kept"));
     /** @brief Object retained after the failed read. */
     const auto retained = target.find_object({0, 0});
     CHECK((retained.has_value() && *retained == id));
@@ -1437,7 +1439,7 @@ TEST_CASE("Version-2 FGL requires a finished layout before assigning the target"
         target.obstruct_coordinate({-1, -2, -3});
         std::stringstream malformed{xml};
         CHECK_THROWS_AS(read_fgl_layout(target, malformed), fgl_parsing_error);
-        CHECK(target.get_layout_name() == "kept");
+        CHECK_THAT((target.get_layout_name()), Catch::Matchers::Equals("kept"));
         /** @brief Object retained after the failed read. */
         const auto retained = target.find_object({0, 0});
         CHECK((retained.has_value() && *retained == kept));

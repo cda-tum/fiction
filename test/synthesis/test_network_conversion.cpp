@@ -17,6 +17,7 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
@@ -130,17 +131,17 @@ TEST_CASE("Name conservation after network conversion", "[network-conversion]")
     const auto converted_maj = convert_network<named_technology_network>(maj);
 
     // network name
-    CHECK(converted_maj.get_network_name() == "maj");
+    CHECK_THAT(converted_maj.get_network_name(), Catch::Matchers::Equals("maj"));
 
     // PI names
     REQUIRE(converted_maj.num_pis() == 3u);
-    CHECK(converted_maj.get_name(converted_maj.make_signal(converted_maj.pi_at(0))) == "a");
-    CHECK(converted_maj.get_name(converted_maj.make_signal(converted_maj.pi_at(1))) == "b");
-    CHECK(converted_maj.get_name(converted_maj.make_signal(converted_maj.pi_at(2))) == "c");
+    CHECK_THAT(converted_maj.get_name(converted_maj.make_signal(converted_maj.pi_at(0))), Catch::Matchers::Equals("a"));
+    CHECK_THAT(converted_maj.get_name(converted_maj.make_signal(converted_maj.pi_at(1))), Catch::Matchers::Equals("b"));
+    CHECK_THAT(converted_maj.get_name(converted_maj.make_signal(converted_maj.pi_at(2))), Catch::Matchers::Equals("c"));
 
     // PO names
     REQUIRE(converted_maj.num_pos() == 1u);
-    CHECK(converted_maj.get_output_name(0) == "f");
+    CHECK_THAT(converted_maj.get_output_name(0), Catch::Matchers::Equals("f"));
 }
 
 // technology_network uses explicit inverter nodes instead of complemented signals.
@@ -256,9 +257,9 @@ TEST_CASE("Convert every two- and three-input function without losing the interf
                 CAPTURE(destination);
                 CHECK(converted.num_pis() == variables);
                 REQUIRE(converted.num_pos() == 3u);
-                CHECK(converted.get_output_name(0) == "f");
-                CHECK(converted.get_output_name(1) == "g");
-                CHECK(converted.get_output_name(2) == "one");
+                CHECK_THAT(converted.get_output_name(0), Catch::Matchers::Equals("f"));
+                CHECK_THAT(converted.get_output_name(1), Catch::Matchers::Equals("g"));
+                CHECK_THAT(converted.get_output_name(2), Catch::Matchers::Equals("one"));
                 const auto actual = mockturtle::simulate<kitty::dynamic_truth_table>(
                     converted, mockturtle::default_simulator<kitty::dynamic_truth_table>{variables});
                 REQUIRE(actual.size() == 3u);

@@ -17,6 +17,7 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/bfs_topo_view.hpp>
@@ -122,8 +123,8 @@ TEST_CASE("Create a topo_view on an AIG", "[bfs-topo-view]")
     const bfs_topo_view aig2{aig};
     nodes.clear();
     aig2.foreach_node([&nodes](auto node) { nodes.push_back(node); });
-    std::ranges::sort(nodes);
-    CHECK(nodes == std::vector<mockturtle::node<mockturtle::aig_network>>{0, 1, 2, 3, 4, 5});
+    CHECK_THAT(nodes, Catch::Matchers::UnorderedRangeEquals(
+                          std::vector<mockturtle::node<mockturtle::aig_network>>{0, 1, 2, 3, 4, 5}));
 }
 
 TEST_CASE("Check BFS order", "[bfs-topo-view]")
@@ -169,10 +170,7 @@ TEST_CASE("Check BFS order", "[bfs-topo-view]")
                                { CHECK(aig2.node_to_index(aig2.get_node(f)) < aig2.node_to_index(n)); });
         });
     CHECK(std::vector(nodes.cbegin(), nodes.cbegin() + 6) == std::vector(expected.cbegin(), expected.cbegin() + 6));
-    std::ranges::sort(nodes);
-    auto sorted_expected = expected;
-    std::ranges::sort(sorted_expected);
-    CHECK(nodes == sorted_expected);
+    CHECK_THAT(nodes, Catch::Matchers::UnorderedRangeEquals(expected));
 }
 
 TEST_CASE("BFS preserves an existing topological traversal", "[bfs-topo-view]")

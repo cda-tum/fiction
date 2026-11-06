@@ -19,6 +19,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
@@ -76,7 +77,7 @@ using namespace fiction::verification;
 template <typename WLyt, typename RLyt>
 void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt)
 {
-    CHECK(wlyt.get_layout_name() == rlyt.get_layout_name());
+    CHECK_THAT(rlyt.get_layout_name(), Catch::Matchers::Equals(wlyt.get_layout_name()));
 
     const bounding_box<WLyt> wbb{wlyt};
     const bounding_box<RLyt> rbb{rlyt};
@@ -95,11 +96,11 @@ void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt)
     CHECK(wlyt.size() == rlyt.size());
     for (uint32_t i = 0; i < wlyt.num_pis(); ++i)
     {
-        CHECK(wlyt.get_input_name(i) == rlyt.get_input_name(i));
+        CHECK_THAT(rlyt.get_input_name(i), Catch::Matchers::Equals(wlyt.get_input_name(i)));
     }
     for (uint32_t i = 0; i < wlyt.num_pos(); ++i)
     {
-        CHECK(wlyt.get_output_name(i) == rlyt.get_output_name(i));
+        CHECK_THAT(rlyt.get_output_name(i), Catch::Matchers::Equals(wlyt.get_output_name(i)));
     }
     wlyt.foreach_object(
         [&](const auto id)
@@ -108,7 +109,7 @@ void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt)
             REQUIRE(restored.has_value());
             /** @brief Restored object whose presence REQUIRE checks. */
             const auto restored_id = *restored;  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks presence.
-            CHECK(wlyt.get_name(id) == rlyt.get_name(restored_id));
+            CHECK_THAT(rlyt.get_name(restored_id), Catch::Matchers::Equals(wlyt.get_name(id)));
             CHECK(wlyt.is_pi(id) == rlyt.is_pi(restored_id));
             CHECK(wlyt.is_po(id) == rlyt.is_po(restored_id));
             CHECK(wlyt.is_buf(id) == rlyt.is_buf(restored_id));
@@ -251,7 +252,7 @@ TEST_CASE("FGL preserves whitespace-only names", "[write-fgl-layout]")
     write_fgl_layout(layout, stream);
     /** Restored layout and port names. */
     const auto restored = read_fgl_layout<cartesian_layout>(stream);
-    CHECK(restored.get_layout_name() == "  ");
+    CHECK_THAT((restored.get_layout_name()), Catch::Matchers::Equals("  "));
     /** Restored terminals whose names must retain whitespace. */
     const auto restored_input  = restored.find_object({0, 0});
     const auto restored_output = restored.find_object({1, 0});
@@ -261,8 +262,8 @@ TEST_CASE("FGL preserves whitespace-only names", "[write-fgl-layout]")
     const auto input_id = *restored_input;  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks presence.
     /** @brief Output identity whose presence REQUIRE checks. */
     const auto output_id = *restored_output;  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks presence.
-    CHECK(restored.get_name(input_id) == "  ");
-    CHECK(restored.get_name(output_id) == "\t");
+    CHECK_THAT((restored.get_name(input_id)), Catch::Matchers::Equals("  "));
+    CHECK_THAT((restored.get_name(output_id)), Catch::Matchers::Equals("\t"));
 }
 
 TEST_CASE("FGL preserves XML whitespace in layout and object names", "[write-fgl-layout]")
@@ -280,9 +281,10 @@ TEST_CASE("FGL preserves XML whitespace in layout and object names", "[write-fgl
     std::stringstream stream{};
     write_fgl_layout(layout, stream);
     const auto restored = read_fgl_layout<cartesian_layout>(stream);
-    CHECK(restored.get_layout_name() == label);
+    CHECK_THAT((restored.get_layout_name()), Catch::Matchers::Equals(label));
     CHECK(restored.size() == 3);
-    restored.foreach_object([&](const auto id) { CHECK(restored.get_name(id) == label); });
+    restored.foreach_object([&](const auto id)
+                            { CHECK_THAT((restored.get_name(id)), Catch::Matchers::Equals(label)); });
     compare_written_and_read_layout(layout, restored);
 }
 
@@ -359,14 +361,14 @@ TEST_CASE("Versioned FGL keeps interface order and dangling objects", "[write-fg
     layout.create_gate({}, constant, {0, 0, 0});
     std::stringstream stream{};
     write_fgl_layout(layout, stream);
-    CHECK(stream.str().find("<fgl version=\"2\">") != std::string::npos);
+    CHECK_THAT(stream.str(), Catch::Matchers::ContainsSubstring("<fgl version=\"2\">"));
     const auto restored = read_fgl_layout<cartesian_layout>(stream);
     CHECK(restored.width() == 3);
     CHECK(restored.height() == 3);
     CHECK(restored.layers() == 1);
     CHECK(restored.size() == layout.size());
-    CHECK(restored.get_input_name(0) == "a");
-    CHECK(restored.get_input_name(1) == "b");
+    CHECK_THAT((restored.get_input_name(0)), Catch::Matchers::Equals("a"));
+    CHECK_THAT((restored.get_input_name(1)), Catch::Matchers::Equals("b"));
     /** @brief Restored gate whose input indices must be preserved. */
     const auto rg = restored.find_object({1, 1, 0});
     REQUIRE(rg.has_value());
@@ -381,8 +383,8 @@ TEST_CASE("Versioned FGL keeps interface order and dangling objects", "[write-fg
     /** @brief Placed zero-input function restored from the file. */
     const auto constant_object = restored.find_object({0, 0, 0});
     CHECK((constant_object.has_value() && restored.object_function(*constant_object).num_vars() == 0));
-    CHECK(restored.get_output_name(0) == layout.get_name(po));
-    CHECK(restored.get_output_name(1) == "pass");
+    CHECK_THAT((restored.get_output_name(0)), Catch::Matchers::Equals(layout.get_name(po)));
+    CHECK_THAT((restored.get_output_name(1)), Catch::Matchers::Equals("pass"));
     compare_written_and_read_layout(layout, restored);
 }
 
@@ -461,10 +463,10 @@ TEST_CASE("FGL validates every object before changing the stream", "[write-fgl-l
     std::stringstream stream{};
     stream << "sentinel";
     CHECK_THROWS_AS(write_fgl_layout(layout, stream), std::invalid_argument);
-    CHECK(stream.str() == "sentinel");
+    CHECK_THAT(stream.str(), Catch::Matchers::Equals("sentinel"));
     layout.connect(wire, {wire, 0});
     CHECK_THROWS_AS(write_fgl_layout(layout, stream), std::invalid_argument);
-    CHECK(stream.str() == "sentinel");
+    CHECK_THAT(stream.str(), Catch::Matchers::Equals("sentinel"));
 }
 
 TEST_CASE("FGL rejects invalid finished placement and metadata", "[write-fgl-layout]")
@@ -477,7 +479,7 @@ TEST_CASE("FGL rejects invalid finished placement and metadata", "[write-fgl-lay
         std::stringstream stream{};
         stream << "kept";
         CHECK_THROWS_AS(write_fgl_layout(layout, stream), std::invalid_argument);
-        CHECK(stream.str() == "kept");
+        CHECK_THAT(stream.str(), Catch::Matchers::Equals("kept"));
     };
     SECTION("Nonadjacent connection")
     {
@@ -536,7 +538,7 @@ TEST_CASE("FGL rejects invalid XML text before changing output", "[write-fgl-lay
         std::stringstream stream{};
         stream << "sentinel";
         CHECK_THROWS_AS(write_fgl_layout(layout, stream), std::invalid_argument);
-        CHECK(stream.str() == "sentinel");
+        CHECK_THAT(stream.str(), Catch::Matchers::Equals("sentinel"));
 
         std::filesystem::path directory{};
         {
@@ -556,7 +558,7 @@ TEST_CASE("FGL rejects invalid XML text before changing output", "[write-fgl-lay
             /** @brief Complete destination bytes after a rejected write. */
             std::stringstream contents{};
             contents << original.rdbuf();
-            CHECK(contents.str() == "sentinel");
+            CHECK_THAT(contents.str(), Catch::Matchers::Equals("sentinel"));
             /** @brief Only the original file remains after the rejected write. */
             auto entries = 0u;
             for (const auto& entry : std::filesystem::directory_iterator{directory})

@@ -19,6 +19,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
@@ -214,7 +215,7 @@ TEMPLATE_TEST_CASE("Name conservation after technology mapping", "[technology-ma
     REQUIRE_FALSE(stats.mapper_stats.mapping_error);
 
     // network name
-    CHECK(mapped_maj.get_network_name() == "maj");
+    CHECK_THAT(mapped_maj.get_network_name(), Catch::Matchers::Equals("maj"));
 }
 
 TEST_CASE("Exception for missing required gates in AIG", "[technology-mapping]")

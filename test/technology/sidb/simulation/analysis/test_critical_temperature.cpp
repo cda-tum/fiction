@@ -20,6 +20,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/progress_recorder.hpp"
@@ -664,7 +665,7 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
         const auto ct_qe = critical_temperature_gate_based(lyt, std::vector{create_id_tt()}, params, &critical_stats);
 
-        CHECK(critical_stats.algorithm_name == "QuickExact");
+        CHECK_THAT(critical_stats.algorithm_name, Catch::Matchers::Equals("QuickExact"));
 
         CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
                    Catch::Matchers::WithinAbs(305.95, 0.01));
@@ -676,7 +677,7 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
         const auto ct_cc = critical_temperature_gate_based(lyt, std::vector{create_id_tt()}, params, &critical_stats);
 
-        CHECK(critical_stats.algorithm_name == "ClusterComplete");
+        CHECK_THAT(critical_stats.algorithm_name, Catch::Matchers::Equals("ClusterComplete"));
 
         CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
                    Catch::Matchers::WithinAbs(305.95, 0.01));
@@ -707,7 +708,7 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
         const auto ct_qe = critical_temperature_non_gate_based(lyt, params, &critical_stats);
 
-        CHECK(critical_stats.algorithm_name == "QuickSim");
+        CHECK_THAT(critical_stats.algorithm_name, Catch::Matchers::Equals("QuickSim"));
 
         CHECK_THAT(std::abs(ct_qe), Catch::Matchers::WithinAbs(11.17, 0.01));
 
@@ -717,7 +718,7 @@ TEST_CASE("Test critical_temperature function", "[critical-temperature]")
 
         const auto ct_cc = critical_temperature_non_gate_based(lyt, params, &critical_stats);
 
-        CHECK(critical_stats.algorithm_name == "ClusterComplete");
+        CHECK_THAT(critical_stats.algorithm_name, Catch::Matchers::Equals("ClusterComplete"));
 
         CHECK_THAT(std::abs(ct_cc), Catch::Matchers::WithinAbs(11.17, 0.01));
 
