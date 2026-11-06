@@ -181,6 +181,8 @@ TEST_CASE("East-south coloring owns its named traversal", "[orthogonal]")
 
     const auto& ntk = container.color_ntk;
     CHECK(physical_design::detail::is_east_south_colored(ntk));
+    REQUIRE(ntk.num_pis() == 2);
+    REQUIRE(ntk.num_pos() == 1);
     CHECK(ntk.get_node(ntk.po_at(0)) == output);
     CHECK(ntk.get_network_name() == "owned_coloring");
     CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(0))) == "left");
@@ -261,7 +263,7 @@ TEST_CASE("Orthogonal placement preserves noncommutative input order", "[orthogo
     const auto               unused = ntk.create_pi();
     ntk.create_po(ntk.create_lt(b, a));
     const auto lyt = orthogonal<cartesian_layout>(ntk);
-    CHECK(lyt.num_pis() == 3);
+    REQUIRE(lyt.num_pis() == 3);
     CHECK(lyt.is_pi(lyt.pi_at(2)));
     const auto extracted = extract_layout_network(lyt);
     CHECK(extracted.num_pis() == 3);
@@ -351,22 +353,30 @@ TEMPLATE_TEST_CASE("Named specification conversion for orthogonal", "[physical-n
     const auto b = source.create_pi("right");
     source.create_po(source.create_and(a, b), "result");
     const auto ntk = fiction::synthesis::convert_network<named_technology_network>(source);
+    REQUIRE(ntk.num_pis() == 2);
+    REQUIRE(ntk.num_pos() == 1);
     CHECK(ntk.get_network_name() == "named_spec");
     CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(0))) == "left");
     CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(1))) == "right");
     CHECK(ntk.get_output_name(0) == "result");
     const auto lyt = orthogonal<cartesian_layout>(ntk);
+    REQUIRE(lyt.num_pis() == 2);
+    REQUIRE(lyt.num_pos() == 1);
     CHECK(lyt.get_layout_name() == "named_spec");
     CHECK(lyt.get_name(lyt.pi_at(0)) == "left");
     CHECK(lyt.get_name(lyt.pi_at(1)) == "right");
     CHECK(lyt.get_output_name(0) == "result");
     const auto extracted = extract_layout_network(lyt);
+    REQUIRE(extracted.num_pis() == 2);
+    REQUIRE(extracted.num_pos() == 1);
     CHECK(extracted.get_network_name() == "named_spec");
     CHECK(extracted.get_name(extracted.make_signal(extracted.pi_at(0))) == "left");
     CHECK(extracted.get_name(extracted.make_signal(extracted.pi_at(1))) == "right");
     CHECK(extracted.get_output_name(0) == "result");
     check_eq(source, extracted);
     const auto roundtrip = orthogonal<cartesian_layout>(convert_network<named_technology_network>(extracted));
+    REQUIRE(roundtrip.num_pis() == 2);
+    REQUIRE(roundtrip.num_pos() == 1);
     CHECK(roundtrip.get_layout_name() == "named_spec");
     CHECK(roundtrip.get_name(roundtrip.pi_at(0)) == "left");
     CHECK(roundtrip.get_name(roundtrip.pi_at(1)) == "right");
