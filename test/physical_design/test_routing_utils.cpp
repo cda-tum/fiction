@@ -48,23 +48,26 @@ void check_objectives(const std::vector<routing_objective>& objectives,
 }
 
 /** @brief Checks all retained tiles and their disconnected signals.
- * @tparam Lyt Layout type. @param lyt Layout. @param expected Expected retained tiles.
+ * @param lyt Layout. @param expected Expected retained tiles.
  */
-template <typename Lyt>
-void check_retained_tiles(const Lyt& lyt, const std::vector<fiction::layouts::layout_base::coordinate>& expected)
+void check_retained_tiles(const cartesian_gate_layout& lyt, const std::vector<layout_base::coordinate>& expected)
 {
-    std::vector<fiction::layouts::layout_base::coordinate> actual{};
+    std::vector<layout_base::coordinate> actual{};
     lyt.foreach_object(
         [&](const auto id)
         {
-            actual.push_back(lyt.get_tile(id));
+            const auto t = lyt.get_tile(id);
+            CAPTURE(t.x, t.y, t.z);
+            actual.push_back(t);
             for (auto input = 0u; input < lyt.input_count(id); ++input)
             {
+                CAPTURE(input);
                 CHECK_FALSE(lyt.source({id, input}));
             }
             CHECK(lyt.fanout_size(id) == 0);
         });
     CHECK_THAT(actual, Catch::Matchers::UnorderedRangeEquals(expected));
+    CHECK(lyt.size() == expected.size());
     for (const auto& t : expected)
     {
         CAPTURE(t.x, t.y, t.z);
@@ -227,8 +230,8 @@ TEST_CASE("Routing preserves duplicate destination ports and retained identities
     REQUIRE(layout.contains(a));
     REQUIRE(layout.contains(gate));
     REQUIRE(layout.contains(po));
-    CHECK(layout.input_count(gate) == 2);
-    CHECK(layout.input_count(po) == 1);
+    REQUIRE(layout.input_count(gate) == 2);
+    REQUIRE(layout.input_count(po) == 1);
     CHECK_FALSE(layout.source({gate, 0}));
     CHECK_FALSE(layout.source({gate, 1}));
     CHECK_FALSE(layout.source({po, 0}));
