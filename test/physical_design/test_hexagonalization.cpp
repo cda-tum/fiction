@@ -337,6 +337,7 @@ TEST_CASE("Hexagonalization preserves declared input holes and terminal order", 
     hex.foreach_gate([&](const auto id) { gates.push_back(id); });
     REQUIRE(gates.size() == 1);
     CHECK(hex.is_lt(gates.front()));
+    REQUIRE(hex.input_count(gates.front()) >= 2);
     CHECK_FALSE(hex.source({gates.front(), 0}));
     const auto source = hex.source({gates.front(), 1});
     REQUIRE(source);
