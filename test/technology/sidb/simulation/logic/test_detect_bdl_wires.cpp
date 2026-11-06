@@ -59,6 +59,7 @@ TEST_CASE("Three separate BDL pairs on the same y-coord (three wires)", "[detect
         REQUIRE(all_bdl_wires.size() == 2);
         /** @brief Complete pairs of each detected wire. */
         std::vector<std::vector<bdl_pair>> pairs{};
+        pairs.reserve(all_bdl_wires.size());
         for (const auto& wire : all_bdl_wires)
         {
             pairs.push_back(wire.pairs);
@@ -107,6 +108,7 @@ TEST_CASE("Three separate BDL pairs on the same x-coord (three wires)", "[detect
         REQUIRE(all_bdl_wires.size() == 3);
         /** @brief Complete pairs of each detected wire. */
         std::vector<std::vector<bdl_pair>> pairs{};
+        pairs.reserve(all_bdl_wires.size());
         for (const auto& wire : all_bdl_wires)
         {
             pairs.push_back(wire.pairs);
@@ -307,6 +309,7 @@ TEST_CASE("Three separate BDL pairs (three wires)", "[detect-bdl-wires]")
         REQUIRE(all_bdl_wires.size() == 3);
         /** @brief Complete pairs of each detected wire. */
         std::vector<std::vector<bdl_pair>> pairs{};
+        pairs.reserve(all_bdl_wires.size());
         for (const auto& wire : all_bdl_wires)
         {
             pairs.push_back(wire.pairs);
