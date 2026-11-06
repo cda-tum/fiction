@@ -74,7 +74,7 @@ void check_clocked_connections(const gate_layout<Geometry>& lyt)
     lyt.foreach_object([&](const auto id) { objects.push_back(id); });
     CHECK(objects.size() == lyt.size());
     std::ranges::sort(objects);
-    CHECK(std::adjacent_find(objects.cbegin(), objects.cend()) == objects.cend());
+    CHECK(std::ranges::adjacent_find(objects) == objects.end());
     for (const auto id : objects)
     {
         for (uint32_t input{}; input < lyt.input_count(id); ++input)
@@ -82,6 +82,7 @@ void check_clocked_connections(const gate_layout<Geometry>& lyt)
             CAPTURE(id.index, input);
             const auto source = lyt.source({id, input});
             REQUIRE(source.has_value());
+            // NOLINTNEXTLINE(bugprone-unchecked-optional-access): REQUIRE checks the value.
             CHECK(lyt.is_incoming_clocked(lyt.get_tile(id), lyt.get_tile(*source)));
         }
     }
