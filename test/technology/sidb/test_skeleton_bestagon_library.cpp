@@ -15,6 +15,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/networks/technology_network.hpp>
@@ -22,7 +23,9 @@
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/skeleton_bestagon_library.hpp>
 
+#include <array>
 #include <type_traits>
+#include <utility>
 
 using namespace fiction;
 using namespace fiction::sidb;
@@ -49,8 +52,23 @@ TEST_CASE("Bestagon supports non-strict comparison functions", "[sidb-dynamic-ga
     const auto                            b = network.create_pi();
     CHECK(network.node_function(network.get_node(network.create_le(a, b))) == fiction::synthesis::create_le_tt());
     CHECK(network.node_function(network.get_node(network.create_ge(a, b))) == fiction::synthesis::create_ge_tt());
-    for (const auto& entry : implementations)
+    const std::array supported{std::pair{"ID", fiction::synthesis::create_id_tt()},
+                               std::pair{"NOT", fiction::synthesis::create_not_tt()},
+                               std::pair{"AND", fiction::synthesis::create_and_tt()},
+                               std::pair{"OR", fiction::synthesis::create_or_tt()},
+                               std::pair{"NAND", fiction::synthesis::create_nand_tt()},
+                               std::pair{"NOR", fiction::synthesis::create_nor_tt()},
+                               std::pair{"XOR", fiction::synthesis::create_xor_tt()},
+                               std::pair{"XNOR", fiction::synthesis::create_xnor_tt()},
+                               std::pair{"LE", fiction::synthesis::create_le_tt()},
+                               std::pair{"GE", fiction::synthesis::create_ge_tt()},
+                               std::pair{"LT", fiction::synthesis::create_lt_tt()},
+                               std::pair{"GT", fiction::synthesis::create_gt_tt()}};
+    for (const auto& [name, function] : supported)
     {
-        CHECK(entry.first == ~(~entry.first));
+        CAPTURE(name);
+        const auto implementation = implementations.find(function);
+        REQUIRE(implementation != implementations.end());
+        CHECK_FALSE(implementation->second.empty());
     }
 }

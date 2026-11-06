@@ -423,7 +423,7 @@ TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs", "[quicksim]
 
     const simulation_parameters params{2, -0.32};
 
-    const auto check_charge_configuration = [](const result& sim_results)
+    const auto check_charge_configuration = [&lyt](const result& sim_results)
     {
         REQUIRE_FALSE(sim_results.charge_distributions.empty());
 
@@ -431,18 +431,15 @@ TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs", "[quicksim]
 
         const auto& charge_lyt_first = sim_results.charge_distributions.front();
 
-        charge_lyt_first.foreach_dot(
-            [&](const auto& cell)
+        REQUIRE(charge_lyt_first.sites() == lyt.sidbs());
+        for (const auto& cell : lyt.sidbs())
+        {
+            if (cell != lattice_site{5, 3, 0})
             {
-                if (cell != lattice_site{5, 3, 0})
-                {
-                    CHECK(charge_lyt_first.get_charge_state(cell) == charge_state::NEGATIVE);
-                }
-                else
-                {
-                    CHECK(charge_lyt_first.get_charge_state({5, 3, 0}) == charge_state::NEUTRAL);
-                }
-            });
+                CHECK(charge_lyt_first.get_charge_state(cell) == charge_state::NEGATIVE);
+            }
+        }
+        CHECK(charge_lyt_first.get_charge_state({5, 3, 0}) == charge_state::NEUTRAL);
     };
 
     const auto [thread_case, number_threads] =
@@ -488,7 +485,7 @@ TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs, all negative
 
     const simulation_parameters params{2, -0.32};
 
-    const auto check_charge_configuration = [](const result& simulation_results)
+    const auto check_charge_configuration = [&lyt](const result& simulation_results)
     {
         REQUIRE_FALSE(simulation_results.charge_distributions.empty());
 
@@ -496,7 +493,8 @@ TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs, all negative
 
         const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
-        for (const auto& cell : charge_lyt_first.sites())
+        REQUIRE(charge_lyt_first.sites() == lyt.sidbs());
+        for (const auto& cell : lyt.sidbs())
         {
             CHECK(charge_lyt_first.get_charge_state(cell) == charge_state::NEGATIVE);
         }

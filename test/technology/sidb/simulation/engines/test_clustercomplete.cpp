@@ -1024,8 +1024,11 @@ TEST_CASE("13 DBs which are all negatively charged", "[clustercomplete]")
 
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
-    charge_lyt_first.foreach_dot([&](const auto& cell)
-                                 { CHECK(charge_lyt_first.get_charge_state(cell) == charge_state::NEGATIVE); });
+    REQUIRE(charge_lyt_first.sites() == lyt.sidbs());
+    for (const auto& cell : lyt.sidbs())
+    {
+        CHECK(charge_lyt_first.get_charge_state(cell) == charge_state::NEGATIVE);
+    }
 
     CHECK(lyt.num_dots() == 13);
 }
@@ -1409,18 +1412,17 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
     /** @brief NAND function with two declared input slots. */
     kitty::dynamic_truth_table nand_function{2};
     kitty::create_from_hex_string(nand_function, "7");
-    gate_lyt.create_gate({}, nand_function, {0, 0});
-    gate_lyt.create_gate({}, nand_function, {2, 2});
+    const auto first_gate  = gate_lyt.create_gate({}, nand_function, {0, 0});
+    const auto second_gate = gate_lyt.create_gate({}, nand_function, {2, 2});
 
     REQUIRE(gate_lyt.num_gates() == 2);
-    gate_lyt.foreach_gate(
-        [&gate_lyt](const auto id)
-        {
-            REQUIRE(gate_lyt.is_nand(id));
-            REQUIRE(gate_lyt.input_count(id) == 2);
-            CHECK_FALSE(gate_lyt.source({id, 0}).has_value());
-            CHECK_FALSE(gate_lyt.source({id, 1}).has_value());
-        });
+    for (const auto id : std::array{first_gate, second_gate})
+    {
+        REQUIRE(gate_lyt.is_nand(id));
+        REQUIRE(gate_lyt.input_count(id) == 2);
+        CHECK_FALSE(gate_lyt.source({id, 0}).has_value());
+        CHECK_FALSE(gate_lyt.source({id, 1}).has_value());
+    }
 
     const auto cell_lyt = apply_gate_library<bestagon_library>(gate_lyt);
 

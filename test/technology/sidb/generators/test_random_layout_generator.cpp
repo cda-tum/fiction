@@ -28,6 +28,7 @@
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/analysis/can_positive_charges_occur.hpp>
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <optional>
@@ -44,6 +45,24 @@ using namespace fiction::sidb::simulation::analysis;
 // macro expands to a throwing assertion whose control flow bugprone-unchecked-optional-access does not
 // model, so the check reports each of those dereferences
 // NOLINTBEGIN(bugprone-unchecked-optional-access)
+
+/** @brief Checks every generated site against the requested area. @param lyt Generated layout. @param params Generation
+ * parameters. */
+void check_generated_sites(const layout& lyt, const generate_random_layout_params& params)
+{
+    const auto& sites = lyt.sidbs();
+    CHECK(sites.size() == params.number_of_sidbs);
+    CHECK(std::ranges::adjacent_find(sites) == sites.end());
+    for (const auto& site : sites)
+    {
+        CAPTURE(site.x, site.y, site.z);
+        CHECK(site.z <= 1);
+        CHECK(site.x >= params.coordinate_pair.first.x);
+        CHECK(site.x <= params.coordinate_pair.second.x);
+        CHECK(row_of(site) >= row_of(params.coordinate_pair.first));
+        CHECK(row_of(site) <= row_of(params.coordinate_pair.second));
+    }
+}
 
 TEST_CASE("Random SiDB layout generation", "[random-sidb-layout-generator]")
 {
@@ -87,15 +106,7 @@ TEST_CASE("Random SiDB layout generation", "[random-sidb-layout-generator]")
         REQUIRE(result_lyt.has_value());
 
         CHECK(result_lyt.value().num_dots() == 10);
-        result_lyt.value().foreach_dot(
-            [](const auto& cell)
-            {
-                CHECK(cell.x < 51);
-                CHECK(cell.x > 0);
-                CHECK(cell.y < 8);
-                CHECK(cell.y > 0);
-                CHECK(cell.z <= 1);
-            });
+        check_generated_sites(result_lyt.value(), params);
     }
 
     SECTION("given corner coordinates and number of placed SiDBs, and allow positive charges")
@@ -109,12 +120,7 @@ TEST_CASE("Random SiDB layout generation", "[random-sidb-layout-generator]")
         REQUIRE(result_lyt.has_value());
 
         CHECK(result_lyt.value().num_dots() == 100);
-        result_lyt.value().foreach_dot(
-            [](const auto& cell)
-            {
-                CHECK(cell.x < 91);
-                CHECK(cell.y < 91);
-            });
+        check_generated_sites(result_lyt.value(), params);
     }
 
     SECTION("given corner coordinates and number of placed SiDBs, and forbid positive charges")
@@ -128,13 +134,7 @@ TEST_CASE("Random SiDB layout generation", "[random-sidb-layout-generator]")
         REQUIRE(result_lyt.has_value());
 
         CHECK(result_lyt.value().num_dots() == 10);
-        result_lyt.value().foreach_dot(
-            [](const auto& cell)
-            {
-                CHECK(cell.x < 91);
-                CHECK(cell.y < 91);
-                CHECK(cell.z <= 1);
-            });
+        check_generated_sites(result_lyt.value(), params);
         CHECK_FALSE(can_positive_charges_occur(result_lyt.value(), params.sim_params));
     }
 
@@ -156,15 +156,7 @@ TEST_CASE("Random SiDB layout generation", "[random-sidb-layout-generator]")
         {
             CHECK(lyt.num_dots() == 10);
             CHECK_FALSE(can_positive_charges_occur(lyt, params.sim_params));
-            lyt.foreach_dot(
-                [](const auto& cell)
-                {
-                    CHECK(cell.x <= 20);
-                    CHECK(cell.x >= 0);
-                    CHECK(cell.y <= 20);
-                    CHECK(cell.y >= 0);
-                    CHECK(cell.z <= 1);
-                });
+            check_generated_sites(lyt, params);
         }
     }
 

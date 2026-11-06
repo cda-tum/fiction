@@ -567,7 +567,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
         CHECK(found_gate_layouts.front().num_defects() == 1);
         CHECK(found_gate_layouts.front().num_dots() == lyt.num_dots() + 2);
 
-        found_gate_layouts.front().foreach_dot([](const auto& cell) { CHECK(cell != lattice_site{14, 10, 0}); });
+        CHECK(found_gate_layouts.front().is_empty_site({14, 10, 0}));
 
         params.design_mode = design_gates_params::design_gates_mode::QUICKCELL;
         const auto found_gate_layouts_quickcell =
@@ -576,8 +576,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
         CHECK(found_gate_layouts_quickcell.front().num_defects() == 1);
         CHECK(found_gate_layouts_quickcell.front().num_dots() == lyt.num_dots() + 2);
 
-        found_gate_layouts_quickcell.front().foreach_dot([](const auto& cell)
-                                                         { CHECK(cell != lattice_site{14, 10, 0}); });
+        CHECK(found_gate_layouts_quickcell.front().is_empty_site({14, 10, 0}));
     }
 
     SECTION("Random design with defect blocking canvas SiDB placement")

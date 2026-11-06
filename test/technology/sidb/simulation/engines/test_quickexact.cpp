@@ -1013,8 +1013,11 @@ TEST_CASE("13 DBs which are all negatively charged", "[quickexact]")
 
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
-    charge_lyt_first.foreach_dot([&](const auto& cell)
-                                 { CHECK(charge_lyt_first.get_charge_state(cell) == charge_state::NEGATIVE); });
+    REQUIRE(charge_lyt_first.sites() == lyt.sidbs());
+    for (const auto& cell : lyt.sidbs())
+    {
+        CHECK(charge_lyt_first.get_charge_state(cell) == charge_state::NEGATIVE);
+    }
 
     CHECK(lyt.num_dots() == 13);
 }
