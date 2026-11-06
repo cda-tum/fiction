@@ -2046,6 +2046,7 @@ TEST_CASE("Grid search to determine the operational domain. The operational stat
         op_domain.for_each(
             [](const auto& pp, [[maybe_unused]] const auto& status)
             {
+                REQUIRE(pp.get_parameters().size() == 2);
                 CHECK(pp.get_parameters()[0] >= 4.0);
                 CHECK(pp.get_parameters()[1] >= 4.0);
             });
