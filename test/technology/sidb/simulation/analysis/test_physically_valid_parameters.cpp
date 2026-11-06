@@ -132,6 +132,7 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
         valid_parameters_exgs.for_each(
             [&](const auto& point, const auto& value)
             {
+                CAPTURE(point.get_parameters());
                 CHECK(visited.insert(point).second);
                 CHECK(valid_parameters.contains(point) == std::optional{value});
             });
