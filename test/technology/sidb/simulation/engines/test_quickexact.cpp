@@ -1698,25 +1698,25 @@ TEST_CASE("Special test cases", "[quickexact]")
         lyt.assign_sidb({3, 0, 0}, dot_tag::NORMAL);
         lyt.assign_sidb({0, 1, 0}, dot_tag::NORMAL);
 
-        SECTION("automatic base number detection on")
-        {
-            const quickexact_params params{.sim_params = simulation_parameters{2, -0.32},
-                                           .base_number_detection =
-                                               quickexact_params::automatic_base_number_detection::ON};
+        const quickexact_params automatic_params{.sim_params = simulation_parameters{2, -0.32},
+                                                 .base_number_detection =
+                                                     quickexact_params::automatic_base_number_detection::ON};
+        const quickexact_params three_state_params{.sim_params = simulation_parameters{3, -0.32},
+                                                   .base_number_detection =
+                                                       quickexact_params::automatic_base_number_detection::OFF};
 
-            const auto simulation_results = quickexact(lyt, params);
-            CHECK(simulation_results.charge_distributions.size() == 3);
-        }
-
-        SECTION("automatic base number detection off")
-        {
-            const quickexact_params params{.sim_params = simulation_parameters{3, -0.32},
-                                           .base_number_detection =
-                                               quickexact_params::automatic_base_number_detection::OFF};
-
-            const auto simulation_results = quickexact(lyt, params);
-            CHECK(simulation_results.charge_distributions.size() == 3);
-        }
+        const auto automatic   = quickexact(lyt, automatic_params);
+        const auto three_state = quickexact(lyt, three_state_params);
+        CHECK(automatic.charge_distributions.size() == 3);
+        CHECK(three_state.charge_distributions.size() == 3);
+        CHECK_THAT(automatic.charge_distributions, Catch::Matchers::UnorderedRangeEquals(
+                                                       three_state.charge_distributions,
+                                                       [](const auto& lhs, const auto& rhs)
+                                                       {
+                                                           return lhs.sites() == rhs.sites() &&
+                                                                  lhs.same_charge_states(rhs) &&
+                                                                  std::abs(lhs.energy() - rhs.energy()) <= ERROR_MARGIN;
+                                                       }));
     }
 
     SECTION("Test case 4")
