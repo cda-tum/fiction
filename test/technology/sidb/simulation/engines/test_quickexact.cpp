@@ -886,7 +886,12 @@ TEST_CASE("7 DBs next to each other | only one physically valid charge distribut
 
     const auto simulation_results = quickexact(lyt, params);
 
-    CHECK(simulation_results.charge_distributions.size() == 1);
+    REQUIRE(simulation_results.charge_distributions.size() == 1);
+    const auto& distribution = simulation_results.charge_distributions.front();
+    REQUIRE(distribution.sites() == lyt.sidbs());
+    CHECK(distribution.num_negative_sidbs() == 6);
+    CHECK(distribution.num_neutral_sidbs() == 1);
+    CHECK(distribution.get_charge_state({2, 4, 1}) == charge_state::NEUTRAL);
 }
 
 TEST_CASE("4 DBs next to each other (positively charged DBs occur)", "[quickexact]")
