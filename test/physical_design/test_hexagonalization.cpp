@@ -109,13 +109,20 @@ static void check_mapping_equiv(const Ntk& ntk)
     CHECK(hex_layout.num_pos() == layout.num_pos());
     if (inputs != mode::NONE)
     {
-        hex_layout.foreach_pi([&hex_layout](const auto gate) { CHECK(hex_layout.get_tile(gate).y == 0); });
+        for (auto i = 0u; i < hex_layout.num_pis(); ++i)
+        {
+            CAPTURE(i);
+            CHECK(hex_layout.get_tile(hex_layout.pi_at(i)).y == 0);
+        }
     }
     if (outputs != mode::NONE)
     {
         check_no_explicit_obstructions(hex_layout);
-        hex_layout.foreach_po([&hex_layout](const auto gate)
-                              { CHECK(hex_layout.get_tile(gate).y == static_cast<int32_t>(hex_layout.height() - 1)); });
+        for (auto i = 0u; i < hex_layout.num_pos(); ++i)
+        {
+            CAPTURE(i);
+            CHECK(hex_layout.get_tile(hex_layout.po_at(i)).y == static_cast<int32_t>(hex_layout.height() - 1));
+        }
     }
 }
 
@@ -149,12 +156,19 @@ static void check_mapping_equiv_layout(const Lyt& lyt)
     CHECK(hex_layout.num_pos() == lyt.num_pos());
     if (inputs != mode::NONE)
     {
-        hex_layout.foreach_pi([&hex_layout](const auto gate) { CHECK(hex_layout.get_tile(gate).y == 0); });
+        for (auto i = 0u; i < hex_layout.num_pis(); ++i)
+        {
+            CAPTURE(i);
+            CHECK(hex_layout.get_tile(hex_layout.pi_at(i)).y == 0);
+        }
     }
     if (outputs != mode::NONE)
     {
-        hex_layout.foreach_po([&hex_layout](const auto gate)
-                              { CHECK(hex_layout.get_tile(gate).y == static_cast<int32_t>(hex_layout.height() - 1)); });
+        for (auto i = 0u; i < hex_layout.num_pos(); ++i)
+        {
+            CAPTURE(i);
+            CHECK(hex_layout.get_tile(hex_layout.po_at(i)).y == static_cast<int32_t>(hex_layout.height() - 1));
+        }
     }
 }
 

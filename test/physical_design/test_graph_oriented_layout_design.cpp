@@ -398,19 +398,19 @@ TEST_CASE("Skip tiles for PI placement", "[graph-oriented-layout-design]")
 
             // collect PI coordinates along top (y=0) and left (x=0)
             std::vector<int32_t> top_x, left_y;
-            lyt.foreach_pi(
-                [&](auto const& gate)
+            CHECK(lyt.num_pis() == ntk.num_pis());
+            for (auto i = 0u; i < lyt.num_pis(); ++i)
+            {
+                const auto c = lyt.get_tile(lyt.pi_at(i));
+                if (c.y == 0)
                 {
-                    const auto c = lyt.get_tile(gate);
-                    if (c.y == 0)
-                    {
-                        top_x.push_back(c.x);
-                    }
-                    if (c.x == 0)
-                    {
-                        left_y.push_back(c.y);
-                    }
-                });
+                    top_x.push_back(c.x);
+                }
+                if (c.x == 0)
+                {
+                    left_y.push_back(c.y);
+                }
+            }
 
             std::ranges::sort(top_x);
             std::ranges::sort(left_y);

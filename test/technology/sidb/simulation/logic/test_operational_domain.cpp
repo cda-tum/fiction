@@ -2530,25 +2530,33 @@ TEST_CASE("Parallel contour surfaces preserve classifications and avoid duplicat
                        { REQUIRE(std::get<0>(value) == operational_status::OPERATIONAL); });
     for (const auto threads : {1u, 2u, 8u})
     {
+        CAPTURE(threads);
         params.number_of_threads = threads;
         for (const auto samples : {1u, 2000u})
         {
+            CAPTURE(samples);
             operational_domain_stats                                                     stats{};
             sidb::simulation::logic::detail::operational_domain_impl<operational_domain> impl{
                 lyt, std::vector{create_and_tt()}, params, stats};
             const auto domain = impl.contour_tracing(samples);
             CHECK(stats.num_operational_parameter_combinations > 0);
             CHECK(stats.num_evaluated_parameter_combinations == domain.size());
-            domain.for_each([&reference](const auto& pp, const auto& status)
-                            { CHECK(reference.contains(pp) == std::optional{status}); });
+            domain.for_each(
+                [&reference](const auto& pp, const auto& status)
+                {
+                    CAPTURE(pp.get_parameters());
+                    CHECK(reference.contains(pp) == std::optional{status});
+                });
             const auto inferred = impl.inferred_operational_parameter_points();
             for (const auto& pp : inferred)
             {
+                CAPTURE(pp.get_parameters());
                 CHECK(reference.contains(pp) == std::optional{std::tuple{operational_status::OPERATIONAL}});
             }
             reference.for_each(
                 [&domain, &inferred](const auto& pp, const auto& status)
                 {
+                    CAPTURE(pp.get_parameters());
                     if (std::get<0>(status) == operational_status::OPERATIONAL)
                     {
                         CHECK((domain.contains(pp).has_value() || std::ranges::find(inferred, pp) != inferred.end()));
@@ -2579,6 +2587,7 @@ TEST_CASE("Contour surfaces infer unsimulated interiors without crossing non-ope
     std::unordered_set<parameter_point> serial_inferred{};
     for (const auto threads : {1u, 2u, 8u})
     {
+        CAPTURE(threads);
         params.number_of_threads = threads;
         operational_domain_stats                                                     stats{};
         sidb::simulation::logic::detail::operational_domain_impl<operational_domain> impl{
@@ -2594,17 +2603,26 @@ TEST_CASE("Contour surfaces infer unsimulated interiors without crossing non-ope
         CHECK(std::ranges::any_of(inferred, [&domain](const auto& pp) { return !domain.contains(pp).has_value(); }));
         for (const auto& pp : inferred)
         {
+            CAPTURE(pp.get_parameters());
             CHECK(reference.contains(pp) == std::optional{std::tuple{operational_status::OPERATIONAL}});
         }
-        domain.for_each([&reference](const auto& pp, const auto& status)
-                        { CHECK(reference.contains(pp) == std::optional{status}); });
+        domain.for_each(
+            [&reference](const auto& pp, const auto& status)
+            {
+                CAPTURE(pp.get_parameters());
+                CHECK(reference.contains(pp) == std::optional{status});
+            });
 
         if (serial_domain.has_value())
         {
             CHECK(inferred_set == serial_inferred);
             CHECK(domain.size() == serial_domain->size());
-            domain.for_each([&serial_domain](const auto& pp, const auto& status)
-                            { CHECK(serial_domain->contains(pp) == std::optional{status}); });
+            domain.for_each(
+                [&serial_domain](const auto& pp, const auto& status)
+                {
+                    CAPTURE(pp.get_parameters());
+                    CHECK(serial_domain->contains(pp) == std::optional{status});
+                });
         }
         else
         {
@@ -2635,6 +2653,7 @@ TEST_CASE("Parallel contour interiors preserve coverage and propagate worker fai
         std::unordered_set<parameter_point> serial_inferred{};
         for (const auto threads : {1u, 8u})
         {
+            CAPTURE(threads);
             params.number_of_threads = threads;
             operational_domain_stats                                                     stats{};
             sidb::simulation::logic::detail::operational_domain_impl<operational_domain> impl{
@@ -2648,6 +2667,7 @@ TEST_CASE("Parallel contour interiors preserve coverage and propagate worker fai
             reference.for_each(
                 [&](const auto& pp, const auto& status)
                 {
+                    CAPTURE(pp.get_parameters());
                     if (const auto known = domain.contains(pp); known.has_value())
                     {
                         CHECK(*known == status);
@@ -2659,14 +2679,19 @@ TEST_CASE("Parallel contour interiors preserve coverage and propagate worker fai
                 });
             for (const auto& pp : inferred)
             {
+                CAPTURE(pp.get_parameters());
                 CHECK(reference.contains(pp) == std::optional{std::tuple{operational_status::OPERATIONAL}});
             }
             if (serial_domain.has_value())
             {
                 CHECK(inferred_set == serial_inferred);
                 CHECK(domain.size() == serial_domain->size());
-                domain.for_each([&](const auto& pp, const auto& status)
-                                { CHECK(serial_domain->contains(pp) == std::optional{status}); });
+                domain.for_each(
+                    [&](const auto& pp, const auto& status)
+                    {
+                        CAPTURE(pp.get_parameters());
+                        CHECK(serial_domain->contains(pp) == std::optional{status});
+                    });
             }
             else
             {
