@@ -9,10 +9,11 @@
 from __future__ import annotations
 
 from typing import Any
+from xml.etree import ElementTree as ET  # ruff: ignore[suspicious-xml-etree-import] -- local writer output
 
 import pytest
 
-from mnt.pyfiction.sidb import charge_distribution, lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb import charge_distribution, lattice, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.io import color_mode, write_sidb_layout_svg_to_string
 from mnt.pyfiction.sidb.model import sidb_charge_state
 from mnt.pyfiction.utils import __repo__, __version__
@@ -284,3 +285,55 @@ def test_svg_rejects_shifted_distribution() -> None:
     shifted.assign_sidb(lattice_site(1, 0))
     with pytest.raises(ValueError):  # ruff: ignore[pytest-raises-too-broad] -- error type is the public contract
         write_sidb_layout_svg_to_string(layout, charge_distribution(shifted))
+
+
+@pytest.mark.parametrize(
+    ("mode", "background_color", "dot_color", "border_color"),
+    [(color_mode.LIGHT, "#ffffff", "#ffffff", "#C8C8C8"), (color_mode.DARK, "#25323D", "#C8C8C8", "#ffffff")],
+)
+def test_si111_svg_geometry(mode: color_mode, background_color: str, dot_color: str, border_color: str) -> None:
+    """Si(111) rendering preserves every lattice and dot position in both color modes."""
+    layout = sidb_layout(lattice.si_111_1x1())
+    for coordinates in ((0, 0, 0), (1, 0, 1), (1, 0, 0), (3, 1, 1)):
+        layout.assign_sidb(lattice_site(*coordinates))
+    root = ET.fromstring(write_sidb_layout_svg_to_string(layout, color_background=mode))  # ruff: ignore[suspicious-xml-element-tree-usage] -- local writer output
+    assert [float(value) for value in root.attrib["viewBox"].split()] == pytest.approx(
+        (0.0, 0.0, 33.25, 11.52), abs=1e-9, rel=0
+    )
+    svg_namespace = "{http://www.w3.org/2000/svg}"
+    href_attribute = "{http://www.w3.org/1999/xlink}href"
+    instances = root.findall(f".//{svg_namespace}use")
+    expected_positions = {
+        "#sidb_color": [(6.65, 3.84), (13.3, 3.84), (16.6255, 5.76), (29.9255, 9.6)],
+        "#lattice_point": [(x, y) for y in (3.84, 7.68) for x in (6.65, 13.3, 19.95, 26.6)]
+        + [(x, y) for y in (5.76, 9.6) for x in (9.9755, 16.6255, 23.2755, 29.9255)],
+    }
+    assert {instance.attrib[href_attribute] for instance in instances} == set(expected_positions)
+    for href, expected in expected_positions.items():
+        selected = [instance for instance in instances if instance.attrib[href_attribute] == href]
+        actual = sorted((float(instance.attrib["x"]), float(instance.attrib["y"])) for instance in selected)
+        assert len(actual) == len(expected)
+        for position, wanted in zip(actual, sorted(expected), strict=True):
+            assert position == pytest.approx(wanted, abs=1e-9, rel=0)
+        for instance in selected:
+            style = {
+                key.strip(): value.strip()
+                for key, value in (
+                    field.split(":", 1) for field in instance.attrib["style"].split(";") if field.strip()
+                )
+            }
+            assert style["fill"] == (dot_color if href == "#sidb_color" else "#6e7175")
+            if href == "#sidb_color":
+                assert style["stroke"] == border_color
+                assert float(style["fill-opacity"]) == 1.0
+                assert float(style["stroke-width"]) == pytest.approx(0.3, abs=1e-12, rel=0)
+    background = root.find(f"{svg_namespace}rect")
+    assert background is not None
+    assert [float(background.attrib[name]) for name in ("x", "y", "width", "height")] == pytest.approx(
+        (0.0, 0.0, 33.25, 11.52), abs=1e-9, rel=0
+    )
+    background_style = {
+        key.strip(): value.strip()
+        for key, value in (field.split(":", 1) for field in background.attrib["style"].split(";") if field.strip())
+    }
+    assert background_style["fill"] == background_color

@@ -17,6 +17,7 @@ import pytest
 
 from mnt.pyfiction.sidb import charge_distribution, lattice, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.io import read_sqd_layout
+from mnt.pyfiction.sidb.model import sidb_charge_state
 from mnt.pyfiction.sidb.simulation import sidb_simulation_engine
 from mnt.pyfiction.sidb.simulation.analysis import physically_valid_parameters
 from mnt.pyfiction.sidb.simulation.engines import quickexact
@@ -50,6 +51,41 @@ def test_excited_state_number_counts_lower_energy_levels(resources_dir: Path) ->
         sweep_dimensions=[operational_domain_value_range(sweep_parameter.EPSILON_R, 5.6, 5.6, 0.1)],
     )
     assert parameters.get_excited_state_number_for_parameter(parameter_point([5.6])) == 2
+
+
+def test_three_dimensional_physical_validity_ranks(resources_dir: Path) -> None:
+    """A third-axis transition-energy sweep distinguishes ground-state and excited-state ranks."""
+    layout = read_sqd_layout(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
+    layout.assign_sidb(lattice_site(36, 1), sidb_dot_tag.EMPTY)
+    layout.assign_sidb(lattice_site(), sidb_dot_tag.EMPTY)
+    distribution = charge_distribution(layout)
+    for coordinates in (
+        (6, 2, 0),
+        (30, 3, 0),
+        (12, 4, 0),
+        (24, 5, 0),
+        (19, 8, 0),
+        (18, 11, 1),
+        (20, 14, 0),
+        (26, 16, 0),
+        (32, 18, 0),
+    ):
+        distribution.assign_charge_state(lattice_site(*coordinates), sidb_charge_state.NEUTRAL)
+    parameters = physically_valid_parameters(
+        layout,
+        distribution,
+        base=2,
+        number_of_threads=1,
+        sweep_dimensions=[
+            operational_domain_value_range(sweep_parameter.EPSILON_R, 5.6, 5.6, 0.1),
+            operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.0, 5.0, 0.1),
+            operational_domain_value_range(sweep_parameter.MU_MINUS, -0.33, -0.31, 0.01),
+        ],
+    )
+    assert [
+        parameters.get_excited_state_number_for_parameter(parameter_point([5.6, 5.0, mu_minus]))
+        for mu_minus in (-0.33, -0.32, -0.31)
+    ] == [0, 0, 1]
 
 
 def test_one_sidb_100_lattice() -> None:
