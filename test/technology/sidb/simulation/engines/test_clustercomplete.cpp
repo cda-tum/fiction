@@ -24,6 +24,7 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/progress_recorder.hpp"
@@ -1843,7 +1844,6 @@ TEST_CASE("ClusterComplete reports progress", "[clustercomplete]")
 #else  // FICTION_ALGLIB_ENABLED
 
 #include <catch2/catch_test_macros.hpp>
-#include <catch2/matchers/catch_matchers_string.hpp>
 
 TEST_CASE("ClusterComplete", "[clustercomplete]")
 {
