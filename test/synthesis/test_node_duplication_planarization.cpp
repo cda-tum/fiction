@@ -688,6 +688,11 @@ TEST_CASE("The shortest path through the H-graph places the fewest nodes", "[nod
                 orders.push_back(std::move(indices));
             });
         REQUIRE(orders.size() == num_pos);
+        for (std::size_t output{}; output < orders.size(); ++output)
+        {
+            CAPTURE(output);
+            REQUIRE_FALSE(orders[output].empty());
+        }
 
         // brute force: every permutation of every output's fanins; consecutive outputs share one placement when
         // the last fanin of one equals the first of the next

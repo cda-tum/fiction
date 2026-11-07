@@ -16,6 +16,8 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
@@ -45,22 +47,38 @@ TEST_CASE("Three separate BDL pairs on the same y-coord (three wires)", "[detect
     lyt.assign_sidb({6, 0, 0}, dot_tag::OUTPUT);
     lyt.assign_sidb({9, 0, 0}, dot_tag::OUTPUT);
 
+    /** @brief Isolated input pair. */
+    const std::vector<bdl_pair> input{{dot_tag::INPUT, {36, 0, 0}, {38, 0, 0}}};
+    /** @brief Connected internal and output pairs. */
+    const std::vector<bdl_pair> output{{dot_tag::NORMAL, {0, 0, 0}, {2, 0, 0}},
+                                       {dot_tag::OUTPUT, {6, 0, 0}, {9, 0, 0}}};
+
     SECTION("Determine all wires")
     {
         const auto all_bdl_wires = detect_bdl_wires(lyt);
         REQUIRE(all_bdl_wires.size() == 2);
+        /** @brief Complete pairs of each detected wire. */
+        std::vector<std::vector<bdl_pair>> pairs{};
+        pairs.reserve(all_bdl_wires.size());
+        for (const auto& wire : all_bdl_wires)
+        {
+            pairs.push_back(wire.pairs);
+        }
+        CHECK_THAT(pairs, Catch::Matchers::UnorderedRangeEquals(std::vector{input, output}));
     }
 
     SECTION("Determine input wires")
     {
         const auto all_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::INPUT);
         REQUIRE(all_bdl_wires.size() == 1);
+        CHECK(all_bdl_wires.front().pairs == input);
     }
 
     SECTION("Determine output wires")
     {
         const auto all_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::OUTPUT);
         REQUIRE(all_bdl_wires.size() == 1);
+        CHECK(all_bdl_wires.front().pairs == output);
     }
 }
 
@@ -77,16 +95,32 @@ TEST_CASE("Three separate BDL pairs on the same x-coord (three wires)", "[detect
     lyt.assign_sidb({0, 8, 0}, dot_tag::OUTPUT);
     lyt.assign_sidb({0, 9, 0}, dot_tag::OUTPUT);
 
+    /** @brief Isolated input pair. */
+    const std::vector<bdl_pair> input{{dot_tag::INPUT, {0, 36, 0}, {0, 37, 0}}};
+    /** @brief Isolated output pair. */
+    const std::vector<bdl_pair> output{{dot_tag::OUTPUT, {0, 8, 0}, {0, 9, 0}}};
+    /** @brief Isolated internal pair. */
+    const std::vector<bdl_pair> internal{{dot_tag::NORMAL, {0, 0, 0}, {0, 1, 0}}};
+
     SECTION("Determine all wires")
     {
         const auto all_bdl_wires = detect_bdl_wires(lyt);
         REQUIRE(all_bdl_wires.size() == 3);
+        /** @brief Complete pairs of each detected wire. */
+        std::vector<std::vector<bdl_pair>> pairs{};
+        pairs.reserve(all_bdl_wires.size());
+        for (const auto& wire : all_bdl_wires)
+        {
+            pairs.push_back(wire.pairs);
+        }
+        CHECK_THAT(pairs, Catch::Matchers::UnorderedRangeEquals(std::vector{input, output, internal}));
     }
 
     SECTION("Determine input wires")
     {
         const auto all_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::INPUT);
         REQUIRE(all_bdl_wires.size() == 1);
+        CHECK(all_bdl_wires.front().pairs == input);
         CHECK(all_bdl_wires[0].port.dir == port_direction::cardinal::NONE);
     }
 
@@ -94,6 +128,7 @@ TEST_CASE("Three separate BDL pairs on the same x-coord (three wires)", "[detect
     {
         const auto all_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::OUTPUT);
         REQUIRE(all_bdl_wires.size() == 1);
+        CHECK(all_bdl_wires.front().pairs == output);
         CHECK(all_bdl_wires[0].port.dir == port_direction::cardinal::NONE);
     }
 }
@@ -102,7 +137,6 @@ TEST_CASE("BDL wire without I/O BDL pairs", "[detect-bdl-wires]")
 {
     layout lyt{};
 
-    lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
     lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
 
     lyt.assign_sidb({4, 0, 0}, dot_tag::NORMAL);
@@ -242,6 +276,10 @@ TEST_CASE("BDL wire from east to west", "[detect-bdl-wires]")
         const auto all_bdl_wires = detect_bdl_wires(lyt);
         REQUIRE(all_bdl_wires.size() == 1);
         CHECK(all_bdl_wires[0].port.dir == port_direction::cardinal::WEST);
+        CHECK(all_bdl_wires.front().pairs == std::vector<bdl_pair>{{dot_tag::OUTPUT, {0, 0, 0}, {2, 0, 0}},
+                                                                   {dot_tag::NORMAL, {6, 0, 0}, {8, 0, 0}},
+                                                                   {dot_tag::NORMAL, {12, 0, 0}, {14, 0, 0}},
+                                                                   {dot_tag::INPUT, {18, 0, 0}, {20, 0, 0}}});
     }
 }
 
@@ -258,22 +296,39 @@ TEST_CASE("Three separate BDL pairs (three wires)", "[detect-bdl-wires]")
     lyt.assign_sidb({30, 17, 0}, dot_tag::OUTPUT);
     lyt.assign_sidb({32, 18, 0}, dot_tag::OUTPUT);
 
+    /** @brief Isolated input pair. */
+    const std::vector<bdl_pair> input{{dot_tag::INPUT, {36, 0, 0}, {38, 0, 0}}};
+    /** @brief Isolated internal pair. */
+    const std::vector<bdl_pair> internal{{dot_tag::NORMAL, {30, 5, 0}, {32, 5, 0}}};
+    /** @brief Isolated diagonal output pair. */
+    const std::vector<bdl_pair> output{{dot_tag::OUTPUT, {30, 17, 0}, {32, 18, 0}}};
+
     SECTION("Determine all wires")
     {
         const auto all_bdl_wires = detect_bdl_wires(lyt);
         REQUIRE(all_bdl_wires.size() == 3);
+        /** @brief Complete pairs of each detected wire. */
+        std::vector<std::vector<bdl_pair>> pairs{};
+        pairs.reserve(all_bdl_wires.size());
+        for (const auto& wire : all_bdl_wires)
+        {
+            pairs.push_back(wire.pairs);
+        }
+        CHECK_THAT(pairs, Catch::Matchers::UnorderedRangeEquals(std::vector{input, internal, output}));
     }
 
     SECTION("Determine input wires")
     {
         const auto all_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::INPUT);
         REQUIRE(all_bdl_wires.size() == 1);
+        CHECK(all_bdl_wires.front().pairs == input);
     }
 
     SECTION("Determine output wires")
     {
         const auto all_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::OUTPUT);
         REQUIRE(all_bdl_wires.size() == 1);
+        CHECK(all_bdl_wires.front().pairs == output);
     }
 }
 

@@ -54,32 +54,38 @@ namespace
 template <typename Lyt>
 void check_border_contract(const Lyt& lyt)
 {
-    lyt.foreach_coordinate(
-        [&lyt](const auto& c)
+    for (int32_t z = 0; z < 2; ++z)
+    {
+        for (int32_t y = 0; y < 4; ++y)
         {
-            CAPTURE(c);
-            CHECK(lyt.contains_coordinate(c));
-
-            CHECK(lyt.north(c).has_value() == (c.y != 0));
-            CHECK(lyt.west(c).has_value() == (c.x != 0));
-            CHECK(lyt.below(c).has_value() == (c.z != 0));
-            CHECK(lyt.east(c).has_value() == std::cmp_less(c.x + 1, lyt.width()));
-            CHECK(lyt.south(c).has_value() == std::cmp_less(c.y + 1, lyt.height()));
-            CHECK(lyt.above(c).has_value() == std::cmp_less(c.z + 1, lyt.layers()));
-            CHECK(lyt.is_at_northern_border(c) == (c.y == 0));
-            CHECK(lyt.is_at_eastern_border(c) == std::cmp_equal(c.x + 1, lyt.width()));
-            CHECK(lyt.is_at_southern_border(c) == std::cmp_equal(c.y + 1, lyt.height()));
-            CHECK(lyt.is_at_western_border(c) == (c.x == 0));
-
-            for (const auto& n : lyt.adjacent_coordinates(c))
+            for (int32_t x = 0; x < 5; ++x)
             {
-                CHECK(n != c);
-                CHECK(lyt.contains_coordinate(n));
+                const layout_base::coordinate c{x, y, z};
+                CAPTURE(c);
+                CHECK(lyt.contains_coordinate(c));
 
-                const auto back = lyt.adjacent_coordinates(n);
-                CHECK(std::find(back.cbegin(), back.cend(), c) != back.cend());
+                CHECK(lyt.north(c).has_value() == (c.y != 0));
+                CHECK(lyt.west(c).has_value() == (c.x != 0));
+                CHECK(lyt.below(c).has_value() == (c.z != 0));
+                CHECK(lyt.east(c).has_value() == std::cmp_less(c.x + 1, lyt.width()));
+                CHECK(lyt.south(c).has_value() == std::cmp_less(c.y + 1, lyt.height()));
+                CHECK(lyt.above(c).has_value() == std::cmp_less(c.z + 1, lyt.layers()));
+                CHECK(lyt.is_at_northern_border(c) == (c.y == 0));
+                CHECK(lyt.is_at_eastern_border(c) == std::cmp_equal(c.x + 1, lyt.width()));
+                CHECK(lyt.is_at_southern_border(c) == std::cmp_equal(c.y + 1, lyt.height()));
+                CHECK(lyt.is_at_western_border(c) == (c.x == 0));
+
+                for (const auto& n : lyt.adjacent_coordinates(c))
+                {
+                    CHECK(n != c);
+                    CHECK(lyt.contains_coordinate(n));
+
+                    const auto back = lyt.adjacent_coordinates(n);
+                    CHECK(std::find(back.cbegin(), back.cend(), c) != back.cend());
+                }
             }
-        });
+        }
+    }
 }
 
 /**
@@ -90,21 +96,27 @@ void check_border_contract(const Lyt& lyt)
 template <typename Lyt>
 void check_moves_stay_adjacent(const Lyt& lyt)
 {
-    lyt.foreach_coordinate(
-        [&lyt](const auto& c)
+    for (int32_t z = 0; z < 2; ++z)
+    {
+        for (int32_t y = 0; y < 4; ++y)
         {
-            CAPTURE(c);
-            for (const auto& moved : {lyt.north(c), lyt.north_east(c), lyt.east(c), lyt.south_east(c), lyt.south(c),
-                                      lyt.south_west(c), lyt.west(c), lyt.north_west(c)})
+            for (int32_t x = 0; x < 5; ++x)
             {
-                if (moved)
+                const layout_base::coordinate c{x, y, z};
+                CAPTURE(c);
+                for (const auto& moved : {lyt.north(c), lyt.north_east(c), lyt.east(c), lyt.south_east(c), lyt.south(c),
+                                          lyt.south_west(c), lyt.west(c), lyt.north_west(c)})
                 {
-                    CHECK(*moved != c);
-                    CHECK(lyt.contains_coordinate(*moved));
-                    CHECK(lyt.is_adjacent_of(c, *moved));
+                    if (moved)
+                    {
+                        CHECK(*moved != c);
+                        CHECK(lyt.contains_coordinate(*moved));
+                        CHECK(lyt.is_adjacent_of(c, *moved));
+                    }
                 }
             }
-        });
+        }
+    }
 }
 
 }  // namespace
@@ -232,6 +244,7 @@ TEMPLATE_TEST_CASE("Geometry neighbors respect borders", "[coordinate-contracts]
 
     CAPTURE(static_cast<int>(a));
     const auto layout = blueprints::make_layout<TestType>(a, {5, 4, 2});
+    CHECK(layout.get_extent() == layout_base::extent{5, 4, 2});
     check_border_contract(layout);
     if constexpr (!std::same_as<TestType, cartesian_layout>)
     {

@@ -37,7 +37,9 @@
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
 
+#include <algorithm>
 #include <cstddef>
+#include <cstdint>
 #include <new>
 #include <stdexcept>
 #include <vector>
@@ -58,6 +60,32 @@ template <typename Geometry>
 void remove_clocking(gate_layout<Geometry>& lyt)
 {
     lyt.foreach_object([&lyt](const auto id) { lyt.assign_clock_number(lyt.get_tile(id), 0); });
+}
+
+/**
+ * @brief Checks every declared connection's clock direction.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
+ * @param lyt Layout to check.
+ */
+template <typename Geometry>
+void check_clocked_connections(const gate_layout<Geometry>& lyt)
+{
+    std::vector<layout_object_id> objects{};
+    lyt.foreach_object([&](const auto id) { objects.push_back(id); });
+    CHECK(objects.size() == lyt.size());
+    std::ranges::sort(objects);
+    CHECK(std::ranges::adjacent_find(objects) == objects.end());
+    for (const auto id : objects)
+    {
+        for (uint32_t input{}; input < lyt.input_count(id); ++input)
+        {
+            CAPTURE(id.index, input);
+            const auto source = lyt.source({id, input});
+            REQUIRE(source.has_value());
+            // NOLINTNEXTLINE(bugprone-unchecked-optional-access): REQUIRE checks the value.
+            CHECK(lyt.is_incoming_clocked(lyt.get_tile(id), lyt.get_tile(*source)));
+        }
+    }
 }
 
 /**
@@ -91,12 +119,7 @@ void remove_assign_and_check_clocking(gate_layout<Geometry> lyt)
         REQUIRE(result);
 
         check_eq(lyt, lyt_clone);
-        lyt.foreach_object(
-            [&](const auto id)
-            {
-                lyt.foreach_fanin(id, [&](const auto source)
-                                  { CHECK(lyt.is_incoming_clocked(lyt.get_tile(id), lyt.get_tile(source))); });
-            });
+        check_clocked_connections(lyt);
     }
 }
 
@@ -232,12 +255,7 @@ TEST_CASE("Clock determination uses explicit constants and logical input ports",
         lyt.create_po(gate, "less", {2, 0});
     }
     REQUIRE(determine_clocking(lyt));
-    lyt.foreach_object(
-        [&](const auto id)
-        {
-            lyt.foreach_fanin(id, [&](const auto src)
-                              { CHECK(lyt.is_incoming_clocked(lyt.get_tile(id), lyt.get_tile(src))); });
-        });
+    check_clocked_connections(lyt);
 }
 
 TEST_CASE("Clock zones span occupied layers without phantom ground objects", "[determine-clocking]")
@@ -263,12 +281,12 @@ TEST_CASE("Clock zones span occupied layers without phantom ground objects", "[d
         }
     }
     REQUIRE(determine_clocking(lyt));
+    check_clocked_connections(lyt);
     lyt.foreach_object(
         [&](const auto id)
         {
             const auto t = lyt.get_tile(id);
             CHECK(lyt.get_clock_number(t) == lyt.get_clock_number({t.x, t.y, 0}));
-            lyt.foreach_fanin(id, [&](const auto src) { CHECK(lyt.is_incoming_clocked(t, lyt.get_tile(src))); });
         });
 }
 
