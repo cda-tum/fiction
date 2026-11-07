@@ -51,7 +51,7 @@ def test_potential_distance_documents_python_exception() -> None:
     [
         (5.0, 5.6, 5.0, 1, 0.1),
         (0.01, 2.0, 1.0, 1, 3.2),
-        (0.01, 2.0, 1.0, 2, math.pi),
+        (0.01, 2.0, 1.0, 2, 3.14),  # ruff: ignore[math-constant] -- exact decimal rounding result
         (0.03, 5.6, 5.0, 0, 4.0),
         (math.inf, 5.6, 5.0, 3, 0.001),
         (1e-300, 1e300, 1e300, 2, 1.44),
@@ -67,7 +67,10 @@ def test_conversion_precision_and_extremes(
     ) == pytest.approx(expected, abs=1e-14, rel=0)
 
 
-@pytest.mark.parametrize("distance", [0.01, 0.07, 0.1, 1.0, 2.0, math.pi, 10.0])
+@pytest.mark.parametrize(
+    "distance",
+    [0.01, 0.07, 0.1, 1.0, 2.0, 3.14, 10.0],  # ruff: ignore[math-constant] -- exact decimal rounding boundary
+)
 def test_decimal_boundaries_round_upward(distance: float) -> None:
     """A decimal boundary remains fixed while a slightly smaller potential advances one distance unit."""
     potential = 8.987552e9 * 1.6021766e-19 / (5.6 * distance * 1e-9) * math.exp(-distance / 5.0)
