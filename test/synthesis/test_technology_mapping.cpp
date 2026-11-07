@@ -92,33 +92,40 @@ TEST_CASE("Asymmetric gate selection", "[technology-mapping]")
     const auto                a = ntk.create_pi();
     const auto                b = ntk.create_pi();
     technology_mapping_params params{};
-    params.inv = true;
+    params.inv               = true;
+    const auto check_mapping = [&]
+    {
+        const auto gates = map_and_check(ntk, params);
+        CHECK(gates.num_lt2 == static_cast<uint32_t>(params.lt2));
+        CHECK(gates.num_gt2 == static_cast<uint32_t>(params.gt2));
+        CHECK(gates.num_le2 == static_cast<uint32_t>(params.le2));
+        CHECK(gates.num_ge2 == static_cast<uint32_t>(params.ge2));
+    };
 
     SECTION("LT")
     {
         ntk.create_po(ntk.create_lt(a, b));
         params.lt2 = true;
+        check_mapping();
     }
     SECTION("GT")
     {
         ntk.create_po(ntk.create_gt(a, b));
         params.gt2 = true;
+        check_mapping();
     }
     SECTION("LE")
     {
         ntk.create_po(ntk.create_le(a, b));
         params.le2 = true;
+        check_mapping();
     }
     SECTION("GE")
     {
         ntk.create_po(ntk.create_ge(a, b));
         params.ge2 = true;
+        check_mapping();
     }
-    const auto gates = map_and_check(ntk, params);
-    CHECK(gates.num_lt2 == static_cast<uint32_t>(params.lt2));
-    CHECK(gates.num_gt2 == static_cast<uint32_t>(params.gt2));
-    CHECK(gates.num_le2 == static_cast<uint32_t>(params.le2));
-    CHECK(gates.num_ge2 == static_cast<uint32_t>(params.ge2));
 }
 
 TEST_CASE("Single comparison gate without an inverter", "[technology-mapping]")
@@ -213,8 +220,13 @@ TEMPLATE_TEST_CASE("Name conservation after technology mapping", "[technology-ma
 
     REQUIRE_FALSE(stats.mapper_stats.mapping_error);
 
-    // network name
+    REQUIRE(mapped_maj.num_pis() == 3);
+    REQUIRE(mapped_maj.num_pos() == 1);
     CHECK(mapped_maj.get_network_name() == "maj");
+    CHECK(mapped_maj.get_name(mapped_maj.make_signal(mapped_maj.pi_at(0))) == "a");
+    CHECK(mapped_maj.get_name(mapped_maj.make_signal(mapped_maj.pi_at(1))) == "b");
+    CHECK(mapped_maj.get_name(mapped_maj.make_signal(mapped_maj.pi_at(2))) == "c");
+    CHECK(mapped_maj.get_output_name(0) == "f");
 }
 
 TEST_CASE("Exception for missing required gates in AIG", "[technology-mapping]")
