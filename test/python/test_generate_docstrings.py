@@ -18,6 +18,9 @@ import pytest
 
 def test_generate_docstrings(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Extract the documented declaration with optional real generator dependencies."""
+    script = Path(__file__).resolve().parents[2] / ".github/scripts/generate_docstrings.py"
+    if not script.is_file():
+        pytest.skip("The docstring generator scripts are not part of the installed test tree.")
     clang = pytest.importorskip("clang.cindex")
     generator = pytest.importorskip("pybind11_mkdoc")
     header = tmp_path / "concept.hpp"
@@ -35,7 +38,6 @@ def test_generate_docstrings(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
     except (clang.LibclangError, OSError):
         pytest.skip("The optional libclang runtime is unavailable")
 
-    script = Path(__file__).resolve().parents[2] / ".github/scripts/generate_docstrings.py"
     spec = importlib.util.spec_from_file_location("generate_docstrings", script)
     assert spec is not None
     assert spec.loader is not None
