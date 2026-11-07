@@ -43,7 +43,8 @@ def _simulate_arguments(parser: Parser) -> None:
 def simulate_command(session: Session, args: argparse.Namespace) -> Result:
     """Compute the truth table of every output of the active network or gate-level layout.
 
-    Layouts are simulated on the logic level, following the clocking; timing is not considered.
+    Layouts are simulated from their declared connections; placement, adjacency, and clocking do not affect the result.
+    Timing is not considered.
     """
     store = one_store(args, "network", "gate_layout")
     element = session.networks.current() if store == "network" else session.gate_layouts.current()
