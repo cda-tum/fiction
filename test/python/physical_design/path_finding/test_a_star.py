@@ -8,6 +8,7 @@
 
 from __future__ import annotations
 
+from collections import deque
 from itertools import pairwise, product, starmap
 from typing import TYPE_CHECKING
 
@@ -252,3 +253,66 @@ def test_searches_reach_crossing_layer_target() -> None:
     assert a_star(layout, (0, 0), (1, 0, 1), crossings=True) == expected
     assert enumerate_all_paths(layout, (0, 0), (1, 0, 1), crossings=True) == [expected]
     assert yen_k_shortest_paths(layout, (0, 0), (1, 0, 1), 10, crossings=True) == [expected]
+
+
+@pytest.mark.parametrize("cls", [shifted_cartesian_layout, hexagonal_layout])
+def test_default_searches_minimize_diagonal_routes(cls: type[shifted_cartesian_layout | hexagonal_layout]) -> None:
+    """A blocked vertical continuation cannot make a unit-cost diagonal route longer."""
+    layout = cls(arrangement.ODD_ROW, (4, 4))
+    blocked = obstructions()
+    blocked.obstruct_connection((1, 1), (1, 0))
+    source, target = (0, 3), (1, 0)
+    expected = [(0, 3), (1, 2), (0, 1), (1, 0)]
+    assert all(starmap(layout.is_adjacent_of, pairwise(expected)))
+    assert all(not blocked.is_obstructed_connection(a, b) for a, b in pairwise(expected))
+    path = a_star(layout, source, target, obstructions=blocked)
+    assert path[0] == source
+    assert path[-1] == target
+    assert len(path) == 4
+    assert a_star_distance(layout, source, target, obstructions=blocked) == 3
+    first = yen_k_shortest_paths(layout, source, target, 1, obstructions=blocked)
+    assert len(first) == 1
+    assert len(first[0]) == 4
+
+
+@pytest.mark.parametrize("cls", [shifted_cartesian_layout, hexagonal_layout])
+@pytest.mark.parametrize("a", list(arrangement))
+def test_offset_search_distances_match_breadth_first_search(
+    cls: type[shifted_cartesian_layout | hexagonal_layout], a: arrangement
+) -> None:
+    """Compare all endpoint pairs against an independent unweighted graph traversal."""
+    layout = cls(a, (4, 4))
+    blocked_site = coordinate(2, 2)
+    blocked_edge = (coordinate(1, 1), coordinate(1, 0))
+    blocked = obstructions()
+    blocked.obstruct_coordinate(blocked_site)
+    blocked.obstruct_connection(*blocked_edge)
+    sites = list(starmap(coordinate, product(range(4), repeat=2)))
+    for source, target in product(sites, repeat=2):
+        frontier = deque([(source, 0)])
+        visited = {source}
+        expected = 2**64 - 1
+        while frontier:
+            site, distance = frontier.popleft()
+            if site == target:
+                expected = distance
+                break
+            for neighbor in layout.adjacent_coordinates(site):
+                if neighbor in visited or (site, neighbor) == blocked_edge:
+                    continue
+                if neighbor == blocked_site and neighbor != target:
+                    continue
+                visited.add(neighbor)
+                frontier.append((neighbor, distance + 1))
+        path = a_star(layout, source, target, obstructions=blocked)
+        assert (len(path) - 1 if path else 2**64 - 1) == expected, (a, source, target)
+        assert a_star_distance(layout, source, target, obstructions=blocked) == expected, (a, source, target)
+        paths = yen_k_shortest_paths(layout, source, target, 1, obstructions=blocked)
+        assert (len(paths[0]) - 1 if paths else 2**64 - 1) == expected, (a, source, target)
+        if path:
+            assert path[0] == source
+            assert path[-1] == target
+            assert len(set(path)) == len(path)
+            assert all(starmap(layout.is_adjacent_of, pairwise(path)))
+            assert all((left, right) != blocked_edge for left, right in pairwise(path))
+            assert blocked_site not in path[1:-1]

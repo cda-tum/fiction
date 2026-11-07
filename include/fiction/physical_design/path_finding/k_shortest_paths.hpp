@@ -74,8 +74,8 @@ class yen_k_shortest_paths_impl
             params{p}
     {
         // start by determining the shortest path between source and target
-        k_shortest_paths.push_back(a_star(layout, objective, manhattan_distance_functor(), unit_cost_functor<uint8_t>(),
-                                          params.astar_params, search_obstructions));
+        k_shortest_paths.push_back(a_star(layout, objective, default_distance_functor<Lyt>{},
+                                          unit_cost_functor<uint8_t>(), params.astar_params, search_obstructions));
     }
 
     /**
@@ -126,7 +126,7 @@ class yen_k_shortest_paths_impl
 
                 // find an alternative path from the spur coordinate to the target and check that it is not empty
                 if (const auto spur_path =
-                        a_star(layout, {spur, objective.target}, manhattan_distance_functor(),
+                        a_star(layout, {spur, objective.target}, default_distance_functor<Lyt>{},
                                unit_cost_functor<uint8_t>(), params.astar_params, search_obstructions);
                     !spur_path.empty())
                 {
@@ -225,7 +225,7 @@ class yen_k_shortest_paths_impl
  * \f$k\f$ is larger than the number of possible paths from source to target, the size of the returned path collection
  * will be smaller than \f$k\f$.
  *
- * This implementation uses the A* algorithm with the Manhattan distance function internally.
+ * This implementation uses A* with the default unit-cost heuristic for the layout geometry internally.
  *
  * If k is zero, this function returns an empty collection without checking endpoint bounds.
  *

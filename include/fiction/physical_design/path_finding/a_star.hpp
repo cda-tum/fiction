@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
 #include "fiction/layouts/obstructions.hpp"
@@ -53,6 +54,13 @@ struct a_star_params
 
 namespace detail
 {
+/**
+ * @brief Selects a consistent heuristic for unit-cost steps in the layout geometry.
+ * @tparam Lyt Coordinate or gate-level layout type.
+ */
+template <typename Lyt>
+using default_distance_functor = std::conditional_t<std::derived_from<Lyt, layouts::cartesian_layout>,
+                                                    manhattan_distance_functor, chebyshev_distance_functor>;
 
 /**
  * @brief Implements A* search.
@@ -333,7 +341,9 @@ class a_star_impl
  * heuristic distance function that estimates the remaining costs towards the target in every step. The heuristic must
  * be consistent with the step costs: `h(u) <= cost(u, v) + h(v)` for every traversable step, with `h(target) = 0`.
  * Step costs must be nonnegative. Manhattan and Euclidean distance satisfy this condition for unit-cost Cartesian
- * steps. See `distance_functor` for implementations.
+ * steps. The default uses Manhattan distance for Cartesian layouts and Chebyshev distance for shifted Cartesian and
+ * hexagonal layouts, whose unit-cost steps can change both planar coordinates. See `distance_functor` for
+ * implementations.
  *
  * Paths do not pass obstructed coordinates or connections, except that the target is never obstructed. A coordinate
  * or connection is obstructed if the `obstructions` argument marks it or if the layout's `is_obstructed_coordinate`
@@ -371,11 +381,11 @@ class a_star_impl
  */
 template <typename Lyt, typename Dist = uint64_t, typename Cost = uint8_t>
     requires std::derived_from<Lyt, fiction::layouts::layout_base>
-[[nodiscard]] layout_coordinate_path a_star(const Lyt& layout, const routing_objective& objective,
-                                            const distance_functor<Dist>& dist_fn      = manhattan_distance_functor(),
-                                            const cost_functor<Cost>&     cost_fn      = unit_cost_functor<uint8_t>(),
-                                            const a_star_params&          params       = {},
-                                            const layouts::obstructions&  obstructions = {})
+[[nodiscard]] layout_coordinate_path
+a_star(const Lyt& layout, const routing_objective& objective,
+       const distance_functor<Dist>& dist_fn = detail::default_distance_functor<Lyt>{},
+       const cost_functor<Cost>& cost_fn = unit_cost_functor<uint8_t>(), const a_star_params& params = {},
+       const layouts::obstructions& obstructions = {})
 {
     return detail::a_star_impl<Lyt, Dist, Cost>{layout, objective, dist_fn, cost_fn, params, obstructions}.run();
 }
@@ -401,8 +411,9 @@ template <typename Lyt>
                                        const fiction::layouts::layout_base::coordinate& target,
                                        const layouts::obstructions&                     obstructions = {})
 {
-    const auto path_length =
-        a_star(layout, {source, target}, manhattan_distance_functor(), unit_cost_functor<>(), {}, obstructions).size();
+    const auto path_length = a_star(layout, {source, target}, detail::default_distance_functor<Lyt>{},
+                                    unit_cost_functor<>(), {}, obstructions)
+                                 .size();
 
     if (path_length == 0ul)
     {
