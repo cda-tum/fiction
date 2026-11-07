@@ -9,10 +9,14 @@
 from __future__ import annotations
 
 import copy
+from typing import TYPE_CHECKING
 
 import pytest
 
 from mnt.pyfiction.qca import qca_cell_mode, qca_cell_type, qca_layout
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 def test_cell_types_and_modes() -> None:
@@ -30,6 +34,7 @@ def test_empty_geometry_has_absent_cell_bounds() -> None:
 def test_geometry_is_cartesian() -> None:
     layout = qca_layout(extent=(10, 10, 2))
 
+    assert len(layout.coordinates()) == 200
     for t in layout.coordinates():
         assert t <= (9, 9, 1)
         assert layout.is_within_bounds(t)
@@ -37,8 +42,12 @@ def test_geometry_is_cartesian() -> None:
     for t in layout.ground_coordinates():
         assert t.z == 0
 
-    for t in layout.adjacent_coordinates((2, 2)):
-        assert t in [(1, 2), (2, 1), (3, 2), (2, 3)]
+    assert sorted((cell.x, cell.y, cell.z) for cell in layout.adjacent_coordinates((2, 2))) == [
+        (1, 2, 0),
+        (2, 1, 0),
+        (2, 3, 0),
+        (3, 2, 0),
+    ]
 
 
 def test_cell_type_and_mode_assignment() -> None:
@@ -68,9 +77,47 @@ def test_cell_type_and_mode_assignment() -> None:
     layout.assign_cell_type((2, 2, 1), qca_cell_type.EMPTY)
     assert layout.is_empty_cell((2, 2, 1))
     assert layout.get_cell_mode((2, 2, 1)) == qca_cell_mode.NORMAL
+    layout.assign_cell_type((2, 2, 1), qca_cell_type.NORMAL)
+    assert layout.get_cell_mode((2, 2, 1)) == qca_cell_mode.NORMAL
 
 
-def test_clock_zones_and_synchronization_elements() -> None:
+def test_crossing_modes_and_reset() -> None:
+    """Each crossing cell stores its mode and normal mode clears an override."""
+    layout = qca_layout((5, 5, 2))
+    for cell in [(2, 2, 0), (2, 1, 1), (2, 2, 1)]:
+        layout.assign_cell_type(cell, qca_cell_type.NORMAL)
+    layout.assign_cell_mode((2, 1, 1), qca_cell_mode.VERTICAL)
+    layout.assign_cell_mode((2, 2, 1), qca_cell_mode.CROSSOVER)
+
+    assert layout.is_crossing_layer((2, 2, 1))
+    assert layout.num_cells() == 3
+    assert [layout.get_cell_mode(cell) for cell in [(2, 2, 0), (2, 1, 1), (2, 2, 1)]] == [
+        qca_cell_mode.NORMAL,
+        qca_cell_mode.VERTICAL,
+        qca_cell_mode.CROSSOVER,
+    ]
+    layout.assign_cell_mode((2, 1, 1), qca_cell_mode.NORMAL)
+    assert layout.get_cell_mode((2, 1, 1)) == qca_cell_mode.NORMAL
+
+
+@pytest.mark.parametrize(("tile_x", "tile_y"), [(0, 1), (1, 0)])
+def test_reject_zero_tile_sizes(tile_x: int, tile_y: int) -> None:
+    with pytest.raises(ValueError, match="positive"):
+        qca_layout((2, 2), "2DDWave", "", tile_x, tile_y)
+
+
+def test_clocked_construction() -> None:
+    layout = qca_layout((5, 5, 2), "USE", "crossing", 5, 5)
+    assert layout.width() == 5
+    assert layout.layers() == 2
+    assert layout.get_layout_name() == "crossing"
+    assert layout.is_clocking_scheme("USE")
+    assert layout.get_tile_size_x() == 5
+    assert layout.get_tile_size_y() == 5
+
+
+@pytest.mark.parametrize("copy_layout", [copy.copy, copy.deepcopy])
+def test_clock_zones_and_synchronization_elements(copy_layout: Callable[[qca_layout], qca_layout]) -> None:
     """Clock numbers and synchronization elements belong to clock zones, i.e., to tiles of cells."""
     layout = qca_layout((5, 5), "2DDWave", "", 2, 2)
     assert layout.get_tile_size_x() == 2
@@ -86,14 +133,22 @@ def test_clock_zones_and_synchronization_elements() -> None:
     assert layout.get_clock_number((2, 2)) == 3
     assert layout.get_synchronization_element((3, 3)) == 2
     assert layout.get_synchronization_element((1, 1)) == 0
+    assert layout.is_synchronization_element((3, 2, 1))
+    assert not layout.is_synchronization_element((1, 1))
+    assert layout.get_synchronization_element((4, 4)) == 0
     assert layout.num_se() == 1
 
-    duplicate = copy.copy(layout)
+    duplicate = copy_layout(layout)
     assert duplicate == layout
     duplicate.assign_clock_number((1, 1), 0)
     duplicate.assign_synchronization_element((1, 1), 0)
+    duplicate.assign_cell_type((0, 0), qca_cell_type.NORMAL)
+    duplicate.assign_cell_mode((0, 0), qca_cell_mode.ROTATED)
+    assert duplicate.num_se() == 0
     assert layout.get_clock_number((2, 2)) == 3
     assert layout.num_se() == 1
+    assert layout.is_empty()
+    assert duplicate != layout
 
     layout.replace_clocking_scheme("USE")
     assert layout.is_clocking_scheme("USE")

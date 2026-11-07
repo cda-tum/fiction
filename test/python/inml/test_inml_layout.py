@@ -8,7 +8,15 @@
 
 from __future__ import annotations
 
+import copy
+from typing import TYPE_CHECKING
+
+import pytest
+
 from mnt.pyfiction.inml import inml_layout, inml_magnet_type
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 def test_magnet_types() -> None:
@@ -16,19 +24,32 @@ def test_magnet_types() -> None:
     assert str(inml_magnet_type.FANOUT_COUPLER_MAGNET) == "inml_magnet_type.FANOUT_COUPLER_MAGNET"
 
 
-def test_planar_clocked_layout() -> None:
+@pytest.mark.parametrize("copy_layout", [copy.copy, copy.deepcopy])
+def test_planar_clocked_layout(copy_layout: Callable[[inml_layout], inml_layout]) -> None:
     layout = inml_layout(
         extent=(8, 8, 2), clocking_scheme="2DDWave", layout_name="inverter", tile_size_x=4, tile_size_y=4
     )
 
     assert layout.layers() == 1
     assert layout.get_tile_size_x() == 4
+    assert layout.get_tile_size_y() == 4
+    assert layout.get_layout_name() == "inverter"
+    assert layout.num_clocks() == 4
 
     layout.assign_cell_type((0, 1), inml_magnet_type.INPUT)
     layout.assign_cell_type((1, 1), inml_magnet_type.INVERTER_MAGNET)
     layout.assign_cell_type((5, 1), inml_magnet_type.OUTPUT)
+    layout.assign_cell_name((0, 1), "a")
 
     assert layout.num_cells() == 3
     assert layout.get_cell_type((1, 1)) == inml_magnet_type.INVERTER_MAGNET
+    assert layout.get_cell_name((0, 1)) == "a"
     assert layout.get_clock_number((1, 1)) == 0
     assert layout.get_clock_number((5, 1)) == 1
+
+    duplicate = copy_layout(layout)
+    assert duplicate == layout
+    duplicate.assign_cell_type((1, 1), inml_magnet_type.NORMAL)
+    assert duplicate.get_cell_type((1, 1)) == inml_magnet_type.NORMAL
+    assert layout.get_cell_type((1, 1)) == inml_magnet_type.INVERTER_MAGNET
+    assert duplicate != layout
