@@ -42,6 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Python CLI tests check independent command results and named error cases.
   - Routing tests compare complete retained-object visits after clearing wires.
   - QCA ONE tests check selected port and OR-gate orientations against independent cell patterns.
   - Network utility tests check fanins through network interfaces instead of fixed node indices.
@@ -975,6 +976,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
 
+  - CLI help and examples now match explicit writers, FGL metadata, and layout simulation.
   - Surface-defect errors document zero-based recognized row indices instead of input line numbers.
   - Time-to-solution confidence documentation now names the target probability of at least one success.
   - ExGS Python documentation now describes all physically valid charge distributions.
