@@ -184,3 +184,48 @@ def test_sqd_invalid_geometry_preserves_file(tmp_path: Path, geometry: lattice) 
         write_sqd_layout(sidb_layout(geometry), str(path))
     assert path.read_bytes() == b"original"
     assert list(tmp_path.iterdir()) == [path]
+
+
+@pytest.mark.parametrize(
+    ("original", "replacement"),
+    [
+        ('<a1 x="4" y="1"/>', ""),
+        ('<a2 x="-2" y="8"/>', ""),
+        ('<b1 x="0" y="0"/>', ""),
+        ('<b2 x="1.5" y="2.5"/>', ""),
+        ("<N>2</N>", ""),
+        ("<N>2</N>", "<N/>"),
+        ("<N>2</N>", "<N>1</N>"),
+        ("<N>2</N>", "<N>3</N>"),
+        ("<N>2</N>", "<N>2.5</N>"),
+        ("<N>2</N>", "<N>2junk</N>"),
+        ('x="4"', ""),
+        ('y="1"', ""),
+        ('x="4"', 'x=""'),
+        ('x="4"', 'x="nan"'),
+        ('x="4"', 'x="inf"'),
+        ('x="4"', 'x="1e999"'),
+        ('x="4"', 'x="text"'),
+        ('x="4"', 'x="4junk"'),
+    ],
+)
+def test_sqd_explicit_lattice_geometry_validation(tmp_path: Path, original: str, replacement: str) -> None:
+    """Explicit lattice vectors and basis sites require complete finite coordinates and exactly two basis sites."""
+    geometry = '<name>custom</name><a1 x="4" y="1"/><a2 x="-2" y="8"/><N>2</N><b1 x="0" y="0"/><b2 x="1.5" y="2.5"/>'
+    document = EMPTY_SQD.replace("<lat_vec/>", f"<lat_vec>{geometry.replace(original, replacement, 1)}</lat_vec>")
+    path = tmp_path / "invalid_geometry.sqd"
+    path.write_text(document, encoding="utf-8")
+    with pytest.raises(sqd_parsing_error):
+        read_sqd_layout(str(path))
+
+
+def test_sqd_invalid_charged_defect_preserves_file(tmp_path: Path) -> None:
+    """A charged defect needs valid material parameters before an existing destination is replaced."""
+    layout = sidb_layout()
+    layout.assign_defect(lattice_site(), sidb_defect(sidb_defect_type.SI_VACANCY, -1, float("inf"), 5.0))
+    path = tmp_path / "preserved.sqd"
+    path.write_bytes(b"original")
+    with pytest.raises(ValueError):  # ruff: ignore[pytest-raises-too-broad] -- exception type is the contract
+        write_sqd_layout(layout, str(path))
+    assert path.read_bytes() == b"original"
+    assert list(tmp_path.iterdir()) == [path]
