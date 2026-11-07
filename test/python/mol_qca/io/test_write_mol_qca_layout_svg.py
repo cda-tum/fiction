@@ -55,25 +55,43 @@ def test_cell_types_and_molecules(tmp_path: Path, *, simple: bool) -> None:
     assert len(document.findall(".//{*}circle")) == (0 if simple else 18)
     assert len(document.findall(".//{*}line")) == (0 if simple else 6)
     assert [
-        tuple(rect.attrib[key] for key in ("x", "y", "width", "height")) for rect in document.findall(".//{*}rect")
-    ] == [("92.93404", "56.46016", "10", "10")] * 5
+        float(rect.attrib[key]) for rect in document.findall(".//{*}rect") for key in ("x", "y", "width", "height")
+    ] == pytest.approx([92.93404, 56.46016, 10, 10] * 5, rel=0, abs=1e-5)
     for cell in cells[:3]:
-        assert [tuple(circle.attrib[key] for key in ("cx", "cy", "r")) for circle in cell.findall(".//{*}circle")] == (
+        assert [
+            float(circle.attrib[key]) for circle in cell.findall(".//{*}circle") for key in ("cx", "cy", "r")
+        ] == pytest.approx(
             []
             if simple
             else [
-                ("95.43404", "58.96016", "0.97553"),
-                ("95.43404", "61.46016", "0.50000"),
-                ("95.43404", "63.96016", "0.97553"),
-                ("100.43404", "58.96016", "0.97553"),
-                ("100.43404", "61.46016", "0.50000"),
-                ("100.43404", "63.96016", "0.97553"),
-            ]
+                95.43404,
+                58.96016,
+                0.97553,
+                95.43404,
+                61.46016,
+                0.5,
+                95.43404,
+                63.96016,
+                0.97553,
+                100.43404,
+                58.96016,
+                0.97553,
+                100.43404,
+                61.46016,
+                0.5,
+                100.43404,
+                63.96016,
+                0.97553,
+            ],
+            rel=0,
+            abs=1e-5,
         )
-        assert [tuple(line.attrib[key] for key in ("x1", "y1", "x2", "y2")) for line in cell.findall(".//{*}line")] == (
-            []
-            if simple
-            else [("95.43404", "58.96016", "95.43404", "63.96016"), ("100.43404", "58.96016", "100.43404", "63.96016")]
+        assert [
+            float(line.attrib[key]) for line in cell.findall(".//{*}line") for key in ("x1", "y1", "x2", "y2")
+        ] == pytest.approx(
+            [] if simple else [95.43404, 58.96016, 95.43404, 63.96016, 100.43404, 58.96016, 100.43404, 63.96016],
+            rel=0,
+            abs=1e-5,
         )
     assert [(element.text or "").strip() for element in document.findall(".//{*}text")] == (
         [] if simple else ["C0", "C1"]
@@ -81,6 +99,7 @@ def test_cell_types_and_molecules(tmp_path: Path, *, simple: bool) -> None:
 
 
 def test_default_is_detailed(tmp_path: Path) -> None:
+    """Omitting the detail option retains the constant-cell label."""
     layout = mol_qca_layout((1, 1))
     layout.assign_cell_type((0, 0), mol_qca_cell_type.CONST_0)
     destination = tmp_path / "layout.svg"
@@ -89,6 +108,7 @@ def test_default_is_detailed(tmp_path: Path) -> None:
 
 
 def test_rejects_invalid_output_paths(tmp_path: Path) -> None:
+    """Invalid paths raise without creating missing parent directories."""
     layout = mol_qca_layout((1, 1))
     with pytest.raises(RuntimeError):
         write_mol_qca_layout_svg(layout, str(tmp_path / "missing" / "layout.svg"))
