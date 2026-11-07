@@ -88,7 +88,7 @@ TEST_CASE("Clock zones are tiles on every layer", "[tile-clocking]")
 
         CHECK(overridden.get_clock_number({2, 2}) == 3);
         CHECK(overridden.get_clock_number({3, 3}) == 3);
-        CHECK(!overridden.is_regularly_clocked());
+        CHECK_FALSE(overridden.is_regularly_clocked());
         CHECK(lyt.get_clock_number({2, 2}) == 2);
     }
 }
