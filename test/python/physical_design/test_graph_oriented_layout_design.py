@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
+from mnt.pyfiction.layouts import layout_input_port
 from mnt.pyfiction.networks.io import read_network
 from mnt.pyfiction.physical_design import (
     gold_cost_objective,
@@ -193,6 +194,7 @@ def test_gold_modes_objectives_planarity_and_statistics(
 def test_gold_seed_and_spacing_are_local_to_each_call(mux21: technology_network) -> None:
     """Reusing seeded options repeats PI placements after a different spacing invocation."""
     positions = []
+    snapshots = []
     for skip, seed, randomize in [(0, 7, False), (3, 42, True), (0, 7, True), (3, 42, True)]:
         layout = graph_oriented_layout_design(
             mux21,
@@ -207,6 +209,22 @@ def test_gold_seed_and_spacing_are_local_to_each_call(mux21: technology_network)
         assert equivalence_checking(mux21, layout) != eq_type.NO
         pi_sites = [layout.get_tile(pi) for pi in layout.pis()]
         positions.append(pi_sites)
+        objects = []
+        for node in [*layout.pis(), *layout.pos(), *layout.gates(), *layout.wires()]:
+            sources = [layout.source(layout_input_port(node, i)) for i in range(layout.input_count(node))]
+            objects.append((
+                layout.get_tile(node),
+                layout.object_function(node).to_hex(),
+                [None if source is None else layout.get_tile(source) for source in sources],
+            ))
+        snapshots.append((
+            layout.width(),
+            layout.height(),
+            layout.layers(),
+            sorted(objects),
+            pi_sites,
+            [layout.get_tile(po) for po in layout.pos()],
+        ))
         min_gap = max(1, skip)
         for edge in [
             sorted(site.x for site in pi_sites if site.y == 0),
@@ -215,3 +233,4 @@ def test_gold_seed_and_spacing_are_local_to_each_call(mux21: technology_network)
             assert all(right - left >= min_gap for left, right in itertools.pairwise(edge))
     assert positions[0] == positions[2]
     assert positions[1] == positions[3]
+    assert snapshots[1] == snapshots[3]

@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from itertools import pairwise, product
+from itertools import pairwise, product, starmap
 from typing import TYPE_CHECKING
 
 import pytest
@@ -63,6 +63,13 @@ def test_non_clocked_path_finding(make_lyt: Callable[[], CoordinateLayout]) -> N
     """Find a zero-length path on unclocked geometry."""
     lyt = make_lyt()
     assert a_star(lyt, coordinate(0, 0), coordinate(0, 0)) == [(0, 0)]
+    for source, target in [((0, 0), (3, 3)), ((3, 3), (0, 0))]:
+        path = a_star(lyt, source, target)
+        assert path[0] == source
+        assert path[-1] == target
+        assert len(path) == len(set(path))
+        assert all(lyt.is_within_bounds(site) for site in path)
+        assert all(starmap(lyt.is_adjacent_of, pairwise(path)))
 
 
 @pytest.mark.parametrize("make_lyt", CLOCKED_LAYOUTS)

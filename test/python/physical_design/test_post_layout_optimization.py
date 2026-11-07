@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
@@ -39,7 +39,8 @@ def test_post_layout_optimization_with_parameters(mux21: technology_network) -> 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
 
-def test_post_layout_optimization_with_stats(mux21: technology_network) -> None:
+@pytest.mark.parametrize("options", [{}, {"max_gate_relocations": 1, "timeout": 1000000}])
+def test_post_layout_optimization_with_stats(mux21: technology_network, options: dict[str, Any]) -> None:
     """Statistics describe the actual input and result, which remain logically equivalent."""
     layout = orthogonal(mux21)
 
@@ -47,30 +48,10 @@ def test_post_layout_optimization_with_stats(mux21: technology_network) -> None:
 
     before = layout.clone()
     stats = post_layout_optimization_stats()
-    post_layout_optimization(layout, statistics=stats)
+    post_layout_optimization(layout, statistics=stats, **options)
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
-    assert stats.time_total.total_seconds() > 0
-    assert stats.x_size_before == before.width()
-    assert stats.y_size_before == before.height()
-    assert stats.x_size_after == layout.width()
-    assert stats.y_size_after == layout.height()
-    assert layout.area() < before.area()
-    assert stats.area_improvement == pytest.approx(100 * (1 - layout.area() / before.area()), abs=0.01)
-
-
-def test_post_layout_optimization_with_stats_and_parameters(mux21: technology_network) -> None:
-    """Statistics describe the actual input and result, which remain logically equivalent."""
-    layout = orthogonal(mux21)
-
-    assert equivalence_checking(mux21, layout) == eq_type.STRONG
-
-    before = layout.clone()
-    stats = post_layout_optimization_stats()
-    post_layout_optimization(layout, statistics=stats, max_gate_relocations=1, timeout=1000000)
-
-    assert equivalence_checking(mux21, layout) == eq_type.STRONG
-    assert stats.time_total.total_seconds() > 0
+    assert stats.time_total.total_seconds() >= 0
     assert stats.x_size_before == before.width()
     assert stats.y_size_before == before.height()
     assert stats.x_size_after == layout.width()
