@@ -7275,6 +7275,30 @@ Raises:
 
 )doc";
 
+static const char *mkd_doc_fiction_networks_match_outputs =
+R"doc(Matches primary outputs by unique nonempty names, then by remaining
+declared positions.
+
+A name matches only when it occurs once in each interface. Empty,
+duplicate, and unmatched names fall back to the remaining positions in
+declared order. Every output receives exactly one match.
+
+Args:
+    left: Left interface owner.
+    right: Right interface owner.
+
+Template Args:
+    Left: Network or placed object layout.
+    Right: Network or placed object layout.
+
+Returns:
+    Right primary output index for each left primary output index.
+
+Raises:
+    ValueError: If the primary output counts differ.
+
+)doc";
+
 static const char *mkd_doc_fiction_networks_num_constant_fanins =
 R"doc(Computes the number of constant fanin nodes of some network node `n`.
 
@@ -7292,7 +7316,8 @@ Returns:
 
 static const char *mkd_doc_fiction_networks_restore_input_names =
 R"doc(Assigns input names from one network to another. Matching inputs are
-identified by their index.
+identified by their index in creation order, the order `pi_at` counts
+in; a ranked source is therefore visited with `foreach_pi_unranked`.
 
 Args:
     ntk_src: Source logic network whose input names are to be
@@ -8510,6 +8535,29 @@ Template Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_allowed_orientation = R"doc(Directions a node may take because of the fanout that drives it.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_allowed_orientation_EAST = R"doc(The node is the first consumer of a fanout and goes east.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_allowed_orientation_FREE = R"doc(The node is not driven by a fanout.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_allowed_orientation_SOUTH = R"doc(The node is the second consumer of a fanout and goes south.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_allowed_orientation_of =
+R"doc(Direction a single-fanin node may take.
+
+A consumer of a fanout node is fixed by its position among the
+consumers; every other node is free.
+
+Args:
+    ntk: Network.
+    n: Single-fanin node.
+
+Returns:
+    Allowed orientation.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl = R"doc(Maps gate-level tiles to cell-level gate implementations.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_apply_gate_library_impl_apply_gate_library_impl =
@@ -8603,6 +8651,30 @@ if it provides one, and recovers the layout name.
 
 Returns:
     The produced layout.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_buffer_connection =
+R"doc(Whether a single-fanin node drives the rightmost fanin of a two-input
+gate.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_buffer_connection_CONNECTED = R"doc(The node drives the rightmost fanin of a two-input gate.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_buffer_connection_UNCONNECTED =
+R"doc(The node drives a single-fanin node, the leftmost fanin of a gate, or
+an output.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_buffer_connection_of =
+R"doc(Whether a single-fanin node drives the rightmost fanin of a two-input
+gate.
+
+Args:
+    ntk: Network.
+    n: Single-fanin node.
+    drives_output: Nodes that drive a primary output.
+
+Returns:
+    Connection type.
 
 )doc";
 
@@ -8719,6 +8791,23 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_compute_level_variables =
+R"doc(Computes the orientation and the new routing lines of every node of a
+level from the lookup tables.
+
+Args:
+    ntk: Network.
+    lyt: Layout.
+    node2pos: Positions of the placed nodes.
+    lvl: Level.
+    drives_output: Nodes that drive a primary output.
+
+Returns:
+    Orientations and new lines, aligned with the rank order of the
+    level.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_compute_num_inputs_left_to_middle_pi =
 R"doc(This function iterates over all primary inputs in the given Cartesian
 layout and counts those whose tile is at the western border. Such
@@ -8779,6 +8868,30 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_compute_wiring =
+R"doc(Computes the wire lengths of every node of a level.
+
+Two-input gates split the level into clusters. Inside a cluster a node
+runs east by the new lines of the nodes right of it and south by the
+new lines of the nodes left of it, so the cluster sits on one
+diagonal. A gate advances the diagonal by the rows between its
+predecessors; the surplus of a cluster's lines over that advance is
+propagated to the clusters right of it as south runs and to the
+clusters left of it as east runs. Finally all nodes are lifted onto
+the largest diagonal.
+
+Args:
+    ntk: Network.
+    lyt: Layout.
+    node2pos: Positions of the placed nodes.
+    new_lines: New lines per node.
+    lvl: Level.
+
+Returns:
+    East and south runs per node.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_connect_and_place =
 R"doc(Routes ordered inputs to a placed two-input gate.
 
@@ -8792,6 +8905,53 @@ R"doc(Routes one input to a placed unary gate.
 
 Template Args:
     Lyt: Output layout type.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_connect_and_place_planar =
+R"doc(Places a single-fanin node on tile `t` and wires its predecessor to
+it.
+
+Args:
+    lyt: Layout.
+    t: Tile east or south of `pre_t`.
+    ntk: Network.
+    n: Node.
+    pre_t: Tile that holds the predecessor's signal.
+
+Returns:
+    Signal of the placed node.
+
+Raises:
+    std::logic_error: If `t` is occupied or neither east nor south of
+                      `pre_t`.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_connect_and_place_planar_2 =
+R"doc(Places a two-input gate on tile `t` and wires its predecessors to it,
+one from above and one from the left.
+
+The signals reach the gate in fanin order, so asymmetric functions
+keep their meaning whichever predecessor sits north.
+
+Args:
+    lyt: Layout.
+    t: Tile.
+    ntk: Network.
+    n: Node.
+    first_t: Tile that holds the first fanin's signal, in the column
+             or the row of `t`.
+    second_t: Tile that holds the second fanin's signal, in the other
+              one of column and row of `t`.
+    c: Value of a constant third fanin, if any.
+
+Returns:
+    Signal of the placed node.
+
+Raises:
+    std::logic_error: If `t` is occupied, or if a predecessor is
+                      neither north nor west of `t`.
 
 )doc";
 
@@ -9802,6 +9962,34 @@ static const char *mkd_doc_fiction_physical_design_detail_fanin_fanout_data_rout
 
 static const char *mkd_doc_fiction_physical_design_detail_fanin_fanout_data_to_clear = R"doc(Intermediate wire coordinates to remove.)doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_fanout_connection =
+R"doc(Whether each of the two consumers of a fanout node is a single-fanin
+node or a two-input gate.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_fanout_connection_BOTH_GATES = R"doc(Both consumers are two-input gates.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_fanout_connection_BOTH_SINGLE = R"doc(Both consumers have a single fanin.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_fanout_connection_FIRST_SINGLE = R"doc(The first consumer has a single fanin, the second is a two-input gate.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_fanout_connection_SECOND_SINGLE = R"doc(The second consumer has a single fanin, the first is a two-input gate.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_fanout_connection_of =
+R"doc(How the two consumers of a fanout node connect.
+
+Args:
+    ntk: Network.
+    n: Fanout node.
+    drives_output: Nodes that drive a primary output.
+
+Returns:
+    Connection type; `BOTH_SINGLE` for a fanout that drives an output.
+
+Raises:
+    std::logic_error: If `n` does not drive exactly two nodes.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_fit_occupied_geometry =
 R"doc(Fits zero-origin geometry to occupied objects. Empty layouts receive
 empty geometry.
@@ -10460,9 +10648,72 @@ Hexagonal layout.
 
 )doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_index_of =
+R"doc(Converts an enumerator to the index it stands for in the lookup
+tables.
+
+Args:
+    e: Enumerator.
+
+Template Args:
+    E: Enumeration type.
+
+Returns:
+    Index.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_is_east =
+R"doc(Whether an orientation places a node east of its predecessor's wire
+end.
+
+Args:
+    o: Orientation.
+
+Returns:
+    `true` iff the node goes east.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_is_east_south_colored = R"doc(Checks that fanouts use distinct direction colors.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_is_eastern_po_orientation_available = R"doc(Checks whether the eastern side can host a primary output.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_level_variables = R"doc(Orientation and routing-line demand of every node of a level.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_level_variables_new_lines = R"doc(New routing lines per node of the level.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_level_variables_orientations = R"doc(Orientation per node of the level.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_level_wiring =
+R"doc(Wire lengths of every node of a level.
+
+They state how far the predecessor's signal runs east and south before
+the node is placed.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_level_wiring_x = R"doc(East run per node.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_level_wiring_y = R"doc(South run per node.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_lift_to_common_diagonal =
+R"doc(Lifts every node of a level onto the diagonal with the largest demand.
+
+The demand of a node is `x + y`, that of a two-input gate additionally
+the rows between its predecessors, which the gate advances on its own.
+Nodes left of the node with the largest demand get the difference as
+south run, nodes right of it as east run.
+
+Args:
+    wiring: Wire lengths; adjusted.
+    gates: Rank positions of the two-input gates.
+    gate_lines: Rows between the predecessors of every gate, in the
+                order of `gates`.
+
+Raises:
+    std::logic_error: If a node demands more than the largest
+                      diagonal.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_nested_vector_hash =
 R"doc(This struct defines a hash function for a nested vector of layout
@@ -10490,6 +10741,18 @@ static const char *mkd_doc_fiction_physical_design_detail_new_gate_location_DEST
 static const char *mkd_doc_fiction_physical_design_detail_new_gate_location_NONE = R"doc(Do not check any tiles.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_new_gate_location_SRC = R"doc(Check if the source tile is empty.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_num_fanins =
+R"doc(Number of non-constant fanins of a node.
+
+Args:
+    ntk: Network.
+    n: Node.
+
+Returns:
+    Non-constant fanins.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_object_at =
 R"doc(Returns the object placed at a coordinate. @param lyt Layout. @param t
@@ -10525,6 +10788,22 @@ Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_orientation =
+R"doc(Direction in which a node is placed relative to the end of its
+predecessor's wire.
+
+The lookup tables of the placement model distinguish two variants per
+direction, which the placement treats alike; the variant only steers
+the entries chosen for the following node.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_orientation_EAST = R"doc(East of the wire end.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_orientation_EAST_SECOND = R"doc(East of the wire end, second variant.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_orientation_SOUTH = R"doc(South of the wire end.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_orientation_SOUTH_SECOND = R"doc(South of the wire end, second variant.)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_orthogonal_impl =
 R"doc(Implementation of the orthogonal physical design algorithm.
 
@@ -10558,6 +10837,17 @@ R"doc(Places and routes the source network with the orthogonal algorithm.
 
 Returns:
     A gate-level layout that implements the source network.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_output_drivers =
+R"doc(Marks the nodes that drive a primary output.
+
+Args:
+    ntk: Network.
+
+Returns:
+    Flags, indexed by node.
 
 )doc";
 
@@ -10614,6 +10904,179 @@ static const char *mkd_doc_fiction_physical_design_detail_placement_info_node2po
 static const char *mkd_doc_fiction_physical_design_detail_placement_info_pi2node =
 R"doc(Original placed primary-input identities, independent of routed output
 ports.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_placement_rule =
+R"doc(Orientation and routing-line demand of a node, one entry of a lookup
+table.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_placement_rule_direction = R"doc(Orientation of the node.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_placement_rule_new_lines = R"doc(New routing lines the node needs.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_placement_rule_placement_rule =
+R"doc(Creates a rule.
+
+Args:
+    d: Orientation of the node.
+    n: New routing lines the node needs.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl =
+R"doc(Implementation of PLANE.
+
+Every level of the ranked network is placed on one anti-diagonal of a
+2DDWave-clocked layout, the ranks running from the top right to the
+bottom left. For each level the lookup tables give every node an
+orientation and a demand for routing lines, `compute_wiring` turns the
+demands into the east and south runs of the predecessors' wires, and
+the nodes are placed in rank order at the ends of those wires. The
+wire of a fanout node is shared by its consumers.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_check_diagonal =
+R"doc(Checks that a placed node sits on the level's diagonal.
+
+Args:
+    n: Node just placed.
+    lvl: Level.
+    diagonal: Diagonal of the level, set by its first node.
+
+Raises:
+    std::logic_error: If `n` is on another diagonal.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_drives_output = R"doc(Nodes that drive a primary output.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_first_pos =
+R"doc(Tile of the first node of the last placed level, the top right end of
+the current diagonal.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_layout = R"doc(Layout under construction.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_node2pos = R"doc(Signal in the layout of every placed node.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_ntk = R"doc(The network.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_output_name =
+R"doc(Name of a primary output, the network's name if it has one and
+`po<index>` otherwise.
+
+Args:
+    po_index: Index of the output.
+
+Returns:
+    Name.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_output_slot =
+R"doc(Primary output waiting for its row, keyed by the rank position of its
+driver.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_output_slot_driver = R"doc(Driver of the output.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_output_slot_index = R"doc(Index of the output.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_output_slot_rank = R"doc(Rank position of the driver on the output level.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_place_input =
+R"doc(Places a primary input.
+
+The first input sits at the top right of the input diagonal; the
+others follow down the diagonal, with inputs in the lower half of the
+diagonal wired in from the left border and inputs in the upper half
+from the top border. An input that drives nothing stays at the border
+without a wire.
+
+Args:
+    n: Input node.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_place_level =
+R"doc(Places every node of a level in rank order.
+
+Args:
+    lvl: Level.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_place_single_fanin =
+R"doc(Places a single-fanin node east or south of the end of its
+predecessor's wire.
+
+The wire runs east and south by the lengths `compute_wiring` assigned.
+
+Args:
+    n: Node.
+    i: Rank position of `n`.
+    orient: Orientation of `n`.
+    wiring: Wire lengths of the level.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_place_t = R"doc(Tile of the last placed node.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_place_two_fanin =
+R"doc(Places a two-input gate at the corner below its northern predecessor
+and right of its western one.
+
+Both wires first run east and south by the lengths `compute_wiring`
+assigned. The western predecessor's east run is at least as long as
+the east run of the next node in the rank, so that its south run stays
+clear of that node's wire.
+
+Args:
+    n: Node.
+    i: Rank position of `n`.
+    wiring: Wire lengths of the level.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_plane_impl =
+R"doc(Creates the implementation.
+
+Args:
+    src: Network.
+    p: Parameters.
+    st: Statistics.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_ps = R"doc(Parameters.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_pst = R"doc(Statistics.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_route_outputs =
+R"doc(Routes every primary output to the right border.
+
+The nodes of the output level sit on one diagonal, so each node owns
+the row of its tile. A node with two outputs takes the row below as
+well, which pushes the rows of every following node down by one until
+a gap between two nodes absorbs the shift; a pushed node first runs
+south to its row, then east. Rows are assigned in rank order. A
+constant output takes a row of its own below the others, driven by a
+constant gate next to the border. The outputs of the layout keep the
+order of the network.
+
+Returns:
+    `1` plus the number of rows the shifts add below the last
+    diagonal, `0` if none were needed.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_plane_impl_run =
+R"doc(Places and routes the network.
+
+Returns:
+    The layout.
+
+Raises:
+    std::logic_error: If the placement breaks the diagonal invariant
+                      or a wire runs into an occupied tile.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl =
 R"doc(Relocates retained objects and reroutes their explicit logical input
@@ -10729,6 +11192,26 @@ static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimizati
 
 static const char *mkd_doc_fiction_physical_design_detail_post_layout_optimization_impl_wiring_reduction_stats = R"doc(Wiring reduction stats.)doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_predecessor_gap =
+R"doc(Room for placing a node, measured in free rows between its leftmost
+predecessor and that predecessor's left neighbour.
+
+The count is clamped to `MAX_GAP`, the largest gap the lookup tables
+distinguish.
+
+Args:
+    ntk: Network.
+    lyt: Layout.
+    node2pos: Positions of the placed nodes.
+    lvl: Level of `n`.
+    n: Node.
+
+Returns:
+    Gap; zero on the input level and for a predecessor without left
+    neighbour.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_priority_queue =
 R"doc(A priority queue class for managing elements with associated
 priorities. The elements are stored in a priority queue, with the
@@ -10764,7 +11247,51 @@ Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_ranked_fanins =
+R"doc(Non-constant fanins of a node sorted by rank position.
+
+Args:
+    ntk: Network.
+    n: Node.
+
+Returns:
+    Fanins of `n`, leftmost first.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_ranked_fanouts =
+R"doc(Fanouts of a node sorted by rank position.
+
+Args:
+    ntk: Network.
+    n: Node.
+
+Returns:
+    Fanouts of `n`, leftmost first.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_recursively_paint_edges = R"doc(Paints adjacent edges with alternating direction colors.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_reuse_or_create_buf =
+R"doc(Continues signal `a` on tile `t` with a buffer.
+
+A tile that already holds a wire driven by `a` is shared, which turns
+the tile of `a` into a layout fanout; any other occupant is a routing
+conflict.
+
+Args:
+    lyt: Layout.
+    a: Signal to continue.
+    t: Tile.
+
+Returns:
+    Signal of the buffer on `t`.
+
+Raises:
+    std::logic_error: If `t` holds anything but a wire driven by `a`.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_routing_connection_obstructed =
 R"doc(Combines layout connections with explicit search constraints.
@@ -10820,6 +11347,21 @@ Template Args:
 Returns:
     The coordinate to enter, or `std::nullopt` if the step is
     obstructed.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_rows_between =
+R"doc(Number of free rows between a tile and another tile south of it.
+
+Args:
+    north: Upper tile.
+    south: Lower tile.
+
+Returns:
+    `south.y - north.y - 1`.
+
+Raises:
+    std::logic_error: If `south` is not south of `north`.
 
 )doc";
 
@@ -10923,6 +11465,21 @@ from the parameters before use.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_search_space_graph_progress_description = R"doc(Most recent candidate description for the worker progress row.)doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_start_orientation =
+R"doc(Orientation of the first node of a level.
+
+The first node goes south in the second variant if the first fanout
+structure or gate of the level is a two-input gate, east otherwise.
+
+Args:
+    ntk: Network.
+    lvl: Level.
+
+Returns:
+    Orientation of the first node.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_to_hex =
 R"doc(Utility function to transform a Cartesian tile into a hexagonal one.
 
@@ -10996,6 +11553,34 @@ static const char *mkd_doc_fiction_physical_design_detail_topo_view_topo_view = 
 
 static const char *mkd_doc_fiction_physical_design_detail_topo_view_update_topo = R"doc(Orders dependencies and includes every declared primary input.)doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_two_input_indices =
+R"doc(Rank positions of the two-input gates of a level.
+
+Args:
+    ntk: Network.
+    lvl: Level.
+
+Returns:
+    Positions, ascending.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_two_input_new_lines =
+R"doc(Rows between the two predecessors of every two-input gate of a level.
+
+Those rows are the diagonal advance each gate brings on its own.
+
+Args:
+    ntk: Network.
+    lyt: Layout.
+    node2pos: Positions of the placed nodes.
+    lvl: Level.
+
+Returns:
+    Rows per gate, in the order of `two_input_indices`.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_update_to_delete_list =
 R"doc(Update the to-delete list based on a possible path in a
 wiring_reduction_layout.
@@ -11022,7 +11607,43 @@ Template Args:
 
 static const char *mkd_doc_fiction_physical_design_detail_wire_east = R"doc()doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_wire_east_then_south =
+R"doc(Runs the signal on `from` east and then south by the given lengths and
+returns the tile it ends on.
+
+Args:
+    lyt: Layout.
+    from: Tile that holds the signal.
+    east: Length of the east run.
+    south: Length of the south run that follows.
+
+Returns:
+    Tile the signal ends on.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_wire_south = R"doc()doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_wire_straight =
+R"doc(Wires the signal on `src` in a straight line towards `dest`, east or
+south, up to the tile before `dest`.
+
+Shared wire tiles are reused, see `reuse_or_create_buf`.
+
+Args:
+    lyt: Layout.
+    src: Tile that holds the signal.
+    dest: Tile east or south of `src`.
+
+Returns:
+    Signal on the tile before `dest`; the signal of `src` if the tiles
+    are adjacent.
+
+Raises:
+    std::logic_error: If `src` is empty or `dest` is neither east nor
+                      south of `src`.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_wiring_reduction_impl =
 R"doc(Searches horizontal and vertical wire cuts and edits the caller's
@@ -13175,6 +13796,86 @@ Returns:
     Output port of the newly placed gate in `lyt`.
 
 )doc";
+
+static const char *mkd_doc_fiction_physical_design_plane =
+R"doc(Places and routes a planar, balanced, fanout-substituted logic network
+with unified outputs as a 2DDWave-clocked gate-level layout without
+wire crossings (PLANE, Planar Layout from Network Embedding).
+
+The approach was originally proposed in \"A Fully Planar Approach to
+Field-coupled Nanocomputing: Scalable Placement and Routing Without
+Wire Crossings\" by B. Hien, M. Walter, S. Hofmann, and R. Wille in
+IEEE NANO 2025.
+
+Every level of the network is placed on one anti-diagonal of the
+layout in rank order, so the planar embedding of the network is
+preserved. Lookup tables decide for every node whether it sits east or
+south of its predecessor's wire and how many routing lines the level
+needs; the wires are then run east and south so that all nodes of a
+level share one diagonal. Primary inputs sit on the left and top
+borders, primary outputs on the right border; constant outputs take
+rows of their own below the others.
+
+The node order of the input is its rank order. The input must be
+planar in that order with at most two non-constant fanins and at most
+two fanouts per node, primary outputs included, and every non-constant
+output must be driven from the last level (unified outputs, see
+`synthesis::network_balancing`). `synthesis::flatten_planarization`
+turns the result of `synthesis::planarization` into such a network.
+
+Args:
+    ntk: Network to place and route.
+    ps: Parameters.
+    pst: Statistics.
+
+Returns:
+    Crossing-free gate-level layout that implements `ntk`.
+
+Raises:
+    networks::high_degree_fanin_exception: If a node has more than two
+                                           non-constant fanins.
+    ValueError: If `ntk` has no primary inputs, if a node drives more
+                than two fanouts, if no output reaches a gate, if a
+                gate has only constant fanins or a constant fanin next
+                to a single non-constant one, if `ntk` is not
+                balanced, if a non-constant output is driven from
+                above the last level, or if the rank order of `ntk`
+                has crossings.
+    std::logic_error: If placement or routing cannot keep the layout
+                      planar; such an input is a defect.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_plane_params = R"doc(Parameters for the planar placement and routing.)doc";
+
+static const char *mkd_doc_fiction_physical_design_plane_params_number_of_clock_phases =
+R"doc(Number of clock phases of the 2DDWave clocking scheme.
+
+Three and four are supported.)doc";
+
+static const char *mkd_doc_fiction_physical_design_plane_params_on_progress = R"doc(Receives completed work and the phase total.)doc";
+
+static const char *mkd_doc_fiction_physical_design_plane_stats = R"doc(Statistics of the planar placement and routing.)doc";
+
+static const char *mkd_doc_fiction_physical_design_plane_stats_num_crossings = R"doc(Number of crossings; zero for every layout this algorithm returns.)doc";
+
+static const char *mkd_doc_fiction_physical_design_plane_stats_num_gates = R"doc(Number of gates.)doc";
+
+static const char *mkd_doc_fiction_physical_design_plane_stats_num_wires = R"doc(Number of wires.)doc";
+
+static const char *mkd_doc_fiction_physical_design_plane_stats_report =
+R"doc(Writes the statistics to a stream.
+
+Args:
+    out: Stream to write to.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_plane_stats_time_total = R"doc(Runtime of placement and routing.)doc";
+
+static const char *mkd_doc_fiction_physical_design_plane_stats_x_size = R"doc(Layout width.)doc";
+
+static const char *mkd_doc_fiction_physical_design_plane_stats_y_size = R"doc(Layout height.)doc";
 
 static const char *mkd_doc_fiction_physical_design_post_layout_optimization =
 R"doc(A post-layout optimization algorithm as originally proposed in \"Post-
@@ -26076,10 +26777,11 @@ R"doc(Builds the planar `virtual_pi_network` from the levelized duplication
 order.
 
 Levels are processed from the primary inputs upwards. A repeated
-primary input becomes a virtual primary input; every other repeated
-node becomes a fresh gate with the same function. Fanins are connected
-in the fanin order of the source node, matched by origin against the
-ids recorded in `fanins_of`, and keep their complementation.
+primary input becomes a virtual primary input named after its real
+one; every other repeated node becomes a fresh gate with the same
+function. Fanins are connected in the fanin order of the source node,
+matched by origin against the ids recorded in `fanins_of`, and keep
+their complementation.
 
 Returns:
     The planar destination network.
@@ -26200,6 +26902,17 @@ Args:
 Returns:
     Nodes created below the level, or a value above `budget` if cut
     off.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_detail_node_duplication_planarization_impl_copy_input_name =
+R"doc(Gives a primary input of the destination the name of the source input
+it stands for, if it has one.
+
+Args:
+    src: Source primary input.
+    dst: Signal of the destination input, real or virtual.
+    dest: Destination network.
 
 )doc";
 
@@ -27043,6 +27756,33 @@ static const char *mkd_doc_fiction_synthesis_fanout_substitution_params_threshol
 R"doc(Maximum number of outputs any gate is allowed to have before
 substitution applies. Must be at least one.)doc";
 
+static const char *mkd_doc_fiction_synthesis_flatten_planarization =
+R"doc(Copies a planar network into a named technology network whose node
+order encodes the rank order.
+
+The result lists the primary inputs in the order of level 0, then the
+gates level by level in rank order. Virtual primary inputs become
+ordinary primary inputs of the result; all names are kept. A
+complemented fanin or output signal reads its node through an inverter
+node that sits right before the node that reads it, and a complemented
+constant becomes the other constant. Such inverters leave the copy
+unbalanced; they occur only in a planar network built by hand over a
+type with complemented signals, such as an AIG, because
+`planarization` works on technology networks.
+
+Args:
+    planar: Planar network, the result of `planarization`.
+
+Template Args:
+    Ntk: Ranked network type of the planar network.
+
+Returns:
+    The copy, and for every primary input of the copy the index of the
+    input of the original network that it stands for. A virtual
+    primary input maps to the index of its real primary input.
+
+)doc";
+
 static const char *mkd_doc_fiction_synthesis_io_tt_reader =
 R"doc(Reads whitespace-separated pairs of a hexadecimal truth table and its
 corresponding Boolean expression. Truth tables use a `0x` or `0X`
@@ -27213,7 +27953,9 @@ an H-graph enumerates the fanin orderings of every node; the shortest
 path through it gives an ordering of the level below in which every
 edge can be drawn without a crossing, at the cost of duplicating the
 nodes that would otherwise be crossed. Duplicated primary inputs
-become virtual primary inputs of the result.
+become virtual primary inputs of the result; every primary input keeps
+its name, and a virtual primary input carries the name of its real
+one.
 
 Consecutive consumers in a level share one copy of their common fanin,
 so the result is not fanout-substituted; `planar_fanout_substitution`
@@ -27505,10 +28247,10 @@ strategy, resolves the crossings that the hybrid strategy kept with
 `planar_fanout_substitution`, and removes the buffers that this leaves
 behind with `planar_rebalancing`.
 
-Duplicated primary inputs become virtual primary inputs of the result.
-The function checks the result for crossings and for balance with
-unified outputs. The fanout degree is not checked;
-`is_fanout_substituted` does it on request.
+Duplicated primary inputs become virtual primary inputs of the result,
+named after their real ones. The function checks the result for
+crossings and for balance with unified outputs. The fanout degree is
+not checked; `is_fanout_substituted` does it on request.
 
 Args:
     ntk: Source network.
@@ -27516,8 +28258,10 @@ Args:
     pst: Statistics.
 
 Template Args:
-    Ntk: Ranked, balanced network type (see `mutable_rank_view`)
-         without virtual primary inputs.
+    Ntk: Ranked, balanced technology network type (see
+         `mutable_rank_view` and `technology_network`) without virtual
+         primary inputs; the stages need `create_node`, `is_buf`, and
+         `is_po`.
 
 Returns:
     Planar `virtual_pi_network` with unified outputs and fanout nodes
@@ -29538,6 +30282,7 @@ R"doc(Standard constructor.
 Args:
     specification: Logical specification of intended functionality.
     implementation: Implementation of specified functionality.
+    p: Parameters.
     st: Statistics.
 
 )doc";
@@ -29566,11 +30311,20 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_verification_detail_equivalence_checking_impl_ps = R"doc(Parameters.)doc";
+
 static const char *mkd_doc_fiction_verification_detail_equivalence_checking_impl_pst = R"doc(Result statistics.)doc";
 
 static const char *mkd_doc_fiction_verification_detail_equivalence_checking_impl_run =
-R"doc(Checks design rules, aligned logic, and throughput. @return Physical
-equivalence type.
+R"doc(Checks design rules, aligned logic, and throughput.
+
+Returns:
+    Physical equivalence type.
+
+Raises:
+    ValueError: If the input mapping is non-empty and does not name
+                one specification input for every implementation
+                input.
 
 )doc";
 
@@ -29766,6 +30520,9 @@ logic network or a placed gate-level layout. Layout logic is extracted
 before SAT checking. Interfaces match by names unique on both sides,
 then by remaining declared positions. Unequal interface sizes, missing
 required inputs, and required dependency cycles return `NO`.
+`ps.input_mapping` replaces the input matching with an explicit one,
+under which the implementation may have more inputs than the
+specification, as a layout with duplicated inputs does.
 
 This implementation enables the comparison of two logic networks, a
 logic network and a gate-level layout or two gate-level layouts. Since
@@ -29791,6 +30548,30 @@ Große, and R. Drechsler in DAC 2020.
 Args:
     spec: The specification.
     impl: The implementation.
+    ps: Parameters.
+    pst: Statistics.
+
+Template Args:
+    Spec: Specification type.
+    Impl: Implementation type.
+
+Returns:
+    The equivalence type of `spec` and `impl`.
+
+Raises:
+    ValueError: If `ps.input_mapping` is non-empty and does not name
+                one specification input for every implementation
+                input.
+
+)doc";
+
+static const char *mkd_doc_fiction_verification_equivalence_checking_2 =
+R"doc(Same as the other `equivalence_checking` function with default
+parameters.
+
+Args:
+    spec: The specification.
+    impl: The implementation.
     pst: Statistics.
 
 Template Args:
@@ -29801,6 +30582,20 @@ Returns:
     The equivalence type of `spec` and `impl`.
 
 )doc";
+
+static const char *mkd_doc_fiction_verification_equivalence_checking_params = R"doc(Parameters for equivalence checking.)doc";
+
+static const char *mkd_doc_fiction_verification_equivalence_checking_params_input_mapping =
+R"doc(Specification input that every implementation input reads, in declared
+order.
+
+Empty: the inputs match by names unique on both sides, then by
+       remaining declared positions, which requires equal
+input counts. Otherwise, entry `i` names the specification input that
+implementation input `i` reads, and the input counts may differ:
+several implementation inputs read the same specification input, as
+the duplicated inputs of a planarized layout do. The outputs match by
+names and positions either way.)doc";
 
 static const char *mkd_doc_fiction_verification_equivalence_checking_stats = R"doc(Physical equivalence result, throughput, and diagnostics.)doc";
 

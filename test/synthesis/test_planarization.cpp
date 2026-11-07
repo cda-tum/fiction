@@ -24,13 +24,17 @@
 
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>
+#include <fiction/networks/virtual_pi_network.hpp>
 #include <fiction/synthesis/fanout_substitution.hpp>
 #include <fiction/synthesis/network_balancing.hpp>
 #include <fiction/synthesis/node_duplication_planarization.hpp>
 #include <fiction/synthesis/planarization.hpp>
+#include <fiction/types.hpp>
 #include <fiction/utils/graph/mincross.hpp>
 
+#include <fmt/format.h>
 #include <mockturtle/algorithms/cleanup.hpp>
+#include <mockturtle/algorithms/simulation.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/traits.hpp>
 
@@ -66,6 +70,39 @@ void check_contract(const Spec& spec, const Impl& impl, const uint32_t degree = 
     CHECK(is_fanout_substituted(impl, {.degree = degree}));
     CHECK(mockturtle::cleanup_dangling(impl).size() == impl.size());
     check_virtual_eq(spec, impl);
+}
+
+/**
+ * Checks that a flattened network computes the functions of the original network under every input assignment, with
+ * each copied input tied to the original input it stands for.
+ */
+template <typename Spec, typename Flat>
+void check_flat_eq(const Spec& spec, const Flat& flat, const std::vector<uint32_t>& original_input)
+{
+    REQUIRE(original_input.size() == flat.num_pis());
+    REQUIRE(flat.num_pos() == spec.num_pos());
+
+    for (uint64_t assignment = 0; assignment < (uint64_t{1} << spec.num_pis()); ++assignment)
+    {
+        CAPTURE(assignment);
+
+        std::vector<bool> original_values(spec.num_pis());
+        for (std::size_t i = 0; i < original_values.size(); ++i)
+        {
+            original_values[i] = ((assignment >> i) & 1u) != 0;
+        }
+
+        std::vector<bool> flat_values(flat.num_pis());
+        for (std::size_t i = 0; i < flat_values.size(); ++i)
+        {
+            flat_values[i] = original_values[original_input[i]];
+        }
+
+        const auto expected = mockturtle::simulate<bool>(spec, mockturtle::default_simulator<bool>{original_values});
+        const auto actual   = mockturtle::simulate<bool>(flat, mockturtle::default_simulator<bool>{flat_values});
+
+        CHECK(actual == expected);
+    }
 }
 
 }  // namespace
@@ -583,4 +620,119 @@ TEST_CASE("Networks with virtual primary inputs are rejected", "[planarization]"
     REQUIRE(planar.num_virtual_pis() > 0);
 
     CHECK_THROWS_AS(planarization(planar), std::invalid_argument);
+}
+
+TEST_CASE("Flattening keeps the functions and the rank order of a planar network", "[planarization]")
+{
+    const auto ntk    = blueprints::full_adder_network<technology_network>();
+    const auto planar = planarization(rank(ntk));
+    REQUIRE(planar.num_virtual_pis() > 0);
+
+    const auto [flat, original_input] = flatten_planarization(planar);
+
+    REQUIRE(original_input.size() == flat.num_pis());
+    CHECK(flat.num_pis() == planar.num_pis());
+    CHECK(flat.num_pos() == planar.num_pos());
+
+    const mutable_rank_view ranked{flat};
+
+    CHECK(ranked.depth() == planar.depth());
+    CHECK(utils::graph::count_crossings(ranked) == 0);
+
+    for (uint32_t level = 0; level <= planar.depth(); ++level)
+    {
+        CAPTURE(level);
+        CHECK(ranked.rank_width(level) == planar.rank_width(level));
+    }
+
+    check_flat_eq(ntk, flat, original_input);
+}
+
+TEST_CASE("Flattening keeps the polarity of fanins and outputs and the constants", "[planarization]")
+{
+    SECTION("planar AIG with complemented signals and shared constant node")
+    {
+        // the pipeline needs a technology network, so an AIG reaches the flattening only as a hand-built planar network
+        virtual_pi_network<mutable_rank_view<mockturtle::aig_network>> planar{};
+
+        const auto a  = planar.create_pi();
+        const auto b  = planar.create_pi();
+        const auto c  = planar.create_pi();
+        const auto a2 = planar.create_virtual_pi(a);
+        planar.create_po(!planar.create_and(a, b));
+        planar.create_po(planar.create_and(!a2, c));
+        planar.create_po(planar.get_constant(true));
+        planar.create_po(planar.get_constant(false));
+        planar.update_ranks();
+
+        mockturtle::aig_network spec{};
+
+        const auto x = spec.create_pi();
+        const auto y = spec.create_pi();
+        const auto z = spec.create_pi();
+        spec.create_po(!spec.create_and(x, y));
+        spec.create_po(spec.create_and(!x, z));
+        spec.create_po(spec.get_constant(true));
+        spec.create_po(spec.get_constant(false));
+
+        const auto [flat, original_input] = flatten_planarization(planar);
+
+        CHECK(original_input == std::vector<uint32_t>{0, 1, 2, 0});
+        CHECK(flat.constant_value(flat.get_node(flat.po_at(2))));
+        CHECK(!flat.constant_value(flat.get_node(flat.po_at(3))));
+        check_flat_eq(spec, flat, original_input);
+    }
+    SECTION("technology network with constant outputs and an inverter")
+    {
+        technology_network tec{};
+
+        const auto a = tec.create_pi();
+        const auto b = tec.create_pi();
+        tec.create_po(tec.create_nand(a, b));
+        tec.create_po(tec.create_and(tec.create_not(a), b));
+        tec.create_po(tec.get_constant(true));
+        tec.create_po(tec.get_constant(false));
+
+        const auto [flat, original_input] = flatten_planarization(planarization(rank(tec)));
+
+        CHECK(flat.constant_value(flat.get_node(flat.po_at(2))));
+        CHECK(!flat.constant_value(flat.get_node(flat.po_at(3))));
+        check_flat_eq(tec, flat, original_input);
+    }
+}
+
+TEST_CASE("Duplicated inputs carry the names of their originals", "[planarization]")
+{
+    auto ntk = blueprints::full_adder_network<named_technology_network>();
+
+    ntk.foreach_pi([&ntk](const auto& pi, const auto i) { ntk.set_name(ntk.make_signal(pi), fmt::format("in{}", i)); });
+
+    // the node order after the cleanup is the one the Python flow ranks; the duplicated inputs then come out in
+    // another order than the originals
+    const mutable_rank_view ranked{mockturtle::cleanup_dangling(
+        network_balancing<named_technology_network>(ntk, {.unify_outputs = true, .buffer_constant_outputs = false}))};
+
+    const auto planar = planarization(ranked);
+    REQUIRE(planar.num_virtual_pis() > 0);
+
+    planar.foreach_pi(
+        [&planar](const auto& pi)
+        {
+            const auto real = planar.is_virtual_pi(pi) ? planar.get_real_pi(pi) : pi;
+
+            CAPTURE(pi, real);
+            REQUIRE(planar.has_name(planar.make_signal(pi)));
+            CHECK(planar.get_name(planar.make_signal(pi)) == planar.get_name(planar.make_signal(real)));
+        });
+
+    const auto [flat, original_input] = flatten_planarization(planar);
+
+    REQUIRE(original_input.size() == flat.num_pis());
+
+    flat.foreach_pi(
+        [&flat, &origin = original_input](const auto& pi, const auto i)
+        {
+            CAPTURE(i, origin[i]);
+            CHECK(flat.get_name(flat.make_signal(pi)) == fmt::format("in{}", origin[i]));
+        });
 }

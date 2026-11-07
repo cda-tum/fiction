@@ -8,3 +8,6 @@
 
 ```{doxygenfunction} fiction::networks::match_interfaces
 ```
+
+```{doxygenfunction} fiction::networks::match_outputs
+```

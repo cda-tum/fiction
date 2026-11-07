@@ -16,22 +16,27 @@
 
 #pragma once
 
+#include "fiction/networks/name_utils.hpp"
 #include "fiction/networks/virtual_pi_network.hpp"
 #include "fiction/synthesis/crossing_gate_planarization.hpp"
 #include "fiction/synthesis/network_balancing.hpp"
 #include "fiction/synthesis/node_duplication_planarization.hpp"
 #include "fiction/synthesis/planar_fanout_substitution.hpp"
 #include "fiction/synthesis/planar_rebalancing.hpp"
+#include "fiction/types.hpp"
 #include "fiction/utils/graph/mincross.hpp"
 #include "fiction/utils/progress.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
+#include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <cstdint>
 #include <iostream>
 #include <stdexcept>
+#include <utility>
+#include <vector>
 
 namespace fiction::synthesis
 {
@@ -108,10 +113,12 @@ struct planarization_stats
  * strategy kept with `crossing_gate_planarization`, restores fanout nodes with `planar_fanout_substitution`, and
  * removes the buffers that this leaves behind with `planar_rebalancing`.
  *
- * Duplicated primary inputs become virtual primary inputs of the result. The function checks the result for crossings
- * and for balance with unified outputs. The fanout degree is not checked; `is_fanout_substituted` does it on request.
+ * Duplicated primary inputs become virtual primary inputs of the result, named after their real ones. The function
+ * checks the result for crossings and for balance with unified outputs. The fanout degree is not checked;
+ * `is_fanout_substituted` does it on request.
  *
- * @tparam Ntk Ranked, balanced network type (see `mutable_rank_view`) without virtual primary inputs.
+ * @tparam Ntk Ranked, balanced technology network type (see `mutable_rank_view` and `technology_network`) without
+ * virtual primary inputs; the stages need `create_node`, `is_buf`, and `is_po`.
  * @param ntk Source network.
  * @param ps Parameters.
  * @param pst Statistics.
@@ -185,6 +192,96 @@ template <typename Ntk>
     }
 
     return result;
+}
+
+/**
+ * @brief Copies a planar network into a named technology network whose node order encodes the rank order.
+ *
+ * The result lists the primary inputs in the order of level 0, then the gates level by level in rank order. Virtual
+ * primary inputs become ordinary primary inputs of the result; all names are kept. A complemented fanin or output
+ * signal reads its node through an inverter node that sits right before the node that reads it, and a complemented
+ * constant becomes the other constant. Such inverters leave the copy unbalanced; they occur only in a planar network
+ * built by hand over a type with complemented signals, such as an AIG, because `planarization` works on technology
+ * networks.
+ *
+ * @tparam Ntk Ranked network type of the planar network.
+ * @param planar Planar network, the result of `planarization`.
+ * @return The copy, and for every primary input of the copy the index of the input of the original network that it
+ * stands for. A virtual primary input maps to the index of its real primary input.
+ */
+template <typename Ntk>
+[[nodiscard]] std::pair<networks::named_technology_network, std::vector<uint32_t>>
+flatten_planarization(const networks::virtual_pi_network<Ntk>& planar)
+{
+    using planar_network = networks::virtual_pi_network<Ntk>;
+    using signal         = mockturtle::signal<networks::named_technology_network>;
+
+    networks::named_technology_network           dest{};
+    mockturtle::node_map<signal, planar_network> old2new{planar};
+    std::vector<uint32_t>                        original_input{};
+
+    // network types whose constants share one node, such as an AIG, keep the polarity in the signal
+    old2new[planar.get_node(planar.get_constant(false))] = dest.get_constant(false);
+    if (planar.get_node(planar.get_constant(true)) != planar.get_node(planar.get_constant(false)))
+    {
+        old2new[planar.get_node(planar.get_constant(true))] = dest.get_constant(true);
+    }
+
+    // a complemented signal reads its node through an inverter; `create_not` turns a complemented constant into the
+    // other constant
+    const auto copy = [&planar, &dest, &old2new](const auto& f)
+    {
+        const auto s = old2new[planar.get_node(f)];
+
+        return planar.is_complemented(f) ? dest.create_not(s) : s;
+    };
+
+    // the index of every real input in the original network is its creation order
+    mockturtle::node_map<uint32_t, planar_network> real_index{planar};
+    uint32_t                                       next_real = 0;
+
+    planar.foreach_pi_unranked(
+        [&planar, &real_index, &next_real](const auto& n)
+        {
+            if (planar.is_real_pi(n))
+            {
+                real_index[n] = next_real++;
+            }
+        });
+
+    planar.foreach_pi(
+        [&planar, &dest, &old2new, &real_index, &original_input](const auto& n)
+        {
+            old2new[n] = dest.create_pi();
+            original_input.push_back(real_index[planar.is_real_pi(n) ? n : planar.get_real_pi(n)]);
+        });
+
+    for (uint32_t level = 1; level <= planar.depth(); ++level)
+    {
+        planar.foreach_node_in_rank(level,
+                                    [&planar, &dest, &old2new, &copy](const auto& n)
+                                    {
+                                        if (planar.is_constant(n) || planar.is_pi(n))
+                                        {
+                                            return;
+                                        }
+
+                                        std::vector<signal> children{};
+                                        planar.foreach_fanin(n, [&copy, &children](const auto& f)
+                                                             { children.push_back(copy(f)); });
+
+                                        old2new[n] = dest.create_node(children, planar.node_function(n));
+                                    });
+    }
+
+    planar.foreach_po([&dest, &copy](const auto& po) { dest.create_po(copy(po)); });
+
+    // the inputs of the copy follow the rank order, not the creation order, so their names come via `old2new`
+    networks::restore_network_name(planar, dest);
+    networks::restore_signal_names(planar, dest, old2new);
+    networks::restore_output_names(planar, dest);
+
+    return {dest, original_input};
 }
 
 }  // namespace fiction::synthesis

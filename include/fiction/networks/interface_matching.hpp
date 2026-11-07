@@ -148,6 +148,28 @@ inline std::vector<uint32_t> match_interface_names(const std::vector<std::string
 }  // namespace detail
 
 /**
+ * @brief Matches primary outputs by unique nonempty names, then by remaining declared positions.
+ *
+ * A name matches only when it occurs once in each interface. Empty, duplicate, and unmatched names fall back to the
+ * remaining positions in declared order. Every output receives exactly one match.
+ * @tparam Left Network or placed object layout.
+ * @tparam Right Network or placed object layout.
+ * @param left Left interface owner.
+ * @param right Right interface owner.
+ * @return Right primary output index for each left primary output index.
+ * @throws std::invalid_argument If the primary output counts differ.
+ */
+template <typename Left, typename Right>
+[[nodiscard]] std::vector<uint32_t> match_outputs(const Left& left, const Right& right)
+{
+    if (left.num_pos() != right.num_pos())
+    {
+        throw std::invalid_argument("Primary output counts differ");
+    }
+    return detail::match_interface_names(detail::interface_output_names(left), detail::interface_output_names(right));
+}
+
+/**
  * @brief Matches primary inputs and outputs by unique nonempty names, then by remaining declared positions.
  *
  * A name matches only when it occurs once in each corresponding interface. Empty, duplicate, and unmatched names
@@ -169,8 +191,7 @@ template <typename Left, typename Right>
     /** @brief Input permutation; temporary input names expire before output matching. */
     auto inputs =
         detail::match_interface_names(detail::interface_input_names(left), detail::interface_input_names(right));
-    return {std::move(inputs),
-            detail::match_interface_names(detail::interface_output_names(left), detail::interface_output_names(right))};
+    return {std::move(inputs), match_outputs(left, right)};
 }
 
 }  // namespace fiction::networks

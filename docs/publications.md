@@ -23,6 +23,11 @@ If you use an algorithm or gate library, please also cite its corresponding pape
 
   [Planarization experiment scripts](https://github.com/cda-tum/fiction/tree/main/experiments/planarization)
 
+- {ref}`Planar placement and routing <plane>` (`plane`):
+  {cite:p}`nano_2025_3`
+
+  [PLANE experiment script](https://github.com/cda-tum/fiction/tree/main/experiments/plane)
+
 - {ref}`Equivalence checking <equiv>` (`equiv`):
   {cite:p}`walter2020equiv`
 

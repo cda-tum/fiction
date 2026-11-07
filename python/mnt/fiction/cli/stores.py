@@ -98,6 +98,7 @@ class Store(Generic[T]):
         self.kind = kind
         self.items: list[T] = []
         self.active: int | None = None
+        self._attachments: list[dict[str, object]] = []
 
     def __len__(self) -> int:
         """Return the number of elements.
@@ -115,14 +116,30 @@ class Store(Generic[T]):
         """
         return iter(self.items)
 
-    def add(self, item: T) -> None:
+    def add(self, item: T, **attachments: object) -> None:
         """Append an element and make it the active one.
 
         Args:
             item: The element.
+            **attachments: Data that belongs to the element but not to its type, such as the input mapping of a
+                layout whose inputs were duplicated; :meth:`attached` returns it while the element is active.
         """
         self.items.append(item)
+        self._attachments.append(attachments)
         self.active = len(self.items) - 1
+
+    def attached(self, key: str) -> object | None:
+        """Return data attached to the active element.
+
+        Args:
+            key: The keyword the data was attached under.
+
+        Returns:
+            The data, or ``None`` when the store is empty or nothing is attached under ``key``.
+        """
+        if self.active is None:
+            return None
+        return self._attachments[self.active].get(key)
 
     def current(self) -> T:
         """Return the active element.
@@ -175,12 +192,14 @@ class Store(Generic[T]):
             msg = f"no {self.kind} in store"
             raise CommandError(msg)
         item = self.items.pop(self.active)
+        del self._attachments[self.active]
         self.active = max(self.active - 1, 0) if self.items else None
         return item
 
     def clear(self) -> None:
         """Remove every element."""
         self.items.clear()
+        self._attachments.clear()
         self.active = None
 
 

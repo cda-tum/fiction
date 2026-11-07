@@ -19,6 +19,7 @@
 
 #include "fiction/layouts/gate_layout.hpp"
 #include "fiction/physical_design/placement_utils.hpp"
+#include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
 #include <mockturtle/traits.hpp>
@@ -156,7 +157,8 @@ void restore_network_name(const NtkOrLytSrc& ntk_or_lyt_src, NtkOrLytDest& ntk_o
     set_name(ntk_or_lyt_dest, get_name(ntk_or_lyt_src));
 }
 /**
- * Assigns input names from one network to another. Matching inputs are identified by their index.
+ * Assigns input names from one network to another. Matching inputs are identified by their index in creation order,
+ * the order `pi_at` counts in; a ranked source is therefore visited with `foreach_pi_unranked`.
  *
  * @tparam NtkSrc Source network type.
  * @tparam NtkDest Target network or gate-level layout type.
@@ -171,32 +173,40 @@ void restore_input_names(const NtkSrc& ntk_src, NtkDest& ntk_dest)
 {
     if constexpr (detail::input_names_enabled<NtkSrc, NtkDest>)
     {
-        ntk_src.foreach_pi(
-            [&](const auto& pi, const auto i)
+        const auto restore = [&](const auto& pi, const auto i)
+        {
+            const auto input = [&]
             {
-                const auto input = [&]
+                if constexpr (detail::native_layout<NtkSrc>)
                 {
-                    if constexpr (detail::native_layout<NtkSrc>)
-                    {
-                        return pi;
-                    }
-                    else
-                    {
-                        return ntk_src.make_signal(pi);
-                    }
-                }();
-                if (ntk_src.has_name(input))
-                {
-                    if constexpr (detail::native_layout<NtkDest>)
-                    {
-                        ntk_dest.set_name(ntk_dest.pi_at(i), ntk_src.get_name(input));
-                    }
-                    else
-                    {
-                        ntk_dest.set_name(ntk_dest.make_signal(ntk_dest.pi_at(i)), ntk_src.get_name(input));
-                    }
+                    return pi;
                 }
-            });
+                else
+                {
+                    return ntk_src.make_signal(pi);
+                }
+            }();
+            if (ntk_src.has_name(input))
+            {
+                if constexpr (detail::native_layout<NtkDest>)
+                {
+                    ntk_dest.set_name(ntk_dest.pi_at(i), ntk_src.get_name(input));
+                }
+                else
+                {
+                    ntk_dest.set_name(ntk_dest.make_signal(ntk_dest.pi_at(i)), ntk_src.get_name(input));
+                }
+            }
+        };
+
+        if constexpr (has_foreach_pi_unranked_v<NtkSrc>)
+        {
+            ntk_src.foreach_pi_unranked(restore);
+        }
+        else
+        {
+            ntk_src.foreach_pi(restore);
+        }
     }
 }
 /**

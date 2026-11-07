@@ -272,6 +272,18 @@ Cartesian layout by default; `--topology` also selects any of the four [hexagona
 It needs a network whose gates have at most two inputs (AND, OR, and inverters after `map --and --or --inv`).
 `-n 3|4` sets the number of clock phases, four by default, and `-v` prints the statistics.
 
+### Planar placement and routing (`plane`)
+
+`plane` planarizes the active network and places and routes it without wire crossings, see
+[the paper](https://doi.org/10.1109/NANO63165.2025.11113822). The network is balanced, planarized by node duplication
+and crossing gates, fanout-substituted, and rebalanced; the Planar Layout from Network Embedding (PLANE) algorithm
+then places every level on one diagonal of a 2DDWave-clocked Cartesian layout. Duplicated inputs become separate
+layout inputs that carry the name of the network input they copy; the `input_mapping` list in the command's result
+gives, for every layout input, the index of that network input. The layout keeps this mapping in the store, and
+`equiv -n -g` checks the layout against the network through it. The network must consist of gates with at most two
+inputs; `plane` rejects any other network with an error. `-n 3|4` sets the number of clock phases, `-x` builds crossing gates from XOR gates, and `-v` prints the
+statistics.
+
 ### Graph-oriented layout design (`gold`)
 
 `gold` searches the space of partial layouts with A\*, where every placement is one step, see
@@ -325,7 +337,10 @@ the quickest way to find bugs in layouts produced by custom algorithms.
 `equiv` checks a gate-level layout against a network or two store elements against each other, see
 [the paper](https://doi.org/10.1109/DAC18072.2020.9218641). `equiv -n -g` takes the active network as the
 specification and the active layout as the implementation; `equiv -n` or `equiv -g` compares the two most recent
-elements of one store. The result is one of four:
+elements of one store. Inputs and outputs match by names that are unique on both sides, then by position. A layout
+that `plane` added carries the mapping of its inputs to the inputs of the network it was built from, and `equiv -n -g`
+checks it through that mapping, so a layout with duplicated inputs verifies against its source network. The result is
+one of four:
 
 1. The implementation computes a different function under at least one input: **not** equivalent.
 2. The implementation computes the same function at full throughput: **strongly** equivalent.
