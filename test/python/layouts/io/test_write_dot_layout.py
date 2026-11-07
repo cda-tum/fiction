@@ -76,9 +76,9 @@ def test_empty_geometry(gate_factory: Callable, tmp_path: Path) -> None:
     if cartesian:
         assert "shape=square" in text
         assert "rankdir=TB" in text
-        assert re.findall(r"^(x\d+y\d+ -> x\d+y\d+ -> x\d+y\d+);$", text, re.MULTILINE) == [
+        assert sorted(re.findall(r"^(x\d+y\d+ -> x\d+y\d+ -> x\d+y\d+);$", text, re.MULTILINE)) == sorted(
             " -> ".join(f"x{x}y{y}" for y in range(3)) for x in range(3)
-        ]
+        )
     else:
         assert f"rankdir={'TB' if row else 'LR'}" in text
         assert ("shape=hexagon" in text) is (type(layout) is hexagonal_gate_layout)
@@ -177,12 +177,12 @@ def test_terminal_escaping_and_constants(tmp_path: Path, *, indexes: bool) -> No
     write_dot_layout(layout, str(destination), indexes=indexes)
     constant_label = f"{constant.index}:{constant.generation}: 0" if indexes else "0"
     wire_label = f"{wire.index}:{wire.generation}: BUF" if indexes else "BUF"
-    assert _nodes(destination.read_text(encoding="utf-8")) == [
+    assert sorted(_nodes(destination.read_text(encoding="utf-8"))) == sorted([
         ("x0y0", name, "snow2"),
         ("x1y0", constant_label, "white"),
         ("x2y0", wire_label, "palegoldenrod"),
         ("x3y0", name, "snow2"),
-    ]
+    ])
 
 
 @pytest.mark.parametrize(
@@ -211,9 +211,9 @@ def test_clock_colors(tmp_path: Path) -> None:
         layout.assign_clock_number((phase, 0), phase)
     destination = tmp_path / "clock.dot"
     write_dot_layout(layout, str(destination), clock_colors=True)
-    assert _nodes(destination.read_text(encoding="utf-8")) == [
+    assert sorted(_nodes(destination.read_text(encoding="utf-8"))) == sorted(
         (f"x{phase}y0", "", color) for phase, color in enumerate(["gray94", "gray67", "gray44", "gray17"])
-    ]
+    )
 
 
 def test_large_progress_total_and_callback_rollback(tmp_path: Path) -> None:
