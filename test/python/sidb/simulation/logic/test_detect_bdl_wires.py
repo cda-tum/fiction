@@ -110,7 +110,9 @@ def test_wire_distance_keyword() -> None:
         (True, True, bdl_wire.port_direction.cardinal.NORTH),
     ],
 )
-def test_wire_port_directions(*, vertical: bool, input_at_end: bool, direction) -> None:
+def test_wire_port_directions(
+    *, vertical: bool, input_at_end: bool, direction: bdl_wire.port_direction.cardinal
+) -> None:
     """Wire ports follow the input-to-internal direction, including mirrored wires."""
     layout = sidb_layout()
     pairs = []

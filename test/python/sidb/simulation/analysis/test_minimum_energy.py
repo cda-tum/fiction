@@ -22,7 +22,7 @@ from mnt.pyfiction.sidb.simulation.analysis import minimum_energy
     "lat",
     [pytest.param(lattice.si_100_2x1(), id="100"), pytest.param(lattice.si_111_1x1(), id="111")],
 )
-def test_three_sidbs(lat):
+def test_three_sidbs(lat: lattice) -> None:
     layout = sidb_layout(lat)
 
     layout.assign_sidb(lattice_site(0, 0, 1), sidb_dot_tag.NORMAL)

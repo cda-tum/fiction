@@ -28,7 +28,7 @@ def three_sidbs() -> sidb_layout:
     return layout
 
 
-def test_geometry_and_potentials():
+def test_geometry_and_potentials() -> None:
     layout = three_sidbs()
     landscape = potential_landscape(layout, base=2, mu_minus=-0.32, epsilon_r=5.6, lambda_tf=5.0)
 
@@ -52,7 +52,7 @@ def test_geometry_and_potentials():
     assert thresholds[charge_transition_threshold_bounds.POSITIVE_LOWER_BOUND.value] == pytest.approx(0.91, abs=1e-5)
 
 
-def test_energies_and_validity():
+def test_energies_and_validity() -> None:
     layout = three_sidbs()
     landscape = potential_landscape(layout, base=2, mu_minus=-0.32, epsilon_r=5.6, lambda_tf=5.0)
 
@@ -81,7 +81,7 @@ def test_energies_and_validity():
     assert internal == pytest.approx(local_potentials)  # no external potential applied
 
 
-def test_external_potentials():
+def test_external_potentials() -> None:
     layout = three_sidbs()
     options: dict[str, Any] = {"base": 2, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
     plain = potential_landscape(layout, **options)
@@ -96,7 +96,7 @@ def test_external_potentials():
     assert shifted.energy(all_negative) < plain.energy(all_negative)
 
 
-def test_charged_defect():
+def test_charged_defect() -> None:
     layout = sidb_layout()
     layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(3, 0, 0), sidb_dot_tag.NORMAL)

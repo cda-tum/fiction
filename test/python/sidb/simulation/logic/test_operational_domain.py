@@ -38,6 +38,7 @@ from mnt.pyfiction.sidb.simulation.logic import (
 from mnt.pyfiction.synthesis import create_and_tt, create_id_tt, create_or_tt, create_xor_tt
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from pathlib import Path
 
 
@@ -79,7 +80,7 @@ def test_parameter_point_extreme_values() -> None:
     assert parameter_point([nan]) in points
 
 
-def test_operational_domain_siqad_or_100_lattice(resources_dir):
+def test_operational_domain_siqad_or_100_lattice(resources_dir: Path) -> None:
     lyt = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
 
     options: dict[str, Any] = {
@@ -102,7 +103,7 @@ def test_operational_domain_siqad_or_100_lattice(resources_dir):
     assert stats_grid.num_operational_parameter_combinations == 10201
 
 
-def test_number_of_threads(resources_dir):
+def test_number_of_threads(resources_dir: Path) -> None:
     """The thread count is configurable and does not change the resulting operational domain."""
     lyt = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
 
@@ -133,7 +134,7 @@ def test_number_of_threads(resources_dir):
     assert stats_single.num_evaluated_parameter_combinations == stats_default.num_evaluated_parameter_combinations
 
 
-def test_three_dimensional_operational_domain_sketch(wire_with_canvas):
+def test_three_dimensional_operational_domain_sketch(wire_with_canvas: sidb_layout) -> None:
     """The sketch and the boundary-following strategies work over three sweep dimensions."""
     lyt = wire_with_canvas
 
@@ -170,7 +171,7 @@ def test_three_dimensional_operational_domain_sketch(wire_with_canvas):
             assert domain[point] == grid_domain[point]
 
 
-def test_operational_domain_sketch_preconditions(wire_with_canvas, resources_dir):
+def test_operational_domain_sketch_preconditions(wire_with_canvas: sidb_layout, resources_dir: Path) -> None:
     """The sketch is rejected when it cannot filter anything."""
     lyt = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
 
@@ -201,7 +202,7 @@ def test_operational_domain_sketch_preconditions(wire_with_canvas, resources_dir
     operational_domain_grid_search(canvas_lyt, [create_id_tt()], **options)
 
 
-def test_operational_domain_xor_gate_100_lattice(resources_dir):
+def test_operational_domain_xor_gate_100_lattice(resources_dir: Path) -> None:
     lyt = read_sqd_layout(str(resources_dir / "hex_21_inputsdbp_xor_v1.sqd"))
 
     options: dict[str, Any] = {
@@ -286,7 +287,7 @@ def test_critical_temperature_domain_xor_gate_100_lattice(resources_dir: Path) -
     assert stats_random_sampling.num_operational_parameter_combinations > 0
 
 
-def test_operational_domain_and_gate_111_lattice(resources_dir):
+def test_operational_domain_and_gate_111_lattice(resources_dir: Path) -> None:
     lyt = read_sqd_layout(str(resources_dir / "AND_mu_032_111_surface.sqd"))
 
     options: dict[str, Any] = {
@@ -316,7 +317,7 @@ def test_operational_domain_and_gate_111_lattice(resources_dir):
     assert stats_contour_tracing.num_operational_parameter_combinations > 0
 
 
-def test_temperature_operational_domain():
+def test_temperature_operational_domain() -> None:
     # Create an instance of critical_temperature_domain
     temp_domain = critical_temperature_domain([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
 
@@ -379,7 +380,7 @@ def test_temperature_operational_domain():
     assert temp_domain.get_dimension(1) == sweep_parameter.LAMBDA_TF
 
 
-def test_operational_domain():
+def test_operational_domain() -> None:
     # Create an instance of operational_domain
     op_domain = operational_domain([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
 
@@ -442,7 +443,7 @@ def test_operational_domain():
     assert len(items_method) == 2
 
 
-def test_operational_domain_two_bdl_pair_wire():
+def test_operational_domain_two_bdl_pair_wire() -> None:
     bdl_wire = sidb_layout()
 
     bdl_wire.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.INPUT)
@@ -583,7 +584,9 @@ def test_invalid_sweep_ranges(ranges: list[tuple[float, float, float]]) -> None:
         critical_temperature_domain_contour_tracing,
     ],
 )
-def test_colliding_sweeps_rejected_before_zero_samples(search) -> None:
+def test_colliding_sweeps_rejected_before_zero_samples(
+    search: Callable[..., operational_domain | critical_temperature_domain],
+) -> None:
     """Zero sampling still validates the grid for every sampling strategy."""
     with pytest.raises(ValueError):  # ruff: ignore[pytest-raises-too-broad] -- error type is the public contract
         search(
@@ -647,7 +650,9 @@ def test_grid_product_overflow_preserves_statistics() -> None:
 
 
 @pytest.mark.parametrize("search", [operational_domain_random_sampling, critical_temperature_domain_random_sampling])
-def test_zero_samples_produce_empty_domain(search, resources_dir: Path) -> None:
+def test_zero_samples_produce_empty_domain(
+    search: Callable[..., operational_domain | critical_temperature_domain], resources_dir: Path
+) -> None:
     """Zero samples produce no classifications or simulator invocations."""
     layout = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
     stats = operational_domain_stats()

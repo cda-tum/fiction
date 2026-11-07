@@ -18,7 +18,7 @@ from mnt.pyfiction.sidb.simulation.logic import bdl_pair, detect_bdl_pairs
     "lat",
     [pytest.param(lattice.si_100_2x1(), id="100"), pytest.param(lattice.si_111_1x1(), id="111")],
 )
-def test_detect_bdl_pairs(lat):
+def test_detect_bdl_pairs(lat: lattice) -> None:
     lyt = sidb_layout(lat)
 
     lyt.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.INPUT)

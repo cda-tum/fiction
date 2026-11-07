@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
-def test_and_gate_100_lattice(resources_dir):
+def test_and_gate_100_lattice(resources_dir: Path) -> None:
     lyt = read_sqd_layout(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
 
     options: dict[str, Any] = {

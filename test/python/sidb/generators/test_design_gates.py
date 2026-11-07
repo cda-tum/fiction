@@ -62,7 +62,7 @@ def nor_gate_skeleton() -> sidb_layout:
     return layout
 
 
-def test_siqad_and_gate_skeleton_100():
+def test_siqad_and_gate_skeleton_100() -> None:
     layout = sidb_layout()
 
     layout.assign_sidb(lattice_site(0, 0, 1), sidb_dot_tag.INPUT)
@@ -104,7 +104,7 @@ def test_siqad_and_gate_skeleton_100():
     assert reports[-1][1] == reports[-1][2]
 
 
-def test_nor_gate_111(nor_gate_skeleton):
+def test_nor_gate_111(nor_gate_skeleton: sidb_layout) -> None:
     layout = nor_gate_skeleton
     options: dict[str, Any] = {
         "base": 2,
@@ -131,7 +131,7 @@ def test_nor_gate_111(nor_gate_skeleton):
     assert len(designed_gates) == 175
 
 
-def test_nor_gate_111_small_canvas(nor_gate_skeleton):
+def test_nor_gate_111_small_canvas(nor_gate_skeleton: sidb_layout) -> None:
     layout = nor_gate_skeleton
     options: dict[str, Any] = {
         "base": 2,

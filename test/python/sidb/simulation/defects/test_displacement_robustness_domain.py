@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
@@ -24,8 +24,11 @@ from mnt.pyfiction.sidb.simulation.defects import (
 from mnt.pyfiction.sidb.simulation.logic import operational_status
 from mnt.pyfiction.synthesis import create_and_tt, create_or_tt
 
+if TYPE_CHECKING:
+    from pathlib import Path
 
-def test_siqad_and_gate_100_lattice():
+
+def test_siqad_and_gate_100_lattice() -> None:
     layout = sidb_layout()
 
     layout.assign_sidb(lattice_site(0, 0, 1), sidb_dot_tag.INPUT)
@@ -79,7 +82,9 @@ def test_siqad_and_gate_100_lattice():
 
 @pytest.mark.parametrize("policy", list(dimer_displacement_policy))
 @pytest.mark.parametrize("mode", list(displacement_analysis_mode))
-def test_stationary_displacement_preserves_layout(resources_dir, policy, mode) -> None:
+def test_stationary_displacement_preserves_layout(
+    resources_dir: Path, policy: dimer_displacement_policy, mode: displacement_analysis_mode
+) -> None:
     """Both search modes and dimer policies preserve a fully fixed layout, including defects and name."""
     layout = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"), "fixed surface")
     layout.assign_defect(lattice_site(100, 100), sidb_defect(sidb_defect_type.SILOXANE))
@@ -115,7 +120,7 @@ def test_invalid_displacement_percentage(percentage: float) -> None:
         )
 
 
-def test_displacement_range_preserves_statistics(resources_dir) -> None:
+def test_displacement_range_preserves_statistics(resources_dir: Path) -> None:
     """Unrepresentable displacements raise before publishing statistics."""
     layout = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
     stats = displacement_robustness_domain_stats()

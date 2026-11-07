@@ -47,7 +47,7 @@ def test_degeneracy_returns_state_count() -> None:
         pytest.param(lattice.si_111_1x1(), 0.233980661373219, id="111"),
     ],
 )
-def test_three_sidbs(lat, all_negative_energy):
+def test_three_sidbs(lat: lattice, all_negative_energy: float) -> None:
     layout = sidb_layout(lat)
 
     layout.assign_sidb(lattice_site(0, 0, 1), sidb_dot_tag.NORMAL)
@@ -89,7 +89,7 @@ def test_three_sidbs(lat, all_negative_energy):
     )
 
 
-def test_degenerate_states():
+def test_degenerate_states() -> None:
     layout = sidb_layout()
     layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(10, 0, 0), sidb_dot_tag.NORMAL)

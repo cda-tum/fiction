@@ -22,7 +22,7 @@ from mnt.pyfiction.sidb.model import (
 )
 
 
-def test_default_arguments():
+def test_default_arguments() -> None:
     defect = sidb_defect(sidb_defect_type.DB)
 
     assert defect.type == sidb_defect_type.DB

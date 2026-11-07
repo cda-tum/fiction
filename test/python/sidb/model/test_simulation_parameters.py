@@ -13,7 +13,7 @@ import pytest
 from mnt.pyfiction.sidb.model import sidb_simulation_parameters
 
 
-def test_initialization():
+def test_initialization() -> None:
     params = sidb_simulation_parameters()
 
     # Check if it is initialized correctly.
@@ -23,7 +23,7 @@ def test_initialization():
     assert params.base == 3
 
 
-def test_custom_initialization():
+def test_custom_initialization() -> None:
     params = sidb_simulation_parameters(
         base_number=2, mu_minus=-0.4, relative_permittivity=7.1, screening_distance=10.0
     )
