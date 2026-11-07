@@ -508,8 +508,8 @@ TEST_CASE("Annealing results own their state values", "[sim-anneal]")
     auto single = simulated_annealing(initial, 1.0, 1.0, 0, cost, schedule, next);
     /** @brief Owns the result after all worker storage leaves scope. */
     auto multi = multi_simulated_annealing(1.0, 1.0, 0, 2, generator, cost, schedule, next);
-    CHECK(single.first == initial);
-    CHECK(multi.first == initial);
+    REQUIRE(single.first == initial);
+    REQUIRE(multi.first == initial);
     single.first.front() = 8;
     multi.first.back()   = 9;
     CHECK(initial.front() == 7);
