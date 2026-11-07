@@ -20,6 +20,7 @@
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/synthesis/network_conversion.hpp"
 #include "fiction/synthesis/technology_mapping_library.hpp"
+#include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/types.hpp"
 
 #include <fmt/format.h>
@@ -611,7 +612,20 @@ class technology_mapping_impl
             return fiction::networks::named_technology_network{};
         }
 
-        const auto mapped_ntk = mockturtle::emap(ntk, lib, params.mapper_params, &stats.mapper_stats);
+        /** @brief Maps a network whose constant-one value is explicit when the mapper requires it. */
+        const auto mapped_ntk = [&]
+        {
+            const auto one = ntk.get_node(ntk.get_constant(true));
+            if (one != ntk.get_node(ntk.get_constant(false)) && ntk.fanout_size(one) > 0)
+            {
+                auto normalized = convert_network<fiction::networks::named_technology_network>(ntk);
+                // emap initializes every constant node as false; a gate computes true without a separate constant.
+                const auto true_gate = normalized.create_node({normalized.get_constant(false)}, create_not_tt());
+                normalized.substitute_node(normalized.get_node(normalized.get_constant(true)), true_gate);
+                return mockturtle::emap(normalized, lib, params.mapper_params, &stats.mapper_stats);
+            }
+            return mockturtle::emap(ntk, lib, params.mapper_params, &stats.mapper_stats);
+        }();
 
         fiction::networks::named_technology_network converted_ntk{};
 

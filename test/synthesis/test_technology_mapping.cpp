@@ -29,12 +29,15 @@
 #include <fiction/synthesis/technology_mapping.hpp>
 #include <fiction/verification/count_gate_types.hpp>
 
+#include <kitty/print.hpp>
+#include <mockturtle/algorithms/simulation.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/networks/xmg.hpp>
 #include <mockturtle/views/names_view.hpp>
 
+#include <array>
 #include <cstdint>
 
 using namespace fiction;
@@ -366,4 +369,37 @@ TEST_CASE("Incomplete technology libraries report mapping failure", "[technology
     CHECK(mapped.num_pos() == 0);
     CHECK(network.num_pis() == 3);
     CHECK(network.num_pos() == 1);
+}
+
+TEST_CASE("Mapping preserves separate constant values in outputs and fanins", "[technology-mapping]")
+{
+    technology_network network{};
+    const auto         a    = network.create_pi();
+    const auto         b    = network.create_pi();
+    const auto         zero = network.get_constant(false);
+    const auto         one  = network.get_constant(true);
+    network.create_po(zero);
+    network.create_po(one);
+    network.create_po(network.create_and(a, one));
+    network.create_po(network.create_and(a, zero));
+    network.create_po(network.create_or(b, one));
+    network.create_po(network.create_or(b, zero));
+
+    const auto                      inv = GENERATE(false, true);
+    const technology_mapping_params params{.inv = inv, .and2 = true, .or2 = true};
+    technology_mapping_stats        stats{};
+    const auto                      mapped = technology_mapping(network, params, &stats);
+    REQUIRE_FALSE(stats.mapper_stats.mapping_error);
+    const auto       simulator = mockturtle::default_simulator<kitty::dynamic_truth_table>{2};
+    const auto       actual    = mockturtle::simulate<kitty::dynamic_truth_table>(mapped, simulator);
+    const auto       original  = mockturtle::simulate<kitty::dynamic_truth_table>(network, simulator);
+    const std::array expected{"0000", "1111", "1010", "0000", "1111", "1100"};
+    REQUIRE(actual.size() == expected.size());
+    REQUIRE(original.size() == expected.size());
+    for (auto output = 0u; output < expected.size(); ++output)
+    {
+        CAPTURE(inv, output);
+        CHECK(kitty::to_binary(actual[output]) == expected[output]);
+        CHECK(kitty::to_binary(original[output]) == expected[output]);
+    }
 }
