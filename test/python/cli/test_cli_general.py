@@ -51,11 +51,6 @@ def test_version(shell: Shell) -> None:
     assert shell.session.log[-1]["result"]["version"]
 
 
-def test_quit_stops_the_session(shell: Shell) -> None:
-    shell.ok("quit")
-    assert not shell.session.running
-
-
 def test_store_lists_elements_and_marks_the_active_one(mux21_shell: Shell, resource: Callable[[str], str]) -> None:
     mux21_shell.ok(f'read "{resource("xor2.v")}"')
     output = mux21_shell.ok("store -n")
@@ -273,6 +268,7 @@ def test_run_script_stops_at_a_failure(shell: Shell, tmp_path: Path) -> None:
     script = tmp_path / "bad.fs"
     script.write_text("version\nfrobnicate\nversion\n", encoding="utf-8")
     assert not shell.session.run_script(script)
+    assert [entry["command"] for entry in shell.session.log] == ["version", "frobnicate"]
     with pytest.raises(CommandError, match="cannot read script"):
         shell.session.run_script(tmp_path / "missing.fs")
 

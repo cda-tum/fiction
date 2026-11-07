@@ -80,18 +80,24 @@ def test_simulation_needs_an_sidb_layout(mux21_shell: Shell) -> None:
     assert "SiDB layout is needed" in mux21_shell.fails("quickexact")
 
 
-def test_physical_parameter_validation(or_gate: Shell) -> None:
-    assert "must be positive" in or_gate.fails("quickexact -e 0")
-    assert "at least 1" in or_gate.fails("quicksim -i 0")
-    assert "usage" in or_gate.fails("quickexact --base 4")
-
-
-@pytest.mark.parametrize("command", ["quickexact -l 0", "quicksim -a 0", "quicksim -a 2"])
-def test_simulation_rejects_invalid_physical_parameters(or_gate: Shell, command: str) -> None:
+@pytest.mark.parametrize(
+    ("command", "message"),
+    [
+        pytest.param("quickexact -e 0", "must be positive", id="zero-permittivity"),
+        pytest.param("quicksim -i 0", "at least 1", id="zero-iterations"),
+        pytest.param("quickexact --base 4", "usage", id="unsupported-charge-base"),
+        pytest.param("quickexact -l 0", "must be positive", id="zero-screening-length"),
+        pytest.param("quicksim -a 0", "in (0, 1]", id="zero-alpha"),
+        pytest.param("quicksim -a 2", "in (0, 1]", id="alpha-above-one"),
+    ],
+)
+def test_simulation_rejects_invalid_physical_parameters(or_gate: Shell, command: str, message: str) -> None:
     count = len(or_gate.session.cell_layouts)
-    or_gate.fails(command)
+    original = or_gate.session.cell_layouts.current()
+    assert message in or_gate.fails(command)
     assert len(or_gate.session.cell_layouts) == count
-    assert or_gate.session.cell_layouts.current().result is None
+    assert or_gate.session.cell_layouts.current() is original
+    assert original.result is None
 
 
 def test_simulation_reports_an_empty_result(shell: Shell) -> None:
@@ -198,11 +204,13 @@ def test_clustercomplete_defaults_to_base_three() -> None:
 
 @pytest.mark.parametrize("command", ["quickexact", "quicksim"])
 def test_two_state_engines_keep_base_two(command: str) -> None:
-    """The two-state engines do not offer --base at all, and temp and opdom still default to 2."""
+    """QuickExact detects the base; QuickSim uses two states without a base option."""
     assert not hasattr(REGISTRY[command].parser.parse_args([]), "base")
-    for gate_based in ("temp", "opdom"):
-        arguments = [] if gate_based == "temp" else ["domain.csv"]
-        assert REGISTRY[gate_based].parser.parse_args(arguments).base == 2
+
+
+@pytest.mark.parametrize(("command", "arguments"), [("temp", []), ("opdom", ["domain.csv"])])
+def test_gate_analysis_defaults_to_base_two(command: str, arguments: list[str]) -> None:
+    assert REGISTRY[command].parser.parse_args(arguments).base == 2
 
 
 def test_temp_runs_on_a_simulated_layout(shell: Shell, resource: Callable[[str], str]) -> None:
