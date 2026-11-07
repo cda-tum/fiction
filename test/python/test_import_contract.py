@@ -100,7 +100,7 @@ def test_submodules_load_lazily() -> None:
         "assert pf.sidb.simulation.engines.quickexact\n"
         "assert 'mnt.pyfiction.sidb' in sys.modules\n"
     )
-    subprocess.run([sys.executable, "-c", script], check=True)  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed interpreter and script
+    subprocess.run([sys.executable, "-c", script], check=True, timeout=30)  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed interpreter and script
 
 
 @pytest.mark.skipif(sys.platform != "linux", reason="Inspect ELF exports with GNU nm")
@@ -145,4 +145,4 @@ def test_coordinate_namespace_in_fresh_interpreter() -> None:
         "assert area(extent(3, 4, 2)) == 12\n"
         "assert cartesian_layout((3, 4)).width() == 3\n"
     )
-    subprocess.run([sys.executable, "-c", script], check=True)  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed interpreter and script
+    subprocess.run([sys.executable, "-c", script], check=True, timeout=30)  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed interpreter and script
