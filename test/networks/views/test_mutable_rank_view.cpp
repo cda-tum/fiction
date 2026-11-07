@@ -371,6 +371,7 @@ TEST_CASE("Rank assignments that do not fit the network are rejected", "[mutable
     const auto n2 = tec.get_node(g2);
 
     const auto before = ranked.get_all_ranks();
+    REQUIRE_FALSE(before.empty());
 
     SECTION("a level beyond the depth")
     {

@@ -19,6 +19,8 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_predicate.hpp>
 
+#include "utils/scoped_temp_directory.hpp"
+
 #include <fiction/technology/sidb/io/read_surface_defects.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
@@ -30,7 +32,6 @@
 #include <random>
 #include <sstream>
 #include <string>
-#include <system_error>
 
 using namespace fiction;
 using namespace fiction::sidb;
@@ -151,48 +152,9 @@ TEST_CASE("Surface defect files preserve every parsed row", "[read-sidb-surface-
     CHECK(expected.get_defect(site_at_row(0, 0)).type == defect_type::DB);
     CHECK(expected.get_defect(site_at_row(0, 1)).type == defect_type::SI_VACANCY);
     /** @brief Exclusively created directory containing the test file. */
-    const auto            prefix = "fiction-surface-input-" + std::to_string(std::random_device{}());
-    std::filesystem::path directory{};
-    bool                  created = false;
-    for (auto attempt = 0; attempt < 16 && !created; ++attempt)
-    {
-        directory = std::filesystem::temp_directory_path() / (prefix + "-" + std::to_string(attempt));
-        std::error_code error{};
-        created = std::filesystem::create_directory(directory, error);
-        if (error && error != std::errc::file_exists)
-        {
-            throw std::filesystem::filesystem_error{"Cannot create temporary directory", directory, error};
-        }
-    }
-    REQUIRE(created);
-    const auto filename = directory / "surface";
-    /** @brief Remove the temporary file during stack unwinding as well. */
-    struct file_cleanup
-    {
-        /** @brief Path to the temporary file. */
-        const std::filesystem::path& path;
-        /** @brief Path to the owned directory. */
-        const std::filesystem::path& directory;
-        /** @brief Keep the owned file and directory until cleanup. */
-        file_cleanup(const std::filesystem::path& file, const std::filesystem::path& dir) : path{file}, directory{dir}
-        {}
-        /** @brief Cleanup ownership cannot be copied. */
-        file_cleanup(const file_cleanup&) = delete;
-        /** @brief Cleanup ownership cannot be assigned. */
-        file_cleanup& operator=(const file_cleanup&) = delete;
-        /** @brief Cleanup ownership cannot be moved. */
-        file_cleanup(file_cleanup&&) = delete;
-        /** @brief Cleanup ownership cannot be move-assigned. */
-        file_cleanup& operator=(file_cleanup&&) = delete;
-        /** @brief Remove the file without throwing during stack unwinding. */
-        ~file_cleanup()
-        {
-            std::error_code error{};
-            std::filesystem::remove(path, error);
-            std::filesystem::remove(directory, error);
-        }
-    };
-    const file_cleanup cleanup{filename, directory};
+    const fiction::test::scoped_temp_directory directory{
+        std::filesystem::temp_directory_path(), "fiction-surface-input-" + std::to_string(std::random_device{}())};
+    const auto filename = directory.path() / "surface";
     {
         /** @brief Binary output preserves the separator. */
         std::ofstream output{filename, std::ios::binary};

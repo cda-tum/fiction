@@ -134,6 +134,7 @@ TEST_CASE("Name conservation after fanout substitution", "[fanout-substitution]"
     CHECK(substituted_maj.get_name(substituted_maj.make_signal(substituted_maj.pi_at(2))) == "c");
 
     // PO names
+    REQUIRE(substituted_maj.num_pos() == 1u);
     CHECK(substituted_maj.get_output_name(0) == "f");
 }
 

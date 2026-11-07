@@ -21,6 +21,8 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/progress_recorder.hpp"
@@ -42,8 +44,10 @@
 #include <algorithm>
 #include <chrono>
 #include <cstddef>
+#include <cstdint>
 #include <stdexcept>
 #include <thread>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
@@ -232,6 +236,18 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
             design_gates(lyt, std::vector<kitty::dynamic_truth_table>{create_xnor_tt()}, params);
 
         REQUIRE(found_gate_layouts.size() == 4);
+        /** @brief Every candidate places the only canvas SiDB at a distinct site. */
+        std::vector<layout> expected{};
+        for (int32_t x = 10; x <= 13; ++x)
+        {
+            CAPTURE(x);
+            auto candidate = lyt;
+            candidate.assign_sidb({x, 4, 0}, dot_tag::LOGIC);
+            CHECK(is_operational(candidate, std::vector{create_xnor_tt()}, params.operational_params).first ==
+                  operational_status::OPERATIONAL);
+            expected.push_back(std::move(candidate));
+        }
+        CHECK_THAT(found_gate_layouts, Catch::Matchers::UnorderedRangeEquals(expected));
     }
     SECTION("Occupied canvas sites are excluded from exhaustive combinations")
     {
@@ -253,8 +269,10 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
         CHECK(stats.number_of_layouts == 3);
         REQUIRE(!found_gate_layouts.empty());
 
-        for (const auto& gate : found_gate_layouts)
+        for (std::size_t candidate_index = 0; candidate_index < found_gate_layouts.size(); ++candidate_index)
         {
+            CAPTURE(candidate_index);
+            const auto& gate = found_gate_layouts[candidate_index];
             CHECK(gate.num_dots() == occupied_lyt.num_dots() + 1);
         }
         // This canvas yields at most three candidates; use digest buckets if the case grows.
@@ -527,7 +545,12 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
         const auto found_gate_layouts =
             design_gates(lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, params);
         REQUIRE(!found_gate_layouts.empty());
-        CHECK(found_gate_layouts.front().num_dots() == lyt.num_dots() + 3);
+        for (std::size_t candidate_index = 0; candidate_index < found_gate_layouts.size(); ++candidate_index)
+        {
+            CAPTURE(candidate_index);
+            const auto& gate = found_gate_layouts[candidate_index];
+            CHECK(gate.num_dots() == lyt.num_dots() + 3);
+        }
     }
 
     SECTION("Random generation attempt limit")
@@ -564,20 +587,27 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
         const auto found_gate_layouts =
             design_gates(defect_layout, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, params);
         REQUIRE(!found_gate_layouts.empty());
-        CHECK(found_gate_layouts.front().num_defects() == 1);
-        CHECK(found_gate_layouts.front().num_dots() == lyt.num_dots() + 2);
-
-        found_gate_layouts.front().foreach_dot([](const auto& cell) { CHECK(cell != lattice_site{14, 10, 0}); });
+        for (std::size_t candidate_index = 0; candidate_index < found_gate_layouts.size(); ++candidate_index)
+        {
+            CAPTURE(candidate_index);
+            const auto& gate = found_gate_layouts[candidate_index];
+            CHECK(gate.defects() == defect_layout.defects());
+            CHECK(gate.num_dots() == lyt.num_dots() + 2);
+            CHECK(gate.is_empty_site({14, 10, 0}));
+        }
 
         params.design_mode = design_gates_params::design_gates_mode::QUICKCELL;
         const auto found_gate_layouts_quickcell =
             design_gates(defect_layout, std::vector<kitty::dynamic_truth_table>{create_and_tt()}, params);
         REQUIRE(!found_gate_layouts_quickcell.empty());
-        CHECK(found_gate_layouts_quickcell.front().num_defects() == 1);
-        CHECK(found_gate_layouts_quickcell.front().num_dots() == lyt.num_dots() + 2);
-
-        found_gate_layouts_quickcell.front().foreach_dot([](const auto& cell)
-                                                         { CHECK(cell != lattice_site{14, 10, 0}); });
+        for (std::size_t candidate_index = 0; candidate_index < found_gate_layouts_quickcell.size(); ++candidate_index)
+        {
+            CAPTURE(candidate_index);
+            const auto& gate = found_gate_layouts_quickcell[candidate_index];
+            CHECK(gate.defects() == defect_layout.defects());
+            CHECK(gate.num_dots() == lyt.num_dots() + 2);
+            CHECK(gate.is_empty_site({14, 10, 0}));
+        }
     }
 
     SECTION("Random design with defect blocking canvas SiDB placement")
@@ -626,7 +656,12 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
         const auto found_gate_layouts =
             design_gates(lyt, std::vector<kitty::dynamic_truth_table>{create_nor_tt()}, params);
         REQUIRE(!found_gate_layouts.empty());
-        CHECK(found_gate_layouts.front().num_dots() == lyt.num_dots() + 3);
+        for (std::size_t candidate_index = 0; candidate_index < found_gate_layouts.size(); ++candidate_index)
+        {
+            CAPTURE(candidate_index);
+            const auto& gate = found_gate_layouts[candidate_index];
+            CHECK(gate.num_dots() == lyt.num_dots() + 3);
+        }
     }
 
     SECTION("Exhaustive Generation, allowing kinks")
@@ -645,7 +680,12 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
             const auto found_gate_layouts =
                 design_gates(lyt, std::vector<kitty::dynamic_truth_table>{create_nor_tt()}, params);
             REQUIRE(found_gate_layouts.size() == 14);
-            CHECK(found_gate_layouts.front().num_dots() == lyt.num_dots() + 3);
+            for (std::size_t candidate_index = 0; candidate_index < found_gate_layouts.size(); ++candidate_index)
+            {
+                CAPTURE(candidate_index);
+                const auto& gate = found_gate_layouts[candidate_index];
+                CHECK(gate.num_dots() == lyt.num_dots() + 3);
+            }
         }
 #endif
 
@@ -655,7 +695,12 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
             const auto found_gate_layouts =
                 design_gates(lyt, std::vector<kitty::dynamic_truth_table>{create_nor_tt()}, params);
             REQUIRE(!found_gate_layouts.empty());
-            CHECK(found_gate_layouts.front().num_dots() == lyt.num_dots() + 3);
+            for (std::size_t candidate_index = 0; candidate_index < found_gate_layouts.size(); ++candidate_index)
+            {
+                CAPTURE(candidate_index);
+                const auto& gate = found_gate_layouts[candidate_index];
+                CHECK(gate.num_dots() == lyt.num_dots() + 3);
+            }
         }
     }
 
@@ -677,7 +722,12 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
         const auto found_gate_layouts =
             design_gates(lyt, std::vector<kitty::dynamic_truth_table>{create_nor_tt()}, params);
         REQUIRE(found_gate_layouts.size() == 3);
-        CHECK(found_gate_layouts.front().num_dots() == lyt.num_dots() + 3);
+        for (std::size_t candidate_index = 0; candidate_index < found_gate_layouts.size(); ++candidate_index)
+        {
+            CAPTURE(candidate_index);
+            const auto& gate = found_gate_layouts[candidate_index];
+            CHECK(gate.num_dots() == lyt.num_dots() + 3);
+        }
     }
 #endif
 
@@ -695,7 +745,12 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
         const auto found_gate_layouts =
             design_gates(lyt, std::vector<kitty::dynamic_truth_table>{create_nor_tt()}, params);
         REQUIRE(found_gate_layouts.size() == 3);
-        CHECK(found_gate_layouts.front().num_dots() == lyt.num_dots() + 3);
+        for (std::size_t candidate_index = 0; candidate_index < found_gate_layouts.size(); ++candidate_index)
+        {
+            CAPTURE(candidate_index);
+            const auto& gate = found_gate_layouts[candidate_index];
+            CHECK(gate.num_dots() == lyt.num_dots() + 3);
+        }
     }
     SECTION("Stop after first gate design is finished, QuickCell")
     {
@@ -711,7 +766,12 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
         const auto found_gate_layouts =
             design_gates(lyt, std::vector<kitty::dynamic_truth_table>{create_nor_tt()}, params);
         REQUIRE(!found_gate_layouts.empty());
-        CHECK(found_gate_layouts.front().num_dots() == lyt.num_dots() + 3);
+        for (std::size_t candidate_index = 0; candidate_index < found_gate_layouts.size(); ++candidate_index)
+        {
+            CAPTURE(candidate_index);
+            const auto& gate = found_gate_layouts[candidate_index];
+            CHECK(gate.num_dots() == lyt.num_dots() + 3);
+        }
     }
 }
 
@@ -730,7 +790,12 @@ TEST_CASE("Design hexagonal CX gate with pruning only", "[design-sidb-gates]")
     const auto found_gate_layouts =
         design_gates(lyt, std::vector<kitty::dynamic_truth_table>{create_crossing_wire_tt()}, params);
     REQUIRE(found_gate_layouts.size() == 3);
-    CHECK(found_gate_layouts.front().num_dots() == lyt.num_dots() + 3);
+    for (std::size_t candidate_index = 0; candidate_index < found_gate_layouts.size(); ++candidate_index)
+    {
+        CAPTURE(candidate_index);
+        const auto& gate = found_gate_layouts[candidate_index];
+        CHECK(gate.num_dots() == lyt.num_dots() + 3);
+    }
 }
 
 // to save runtime in the CI, this test is only run in RELEASE mode
@@ -753,7 +818,12 @@ TEST_CASE("Design Bestagon shaped CX gate with QuickCell", "[design-sidb-gates]"
         const auto found_gate_layouts =
             design_gates(lyt, std::vector<kitty::dynamic_truth_table>{create_crossing_wire_tt()}, params);
         REQUIRE(found_gate_layouts.size() == 3);
-        CHECK(found_gate_layouts.front().num_dots() == lyt.num_dots() + 3);
+        for (std::size_t candidate_index = 0; candidate_index < found_gate_layouts.size(); ++candidate_index)
+        {
+            CAPTURE(candidate_index);
+            const auto& gate = found_gate_layouts[candidate_index];
+            CHECK(gate.num_dots() == lyt.num_dots() + 3);
+        }
     }
 }
 
@@ -774,7 +844,12 @@ TEST_CASE("Design Bestagon shaped CX gate with QuickCell (flipped)", "[design-si
 
         const auto found_gate_layouts = design_gates(lyt, create_crossing_wire_tt(), params);
         REQUIRE(found_gate_layouts.size() == 3);
-        CHECK(found_gate_layouts.front().num_dots() == lyt.num_dots() + 3);
+        for (std::size_t candidate_index = 0; candidate_index < found_gate_layouts.size(); ++candidate_index)
+        {
+            CAPTURE(candidate_index);
+            const auto& gate = found_gate_layouts[candidate_index];
+            CHECK(gate.num_dots() == lyt.num_dots() + 3);
+        }
     }
 }
 

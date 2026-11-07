@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
@@ -21,16 +22,56 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/layouts/obstructions.hpp>
 #include <fiction/physical_design/path_finding/enumerate_all_paths.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
 
+#include <algorithm>
+#include <cstddef>
+#include <set>
 #include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::physical_design;
 using namespace fiction::physical_design::path_finding;
+
+/**
+ * @brief Checks complete path validity without relying on the enumeration order.
+ * @tparam Lyt Layout type.
+ * @param layout Layout in which paths are routed.
+ * @param paths Enumerated paths from (0,0) to (3,3).
+ */
+template <typename Lyt>
+void check_four_by_four_paths(const Lyt& layout, const path_collection& paths)
+{
+    const path_set unique{paths.cbegin(), paths.cend()};
+    CHECK(unique.size() == paths.size());
+    for (std::size_t index{}; index < paths.size(); ++index)
+    {
+        CAPTURE(index);
+        const auto& path = paths[index];
+        REQUIRE_FALSE(path.empty());
+        CHECK(path.front() == layout_base::coordinate{0, 0});
+        CHECK(path.back() == layout_base::coordinate{3, 3});
+        const std::set<layout_base::coordinate> coordinates{path.cbegin(), path.cend()};
+        CHECK(coordinates.size() == path.size());
+        for (std::size_t step{}; step < path.size(); ++step)
+        {
+            CAPTURE(step);
+            CHECK(layout.is_within_bounds(path[step]));
+            if (step > 0)
+            {
+                CHECK(layout.is_adjacent_of(path[step - 1], path[step]));
+                if constexpr (requires { layout.is_outgoing_clocked(path[step - 1], path[step]); })
+                {
+                    CHECK(layout.is_outgoing_clocked(path[step - 1], path[step]));
+                }
+            }
+        }
+    }
+}
 
 TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
 {
@@ -149,6 +190,7 @@ TEST_CASE("Enumerate all paths on 4x4 layouts", "[enumerate-all-paths]")
             const auto collection = enumerate_all_paths(layout, {.source = {0, 0}, .target = {3, 3}});
 
             CHECK(collection.size() == 184);
+            check_four_by_four_paths(layout, collection);
         }
     }
     SECTION("clocking paths")
@@ -162,6 +204,7 @@ TEST_CASE("Enumerate all paths on 4x4 layouts", "[enumerate-all-paths]")
                 const auto collection = enumerate_all_paths(layout, {.source = {0, 0}, .target = {3, 3}});
 
                 CHECK(collection.size() == 20);
+                check_four_by_four_paths(layout, collection);
             }
         }
         SECTION("USE")
@@ -173,6 +216,7 @@ TEST_CASE("Enumerate all paths on 4x4 layouts", "[enumerate-all-paths]")
                 const auto collection = enumerate_all_paths(layout, {.source = {0, 0}, .target = {3, 3}});
 
                 CHECK(collection.size() == 4);
+                check_four_by_four_paths(layout, collection);
             }
         }
     }
@@ -197,6 +241,11 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruc
                 enumerate_all_paths(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, {}, search_obstructions);
 
             CHECK(collection.size() == 108);
+            check_four_by_four_paths(obstr_lyt, collection);
+            for (const auto& path : collection)
+            {
+                CHECK(std::ranges::find(path, layout_base::coordinate{3, 0}) == path.cend());
+            }
         }
     }
     SECTION("clocking paths")
@@ -215,6 +264,11 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruc
                 const auto collection = enumerate_all_paths(obstr_lyt, {.source = {0, 0}, .target = {3, 3}});
 
                 CHECK(collection.size() == 19);
+                check_four_by_four_paths(obstr_lyt, collection);
+                for (const auto& path : collection)
+                {
+                    CHECK(std::ranges::find(path, layout_base::coordinate{3, 0}) == path.cend());
+                }
             }
         }
         SECTION("USE")
@@ -379,6 +433,14 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruc
                 enumerate_all_paths(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, {}, search_obstructions);
 
             CHECK(collection.size() == 108);
+            check_four_by_four_paths(obstr_lyt, collection);
+            for (const auto& path : collection)
+            {
+                CHECK(std::ranges::adjacent_find(
+                          path, [](const auto from, const auto to)
+                          { return from == layout_base::coordinate{2, 0} && to == layout_base::coordinate{3, 0}; }) ==
+                      path.cend());
+            }
         }
     }
     SECTION("clocking paths")
@@ -399,6 +461,16 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruc
                     enumerate_all_paths(obstr_lyt, {.source = {0, 0}, .target = {3, 3}}, {}, search_obstructions);
 
                 CHECK(collection.size() == 19);
+                check_four_by_four_paths(obstr_lyt, collection);
+                for (const auto& path : collection)
+                {
+                    CHECK(std::ranges::adjacent_find(path,
+                                                     [](const auto from, const auto to)
+                                                     {
+                                                         return from == layout_base::coordinate{2, 0} &&
+                                                                to == layout_base::coordinate{3, 0};
+                                                     }) == path.cend());
+                }
             }
         }
         SECTION("USE")
