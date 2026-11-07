@@ -152,3 +152,29 @@ def test_progress_callback_completes() -> None:
         text=True,
         timeout=30,
     )
+
+
+@pytest.mark.parametrize(
+    "bounds",
+    [
+        (5.0, 6.0, 0.0),
+        (5.0, 6.0, -1.0),
+        (6.0, 5.0, 1.0),
+        (float("nan"), 6.0, 0.1),
+        (5.0, float("inf"), 0.1),
+        (5.0, 6.0, float("nan")),
+        (5.0, 6.0, float("inf")),
+        (5.0, 6.0, 2.2250738585072014e-308),
+        (5.6, 5.6000002, 1e-7),
+    ],
+)
+def test_physical_validity_sweep_boundaries(bounds: tuple[float, float, float]) -> None:
+    """Matching configurations validate grid bounds; mismatched configurations yield no domain."""
+    layout = sidb_layout()
+    layout.assign_sidb(lattice_site())
+    dimensions = [operational_domain_value_range(sweep_parameter.EPSILON_R, *bounds)]
+    with pytest.raises(ValueError):  # ruff: ignore[pytest-raises-too-broad] -- error type is the public contract
+        physically_valid_parameters(layout, charge_distribution(layout), sweep_dimensions=dimensions)
+    empty_domain = physically_valid_parameters(layout, charge_distribution(), sweep_dimensions=dimensions)
+    with pytest.raises(ValueError, match="no excited state number available"):
+        empty_domain.get_excited_state_number_for_parameter(parameter_point([5.6]))

@@ -13,6 +13,8 @@ from __future__ import annotations
 import threading
 from typing import TYPE_CHECKING, Any
 
+import pytest
+
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.io import read_sqd_layout
 from mnt.pyfiction.sidb.model import sidb_charge_state, sidb_defect, sidb_defect_type
@@ -131,3 +133,24 @@ def test_quicksim_reports_progress_from_worker_threads(resources_dir: Path) -> N
     assert sum(done for done, total in final.values()) == options["iteration_steps"]
     assert all(done == total for done, total in final.values())
     assert all(count == 2 for worker, count, *rest in workers)
+
+
+@pytest.mark.parametrize(("nonempty", "iterations"), [(False, 80), (False, 0), (True, 0)])
+def test_quicksim_no_search_result(*, nonempty: bool, iterations: int) -> None:
+    """Empty layouts and zero iterations return None without a fabricated charge distribution."""
+    layout = sidb_layout()
+    if nonempty:
+        layout.assign_sidb(lattice_site())
+    assert quicksim(layout, base=2, iteration_steps=iterations) is None
+
+
+@pytest.mark.parametrize("threads", [1, 2, 4])
+def test_single_sidb_thread_counts(threads: int) -> None:
+    """Each worker count finds the isolated negative SiDB and one distinct ground state."""
+    layout = sidb_layout()
+    layout.assign_sidb(lattice_site(1, 3))
+    result = quicksim(layout, base=2, number_threads=threads, iteration_steps=8)
+    assert result is not None
+    assert result.charge_distributions
+    assert all(cd.charge_states() == [sidb_charge_state.NEGATIVE] for cd in result.charge_distributions)
+    assert len(result.groundstates()) == 1

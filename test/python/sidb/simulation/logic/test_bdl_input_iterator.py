@@ -13,7 +13,12 @@ import gc
 import pytest
 
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
-from mnt.pyfiction.sidb.simulation.logic import bdl_input_iterator, bdl_wire_selection, detect_bdl_wires
+from mnt.pyfiction.sidb.simulation.logic import (
+    bdl_input_iterator,
+    bdl_wire_selection,
+    detect_bdl_wires,
+    generate_bdl_input_pattern_layouts,
+)
 
 
 @pytest.fixture
@@ -212,3 +217,29 @@ def test_keyword_iterator_owns_options_and_supplied_wires(bdl_wire: sidb_layout)
     actual = list(iterator)
     assert len(actual) == len(expected) == 2
     assert [layout.sidbs() for layout in actual] == [layout.sidbs() for layout in expected]
+
+
+@pytest.mark.parametrize("pairs", [63, 64])
+def test_input_pair_limit(pairs: int) -> None:
+    """The iterator permits 63 input bits and rejects 64 before enumerating patterns."""
+    layout = sidb_layout()
+    for row in range(pairs):
+        layout.assign_sidb(lattice_site(0, row * 10), sidb_dot_tag.INPUT)
+        layout.assign_sidb(lattice_site(2, row * 10), sidb_dot_tag.INPUT)
+    if pairs == 63:
+        assert bdl_input_iterator(layout).num_input_pairs() == 63
+    else:
+        with pytest.raises(ValueError):  # ruff: ignore[pytest-raises-too-broad] -- error type is the public contract
+            bdl_input_iterator(layout)
+        with pytest.raises(ValueError):  # ruff: ignore[pytest-raises-too-broad] -- error type is the public contract
+            generate_bdl_input_pattern_layouts(layout)
+
+
+def test_generated_patterns_are_independent(bdl_wire: sidb_layout) -> None:
+    """Generated layouts own separate state and preserve the caller's original layout."""
+    layouts = generate_bdl_input_pattern_layouts(bdl_wire)
+    assert len(layouts) == 2
+    probe = lattice_site(100, 100)
+    layouts[0].assign_sidb(probe)
+    assert layouts[1].is_empty_site(probe)
+    assert bdl_wire.is_empty_site(probe)

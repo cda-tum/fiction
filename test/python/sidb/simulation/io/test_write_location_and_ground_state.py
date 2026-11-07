@@ -16,7 +16,7 @@ import pytest
 
 from mnt.pyfiction.sidb import charge_distribution, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.simulation import sidb_simulation_result
-from mnt.pyfiction.sidb.simulation.engines import quickexact
+from mnt.pyfiction.sidb.simulation.engines import exhaustive_ground_state_simulation, quickexact
 from mnt.pyfiction.sidb.simulation.io import write_location_and_ground_state
 
 if TYPE_CHECKING:
@@ -80,3 +80,26 @@ def test_invalid_input_preserves_destination(energy: float | None, tmp_path: Pat
 
     assert filename.read_text() == "original"
     assert list(tmp_path.iterdir()) == [filename]
+
+
+@pytest.mark.parametrize("degenerate", [False, True])
+def test_groundstate_csv_complete_columns(tmp_path: Path, *, degenerate: bool) -> None:
+    """The CSV preserves nanometer coordinates and each complete ground-state column."""
+    layout = sidb_layout()
+    coordinates = [0, 3, 5, 8] if degenerate else [0, 3, 5]
+    for x in coordinates:
+        layout.assign_sidb(lattice_site(x, 0))
+    path = tmp_path / "states.csv"
+    write_location_and_ground_state(exhaustive_ground_state_simulation(layout, base=2), str(path))
+    rows = [line.split(";")[:-1] for line in path.read_text(encoding="utf-8").splitlines()]
+    assert rows[0] == ["x [nm]", " y [nm]", "GS_0", *(["GS_1"] if degenerate else [])]
+    assert [(row[0], row[1]) for row in rows[1:]] == [(f"{x * 0.384:.3f}", "0.000") for x in coordinates]
+    columns = sorted(zip(*(tuple(int(charge) for charge in row[2:]) for row in rows[1:]), strict=True))
+    assert columns == ([(-1, -1, 0, -1), (-1, 0, -1, -1)] if degenerate else [(-1, 0, -1)])
+
+
+def test_empty_csv_output(tmp_path: Path) -> None:
+    """An empty simulation result writes an empty file."""
+    path = tmp_path / "empty.csv"
+    write_location_and_ground_state(sidb_simulation_result(), str(path))
+    assert path.read_bytes() == b""

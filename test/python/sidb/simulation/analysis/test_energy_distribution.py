@@ -35,6 +35,7 @@ def test_degeneracy_returns_state_count() -> None:
     distribution.add_energy_state(energy_state(-1.0, 7))
     distribution.add_energy_state(energy_state(0.0, 3))
     assert distribution.degeneracy(-1.0) == 7
+    assert distribution.degeneracy(-1.0 + 1e-7) == 7
     assert distribution.degeneracy(0.0) == 3
     assert distribution.degeneracy(1.0) is None
 
@@ -113,3 +114,27 @@ def test_degenerate_states():
         (first.electrostatic_potential_energy, first.degeneracy),
         (second.electrostatic_potential_energy, second.degeneracy),
     ] == [(pytest.approx(0.5), 2), (pytest.approx(1.0), 1)]
+    assert distribution.get_nth_state(2) is None
+
+
+def test_duplicate_configurations_do_not_inflate_degeneracy() -> None:
+    """Degeneracy counts distinct charge configurations rather than repeated input entries."""
+    layout = sidb_layout()
+    layout.assign_sidb(lattice_site())
+    neutral = charge_distribution(layout, sidb_charge_state.NEUTRAL)
+    negative = charge_distribution(layout)
+    positive = charge_distribution(layout, sidb_charge_state.POSITIVE)
+    positive.assign_energy(1.0)
+    distribution = calculate_energy_distribution([neutral] * 3 + [negative] * 4 + [positive] * 3)
+    assert distribution.size() == 2
+    assert distribution.degeneracy(0.0) == 2
+    assert distribution.degeneracy(1.0) == 1
+
+
+def test_empty_configuration_has_one_zero_energy_state() -> None:
+    """An empty configuration is distinct from an absent distribution."""
+    distribution = calculate_energy_distribution([charge_distribution()])
+    assert distribution.size() == 1
+    state = distribution.get_nth_state(0)
+    assert state is not None
+    assert (state.electrostatic_potential_energy, state.degeneracy) == (0.0, 1)

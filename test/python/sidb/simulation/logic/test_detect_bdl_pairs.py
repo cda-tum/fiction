@@ -11,7 +11,7 @@ from __future__ import annotations
 import pytest
 
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
-from mnt.pyfiction.sidb.simulation.logic import detect_bdl_pairs
+from mnt.pyfiction.sidb.simulation.logic import bdl_pair, detect_bdl_pairs
 
 
 @pytest.mark.parametrize(
@@ -38,7 +38,10 @@ def test_detect_bdl_pairs(lat):
 
     assert len(input_bdl_pairs) == 0
     assert len(output_bdl_pairs) == 0
-    assert len(normal_bdl_pairs) == 2
+    assert normal_bdl_pairs == [
+        bdl_pair(sidb_dot_tag.NORMAL, lattice_site(2, 0), lattice_site(4, 0)),
+        bdl_pair(sidb_dot_tag.NORMAL, lattice_site(3, 0), lattice_site(5, 0)),
+    ]
 
 
 def test_pair_distance_keywords() -> None:
@@ -49,3 +52,16 @@ def test_pair_distance_keywords() -> None:
     assert len(detect_bdl_pairs(layout, sidb_dot_tag.INPUT, minimum_distance=0.7, maximum_distance=1.3)) == 1
     assert not detect_bdl_pairs(layout, sidb_dot_tag.INPUT, minimum_distance=1.3, maximum_distance=1.5)
     assert not detect_bdl_pairs(layout, sidb_dot_tag.INPUT, minimum_distance=0.3, maximum_distance=1.0)
+
+
+def test_pair_distance_bounds_are_inclusive() -> None:
+    """A pair exactly on either physical-distance bound remains eligible."""
+    layout = sidb_layout()
+    first, second = lattice_site(), lattice_site(2, 0)
+    layout.assign_sidb(first, sidb_dot_tag.INPUT)
+    layout.assign_sidb(second, sidb_dot_tag.INPUT)
+    distance = layout.get_lattice().nm_distance(first, second)
+    assert detect_bdl_pairs(layout, sidb_dot_tag.INPUT, minimum_distance=distance, maximum_distance=distance) == [
+        bdl_pair(sidb_dot_tag.INPUT, first, second)
+    ]
+    assert detect_bdl_pairs(sidb_layout(), sidb_dot_tag.NORMAL) == []

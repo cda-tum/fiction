@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
+from mnt.pyfiction.sidb import sidb_layout
 from mnt.pyfiction.sidb.io import read_sqd_layout
 from mnt.pyfiction.sidb.simulation import sidb_simulation_engine
 from mnt.pyfiction.sidb.simulation.logic import (
@@ -105,3 +106,45 @@ def test_progress_callback_completes(resources_dir: Path) -> None:
         text=True,
         timeout=30,
     )
+
+
+@pytest.mark.parametrize(
+    "seed",
+    [
+        [],
+        [5.0],
+        [5.0, 5.0, 5.0],
+        [float("nan"), 5.0],
+        [5.0, float("inf")],
+        [-float("inf"), 5.0],
+        [4.9, 5.0],
+        [5.0, 6.1],
+    ],
+)
+def test_ratio_rejects_malformed_seed(seed: list[float]) -> None:
+    """Seeds must match the dimensions and lie inside finite sweep bounds."""
+    with pytest.raises(ValueError):  # ruff: ignore[pytest-raises-too-broad] -- error type is the public contract
+        operational_domain_ratio(
+            sidb_layout(),
+            [create_and_tt()],
+            parameter_point(seed),
+            sweep_dimensions=[
+                operational_domain_value_range(sweep_parameter.EPSILON_R, 5.0, 6.0, 1.0),
+                operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.0, 6.0, 1.0),
+            ],
+        )
+
+
+@pytest.mark.parametrize(("maximum", "step"), [(5.1, 0.0), (5.0000002, 1e-7)])
+def test_ratio_rejects_invalid_sweep(maximum: float, step: float) -> None:
+    """Ratios reject invalid steps and coordinate identities before sampling."""
+    with pytest.raises(ValueError):  # ruff: ignore[pytest-raises-too-broad] -- error type is the public contract
+        operational_domain_ratio(
+            sidb_layout(),
+            [create_and_tt()],
+            parameter_point([5.0, 5.0]),
+            sweep_dimensions=[
+                operational_domain_value_range(sweep_parameter.EPSILON_R, 5.0, maximum, step),
+                operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.0, 5.0, 0.1),
+            ],
+        )

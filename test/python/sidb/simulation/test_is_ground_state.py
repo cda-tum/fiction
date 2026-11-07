@@ -67,3 +67,23 @@ def test_empty_results() -> None:
     """Empty results contain no ground state."""
 
     assert not is_ground_state(sidb_simulation_result(), sidb_simulation_result())
+
+
+@pytest.mark.parametrize(
+    ("heuristic_indices", "exact_indices", "expected"),
+    [([0], [0, 1], False), ([0], [0, 0], True), ([1, 0], [0, 1], True), ([0, 1], [0], False), ([0], [], False)],
+)
+def test_degenerate_groundstate_sets(heuristic_indices: list[int], exact_indices: list[int], *, expected: bool) -> None:
+    """Ground-state matching requires every distinct ground state and ignores duplicates."""
+    layout = sidb_layout()
+    layout.assign_sidb(lattice_site(1, 3))
+    layout.assign_sidb(lattice_site(3, 3))
+    states = [charge_distribution(layout), charge_distribution(layout)]
+    states[0].assign_charge_state(lattice_site(3, 3), sidb_charge_state.NEUTRAL)
+    states[1].assign_charge_state(lattice_site(1, 3), sidb_charge_state.NEUTRAL)
+    heuristic = sidb_simulation_result()
+    exact = sidb_simulation_result()
+    heuristic.layout = exact.layout = layout
+    heuristic.charge_distributions = [states[index] for index in heuristic_indices]
+    exact.charge_distributions = [states[index] for index in exact_indices]
+    assert is_ground_state(heuristic, exact) is expected

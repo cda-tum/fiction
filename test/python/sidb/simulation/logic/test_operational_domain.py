@@ -542,3 +542,152 @@ def test_single_point_keyword_domain(resources_dir: Path) -> None:
     assert domain[parameter_point([5.7, 3.0])] == operational_status.OPERATIONAL
     assert stats.num_evaluated_parameter_combinations == 1
     assert stats.num_operational_parameter_combinations == 1
+
+
+@pytest.mark.parametrize(
+    "ranges",
+    [
+        [(5.6, 5.6, 0.0)],
+        [(5.6, 5.6, -0.0)],
+        [(float("nan"), 5.6, 0.1)],
+        [(5.6, float("inf"), 0.1)],
+        [(5.6, 5.6, float("nan"))],
+        [(1.0, 2.0, 2.2250738585072014e-308)],
+        [(5.6, 5.6000002, 1e-7)],
+        [(5.6000004, 5.6000022, 6e-7)],
+        [(5.6, 5.7, 1e-18)],
+    ],
+)
+def test_invalid_sweep_ranges(ranges: list[tuple[float, float, float]]) -> None:
+    """Reject non-finite, overflowing, and identity-colliding grids before allocation or simulation."""
+    dimensions = [sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF]
+    with pytest.raises(ValueError):  # ruff: ignore[pytest-raises-too-broad] -- error type is the public contract
+        operational_domain_grid_search(
+            sidb_layout(),
+            [create_id_tt()],
+            sweep_dimensions=[
+                operational_domain_value_range(dimension, *bounds)
+                for dimension, bounds in zip(dimensions, ranges, strict=False)
+            ],
+        )
+
+
+@pytest.mark.parametrize(
+    "search",
+    [
+        operational_domain_random_sampling,
+        operational_domain_flood_fill,
+        operational_domain_contour_tracing,
+        critical_temperature_domain_random_sampling,
+        critical_temperature_domain_flood_fill,
+        critical_temperature_domain_contour_tracing,
+    ],
+)
+def test_colliding_sweeps_rejected_before_zero_samples(search) -> None:
+    """Zero sampling still validates the grid for every sampling strategy."""
+    with pytest.raises(ValueError):  # ruff: ignore[pytest-raises-too-broad] -- error type is the public contract
+        search(
+            sidb_layout(),
+            [create_id_tt()],
+            0,
+            sweep_dimensions=[
+                operational_domain_value_range(sweep_parameter.EPSILON_R, 5.6, 5.6000002, 1e-7),
+                operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.0, 5.0, 0.1),
+            ],
+        )
+
+
+@pytest.mark.parametrize(("maximum", "step", "count"), [(5.6, 1e-7, 1), (5.64, 0.07, 1), (5.600001, 6e-7, 2)])
+def test_distinct_sweep_identities(resources_dir: Path, maximum: float, step: float, count: int) -> None:
+    """Singleton and fine sweeps retain distinct points after trimming their last step."""
+    layout = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
+    minimum = 5.6000004 if count == 2 else 5.6
+    stats = operational_domain_stats()
+    domain = operational_domain_grid_search(
+        layout,
+        [create_or_tt()],
+        number_of_threads=1,
+        stats=stats,
+        mu_minus=-0.28,
+        threshold_bdl_interdistance=1.5,
+        sweep_dimensions=[
+            operational_domain_value_range(sweep_parameter.EPSILON_R, minimum, maximum, step),
+            operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.0, 5.0, 0.1),
+        ],
+    )
+    assert len(domain) == count
+    assert stats.num_evaluated_parameter_combinations == count
+
+
+def test_flood_fill_rejects_one_dimension() -> None:
+    """Flood fill requires at least two sweep dimensions, even without samples."""
+    with pytest.raises(ValueError):  # ruff: ignore[pytest-raises-too-broad] -- error type is the public contract
+        operational_domain_flood_fill(
+            sidb_layout(),
+            [create_id_tt()],
+            0,
+            sweep_dimensions=[operational_domain_value_range(sweep_parameter.EPSILON_R, 5.0, 5.1, 0.1)],
+        )
+
+
+def test_grid_product_overflow_preserves_statistics() -> None:
+    """A product of small dimensions fails before the grid is allocated or statistics are published."""
+    stats = operational_domain_stats()
+    with pytest.raises(ValueError):  # ruff: ignore[pytest-raises-too-broad] -- error type is the public contract
+        operational_domain_random_sampling(
+            sidb_layout(),
+            [create_id_tt()],
+            0,
+            stats=stats,
+            sweep_dimensions=[
+                operational_domain_value_range(sweep_parameter.EPSILON_R, 5.6, 5.7, 0.1) for _ in range(64)
+            ],
+        )
+    assert stats.num_total_parameter_points == 0
+
+
+@pytest.mark.parametrize("search", [operational_domain_random_sampling, critical_temperature_domain_random_sampling])
+def test_zero_samples_produce_empty_domain(search, resources_dir: Path) -> None:
+    """Zero samples produce no classifications or simulator invocations."""
+    layout = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
+    stats = operational_domain_stats()
+    domain = search(
+        layout,
+        [create_or_tt()],
+        0,
+        stats=stats,
+        sweep_dimensions=[
+            operational_domain_value_range(sweep_parameter.EPSILON_R, 5.6, 5.7, 0.1),
+            operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.0, 5.1, 0.1),
+        ],
+    )
+    assert len(domain) == 0
+    assert stats.num_evaluated_parameter_combinations == 0
+    assert stats.num_simulator_invocations == 0
+
+
+def test_random_sampling_stops_when_grid_is_exhausted(resources_dir: Path) -> None:
+    """Requesting more samples than grid points yields the complete classification once."""
+    layout = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
+    dimensions = [
+        operational_domain_value_range(sweep_parameter.EPSILON_R, 5.7, 5.8, 0.1),
+        operational_domain_value_range(sweep_parameter.LAMBDA_TF, 3.0, 3.1, 0.1),
+    ]
+    stats = operational_domain_stats()
+    domain = operational_domain_random_sampling(
+        layout,
+        [create_or_tt()],
+        100,
+        stats=stats,
+        mu_minus=-0.28,
+        threshold_bdl_interdistance=1.5,
+        sweep_dimensions=dimensions,
+        number_of_threads=2,
+    )
+    expected = {
+        parameter_point([epsilon, screening]): operational_status.OPERATIONAL
+        for epsilon in (5.7, 5.8)
+        for screening in (3.0, 3.1)
+    }
+    assert dict(domain.items()) == expected
+    assert stats.num_evaluated_parameter_combinations == 4

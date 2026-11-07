@@ -14,7 +14,7 @@ import pytest
 
 from mnt.pyfiction.sidb import charge_distribution, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.io import print_sidb_layout
-from mnt.pyfiction.sidb.model import sidb_charge_state
+from mnt.pyfiction.sidb.model import sidb_charge_state, sidb_defect, sidb_defect_type
 
 CHARGED = "●"
 """What a charged SiDB looks like; only the color tells a negative one from a positive one."""
@@ -77,4 +77,36 @@ def test_a_charge_distribution_replaces_the_dots(two_sidb_layout: sidb_layout) -
 
 def test_an_empty_layout_prints_nothing_but_a_note() -> None:
     picture = print_sidb_layout(sidb_layout(), lat_color=False)
-    assert picture.strip()
+    assert picture == "[i] empty layout\n"
+
+
+@pytest.mark.parametrize("coordinate", [-(2**31), 2**31 - 1])
+def test_text_padding_boundaries(coordinate: int) -> None:
+    """Unpadded sites at coordinate limits print, while padding raises IndexError."""
+    layout = sidb_layout()
+    layout.assign_sidb(lattice_site(coordinate, coordinate))
+    assert print_sidb_layout(layout, lat_color=False, crop_layout=False) == " ◯ \n"
+    with pytest.raises(IndexError):
+        print_sidb_layout(layout, lat_color=False, crop_layout=True)
+
+
+def test_charge_defect_and_dot_priority() -> None:
+    """Charge states take priority over overlapping defects, followed by defect symbols and dots."""
+    layout = sidb_layout()
+    for x, tag in enumerate((sidb_dot_tag.INPUT, sidb_dot_tag.NORMAL, sidb_dot_tag.OUTPUT)):
+        layout.assign_sidb(lattice_site(x, 0), tag)
+    layout.assign_defect(lattice_site(), sidb_defect(sidb_defect_type.UNKNOWN, 1))
+    layout.assign_defect(lattice_site(1, 0), sidb_defect(sidb_defect_type.UNKNOWN, -1))
+    charges = charge_distribution(layout, sidb_charge_state.NONE)
+    charges.assign_charge_state(lattice_site(), sidb_charge_state.NEGATIVE)
+    assert print_sidb_layout(layout, charges, lat_color=False, crop_layout=False) == " ●  ⊟  ◯ \n"
+
+
+def test_printer_rejects_shifted_distribution() -> None:
+    """A charge distribution must refer to the same sites as the printed layout."""
+    layout = sidb_layout()
+    layout.assign_sidb(lattice_site())
+    shifted = sidb_layout()
+    shifted.assign_sidb(lattice_site(1, 0))
+    with pytest.raises(ValueError):  # ruff: ignore[pytest-raises-too-broad] -- error type is the public contract
+        print_sidb_layout(layout, charge_distribution(shifted))

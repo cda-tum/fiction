@@ -48,3 +48,9 @@ def test_three_sidbs(lat):
     assert result == pytest.approx(min(cd.energy() for cd in [cd1, cd2, cd3, cd4]))
     assert result == pytest.approx(cd4.energy())
     assert result < 0.0
+
+
+def test_empty_and_single_minimum() -> None:
+    """An absent distribution has infinite minimum energy; an empty configuration has zero energy."""
+    assert minimum_energy([]) == float("inf")
+    assert minimum_energy([charge_distribution()]) == 0.0

@@ -115,7 +115,11 @@ def test_degenerate_ground_states():
     result = sidb_simulation_result()
     result.charge_distributions = [excited, left, right, left]
 
-    assert len(result.groundstates()) == 2
+    groundstates = result.groundstates()
+    assert len(groundstates) == 2
+    assert sorted((tuple(cd.charge_states()) for cd in groundstates), key=str) == sorted(
+        [tuple(left.charge_states()), tuple(right.charge_states())], key=str
+    )
 
 
 def test_distribution_index_boundary() -> None:

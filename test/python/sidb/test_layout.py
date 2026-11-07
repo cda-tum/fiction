@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.model import sidb_defect, sidb_defect_type
 
@@ -80,3 +82,48 @@ def test_defects() -> None:
     lyt.move_defect(lattice_site(5, 2, 0), lattice_site(6, 2, 0))
     assert lyt.get_defect(lattice_site(6, 2, 0)) == vacancy
     assert lyt.bounding_box() == (lattice_site(1, 0, 1), lattice_site(6, 2, 0))
+
+
+def test_defect_move_erase_and_neutral_charge_counts() -> None:
+    """Defect movement preserves values, empty moves do nothing, and NONE erases a defect."""
+    layout = sidb_layout()
+    first, second = lattice_site(), lattice_site(5, 2)
+    positive = sidb_defect(sidb_defect_type.UNKNOWN, 1)
+    vacancy = sidb_defect(sidb_defect_type.SI_VACANCY)
+    layout.assign_defect(first, positive)
+    layout.assign_defect(second, vacancy)
+    assert layout.num_charged_defects() == 2
+    assert layout.num_neutral_defects() == 1
+    assert layout.num_positively_charged_defects() == 1
+    assert layout.num_negatively_charged_defects() == 0
+    expected = [(first, positive), (second, vacancy)]
+    layout.move_defect(lattice_site(9, 9), first)
+    layout.move_defect(second, second)
+    assert layout.defects() == expected
+    layout.move_defect(layout.defects()[0][0], layout.defects()[1][0])
+    assert layout.defects() == [(second, positive)]
+    layout.assign_defect(second, sidb_defect(sidb_defect_type.NONE))
+    assert layout.defects() == []
+
+
+@pytest.mark.parametrize(("coordinate", "offsets", "basis"), [(-(2**31), [0, 1], 0), (2**31 - 1, [-1, 0], 1)])
+def test_defect_extent_clips_coordinate_limits(coordinate: int, offsets: list[int], basis: int) -> None:
+    """Affected sites stop at representable coordinates without wrapping or changing basis."""
+    layout = sidb_layout()
+    site = lattice_site(coordinate, coordinate, basis)
+    layout.assign_defect(site, sidb_defect(sidb_defect_type.SI_VACANCY))
+    assert set(layout.affected_sidbs(site, (1, 1))) == {
+        lattice_site(coordinate + x, coordinate + y, basis) for x in offsets for y in offsets
+    }
+
+
+def test_complete_affected_sites() -> None:
+    """Affected-site union preserves both defect extents and lattice basis indices."""
+    layout = sidb_layout()
+    charged_site, neutral_site = lattice_site(5, 2), lattice_site(1, 0, 1)
+    layout.assign_defect(charged_site, sidb_defect(sidb_defect_type.SI_VACANCY))
+    layout.assign_defect(neutral_site, sidb_defect(sidb_defect_type.SILOXANE))
+    expected = {lattice_site(x, y) for x in (4, 5, 6) for y in (1, 2, 3)}
+    assert set(layout.affected_sidbs(charged_site, (1, 1))) == expected
+    assert set(layout.all_affected_sidbs((1, 1), (0, 0))) == expected | {neutral_site}
+    assert layout.affected_sidbs(lattice_site(9, 9)) == set()

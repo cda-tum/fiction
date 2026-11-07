@@ -265,3 +265,22 @@ def test_sidb_layout_svg() -> None:
     assert svg.count('xlink:href="#sidb_color"') == 4
     assert svg.count('xlink:href="#lattice_point"') == 16
     assert 'viewBox="0 0 19.2 23.04"' in svg
+
+
+@pytest.mark.parametrize("coordinates", [(2**31 - 1, 0, 0), (0, 2**31 - 1, 0), (0, 2**31 - 1, 1)])
+def test_svg_padding_boundaries(coordinates: tuple[int, int, int]) -> None:
+    """SVG padding rejects coordinates that cannot represent the surrounding lattice."""
+    layout = sidb_layout()
+    layout.assign_sidb(lattice_site(*coordinates))
+    with pytest.raises(IndexError):
+        write_sidb_layout_svg_to_string(layout)
+
+
+def test_svg_rejects_shifted_distribution() -> None:
+    """Charge colors require the distribution and layout to describe the same sites."""
+    layout = sidb_layout()
+    layout.assign_sidb(lattice_site())
+    shifted = sidb_layout()
+    shifted.assign_sidb(lattice_site(1, 0))
+    with pytest.raises(ValueError):  # ruff: ignore[pytest-raises-too-broad] -- error type is the public contract
+        write_sidb_layout_svg_to_string(layout, charge_distribution(shifted))

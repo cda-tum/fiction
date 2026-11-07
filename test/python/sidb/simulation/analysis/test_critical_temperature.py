@@ -8,6 +8,7 @@
 
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING, Any
 
 import pytest
@@ -211,3 +212,24 @@ def test_invalid_specification_raises_value_error(*, mixed_variables: bool) -> N
         critical_temperature_gate_based(sidb_layout(), spec)
     with pytest.raises(ValueError, match="variables" if mixed_variables else "empty"):
         critical_temperature_gate_based([], spec, [], [], [])
+
+
+@pytest.mark.parametrize(
+    "maximum", [-1.0, -5e-324, -math.inf, math.nan, math.inf, 1.7976931348623157e308, float(2**64 - 1) / 100]
+)
+def test_invalid_temperature_limits(maximum: float) -> None:
+    """Temperature bounds must fit the finite non-negative centikelvin iteration range."""
+    stats = critical_temperature_stats()
+    with pytest.raises(ValueError):  # ruff: ignore[pytest-raises-too-broad] -- error type is the public contract
+        critical_temperature_non_gate_based(sidb_layout(), max_temperature=maximum, stats=stats)
+    assert stats.num_valid_lyt == 0
+    with pytest.raises(ValueError):  # ruff: ignore[pytest-raises-too-broad] -- error type is the public contract
+        critical_temperature_gate_based(sidb_layout(), [create_and_tt()], max_temperature=maximum, stats=stats)
+    assert stats.num_valid_lyt == 0
+
+
+@pytest.mark.parametrize("maximum", [0.0, 5e-324, 0.005, 400.0])
+def test_empty_temperature_analysis(maximum: float) -> None:
+    """Empty gate analysis returns zero; non-gate analysis returns the selected upper bound."""
+    assert critical_temperature_gate_based(sidb_layout(), [create_and_tt()], max_temperature=maximum) == 0.0
+    assert critical_temperature_non_gate_based(sidb_layout(), max_temperature=maximum) == maximum

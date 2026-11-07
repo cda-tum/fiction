@@ -10,14 +10,19 @@ from __future__ import annotations
 
 from typing import Any
 
+import pytest
+
 from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
+from mnt.pyfiction.sidb.io import read_sqd_layout
+from mnt.pyfiction.sidb.model import sidb_defect, sidb_defect_type
 from mnt.pyfiction.sidb.simulation.defects import (
     determine_displacement_robustness_domain,
     dimer_displacement_policy,
     displacement_analysis_mode,
     displacement_robustness_domain_stats,
 )
-from mnt.pyfiction.synthesis import create_and_tt
+from mnt.pyfiction.sidb.simulation.logic import operational_status
+from mnt.pyfiction.synthesis import create_and_tt, create_or_tt
 
 
 def test_siqad_and_gate_100_lattice():
@@ -70,3 +75,57 @@ def test_siqad_and_gate_100_lattice():
     _ = determine_displacement_robustness_domain(layout, [create_and_tt()], stats=stats, **options)
 
     assert stats.num_non_operational_sidb_displacements + stats.num_operational_sidb_displacements == 8
+
+
+@pytest.mark.parametrize("policy", list(dimer_displacement_policy))
+@pytest.mark.parametrize("mode", list(displacement_analysis_mode))
+def test_stationary_displacement_preserves_layout(resources_dir, policy, mode) -> None:
+    """Both search modes and dimer policies preserve a fully fixed layout, including defects and name."""
+    layout = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"), "fixed surface")
+    layout.assign_defect(lattice_site(100, 100), sidb_defect(sidb_defect_type.SILOXANE))
+    stats = displacement_robustness_domain_stats()
+    reports = []
+    # A fixed layout has exactly one candidate, so exhaustive and random modes have the same complete oracle.
+    domain = determine_displacement_robustness_domain(
+        layout,
+        [create_or_tt()],
+        displacement_variations=(0, 0),
+        fixed_sidbs=set(layout.sidbs()),
+        analysis_mode=mode,
+        dimer_policy=policy,
+        threshold_bdl_interdistance=1.5,
+        mu_minus=-0.28,
+        epsilon_r=5.7,
+        lambda_tf=3.0,
+        stats=stats,
+        on_progress=lambda task, done, total: reports.append((task, done, total)),
+    )
+    assert domain.influence_information == [(layout, operational_status.OPERATIONAL)]
+    assert stats.num_non_operational_sidb_displacements == 0
+    assert stats.num_operational_sidb_displacements == 1
+    assert reports[-1][1:] == (1, 1)
+
+
+@pytest.mark.parametrize("percentage", [-0.1, 1.1, float("nan"), float("inf")])
+def test_invalid_displacement_percentage(percentage: float) -> None:
+    """Sampling fractions reject non-finite values and values outside the unit interval."""
+    with pytest.raises(ValueError, match="between 0 and 1"):
+        determine_displacement_robustness_domain(
+            sidb_layout(), [create_and_tt()], percentage_of_analyzed_displaced_layouts=percentage
+        )
+
+
+def test_displacement_range_preserves_statistics(resources_dir) -> None:
+    """Unrepresentable displacements raise before publishing statistics."""
+    layout = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
+    stats = displacement_robustness_domain_stats()
+    stats.num_operational_sidb_displacements = 42
+    with pytest.raises(IndexError):
+        determine_displacement_robustness_domain(
+            layout,
+            [create_and_tt()],
+            displacement_variations=(2**64 - 1, 0),
+            threshold_bdl_interdistance=1.5,
+            stats=stats,
+        )
+    assert stats.num_operational_sidb_displacements == 42

@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+from itertools import starmap
+
 import pytest
 
 from mnt.pyfiction.sidb import lattice, lattice_site, row_of, site_at_row, sites_in_area
@@ -101,3 +103,43 @@ def test_arithmetic_boundaries() -> None:
         _ = lattice_site(2**31 - 1, 0) + lattice_site(1, 0)
     with pytest.raises(IndexError):
         _ = lattice_site(0, -(2**31), 0) - lattice_site(0, 0, 1)
+
+
+@pytest.mark.parametrize(
+    ("first", "last", "expected"),
+    [
+        ((0, 0, 0), (1, 1, 0), [(0, 0, 0), (1, 0, 0), (0, 0, 1), (1, 0, 1), (0, 1, 0), (1, 1, 0)]),
+        ((-1, -1, 1), (0, 0, 0), [(-1, -1, 1), (0, -1, 1), (-1, 0, 0), (0, 0, 0)]),
+        ((2, 3, 1), (2, 3, 1), [(2, 3, 1)]),
+        (
+            (2**31 - 2, 2**31 - 1, 0),
+            (2**31 - 1, 2**31 - 1, 1),
+            [
+                (2**31 - 2, 2**31 - 1, 0),
+                (2**31 - 1, 2**31 - 1, 0),
+                (2**31 - 2, 2**31 - 1, 1),
+                (2**31 - 1, 2**31 - 1, 1),
+            ],
+        ),
+    ],
+)
+def test_area_raster_order(first: tuple, last: tuple, expected: list[tuple]) -> None:
+    """Area traversal includes both corners, accepts either corner order, and retains the basis."""
+    wanted = list(starmap(lattice_site, expected))
+    assert sites_in_area(lattice_site(*first), lattice_site(*last)) == wanted
+    assert sites_in_area(lattice_site(*last), lattice_site(*first)) == wanted
+
+
+@pytest.mark.parametrize(
+    ("lat", "position", "expected"),
+    [
+        (lattice.si_100_2x1(), (0, 8, 1), (0.0, 6.369)),
+        (lattice.si_100_2x1(), (1, 10, 1), (0.384, 7.905)),
+        (lattice.si_100_2x1(), (-5, -5, 0), (-1.92, -3.84)),
+        (lattice.si_111_1x1(), (-5, -5, 0), (-3.325, -1.92)),
+        (lattice.si_111_1x1(), (1, 1, 1), (0.99755, 0.576)),
+    ],
+)
+def test_lattice_positions(lat: lattice, position: tuple, expected: tuple[float, float]) -> None:
+    """Physical positions include negative unit cells and both lattice bases."""
+    assert lat.nm_position(lattice_site(*position)) == pytest.approx(expected, abs=1e-5)
