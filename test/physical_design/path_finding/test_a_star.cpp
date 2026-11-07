@@ -820,7 +820,7 @@ TEST_CASE("Default A* heuristics preserve shortest offset-coordinate paths", "[A
         obstructions blocked{};
         blocked.obstruct_connection({1, 1}, {1, 0});
         /** @brief Endpoints whose shortest route changes both axes in one step. */
-        const routing_objective objective{{0, 3}, {1, 0}};
+        const routing_objective objective{.source = {0, 3}, .target = {1, 0}};
         /** @brief Independent route proving the three-step upper bound. */
         const layout_coordinate_path expected{{0, 3}, {1, 2}, {0, 1}, {1, 0}};
         for (std::size_t i = 1; i < expected.size(); ++i)

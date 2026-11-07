@@ -25,7 +25,6 @@
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/physical_design/path_finding/a_star.hpp>
 #include <fiction/physical_design/path_finding/cost.hpp>
-#include <fiction/physical_design/path_finding/distance.hpp>
 
 #include <optional>
 #include <vector>
