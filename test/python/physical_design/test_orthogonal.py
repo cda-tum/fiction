@@ -40,7 +40,7 @@ def test_orthogonal_with_parameters(mux21):
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
 
-def test_orthogonal_with_stats(mux21):
+def test_orthogonal_with_stats(mux21: technology_network) -> None:
     stats = orthogonal_stats()
 
     layout = orthogonal(mux21, statistics=stats)

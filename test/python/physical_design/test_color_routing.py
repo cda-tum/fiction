@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
 
 from mnt.pyfiction.layouts import (
@@ -19,6 +21,9 @@ from mnt.pyfiction.layouts import (
 )
 from mnt.pyfiction.networks import simulate_outputs
 from mnt.pyfiction.physical_design import color_routing, graph_coloring_engine
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 @pytest.mark.parametrize("conduct_partial_routing", [False, True])
@@ -64,7 +69,7 @@ def test_endpoint_validation_preserves_layout() -> None:
         ),
     ],
 )
-def test_routing(make_lyt):
+def test_routing(make_lyt: Callable[[], cartesian_gate_layout | hexagonal_gate_layout]) -> None:
     lyt = make_lyt()
     x1 = lyt.create_pi("x1", coordinate(0, 0))
     x2 = lyt.create_pi("x2", coordinate(0, 1))

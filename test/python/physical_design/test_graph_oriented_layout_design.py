@@ -26,6 +26,7 @@ from mnt.pyfiction.verification import eq_type, equivalence_checking
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from mnt.pyfiction.layouts import cartesian_gate_layout
     from mnt.pyfiction.networks import technology_network
 
 
@@ -109,7 +110,7 @@ def test_graph_oriented_layout_design_with_custom_cost_function(mux21: technolog
 
     evaluated = []
 
-    def custom_cost_objective(layout):
+    def custom_cost_objective(layout: cartesian_gate_layout) -> int:
         evaluated.append(layout.num_gates())
         return layout.num_wires() * 2 + layout.num_crossings()
 
