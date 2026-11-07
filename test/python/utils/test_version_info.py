@@ -10,9 +10,8 @@
 
 from __future__ import annotations
 
+from datetime import date
 from time import strptime
-
-import pytest
 
 from mnt import pyfiction
 from mnt.pyfiction import utils
@@ -26,18 +25,13 @@ def test_version_and_repository() -> None:
     assert utils.__repo__ == "https://github.com/cda-tum/fiction"
 
 
-@pytest.mark.parametrize(
-    ("attribute", "date_format"),
-    [("__compiled_date__", "%b %d %Y"), ("__compiled_time__", "%H:%M:%S")],
-    ids=["date", "time"],
-)
-def test_build_timestamp(attribute: str, date_format: str) -> None:
-    """Build metadata contains the compiler's date and time strings.
+def test_build_date() -> None:
+    """The compiler date contains an English month and a valid calendar date."""
+    month, day, year = utils.__compiled_date__.split()
+    months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    date(int(year), months.index(month) + 1, int(day))
 
-    Args:
-        attribute: Exported build timestamp field.
-        date_format: Format of the compiler macro supplying the field.
-    """
-    value = getattr(utils, attribute)
-    assert isinstance(value, str)
-    strptime(value, date_format)
+
+def test_build_time() -> None:
+    """The compiler time contains valid hours, minutes, and seconds."""
+    strptime(utils.__compiled_time__, "%H:%M:%S")
