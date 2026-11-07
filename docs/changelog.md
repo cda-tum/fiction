@@ -42,6 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Python synthesis tests cover bound truth tables, conversion, mapping, and planarization.
   - Routing tests compare complete retained-object visits after clearing wires.
   - QCA ONE tests check selected port and OR-gate orientations against independent cell patterns.
   - Network utility tests check fanins through network interfaces instead of fixed node indices.
@@ -757,6 +758,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - `synthesis::technology_mapping` now preserves constant-one outputs and gate inputs.
   - Non-strict comparison truth tables now match LE and GE gates, restoring Bestagon skeleton lookup.
     Published standard-cell experiment rows labeled `le` and `ge` use NOR and `!b`, respectively.
   - Technology mapping now respects the selected LT, GT, LE, and GE gate types. Previously mapped networks may
