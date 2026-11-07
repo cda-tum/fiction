@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
 
 from mnt.pyfiction.layouts import (
@@ -19,6 +21,9 @@ from mnt.pyfiction.layouts import (
 )
 from mnt.pyfiction.physical_design import clear_routing, extract_routing_objectives, is_crossable_wire, route_path
 from mnt.pyfiction.physical_design.path_finding import a_star
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 def test_empty_layout() -> None:
@@ -46,15 +51,18 @@ def test_empty_layout_a_star() -> None:
 
 
 @pytest.mark.parametrize(
-    "layout",
+    "make_layout",
     [
-        pytest.param(cartesian_gate_layout((3, 1)), id="cartesian"),
-        pytest.param(shifted_cartesian_gate_layout(arrangement.EVEN_ROW, (3, 1)), id="shifted"),
-        pytest.param(hexagonal_gate_layout(arrangement.EVEN_ROW, (3, 1)), id="hexagonal"),
+        pytest.param(lambda: cartesian_gate_layout((3, 1)), id="cartesian"),
+        pytest.param(lambda: shifted_cartesian_gate_layout(arrangement.EVEN_ROW, (3, 1)), id="shifted"),
+        pytest.param(lambda: hexagonal_gate_layout(arrangement.EVEN_ROW, (3, 1)), id="hexagonal"),
     ],
 )
-def test_clear_routing(layout: cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout) -> None:
+def test_clear_routing(
+    make_layout: Callable[[], cartesian_gate_layout | shifted_cartesian_gate_layout | hexagonal_gate_layout],
+) -> None:
     """Remove routing wires and preserve disconnected terminal identities."""
+    layout = make_layout()
     source = layout.create_pi("source", (0, 0))
     wire = layout.create_buf(source, (1, 0))
     output = layout.create_po(wire, "output", (2, 0))

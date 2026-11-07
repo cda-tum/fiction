@@ -110,7 +110,8 @@ def test_color_routing_preserves_noncommutative_input_indices(engine: graph_colo
     gate = layout.create_lt(a, b, (1, 1))
     layout.disconnect(layout_input_port(gate, 0))
     layout.disconnect(layout_input_port(gate, 1))
-    assert color_routing(layout, [((1, 0), (1, 1), 1), ((0, 1), (1, 1), 0)], engine=engine)
+    success = color_routing(layout, [((1, 0), (1, 1), 1), ((0, 1), (1, 1), 0)], engine=engine)
+    assert success
     assert layout.source(layout_input_port(gate, 0)) == a
     assert layout.source(layout_input_port(gate, 1)) == b
     assert layout.is_lt(gate)
@@ -124,7 +125,8 @@ def test_partial_routing_preserves_satisfiable_objectives(*, partial: bool) -> N
     output = layout.create_po(source, "f", (1, 1))
     layout.disconnect(layout_input_port(output, 0))
     objectives = [((0, 0), (1, 1), 0), ((1, 1), (0, 0), 0)]
-    assert color_routing(layout, objectives, conduct_partial_routing=partial) is partial
+    success = color_routing(layout, objectives, conduct_partial_routing=partial)
+    assert success is partial
     if partial:
         assert simulate_outputs(layout) == [("f", [True, False])]
     else:
@@ -139,7 +141,8 @@ def test_color_routing_repeated_sources_keep_distinct_input_paths(*, crossings: 
     gate = layout.create_lt(a, a, (1, 1))
     layout.disconnect(layout_input_port(gate, 0))
     layout.disconnect(layout_input_port(gate, 1))
-    assert color_routing(layout, [((0, 0), (1, 1), 0), ((0, 0), (1, 1), 1)], crossings=crossings)
+    success = color_routing(layout, [((0, 0), (1, 1), 0), ((0, 0), (1, 1), 1)], crossings=crossings)
+    assert success
     wires = [layout.source(layout_input_port(gate, i)) for i in range(2)]
     assert wires[0] != wires[1]
     for wire in wires:

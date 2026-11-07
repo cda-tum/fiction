@@ -412,3 +412,384 @@ def test_topolinano_rejects_nand() -> None:
         layout.assign_clock_number(site, clock)
     with pytest.raises(ValueError, match=r"type.*2.*2"):
         apply_topolinano_library(layout)
+
+
+def _assert_cell_tile(cells: Any, origin: tuple[int, int, int], rows: list[str]) -> None:
+    """Compare every occupied and empty cell in one independently specified tile."""
+    x, y, z = origin
+    actual = [
+        "".join(chr(cells.get_cell_type((x + dx, y + dy, z)).value) for dx in range(len(row)))
+        for dy, row in enumerate(rows)
+    ]
+    assert actual == rows
+
+
+def _rotate_rows(rows: list[str], turns: int) -> list[str]:
+    """Rotate a native reference pattern clockwise.
+
+    Returns:
+        The rotated reference rows.
+    """
+    for _ in range(turns):
+        rows = ["".join(row) for row in zip(*rows[::-1], strict=True)]
+    return rows
+
+
+def test_bestagon_double_wire_interface() -> None:
+    """Map two distinct signals through the same hexagonal tile on separate layers."""
+    layout = hexagonal_gate_layout(arrangement.EVEN_ROW, (3, 3, 2), "ROW")
+    a = layout.create_pi("x1", (0, 0))
+    first = layout.create_buf(a, (1, 1))
+    layout.create_po(first, "f1", (0, 2))
+    b = layout.create_pi("x2", (1, 0))
+    second = layout.create_buf(b, (1, 1, 1))
+    layout.create_po(second, "f2", (1, 2))
+    cells = apply_bestagon_library(layout)
+    reference = read_sqd_layout(
+        str(
+            Path(__file__).resolve().parents[2]
+            / "resources"
+            / "bestagon_library"
+            / "multi_tile_layout"
+            / "double_wire.sqd"
+        )
+    )
+    assert [(site, cells.get_dot_tag(site)) for site in cells.sidbs()] == [
+        (site, reference.get_dot_tag(site)) for site in reference.sidbs()
+    ]
+
+
+def test_mol_fanout_three_keeps_a_clock_hidden_branch() -> None:
+    """Physical fanout ports include the third branch hidden by 2DDWave clock flow."""
+    layout = cartesian_gate_layout((3, 3), "2DDWave")
+    source = layout.create_pi("x", (1, 0))
+    fanout = layout.create_buf(source, (1, 1))
+    layout.create_po(fanout, "east", (2, 1))
+    layout.create_po(fanout, "south", (1, 2))
+    # A second fanout accepts the backwards-clocked input through physical ports.
+    west = layout.create_buf(fanout, (0, 1))
+    layout.create_po(west, "north", (0, 0))
+    layout.create_po(west, "south-west", (0, 2))
+    layout.assign_clock_number((0, 0), 2)
+    assert len(layout.outgoing_data_flow((1, 1))) == 2
+    assert layout.fanout_size(fanout) == 3
+    cells = apply_sim7_mol_library(layout)
+    _assert_cell_tile(
+        cells,
+        (10, 10, 0),
+        [
+            "    aa    ",
+            "    aa    ",
+            "    aa    ",
+            "   bbbb   ",
+            "ddcbbbbcdd",
+            "ddcbbbbcdd",
+            "   bbbb   ",
+            "    cc    ",
+            "    dd    ",
+            "    dd    ",
+        ],
+    )
+
+
+def test_mol_fanout_three_rejects_missing_adjacent_input() -> None:
+    """A mappable source with a remote fanout cannot supply the fanout's physical input port."""
+    layout = cartesian_gate_layout((4, 4), "2DDWave")
+    a = layout.create_pi("a", (0, 1))
+    b = layout.create_pi("b", (1, 0))
+    gate = layout.create_or(a, b, (1, 1))
+    layout.create_po(gate, "copy", (2, 1))
+    fanout = layout.create_buf(gate, (2, 2))
+    for site in [(3, 2), (2, 3), (1, 2)]:
+        layout.create_po(fanout, "branch", site)
+    assert layout.fanout_size(fanout) == 3
+    with pytest.raises(ValueError, match=r"orientation.*2,2,0"):
+        apply_sim7_mol_library(layout)
+
+
+@pytest.mark.parametrize("down", [False, True])
+def test_topolinano_vertical_staircase(*, down: bool) -> None:
+    """Both vertical signal directions preserve the complete staircase cell pattern."""
+    layout = shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (5, 5))
+    incoming, outgoing = ((2, 1), (2, 3)) if down else ((2, 3), (2, 1))
+    # Boundary wires provide supported interfaces without changing the staircase's ports.
+    source = layout.create_buf(incoming)
+    wire = layout.create_buf(source, (2, 2))
+    layout.create_buf(wire, outgoing)
+    for site, clock in [(incoming, 0), ((2, 2), 1), (outgoing, 2)]:
+        layout.assign_clock_number(site, clock)
+    cells = apply_topolinano_library(layout)
+    expected = ["x   ", "xxx ", "  x ", "  xx"] if down else ["  xx", "  x ", "xxx ", "x   "]
+    _assert_cell_tile(cells, (8, 8, 0), expected)
+
+
+def test_topolinano_wire_into_northern_majority() -> None:
+    """The northern majority receives the short two-cell wire connector."""
+    layout = shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (5, 6))
+    a = layout.create_buf((1, 2))
+    b = layout.create_buf((1, 1))
+    c = layout.create_buf((3, 1))
+    wire = layout.create_buf(a, (2, 3))
+    gate = layout.create_maj(wire, b, c, (2, 2))
+    layout.create_buf(gate, (2, 1))
+    for site, clock in [((1, 2), 0), ((2, 3), 1), ((1, 1), 1), ((3, 1), 1), ((2, 2), 2), ((2, 1), 3)]:
+        layout.assign_clock_number(site, clock)
+    cells = apply_topolinano_library(layout)
+    _assert_cell_tile(cells, (8, 12, 0), ["xx  ", "    ", "    ", "    "])
+
+
+def test_topolinano_inverter_from_southwest_and() -> None:
+    """An AND predecessor selects the inverter's lower-left physical connector."""
+    layout = shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (5, 5))
+    a = layout.create_pi("a", (0, 2))
+    b = layout.create_pi("b", (0, 3))
+    conjunction = layout.create_and(a, b, (1, 2))
+    inverter = layout.create_not(conjunction, (2, 2))
+    layout.create_po(inverter, "f", (3, 1))
+    for site, clock in [((0, 2), 0), ((0, 3), 0), ((1, 2), 1), ((2, 2), 2), ((3, 1), 3)]:
+        layout.assign_clock_number(site, clock)
+    cells = apply_topolinano_library(layout)
+    _assert_cell_tile(cells, (8, 8, 0), ["nnnn", "x   ", "x   ", "x   "])
+
+
+def test_qca_crossing_and_wire_patterns() -> None:
+    """Compare the crossing fixture's AND, bent wire, crossing wire, and postprocessed vias."""
+    layout = cartesian_gate_layout((4, 3, 2), "2DDWave")
+    a = layout.create_pi("a", (1, 0))
+    b = layout.create_pi("b", (0, 1))
+    c = layout.create_pi("c", (2, 0))
+    d = layout.create_pi("d", (0, 2))
+    first_and = layout.create_and(a, b, (1, 1))
+    first_wire = layout.create_buf(c, (2, 1))
+    second_wire = layout.create_buf(d, (1, 2))
+    second_and = layout.create_and(first_wire, second_wire, (2, 2))
+    crossing = layout.create_buf(first_and, (2, 1, 1))
+    layout.create_po(crossing, "f", (3, 1))
+    layout.create_po(second_and, "g", (3, 2))
+    cells = apply_qca_one_library(layout)
+    for origin in [(5, 5, 0), (10, 10, 0)]:
+        _assert_cell_tile(cells, origin, ["  x  ", "  x  ", "xxxxx", "  x  ", "  0  "])
+    _assert_cell_tile(cells, (10, 5, 0), ["  x  ", "  x  ", "x x x", "  x  ", "  x  "])
+    _assert_cell_tile(cells, (10, 5, 1), ["     ", "     ", "xxxxx", "     ", "     "])
+    _assert_cell_tile(cells, (5, 10, 0), ["     ", "     ", "xxxxx", "     ", "     "])
+
+
+@pytest.mark.parametrize("apply", [apply_qca_one_library, apply_sim7_mol_library], ids=["qca", "mol"])
+def test_library_fanout_two_and_bent_wire_tiles(apply: Callable[..., Any]) -> None:
+    """Two fanout orientations and a bent wire retain their complete physical patterns."""
+    layout = cartesian_gate_layout((3, 3, 2), "OPEN")
+    for site, clock in [
+        ((0, 0), 3),
+        ((0, 1), 0),
+        ((0, 2), 1),
+        ((1, 0), 2),
+        ((1, 1), 1),
+        ((1, 2), 0),
+        ((2, 0), 3),
+        ((2, 1), 2),
+        ((2, 2), 3),
+    ]:
+        layout.assign_clock_number(site, clock)
+    source = layout.create_pi("x", (0, 1))
+    first = layout.create_buf(source, (1, 1))
+    second = layout.create_buf(first, (2, 1))
+    wire = layout.create_buf(second, (2, 2))
+    layout.create_po(first, "f", (1, 0))
+    layout.create_po(second, "g", (2, 0))
+    layout.create_po(wire, "h", (1, 2))
+    cells = apply(layout)
+    if apply is apply_qca_one_library:
+        fanout = ["     ", "     ", "xxxxx", "  x  ", "  x  "]
+        bent = ["  x  ", "  x  ", "  xxx", "     ", "     "]
+        _assert_cell_tile(cells, (5, 5, 0), _rotate_rows(fanout, 2))
+        _assert_cell_tile(cells, (10, 5, 0), _rotate_rows(fanout, 1))
+        _assert_cell_tile(cells, (10, 10, 0), _rotate_rows(bent, 3))
+    else:
+        fanout = ["          "] * 4 + ["ddddccbbaa"] * 2 + ["    dd    "] * 4
+        fanout_d = ["          "] * 4 + ["ddddccdddd"] * 2 + ["    bb    "] * 2 + ["    aa    "] * 2
+        bent = ["    dd    "] * 2 + ["    cc    "] * 2 + ["    bbbaaa"] * 2 + ["          "] * 4
+        _assert_cell_tile(cells, (10, 10, 0), _rotate_rows(fanout, 2))
+        _assert_cell_tile(cells, (20, 10, 0), _rotate_rows(fanout_d, 1))
+        _assert_cell_tile(cells, (20, 20, 0), _rotate_rows(bent, 3))
+
+
+def test_mol_majority_and_straight_wire_tiles() -> None:
+    """Majority cells and wire phase ordering follow independent native reference patterns."""
+    layout = cartesian_gate_layout((3, 3), "OPEN")
+    a = layout.create_pi("a", (0, 1))
+    b = layout.create_pi("b", (1, 0))
+    c = layout.create_pi("c", (2, 1))
+    majority = layout.create_maj(a, b, c, (1, 1))
+    layout.create_po(majority, "f", (1, 2))
+    for site, clock in [((0, 1), 0), ((1, 0), 0), ((2, 1), 0), ((1, 1), 1), ((1, 2), 2)]:
+        layout.assign_clock_number(site, clock)
+    cells = apply_sim7_mol_library(layout)
+    _assert_cell_tile(
+        cells,
+        (10, 10, 0),
+        [
+            "    aa    ",
+            "    aa    ",
+            "    aa    ",
+            "   bbbb   ",
+            "aaabbbbaaa",
+            "aaabbbbaaa",
+            "   bbbb   ",
+            "    cc    ",
+            "    dd    ",
+            "    dd    ",
+        ],
+    )
+    wire_layout = cartesian_gate_layout((3, 1), "2DDWave")
+    source = wire_layout.create_pi("x", (0, 0))
+    wire = wire_layout.create_buf(source, (1, 0))
+    wire_layout.create_po(wire, "f", (2, 0))
+    mapped_wire = apply_sim7_mol_library(wire_layout)
+    _assert_cell_tile(
+        mapped_wire,
+        (10, 0, 0),
+        _rotate_rows(["    aa    "] * 3 + ["    bb    "] * 2 + ["    cc    "] * 2 + ["    dd    "] * 3, 3),
+    )
+
+
+def test_mol_and_or_inverter_gate_patterns() -> None:
+    """Map the native compound fixture, including both AND and inverter orientations."""
+    layout = cartesian_gate_layout((5, 3), "2DDWave")
+    a = layout.create_pi("a", (0, 2))
+    b = layout.create_pi("b", (1, 0))
+    c = layout.create_pi("c", (2, 0))
+    first_inverter = layout.create_not(a, (1, 2))
+    first_wire = layout.create_buf(b, (1, 1))
+    fanout_gate = layout.create_buf(first_wire, (2, 1))
+    second_inverter = layout.create_not(c, (3, 0))
+    disjunction_gate = layout.create_or(first_inverter, fanout_gate, (2, 2))
+    first_and = layout.create_and(second_inverter, fanout_gate, (3, 1))
+    second_and = layout.create_and(disjunction_gate, first_and, (3, 2))
+    layout.create_po(second_and, "f", (4, 2))
+    cells = apply_sim7_mol_library(layout)
+    straight_inverter = [
+        "    aa    ",
+        "    aa    ",
+        "  bbaabb  ",
+        "  bbaabb  ",
+        "  bb  bb  ",
+        "    cc    ",
+        "   dccd   ",
+        "   dddd   ",
+        "    dd    ",
+        "    dd    ",
+    ]
+    bent_inverter_r = [
+        "   dddd   ",
+        "   dccd   ",
+        "    cc    ",
+        "  bb  bb  ",
+        "  bbbaaaaa",
+        "  bbbaaaaa",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+    ]
+    conjunction = [
+        "    00    ",
+        "    aa    ",
+        "    aa    ",
+        "   bbbb   ",
+        "ddcbbbbaaa",
+        "ddcbbbbaaa",
+        "   bbbb   ",
+        "    aa    ",
+        "    aa    ",
+        "    aa    ",
+    ]
+    conjunction_r = [
+        "    00    ",
+        "    aa    ",
+        "    aa    ",
+        "   bbbb   ",
+        "aaabbbbcdd",
+        "aaabbbbcdd",
+        "   bbbb   ",
+        "    aa    ",
+        "    aa    ",
+        "    aa    ",
+    ]
+    disjunction = [
+        "    11    ",
+        "    aa    ",
+        "    aa    ",
+        "   bbbb   ",
+        "ddcbbbbaaa",
+        "ddcbbbbaaa",
+        "   bbbb   ",
+        "    aa    ",
+        "    aa    ",
+        "    aa    ",
+    ]
+    fanout = [
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+        "aabbccdddd",
+        "aabbccdddd",
+        "    dd    ",
+        "    dd    ",
+        "    dd    ",
+        "    dd    ",
+    ]
+    bent_wire = [
+        "    aa    ",
+        "    aa    ",
+        "    aa    ",
+        "    bb    ",
+        "    bbccdd",
+        "    bbccdd",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+    ]
+    for origin, pattern, turns in [
+        ((10, 20, 0), straight_inverter, 3),
+        ((10, 10, 0), bent_wire, 0),
+        ((20, 10, 0), fanout, 0),
+        ((30, 0, 0), bent_inverter_r, 2),
+        ((20, 20, 0), disjunction, 2),
+        ((30, 10, 0), conjunction_r, 1),
+        ((30, 20, 0), conjunction, 2),
+    ]:
+        _assert_cell_tile(cells, origin, _rotate_rows(pattern, turns))
+
+
+def test_topolinano_compound_gate_patterns() -> None:
+    """AND, OR, wires, and the inverter retain the native compound fixture's cell blocks."""
+    layout = shifted_cartesian_gate_layout(arrangement.ODD_COLUMN, (5, 3), "COLUMNAR3")
+    a = layout.create_pi("a", (0, 0))
+    b = layout.create_pi("b", (0, 1))
+    c = layout.create_pi("c", (0, 2))
+    conjunction = layout.create_and(a, b, (1, 0))
+    first_wire = layout.create_buf(c, (1, 1))
+    second_wire = layout.create_buf(conjunction, (2, 0))
+    inverter = layout.create_not(first_wire, (2, 1))
+    disjunction = layout.create_or(second_wire, inverter, (3, 0))
+    layout.create_po(disjunction, "f", (4, 0))
+    cells = apply_topolinano_library(layout)
+    for origin, pattern in [
+        ((4, 2, 0), ["d   ", "dxxx", "d   ", "    "]),
+        ((4, 6, 0), ["xxxx", "    ", "    ", "    "]),
+        ((8, 0, 0), ["    ", "    ", "xxxx", "x   "]),
+        ((8, 4, 0), ["nnnn", "x   ", "x   ", "    "]),
+        ((12, 2, 0), ["u   ", "uxxx", "u   ", "    "]),
+    ]:
+        _assert_cell_tile(cells, origin, pattern)
+    assert sorted(cells.get_cell_name(site) for site in cells.cells() if cells.is_pi(site)) == ["a", "b", "c"]
+    assert [cells.get_cell_name(site) for site in cells.cells() if cells.is_po(site)] == ["f"]
+
+
+def test_qca_application_skips_unoccupied_tiles() -> None:
+    """Public application maps occupied objects and leaves an empty source grid empty."""
+    cells = apply_qca_one_library(cartesian_gate_layout((2, 2)))
+    assert cells.num_cells() == 0
+    assert (cells.width(), cells.height(), cells.layers()) == (10, 10, 1)

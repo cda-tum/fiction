@@ -58,7 +58,8 @@ def test_optimization_preserves_ordered_ports_and_caller_identity(
     assert simulate_outputs(layout) == expected
     stats = make_stats()
     reports = []
-    assert optimize(layout, statistics=stats, on_progress=lambda *report: reports.append(report)) is None
+    result = optimize(layout, statistics=stats, on_progress=lambda *report: reports.append(report))
+    assert result is None
     assert all(layout.contains(node) for node in (a, b, gate, output))
     assert layout.is_lt(gate)
     assert simulate_outputs(layout) == expected

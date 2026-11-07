@@ -316,3 +316,18 @@ def test_offset_search_distances_match_breadth_first_search(
             assert all(starmap(layout.is_adjacent_of, pairwise(path)))
             assert all((left, right) != blocked_edge for left, right in pairwise(path))
             assert blocked_site not in path[1:-1]
+
+
+@pytest.mark.parametrize("scheme", ["RES", "ESR"])
+def test_res_and_esr_clocked_shortest_paths(scheme: str) -> None:
+    """Distinct clock flows retain a minimum path with every step clock-legal."""
+    layout = cartesian_gate_layout((10, 10), scheme)
+    path = a_star(layout, (0, 0), (9, 9))
+    assert len(path) == 19
+    assert path[0] == (0, 0)
+    assert path[-1] == (9, 9)
+    assert len(path) == len(set(path))
+    assert all(layout.is_within_bounds(site) for site in path)
+    assert all(starmap(layout.is_adjacent_of, pairwise(path)))
+    assert all(starmap(layout.is_outgoing_clocked, pairwise(path)))
+    assert a_star_distance(layout, (0, 0), (9, 9)) == 18
