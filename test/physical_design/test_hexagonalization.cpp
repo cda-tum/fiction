@@ -109,13 +109,26 @@ static void check_mapping_equiv(const Ntk& ntk)
     CHECK(hex_layout.num_pos() == layout.num_pos());
     if (inputs != mode::NONE)
     {
-        hex_layout.foreach_pi([&hex_layout](const auto gate) { CHECK(hex_layout.get_tile(gate).y == 0); });
+        for (auto i = 0u; i < hex_layout.num_pis(); ++i)
+        {
+            CAPTURE(i);
+            /** @brief Primary input position. */
+            const auto tile = hex_layout.get_tile(hex_layout.pi_at(i));
+            CAPTURE(tile);
+            CHECK(tile.y == 0);
+        }
     }
     if (outputs != mode::NONE)
     {
         check_no_explicit_obstructions(hex_layout);
-        hex_layout.foreach_po([&hex_layout](const auto gate)
-                              { CHECK(hex_layout.get_tile(gate).y == static_cast<int32_t>(hex_layout.height() - 1)); });
+        for (auto i = 0u; i < hex_layout.num_pos(); ++i)
+        {
+            CAPTURE(i);
+            /** @brief Primary output position. */
+            const auto tile = hex_layout.get_tile(hex_layout.po_at(i));
+            CAPTURE(tile);
+            CHECK(tile.y == static_cast<int32_t>(hex_layout.height() - 1));
+        }
     }
 }
 
@@ -149,12 +162,25 @@ static void check_mapping_equiv_layout(const Lyt& lyt)
     CHECK(hex_layout.num_pos() == lyt.num_pos());
     if (inputs != mode::NONE)
     {
-        hex_layout.foreach_pi([&hex_layout](const auto gate) { CHECK(hex_layout.get_tile(gate).y == 0); });
+        for (auto i = 0u; i < hex_layout.num_pis(); ++i)
+        {
+            CAPTURE(i);
+            /** @brief Primary input position. */
+            const auto tile = hex_layout.get_tile(hex_layout.pi_at(i));
+            CAPTURE(tile);
+            CHECK(tile.y == 0);
+        }
     }
     if (outputs != mode::NONE)
     {
-        hex_layout.foreach_po([&hex_layout](const auto gate)
-                              { CHECK(hex_layout.get_tile(gate).y == static_cast<int32_t>(hex_layout.height() - 1)); });
+        for (auto i = 0u; i < hex_layout.num_pos(); ++i)
+        {
+            CAPTURE(i);
+            /** @brief Primary output position. */
+            const auto tile = hex_layout.get_tile(hex_layout.po_at(i));
+            CAPTURE(tile);
+            CHECK(tile.y == static_cast<int32_t>(hex_layout.height() - 1));
+        }
     }
 }
 
@@ -299,14 +325,26 @@ TEST_CASE("Hexagonalization preserves declared input holes and terminal order", 
     CHECK(hex.get_input_name(0) == "a");
     CHECK(hex.get_input_name(1) == "b");
     CHECK(hex.get_output_name(0) == "f");
-    hex.foreach_gate(
-        [&](const auto id)
-        {
-            CHECK(hex.is_lt(id));
-            CHECK_FALSE(hex.source({id, 0}));
-            REQUIRE(hex.source({id, 1}));
-            CHECK(hex.get_name(*hex.source({id, 1})) == "b");
-        });
+    /** @brief Primary inputs in visitor order. */
+    std::vector<layout_object_id> inputs{};
+    /** @brief Primary outputs in visitor order. */
+    std::vector<layout_object_id> outputs{};
+    hex.foreach_pi([&](const auto id) { inputs.push_back(id); });
+    hex.foreach_po([&](const auto id) { outputs.push_back(id); });
+    CHECK(inputs == std::vector{hex.pi_at(0), hex.pi_at(1)});
+    CHECK(outputs == std::vector{hex.po_at(0)});
+    std::vector<layout_object_id> gates{};
+    hex.foreach_gate([&](const auto id) { gates.push_back(id); });
+    REQUIRE(gates.size() == 1);
+    CHECK(hex.is_lt(gates.front()));
+    REQUIRE(hex.input_count(gates.front()) >= 2);
+    CHECK_FALSE(hex.source({gates.front(), 0}));
+    const auto source = hex.source({gates.front(), 1});
+    REQUIRE(source);
+    if (source)
+    {
+        CHECK(hex.get_name(*source) == "b");
+    }
 }
 
 TEST_CASE("Hexagonalization reports progress", "[hexagonalization]")

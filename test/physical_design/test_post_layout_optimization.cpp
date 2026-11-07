@@ -322,19 +322,20 @@ TEST_CASE("Optimization accepts interior terminals", "[post-layout-optimization]
         check_eq(original, layout);
         REQUIRE(layout.num_pis() == original.num_pis());
         REQUIRE(layout.num_pos() == original.num_pos());
-        layout.foreach_pi(
-            [&layout](const auto& pi)
-            {
-                const auto tile = layout.get_tile(pi);
-                CHECK((layout.is_at_northern_border(tile) || layout.is_at_western_border(tile)));
-            });
-
-        layout.foreach_po(
-            [&layout](const auto& po)
-            {
-                const auto tile = layout.get_tile(po);
-                CHECK((layout.is_at_eastern_border(tile) || layout.is_at_southern_border(tile)));
-            });
+        for (auto i = 0u; i < layout.num_pis(); ++i)
+        {
+            CAPTURE(i);
+            const auto tile = layout.get_tile(layout.pi_at(i));
+            CAPTURE(tile);
+            CHECK((layout.is_at_northern_border(tile) || layout.is_at_western_border(tile)));
+        }
+        for (auto i = 0u; i < layout.num_pos(); ++i)
+        {
+            CAPTURE(i);
+            const auto tile = layout.get_tile(layout.po_at(i));
+            CAPTURE(tile);
+            CHECK((layout.is_at_eastern_border(tile) || layout.is_at_southern_border(tile)));
+        }
     }
 }
 
@@ -446,6 +447,8 @@ TEST_CASE("Post-layout optimization preserves rectangular layouts", "[post-layou
                                                   {layout.get_tile(b), layout.get_tile(gate), 1},
                                                   {layout.get_tile(gate), layout.get_tile(output), 0}};
     CHECK_THAT(extract_routing_objectives(layout), Catch::Matchers::UnorderedRangeEquals(expected));
+    REQUIRE(layout.num_pis() == 2);
+    REQUIRE(layout.num_pos() == 1);
     CHECK(layout.get_input_name(0) == "a");
     CHECK(layout.get_input_name(1) == "b");
     CHECK(layout.get_output_name(0) == "f");
