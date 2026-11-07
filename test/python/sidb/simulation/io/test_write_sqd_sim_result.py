@@ -11,18 +11,20 @@
 from __future__ import annotations
 
 import math
+import time
 from collections import Counter
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 from xml.etree import ElementTree as ET  # ruff: ignore[suspicious-xml-etree-import] - Only local, fixed test data is parsed.
 
 import pytest
 
 from mnt.pyfiction.sidb import charge_distribution, lattice_site, sidb_dot_tag, sidb_layout
-from mnt.pyfiction.sidb.model import sidb_charge_state
+from mnt.pyfiction.sidb.model import sidb_charge_state, sidb_simulation_parameters
 from mnt.pyfiction.sidb.simulation import sidb_simulation_result
 from mnt.pyfiction.sidb.simulation.engines import exhaustive_ground_state_simulation, quickexact
 from mnt.pyfiction.sidb.simulation.io import write_sqd_sim_result
+from mnt.pyfiction.utils import __repo__, __version__
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -76,29 +78,64 @@ def test_invalid_engine_name_preserves_destination(tmp_path: Path, control: str)
     assert list(tmp_path.iterdir()) == [filename]
 
 
-def test_simulation_xml_preserves_charges_and_physical_locations(tmp_path: Path) -> None:
-    """SiQAD XML stores every positive-charge configuration and physical location with valid metadata."""
+def test_empty_simulation_xml_metadata(tmp_path: Path) -> None:
+    """Empty results preserve physical metadata and emit a canonical timestamp for the write."""
+    result = sidb_simulation_result()
+    result.algorithm_name = "TestSim"
+    result.simulation_runtime = timedelta(seconds=42)
+    result.simulation_parameters = sidb_simulation_parameters(
+        base_number=2, mu_minus=-0.25, relative_permittivity=4.2, screening_distance=6.0
+    )
+    path = tmp_path / "empty.xml"
+    before = math.floor(time.time())
+    write_sqd_sim_result(result, str(path))
+    after = math.floor(time.time())
+    root = ET.fromstring(path.read_text(encoding="utf-8"))  # ruff: ignore[suspicious-xml-element-tree-usage] -- local writer output
+    assert root.findtext("eng_info/engine") == "TestSim"
+    assert root.findtext("eng_info/version") == __version__
+    assert root.findtext("eng_info/repo") == __repo__
+    assert root.findtext("eng_info/return_code") == "0"
+    assert root.findtext("eng_info/time_elapsed_s") == "42"
+    assert root.findtext("sim_params/debye_length") == "6"
+    assert root.findtext("sim_params/eps_r") == "4.2"
+    assert root.findtext("sim_params/muzm") == "-0.25"
+    for container in ("physloc", "elec_dist"):
+        element = root.find(container)
+        assert element is not None
+        assert list(element) == []
+    timestamp = root.findtext("eng_info/timestamp")
+    assert timestamp is not None
+    parsed = datetime.fromisoformat(timestamp)
+    assert parsed.strftime("%Y-%m-%d %H:%M:%S") == timestamp
+    assert any(before <= parsed.replace(fold=fold).timestamp() <= after for fold in (0, 1))
+
+
+@pytest.mark.parametrize("base", [2, 3])
+def test_simulation_xml_preserves_charges_and_physical_locations(tmp_path: Path, base: int) -> None:
+    """SiQAD XML preserves charge configurations and positions with state count three for both simulation bases."""
     layout = sidb_layout()
     for x in (5, 6, 7):
         layout.assign_sidb(lattice_site(x, 0))
-    result = exhaustive_ground_state_simulation(layout, base=3)
+    result = exhaustive_ground_state_simulation(layout, base=base)
     path = tmp_path / "states.xml"
     write_sqd_sim_result(result, str(path))
     root = ET.fromstring(path.read_text(encoding="utf-8"))  # ruff: ignore[suspicious-xml-element-tree-usage] -- local writer output
     assert root.tag == "sim_out"
     assert root.findtext("eng_info/engine") == "ExGS"
-    timestamp = root.findtext("eng_info/timestamp")
-    assert timestamp is not None
-    assert datetime.fromisoformat(timestamp)
     assert [(float(dot.attrib["x"]), float(dot.attrib["y"])) for dot in root.findall("physloc/dbdot")] == [
         (19.2, 0.0),
         (23.04, 0.0),
         (26.88, 0.0),
     ]
     distributions = root.findall("elec_dist/dist")
-    assert Counter(dist.text for dist in distributions) == Counter(["-+-", "0-0"])
-    assert [float(dist.attrib["energy"]) for dist in distributions] == pytest.approx([-0.953108, 0.0], abs=1e-6)
-    assert all(dist.attrib["physically_valid"] == "1" and dist.attrib["count"] == "1" for dist in distributions)
+    assert Counter(dist.text for dist in distributions) == Counter(["-+-", "0-0"] if base == 3 else ["0-0"])
+    assert [float(dist.attrib["energy"]) for dist in distributions] == pytest.approx(
+        [-0.953108, 0.0] if base == 3 else [0.0], abs=1e-6, rel=0
+    )
+    assert all(
+        dist.attrib["physically_valid"] == "1" and dist.attrib["count"] == "1" and dist.attrib["state_count"] == "3"
+        for dist in distributions
+    )
 
 
 def test_simulation_xml_rejects_shifted_sites(tmp_path: Path) -> None:
