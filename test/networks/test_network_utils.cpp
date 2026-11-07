@@ -20,6 +20,8 @@
 // Test dependencies follow the defining header to expose missing direct includes.
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
 
@@ -73,8 +75,8 @@ TEST_CASE("High-degree fanin nodes", "[network-utils]")
     CHECK_FALSE(has_high_degree_fanin_nodes(and_inv, 2));
     CHECK_FALSE(has_high_degree_fanin_nodes(and_inv, 3));
 
-    CHECK(high_degree_fanin_exception{}.what() ==
-          std::string{"network contains nodes that exceed the supported fanin size"});
+    CHECK_THAT(high_degree_fanin_exception{}.what(),
+               Catch::Matchers::Equals("network contains nodes that exceed the supported fanin size"));
 }
 
 TEST_CASE("Incoming primary input", "[network-utils]")

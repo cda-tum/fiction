@@ -18,6 +18,8 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
@@ -391,7 +393,7 @@ TEST_CASE("Statistics report the number of duplications", "[node-duplication-pla
 
     std::ostringstream os{};
     st.report(os);
-    CHECK(os.str().find("duplications") != std::string::npos);
+    CHECK_THAT(os.str(), Catch::Matchers::ContainsSubstring("duplications"));
 }
 
 TEST_CASE("Hybrid strategy keeps crossings only where crossing gates are cheaper", "[node-duplication-planarization]")
@@ -471,7 +473,7 @@ TEST_CASE("Hybrid strategy with a prohibitive duplication cost keeps crossings",
 
     std::ostringstream os{};
     st.report(os);
-    CHECK(os.str().find("crossing levels") != std::string::npos);
+    CHECK_THAT(os.str(), Catch::Matchers::ContainsSubstring("crossing levels"));
 }
 
 TEST_CASE("The duplication limit aborts the planarization", "[node-duplication-planarization]")

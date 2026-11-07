@@ -15,6 +15,8 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/scoped_temp_directory.hpp"
 
@@ -77,13 +79,13 @@ TEST_CASE("Failed serialization preserves the destination", "[atomic-write]")
     {
         std::ifstream     stream{destination};
         const std::string content{std::istreambuf_iterator<char>{stream}, std::istreambuf_iterator<char>{}};
-        CHECK(content == "original");
+        CHECK_THAT(content, Catch::Matchers::Equals("original"));
     }
     detail::atomic_write(destination.string(), [](std::ostream& stream) { stream << "complete"; });
     {
         std::ifstream     stream{destination};
         const std::string content{std::istreambuf_iterator<char>{stream}, std::istreambuf_iterator<char>{}};
-        CHECK(content == "complete");
+        CHECK_THAT(content, Catch::Matchers::Equals("complete"));
     }
 #ifndef _WIN32
     CHECK(std::filesystem::status(destination).permissions() == permissions);
@@ -138,7 +140,7 @@ TEST_CASE("Transactional output preserves symbolic links", "[atomic-write]")
     {
         std::ifstream     stream{destination};
         const std::string content{std::istreambuf_iterator<char>{stream}, std::istreambuf_iterator<char>{}};
-        CHECK(content == "original");
+        CHECK_THAT(content, Catch::Matchers::Equals("original"));
     }
     detail::atomic_write(link.string(), [](std::ostream& stream) { stream << "complete"; });
     CHECK(std::filesystem::is_symlink(link));
@@ -146,7 +148,7 @@ TEST_CASE("Transactional output preserves symbolic links", "[atomic-write]")
     {
         std::ifstream     stream{destination};
         const std::string content{std::istreambuf_iterator<char>{stream}, std::istreambuf_iterator<char>{}};
-        CHECK(content == "complete");
+        CHECK_THAT(content, Catch::Matchers::Equals("complete"));
     }
     std::filesystem::remove(destination);
     CHECK_THROWS_AS(detail::atomic_write(link.string(), [](std::ostream& stream) { stream << "new"; }),

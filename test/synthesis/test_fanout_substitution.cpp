@@ -19,6 +19,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/generators/catch_generators_range.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
@@ -125,17 +127,20 @@ TEST_CASE("Name conservation after fanout substitution", "[fanout-substitution]"
     const auto substituted_maj = fanout_substitution<named_technology_network>(maj);
 
     // network name
-    CHECK(substituted_maj.get_network_name() == "maj");
+    CHECK_THAT(substituted_maj.get_network_name(), Catch::Matchers::Equals("maj"));
 
     // PI names
     REQUIRE(substituted_maj.num_pis() == 3u);
-    CHECK(substituted_maj.get_name(substituted_maj.make_signal(substituted_maj.pi_at(0))) == "a");
-    CHECK(substituted_maj.get_name(substituted_maj.make_signal(substituted_maj.pi_at(1))) == "b");
-    CHECK(substituted_maj.get_name(substituted_maj.make_signal(substituted_maj.pi_at(2))) == "c");
+    CHECK_THAT(substituted_maj.get_name(substituted_maj.make_signal(substituted_maj.pi_at(0))),
+               Catch::Matchers::Equals("a"));
+    CHECK_THAT(substituted_maj.get_name(substituted_maj.make_signal(substituted_maj.pi_at(1))),
+               Catch::Matchers::Equals("b"));
+    CHECK_THAT(substituted_maj.get_name(substituted_maj.make_signal(substituted_maj.pi_at(2))),
+               Catch::Matchers::Equals("c"));
 
     // PO names
     REQUIRE(substituted_maj.num_pos() == 1u);
-    CHECK(substituted_maj.get_output_name(0) == "f");
+    CHECK_THAT(substituted_maj.get_output_name(0), Catch::Matchers::Equals("f"));
 }
 
 TEST_CASE("Degree and threshold in fanout substitution", "[fanout-substitution]")

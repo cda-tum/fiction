@@ -19,6 +19,8 @@
 
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/traits.hpp>
@@ -31,7 +33,6 @@
 #include <mockturtle/networks/sequential.hpp>
 #include <mockturtle/traits.hpp>
 
-#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <vector>
@@ -145,8 +146,7 @@ TEST_CASE("gate and fanin iteration agree with the klut network", "[technology-n
     base.foreach_gate([&base_gates](const auto& n) { base_gates.push_back(n); });
 
     CHECK(gates == base_gates);
-    std::ranges::sort(gates);
-    CHECK(gates == std::vector<uint64_t>(pool.begin() + 40, pool.end()));
+    CHECK_THAT(gates, Catch::Matchers::UnorderedRangeEquals(std::vector<uint64_t>(pool.begin() + 40, pool.end())));
 
     tec.foreach_node(
         [&tec, &base, &pool](const auto& n)
@@ -731,16 +731,16 @@ TEST_CASE("node and signal iteration in a technology network", "[technology-netw
         REQUIRE(visited.size() == 6);
         /** @brief First value of the full traversal, without imposing a node order. */
         const auto first = visited.front();
-        std::ranges::sort(visited);
-        CHECK(visited == std::vector<technology_network::node>{tec.get_node(tec.get_constant(false)),
-                                                               tec.get_node(tec.get_constant(true)), x1, x2, f1, f2});
+        CHECK_THAT(visited,
+                   Catch::Matchers::UnorderedRangeEquals(std::vector<technology_network::node>{
+                       tec.get_node(tec.get_constant(false)), tec.get_node(tec.get_constant(true)), x1, x2, f1, f2}));
         CHECK(indices == std::vector<uint32_t>{0, 1, 2, 3, 4, 5});
 
         visited.clear();
         tec.foreach_node([&](const auto value) { visited.push_back(value); });
-        std::ranges::sort(visited);
-        CHECK(visited == std::vector<technology_network::node>{tec.get_node(tec.get_constant(false)),
-                                                               tec.get_node(tec.get_constant(true)), x1, x2, f1, f2});
+        CHECK_THAT(visited,
+                   Catch::Matchers::UnorderedRangeEquals(std::vector<technology_network::node>{
+                       tec.get_node(tec.get_constant(false)), tec.get_node(tec.get_constant(true)), x1, x2, f1, f2}));
 
         visited.clear();
         indices.clear();

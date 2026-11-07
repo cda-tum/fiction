@@ -16,12 +16,14 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include <fiction/technology/sidb/simulation/io/write_operational_domain.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 
-#include <algorithm>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -39,7 +41,7 @@ namespace
  * @param output Serialized domain.
  * @param expected Expected header followed by every sample, including multiplicity.
  */
-void check_csv_output(const std::string& output, std::vector<std::string> expected)
+void check_csv_output(const std::string& output, const std::vector<std::string>& expected)
 {
     std::istringstream       is{output};
     std::vector<std::string> emitted{};
@@ -49,9 +51,7 @@ void check_csv_output(const std::string& output, std::vector<std::string> expect
     }
     REQUIRE_FALSE(emitted.empty());
     CHECK(emitted.front() == expected.front());
-    std::ranges::sort(emitted);
-    std::ranges::sort(expected);
-    CHECK(emitted == expected);
+    CHECK_THAT(emitted, Catch::Matchers::UnorderedRangeEquals(expected));
 }
 
 }  // namespace
@@ -71,7 +71,7 @@ TEST_CASE("Write empty operational domain", "[write-operational-domain]")
 
         write_operational_domain(opdom, os);
 
-        CHECK(os.str() == expected);
+        CHECK_THAT(os.str(), Catch::Matchers::Equals(expected));
     }
     SECTION("One sweep dimensions")
     {
@@ -83,7 +83,7 @@ TEST_CASE("Write empty operational domain", "[write-operational-domain]")
 
         write_operational_domain(opdom, os);
 
-        CHECK(os.str() == expected);
+        CHECK_THAT(os.str(), Catch::Matchers::Equals(expected));
     }
     SECTION("Two sweep dimensions")
     {
@@ -96,7 +96,7 @@ TEST_CASE("Write empty operational domain", "[write-operational-domain]")
 
         write_operational_domain(opdom, os);
 
-        CHECK(os.str() == expected);
+        CHECK_THAT(os.str(), Catch::Matchers::Equals(expected));
     }
     SECTION("Three sweep dimensions")
     {
@@ -110,7 +110,7 @@ TEST_CASE("Write empty operational domain", "[write-operational-domain]")
 
         write_operational_domain(opdom, os);
 
-        CHECK(os.str() == expected);
+        CHECK_THAT(os.str(), Catch::Matchers::Equals(expected));
     }
 }
 

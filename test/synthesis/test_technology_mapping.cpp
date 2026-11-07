@@ -19,6 +19,8 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
@@ -222,11 +224,11 @@ TEMPLATE_TEST_CASE("Name conservation after technology mapping", "[technology-ma
 
     REQUIRE(mapped_maj.num_pis() == 3);
     REQUIRE(mapped_maj.num_pos() == 1);
-    CHECK(mapped_maj.get_network_name() == "maj");
-    CHECK(mapped_maj.get_name(mapped_maj.make_signal(mapped_maj.pi_at(0))) == "a");
-    CHECK(mapped_maj.get_name(mapped_maj.make_signal(mapped_maj.pi_at(1))) == "b");
-    CHECK(mapped_maj.get_name(mapped_maj.make_signal(mapped_maj.pi_at(2))) == "c");
-    CHECK(mapped_maj.get_output_name(0) == "f");
+    CHECK_THAT(mapped_maj.get_network_name(), Catch::Matchers::Equals("maj"));
+    CHECK_THAT(mapped_maj.get_name(mapped_maj.make_signal(mapped_maj.pi_at(0))), Catch::Matchers::Equals("a"));
+    CHECK_THAT(mapped_maj.get_name(mapped_maj.make_signal(mapped_maj.pi_at(1))), Catch::Matchers::Equals("b"));
+    CHECK_THAT(mapped_maj.get_name(mapped_maj.make_signal(mapped_maj.pi_at(2))), Catch::Matchers::Equals("c"));
+    CHECK_THAT(mapped_maj.get_output_name(0), Catch::Matchers::Equals("f"));
 }
 
 TEST_CASE("Exception for missing required gates in AIG", "[technology-mapping]")

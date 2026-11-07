@@ -17,6 +17,9 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/progress_recorder.hpp"
 
@@ -106,7 +109,7 @@ TEST_CASE("The first and the final count are always reported", "[progress]")
         }
     }
 
-    CHECK(rec.task == "items");
+    CHECK_THAT(rec.task, Catch::Matchers::Equals("items"));
     REQUIRE(rec.records.size() >= 2);
     CHECK(rec.records.front() == record{0, 10});
     CHECK(rec.records.back() == record{10, 10});
@@ -247,8 +250,7 @@ TEST_CASE("Two reporters share a caller-synchronized callback", "[progress]")
     first.join();
     second.join();
 
-    std::ranges::sort(rec.records);
-    CHECK(rec.records == std::vector<record>{{0, 3}, {0, 3}, {3, 3}, {3, 3}});
+    CHECK_THAT(rec.records, Catch::Matchers::UnorderedRangeEquals(std::vector<record>{{0, 3}, {0, 3}, {3, 3}, {3, 3}}));
 }
 
 TEST_CASE("Concurrent advances are counted exactly once", "[progress]")
@@ -364,8 +366,7 @@ TEST_CASE("Worker progress preserves identities and clears activity", "[progress
         }
     }
     CHECK(valid);
-    std::ranges::sort(finished);
-    CHECK(finished == std::vector<std::size_t>{0, 1, 2, 3});
+    CHECK_THAT(finished, Catch::Matchers::UnorderedRangeEquals(std::vector<std::size_t>{0, 1, 2, 3}));
     CHECK(std::ranges::none_of(active, [](const bool running) { return running; }));
     CHECK(std::ranges::all_of(counts, [](const auto count) { return count == 3; }));
 }
@@ -424,7 +425,7 @@ TEST_CASE("Progress recorder checks task histories", "[progress]")
         if (report.task == "items")
         {
             REQUIRE(index < filtered.size());
-            CHECK(filtered[index].task == report.task);
+            CHECK_THAT(filtered[index].task, Catch::Matchers::Equals(report.task));
             CHECK(filtered[index].done == report.done);
             CHECK(filtered[index].total == report.total);
             ++index;

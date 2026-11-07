@@ -17,6 +17,8 @@
 
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
@@ -123,7 +125,7 @@ TEST_CASE("Ground-state CSV rejects mismatched distribution sites before output"
         std::stringstream os{};
         os << "original";
         CHECK_THROWS_AS(write_location_and_ground_state(res, os), std::invalid_argument);
-        CHECK(os.str() == "original");
+        CHECK_THAT(os.str(), Catch::Matchers::Equals("original"));
     };
 
     SECTION("fewer distribution sites")
@@ -150,7 +152,7 @@ TEST_CASE("Ground-state CSV writes nothing for an empty result", "[write_txt_sim
     std::stringstream os{};
     os << "original";
     write_location_and_ground_state(result{}, os);
-    CHECK(os.str() == "original");
+    CHECK_THAT(os.str(), Catch::Matchers::Equals("original"));
 }
 
 TEST_CASE("Ground-state CSV preserves distributions across site-list sharing", "[write_txt_sim_result]")
@@ -166,9 +168,9 @@ TEST_CASE("Ground-state CSV preserves distributions across site-list sharing", "
     {
         std::stringstream os{};
         write_location_and_ground_state(res, os);
-        CHECK(os.str() == "x [nm]; y [nm];GS_0;GS_1;GS_2;\n"
-                          "0.000;0.000;-1;0;-1;\n"
-                          "0.768;0.000;-1;0;-1;\n");
+        CHECK_THAT(os.str(), Catch::Matchers::Equals("x [nm]; y [nm];GS_0;GS_1;GS_2;\n"
+                                                     "0.000;0.000;-1;0;-1;\n"
+                                                     "0.768;0.000;-1;0;-1;\n"));
     };
 
     SECTION("shared site lists")
@@ -210,7 +212,7 @@ TEST_CASE("Ground-state CSV preserves distributions across site-list sharing", "
         std::stringstream os{};
         os << "original";
         CHECK_THROWS_AS(write_location_and_ground_state(res, os), std::invalid_argument);
-        CHECK(os.str() == "original");
+        CHECK_THAT(os.str(), Catch::Matchers::Equals("original"));
     }
 }
 
@@ -231,7 +233,7 @@ TEST_CASE("Ground-state CSV rejects nonfinite energies before output", "[write_t
             os << "original";
             CAPTURE(energy, index);
             CHECK_THROWS_AS(write_location_and_ground_state(res, os), std::invalid_argument);
-            CHECK(os.str() == "original");
+            CHECK_THAT(os.str(), Catch::Matchers::Equals("original"));
         }
     }
 }

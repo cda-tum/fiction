@@ -75,7 +75,7 @@ TEST_CASE("Temporary test directories preserve occupied names and clean up", "[n
     REQUIRE(input.is_open());
     std::string contents{};
     input >> contents;
-    CHECK(contents == "kept");
+    CHECK_THAT((contents), Catch::Matchers::Equals("kept"));
 
     for (auto index = 1; index < 16; ++index)
     {
@@ -120,7 +120,7 @@ TEST_CASE("Temporary test directories preserve occupied names and clean up", "[n
     REQUIRE(occupied_input.is_open());
     std::string retained{};
     occupied_input >> retained;
-    CHECK(retained == "kept");
+    CHECK_THAT((retained), Catch::Matchers::Equals("kept"));
 }
 
 TEMPLATE_TEST_CASE("Read Verilog", "[network-reader]", named_aig_network, named_xag_network, named_mig_network,
@@ -154,16 +154,17 @@ TEMPLATE_TEST_CASE("Read Verilog", "[network-reader]", named_aig_network, named_
         REQUIRE(mux21.num_pos() == 1);
 
         // network name
-        CHECK(mux21.get_network_name() == "mux21");
+        CHECK_THAT((mux21.get_network_name()), Catch::Matchers::Equals("mux21"));
 
         // PI names
         for (uint32_t i = 0; i < mux21.num_pis(); ++i)
         {
-            CHECK(mux21.get_name(mux21.make_signal(mux21.pi_at(i))) == "in" + std::to_string(i));
+            CHECK_THAT((mux21.get_name(mux21.make_signal(mux21.pi_at(i)))),
+                       Catch::Matchers::Equals("in" + std::to_string(i)));
         }
 
         // PO names
-        CHECK(mux21.get_output_name(0) == "out");
+        CHECK_THAT((mux21.get_output_name(0)), Catch::Matchers::Equals("out"));
     }
 }
 
@@ -218,7 +219,7 @@ TEST_CASE("BLIF readers accept empty lines without changing logic", "[network-re
         kitty::dynamic_truth_table expected{3};
         kitty::create_from_hex_string(expected, functions.at(index));
         CHECK(actual.at(index) == expected);
-        CHECK(network.get_output_name(static_cast<uint32_t>(index)) == names.at(index));
+        CHECK_THAT((network.get_output_name(static_cast<uint32_t>(index))), Catch::Matchers::Equals(names.at(index)));
     }
 }
 
@@ -237,5 +238,5 @@ TEST_CASE("BLIF readers report invalid declarations after empty lines", "[networ
     std::ostringstream                                        diagnostics{};
     network_reader<std::shared_ptr<named_technology_network>> reader{path.string(), diagnostics};
     CHECK(reader.get_networks().empty());
-    CHECK(diagnostics.str().find("parsing error in " + path.string()) != std::string::npos);
+    CHECK_THAT(diagnostics.str(), Catch::Matchers::ContainsSubstring("parsing error in " + path.string()));
 }

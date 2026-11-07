@@ -18,6 +18,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include <fiction/layouts/layout_base.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
@@ -155,8 +156,8 @@ TEST_CASE("Lattice sites", "[lattice]")
     }
     SECTION("string and format")
     {
-        CHECK(lattice_site{1, -2, 1}.str() == "(1,-2,1)");
-        CHECK(fmt::format("{}", lattice_site{1, -2, 1}) == "(1,-2,1)");
+        CHECK_THAT((lattice_site{1, -2, 1}.str()), Catch::Matchers::Equals("(1,-2,1)"));
+        CHECK_THAT(fmt::format("{}", lattice_site{1, -2, 1}), Catch::Matchers::Equals("(1,-2,1)"));
     }
     SECTION("hash")
     {
@@ -236,7 +237,7 @@ TEST_CASE("H-Si(100)-2x1 positions", "[lattice]")
 
     const auto lat = lattice::si_100_2x1();
 
-    CHECK(lat.name == "Si(100) 2x1");
+    CHECK_THAT(lat.name, Catch::Matchers::Equals("Si(100) 2x1"));
 
     const auto check = [&lat](const lattice_site& s, const double x, const double y)
     {
@@ -269,7 +270,7 @@ TEST_CASE("H-Si(111)-1x1 positions", "[lattice]")
 
     const auto lat = lattice::si_111_1x1();
 
-    CHECK(lat.name == "Si(111) 1x1");
+    CHECK_THAT(lat.name, Catch::Matchers::Equals("Si(111) 1x1"));
 
     const auto check = [&lat](const lattice_site& s, const double x, const double y)
     {

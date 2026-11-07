@@ -19,6 +19,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/progress_recorder.hpp"
 
@@ -95,7 +96,7 @@ TEST_CASE("No heuristic results", "[time-to-solution]")
     CHECK(std::isinf(stats.time_to_solution));
     CHECK(stats.acc == 0.0);
     CHECK(stats.mean_single_runtime == 0.0);
-    CHECK(stats.algorithm == "QuickExact");
+    CHECK_THAT(stats.algorithm, Catch::Matchers::Equals("QuickExact"));
 }
 
 // Test 1: Basic time-to-solution test with different layout types
@@ -111,7 +112,7 @@ TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to-solution
         const time_to_solution_params   tts_params_quickexact{.engine = exact_engine::QUICKEXACT};
         time_to_solution(lyt, qs_params, tts_params_quickexact, &tts_stat_quickexact);
 
-        CHECK(tts_stat_quickexact.algorithm == "QuickExact");
+        CHECK_THAT(tts_stat_quickexact.algorithm, Catch::Matchers::Equals("QuickExact"));
         CHECK_THAT(tts_stat_quickexact.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK(std::isinf(tts_stat_quickexact.time_to_solution));
         CHECK_THAT(tts_stat_quickexact.mean_single_runtime, Catch::Matchers::WithinAbs(0.0, 0.00001));
@@ -122,7 +123,7 @@ TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to-solution
         const time_to_solution_params tts_params_clustercomplete{.engine = exact_engine::CLUSTERCOMPLETE};
         time_to_solution(lyt, qs_params, tts_params_clustercomplete, &tts_stat_clustercomplete);
 
-        CHECK(tts_stat_clustercomplete.algorithm == "ClusterComplete");
+        CHECK_THAT(tts_stat_clustercomplete.algorithm, Catch::Matchers::Equals("ClusterComplete"));
         CHECK_THAT(tts_stat_clustercomplete.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK(std::isinf(tts_stat_clustercomplete.time_to_solution));
         CHECK_THAT(tts_stat_clustercomplete.mean_single_runtime, Catch::Matchers::WithinAbs(0.0, 0.00001));
@@ -133,7 +134,7 @@ TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to-solution
         const time_to_solution_params tts_params_exgs{.engine = exact_engine::EXGS};
         time_to_solution(lyt, qs_params, tts_params_exgs, &tts_stat_exgs);
 
-        CHECK(tts_stat_exgs.algorithm == "ExGS");
+        CHECK_THAT(tts_stat_exgs.algorithm, Catch::Matchers::Equals("ExGS"));
         CHECK_THAT(tts_stat_exgs.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK(std::isinf(tts_stat_exgs.time_to_solution));
         CHECK_THAT(tts_stat_exgs.mean_single_runtime, Catch::Matchers::WithinAbs(0.0, 0.00001));
@@ -276,7 +277,7 @@ TEST_CASE("Time-to-solution counts failed and absent heuristic attempts", "[time
     CHECK(std::isinf(stats.time_to_solution));
     CHECK_THAT(stats.acc, Catch::Matchers::WithinAbs(0.0, 1e-12));
     CHECK_THAT(stats.mean_single_runtime, Catch::Matchers::WithinAbs(0.0, 1e-12));
-    CHECK(stats.algorithm == "QuickExact");
+    CHECK_THAT(stats.algorithm, Catch::Matchers::Equals("QuickExact"));
 }
 
 TEST_CASE("Time-to-solution averages successful and failed runtimes", "[time-to-solution]")
@@ -313,7 +314,7 @@ TEST_CASE("Time-to-solution reports progress", "[time-to-solution]")
     time_to_solution_stats stats{};
     time_to_solution(lyt, qs_params, tts_params, &stats);
 
-    CHECK(stats.algorithm == "QuickExact");
+    CHECK_THAT(stats.algorithm, Catch::Matchers::Equals("QuickExact"));
 
     CHECK(rec.is_consistent("repetitions"));
     CHECK(rec.final_count("repetitions") == 5);

@@ -18,6 +18,8 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "fiction/utils/version_info.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
@@ -84,7 +86,7 @@ TEST_CASE("Write empty iNML layout", "[qll]")
 
     write_qll_layout(layout, layout_stream);
 
-    CHECK(layout_stream.str() == qll_layout);
+    CHECK_THAT(layout_stream.str(), Catch::Matchers::Equals(qll_layout));
 }
 
 TEST_CASE("Write single-layer iNML MAJ gate", "[qll]")
@@ -173,7 +175,7 @@ TEST_CASE("Write single-layer iNML MAJ gate", "[qll]")
 
     write_qll_layout(layout, layout_stream);
 
-    CHECK(layout_stream.str() == qll_layout);
+    CHECK_THAT(layout_stream.str(), Catch::Matchers::Equals(qll_layout));
 }
 
 TEST_CASE("Write single-layer iNML coupler with inverter magnet", "[qll]")
@@ -268,7 +270,7 @@ TEST_CASE("Write single-layer iNML coupler with inverter magnet", "[qll]")
 
     write_qll_layout(layout, layout_stream);
 
-    CHECK(layout_stream.str() == qll_layout);
+    CHECK_THAT(layout_stream.str(), Catch::Matchers::Equals(qll_layout));
 }
 
 TEST_CASE("Write single-layer iNML crosswire", "[qll]")
@@ -339,7 +341,7 @@ TEST_CASE("Write single-layer iNML crosswire", "[qll]")
 
     write_qll_layout(layout, layout_stream);
 
-    CHECK(layout_stream.str() == qll_layout);
+    CHECK_THAT(layout_stream.str(), Catch::Matchers::Equals(qll_layout));
 }
 
 /** @brief QLL and QCC reject either terminal away from its designated iNML border before writing. */
@@ -359,9 +361,9 @@ TEST_CASE("Abort on non-pin iNML layouts", "[qll]")
     layout.assign_cell_type({invalid_input ? 4 : 2, 2}, inml::magnet_type::OUTPUT);
 
     CHECK_THROWS_AS(write_qll_layout(layout, layout_stream), std::invalid_argument);
-    CHECK(layout_stream.str() == "preserved");
+    CHECK_THAT(layout_stream.str(), Catch::Matchers::Equals("preserved"));
     CHECK_THROWS_AS(write_qcc_layout(layout, layout_stream), std::invalid_argument);
-    CHECK(layout_stream.str() == "preserved");
+    CHECK_THAT(layout_stream.str(), Catch::Matchers::Equals("preserved"));
 }
 
 /** @brief QLL propagates output-stream failures when the caller enables exceptions. */
@@ -406,7 +408,7 @@ TEST_CASE("Write empty mQCA layout", "[qll]")
 
     write_qll_layout(layout, layout_stream);
 
-    CHECK(layout_stream.str() == qll_layout);
+    CHECK_THAT(layout_stream.str(), Catch::Matchers::Equals(qll_layout));
 }
 
 TEST_CASE("Write single-layer molQCA phase cells", "[qll]")
@@ -455,7 +457,7 @@ TEST_CASE("Write single-layer molQCA phase cells", "[qll]")
 
     write_qll_layout(layout, layout_stream);
 
-    CHECK(layout_stream.str() == qll_layout);
+    CHECK_THAT(layout_stream.str(), Catch::Matchers::Equals(qll_layout));
 }
 
 /** @brief Both molQCA constant values serialize as named input pins. */
@@ -499,7 +501,7 @@ TEST_CASE("Write molQCA constant cells", "[qll]")
 
     write_qll_layout(layout, layout_stream);
 
-    CHECK(layout_stream.str() == qll_layout);
+    CHECK_THAT(layout_stream.str(), Catch::Matchers::Equals(qll_layout));
 }
 
 TEST_CASE("Write single-layer mQCA AND gate", "[qll]")
@@ -551,7 +553,7 @@ TEST_CASE("Write single-layer mQCA AND gate", "[qll]")
 
     write_qll_layout(layout, layout_stream);
 
-    CHECK(layout_stream.str() == qll_layout);
+    CHECK_THAT(layout_stream.str(), Catch::Matchers::Equals(qll_layout));
 }
 
 TEST_CASE("Write dual-layer mQCA crossover", "[qll]")
@@ -618,5 +620,5 @@ TEST_CASE("Write dual-layer mQCA crossover", "[qll]")
 
     write_qll_layout(layout, layout_stream);
 
-    CHECK(layout_stream.str() == qll_layout);
+    CHECK_THAT(layout_stream.str(), Catch::Matchers::Equals(qll_layout));
 }

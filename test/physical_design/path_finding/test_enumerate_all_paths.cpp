@@ -17,6 +17,7 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_contains.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -244,7 +245,7 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruc
             check_four_by_four_paths(obstr_lyt, collection);
             for (const auto& path : collection)
             {
-                CHECK(std::ranges::find(path, layout_base::coordinate{3, 0}) == path.cend());
+                CHECK_THAT(path, !Catch::Matchers::Contains(layout_base::coordinate{3, 0}));
             }
         }
     }
@@ -267,7 +268,7 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruc
                 check_four_by_four_paths(obstr_lyt, collection);
                 for (const auto& path : collection)
                 {
-                    CHECK(std::ranges::find(path, layout_base::coordinate{3, 0}) == path.cend());
+                    CHECK_THAT(path, !Catch::Matchers::Contains(layout_base::coordinate{3, 0}));
                 }
             }
         }

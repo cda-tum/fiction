@@ -15,6 +15,8 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/allocation_failure.hpp"
 
@@ -94,7 +96,7 @@ TEST_CASE("Empty layout", "[layout]")
 
     const layout named{lattice::si_111_1x1(), "named"};
     CHECK(named.get_lattice() == lattice::si_111_1x1());
-    CHECK(named.get_layout_name() == "named");
+    CHECK_THAT(named.get_layout_name(), Catch::Matchers::Equals("named"));
 }
 
 TEST_CASE("Dots", "[layout]")

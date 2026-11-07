@@ -18,6 +18,8 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/scoped_temp_directory.hpp"
@@ -78,7 +80,7 @@ TEST_CASE("SQD export preserves output when lattice geometry is non-finite", "[s
         std::stringstream stream{};
         stream << "original";
         CHECK_THROWS_AS(write_sqd_layout(lyt, stream), std::invalid_argument);
-        CHECK(stream.str() == "original");
+        CHECK_THAT(stream.str(), Catch::Matchers::Equals("original"));
     }
     SECTION("file")
     {
@@ -99,7 +101,7 @@ TEST_CASE("SQD export preserves output when lattice geometry is non-finite", "[s
             std::ifstream stream{destination, std::ios::binary};
             /** @brief Every preserved destination byte. */
             const std::string content{std::istreambuf_iterator<char>{stream}, std::istreambuf_iterator<char>{}};
-            CHECK(content == "original");
+            CHECK_THAT(content, Catch::Matchers::Equals("original"));
         }
     }
 }
@@ -135,7 +137,7 @@ TEST_CASE("SQD export preserves output when charged-defect parameters are invali
         std::stringstream stream{};
         stream << original;
         CHECK_THROWS_AS(write_sqd_layout(lyt, stream, on_progress), std::invalid_argument);
-        CHECK(stream.str() == original);
+        CHECK_THAT(stream.str(), Catch::Matchers::Equals(original));
         CHECK(callbacks == 0);
     }
     SECTION("file")
@@ -157,7 +159,7 @@ TEST_CASE("SQD export preserves output when charged-defect parameters are invali
             std::ifstream stream{destination, std::ios::binary};
             /** @brief Every preserved destination byte. */
             const std::string content{std::istreambuf_iterator<char>{stream}, std::istreambuf_iterator<char>{}};
-            CHECK(content == original);
+            CHECK_THAT(content, Catch::Matchers::Equals(original));
         }
         CHECK(callbacks == 0);
     }
@@ -343,7 +345,7 @@ TEST_CASE("Write and read back an sidb::layout", "[sqd]")
         const auto* name = vectors->FirstChildElement("name");
         REQUIRE(name != nullptr);
         REQUIRE(name->GetText() != nullptr);
-        CHECK(std::string{name->GetText()} == lat.name);
+        CHECK_THAT(std::string{name->GetText()}, Catch::Matchers::Equals(lat.name));
         CHECK(read_sqd_layout(stream) == lyt);
     }
     SECTION("serialized geometry takes precedence over the lattice name")
@@ -396,7 +398,7 @@ TEST_CASE("Write and read back an sidb::layout", "[sqd]")
 
         CHECK(read_layout.get_lattice() == sidb::lattice::si_111_1x1());
         CHECK(read_layout == lyt);
-        CHECK(layout_stream.str().find("Si(111) 1x1") != std::string::npos);
-        CHECK(layout_stream.str().find("Defects") == std::string::npos);
+        CHECK_THAT(layout_stream.str(), Catch::Matchers::ContainsSubstring("Si(111) 1x1"));
+        CHECK_THAT(layout_stream.str(), !Catch::Matchers::ContainsSubstring("Defects"));
     }
 }

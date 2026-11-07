@@ -18,6 +18,8 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/scoped_temp_directory.hpp"
 
@@ -55,7 +57,7 @@ TEST_CASE("QCAD names must fit one text record", "[qcad]")
     std::ostringstream stream{};
     stream << "sentinel";
     CHECK_THROWS_AS(write_qca_layout(layout, stream), std::invalid_argument);
-    CHECK(stream.str() == "sentinel");
+    CHECK_THAT(stream.str(), Catch::Matchers::Equals("sentinel"));
 
     const fiction::test::scoped_temp_directory directory{std::filesystem::temp_directory_path(),
                                                          "fiction-qca-name-" + std::to_string(std::random_device{}())};
@@ -68,7 +70,7 @@ TEST_CASE("QCAD names must fit one text record", "[qcad]")
     CHECK_THROWS_AS(write_qca_layout(layout, filename.string()), std::invalid_argument);
     std::ifstream     original{filename};
     const std::string contents{std::istreambuf_iterator<char>{original}, std::istreambuf_iterator<char>{}};
-    CHECK(contents == "sentinel");
+    CHECK_THAT(contents, Catch::Matchers::Equals("sentinel"));
 }
 
 TEST_CASE("QCAD preserves representable names and clips cells to the frame", "[qcad]")
@@ -88,9 +90,9 @@ TEST_CASE("QCAD preserves representable names and clips cells to the frame", "[q
     layout.assign_cell_name({2, 0}, "ignored\noutside cell");
     std::ostringstream actual{};
     write_qca_layout(layout, actual);
-    CHECK(actual.str() == expected.str());
-    CHECK(actual.str().find("name=" + name + '\n') != std::string::npos);
-    CHECK(actual.str().find("psz=" + name + '\n') != std::string::npos);
+    CHECK_THAT(actual.str(), Catch::Matchers::Equals(expected.str()));
+    CHECK_THAT(actual.str(), Catch::Matchers::ContainsSubstring("name=" + name + '\n'));
+    CHECK_THAT(actual.str(), Catch::Matchers::ContainsSubstring("psz=" + name + '\n'));
 }
 
 TEST_CASE("Write empty QCAD layout", "[qcad]")
@@ -153,7 +155,7 @@ TEST_CASE("Write empty QCAD layout", "[qcad]")
 
     std::ostringstream layout_stream{};
     write_qca_layout(layout, layout_stream, {.create_inter_layer_via_cells = create_vias});
-    CHECK(layout_stream.str() == qcad_layout);
+    CHECK_THAT(layout_stream.str(), Catch::Matchers::Equals(qcad_layout));
 }
 
 TEST_CASE("Write single-layer QCAD AND gate", "[qcad]")
@@ -769,7 +771,7 @@ TEST_CASE("Write single-layer QCAD AND gate", "[qcad]")
 
     write_qca_layout(layout, layout_stream, {.create_inter_layer_via_cells = false});
 
-    CHECK(layout_stream.str() == qcad_layout);
+    CHECK_THAT(layout_stream.str(), Catch::Matchers::Equals(qcad_layout));
 }
 
 TEST_CASE("Write wire crossing", "[qcad]")
@@ -1452,7 +1454,7 @@ TEST_CASE("Write wire crossing", "[qcad]")
 
         write_qca_layout(layout, layout_stream, {.create_inter_layer_via_cells = true});
 
-        CHECK(layout_stream.str() == qcad_layout);
+        CHECK_THAT(layout_stream.str(), Catch::Matchers::Equals(qcad_layout));
     }
     SECTION("Using general function")
     {
@@ -1460,7 +1462,7 @@ TEST_CASE("Write wire crossing", "[qcad]")
 
         write_qca_layout(layout, layout_stream);
 
-        CHECK(layout_stream.str() == qcad_layout);
+        CHECK_THAT(layout_stream.str(), Catch::Matchers::Equals(qcad_layout));
     }
 }
 
@@ -1479,9 +1481,9 @@ TEST_CASE("QCAD retains quantum-dot offsets at large coordinates", "[qcad]")
     std::ostringstream stream{};
     write_qca_layout(layout, stream);
     const auto axis = along_y ? 'y' : 'x';
-    CHECK(stream.str().find(fmt::format("{}={}\n", axis, center)) != std::string::npos);
-    CHECK(stream.str().find(fmt::format("{}={}\n", axis, positive_dot)) != std::string::npos);
-    CHECK(stream.str().find(fmt::format("{}={}\n", axis, negative_dot)) != std::string::npos);
+    CHECK_THAT(stream.str(), Catch::Matchers::ContainsSubstring(fmt::format("{}={}\n", axis, center)));
+    CHECK_THAT(stream.str(), Catch::Matchers::ContainsSubstring(fmt::format("{}={}\n", axis, positive_dot)));
+    CHECK_THAT(stream.str(), Catch::Matchers::ContainsSubstring(fmt::format("{}={}\n", axis, negative_dot)));
 }
 
 TEST_CASE("QCAD retains label widths for long names", "[qcad]")
@@ -1491,7 +1493,7 @@ TEST_CASE("QCAD retains label widths for long names", "[qcad]")
     layout.assign_cell_name({0, 0}, std::string(3355443, 'x'));
     std::ostringstream stream{};
     write_qca_layout(layout, stream);
-    CHECK(stream.str().find("bounding_box.cxWorld=33554434.000000\n") != std::string::npos);
+    CHECK_THAT(stream.str(), Catch::Matchers::ContainsSubstring("bounding_box.cxWorld=33554434.000000\n"));
 }
 
 TEST_CASE("QCAD preserves optional via layers before empty crossing layers", "[qcad]")

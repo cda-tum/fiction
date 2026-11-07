@@ -18,6 +18,8 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
@@ -157,7 +159,7 @@ static void check_mapping_equiv_layout(const Lyt& lyt)
     const auto                    hex_layout = hexagonalization(lyt, params, &stats);
 
     check_eq(lyt, hex_layout);
-    CHECK(lyt.get_layout_name() == hex_layout.get_layout_name());
+    CHECK_THAT(hex_layout.get_layout_name(), Catch::Matchers::Equals(lyt.get_layout_name()));
     CHECK(hex_layout.num_pis() == lyt.num_pis());
     CHECK(hex_layout.num_pos() == lyt.num_pos());
     if (inputs != mode::NONE)
@@ -322,9 +324,9 @@ TEST_CASE("Hexagonalization preserves declared input holes and terminal order", 
     REQUIRE(hex.num_pis() == 2);
     REQUIRE(hex.num_pos() == 1);
     REQUIRE(hex.num_gates() == 1);
-    CHECK(hex.get_input_name(0) == "a");
-    CHECK(hex.get_input_name(1) == "b");
-    CHECK(hex.get_output_name(0) == "f");
+    CHECK_THAT(hex.get_input_name(0), Catch::Matchers::Equals("a"));
+    CHECK_THAT(hex.get_input_name(1), Catch::Matchers::Equals("b"));
+    CHECK_THAT(hex.get_output_name(0), Catch::Matchers::Equals("f"));
     /** @brief Primary inputs in visitor order. */
     std::vector<layout_object_id> inputs{};
     /** @brief Primary outputs in visitor order. */
@@ -343,7 +345,7 @@ TEST_CASE("Hexagonalization preserves declared input holes and terminal order", 
     REQUIRE(source);
     if (source)
     {
-        CHECK(hex.get_name(*source) == "b");
+        CHECK_THAT(hex.get_name(*source), Catch::Matchers::Equals("b"));
     }
 }
 

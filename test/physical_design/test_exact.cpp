@@ -18,6 +18,8 @@
 
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
@@ -163,14 +165,14 @@ void check_io_names(const Ntk& ntk, const Lyt& lyt)
     {
         for (auto i = 0u; i < ntk.num_pis(); ++i)
         {
-            CHECK(lyt.get_input_name(i) == ntk.get_name(ntk.make_signal(ntk.pi_at(i))));
+            CHECK_THAT(lyt.get_input_name(i), Catch::Matchers::Equals(ntk.get_name(ntk.make_signal(ntk.pi_at(i)))));
         }
     }
     if constexpr (mockturtle::has_get_output_name_v<Ntk>)
     {
         for (auto i = 0u; i < ntk.num_pos(); ++i)
         {
-            CHECK(lyt.get_output_name(i) == ntk.get_output_name(i));
+            CHECK_THAT(lyt.get_output_name(i), Catch::Matchers::Equals(ntk.get_output_name(i)));
         }
     }
 }
@@ -678,15 +680,15 @@ TEST_CASE("Name conservation after exact physical design", "[exact]")
     const auto& result = *layout;  // NOLINT(bugprone-unchecked-optional-access): REQUIRE passed.
 
     // network name
-    CHECK(result.get_layout_name() == "maj");
+    CHECK_THAT(result.get_layout_name(), Catch::Matchers::Equals("maj"));
 
     // PI names
-    CHECK(result.get_name(result.pi_at(0)) == "a");
-    CHECK(result.get_name(result.pi_at(1)) == "b");
-    CHECK(result.get_name(result.pi_at(2)) == "c");
+    CHECK_THAT(result.get_name(result.pi_at(0)), Catch::Matchers::Equals("a"));
+    CHECK_THAT(result.get_name(result.pi_at(1)), Catch::Matchers::Equals("b"));
+    CHECK_THAT(result.get_name(result.pi_at(2)), Catch::Matchers::Equals("c"));
 
     // PO names
-    CHECK(result.get_output_name(0) == "f");
+    CHECK_THAT(result.get_output_name(0), Catch::Matchers::Equals("f"));
 }
 
 TEST_CASE("Exact physical design reports progress", "[exact]")
@@ -743,23 +745,23 @@ TEMPLATE_TEST_CASE("Named specification conversion for exact", "[physical-networ
     const auto b = source.create_pi("right");
     source.create_po(source.create_and(a, b), "result");
     const auto ntk = fiction::synthesis::convert_network<named_technology_network>(source);
-    CHECK(ntk.get_network_name() == "named_spec");
-    CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(0))) == "left");
-    CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(1))) == "right");
-    CHECK(ntk.get_output_name(0) == "result");
+    CHECK_THAT(ntk.get_network_name(), Catch::Matchers::Equals("named_spec"));
+    CHECK_THAT(ntk.get_name(ntk.make_signal(ntk.pi_at(0))), Catch::Matchers::Equals("left"));
+    CHECK_THAT(ntk.get_name(ntk.make_signal(ntk.pi_at(1))), Catch::Matchers::Equals("right"));
+    CHECK_THAT(ntk.get_output_name(0), Catch::Matchers::Equals("result"));
     const auto result = exact<cartesian_layout>(ntk);
     REQUIRE(result.has_value());
     // NOLINTNEXTLINE(bugprone-unchecked-optional-access): REQUIRE guards the access
     const auto& lyt = result.value();
-    CHECK(lyt.get_layout_name() == "named_spec");
-    CHECK(lyt.get_name(lyt.pi_at(0)) == "left");
-    CHECK(lyt.get_name(lyt.pi_at(1)) == "right");
-    CHECK(lyt.get_output_name(0) == "result");
+    CHECK_THAT(lyt.get_layout_name(), Catch::Matchers::Equals("named_spec"));
+    CHECK_THAT(lyt.get_name(lyt.pi_at(0)), Catch::Matchers::Equals("left"));
+    CHECK_THAT(lyt.get_name(lyt.pi_at(1)), Catch::Matchers::Equals("right"));
+    CHECK_THAT(lyt.get_output_name(0), Catch::Matchers::Equals("result"));
     const auto extracted = extract_layout_network(lyt);
-    CHECK(extracted.get_network_name() == "named_spec");
-    CHECK(extracted.get_name(extracted.make_signal(extracted.pi_at(0))) == "left");
-    CHECK(extracted.get_name(extracted.make_signal(extracted.pi_at(1))) == "right");
-    CHECK(extracted.get_output_name(0) == "result");
+    CHECK_THAT(extracted.get_network_name(), Catch::Matchers::Equals("named_spec"));
+    CHECK_THAT(extracted.get_name(extracted.make_signal(extracted.pi_at(0))), Catch::Matchers::Equals("left"));
+    CHECK_THAT(extracted.get_name(extracted.make_signal(extracted.pi_at(1))), Catch::Matchers::Equals("right"));
+    CHECK_THAT(extracted.get_output_name(0), Catch::Matchers::Equals("result"));
     check_eq(source, extracted);
 }
 

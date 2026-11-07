@@ -19,6 +19,8 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
@@ -184,11 +186,11 @@ TEST_CASE("East-south coloring owns its named traversal", "[orthogonal]")
     REQUIRE(ntk.num_pis() == 2);
     REQUIRE(ntk.num_pos() == 1);
     CHECK(ntk.get_node(ntk.po_at(0)) == output);
-    CHECK(ntk.get_network_name() == "owned_coloring");
-    CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(0))) == "left");
-    CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(1))) == "right");
-    CHECK(ntk.get_name(ntk.po_at(0)) == "conjunction");
-    CHECK(ntk.get_output_name(0) == "result");
+    CHECK_THAT(ntk.get_network_name(), Catch::Matchers::Equals("owned_coloring"));
+    CHECK_THAT(ntk.get_name(ntk.make_signal(ntk.pi_at(0))), Catch::Matchers::Equals("left"));
+    CHECK_THAT(ntk.get_name(ntk.make_signal(ntk.pi_at(1))), Catch::Matchers::Equals("right"));
+    CHECK_THAT(ntk.get_name(ntk.po_at(0)), Catch::Matchers::Equals("conjunction"));
+    CHECK_THAT(ntk.get_output_name(0), Catch::Matchers::Equals("result"));
 }
 
 TEST_CASE("Orthogonal physical design of a network without primary inputs", "[orthogonal]")
@@ -279,17 +281,17 @@ TEST_CASE("Name conservation after orthogonal physical design", "[orthogonal]")
     const auto layout = orthogonal<cartesian_layout>(convert_network<named_technology_network>(maj));
 
     // network name
-    CHECK(layout.get_layout_name() == "maj");
+    CHECK_THAT(layout.get_layout_name(), Catch::Matchers::Equals("maj"));
 
     // PI names
     REQUIRE(layout.num_pis() == 3);
-    CHECK(layout.get_name(layout.pi_at(0)) == "a");  // first PI
-    CHECK(layout.get_name(layout.pi_at(1)) == "b");  // second PI
-    CHECK(layout.get_name(layout.pi_at(2)) == "c");  // third PI
+    CHECK_THAT(layout.get_name(layout.pi_at(0)), Catch::Matchers::Equals("a"));  // first PI
+    CHECK_THAT(layout.get_name(layout.pi_at(1)), Catch::Matchers::Equals("b"));  // second PI
+    CHECK_THAT(layout.get_name(layout.pi_at(2)), Catch::Matchers::Equals("c"));  // third PI
 
     // PO names
     REQUIRE(layout.num_pos() == 1);
-    CHECK(layout.get_output_name(0) == "f");
+    CHECK_THAT(layout.get_output_name(0), Catch::Matchers::Equals("f"));
 }
 
 TEST_CASE("Orthogonal physical design requires an arrangement for hexagonal layouts", "[orthogonal]")
@@ -355,31 +357,31 @@ TEMPLATE_TEST_CASE("Named specification conversion for orthogonal", "[physical-n
     const auto ntk = fiction::synthesis::convert_network<named_technology_network>(source);
     REQUIRE(ntk.num_pis() == 2);
     REQUIRE(ntk.num_pos() == 1);
-    CHECK(ntk.get_network_name() == "named_spec");
-    CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(0))) == "left");
-    CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(1))) == "right");
-    CHECK(ntk.get_output_name(0) == "result");
+    CHECK_THAT(ntk.get_network_name(), Catch::Matchers::Equals("named_spec"));
+    CHECK_THAT(ntk.get_name(ntk.make_signal(ntk.pi_at(0))), Catch::Matchers::Equals("left"));
+    CHECK_THAT(ntk.get_name(ntk.make_signal(ntk.pi_at(1))), Catch::Matchers::Equals("right"));
+    CHECK_THAT(ntk.get_output_name(0), Catch::Matchers::Equals("result"));
     const auto lyt = orthogonal<cartesian_layout>(ntk);
     REQUIRE(lyt.num_pis() == 2);
     REQUIRE(lyt.num_pos() == 1);
-    CHECK(lyt.get_layout_name() == "named_spec");
-    CHECK(lyt.get_name(lyt.pi_at(0)) == "left");
-    CHECK(lyt.get_name(lyt.pi_at(1)) == "right");
-    CHECK(lyt.get_output_name(0) == "result");
+    CHECK_THAT(lyt.get_layout_name(), Catch::Matchers::Equals("named_spec"));
+    CHECK_THAT(lyt.get_name(lyt.pi_at(0)), Catch::Matchers::Equals("left"));
+    CHECK_THAT(lyt.get_name(lyt.pi_at(1)), Catch::Matchers::Equals("right"));
+    CHECK_THAT(lyt.get_output_name(0), Catch::Matchers::Equals("result"));
     const auto extracted = extract_layout_network(lyt);
     REQUIRE(extracted.num_pis() == 2);
     REQUIRE(extracted.num_pos() == 1);
-    CHECK(extracted.get_network_name() == "named_spec");
-    CHECK(extracted.get_name(extracted.make_signal(extracted.pi_at(0))) == "left");
-    CHECK(extracted.get_name(extracted.make_signal(extracted.pi_at(1))) == "right");
-    CHECK(extracted.get_output_name(0) == "result");
+    CHECK_THAT(extracted.get_network_name(), Catch::Matchers::Equals("named_spec"));
+    CHECK_THAT(extracted.get_name(extracted.make_signal(extracted.pi_at(0))), Catch::Matchers::Equals("left"));
+    CHECK_THAT(extracted.get_name(extracted.make_signal(extracted.pi_at(1))), Catch::Matchers::Equals("right"));
+    CHECK_THAT(extracted.get_output_name(0), Catch::Matchers::Equals("result"));
     check_eq(source, extracted);
     const auto roundtrip = orthogonal<cartesian_layout>(convert_network<named_technology_network>(extracted));
     REQUIRE(roundtrip.num_pis() == 2);
     REQUIRE(roundtrip.num_pos() == 1);
-    CHECK(roundtrip.get_layout_name() == "named_spec");
-    CHECK(roundtrip.get_name(roundtrip.pi_at(0)) == "left");
-    CHECK(roundtrip.get_name(roundtrip.pi_at(1)) == "right");
-    CHECK(roundtrip.get_output_name(0) == "result");
+    CHECK_THAT(roundtrip.get_layout_name(), Catch::Matchers::Equals("named_spec"));
+    CHECK_THAT(roundtrip.get_name(roundtrip.pi_at(0)), Catch::Matchers::Equals("left"));
+    CHECK_THAT(roundtrip.get_name(roundtrip.pi_at(1)), Catch::Matchers::Equals("right"));
+    CHECK_THAT(roundtrip.get_output_name(0), Catch::Matchers::Equals("result"));
     check_eq(extracted, roundtrip);
 }
