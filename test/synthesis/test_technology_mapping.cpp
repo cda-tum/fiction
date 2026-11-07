@@ -29,6 +29,7 @@
 #include <fiction/synthesis/technology_mapping.hpp>
 #include <fiction/verification/count_gate_types.hpp>
 
+#include <kitty/dynamic_truth_table.hpp>
 #include <kitty/print.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
 #include <mockturtle/networks/aig.hpp>
@@ -399,7 +400,7 @@ TEST_CASE("Mapping preserves separate constant values in outputs and fanins", "[
     for (auto output = 0u; output < expected.size(); ++output)
     {
         CAPTURE(inv, output);
-        CHECK(kitty::to_binary(actual[output]) == expected[output]);
-        CHECK(kitty::to_binary(original[output]) == expected[output]);
+        CHECK(kitty::to_binary(actual[output]) == expected.at(output));
+        CHECK(kitty::to_binary(original[output]) == expected.at(output));
     }
 }
