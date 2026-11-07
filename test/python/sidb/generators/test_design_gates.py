@@ -92,9 +92,6 @@ def test_siqad_and_gate_skeleton_100():
         "sim_engine": sidb_simulation_engine.QUICKEXACT,
     }
 
-    assert options["canvas"][0] == lattice_site(4, 4, 0)
-    assert options["canvas"][1] == lattice_site(14, 5, 1)
-
     reports: list[tuple[str, int, int]] = []
     options["on_progress"] = lambda task, done, total: reports.append((task, done, total))
 
@@ -120,9 +117,6 @@ def test_nor_gate_111(nor_gate_skeleton):
         "op_condition": operational_condition.REJECT_KINKS,
     }
 
-    assert options["canvas"][0] == lattice_site(10, 11, 0)
-    assert options["canvas"][1] == lattice_site(14, 17, 0)
-
     designed_gates = design_sidb_gates(layout, [create_nor_tt()], **options)
     assert len(designed_gates) == 44
 
@@ -137,7 +131,7 @@ def test_nor_gate_111(nor_gate_skeleton):
     assert len(designed_gates) == 175
 
 
-def test_nor_gate_111_quickcell(nor_gate_skeleton):
+def test_nor_gate_111_small_canvas(nor_gate_skeleton):
     layout = nor_gate_skeleton
     options: dict[str, Any] = {
         "base": 2,
@@ -149,9 +143,6 @@ def test_nor_gate_111_quickcell(nor_gate_skeleton):
     options["canvas"] = (lattice_site(10, 13, 0), lattice_site(14, 17, 0))
     options["number_of_canvas_sidbs"] = 3
     options["sim_engine"] = sidb_simulation_engine.QUICKEXACT
-
-    assert options["canvas"][0] == lattice_site(10, 13, 0)
-    assert options["canvas"][1] == lattice_site(14, 17, 0)
 
     designed_gates = design_sidb_gates(layout, [create_nor_tt()], **options)
     assert len(designed_gates) == 14

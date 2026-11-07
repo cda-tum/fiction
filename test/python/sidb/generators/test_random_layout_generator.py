@@ -55,14 +55,14 @@ def test_area_with_one_coordinate_111_lattice() -> None:
 
 def test_impossible_design_of_single_layout() -> None:
     """The generator returns None when the requested SiDBs do not fit."""
-    result_lyt = generate_random_sidb_layout(sidb_layout(), number_of_sidbs=2)
+    result_lyt = generate_random_sidb_layout(sidb_layout(), number_of_sidbs=2, maximal_attempts=5)
     assert result_lyt is None
 
 
 def test_impossible_design_of_multiple_layouts() -> None:
     """Repeated generation returns None when the requested SiDBs do not fit."""
     result_lyt = generate_multiple_random_sidb_layouts(
-        sidb_layout(), maximal_attempts_for_multiple_layouts=5, number_of_sidbs=2
+        sidb_layout(), maximal_attempts_for_multiple_layouts=5, number_of_sidbs=2, maximal_attempts=5
     )
     assert result_lyt is None
 
