@@ -8,6 +8,7 @@
 
 from __future__ import annotations
 
+import json
 from typing import TYPE_CHECKING
 
 import pytest
@@ -129,6 +130,10 @@ def test_physical_interface_and_defect_diagnostics(
     assert stats.eq == expected
     assert stats.spec_drv_stats.drvs == 0
     assert (stats.impl_drv_stats.drvs == 0) is (defect is None)
+    if defect == "non_adjacent":
+        report = json.loads(stats.impl_drv_stats.report)
+        assert len(report["Non adjacent connections"]) == 2
+        assert not report.get("Objects outside extent")
     if defect is None:
         assert equivalence_checking(layout, network) == eq_type.STRONG
         assert equivalence_checking(layout, layout.clone()) == eq_type.STRONG
