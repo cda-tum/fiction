@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from mnt.pyfiction.networks import simulate_outputs, technology_network
+from mnt.pyfiction.networks import get_name, set_name, simulate_outputs, technology_network
 from mnt.pyfiction.synthesis import fanout_substitution, is_fanout_substituted, network_balancing, substitution_strategy
 
 if TYPE_CHECKING:
@@ -66,13 +66,16 @@ def test_repeated_substitution_and_balancing(
     interface_network: technology_network, interface_outputs: list[tuple[str, list[bool]]]
 ) -> None:
     network = interface_network
+    set_name(network, "interfaces")
     for _ in range(3):
         network = fanout_substitution(network)
         _check_degrees(network, 2, 1)
+        assert get_name(network) == "interfaces"
         assert [network.get_name(pi) for pi in network.pis()] == ["apple", "banana", "cherry", "unused"]
         assert simulate_outputs(network) == interface_outputs
     balanced = network_balancing(network)
     _check_degrees(balanced, 2, 1)
+    assert get_name(balanced) == "interfaces"
     assert simulate_outputs(balanced) == interface_outputs
 
 

@@ -207,15 +207,35 @@ def test_networks_without_duplicates_keep_their_inputs(mux21: technology_network
     _check_structure(planar)
 
 
-def test_fanout_degree(full_adder: technology_network) -> None:
+@pytest.mark.parametrize("degree", [3, 1 << 31, (1 << 32) - 1])
+def test_fanout_degree(full_adder: technology_network, degree: int) -> None:
     """Fanout nodes respect the requested degree."""
     balanced = _balanced(full_adder)
 
-    planar, original_input = planarization(balanced, fanout_degree=3)
+    planar, original_input = planarization(balanced, fanout_degree=degree)
 
-    assert is_fanout_substituted(planar, degree=3)
+    assert is_fanout_substituted(planar, degree=degree)
     assert _equivalent_with_tied_inputs(balanced, planar, original_input)
-    _check_structure(planar, degree=3)
+    _check_structure(planar, degree=degree)
+
+
+def test_asymmetric_gates_keep_fanin_order(blif_network: Callable[[str], technology_network]) -> None:
+    """LT, GT and ITE retain their input order when shared asymmetric gates require duplication."""
+    network = blif_network(
+        ".model asymmetric\n.inputs a b\n.outputs h f g\n.names a b lt\n10 1\n.names a b gt\n01 1\n"
+        ".names lt gt f\n10 1\n.names gt lt g\n10 1\n.names f g a h\n11- 1\n0-1 1\n.end\n"
+    )
+    assert simulate_outputs(network) == [
+        ("h", [True, False, False, False]),
+        ("f", [False, False, True, False]),
+        ("g", [False, True, False, False]),
+    ]
+    balanced = _balanced(network)
+    stats = planarization_stats()
+    planar, original_input = planarization(balanced, strategy=planarization_strategy.DUPLICATION, statistics=stats)
+    assert stats.num_duplications > 0
+    assert _equivalent_with_tied_inputs(balanced, planar, original_input)
+    _check_structure(planar)
 
 
 @pytest.mark.parametrize("seed", [None, 7])
