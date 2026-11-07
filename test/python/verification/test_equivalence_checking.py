@@ -72,6 +72,42 @@ def test_empty_layout_and_network_equivalence(
         assert stats.spec_drv_stats.drvs == stats.impl_drv_stats.drvs == 0
 
 
+def test_empty_networks_are_equivalent() -> None:
+    """Two empty technology networks compare strongly without an output miter."""
+    stats = equivalence_checking_stats()
+    assert equivalence_checking(technology_network(), technology_network(), stats) == eq_type.STRONG
+    assert stats.eq == eq_type.STRONG
+    assert stats.counter_example == []
+
+
+@pytest.mark.parametrize("direction", ["layout-layout", "network-layout", "layout-network"])
+def test_logical_inequivalence_has_no_physical_defects(
+    tmp_path: Path, direction: str, make_layout: Callable[[tuple[int, int, int], str], GateLayout]
+) -> None:
+    """Valid physical layouts with different functions return a distinguishing counterexample."""
+    identity = cartesian_gate_layout((1, 3, 1), "2DDWave")
+    signal = identity.create_pi("a", (0, 0))
+    identity.create_po(signal, "result", (0, 1))
+    inverted = make_layout((1, 3, 1), "2DDWave")
+    source = inverted.create_pi("a", (0, 0))
+    gate = inverted.create_not(source, (0, 1))
+    inverted.create_po(gate, "result", (0, 2))
+    path = tmp_path / "identity.blif"
+    path.write_text(".model identity\n.inputs a\n.outputs result\n.names a result\n1 1\n.end\n", encoding="utf-8")
+    network = read_network(str(path))
+    specification = network if direction == "network-layout" else identity
+    implementation = network if direction == "layout-network" else inverted
+    if direction == "layout-network":
+        specification = inverted
+    stats = equivalence_checking_stats()
+    assert equivalence_checking(specification, implementation, stats) == eq_type.NO
+    assert stats.eq == eq_type.NO
+    assert stats.spec_drv_stats.drvs == stats.impl_drv_stats.drvs == 0
+    assert len(stats.counter_example) == 1
+    assignment = int(stats.counter_example[0])
+    assert simulate(specification)["result"][1 - assignment] != simulate(implementation)["result"][1 - assignment]
+
+
 @pytest.mark.parametrize("defect", [None, "non_adjacent", "disconnected"])
 def test_physical_interface_and_defect_diagnostics(
     tmp_path: Path, defect: str | None, make_layout: Callable[[tuple[int, int, int], str], GateLayout]
