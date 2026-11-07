@@ -43,12 +43,15 @@ void check_identity_conversion(const arrangement a)
 {
     const hexagonal_layout layout{a, {10, 10}};
     CAPTURE(static_cast<int>(a));
-    layout.foreach_coordinate(
-        [&layout](const auto& coord)
+    for (int32_t y = 0; y < 10; ++y)
+    {
+        for (int32_t x = 0; x < 10; ++x)
         {
+            const layout_base::coordinate coord{x, y};
             CAPTURE(coord);
             CHECK(layout.to_offset_coordinate(layout.to_cube_coordinate(coord)) == coord);
-        });
+        }
+    }
 }
 
 TEST_CASE("Coordinate creation", "[hexagonal-layout]")

@@ -67,6 +67,12 @@ TEST_CASE("CSV writer", "[csv-writer]")
         CHECK_THAT(ss.str(), Catch::Matchers::Equals("a,b,c\n"));
     }
 
+    SECTION("writing values without escaping")
+    {
+        writer.write_line("a,b", "\"quoted\"", "first\nsecond");
+        CHECK(ss.str() == "a,b,\"quoted\",first\nsecond\n");
+    }
+
     SECTION("writing mixed type values")
     {
         writer.write_line("mixed", 1234, 42.0);

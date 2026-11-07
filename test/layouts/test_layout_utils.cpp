@@ -104,9 +104,11 @@ TEMPLATE_TEST_CASE("Port directions to coordinates", "[layout-utils]", (cartesia
     CAPTURE(static_cast<int>(a));
     const auto lyt = blueprints::make_layout<TestType>(a, {5, 5});
 
-    lyt.foreach_coordinate(
-        [&lyt](const auto& c)
+    for (int32_t y = 0; y < 5; ++y)
+    {
+        for (int32_t x = 0; x < 5; ++x)
         {
+            const layout_base::coordinate c{x, y};
             CAPTURE(c);
             CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::NORTH}) ==
                   lyt.north(c));
@@ -122,7 +124,8 @@ TEMPLATE_TEST_CASE("Port directions to coordinates", "[layout-utils]", (cartesia
             CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::WEST}) == lyt.west(c));
             CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::NORTH_WEST}) ==
                   lyt.north_west(c));
-        });
+        }
+    }
 }
 
 TEST_CASE("Random coordinates stay inside inclusive corner bounds", "[layout-utils]")

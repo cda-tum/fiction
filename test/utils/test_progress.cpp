@@ -127,12 +127,12 @@ TEST_CASE("Intermediate reports are throttled to whole percents", "[progress]")
         CHECK(rec.records.size() == 1);
 
         reporter.advance(9);  // 10 of 1000 completes the first percent
-        CHECK(rec.records.size() == 2);
+        REQUIRE(rec.records.size() == 2);
         CHECK(rec.records.back() == record{10, 1000});
 
         let_throttle_pass();
         reporter.advance(25);
-        CHECK(rec.records.size() == 3);
+        REQUIRE(rec.records.size() == 3);
         CHECK(rec.records.back() == record{35, 1000});
     }
 
@@ -153,6 +153,7 @@ TEST_CASE("Intermediate reports are throttled in time", "[progress]")
     }
 
     // a tight loop of 100 items finishes well within the report interval
+    REQUIRE_FALSE(rec.records.empty());
     CHECK(rec.records.size() < 100);
     CHECK(rec.records.front() == record{0, 100});
     CHECK(rec.records.back() == record{100, 100});
@@ -171,7 +172,7 @@ TEST_CASE("An unknown total is reported as zero", "[progress]")
         CHECK(rec.records.size() == 1);
 
         reporter.advance();
-        CHECK(rec.records.size() == 2);
+        REQUIRE(rec.records.size() == 2);
         CHECK(rec.records.back() == record{64, 0});
     }
 
@@ -187,7 +188,7 @@ TEST_CASE("The total can be set once it is known", "[progress]")
         utils::progress_reporter reporter{rec.callback(), "items"};
 
         reporter.set_total(5);
-        CHECK(rec.records == std::vector<record>{{0, 0}, {0, 5}});
+        REQUIRE(rec.records == std::vector<record>{{0, 0}, {0, 5}});
 
         reporter.advance(5);
     }

@@ -31,8 +31,10 @@
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 
 #include <limits>
+#include <optional>
 #include <stdexcept>
 #include <tuple>
+#include <unordered_set>
 #include <vector>
 
 using namespace fiction;
@@ -126,6 +128,15 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
         op_domain_params.operational_params.sim_engine = engine::EXGS;
         const auto valid_parameters_exgs               = physically_valid_parameters(lyt, cd, op_domain_params);
         CHECK(valid_parameters_exgs.size() == 43);
+        std::unordered_set<parameter_point> visited{};
+        valid_parameters_exgs.for_each(
+            [&](const auto& point, const auto& value)
+            {
+                CAPTURE(point.get_parameters());
+                CHECK(visited.insert(point).second);
+                CHECK(valid_parameters.contains(point) == std::optional{value});
+            });
+        CHECK(visited.size() == valid_parameters_exgs.size());
 
         op_domain_params.operational_params.sim_engine = engine::QUICKSIM;
         const auto valid_parameters_quicksim           = physically_valid_parameters(lyt, cd, op_domain_params);

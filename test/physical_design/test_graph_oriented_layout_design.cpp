@@ -19,6 +19,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "fiction/layouts/layout_base.hpp"
@@ -399,19 +400,19 @@ TEST_CASE("Skip tiles for PI placement", "[graph-oriented-layout-design]")
 
             // collect PI coordinates along top (y=0) and left (x=0)
             std::vector<int32_t> top_x, left_y;
-            lyt.foreach_pi(
-                [&](auto const& gate)
+            REQUIRE(lyt.num_pis() == ntk.num_pis());
+            for (auto i = 0u; i < lyt.num_pis(); ++i)
+            {
+                const auto c = lyt.get_tile(lyt.pi_at(i));
+                if (c.y == 0)
                 {
-                    const auto c = lyt.get_tile(gate);
-                    if (c.y == 0)
-                    {
-                        top_x.push_back(c.x);
-                    }
-                    if (c.x == 0)
-                    {
-                        left_y.push_back(c.y);
-                    }
-                });
+                    top_x.push_back(c.x);
+                }
+                if (c.x == 0)
+                {
+                    left_y.push_back(c.y);
+                }
+            }
 
             std::ranges::sort(top_x);
             std::ranges::sort(left_y);
@@ -500,6 +501,8 @@ TEST_CASE("Name conservation after graph-oriented layout design", "[graph-orient
 
     // network name
     const auto& checked_layout = required_value(layout);
+    REQUIRE(checked_layout.num_pis() == 3);
+    REQUIRE(checked_layout.num_pos() == 1);
     CHECK_THAT(checked_layout.get_layout_name(), Catch::Matchers::Equals("maj"));
 
     // PI names
@@ -641,7 +644,8 @@ TEST_CASE("GOLD preserves declared PI order and noncommutative input ports", "[g
     const auto                                result = graph_oriented_layout_design(ntk, params);
     REQUIRE(result.has_value());
     const auto& layout = required_value(result);
-    CHECK(layout.num_pis() == 3);
+    REQUIRE(layout.num_pis() == 3);
+    REQUIRE(layout.num_pos() == 1);
     CHECK_THAT(layout.get_name(layout.pi_at(0)), Catch::Matchers::Equals("unused"));
     CHECK_THAT(layout.get_name(layout.pi_at(1)), Catch::Matchers::Equals("a"));
     CHECK_THAT(layout.get_name(layout.pi_at(2)), Catch::Matchers::Equals("b"));
@@ -690,6 +694,7 @@ TEST_CASE("GOLD preserves mixed constant and logic output order", "[graph-orient
                                                      .enable_multithreading = false};
     const auto                                result = graph_oriented_layout_design(ntk, params);
     REQUIRE(result.has_value());
+    REQUIRE(required_value(result).num_pos() == 3);
     CHECK_THAT(required_value(result).get_output_name(0), Catch::Matchers::Equals("input_copy"));
     CHECK_THAT(required_value(result).get_output_name(1), Catch::Matchers::Equals("one"));
     CHECK_THAT(required_value(result).get_output_name(2), Catch::Matchers::Equals("zero"));
@@ -707,6 +712,8 @@ TEMPLATE_TEST_CASE("Named specification conversion for graph_oriented_layout_des
     const auto b = source.create_pi("right");
     source.create_po(source.create_and(a, b), "result");
     const auto ntk = fiction::synthesis::convert_network<named_technology_network>(source);
+    REQUIRE(ntk.num_pis() == 2);
+    REQUIRE(ntk.num_pos() == 1);
     CHECK_THAT(ntk.get_network_name(), Catch::Matchers::Equals("named_spec"));
     CHECK_THAT(ntk.get_name(ntk.make_signal(ntk.pi_at(0))), Catch::Matchers::Equals("left"));
     CHECK_THAT(ntk.get_name(ntk.make_signal(ntk.pi_at(1))), Catch::Matchers::Equals("right"));
@@ -715,11 +722,15 @@ TEMPLATE_TEST_CASE("Named specification conversion for graph_oriented_layout_des
     const auto                                result = graph_oriented_layout_design(ntk, ps);
     REQUIRE(result.has_value());
     const auto& lyt = required_value(result);
+    REQUIRE(lyt.num_pis() == 2);
+    REQUIRE(lyt.num_pos() == 1);
     CHECK_THAT(lyt.get_layout_name(), Catch::Matchers::Equals("named_spec"));
     CHECK_THAT(lyt.get_name(lyt.pi_at(0)), Catch::Matchers::Equals("left"));
     CHECK_THAT(lyt.get_name(lyt.pi_at(1)), Catch::Matchers::Equals("right"));
     CHECK_THAT(lyt.get_output_name(0), Catch::Matchers::Equals("result"));
     const auto extracted = extract_layout_network(lyt);
+    REQUIRE(extracted.num_pis() == 2);
+    REQUIRE(extracted.num_pos() == 1);
     CHECK_THAT(extracted.get_network_name(), Catch::Matchers::Equals("named_spec"));
     CHECK_THAT(extracted.get_name(extracted.make_signal(extracted.pi_at(0))), Catch::Matchers::Equals("left"));
     CHECK_THAT(extracted.get_name(extracted.make_signal(extracted.pi_at(1))), Catch::Matchers::Equals("right"));
