@@ -42,6 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Python tests check native version, repository, and build metadata.
   - Routing tests compare complete retained-object visits after clearing wires.
   - QCA ONE tests check selected port and OR-gate orientations against independent cell patterns.
   - Network utility tests check fanins through network interfaces instead of fixed node indices.
