@@ -23,6 +23,7 @@ from mnt.pyfiction.layouts import (
 )
 from mnt.pyfiction.layouts.io import fgl_parsing_error, read_fgl_layout, write_fgl_layout
 from mnt.pyfiction.synthesis import dynamic_truth_table
+from mnt.pyfiction.verification import gate_level_drvs
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -477,19 +478,34 @@ def test_legacy_empty_maximum_indices_define_one_tile(fgl_path: Path) -> None:
 
 
 def test_version_two_rejects_a_cycle_outside_output_cones(tmp_path: Path) -> None:
-    layout = cartesian_gate_layout((3, 2), "2DDWave")
-    source = layout.create_pi("a", (0, 0))
-    layout.create_po(source, "f", (1, 0))
-    wire = layout.create_buf(source, (0, 1))
-    layout.create_buf(wire, (1, 1))
+    """Reject physically valid cycles that do not feed a primary output."""
+    layout = cartesian_gate_layout((3, 3), "OPEN")
+    source = layout.create_pi("a", (0, 1))
+    layout.create_po(source, "f", (0, 0))
+    layout.assign_clock_number((0, 1), 3)
+    layout.assign_clock_number((0, 0), 0)
+    positions = [(1, 1), (2, 1), (2, 2), (1, 2)]
+    previous = source
+    for phase, position in enumerate(positions):
+        previous = layout.create_buf(previous, position)
+        layout.assign_clock_number(position, phase)
+    assert gate_level_drvs(layout, missing_connections=False) == (0, 0)
     path = tmp_path / "dangling.fgl"
     write_fgl_layout(layout, str(path))
-    assert read_fgl_layout(str(path)).size() == 4
+    assert read_fgl_layout(str(path)).size() == 6
+    first = layout.find_object(positions[0])
+    assert first is not None
+    layout.connect(previous, layout_input_port(first, 0))
+    assert gate_level_drvs(layout) == (0, 0)
     document = ET.fromstring(path.read_text(encoding="utf-8"))  # ruff: ignore[suspicious-xml-element-tree-usage] -- writer output
-    gates = document.findall("gates/gate")
-    target = gates[2].find("incoming/signal/source")
+    gates = {
+        (int(gate.findtext("loc/x", "")), int(gate.findtext("loc/y", ""))): gate
+        for gate in document.findall("gates/gate")
+    }
+    target = gates[positions[0]].find("incoming/signal/source")
     assert target is not None
-    target.text = gates[3].findtext("id")
+    target.text = gates[positions[-1]].findtext("id")
+    assert target.text is not None
     path.write_text(ET.tostring(document, encoding="unicode"), encoding="utf-8")
-    with pytest.raises(fgl_parsing_error):
+    with pytest.raises(fgl_parsing_error, match="acyclic"):
         read_fgl_layout(str(path))

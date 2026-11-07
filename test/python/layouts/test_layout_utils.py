@@ -78,7 +78,8 @@ def test_normalize_rejects_unrepresentable_occupied_span() -> None:
         ((-(2**31), 0, 0), (2**31 - 1, 0, 0)),
     ],
 )
-def test_random_coordinate_inclusive_signed_bounds(first, second) -> None:
+def test_random_coordinate_inclusive_signed_bounds(first: tuple[int, int, int], second: tuple[int, int, int]) -> None:
+    """Sample inclusive signed regions with either corner order."""
     bounds = [(min(a, b), max(a, b)) for a, b in zip(first, second, strict=True)]
     for start, stop in [(first, second), (second, first)]:
         for _ in range(32):

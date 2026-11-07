@@ -206,7 +206,13 @@ def test_cartesian_direction_and_opposite_pairs() -> None:
         ),
     ],
 )
-def test_hexagonal_arrangement_neighbors(a, diagonals, edge, opposites) -> None:
+def test_hexagonal_arrangement_neighbors(
+    a: arrangement,
+    diagonals: list[tuple[int, int]],
+    edge: list[tuple[int, int]],
+    opposites: list[tuple[tuple[int, int], tuple[int, int]]],
+) -> None:
+    """Check literal neighbors and opposite pairs for each offset arrangement."""
     layout = hexagonal_layout(a, (5, 5, 2))
     for direction, expected in zip(("north_east", "south_east", "south_west", "north_west"), diagonals, strict=True):
         assert getattr(layout, direction)((2, 2)) == coordinate(expected)
