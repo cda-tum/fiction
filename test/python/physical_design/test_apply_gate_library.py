@@ -8,7 +8,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import pytest
@@ -34,6 +33,7 @@ from mnt.pyfiction.synthesis import create_and_tt
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+    from pathlib import Path
 
     from mnt.pyfiction.networks import technology_network
 
@@ -104,7 +104,7 @@ def test_apply_topolinano_library(mux21: technology_network) -> None:
 
 
 @pytest.mark.parametrize("name", ["INV", "OR", "NAND", "NOR", "XOR", "XNOR"])
-def test_bestagon_static_interfaces(name: str) -> None:
+def test_bestagon_static_interfaces(name: str, resources_dir: Path) -> None:
     """Static Bestagon gates retain the reference's complete tagged SiDB placement."""
     layout = hexagonal_gate_layout(arrangement.EVEN_ROW, (3, 3, 2), "ROW", name)
     a = layout.create_pi("x1", (0, 0))
@@ -112,11 +112,7 @@ def test_bestagon_static_interfaces(name: str) -> None:
     gate = layout.create_not(a, (1, 1)) if b is None else getattr(layout, f"create_{name.lower()}")(a, b, (1, 1))
     layout.create_po(gate, "f1", (0, 2))
     cells = apply_bestagon_library(layout, on_progress=None)
-    reference = read_sqd_layout(
-        str(
-            Path(__file__).resolve().parents[2] / "resources" / "bestagon_library" / "multi_tile_layout" / f"{name}.sqd"
-        )
-    )
+    reference = read_sqd_layout(str(resources_dir / f"bestagon_{name.lower()}.sqd"))
     assert cells.num_dots() == reference.num_dots()
     assert [(site, cells.get_dot_tag(site)) for site in cells.sidbs()] == [
         (site, reference.get_dot_tag(site)) for site in reference.sidbs()
@@ -435,7 +431,7 @@ def _rotate_rows(rows: list[str], turns: int) -> list[str]:
     return rows
 
 
-def test_bestagon_double_wire_interface() -> None:
+def test_bestagon_double_wire_interface(resources_dir: Path) -> None:
     """Map two distinct signals through the same hexagonal tile on separate layers."""
     layout = hexagonal_gate_layout(arrangement.EVEN_ROW, (3, 3, 2), "ROW")
     a = layout.create_pi("x1", (0, 0))
@@ -445,15 +441,7 @@ def test_bestagon_double_wire_interface() -> None:
     second = layout.create_buf(b, (1, 1, 1))
     layout.create_po(second, "f2", (1, 2))
     cells = apply_bestagon_library(layout)
-    reference = read_sqd_layout(
-        str(
-            Path(__file__).resolve().parents[2]
-            / "resources"
-            / "bestagon_library"
-            / "multi_tile_layout"
-            / "double_wire.sqd"
-        )
-    )
+    reference = read_sqd_layout(str(resources_dir / "bestagon_double_wire.sqd"))
     assert [(site, cells.get_dot_tag(site)) for site in cells.sidbs()] == [
         (site, reference.get_dot_tag(site)) for site in reference.sidbs()
     ]
