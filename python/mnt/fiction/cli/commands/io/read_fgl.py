@@ -43,7 +43,6 @@ def _read_fgl_arguments(parser: Parser) -> None:
 def read_fgl(session: Session, args: argparse.Namespace) -> Result:
     """Read a gate-level layout from an FGL file.
 
-    The file does not record its topology, so --topology selects the reader; it defaults to
-    cartesian.
+    The selected topology must match the FGL metadata; --topology defaults to cartesian.
     """
     return read_file(session, args.path, topology=args.topology, suffixes=(".fgl",))

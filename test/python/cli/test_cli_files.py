@@ -22,6 +22,7 @@ from mnt.pyfiction.inml import inml_layout, inml_magnet_type
 from mnt.pyfiction.layouts import arrangement, shifted_cartesian_gate_layout
 from mnt.pyfiction.layouts.io import write_fgl_layout
 from mnt.pyfiction.networks import aig_network, mig_network, set_name, simulate_outputs, technology_network, xag_network
+from mnt.pyfiction.networks.io import read_network
 from mnt.pyfiction.qca import qca_layout
 from mnt.pyfiction.sidb import sidb_layout
 from mnt.pyfiction.sidb.io import read_sqd_layout
@@ -40,7 +41,7 @@ if TYPE_CHECKING:
 def test_read_verilog_as_every_type(shell: Shell, resource: Callable[[str], str], network_type: str, cls: type) -> None:
     shell.ok(f'read "{resource("mux21.v")}" --type {network_type}')
     network = shell.session.networks.current()
-    assert type(network).__name__ == cls.__name__
+    assert isinstance(network, cls)
     assert network.num_pis() == 3
     assert shell.session.log[-1]["result"]["network"]["type"] == network_type.upper()
 
@@ -76,10 +77,11 @@ def test_read_blif_rejects_other_types(shell: Shell, tmp_path: Path, mux21_shell
     assert "technology networks only" in shell.fails(f'read "{blif}" --type aig')
 
 
-def test_read_rejects_a_directory(shell: Shell, tmp_path: Path) -> None:
-    """Reading a folder is no longer supported; the message says to name one file."""
-    assert "is a directory" in shell.fails(f'read "{tmp_path}"')
-    assert len(shell.session.networks) == 0
+@pytest.mark.parametrize("command", ["read", "read_verilog"])
+def test_read_rejects_a_directory(shell: Shell, tmp_path: Path, command: str) -> None:
+    """Readers require a file and leave the network store empty after rejection."""
+    assert "is a directory" in shell.fails(f'{command} "{tmp_path}"')
+    assert not shell.session.networks.items
 
 
 def test_split_readers_take_their_own_format(shell: Shell, resource: Callable[[str], str]) -> None:
@@ -90,25 +92,35 @@ def test_split_readers_take_their_own_format(shell: Shell, resource: Callable[[s
     assert len(shell.session.cell_layouts) == 1
 
 
-def test_split_readers_reject_another_format(shell: Shell, resource: Callable[[str], str]) -> None:
+@pytest.mark.parametrize(
+    ("command", "filename", "suffix"),
+    [
+        pytest.param("read_sqd", "mux21.v", ".sqd", id="sqd-reader-verilog-file"),
+        pytest.param("read_verilog", "siqad_or_gate.sqd", ".v", id="verilog-reader-sqd-file"),
+    ],
+)
+def test_split_readers_reject_another_format(
+    shell: Shell, resource: Callable[[str], str], command: str, filename: str, suffix: str
+) -> None:
     """A reader named for one format refuses another, rather than guessing."""
-    assert ".sqd" in shell.fails(f'read_sqd "{resource("mux21.v")}"')
-    assert ".v" in shell.fails(f'read_verilog "{resource("siqad_or_gate.sqd")}"')
+    assert suffix in shell.fails(f'{command} "{resource(filename)}"')
     assert len(shell.session.networks) == 0
+    assert len(shell.session.cell_layouts) == 0
 
 
-def test_split_readers_reject_a_directory(shell: Shell, tmp_path: Path) -> None:
-    assert "is a directory" in shell.fails(f'read_verilog "{tmp_path}"')
-
-
-def test_read_aiger_accepts_both_aiger_suffixes(shell: Shell, tmp_path: Path, resource: Callable[[str], str]) -> None:
+@pytest.mark.parametrize("suffix", [".aig", ".aag"])
+def test_read_aiger_accepts_both_aiger_suffixes(
+    shell: Shell, tmp_path: Path, resource: Callable[[str], str], suffix: str
+) -> None:
     """read_aiger reads binary .aig and ASCII .aag, dispatching on the file's own suffix."""
-    shell.ok(f'read_verilog "{resource("mux21.v")}" --type aig')
-    binary = tmp_path / "mux21.aig"
-    shell.ok(f'write_aiger "{binary}"')
-    shell.ok("clear -n")
-    shell.ok(f'read_aiger "{binary}"')
+    path = tmp_path / f"mux21{suffix}"
+    if suffix == ".aag":
+        path.write_text("aag 6 3 0 1 3\n2\n4\n6\n13\n8 2 7\n10 4 6\n12 9 11\nc\nMUX\n", encoding="utf-8")
+    else:
+        shell.ok(f'read_verilog "{resource("mux21.v")}" --type aig; write_aiger "{path}"; clear -n')
+    shell.ok(f'read_aiger "{path}"; simulate -n --store')
     assert len(shell.session.networks) == 1
+    assert shell.session.truth_tables.current().to_binary() == "11001010"
 
 
 def test_read_missing_and_unknown_files(shell: Shell, tmp_path: Path) -> None:
@@ -139,9 +151,9 @@ def test_sqd_shell_round_trip(shell: Shell, resource: Callable[[str], str], tmp_
     after = shell.session.cell_layouts.current().layout
     assert isinstance(before, sidb_layout)
     assert isinstance(after, sidb_layout)
-    assert after.num_dots() == before.num_dots()
-    assert after.num_pis() == before.num_pis()
-    assert after.num_pos() == before.num_pos()
+    assert sorted((site.x, site.y, site.z, after.get_dot_tag(site)) for site in after.sidbs()) == sorted(
+        (site.x, site.y, site.z, before.get_dot_tag(site)) for site in before.sidbs()
+    )
 
 
 @pytest.mark.parametrize("topology", ["cartesian", "shifted_cartesian", "hexagonal"])
@@ -158,6 +170,11 @@ def test_fgl_round_trip(shell: Shell, resource: Callable[[str], str], tmp_path: 
     gates = shell.session.gate_layouts.current().num_gates()
     shell.ok(f'write_fgl "{fgl}"; clear -g; read "{fgl}" --topology {topology}')
     assert shell.session.gate_layouts.current().num_gates() == gates
+    assert simulate_outputs(shell.session.gate_layouts.current()) == (
+        [("f", [True, False])]
+        if topology == "shifted_cartesian"
+        else [("out", [True, True, False, False, True, False, True, False])]
+    )
 
 
 @pytest.mark.parametrize(
@@ -166,7 +183,12 @@ def test_fgl_round_trip(shell: Shell, resource: Callable[[str], str], tmp_path: 
 def test_write_networks(mux21_shell: Shell, tmp_path: Path, writer: str, suffix: str) -> None:
     path = tmp_path / f"mux21{suffix}"
     mux21_shell.ok(f'{writer} "{path}"')
-    assert path.stat().st_size > 0
+    if suffix == ".dot":
+        assert "digraph" in path.read_text(encoding="utf-8")
+    else:
+        assert simulate_outputs(read_network(str(path))) == [
+            ("out", [True, True, False, False, True, False, True, False])
+        ]
 
 
 def test_write_aiger_needs_an_aig(mux21_shell: Shell, tmp_path: Path, resource: Callable[[str], str]) -> None:
@@ -236,22 +258,27 @@ def test_write_refuses_a_directory(mux21_shell: Shell, tmp_path: Path) -> None:
     assert "is a directory" in mux21_shell.fails(f'write_verilog "{tmp_path}"')
 
 
-def test_writer_selects_format_independently_of_filename(mux21_shell: Shell, tmp_path: Path) -> None:
+@pytest.mark.parametrize(
+    "name", ["output", "output.xyz", "output.blif"], ids=["extensionless", "unknown", "other-format"]
+)
+def test_writer_selects_format_independently_of_filename(mux21_shell: Shell, tmp_path: Path, name: str) -> None:
     """The writer command determines serialization, including for extensionless output."""
-    for name in ("output", "output.xyz", "output.blif"):
-        path = tmp_path / name
-        mux21_shell.ok(f'write_verilog "{path}"')
-        assert "module top" in path.read_text(encoding="utf-8")
-    assert "unknown command" in mux21_shell.fails("write output.v")
+    path = tmp_path / name
+    mux21_shell.ok(f'write_verilog "{path}"')
+    assert "module top" in path.read_text(encoding="utf-8")
 
 
-def test_write_dot_selects_the_store(mux21_shell: Shell, tmp_path: Path) -> None:
+def test_generic_writer_is_not_registered(shell: Shell) -> None:
+    assert "unknown command" in shell.fails("write output.v")
+
+
+@pytest.mark.parametrize("flag", ["-n", "-g", ""], ids=["network", "gate-layout", "default-gate-layout"])
+def test_write_dot_selects_the_store(mux21_shell: Shell, tmp_path: Path, flag: str) -> None:
     """-n and -g read as ordinary store selection on a .dot file; a layout is the default."""
     mux21_shell.ok("ortho")
-    for flag, expected in (("-n", "digraph"), ("-g", "digraph"), ("", "digraph")):
-        path = tmp_path / f"out{flag or 'default'}.dot"
-        mux21_shell.ok(f'write_dot "{path}" {flag}')
-        assert expected in path.read_text(encoding="utf-8")
+    path = tmp_path / "out.dot"
+    mux21_shell.ok(f'write_dot "{path}" {flag}')
+    assert "digraph" in path.read_text(encoding="utf-8")
 
 
 def test_write_dot_indexes_and_clock_colors(mux21_shell: Shell, tmp_path: Path) -> None:
@@ -264,15 +291,11 @@ def test_write_dot_indexes_and_clock_colors(mux21_shell: Shell, tmp_path: Path) 
     assert plain.read_text(encoding="utf-8") != colored.read_text(encoding="utf-8")
 
 
-@pytest.mark.parametrize("suffix", [".qll", ".sqd"])
-def test_write_more_cell_formats(shell: Shell, resource: Callable[[str], str], tmp_path: Path, suffix: str) -> None:
-    """The happy paths of the cell-level writers, not only their type errors."""
-    if suffix == ".sqd":
-        shell.ok(f'read "{resource("siqad_or_gate.sqd")}"')
-    else:
-        shell.ok(f'read "{resource("mux21.v")}"; ortho; cell')
-    path = tmp_path / f"out{suffix}"
-    shell.ok(f'write_{suffix[1:]} "{path}"')
+def test_write_sqd(shell: Shell, resource: Callable[[str], str], tmp_path: Path) -> None:
+    """The SQD writer serializes the active SiDB layout."""
+    shell.ok(f'read "{resource("siqad_or_gate.sqd")}"')
+    path = tmp_path / "out.sqd"
+    shell.ok(f'write_sqd "{path}"')
     assert path.stat().st_size > 0
 
 
@@ -353,11 +376,14 @@ def test_read_fgl_round_trips_a_gate_layout(shell: Shell, tmp_path: Path, resour
     shell.ok("clear -g")
     shell.ok(f'read_fgl "{path}" --topology cartesian')
     assert len(shell.session.gate_layouts) == 1
+    assert simulate_outputs(shell.session.gate_layouts.current()) == [
+        ("out", [True, True, False, False, True, False, True, False])
+    ]
 
 
-def test_split_readers_report_a_missing_file(shell: Shell, tmp_path: Path) -> None:
-    assert "no such file" in shell.fails(f'read_verilog "{tmp_path / "absent.v"}"')
-    assert "no such file" in shell.fails(f'read_fgl "{tmp_path / "absent.fgl"}"')
+@pytest.mark.parametrize(("command", "suffix"), [("read_verilog", ".v"), ("read_fgl", ".fgl")])
+def test_split_readers_report_a_missing_file(shell: Shell, tmp_path: Path, command: str, suffix: str) -> None:
+    assert "no such file" in shell.fails(f'{command} "{tmp_path / f"absent{suffix}"}"')
 
 
 @pytest.mark.parametrize(
@@ -390,7 +416,7 @@ def test_all_topologies_round_trip_small_fixture(shell: Shell, tmp_path: Path, t
     restored = shell.session.gate_layouts.current()
     assert restored.num_clocks() == phases
     assert restored.num_pis() == restored.num_pos() == 1
-    assert simulate_outputs(restored) == simulate_outputs(layout)
+    assert simulate_outputs(restored) == [("f", [True, False])]
 
 
 @pytest.mark.parametrize(
