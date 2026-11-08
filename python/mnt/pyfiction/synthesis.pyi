@@ -569,7 +569,7 @@ def technology_mapping(
     stats: technology_mapping_stats | None = None,
 ) -> mnt.pyfiction.networks.technology_network:
     """
-    Map the input network to the gates enabled by the boolean keyword options.
+    Map a combinational input network to the gates enabled by the boolean keyword options.
     No gates are enabled by default; missing required gates raise missing_required_gates_exception.
     Returns an empty network on mapping failure; stats.mapper_stats.mapping_error reports the failure.
     Each source gate needs a library match, even if the overall function is representable.

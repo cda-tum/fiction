@@ -151,7 +151,7 @@ void register_technology_mapping_impl(nb::module_& m)
         nb::arg("dot")     = fiction::synthesis::technology_mapping_params{}.dot,
         nb::arg("mux")     = fiction::synthesis::technology_mapping_params{}.mux,
         nb::arg("and_xor") = fiction::synthesis::technology_mapping_params{}.and_xor, nb::arg("stats") = nullptr,
-        R"doc(Map the input network to the gates enabled by the boolean keyword options.
+        R"doc(Map a combinational input network to the gates enabled by the boolean keyword options.
 No gates are enabled by default; missing required gates raise missing_required_gates_exception.
 Returns an empty network on mapping failure; stats.mapper_stats.mapping_error reports the failure.
 Each source gate needs a library match, even if the overall function is representable.

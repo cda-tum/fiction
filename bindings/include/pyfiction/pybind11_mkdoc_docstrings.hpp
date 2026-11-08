@@ -27575,14 +27575,12 @@ Args:
 static const char *mkd_doc_fiction_synthesis_planarization_stats_time_total = R"doc(Runtime of the whole pipeline.)doc";
 
 static const char *mkd_doc_fiction_synthesis_technology_mapping =
-R"doc(Performs technology mapping on the given network. Technology mapping
-is the process of replacing the gates in a network with gates from a
-given technology library. This function utilizes `mockturtle::emap` to
-perform the technology mapping. This function is a wrapper around that
-interface to provide a more convenient usage.
+R"doc(Maps a combinational logic network to gates from the provided
+technology library using `mockturtle::emap`. Non-combinational inputs
+report mapping failure before library validation.
 
 Args:
-    ntk: Input logic network.
+    ntk: Combinational input logic network.
     params: Technology mapping parameters.
     pst: Technology mapping statistics.
 
@@ -27591,9 +27589,10 @@ Template Args:
 
 Returns:
     Mapped network exclusively using gates from the provided library,
-    or an empty network on mapping failure. The mapper requires a
-    library match for each source gate and can reject a network whose
-    overall function is representable by the library. Check
+    or an empty network on mapping failure, including non-
+    combinational input. The mapper requires a library match for each
+    source gate and can reject a network whose overall function is
+    representable by the library. Check
     `pst->mapper_stats.mapping_error` when statistics are supplied.
 
 Raises:
