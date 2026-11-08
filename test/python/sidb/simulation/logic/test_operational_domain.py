@@ -80,6 +80,36 @@ def test_parameter_point_extreme_values() -> None:
     assert parameter_point([nan]) in points
 
 
+@pytest.mark.parametrize("domain_type", [operational_domain, critical_temperature_domain])
+def test_domain_dimension_metadata(domain_type: type[operational_domain | critical_temperature_domain]) -> None:
+    """Default domains have no axes; constructed domains retain their declared axis order."""
+    domain = domain_type()
+    assert len(domain) == 0
+    assert domain.get_number_of_dimensions() == 0
+    for index in (0, 1):
+        with pytest.raises(IndexError):
+            domain.get_dimension(index)
+    for dimensions in (
+        [sweep_parameter.LAMBDA_TF, sweep_parameter.MU_MINUS],
+        [sweep_parameter.LAMBDA_TF, sweep_parameter.EPSILON_R, sweep_parameter.MU_MINUS],
+    ):
+        domain = domain_type(dimensions)
+        assert domain.get_number_of_dimensions() == len(dimensions)
+        assert [domain.get_dimension(index) for index in range(len(dimensions))] == dimensions
+        with pytest.raises(IndexError):
+            domain.get_dimension(len(dimensions))
+
+
+def test_operational_domain_add_dimension() -> None:
+    """Adding an axis updates its count and indexed lookup."""
+    domain = operational_domain()
+    domain.add_dimension(sweep_parameter.EPSILON_R)
+    assert domain.get_number_of_dimensions() == 1
+    assert domain.get_dimension(0) == sweep_parameter.EPSILON_R
+    with pytest.raises(IndexError):
+        domain.get_dimension(1)
+
+
 def test_operational_domain_siqad_or_100_lattice(resources_dir: Path) -> None:
     lyt = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
 

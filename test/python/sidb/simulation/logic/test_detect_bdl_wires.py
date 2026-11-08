@@ -128,3 +128,38 @@ def test_wire_port_directions(
     assert wires[0].direction.dir == direction.value
     assert wires[0].first_bdl_pair == pairs[-1 if input_at_end else 0]
     assert wires[0].last_bdl_pair == pairs[0 if input_at_end else -1]
+
+
+@pytest.mark.parametrize(
+    ("last", "input_at_end", "threshold", "direction"),
+    [
+        ((18, 0, 0), False, 2.5, bdl_wire.port_direction.cardinal.EAST),
+        ((18, 0, 0), True, 2.5, bdl_wire.port_direction.cardinal.WEST),
+        ((18, 1, 0), False, 2.5, bdl_wire.port_direction.cardinal.SOUTH),
+        ((18, -1, 1), False, 3.0, bdl_wire.port_direction.cardinal.NORTH),
+    ],
+    ids=["east", "west", "south", "north"],
+)
+def test_undulating_wire_endpoints(
+    *,
+    last: tuple[int, int, int],
+    input_at_end: bool,
+    threshold: float,
+    direction: bdl_wire.port_direction.cardinal,
+) -> None:
+    """Wire directions follow physical endpoints despite intermediate changes in height."""
+    layout = sidb_layout()
+    pairs = []
+    for index, (x, y, z) in enumerate([(0, 0, 0), (6, 1, 0), (12, 0, 1), last]):
+        tag = sidb_dot_tag.INPUT if index == (3 if input_at_end else 0) else sidb_dot_tag.NORMAL
+        upper, lower = lattice_site(x, y, z), lattice_site(x + 2, y, z)
+        layout.assign_sidb(upper, tag)
+        layout.assign_sidb(lower, tag)
+        pairs.append(bdl_pair(tag, upper, lower))
+    wires = detect_bdl_wires(
+        layout, minimum_distance=0.5, threshold_bdl_interdistance=threshold, wire_selection=bdl_wire_selection.INPUT
+    )
+    assert wire_pairs(wires) == Counter([pair_identities(pairs)])
+    assert wires[0].direction.dir == direction.value
+    assert wires[0].first_bdl_pair == pairs[-1 if input_at_end else 0]
+    assert wires[0].last_bdl_pair == pairs[0 if input_at_end else -1]
