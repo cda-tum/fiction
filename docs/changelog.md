@@ -42,6 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Python layout tests cover bound geometry, clocking, topology, normalization, and FGL contracts.
   - Python CLI tests check independent command results and named error cases.
   - Python FCN, QCA, molecular QCA, and iNML tests cover bound technology and writer contracts.
   - Python physical-design tests cover placement, paths, gate libraries, solvers, and optimization.

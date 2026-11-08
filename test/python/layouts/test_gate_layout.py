@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import copy
 import operator
+from operator import attrgetter
 from typing import TYPE_CHECKING, cast
 
 import pytest
@@ -144,11 +145,8 @@ def test_gate_layout_inheritance(
     assert layout.incoming_clocked_zones((0, 0)) == []
     assert layout.outgoing_clocked_zones((2, 2)) == []
 
-    for icz in layout.incoming_clocked_zones((1, 1)):
-        assert icz in [layout.coord(1, 0), layout.coord(0, 1)]
-
-    for icz in layout.outgoing_clocked_zones((1, 1)):
-        assert icz in [layout.coord(1, 2), layout.coord(2, 1)]
+    assert sorted(layout.incoming_clocked_zones((1, 1))) == [coordinate(1, 0), coordinate(0, 1)]
+    assert sorted(layout.outgoing_clocked_zones((1, 1))) == [coordinate(2, 1), coordinate(1, 2)]
 
 
 def test_gate_creation_requires_placement_and_valid_ports() -> None:
@@ -317,15 +315,11 @@ def test_gate_layout_iteration(make_layout: Callable[[], GateLayout]) -> None:
 
     assert layout.pis() == [x1, x2, x3, x4]
     assert layout.pos() == [f1, f2]
-    gates = layout.gates()
-    assert len(gates) == 2
-    assert a1 in gates
-    assert a2 in gates
-    wires = layout.wires()
-    assert len(wires) == layout.num_wires() == 3
+    key = attrgetter("index", "generation")
+    assert sorted(layout.gates(), key=key) == sorted([a1, a2], key=key)
+    assert sorted(layout.wires(), key=key) == sorted([b1, b2, c], key=key)
+    assert layout.num_wires() == 3
     assert layout.num_gates() == 2
-    for port in (b1, b2, c):
-        assert port in wires
     for port in (x1, x2, x3, x4, f1, f2):
         assert layout.is_buf(port)
         assert not layout.is_wire(port)
