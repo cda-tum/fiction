@@ -42,7 +42,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Python CLI tests check independent command results and named error cases.
   - Python network tests cover bound logic, interfaces, readers, writers, and random generation.
+  - Python physical-design tests cover placement, paths, gate libraries, solvers, and optimization.
+  - Python SiDB tests cover bound model, simulation, analysis, generator, and I/O contracts.
+  - Python verification tests cover timing, physical diagnostics, gate classifications, and counterexamples.
   - Python tests cover every module marker and report compile-flag cases independently.
   - Python tests check native version, repository, and build metadata.
   - Routing tests compare complete retained-object visits after clearing wires.
@@ -760,6 +764,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Default A*, A* distance, and Yen searches now return shortest paths on shifted Cartesian and hexagonal layouts.
+    Their default heuristic uses Chebyshev distance for diagonal steps.
   - Non-strict comparison truth tables now match LE and GE gates, restoring Bestagon skeleton lookup.
     Published standard-cell experiment rows labeled `le` and `ge` use NOR and `!b`, respectively.
   - Technology mapping now respects the selected LT, GT, LE, and GE gate types. Previously mapped networks may
@@ -978,6 +984,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
 
+  - CLI help and examples now match explicit writers, FGL metadata, and layout simulation.
   - Surface-defect errors document zero-based recognized row indices instead of input line numbers.
   - Time-to-solution confidence documentation now names the target probability of at least one success.
   - ExGS Python documentation now describes all physically valid charge distributions.

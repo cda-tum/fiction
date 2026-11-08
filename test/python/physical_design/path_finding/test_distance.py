@@ -107,3 +107,31 @@ def test_twoddwave() -> None:
 def test_squared_euclidean_range() -> None:
     """Preserve exact squared distances after widening signed differences."""
     assert squared_euclidean_distance(coordinate(-2147483647, 0), coordinate(2147483647, 0)) == 18446744056529682436
+
+
+@pytest.mark.parametrize(
+    ("source", "target", "manhattan", "squared", "chebyshev", "forward"),
+    [
+        ((4, 4), (0, 0), 8, 32, 4, False),
+        ((2, 1), (0, 2), 3, 5, 2, False),
+        ((-4, -3), (1, -1), 7, 29, 5, True),
+        ((-2, -8), (-6, -4), 8, 32, 4, False),
+        ((6, 2, 1), (0, 4, 0), 8, 40, 6, False),
+        ((0, 4, 1), (9, 1, 1), 12, 90, 9, False),
+    ],
+)
+def test_distance_signed_reverse_and_layer_contracts(
+    source: tuple[int, int] | tuple[int, int, int],
+    target: tuple[int, int] | tuple[int, int, int],
+    manhattan: int,
+    squared: int,
+    chebyshev: int,
+    *,
+    forward: bool,
+) -> None:
+    """Use planar distance for signed coordinates and ignore elevation."""
+    assert manhattan_distance(source, target) == manhattan
+    assert squared_euclidean_distance(source, target) == squared
+    assert euclidean_distance(source, target) == pytest.approx(squared**0.5, abs=1e-7)
+    assert chebyshev_distance(source, target) == chebyshev
+    assert twoddwave_distance(source, target) == (manhattan if forward else 2**32 - 1)

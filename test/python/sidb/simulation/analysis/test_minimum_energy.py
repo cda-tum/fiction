@@ -22,7 +22,7 @@ from mnt.pyfiction.sidb.simulation.analysis import minimum_energy
     "lat",
     [pytest.param(lattice.si_100_2x1(), id="100"), pytest.param(lattice.si_111_1x1(), id="111")],
 )
-def test_three_sidbs(lat):
+def test_three_sidbs(lat: lattice) -> None:
     layout = sidb_layout(lat)
 
     layout.assign_sidb(lattice_site(0, 0, 1), sidb_dot_tag.NORMAL)
@@ -48,3 +48,9 @@ def test_three_sidbs(lat):
     assert result == pytest.approx(min(cd.energy() for cd in [cd1, cd2, cd3, cd4]))
     assert result == pytest.approx(cd4.energy())
     assert result < 0.0
+
+
+def test_empty_and_single_minimum() -> None:
+    """An absent distribution has infinite minimum energy; an empty configuration has zero energy."""
+    assert minimum_energy([]) == float("inf")
+    assert minimum_energy([charge_distribution()]) == 0.0

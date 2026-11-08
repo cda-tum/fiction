@@ -91,6 +91,7 @@ def test_cell_library_spellings(mux21_shell: Shell, spelling: str) -> None:
     """Hyphens, underscores, spaces, and case are ignored in a gate library name, as in the C++ shell."""
     mux21_shell.ok(f"ortho; cell -l '{spelling}'")
     assert len(mux21_shell.session.cell_layouts) == 1
+    assert isinstance(mux21_shell.session.cell_layouts.current().layout, qca_layout)
 
 
 @pytest.mark.parametrize("shift", [arrangement.ODD_ROW, arrangement.EVEN_ROW])
