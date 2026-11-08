@@ -320,13 +320,26 @@ class technology_mapping_impl
     /** @brief Returns the source network mapped to the supplied technology library. */
     [[nodiscard]] fiction::networks::named_technology_network run() const
     {
-        if constexpr (mockturtle::has_is_combinational_v<Ntk>)
+        /** @brief Whether the optional source interface reports sequential state. */
+        const auto is_sequential = [&]
         {
-            if (!ntk.is_combinational())
+            if constexpr (mockturtle::has_is_combinational_v<Ntk>)
             {
-                stats.mapper_stats.mapping_error = true;
-                return fiction::networks::named_technology_network{};
+                return !ntk.is_combinational();
             }
+            else if constexpr (mockturtle::has_num_registers_v<Ntk>)
+            {
+                return ntk.num_registers() != 0;
+            }
+            else
+            {
+                return false;
+            }
+        }();
+        if (is_sequential)
+        {
+            stats.mapper_stats.mapping_error = true;
+            return fiction::networks::named_technology_network{};
         }
 
         // Validate that the library contains required gates for the base network type
@@ -626,13 +639,27 @@ class technology_mapping_impl
         const auto mapped_ntk = [&]
         {
             const auto one = ntk.get_node(ntk.get_constant(true));
-            if (one != ntk.get_node(ntk.get_constant(false)) && ntk.fanout_size(one) > 0)
+            if (one != ntk.get_node(ntk.get_constant(false)))
             {
-                auto normalized = convert_network<fiction::networks::named_technology_network>(ntk);
-                // emap initializes every constant node as false; a gate computes true without a separate constant.
-                const auto true_gate = normalized.create_node({normalized.get_constant(false)}, create_not_tt());
-                normalized.substitute_node(normalized.get_node(normalized.get_constant(true)), true_gate);
-                return mockturtle::emap(normalized, lib, params.mapper_params, &stats.mapper_stats);
+                /** @brief Views can expose a constant output without increasing the inherited fanout count. */
+                bool uses_one = ntk.fanout_size(one) > 0;
+                if (!uses_one)
+                {
+                    ntk.foreach_po(
+                        [&](const auto& output)
+                        {
+                            uses_one = uses_one || ntk.get_node(output) == one;
+                            return !uses_one;
+                        });
+                }
+                if (uses_one)
+                {
+                    auto normalized = convert_network<fiction::networks::named_technology_network>(ntk);
+                    // emap initializes every constant node as false; a gate computes true without a separate constant.
+                    const auto true_gate = normalized.create_node({normalized.get_constant(false)}, create_not_tt());
+                    normalized.substitute_node(normalized.get_node(normalized.get_constant(true)), true_gate);
+                    return mockturtle::emap(normalized, lib, params.mapper_params, &stats.mapper_stats);
+                }
             }
             return mockturtle::emap(ntk, lib, params.mapper_params, &stats.mapper_stats);
         }();

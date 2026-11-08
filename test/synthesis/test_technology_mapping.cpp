@@ -37,10 +37,12 @@
 #include <mockturtle/networks/sequential.hpp>
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/networks/xmg.hpp>
+#include <mockturtle/views/cut_view.hpp>
 #include <mockturtle/views/names_view.hpp>
 
 #include <array>
 #include <cstdint>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::networks;
@@ -49,6 +51,22 @@ using namespace fiction::verification;
 
 namespace
 {
+
+/** @brief Sequential network whose optional combinational query is available only on lvalues. */
+class register_count_network : public mockturtle::sequential<technology_network>
+{
+  public:
+    /** @brief Reports whether this lvalue has no registers. */
+    [[nodiscard]] bool is_combinational() const&
+    {
+        return mockturtle::sequential<technology_network>::is_combinational();
+    }
+    /** @brief Omits the rvalue query inspected by the optional-interface trait. */
+    bool is_combinational() && = delete;
+};
+
+static_assert(!mockturtle::has_is_combinational_v<register_count_network>);
+static_assert(mockturtle::has_num_registers_v<register_count_network>);
 
 /**
  * @brief Checks mapping success, Boolean behavior, and the selected gate library.
@@ -406,10 +424,11 @@ TEST_CASE("Mapping preserves separate constant values in outputs and fanins", "[
     }
 }
 
-TEST_CASE("Sequential inputs report mapping failure", "[technology-mapping]")
+TEMPLATE_TEST_CASE("Sequential inputs report mapping failure", "[technology-mapping]",
+                   mockturtle::sequential<technology_network>, register_count_network)
 {
     /** @brief Sequential source with a used, distinct constant-one node. */
-    mockturtle::sequential<technology_network> network{};
+    TestType network{};
     /** @brief Primary input driving the register input. */
     const auto input = network.create_pi();
     network.create_ro();
@@ -431,4 +450,52 @@ TEST_CASE("Sequential inputs report mapping failure", "[technology-mapping]")
     CHECK(network.num_pos() == 1);
     CHECK(network.num_registers() == 1);
     CHECK(network.po_at(0) == network.get_constant(true));
+}
+
+TEST_CASE("Mapping preserves a constant-one cut-view output", "[technology-mapping]")
+{
+    /** @brief Underlying network with an otherwise unused true constant. */
+    technology_network network{};
+    /** @brief Distinct constant-one signal exposed only by the cut. */
+    const auto one = network.get_constant(true);
+    /** @brief Constant-only cut whose output does not increase the inherited fanout count. */
+    const mockturtle::cut_view view{network, std::vector<technology_network::node>{}, one};
+    REQUIRE(view.get_node(one) != view.get_node(view.get_constant(false)));
+    REQUIRE(view.fanout_size(view.get_node(one)) == 0);
+    /** @brief Outputs exposed by the cut rather than the underlying network. */
+    std::vector<technology_network::signal> outputs{};
+    view.foreach_po([&](const auto& output) { outputs.push_back(output); });
+    REQUIRE(outputs == std::vector{one});
+    /** @brief Mapping status for the constant-only cut. */
+    technology_mapping_stats stats{};
+    /** @brief Mapped function of the cut. */
+    const auto mapped = technology_mapping(view, and_or_not(), &stats);
+    REQUIRE_FALSE(stats.mapper_stats.mapping_error);
+    /** @brief Exhaustive simulation of the zero-input output. */
+    const auto actual = mockturtle::simulate<kitty::dynamic_truth_table>(
+        mapped, mockturtle::default_simulator<kitty::dynamic_truth_table>{0});
+    REQUIRE(actual.size() == 1);
+    CHECK(kitty::to_binary(actual.front()) == "1");
+    CHECK(network.num_pos() == 0);
+    CHECK(network.fanout_size(network.get_node(one)) == 0);
+}
+
+TEST_CASE("Register-count fallback accepts combinational input", "[technology-mapping]")
+{
+    /** @brief A register-capable interface with no sequential state. */
+    register_count_network network{};
+    /** @brief Input forwarded to the primary output. */
+    const auto input = network.create_pi();
+    network.create_po(input);
+    REQUIRE(network.num_registers() == 0);
+    /** @brief Status for a supported combinational source. */
+    technology_mapping_stats stats{};
+    /** @brief Mapped identity function. */
+    const auto mapped = technology_mapping(network, and_or_not(), &stats);
+    REQUIRE_FALSE(stats.mapper_stats.mapping_error);
+    /** @brief Complete one-input simulation. */
+    const auto actual = mockturtle::simulate<kitty::dynamic_truth_table>(
+        mapped, mockturtle::default_simulator<kitty::dynamic_truth_table>{1});
+    REQUIRE(actual.size() == 1);
+    CHECK(kitty::to_binary(actual.front()) == "10");
 }
