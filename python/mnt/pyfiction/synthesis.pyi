@@ -131,7 +131,8 @@ def create_xnor_tt() -> dynamic_truth_table:
 def create_lt_tt() -> dynamic_truth_table:
     """
     Creates and returns a truth table that implements the less-than
-    function in two variables.
+    function in two variables. Variable 0 is a and variable 1 is b; the
+    function is `a & !b`.
 
     Returns:
         Less-than function in two variables.
@@ -140,7 +141,8 @@ def create_lt_tt() -> dynamic_truth_table:
 def create_gt_tt() -> dynamic_truth_table:
     """
     Creates and returns a truth table that implements the greater-than
-    function in two variables.
+    function in two variables. Variable 0 is a and variable 1 is b; the
+    function is `!a & b`.
 
     Returns:
         Greater-than function in two variables.
@@ -149,7 +151,8 @@ def create_gt_tt() -> dynamic_truth_table:
 def create_le_tt() -> dynamic_truth_table:
     """
     Creates and returns a truth table that implements the less-than-or-
-    equal function in two variables.
+    equal function in two variables. Variable 0 is a and variable 1 is b;
+    the function is `a | !b`.
 
     Returns:
         Less-than-or-equal function in two variables.
@@ -158,7 +161,8 @@ def create_le_tt() -> dynamic_truth_table:
 def create_ge_tt() -> dynamic_truth_table:
     """
     Creates and returns a truth table that implements the greater-than-or-
-    equal function in two variables.
+    equal function in two variables. Variable 0 is a and variable 1 is b;
+    the function is `!a | b`.
 
     Returns:
         Greater-than-or-equal function in two variables.
@@ -264,8 +268,8 @@ def create_double_wire_tt() -> list[dynamic_truth_table]:
     variables. The function returns a vector containing two truth tables.
 
     Returns:
-        Vector of truth tables, each representing an output of the double
-        wire function.
+        Truth tables for output ports 0 and 1, passing bits 1 and 0 of the
+        input index, respectively.
     """
 
 def create_crossing_wire_tt() -> list[dynamic_truth_table]:
@@ -278,8 +282,8 @@ def create_crossing_wire_tt() -> list[dynamic_truth_table]:
     variables. The function returns a vector containing two truth tables.
 
     Returns:
-        Vector of truth tables, each representing an output of the
-        crossing wire function.
+        Truth tables for output ports 0 and 1, passing bits 0 and 1 of the
+        input index, respectively.
     """
 
 def create_fan_out_tt() -> list[dynamic_truth_table]:
@@ -305,8 +309,7 @@ def create_half_adder_tt() -> list[dynamic_truth_table]:
     variables. The function returns a vector containing two truth tables.
 
     Returns:
-        Vector of truth tables, each representing an output of the half
-        adder function.
+        Truth tables for output ports 0 (sum, XOR) and 1 (carry, AND).
     """
 
 class substitution_strategy(enum.Enum):
@@ -565,9 +568,10 @@ def technology_mapping(
     stats: technology_mapping_stats | None = None,
 ) -> mnt.pyfiction.networks.technology_network:
     """
-    Map the input network to the gates enabled by the boolean keyword options.
+    Map a combinational input network to the gates enabled by the boolean keyword options.
     No gates are enabled by default; missing required gates raise missing_required_gates_exception.
-    Returns a technology network; stats receives mapper statistics when supplied.
+    Returns an empty network on mapping failure; stats.mapper_stats.mapping_error reports the failure.
+    Each source gate needs a library match, even if the overall function is representable.
     Gate-set factory dictionaries can be expanded into these keywords.
 
     Args:

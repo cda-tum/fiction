@@ -18,6 +18,8 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
@@ -25,7 +27,6 @@
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp>
 
-#include <algorithm>
 #include <optional>
 #include <vector>
 
@@ -159,10 +160,10 @@ TEST_CASE("Atomic wire BDL detection", "[detect-bdl-pairs]")
                                                          {dot_tag::NORMAL, {3, 0, 0}, {4, 0, 0}}}));
 
         /** @brief All normal dots, retaining multiplicity to detect reused endpoints. */
-        std::vector<lattice_site> paired_sites{normal_pair1.upper, normal_pair1.lower, normal_pair2.upper,
-                                               normal_pair2.lower};
-        std::ranges::sort(paired_sites);
-        CHECK(paired_sites == std::vector<lattice_site>{{2, 0, 0}, {3, 0, 0}, {4, 0, 0}, {5, 0, 0}});
+        const std::vector<lattice_site> paired_sites{normal_pair1.upper, normal_pair1.lower, normal_pair2.upper,
+                                                     normal_pair2.lower};
+        CHECK_THAT(paired_sites, Catch::Matchers::UnorderedRangeEquals(
+                                     std::vector<lattice_site>{{2, 0, 0}, {3, 0, 0}, {4, 0, 0}, {5, 0, 0}}));
     }
 }
 

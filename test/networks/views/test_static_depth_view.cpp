@@ -19,6 +19,8 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/static_depth_view.hpp>
@@ -102,9 +104,9 @@ TEST_CASE("Depth view assignment preserves network names", "[static-depth-view]"
 
     REQUIRE(dest.num_pis() == 1);
     REQUIRE(dest.num_pos() == 1);
-    CHECK(dest.get_network_name() == "source");
-    CHECK(dest.get_name(dest.pi_at(0)) == "input");
-    CHECK(dest.get_output_name(0) == "output");
+    CHECK_THAT((dest.get_network_name()), Catch::Matchers::Equals("source"));
+    CHECK_THAT((dest.get_name(dest.pi_at(0))), Catch::Matchers::Equals("input"));
+    CHECK_THAT((dest.get_output_name(0)), Catch::Matchers::Equals("output"));
     CHECK(dest.depth() == 0);
 }
 
@@ -139,9 +141,9 @@ TEST_CASE("Update Levels Technology Network", "[static-depth-view]")
     tec_d.create_po(a1_r);
     tec_d.update_levels();
 
-    CHECK(tec_d.level(2) == 0u);
-    CHECK(tec_d.level(3) == 0u);
-    CHECK(tec_d.level(4) == 1u);
+    CHECK(tec_d.level(tec_d.get_node(x1_r)) == 0u);
+    CHECK(tec_d.level(tec_d.get_node(x2_r)) == 0u);
+    CHECK(tec_d.level(tec_d.get_node(a1_r)) == 1u);
     CHECK(tec_d.depth() == 1u);
 }
 

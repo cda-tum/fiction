@@ -17,13 +17,15 @@
  * @author Simon Hofmann (simon1hofmann)
  */
 
+#include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
+
+// Test dependencies follow the defining header to expose missing direct includes.
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
-#include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
@@ -32,7 +34,6 @@
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
-#include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/potential_landscape.hpp>
 #include <fiction/utils/execution_timeout.hpp>
 
@@ -560,23 +561,8 @@ TEST_CASE(
 
 TEST_CASE("BDL wire", "[is-operational]")
 {
-
-    layout lyt{lattice::si_100_2x1(), "BDL wire"};
-
-    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_sidb({3, 0, 0}, dot_tag::INPUT);
-
-    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({14, 0, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({18, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_sidb({20, 0, 0}, dot_tag::OUTPUT);
-
-    // output perturber
-    lyt.assign_sidb({24, 0, 0}, dot_tag::NORMAL);
+    /** @brief BDL wire with an output perturber. */
+    const auto lyt = blueprints::bdl_wire();
 
     simulation_parameters sim_params{};
 
@@ -947,6 +933,7 @@ TEST_CASE("Operational checks reject charged defects with QuickSim", "[is-operat
 
     SECTION("A charged defect occurs only in a later supplied layout")
     {
+        REQUIRE(layouts.size() == 4);
         /** @brief Input-pattern layout with its charged defect removed. */
         for (auto& pattern : layouts)
         {
@@ -967,7 +954,8 @@ TEST_CASE("An empty simulation result cannot establish an operational pattern", 
     const auto output_wires = detect_bdl_wires(lyt, {}, bdl_wire_selection::OUTPUT);
     /** @brief Layouts with the Boolean input patterns applied. */
     auto layouts = generate_bdl_input_pattern_layouts(lyt, {}, input_wires);
-    layouts[1]   = layout{};
+    REQUIRE(layouts.size() == 4);
+    layouts[1] = layout{};
     /** @brief AND truth-table specification. */
     const std::vector<kitty::dynamic_truth_table> spec{create_and_tt()};
     /** @brief Physical and simulation settings for the operational check. */

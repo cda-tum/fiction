@@ -17,6 +17,8 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "fiction/layouts/layout_base.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
@@ -181,7 +183,7 @@ TEST_CASE("ToPoliNano straightens two-cell wire segments", "[inml-topolinano-lib
     topolinano_library::post_layout_optimization(lyt);
 
     CHECK(lyt.get_cell_type({0, 1}) == magnet_type::INPUT);
-    CHECK(lyt.get_cell_name({0, 1}) == "x");
+    CHECK_THAT(lyt.get_cell_name({0, 1}), Catch::Matchers::Equals("x"));
     CHECK(lyt.get_cell_type({1, 1}) == magnet_type::NORMAL);
     CHECK(lyt.is_empty_cell({0, row}));
     CHECK(lyt.is_empty_cell({1, row}));
@@ -219,7 +221,7 @@ TEST_CASE("ToPoliNano preserves wire segments without a neighboring row", "[inml
 
     CHECK(lyt.num_cells() == 3);
     CHECK(lyt.get_cell_type({0, 0}) == magnet_type::INPUT);
-    CHECK(lyt.get_cell_name({0, 0}) == "x");
+    CHECK_THAT(lyt.get_cell_name({0, 0}), Catch::Matchers::Equals("x"));
     CHECK(lyt.get_cell_type({1, 0}) == magnet_type::NORMAL);
     CHECK(lyt.get_cell_type({2, 0}) == magnet_type::OUTPUT);
 }
@@ -366,4 +368,25 @@ TEST_CASE("ToPoliNano rejects an unsupported NAND gate", "[inml-topolinano-libra
     {
         CHECK(error.where() == coordinate);
     }
+}
+
+/** @brief A disconnected wire maps to its complete default physical tile. */
+TEST_CASE("ToPoliNano maps a disconnected wire", "[inml-topolinano-library]")
+{
+    /** @brief Column-shifted layout containing one disconnected wire. */
+    shifted_cartesian_gate_layout lyt{arrangement::ODD_COLUMN, {4, 4}};
+    lyt.create_buf({2, 2});
+
+    // clang-format off
+
+    /** @brief Complete wire between the default upper-left and lower-right connectors. */
+    static constexpr const topolinano_library::gate expected{
+        topolinano_library::cell_list_to_gate<char>({{{'x', ' ', ' ', ' '},
+                                                    {'x', 'x', 'x', ' '},
+                                                    {' ', ' ', 'x', 'x'},
+                                                    {' ', ' ', ' ', ' '}}})};
+
+    // clang-format on
+
+    CHECK(topolinano_library::set_up_gate(lyt, {2, 2}) == expected);
 }

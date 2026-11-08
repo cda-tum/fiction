@@ -20,14 +20,12 @@
 
 #include <fiction/utils/optimization/simulated_annealing.hpp>
 
-#include <algorithm>
 #include <atomic>
 #include <cmath>
 #include <concepts>
 #include <cstdint>
 #include <limits>
 #include <memory>
-#include <random>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -222,37 +220,6 @@ double schwefel_function_1d(const double& x) noexcept
 {
     return 418.9829 - (x * std::sin(std::sqrt(std::abs(x))));
 }
-/**
- * This function implements a randomized initial state generator for the 1D Schwefel function. It returns a random value
- * in the range [-500, 500].
- */
-double schwefel_1d_init_state_generator() noexcept
-{
-    /** @brief Initial-state random engine local to this worker. */
-    static thread_local std::mt19937_64 generator{std::random_device{}()};
-
-    /** @brief Initial-state draw distribution local to this worker. */
-    static thread_local std::uniform_real_distribution<double> distribution{-500.0, 500.0};
-
-    return distribution(generator);
-}
-/**
- * This function implements a randomized adjacent state generator for the 1D Schwefel function. Within a range of
- * +/- 100 of the current state, a new state is randomly generated.
- *
- * @param x The current state.
- * @return A randomized adjacent state.
- */
-double random_next_schwefel(const double& x) noexcept
-{
-    /** @brief Neighbor-state random engine local to this worker. */
-    static thread_local std::mt19937_64 generator{std::random_device{}()};
-
-    std::uniform_real_distribution<double> distribution{x - 100, x + 100};
-
-    return std::clamp(distribution(generator), -500.0, 500.0);
-}
-
 // Test the Schwefel implementation
 TEST_CASE("1D Schwefel function", "[sim-anneal]")
 {
@@ -273,38 +240,6 @@ double drop_wave_function_2d(const std::pair<double, double>& x) noexcept
     return -((1.0 + std::cos(12.0 * std::sqrt((x.first * x.first) + (x.second * x.second)))) /
              (0.5 * ((x.first * x.first) + (x.second * x.second)) + 2.0));
 }
-/**
- * This function implements a randomized initial state generator for the 2D Drop-Wave function. It returns a random pair
- * in the range [-5.12, 5.12].
- */
-std::pair<double, double> drop_wave_2d_init_state_generator() noexcept
-{
-    /** @brief Initial-state random engine local to this worker. */
-    static thread_local std::mt19937_64 generator{std::random_device{}()};
-
-    /** @brief Initial-state draw distribution local to this worker. */
-    static thread_local std::uniform_real_distribution<double> distribution{-5.12, 5.12};
-
-    return {distribution(generator), distribution(generator)};
-}
-/**
- * This function implements a randomized adjacent state generator for the 2D Drop-Wave function. Within a range of
- * +/- 1 of each of the current state's dimensions, a new state is randomly generated.
- *
- * @param x The current state.
- * @return A randomized adjacent state.
- */
-std::pair<double, double> random_next_drop_wave(const std::pair<double, double>& x) noexcept
-{
-    /** @brief Neighbor-state random engine local to this worker. */
-    static thread_local std::mt19937_64 generator{std::random_device{}()};
-
-    std::uniform_real_distribution<double> distribution_x{x.first - 1, x.first + 1};
-    std::uniform_real_distribution<double> distribution_y{x.second - 1, x.second + 1};
-
-    return {std::clamp(distribution_x(generator), -5.12, 5.12), std::clamp(distribution_y(generator), -5.12, 5.12)};
-}
-
 // Test the Drop-Wave implementation
 TEST_CASE("2D Drop-Wave function", "[sim-anneal]")
 {
@@ -318,41 +253,51 @@ TEST_CASE("2D Drop-Wave function", "[sim-anneal]")
 TEST_CASE("Simulated Annealing for optimizing the 1D Schwefel function", "[sim-anneal]")
 {
     constexpr const auto init_state = 0.0;
-    constexpr const auto init_temp  = 5000.0;
+    constexpr const auto init_temp  = 20.0;
     constexpr const auto final_temp = 1.0;
-    constexpr const auto cycles     = 10u;
-    constexpr const auto instances  = 50u;
+    constexpr const auto cycles     = 2u;
+    constexpr const auto instances  = 4u;
 
     const auto init_cost = schwefel_function_1d(init_state);
+    const auto initial   = [] { return 0.0; };
+    const auto next      = [](const double state)
+    {
+        if (state < 200.0)
+        {
+            return 200.0;
+        }
+        return state < 400.0 ? 400.0 : 420.9687;
+    };
 
     SECTION("Linear temperature schedule")
     {
-        const auto [single_result, single_cost] =
-            simulated_annealing(init_state, init_temp, final_temp, cycles, schwefel_function_1d,
-                                linear_temperature_schedule, random_next_schwefel);
+        const auto [single_result, single_cost] = simulated_annealing(
+            init_state, init_temp, final_temp, cycles, schwefel_function_1d, linear_temperature_schedule, next);
 
-        const auto [multi_result, multi_cost] =
-            multi_simulated_annealing(init_temp, final_temp, cycles, instances, schwefel_1d_init_state_generator,
-                                      schwefel_function_1d, linear_temperature_schedule, random_next_schwefel);
+        const auto [multi_result, multi_cost] = multi_simulated_annealing(
+            init_temp, final_temp, cycles, instances, initial, schwefel_function_1d, linear_temperature_schedule, next);
 
         CHECK(single_cost < init_cost);
         CHECK(multi_cost < init_cost);
+        CHECK(single_result == 420.9687);
+        CHECK(multi_result == 420.9687);
 
         CHECK_THAT(schwefel_function_1d(single_result), Catch::Matchers::WithinAbs(single_cost, 0.00001));
         CHECK_THAT(schwefel_function_1d(multi_result), Catch::Matchers::WithinAbs(multi_cost, 0.00001));
     }
     SECTION("Geometric temperature schedule")
     {
-        const auto [single_result, single_cost] =
-            simulated_annealing(init_state, init_temp, final_temp, cycles, schwefel_function_1d,
-                                geometric_temperature_schedule, random_next_schwefel);
+        const auto [single_result, single_cost] = simulated_annealing(
+            init_state, init_temp, final_temp, cycles, schwefel_function_1d, geometric_temperature_schedule, next);
 
         const auto [multi_result, multi_cost] =
-            multi_simulated_annealing(init_temp, final_temp, cycles, instances, schwefel_1d_init_state_generator,
-                                      schwefel_function_1d, geometric_temperature_schedule, random_next_schwefel);
+            multi_simulated_annealing(init_temp, final_temp, cycles, instances, initial, schwefel_function_1d,
+                                      geometric_temperature_schedule, next);
 
         CHECK(single_cost < init_cost);
         CHECK(multi_cost < init_cost);
+        CHECK(single_result == 420.9687);
+        CHECK(multi_result == 420.9687);
 
         CHECK_THAT(schwefel_function_1d(single_result), Catch::Matchers::WithinAbs(single_cost, 0.00001));
         CHECK_THAT(schwefel_function_1d(multi_result), Catch::Matchers::WithinAbs(multi_cost, 0.00001));
@@ -361,41 +306,46 @@ TEST_CASE("Simulated Annealing for optimizing the 1D Schwefel function", "[sim-a
 TEST_CASE("Simulated Annealing for optimizing the 2D Drop-Wave function", "[sim-anneal]")
 {
     constexpr const auto init_state = std::pair{2.5, -2.5};
-    constexpr const auto init_temp  = 5000.0;
+    constexpr const auto init_temp  = 20.0;
     constexpr const auto final_temp = 1.0;
-    constexpr const auto cycles     = 10u;
-    constexpr const auto instances  = 50u;
+    constexpr const auto cycles     = 2u;
+    constexpr const auto instances  = 4u;
 
     const auto init_cost = drop_wave_function_2d(init_state);
+    const auto initial   = [] { return std::pair{2.5, -2.5}; };
+    const auto next      = [](const std::pair<double, double> state)
+    { return state.first > 2.0 ? std::pair{1.5, -1.5} : std::pair{0.0, 0.0}; };
 
     SECTION("Linear temperature schedule")
     {
-        const auto [single_result, single_cost] =
-            simulated_annealing(init_state, init_temp, final_temp, cycles, drop_wave_function_2d,
-                                linear_temperature_schedule, random_next_drop_wave);
+        const auto [single_result, single_cost] = simulated_annealing(
+            init_state, init_temp, final_temp, cycles, drop_wave_function_2d, linear_temperature_schedule, next);
 
         const auto [multi_result, multi_cost] =
-            multi_simulated_annealing(init_temp, final_temp, cycles, instances, drop_wave_2d_init_state_generator,
-                                      drop_wave_function_2d, linear_temperature_schedule, random_next_drop_wave);
+            multi_simulated_annealing(init_temp, final_temp, cycles, instances, initial, drop_wave_function_2d,
+                                      linear_temperature_schedule, next);
 
         CHECK(single_cost < init_cost);
         CHECK(multi_cost < init_cost);
+        CHECK(single_result == std::pair{0.0, 0.0});
+        CHECK(multi_result == std::pair{0.0, 0.0});
 
         CHECK_THAT(drop_wave_function_2d(single_result), Catch::Matchers::WithinAbs(single_cost, 0.00001));
         CHECK_THAT(drop_wave_function_2d(multi_result), Catch::Matchers::WithinAbs(multi_cost, 0.00001));
     }
     SECTION("Geometric temperature schedule")
     {
-        const auto [single_result, single_cost] =
-            simulated_annealing(init_state, init_temp, final_temp, cycles, drop_wave_function_2d,
-                                geometric_temperature_schedule, random_next_drop_wave);
+        const auto [single_result, single_cost] = simulated_annealing(
+            init_state, init_temp, final_temp, cycles, drop_wave_function_2d, geometric_temperature_schedule, next);
 
         const auto [multi_result, multi_cost] =
-            multi_simulated_annealing(init_temp, final_temp, cycles, instances, drop_wave_2d_init_state_generator,
-                                      drop_wave_function_2d, geometric_temperature_schedule, random_next_drop_wave);
+            multi_simulated_annealing(init_temp, final_temp, cycles, instances, initial, drop_wave_function_2d,
+                                      geometric_temperature_schedule, next);
 
         CHECK(single_cost < init_cost);
         CHECK(multi_cost < init_cost);
+        CHECK(single_result == std::pair{0.0, 0.0});
+        CHECK(multi_result == std::pair{0.0, 0.0});
 
         CHECK_THAT(drop_wave_function_2d(single_result), Catch::Matchers::WithinAbs(single_cost, 0.00001));
         CHECK_THAT(drop_wave_function_2d(multi_result), Catch::Matchers::WithinAbs(multi_cost, 0.00001));
@@ -428,9 +378,23 @@ TEST_CASE("Annealing rejects non-finite temperature bounds", "[sim-anneal]")
 
 TEST_CASE("Multi-state annealing rejects zero instances", "[sim-anneal]")
 {
-    CHECK_THROWS_AS(multi_simulated_annealing(2.0, 1.0, 1, 0, schwefel_1d_init_state_generator, schwefel_function_1d,
-                                              linear_temperature_schedule, random_next_schwefel),
+    CHECK_THROWS_AS(multi_simulated_annealing(
+                        2.0, 1.0, 1, 0, [] { return 0.0; }, schwefel_function_1d, linear_temperature_schedule,
+                        [](double state) { return state; }),
                     std::invalid_argument);
+}
+
+TEST_CASE("Multi-state annealing selects the best initial state", "[sim-anneal]")
+{
+    std::atomic<int> generated{};
+    const auto       initial  = [&generated] { return 4 - generated.fetch_add(1); };
+    const auto       cost     = [](int state) { return state; };
+    const auto       schedule = [](double temperature) { return temperature; };
+    const auto       next     = [](int state) { return state; };
+    const auto       result   = multi_simulated_annealing(1.0, 1.0, 0, 4, initial, cost, schedule, next);
+    CHECK(generated == 4);
+    CHECK(result.first == 1);
+    CHECK(result.second == 1);
 }
 
 TEST_CASE("Concurrent annealing preserves a known minimum", "[sim-anneal]")
@@ -544,8 +508,8 @@ TEST_CASE("Annealing results own their state values", "[sim-anneal]")
     auto single = simulated_annealing(initial, 1.0, 1.0, 0, cost, schedule, next);
     /** @brief Owns the result after all worker storage leaves scope. */
     auto multi = multi_simulated_annealing(1.0, 1.0, 0, 2, generator, cost, schedule, next);
-    CHECK(single.first == initial);
-    CHECK(multi.first == initial);
+    REQUIRE(single.first == initial);
+    REQUIRE(multi.first == initial);
     single.first.front() = 8;
     multi.first.back()   = 9;
     CHECK(initial.front() == 7);

@@ -18,6 +18,10 @@
 
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
+
+#include "utils/scoped_temp_directory.hpp"
 
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
@@ -116,7 +120,7 @@ TEST_CASE("Read single-dot SQD layout", "[sqd]")
 
     const auto lyt = read_sqd_layout(layout_stream);
 
-    CHECK(lyt.get_lattice().name == "Si(111) 1x1");
+    CHECK_THAT(lyt.get_lattice().name, Catch::Matchers::Equals("Si(111) 1x1"));
     CHECK(lyt.num_dots() == 1);
     CHECK(lyt.get_dot_tag({0, 0, 0}) == dot_tag::NORMAL);
     CHECK(lyt.bounding_box() == std::pair{lattice_site{0, 0, 0}, lattice_site{0, 0, 0}});
@@ -1026,7 +1030,7 @@ TEST_CASE("Read SQD layout into an sidb::layout", "[sqd]")
 
     const auto lyt = read_sqd_layout(layout_stream, "gate");
 
-    CHECK(lyt.get_layout_name() == "gate");
+    CHECK_THAT(lyt.get_layout_name(), Catch::Matchers::Equals("gate"));
     CHECK(lyt.get_lattice() == sidb::lattice::si_111_1x1());
     CHECK(lyt.num_dots() == 4);
     CHECK(lyt.get_dot_tag({0, 0, 0}) == dot_tag::INPUT);
@@ -1229,11 +1233,12 @@ TEST_CASE("SQD readers reject incomplete document consumption", "[sqd]")
     std::istringstream valid{"<?xml version=\"1.0\"?><!-- before -->\r\n" + xml + "\r\n<!-- after -->"};
     CHECK(read_sqd_layout(valid).is_empty());
 
+    const fiction::test::scoped_temp_directory directory{std::filesystem::temp_directory_path(),
+                                                         "fiction-sqd-input-" + std::to_string(std::random_device{}())};
     for (const auto control : {char{0}, char{26}})
     {
         /** @brief Temporary SQD file containing the complete byte sequence. */
-        const auto filename =
-            std::filesystem::temp_directory_path() / ("fiction-sqd-input-" + std::to_string(std::random_device{}()));
+        const auto filename = directory.path() / "input.sqd";
         {
             /** @brief Binary output preserves control bytes. */
             std::ofstream output{filename, std::ios::binary};
@@ -1241,6 +1246,5 @@ TEST_CASE("SQD readers reject incomplete document consumption", "[sqd]")
             output << xml << control << "<invalid>";
         }
         CHECK_THROWS_AS(read_sqd_layout(filename.string()), sqd_parsing_error);
-        std::filesystem::remove(filename);
     }
 }

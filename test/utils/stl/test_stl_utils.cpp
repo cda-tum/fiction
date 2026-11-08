@@ -88,6 +88,18 @@ TEST_CASE("Test find_first_two_of with layout_coordinate_paths", "[find_first_tw
     CHECK(it4 == std::next(p2.begin(), 1));
 }
 
+TEST_CASE("find_first_two_of checks complete ranges", "[find_first_two_of]")
+{
+    const std::array first{1, 2, 3};
+    const std::array reordered{1, 3, 2};
+    CHECK(find_first_two_of(first.cbegin(), first.cend(), reordered.cbegin(), reordered.cend()) == first.cend());
+
+    const std::array ending_first{9, 4, 1, 2};
+    const std::array ending_second{8, 6, 1, 2};
+    CHECK(find_first_two_of(ending_first.cbegin(), ending_first.cend(), ending_second.cbegin(), ending_second.cend()) ==
+          std::next(ending_first.cbegin(), 2));
+}
+
 /** @brief Ranges without a pair have no shared two-element subsequence. */
 TEST_CASE("find_first_two_of rejects ranges shorter than a pair", "[find_first_two_of]")
 {

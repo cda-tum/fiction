@@ -48,6 +48,7 @@
 #include <stdexcept>
 #include <thread>
 #include <tuple>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -522,6 +523,7 @@ TEST_CASE("Concurrent defect-influence sampling matches grid results", "[defect-
                                              defect_influence_params::influence_definition::GROUND_STATE_CHANGE,
                                          .number_of_threads = 1};
     const auto                    reference = defect_influence_grid_search(lyt, params);
+    REQUIRE_FALSE(reference.empty());
 
     std::barrier                                        start{4};
     std::array<std::future<defect_influence_domain>, 4> calls{};
@@ -538,13 +540,16 @@ TEST_CASE("Concurrent defect-influence sampling matches grid results", "[defect-
     {
         const auto sampled = call.get();
         CHECK(sampled.size() == reference.size());
+        std::unordered_set<lattice_site> visited{};
         sampled.for_each(
             [&](const auto& point, const auto& value)
             {
+                CHECK(visited.insert(point).second);
                 const auto expected = reference.contains(point);
                 REQUIRE(expected.has_value());
                 CHECK(*expected == value);
             });
+        CHECK(visited.size() == sampled.size());
     }
 }
 

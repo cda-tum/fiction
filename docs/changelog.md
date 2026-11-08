@@ -54,6 +54,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Python synthesis tests cover bound truth tables, conversion, mapping, and planarization.
+  - Python layout tests cover bound geometry, clocking, topology, normalization, and FGL contracts.
+  - Python CLI tests check independent command results and named error cases.
+  - Python FCN, QCA, molecular QCA, and iNML tests cover bound technology and writer contracts.
+  - Python network tests cover bound logic, interfaces, I/O, random generation, and layout extraction.
+  - Python physical-design tests cover placement, paths, gate libraries, solvers, and optimization.
+  - Python SiDB tests cover bound model, simulation, analysis, generator, and I/O contracts.
+  - Python verification tests cover timing, physical diagnostics, gate classifications, and counterexamples.
+  - Python tests cover every module marker and report compile-flag cases independently.
+  - Python tests check native version, repository, and build metadata.
+  - Routing tests compare complete retained-object visits after clearing wires.
+  - QCA ONE tests check selected port and OR-gate orientations against independent cell patterns.
+  - Network utility tests check fanins through network interfaces instead of fixed node indices.
+  - Hexagonal layout tests share conversion checks and cover negative coordinates.
+  - Network conversion tests check Boolean equivalence after repeated synthesis passes.
+  - Network-view tests use node handles and cover sorted traversal and current edge colors.
+  - SiDB surface tests check blocked dummy-library gates and ports across tiles.
+  - Surface analysis documents its coordinate and missing-port exceptions.
+  - QCA writer tests use exclusively created temporary directories.
+  - Network reader tests use exclusively created temporary directories.
+  - Obstruction tests check complete gate-layout coordinate states after each change.
+  - Cell-grid tests check complete occupied-cell traversal without repeating unrelated queries.
+  - FGL writer tests use exclusively created temporary directories.
+  - Layout optimization tests share corner-case checks and identify failing fixtures.
+  - Clocking-scheme tests share phase cases and retain independent override checks.
+  - SiDB operational checks reuse the BDL wire fixture and test a non-operational single-point domain.
+  - CLI tests check operational-domain exports and area parameter overrides.
+  - Python SiDB engine tests check complete charge-state configurations.
+  - Python layout tests cover rectangular iteration bounds and clock zones.
+  - Python BDL wire tests verify pair identities and wire endpoints.
+  - Documentation tab tests cover nested fragments and repeated same-page navigation.
   - Crossing-cost sweeps avoid repeated edge-counter lookups.
   - Physical-design solver tests check layout statistics and report failing parameter rows.
   - Modernized network-view tests with complete visitor checks, typed trait cases, and copy/move coverage.
@@ -180,7 +211,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     with `convert_network<networks::named_technology_network>` before placement; names survive conversion and extraction.
   - `verification::virtual_miter` is no longer `noexcept`, since the rank view it builds can throw.
   - `synthesis::node_duplication_planarization` skips unused cone-weight traversals when ranking duplication choices.
-  - `utils::graph::mincross` with optimization runs about 10x faster and returns the same rank order.
+  - `utils::graph::mincross` with optimization runs about 10x faster and returns the same rank order for networks
+    without parallel edges.
   - Path enumeration moves completed results and selected candidates. Completed graph results transfer their owned storage.
   - `potential_to_distance_conversion` now uses a bounded inverse search and avoids intermediate underflow.
     Zero potential returns infinity; invalid potentials, physical parameters, or precision above 15 decimal places
@@ -280,8 +312,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - SiDB model, layout, and gate-library tests now share data rows and check complete defect regions and exception ports.
   - Modernized iNML and molecular QCA tests with complete SVG file checks, cell-type rows, and independent
     gate-orientation cases.
+  - SiDB generator tests share timeout and backend rows and check complete layouts, defects, and timeout statistics.
   - Streamlined SiDB operational tests and clarified ratio and parameter-row diagnostics.
   - Streamlined QuickExact and QuickSim tests while preserving physical inputs, charge configurations, and timeout coverage.
+  - Progress-recorder consistency and final-count queries now inspect report histories without copying them.
   - Modernized QCA tests with shared format expectations and SVG detail multiplicity checks.
   - Modernized layout-transformation tests with named cases, defect-aware interface checks, and complete routing checks.
   - FCN tests share port-list and constant-cell cases and check writer failure recovery.
@@ -289,6 +323,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Modernized utility tests with named data rows, direct result checks, and complete progress observations.
   - SiDB simulation tests check complete CSV rows and degenerate ground states.
   - Modernized physical-design helper tests with complete routing collections and independent solver rows.
+  - Operational-domain tests cover invalid ranges and compare complete thread-count results.
   - Streamlined BDL iterator, pair, wire, and logic-match tests with complete physical expectations.
   - Streamlined SiDB analysis tests while preserving energy, degeneracy, parameter-sweep, and timeout checks.
   - Streamlined synthesis tests and strengthened clone, conversion, and gate-library checks.
@@ -382,6 +417,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     11.0.2 does not compile with clang 20.
 
 - Documentation:
+  - Multi-output truth-table factories now document their output-port order.
   - Color routing documentation no longer claims lexicographic ordering.
   - Progress callback docs state the input-mutation precondition, propagation from construction and updates,
     and suppression during reporter destruction.
@@ -748,6 +784,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - `synthesis::technology_mapping` now preserves constant-one outputs and gate inputs, including view outputs, and reports mapping failure for sequential inputs.
+  - Default A*, A* distance, and Yen searches now return shortest paths on shifted Cartesian and hexagonal layouts.
+    Their default heuristic uses Chebyshev distance for diagonal steps.
+  - Non-strict comparison truth tables now match LE and GE gates, restoring Bestagon skeleton lookup.
+    Published standard-cell experiment rows labeled `le` and `ge` use NOR and `!b`, respectively.
+  - Technology mapping now respects the selected LT, GT, LE, and GE gate types. Previously mapped networks may
+    contain unselected gate types.
+  - `utils::graph::mincross` now counts each parallel edge and uses 64-bit crossing counts during minimization.
+  - `utils::graph::mincross` now rejects unbalanced networks instead of accessing ranks out of bounds.
+  - `parameter_point` now distinguishes extreme values and consistently hashes NaN values; `quantize` rejects
+    values outside its integer grid.
   - Ground-state CSV output now rejects nonfinite energies before changing output and preserves finite
     minimum-energy states when six-decimal rounding overflows.
   - `is_ground_state` now returns `false` for extra heuristic ground states in Debug and Release.
@@ -763,6 +810,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     TabuCol rejects effective color counts above `INT_MAX`.
   - `on_the_fly_gate_library` now honors `DESIGN_ON_THE_FLY` for crossings and double wires on defective surfaces.
   - Node-duplication planarization reports bounded progress for outputs driven directly by inputs.
+  - `surface_analysis` now handles large defect spacings without materializing their full influence areas.
   - `surface_analysis` now propagates allocation failure while building its blacklist.
   - `is_balanced` now propagates allocation failures instead of terminating.
   - `is_fanout_substituted` now accepts progress callbacks whose copies can throw.
@@ -889,6 +937,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     and leave the shell usable. Status text accounts for Unicode display widths.
 
 - Code quality:
+  - The half-adder test fixture now names its AND output `carry` and its XOR output `sum`.
+  - QuickCell's defect test now passes the defective skeleton and checks complete result metadata.
   - `find_first_two_of` now returns the end iterator when either range has fewer than two elements.
 
 - Continuous integration:
@@ -957,6 +1007,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
 
+  - CLI help and examples now match explicit writers, FGL metadata, and layout simulation.
+  - Surface-defect errors document zero-based recognized row indices instead of input line numbers.
   - Time-to-solution confidence documentation now names the target probability of at least one success.
   - ExGS Python documentation now describes all physically valid charge distributions.
   - Graph coloring documents TabuCol's bounded search and empty-result contract. SiDB printing documents its
@@ -964,6 +1016,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `integral_abs` documents that signed minimum values are outside its representable-result domain.
   - Potential-landscape energy complexity includes charged-defect interactions.
   - Timing documentation now states the throughput formula and input hold time in clock cycles.
+  - Operational-domain documentation now states that grid search and random sampling require at least one sweep dimension.
   - BDL pair-detection documentation clarifies per-tag sorting and no longer implies a distance-bound performance guarantee.
   - Binding docstring instructions now use the generator wrapper that CI runs.
   - Hexagonal layout documentation now names the eastern border and `is_adjacent_of` correctly.
@@ -993,6 +1046,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Corrected test, benchmark, experiment, and documentation build instructions.
 
 - Experiments:
+  - Published standard-cell experiments retain their original `le` and `ge` truth-table words, which encode NOR and `!b` in their valid bits.
   - Layout experiments now reject failed GENLIB and Verilog reads in Release builds.
   - Clock-number assignment and color-routing experiments copy clocking names into string columns.
   - Layout experiments preserve their wire-count columns with physical wire counts that exclude terminals.

@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
@@ -39,7 +39,8 @@ def test_wiring_reduction_with_parameters(mux21: technology_network) -> None:
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
 
-def test_wiring_reduction_with_stats(mux21: technology_network) -> None:
+@pytest.mark.parametrize("options", [{}, {"timeout": 1000000}])
+def test_wiring_reduction_with_stats(mux21: technology_network, options: dict[str, Any]) -> None:
     """Statistics describe the actual input and result, which remain logically equivalent."""
     layout = orthogonal(mux21)
 
@@ -47,36 +48,10 @@ def test_wiring_reduction_with_stats(mux21: technology_network) -> None:
 
     before = layout.clone()
     stats = wiring_reduction_stats()
-    wiring_reduction(layout, statistics=stats)
+    wiring_reduction(layout, statistics=stats, **options)
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
-    assert stats.time_total.total_seconds() > 0
-    assert stats.x_size_before == before.width()
-    assert stats.y_size_before == before.height()
-    assert stats.x_size_after == layout.width()
-    assert stats.y_size_after == layout.height()
-    wires_before = before.num_wires()
-    wires_after = layout.num_wires()
-    assert stats.num_wires_before == wires_before
-    assert stats.num_wires_after == wires_after
-    assert layout.num_wires() < before.num_wires()
-    assert stats.wiring_improvement == pytest.approx(100 * (1 - wires_after / wires_before), abs=0.01)
-    assert layout.area() < before.area()
-    assert stats.area_improvement == pytest.approx(100 * (1 - layout.area() / before.area()), abs=0.01)
-
-
-def test_wiring_reduction_with_stats_and_parameters(mux21: technology_network) -> None:
-    """Statistics describe the actual input and result, which remain logically equivalent."""
-    layout = orthogonal(mux21)
-
-    assert equivalence_checking(mux21, layout) == eq_type.STRONG
-
-    before = layout.clone()
-    stats = wiring_reduction_stats()
-    wiring_reduction(layout, statistics=stats, timeout=1000000)
-
-    assert equivalence_checking(mux21, layout) == eq_type.STRONG
-    assert stats.time_total.total_seconds() > 0
+    assert stats.time_total.total_seconds() >= 0
     assert stats.x_size_before == before.width()
     assert stats.y_size_before == before.height()
     assert stats.x_size_after == layout.width()

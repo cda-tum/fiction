@@ -171,6 +171,8 @@ struct on_the_fly_circuit_design_on_defective_surface_stats
  * @throws utils::timeout_error If a circuit or gate-design timeout expires.
  * @throws std::invalid_argument If the simulation engine does not support the requested gate-design timeout.
  * @throws fcn::unsupported_gate_orientation_exception If a gate orientation has no implementation.
+ * @throws std::out_of_range If a surface defect has an invalid lattice basis.
+ * @throws std::overflow_error If a placed gate cell exceeds the coordinate range.
  * @throws unsuccessful_pr_error If placement and routing cannot satisfy the blacklist.
  */
 [[nodiscard]] inline layout on_the_fly_circuit_design_on_defective_surface(

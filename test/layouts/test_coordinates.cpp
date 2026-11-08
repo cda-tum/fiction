@@ -22,6 +22,7 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
@@ -148,8 +149,8 @@ TEST_CASE("Every signed coordinate is a value", "[coordinates][size-contract]")
 
     std::ostringstream stream{};
     stream << coordinate{-3, 2, 7};
-    CHECK(stream.str() == "(-3,2,7)");
-    CHECK(fmt::format("{}", coordinate{-3, 2, 7}) == "(-3,2,7)");
+    CHECK_THAT(stream.str(), Catch::Matchers::Equals("(-3,2,7)"));
+    CHECK_THAT((fmt::format("{}", coordinate{-3, 2, 7})), Catch::Matchers::Equals("(-3,2,7)"));
     /** @brief Distinct signed positions used to check coordinate hashing. */
     const std::unordered_set<coordinate> positions{{0, 0, 0}, {0, 0, 2}, {-2147483648ll, 0, 0}, {2147483647, 0, 0}};
     CHECK(positions.size() == 4);

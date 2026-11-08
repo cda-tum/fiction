@@ -60,6 +60,7 @@ def test_equiv_checks_a_plane_layout_through_its_input_mapping(shell: Shell, res
 def test_equiv_two_layouts(mux21_shell: Shell) -> None:
     mux21_shell.ok("ortho; optimize; equiv -g")
     assert "equivalent" in mux21_shell.output
+    assert mux21_shell.session.log[-1]["result"]["eq"] in {"STRONG", "WEAK"}
     assert "select the stores" in mux21_shell.fails("equiv")
 
 

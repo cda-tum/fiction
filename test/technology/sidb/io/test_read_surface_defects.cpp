@@ -14,7 +14,13 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_predicate.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
+
+#include "utils/scoped_temp_directory.hpp"
 
 #include <fiction/technology/sidb/io/read_surface_defects.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
@@ -39,6 +45,7 @@ TEST_CASE("Read surface defects into an sidb::layout", "[read-sidb-surface-defec
     {
         for (const auto* const surface : {"[]", "[[]]", "[[][][]]"})
         {
+            CAPTURE(surface);
             std::istringstream surface_stream{surface};
 
             const auto lyt = read_surface_defects(surface_stream);
@@ -57,7 +64,7 @@ TEST_CASE("Read surface defects into an sidb::layout", "[read-sidb-surface-defec
 
         const auto lyt = read_surface_defects(surface_stream, "surface");
 
-        CHECK(lyt.get_layout_name() == "surface");
+        CHECK_THAT(lyt.get_layout_name(), Catch::Matchers::Equals("surface"));
         CHECK(lyt.is_empty());
         CHECK(lyt.num_defects() == 10);
 
@@ -87,6 +94,7 @@ TEST_CASE("Read surface defects into an sidb::layout", "[read-sidb-surface-defec
              {"[[0 1 0 0] [0 -5 0 0] [0 1 0 0]]", "[[0 1 0 0] [0 Z 0 0] [0 1 0 0]]",
               "[[0 1 0 0] [1111111111111111111111111111111111111111111111111111111111111111x] [0 1 0 0]]"})
         {
+            CAPTURE(surface);
             std::istringstream surface_stream{surface};
             const auto         lyt = read_surface_defects(surface_stream);
             // the ignored line does not count as a row, so the third line lands on row 1
@@ -110,13 +118,24 @@ TEST_CASE("Read surface defects into an sidb::layout", "[read-sidb-surface-defec
     SECTION("exceptions")
     {
         std::istringstream unsupported{"[[0 1 2 3] [4 5 6 7] [8 9 10 11]]"};
-        CHECK_THROWS_AS(read_surface_defects(unsupported), unsupported_defect_index_exception);
+        CHECK_THROWS_MATCHES(read_surface_defects(unsupported), unsupported_defect_index_exception,
+                             Catch::Matchers::Predicate<unsupported_defect_index_exception>(
+                                 [](const auto& e) { return e.which() == 11; }, "unsupported index is 11"));
 
         std::istringstream oversized{"[[999999999999999999999999]]"};
-        CHECK_THROWS_AS(read_surface_defects(oversized), unsupported_defect_index_exception);
+        CHECK_THROWS_MATCHES(read_surface_defects(oversized), unsupported_defect_index_exception,
+                             Catch::Matchers::Predicate<unsupported_defect_index_exception>(
+                                 [](const auto& e) { return e.which() == -1; }, "oversized index is reported as -1"));
 
         std::istringstream missing{"[[0 1 2 3] [4 5 6] [8 9 10 0]]"};
-        CHECK_THROWS_AS(read_surface_defects(missing), missing_position_exception);
+        CHECK_THROWS_MATCHES(read_surface_defects(missing), missing_position_exception,
+                             Catch::Matchers::Predicate<missing_position_exception>(
+                                 [](const auto& e) { return e.where() == 1; }, "missing position is on row 1"));
+
+        std::istringstream ignored_line{"[1 2]\n[invalid]\n[1]"};
+        CHECK_THROWS_MATCHES(read_surface_defects(ignored_line), missing_position_exception,
+                             Catch::Matchers::Predicate<missing_position_exception>(
+                                 [](const auto& e) { return e.where() == 1; }, "ignored lines do not count as rows"));
 
         CHECK_THROWS_AS(read_surface_defects("/this/file/does/not/exist.txt"), std::ifstream::failure);
     }
@@ -131,9 +150,12 @@ TEST_CASE("Surface defect files preserve every parsed row", "[read-sidb-surface-
     /** @brief Expected defects after parsing the complete input. */
     const auto expected = read_surface_defects(stream);
     REQUIRE(expected.num_defects() == 2);
-    /** @brief File containing the same bytes as the stream. */
-    const auto filename =
-        std::filesystem::temp_directory_path() / ("fiction-surface-input-" + std::to_string(std::random_device{}()));
+    CHECK(expected.get_defect(site_at_row(0, 0)).type == defect_type::DB);
+    CHECK(expected.get_defect(site_at_row(0, 1)).type == defect_type::SI_VACANCY);
+    /** @brief Exclusively created directory containing the test file. */
+    const fiction::test::scoped_temp_directory directory{
+        std::filesystem::temp_directory_path(), "fiction-surface-input-" + std::to_string(std::random_device{}())};
+    const auto filename = directory.path() / "surface";
     {
         /** @brief Binary output preserves the separator. */
         std::ofstream output{filename, std::ios::binary};
@@ -141,5 +163,4 @@ TEST_CASE("Surface defect files preserve every parsed row", "[read-sidb-surface-
         output << surface;
     }
     CHECK(read_surface_defects(filename.string()) == expected);
-    std::filesystem::remove(filename);
 }

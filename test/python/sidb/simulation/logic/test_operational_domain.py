@@ -8,6 +8,7 @@
 
 from __future__ import annotations
 
+from collections import Counter
 from typing import TYPE_CHECKING, Any
 
 import pytest
@@ -38,6 +39,7 @@ from mnt.pyfiction.sidb.simulation.logic import (
 from mnt.pyfiction.synthesis import create_and_tt, create_id_tt, create_or_tt, create_xor_tt
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from pathlib import Path
 
 
@@ -72,7 +74,44 @@ def wire_with_canvas() -> sidb_layout:
     return lyt
 
 
-def test_operational_domain_siqad_or_100_lattice(resources_dir):
+def test_parameter_point_extreme_values() -> None:
+    nan = float("nan")
+    points = {parameter_point([value]) for value in (1e300, 2e300, -1e300, float("inf"), -float("inf"), nan)}
+    assert len(points) == 6
+    assert parameter_point([nan]) in points
+
+
+@pytest.mark.parametrize("domain_type", [operational_domain, critical_temperature_domain])
+def test_domain_dimension_metadata(domain_type: type[operational_domain | critical_temperature_domain]) -> None:
+    """Default domains have no axes; constructed domains retain their declared axis order."""
+    domain = domain_type()
+    assert len(domain) == 0
+    assert domain.get_number_of_dimensions() == 0
+    for index in (0, 1):
+        with pytest.raises(IndexError):
+            domain.get_dimension(index)
+    for dimensions in (
+        [sweep_parameter.LAMBDA_TF, sweep_parameter.MU_MINUS],
+        [sweep_parameter.LAMBDA_TF, sweep_parameter.EPSILON_R, sweep_parameter.MU_MINUS],
+    ):
+        domain = domain_type(dimensions)
+        assert domain.get_number_of_dimensions() == len(dimensions)
+        assert [domain.get_dimension(index) for index in range(len(dimensions))] == dimensions
+        with pytest.raises(IndexError):
+            domain.get_dimension(len(dimensions))
+
+
+def test_operational_domain_add_dimension() -> None:
+    """Adding an axis updates its count and indexed lookup."""
+    domain = operational_domain()
+    domain.add_dimension(sweep_parameter.EPSILON_R)
+    assert domain.get_number_of_dimensions() == 1
+    assert domain.get_dimension(0) == sweep_parameter.EPSILON_R
+    with pytest.raises(IndexError):
+        domain.get_dimension(1)
+
+
+def test_operational_domain_siqad_or_100_lattice(resources_dir: Path) -> None:
     lyt = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
 
     options: dict[str, Any] = {
@@ -95,7 +134,7 @@ def test_operational_domain_siqad_or_100_lattice(resources_dir):
     assert stats_grid.num_operational_parameter_combinations == 10201
 
 
-def test_number_of_threads(resources_dir):
+def test_number_of_threads(resources_dir: Path) -> None:
     """The thread count is configurable and does not change the resulting operational domain."""
     lyt = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
 
@@ -126,7 +165,7 @@ def test_number_of_threads(resources_dir):
     assert stats_single.num_evaluated_parameter_combinations == stats_default.num_evaluated_parameter_combinations
 
 
-def test_three_dimensional_operational_domain_sketch(wire_with_canvas):
+def test_three_dimensional_operational_domain_sketch(wire_with_canvas: sidb_layout) -> None:
     """The sketch and the boundary-following strategies work over three sweep dimensions."""
     lyt = wire_with_canvas
 
@@ -163,7 +202,7 @@ def test_three_dimensional_operational_domain_sketch(wire_with_canvas):
             assert domain[point] == grid_domain[point]
 
 
-def test_operational_domain_sketch_preconditions(wire_with_canvas, resources_dir):
+def test_operational_domain_sketch_preconditions(wire_with_canvas: sidb_layout, resources_dir: Path) -> None:
     """The sketch is rejected when it cannot filter anything."""
     lyt = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
 
@@ -194,7 +233,7 @@ def test_operational_domain_sketch_preconditions(wire_with_canvas, resources_dir
     operational_domain_grid_search(canvas_lyt, [create_id_tt()], **options)
 
 
-def test_operational_domain_xor_gate_100_lattice(resources_dir):
+def test_operational_domain_xor_gate_100_lattice(resources_dir: Path) -> None:
     lyt = read_sqd_layout(str(resources_dir / "hex_21_inputsdbp_xor_v1.sqd"))
 
     options: dict[str, Any] = {
@@ -279,7 +318,7 @@ def test_critical_temperature_domain_xor_gate_100_lattice(resources_dir: Path) -
     assert stats_random_sampling.num_operational_parameter_combinations > 0
 
 
-def test_operational_domain_and_gate_111_lattice(resources_dir):
+def test_operational_domain_and_gate_111_lattice(resources_dir: Path) -> None:
     lyt = read_sqd_layout(str(resources_dir / "AND_mu_032_111_surface.sqd"))
 
     options: dict[str, Any] = {
@@ -309,133 +348,49 @@ def test_operational_domain_and_gate_111_lattice(resources_dir):
     assert stats_contour_tracing.num_operational_parameter_combinations > 0
 
 
-def test_temperature_operational_domain():
-    # Create an instance of critical_temperature_domain
-    temp_domain = critical_temperature_domain([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
-
-    # Create test key and value
-    key = parameter_point([1.0, 2.0])
-    value = (operational_status.OPERATIONAL, 0.1)
-
-    # Add a value to the domain using __setitem__
-    temp_domain[key] = value
-
-    # __getitem__ should return the value for an existing key
-    assert temp_domain[key] == value
-
-    # __getitem__ should raise KeyError for missing key
-    missing_key = parameter_point([4.0, 5.0])
+@pytest.mark.parametrize(
+    ("domain_type", "points", "values"),
+    [
+        (
+            critical_temperature_domain,
+            ((1.0, 2.0), (3.3, 4.4), (4.0, 5.0)),
+            ((operational_status.OPERATIONAL, 0.1), (operational_status.NON_OPERATIONAL, 0.0)),
+        ),
+        (
+            operational_domain,
+            ((10.0, 20.0), (1.1, 2.2), (7.0, 8.0)),
+            (operational_status.NON_OPERATIONAL, operational_status.OPERATIONAL),
+        ),
+    ],
+    ids=["critical-temperature", "operational"],
+)
+def test_domain_mapping_protocol(
+    domain_type: type[operational_domain | critical_temperature_domain],
+    points: tuple[tuple[float, float], ...],
+    values: tuple[Any, Any],
+) -> None:
+    """Both domain classes expose complete mapping views and missing-key errors."""
+    domain = domain_type([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
+    key, new_key, missing_key = (parameter_point(list(point)) for point in points)
+    value, new_value = values
+    domain[key] = value
+    assert domain[key] == value
     with pytest.raises(KeyError):
-        _ = temp_domain[missing_key]
-
-    # __setitem__ should add or update a value
-    new_key = parameter_point([3.3, 4.4])
-    new_value = (operational_status.NON_OPERATIONAL, 0.0)
-    temp_domain[new_key] = new_value
-    assert temp_domain[new_key] == new_value
-
-    # __contains__ should work for present and missing keys
-    assert key in temp_domain
-    assert new_key in temp_domain
-    assert missing_key not in temp_domain
-
-    # __len__ should reflect the number of items
-    assert len(temp_domain) == 2
-
-    # __iter__ should yield all keys
-    keys = list(iter(temp_domain))
-    assert key in keys
-    assert new_key in keys
-    assert set(keys) == set(temp_domain.keys())
-
-    # keys() should return all keys
-    keys_method = temp_domain.keys()
-    assert set(keys_method) == {key, new_key}
-
-    # values() should return all values
-    values_method = temp_domain.values()
-    assert value in values_method
-    assert new_value in values_method
-    assert len(values_method) == 2
-
-    # items() should return all (key, value) pairs
-    items_method = temp_domain.items()
-    assert (key, value) in items_method
-    assert (new_key, new_value) in items_method
-    assert len(items_method) == 2
-
-    # Test retrieving a value that doesn't exist using contains (should return None)
-    assert missing_key not in temp_domain
-
-    # Modify dimensions and verify
-    assert temp_domain.get_dimension(0) == sweep_parameter.EPSILON_R
-    assert temp_domain.get_dimension(1) == sweep_parameter.LAMBDA_TF
+        _ = domain[missing_key]
+    domain[new_key] = new_value
+    assert domain[new_key] == new_value
+    assert key in domain
+    assert new_key in domain
+    assert missing_key not in domain
+    assert len(domain) == 2
+    expected_keys = Counter([key, new_key])
+    assert Counter(iter(domain)) == expected_keys
+    assert Counter(domain.keys()) == expected_keys
+    assert Counter(domain.values()) == Counter(values)
+    assert Counter(domain.items()) == Counter([(key, value), (new_key, new_value)])
 
 
-def test_operational_domain():
-    # Create an instance of operational_domain
-    op_domain = operational_domain([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
-
-    # Create test key and value
-    key = parameter_point([10.0, 20.0])
-    value = operational_status.NON_OPERATIONAL
-
-    # Add a value to the domain
-    op_domain[key] = value
-
-    # Test retrieving a value that doesn't exist
-    missing_key = parameter_point([7.0, 8.0])
-    assert missing_key not in op_domain
-
-    # Modify dimensions and verify
-    assert op_domain.get_dimension(0) == sweep_parameter.EPSILON_R
-    assert op_domain.get_dimension(1) == sweep_parameter.LAMBDA_TF
-
-    # __getitem__ should return the value for an existing key
-    assert op_domain[key] == value
-
-    # __getitem__ should raise KeyError for missing key
-    with pytest.raises(KeyError):
-        _ = op_domain[missing_key]
-
-    # __setitem__ should add or update a value
-    new_key = parameter_point([1.1, 2.2])
-    new_value = operational_status.OPERATIONAL
-    op_domain[new_key] = operational_status.OPERATIONAL
-    assert op_domain[new_key] == new_value
-
-    # __contains__ should work for present and missing keys
-    assert key in op_domain
-    assert new_key in op_domain
-    assert missing_key not in op_domain
-
-    # __len__ should reflect the number of items
-    assert len(op_domain) == 2
-
-    # __iter__ should yield all keys
-    keys = list(iter(op_domain))
-    assert key in keys
-    assert new_key in keys
-    assert set(keys) == set(op_domain.keys())
-
-    # keys() should return all keys
-    keys_method = op_domain.keys()
-    assert set(keys_method) == {key, new_key}
-
-    # values() should return all values
-    values_method = op_domain.values()
-    assert value in values_method
-    assert new_value in values_method
-    assert len(values_method) == 2
-
-    # items() should return all (key, value) pairs
-    items_method = op_domain.items()
-    assert (key, value) in items_method
-    assert (new_key, new_value) in items_method
-    assert len(items_method) == 2
-
-
-def test_operational_domain_two_bdl_pair_wire():
+def test_operational_domain_two_bdl_pair_wire() -> None:
     bdl_wire = sidb_layout()
 
     bdl_wire.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.INPUT)
@@ -535,3 +490,156 @@ def test_single_point_keyword_domain(resources_dir: Path) -> None:
     assert domain[parameter_point([5.7, 3.0])] == operational_status.OPERATIONAL
     assert stats.num_evaluated_parameter_combinations == 1
     assert stats.num_operational_parameter_combinations == 1
+
+
+@pytest.mark.parametrize(
+    "ranges",
+    [
+        [(5.6, 5.6, 0.0)],
+        [(5.6, 5.6, -0.0)],
+        [(float("nan"), 5.6, 0.1)],
+        [(5.6, float("inf"), 0.1)],
+        [(5.6, 5.6, float("nan"))],
+        [(1.0, 2.0, 2.2250738585072014e-308)],
+        [(5.6, 5.6000002, 1e-7)],
+        [(5.6000004, 5.6000022, 6e-7)],
+        [(5.6, 5.7, 1e-18)],
+    ],
+)
+def test_invalid_sweep_ranges(ranges: list[tuple[float, float, float]]) -> None:
+    """Reject non-finite, overflowing, and identity-colliding grids before allocation or simulation."""
+    dimensions = [sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF]
+    with pytest.raises(ValueError):  # ruff: ignore[pytest-raises-too-broad] -- error type is the public contract
+        operational_domain_grid_search(
+            sidb_layout(),
+            [create_id_tt()],
+            sweep_dimensions=[
+                operational_domain_value_range(dimension, *bounds)
+                for dimension, bounds in zip(dimensions, ranges, strict=False)
+            ],
+        )
+
+
+@pytest.mark.parametrize(
+    "search",
+    [
+        operational_domain_random_sampling,
+        operational_domain_flood_fill,
+        operational_domain_contour_tracing,
+        critical_temperature_domain_random_sampling,
+        critical_temperature_domain_flood_fill,
+        critical_temperature_domain_contour_tracing,
+    ],
+)
+def test_colliding_sweeps_rejected_before_zero_samples(
+    search: Callable[..., operational_domain | critical_temperature_domain],
+) -> None:
+    """Zero sampling still validates the grid for every sampling strategy."""
+    with pytest.raises(ValueError):  # ruff: ignore[pytest-raises-too-broad] -- error type is the public contract
+        search(
+            sidb_layout(),
+            [create_id_tt()],
+            0,
+            sweep_dimensions=[
+                operational_domain_value_range(sweep_parameter.EPSILON_R, 5.6, 5.6000002, 1e-7),
+                operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.0, 5.0, 0.1),
+            ],
+        )
+
+
+@pytest.mark.parametrize(("maximum", "step", "count"), [(5.6, 1e-7, 1), (5.64, 0.07, 1), (5.600001, 6e-7, 2)])
+def test_distinct_sweep_identities(resources_dir: Path, maximum: float, step: float, count: int) -> None:
+    """Singleton and fine sweeps retain distinct points after trimming their last step."""
+    layout = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
+    minimum = 5.6000004 if count == 2 else 5.6
+    stats = operational_domain_stats()
+    domain = operational_domain_grid_search(
+        layout,
+        [create_or_tt()],
+        number_of_threads=1,
+        stats=stats,
+        mu_minus=-0.28,
+        threshold_bdl_interdistance=1.5,
+        sweep_dimensions=[
+            operational_domain_value_range(sweep_parameter.EPSILON_R, minimum, maximum, step),
+            operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.0, 5.0, 0.1),
+        ],
+    )
+    assert len(domain) == count
+    assert stats.num_evaluated_parameter_combinations == count
+
+
+def test_flood_fill_rejects_one_dimension() -> None:
+    """Flood fill requires at least two sweep dimensions, even without samples."""
+    with pytest.raises(ValueError):  # ruff: ignore[pytest-raises-too-broad] -- error type is the public contract
+        operational_domain_flood_fill(
+            sidb_layout(),
+            [create_id_tt()],
+            0,
+            sweep_dimensions=[operational_domain_value_range(sweep_parameter.EPSILON_R, 5.0, 5.1, 0.1)],
+        )
+
+
+def test_grid_product_overflow_preserves_statistics() -> None:
+    """A product of small dimensions fails before the grid is allocated or statistics are published."""
+    stats = operational_domain_stats()
+    with pytest.raises(ValueError):  # ruff: ignore[pytest-raises-too-broad] -- error type is the public contract
+        operational_domain_random_sampling(
+            sidb_layout(),
+            [create_id_tt()],
+            0,
+            stats=stats,
+            sweep_dimensions=[
+                operational_domain_value_range(sweep_parameter.EPSILON_R, 5.6, 5.7, 0.1) for _ in range(64)
+            ],
+        )
+    assert stats.num_total_parameter_points == 0
+
+
+@pytest.mark.parametrize("search", [operational_domain_random_sampling, critical_temperature_domain_random_sampling])
+def test_zero_samples_produce_empty_domain(
+    search: Callable[..., operational_domain | critical_temperature_domain], resources_dir: Path
+) -> None:
+    """Zero samples produce no classifications or simulator invocations."""
+    layout = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
+    stats = operational_domain_stats()
+    domain = search(
+        layout,
+        [create_or_tt()],
+        0,
+        stats=stats,
+        sweep_dimensions=[
+            operational_domain_value_range(sweep_parameter.EPSILON_R, 5.6, 5.7, 0.1),
+            operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.0, 5.1, 0.1),
+        ],
+    )
+    assert len(domain) == 0
+    assert stats.num_evaluated_parameter_combinations == 0
+    assert stats.num_simulator_invocations == 0
+
+
+def test_random_sampling_stops_when_grid_is_exhausted(resources_dir: Path) -> None:
+    """Requesting more samples than grid points yields the complete classification once."""
+    layout = read_sqd_layout(str(resources_dir / "siqad_or_gate.sqd"))
+    dimensions = [
+        operational_domain_value_range(sweep_parameter.EPSILON_R, 5.7, 5.8, 0.1),
+        operational_domain_value_range(sweep_parameter.LAMBDA_TF, 3.0, 3.1, 0.1),
+    ]
+    stats = operational_domain_stats()
+    domain = operational_domain_random_sampling(
+        layout,
+        [create_or_tt()],
+        100,
+        stats=stats,
+        mu_minus=-0.28,
+        threshold_bdl_interdistance=1.5,
+        sweep_dimensions=dimensions,
+        number_of_threads=2,
+    )
+    expected = {
+        parameter_point([epsilon, screening]): operational_status.OPERATIONAL
+        for epsilon in (5.7, 5.8)
+        for screening in (3.0, 3.1)
+    }
+    assert dict(domain.items()) == expected
+    assert stats.num_evaluated_parameter_combinations == 4

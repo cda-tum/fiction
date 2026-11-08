@@ -22,8 +22,9 @@ for (const checked of [true, false]) {
       parentElement: { closest: () => null },
     };
     const target = {
-      closest: () => panel,
+      closest: (selector) => (selector === ".sd-tab-content" ? panel : null),
       scrollIntoView() {
+        assert.equal(input.checked, true);
         scrolled = true;
       },
     };
@@ -34,7 +35,8 @@ for (const checked of [true, false]) {
         addEventListener: (event, callback) => (listeners[event] = callback),
       },
       document: {
-        getElementById: (id) => (id === "target" ? target : input),
+        getElementById: (id) =>
+          id === "target" ? target : id === "tab" ? input : null,
         addEventListener() {},
       },
     });
@@ -43,3 +45,137 @@ for (const checked of [true, false]) {
     assert.equal(scrolled, true);
   });
 }
+
+for (const [innerChecked, outerChecked] of [
+  [false, false],
+  [false, true],
+  [true, false],
+  [true, true],
+]) {
+  test(`hash changes reveal an encoded nested target with inner=${innerChecked} outer=${outerChecked}`, () => {
+    const inputs = {
+      inner: { checked: innerChecked },
+      outer: { checked: outerChecked },
+    };
+    let scrolled = false;
+    let outerClicks = 0;
+    let innerClicks = 0;
+    const outer = {
+      previousElementSibling: {
+        htmlFor: "outer",
+        click() {
+          outerClicks++;
+          inputs.outer.checked = !inputs.outer.checked;
+        },
+      },
+      parentElement: { closest: () => null },
+    };
+    const inner = {
+      previousElementSibling: {
+        htmlFor: "inner",
+        click() {
+          innerClicks++;
+          inputs.inner.checked = !inputs.inner.checked;
+        },
+      },
+      parentElement: {
+        closest: (selector) => (selector === ".sd-tab-content" ? outer : null),
+      },
+    };
+    const target = {
+      closest: (selector) => (selector === ".sd-tab-content" ? inner : null),
+      scrollIntoView() {
+        assert.equal(inputs.inner.checked, true);
+        assert.equal(inputs.outer.checked, true);
+        scrolled = true;
+      },
+    };
+    const listeners = {};
+    runInNewContext(script, {
+      window: {
+        location: { hash: "#topic%20name" },
+        addEventListener: (event, callback) => (listeners[event] = callback),
+      },
+      document: {
+        getElementById: (id) => (id === "topic name" ? target : inputs[id]),
+        addEventListener() {},
+      },
+    });
+    listeners.hashchange();
+    assert.equal(inputs.inner.checked, true);
+    assert.equal(inputs.outer.checked, true);
+    assert.equal(outerClicks, outerChecked ? 0 : 1);
+    assert.equal(innerClicks, innerChecked ? 0 : 1);
+    assert.equal(scrolled, true);
+  });
+}
+
+test("malformed fragments do not reveal or scroll a target", () => {
+  const listeners = {};
+  let revealed = false;
+  let scrolled = false;
+  const panel = {
+    previousElementSibling: { htmlFor: "tab", click: () => (revealed = true) },
+    parentElement: { closest: () => null },
+  };
+  const target = {
+    closest: () => panel,
+    scrollIntoView: () => (scrolled = true),
+  };
+  runInNewContext(script, {
+    window: {
+      location: { hash: "#%E0%A4%A" },
+      addEventListener: (event, callback) => (listeners[event] = callback),
+    },
+    document: {
+      getElementById: (id) => (id === "tab" ? { checked: false } : target),
+      addEventListener() {},
+    },
+  });
+  assert.doesNotThrow(() => listeners.hashchange());
+  assert.equal(revealed, false);
+  assert.equal(scrolled, false);
+});
+
+test("same-page link clicks reveal the current fragment", () => {
+  const listeners = {};
+  const input = { checked: false };
+  let scrolled = 0;
+  const panel = {
+    previousElementSibling: {
+      htmlFor: "tab",
+      click: () => (input.checked = true),
+    },
+    parentElement: { closest: () => null },
+  };
+  const target = {
+    closest: (selector) => (selector === ".sd-tab-content" ? panel : null),
+    scrollIntoView: () => {
+      scrolled++;
+    },
+  };
+  const href = "https://example.org/page#target";
+  runInNewContext(script, {
+    window: {
+      location: { hash: "#target", href },
+      addEventListener() {},
+    },
+    document: {
+      getElementById: (id) =>
+        id === "target" ? target : id === "tab" ? input : null,
+      addEventListener: (event, callback) => (listeners[event] = callback),
+    },
+  });
+  const click = (url) =>
+    listeners.click({
+      target: {
+        closest: (selector) => (selector === "a[href]" ? { href: url } : null),
+      },
+    });
+  click("https://example.org/other#target");
+  assert.equal(input.checked, false);
+  assert.equal(scrolled, 0);
+  click(href);
+  assert.equal(input.checked, true);
+  assert.equal(scrolled, 1);
+});

@@ -20,6 +20,7 @@
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/synthesis/network_conversion.hpp"
 #include "fiction/synthesis/technology_mapping_library.hpp"
+#include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/types.hpp"
 
 #include <fmt/format.h>
@@ -30,6 +31,7 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
+#include <mockturtle/traits.hpp>
 #include <mockturtle/utils/tech_library.hpp>
 
 #include <cassert>
@@ -318,6 +320,28 @@ class technology_mapping_impl
     /** @brief Returns the source network mapped to the supplied technology library. */
     [[nodiscard]] fiction::networks::named_technology_network run() const
     {
+        /** @brief Whether the optional source interface reports sequential state. */
+        const auto is_sequential = [&]
+        {
+            if constexpr (mockturtle::has_is_combinational_v<Ntk>)
+            {
+                return !ntk.is_combinational();
+            }
+            else if constexpr (mockturtle::has_num_registers_v<Ntk>)
+            {
+                return ntk.num_registers() != 0;
+            }
+            else
+            {
+                return false;
+            }
+        }();
+        if (is_sequential)
+        {
+            stats.mapper_stats.mapping_error = true;
+            return fiction::networks::named_technology_network{};
+        }
+
         // Validate that the library contains required gates for the base network type
         validate_required_gates();
 
@@ -611,7 +635,34 @@ class technology_mapping_impl
             return fiction::networks::named_technology_network{};
         }
 
-        const auto mapped_ntk = mockturtle::emap(ntk, lib, params.mapper_params, &stats.mapper_stats);
+        /** @brief Maps a network whose constant-one value is explicit when the mapper requires it. */
+        const auto mapped_ntk = [&]
+        {
+            const auto one = ntk.get_node(ntk.get_constant(true));
+            if (one != ntk.get_node(ntk.get_constant(false)))
+            {
+                /** @brief Views can expose a constant output without increasing the inherited fanout count. */
+                bool uses_one = ntk.fanout_size(one) > 0;
+                if (!uses_one)
+                {
+                    ntk.foreach_po(
+                        [&](const auto& output)
+                        {
+                            uses_one = uses_one || ntk.get_node(output) == one;
+                            return !uses_one;
+                        });
+                }
+                if (uses_one)
+                {
+                    auto normalized = convert_network<fiction::networks::named_technology_network>(ntk);
+                    // emap initializes every constant node as false; a gate computes true without a separate constant.
+                    const auto true_gate = normalized.create_node({normalized.get_constant(false)}, create_not_tt());
+                    normalized.substitute_node(normalized.get_node(normalized.get_constant(true)), true_gate);
+                    return mockturtle::emap(normalized, lib, params.mapper_params, &stats.mapper_stats);
+                }
+            }
+            return mockturtle::emap(ntk, lib, params.mapper_params, &stats.mapper_stats);
+        }();
 
         fiction::networks::named_technology_network converted_ntk{};
 
@@ -629,15 +680,17 @@ class technology_mapping_impl
 }  // namespace detail
 
 /**
- * Performs technology mapping on the given network. Technology mapping is the process of replacing the gates in a
- * network with gates from a given technology library. This function utilizes `mockturtle::emap` to perform the
- * technology mapping. This function is a wrapper around that interface to provide a more convenient usage.
+ * Maps a combinational logic network to gates from the provided technology library using `mockturtle::emap`.
+ * Non-combinational inputs report mapping failure before library validation.
  *
  * @tparam Ntk Input logic network type.
- * @param ntk Input logic network.
+ * @param ntk Combinational input logic network.
  * @param params Technology mapping parameters.
  * @param pst Technology mapping statistics.
- * @return Mapped network exclusively using gates from the provided library.
+ * @return Mapped network exclusively using gates from the provided library, or an empty network on mapping failure,
+ * including non-combinational input.
+ * The mapper requires a library match for each source gate and can reject a network whose overall function is
+ * representable by the library. Check `pst->mapper_stats.mapping_error` when statistics are supplied.
  * @throws missing_required_gates_exception if the technology library does not contain required gates for the base
  *         network type (e.g., AIG requires INV and AND; XAG requires INV, AND, and XOR; MIG requires INV and MAJ).
  */

@@ -15,6 +15,8 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/allocation_failure.hpp"
 
@@ -138,7 +140,7 @@ TEST_CASE("Cell writers propagate terminal-list allocation failures", "[cell-wri
                 }
                 /** @brief Complete output used to check recovery after the injected failure. */
                 const auto expected = stream.str();
-                CHECK(expected.find("name=\"terminal\"") != std::string::npos);
+                CHECK_THAT(expected, Catch::Matchers::ContainsSubstring("name=\"terminal\""));
                 stream.str(std::string{});
                 /** @brief Records an allocation failure propagated through the public writer. */
                 bool propagated{};
@@ -176,7 +178,7 @@ TEST_CASE("Cell writers propagate terminal-list allocation failures", "[cell-wri
                 {
                     CHECK_NOTHROW(write_qll_layout(lyt, stream));
                 }
-                CHECK(stream.str() == expected);
+                CHECK_THAT(stream.str(), Catch::Matchers::Equals(expected));
             }
         }
     }

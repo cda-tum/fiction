@@ -15,7 +15,10 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
 
@@ -29,6 +32,7 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/traits.hpp>
 
+#include <cstdint>
 #include <stdexcept>
 #include <vector>
 
@@ -38,7 +42,26 @@ using namespace fiction::networks::views;
 using namespace fiction::synthesis;
 using namespace fiction::utils::graph;
 
-TEST_CASE("Dummy Check", "[mincross]")
+/**
+ * Checks that each output rank contains the input rank's nodes.
+ *
+ * @tparam Ntk Ranked network type.
+ * @param input Original network.
+ * @param result Reordered network.
+ */
+template <typename Ntk>
+void check_rank_permutations(const Ntk& input, const Ntk& result)
+{
+    CHECK(result.check_validity());
+    REQUIRE(result.depth() == input.depth());
+    for (uint32_t level = 0; level <= input.depth(); ++level)
+    {
+        CAPTURE(level);
+        CHECK_THAT(result.get_ranks(level), Catch::Matchers::UnorderedRangeEquals(input.get_ranks(level)));
+    }
+}
+
+TEST_CASE("Minimize crossings in an XOR network", "[mincross]")
 {
     mockturtle::aig_network aig;
 
@@ -53,9 +76,10 @@ TEST_CASE("Dummy Check", "[mincross]")
     const mincross_params p{};
     const auto            ntk = mincross(aig_r, p, &st);
     CHECK(st.num_crossings == 1);
+    CHECK(count_crossings(ntk) == 1);
 }
 
-TEST_CASE("Fixed PIs Check", "[mincross]")
+TEST_CASE("Keep primary inputs in rank order when requested", "[mincross]")
 {
     technology_network tec;
 
@@ -67,19 +91,26 @@ TEST_CASE("Fixed PIs Check", "[mincross]")
     tec.create_po(f);
     tec.create_po(b);
 
-    const auto aig_r = mutable_rank_view(tec);
+    const auto aig_r        = mutable_rank_view(tec);
+    const auto original_pis = aig_r.get_ranks(0);
 
     mincross_stats  st{};
     mincross_params p{.fixed_pis = false};
     auto            ntk = mincross(aig_r, p, &st);
     CHECK(st.num_crossings == 0);
+    CHECK(count_crossings(ntk) == st.num_crossings);
 
+    st          = {};
     p.fixed_pis = true;
     ntk         = mincross(aig_r, p, &st);
     CHECK(st.num_crossings == 1);
+    CHECK(count_crossings(ntk) == st.num_crossings);
+    CHECK(ntk.get_ranks(0) == original_pis);
+    CHECK(aig_r.get_ranks(0) == original_pis);
+    check_rank_permutations(aig_r, ntk);
 }
 
-TEST_CASE("Planar Network", "[mincross]")
+TEST_CASE("Minimize crossings without changing network connectivity", "[mincross]")
 {
     mockturtle::aig_network aig;
 
@@ -96,19 +127,44 @@ TEST_CASE("Planar Network", "[mincross]")
     rank1.push_back(aig_r.get_node(f2));
     rank1.push_back(aig_r.get_node(f1));
     aig_r.set_ranks(1, rank1);
+    const auto original_pis = aig_r.get_ranks(0);
 
     mincross_stats  st{};
     mincross_params p{.optimize = false};
 
     auto ntk = mincross(aig_r, p, &st);  // counts crossings
     CHECK(st.num_crossings == 3);
+    CHECK(ntk.get_all_ranks() == aig_r.get_all_ranks());
 
+    st         = {};
     p.optimize = true;
     ntk        = mincross(aig_r, p, &st);
     CHECK(st.num_crossings == 0);
+    CHECK(count_crossings(ntk) == st.num_crossings);
+    check_rank_permutations(aig_r, ntk);
+
+    st          = {};
+    p.fixed_pis = true;
+    ntk         = mincross(aig_r, p, &st);
+    CHECK(st.num_crossings <= 3);
+    CHECK(count_crossings(ntk) == st.num_crossings);
+    CHECK(ntk.get_ranks(0) == original_pis);
+    CHECK(aig_r.get_ranks(0) == original_pis);
+    CHECK(aig_r.get_ranks(1) == rank1);
+    check_rank_permutations(aig_r, ntk);
+    CHECK(ntk.po_at(0) == f1);
+    CHECK(ntk.po_at(1) == f2);
+    std::vector<mockturtle::signal<mockturtle::aig_network>> fanins1{};
+    std::vector<mockturtle::signal<mockturtle::aig_network>> fanins2{};
+    ntk.foreach_fanin(ntk.get_node(f1), [&fanins1](const auto& f) { fanins1.push_back(f); });
+    ntk.foreach_fanin(ntk.get_node(f2), [&fanins2](const auto& f) { fanins2.push_back(f); });
+    const std::vector<mockturtle::signal<mockturtle::aig_network>> expected_fanins1{x1, x2};
+    const std::vector<mockturtle::signal<mockturtle::aig_network>> expected_fanins2{x2, x3};
+    CHECK_THAT(fanins1, Catch::Matchers::UnorderedRangeEquals(expected_fanins1));
+    CHECK_THAT(fanins2, Catch::Matchers::UnorderedRangeEquals(expected_fanins2));
 }
 
-TEST_CASE("Majority", "[mincross]")
+TEST_CASE("Minimize crossings in a majority network", "[mincross]")
 {
     technology_network tec{};
 
@@ -131,13 +187,17 @@ TEST_CASE("Majority", "[mincross]")
 
     auto ntk = mincross(tec_r, p, &st);  // counts crossings
     CHECK(st.num_crossings == 2);
+    CHECK(ntk.get_all_ranks() == tec_r.get_all_ranks());
 
+    st         = {};
     p.optimize = true;
     ntk        = mincross(tec_r, p, &st);
     CHECK(st.num_crossings == 0);
+    CHECK(count_crossings(ntk) == st.num_crossings);
+    check_rank_permutations(tec_r, ntk);
 }
 
-TEST_CASE("Adder", "[mincross]")
+TEST_CASE("Minimize crossings in a full adder", "[mincross]")
 {
     auto tec = blueprints::full_adder_network<named_technology_network>();
 
@@ -152,10 +212,14 @@ TEST_CASE("Adder", "[mincross]")
 
     auto ntk = mincross(tec_r, p, &st);  // counts crossings
     CHECK(st.num_crossings == 4);
+    CHECK(ntk.get_all_ranks() == tec_r.get_all_ranks());
 
+    st         = {};
     p.optimize = true;
     ntk        = mincross(tec_r, p, &st);
     CHECK(st.num_crossings == 2);
+    CHECK(count_crossings(ntk) == st.num_crossings);
+    check_rank_permutations(tec_r, ntk);
 }
 
 TEST_CASE("Counting crossings agrees with mincross without optimization", "[mincross]")
@@ -164,6 +228,7 @@ TEST_CASE("Counting crossings agrees with mincross without optimization", "[minc
          {blueprints::full_adder_network<technology_network>(), blueprints::mux21_network<technology_network>(),
           blueprints::maj4_network<technology_network>()})
     {
+        INFO("Network size: " << tec.size());
         const auto tec_r = mutable_rank_view(network_balancing<technology_network>(tec));
 
         mincross_stats        st{};
@@ -200,4 +265,207 @@ TEST_CASE("Counting crossings rejects unbalanced networks", "[mincross]")
     const auto tec = blueprints::unbalanced_and_inv_network<technology_network>();
 
     CHECK_THROWS_AS(count_crossings(mutable_rank_view(tec)), std::invalid_argument);
+}
+
+TEST_CASE("Count crossings for parallel edges", "[mincross]")
+{
+    technology_network tec{};
+    const auto         a = tec.create_pi();
+    const auto         b = tec.create_pi();
+    const auto         x = tec.create_and(b, b);
+    const auto         y = tec.create_and(a, b);
+    tec.create_po(x);
+    tec.create_po(y);
+    auto ranked = mutable_rank_view(tec);
+
+    SECTION("Parallel edges cross a third edge")
+    {
+        mincross_stats st{};
+        const auto     result = mincross(ranked, mincross_params{.optimize = false}, &st);
+        CHECK(st.num_crossings == 2);
+        CHECK(count_crossings(result) == 2);
+    }
+    SECTION("Edges sharing an endpoint do not cross")
+    {
+        ranked.set_ranks(1, {ranked.get_node(y), ranked.get_node(x)});
+        mincross_stats st{};
+        const auto     result = mincross(ranked, mincross_params{.optimize = false}, &st);
+        CHECK(st.num_crossings == 0);
+        CHECK(count_crossings(result) == 0);
+    }
+    SECTION("Optimized statistics count every edge")
+    {
+        CHECK(count_crossings(ranked) == 2);
+        mincross_stats st{};
+        const auto     result = mincross(ranked, {}, &st);
+        CHECK(st.num_crossings <= 2);
+        CHECK(count_crossings(result) == st.num_crossings);
+        check_rank_permutations(ranked, result);
+    }
+}
+
+TEST_CASE("Crossing minimization rejects unbalanced networks", "[mincross]")
+{
+    technology_network tec{};
+    const auto         a = tec.create_pi();
+    const auto         b = tec.create_pi();
+    const auto         c = tec.create_pi();
+    const auto         d = tec.create_pi();
+    const auto         e = tec.create_pi();
+    const auto         g = tec.create_and(a, b);
+    tec.create_po(tec.create_and(g, b));
+    tec.create_po(tec.create_and(g, c));
+    tec.create_po(tec.create_and(g, d));
+    tec.create_po(tec.create_and(g, e));
+    auto ranked = mutable_rank_view(tec);
+
+    CHECK_THROWS_AS(mincross(ranked, mincross_params{.optimize = false}), std::invalid_argument);
+    CHECK_THROWS_AS(mincross(ranked), std::invalid_argument);
+}
+
+TEST_CASE("Optimized parallel-edge networks report remaining crossings", "[mincross]")
+{
+    technology_network tec{};
+    const auto         a = tec.create_pi();
+    const auto         b = tec.create_pi();
+    tec.create_po(tec.create_and(a, a));
+    tec.create_po(tec.create_and(a, b));
+    tec.create_po(tec.create_and(a, b));
+    tec.create_po(tec.create_and(b, b));
+    auto ranked = mutable_rank_view(tec);
+    CHECK(count_crossings(ranked) == 1);
+    mincross_stats st{};
+    const auto     result = mincross(ranked, {}, &st);
+
+    CHECK(st.num_crossings <= 1);
+    CHECK(st.num_crossings == count_crossings(result));
+    check_rank_permutations(ranked, result);
+}
+
+TEST_CASE("Minimize crossings in depth-zero and constant-fanin networks", "[mincross]")
+{
+    technology_network tec{};
+    const auto         a = tec.create_pi();
+    SECTION("Input-only network")
+    {
+        tec.create_po(a);
+        auto           ranked = mutable_rank_view(tec);
+        mincross_stats st{};
+        const auto     result = mincross(ranked, {}, &st);
+        CHECK(st.num_crossings == 0);
+        CHECK(count_crossings(result) == 0);
+        CHECK(result.get_all_ranks() == ranked.get_all_ranks());
+    }
+    SECTION("Constant input is not an edge between ranks")
+    {
+        tec.create_po(tec.create_and(a, tec.get_constant(false)));
+        auto           ranked = mutable_rank_view(tec);
+        mincross_stats st{};
+        const auto     result = mincross(ranked, {}, &st);
+        CHECK(st.num_crossings == 0);
+        CHECK(count_crossings(result) == 0);
+        check_rank_permutations(ranked, result);
+    }
+}
+
+TEST_CASE("Ignore constant fanins while minimizing crossings", "[mincross]")
+{
+    technology_network tec{};
+    const auto         a = tec.create_pi();
+    const auto         b = tec.create_pi();
+    const auto         c = tec.create_pi();
+    const auto         x = tec.create_and(a, b);
+    const auto         y = tec.create_and(b, c);
+    const auto         z = tec.create_and(c, tec.get_constant(false));
+    tec.create_po(x);
+    tec.create_po(y);
+    tec.create_po(z);
+    auto ranked = mutable_rank_view(tec);
+    ranked.set_ranks(1, {ranked.get_node(y), ranked.get_node(x), ranked.get_node(z)});
+    const auto original_pis = ranked.get_ranks(0);
+
+    CHECK(count_crossings(ranked) == 3);
+    mincross_stats st{};
+    const auto     result = mincross(ranked, mincross_params{.fixed_pis = true}, &st);
+    CHECK(st.num_crossings <= 3);
+    CHECK(count_crossings(result) == st.num_crossings);
+    CHECK(result.get_ranks(0) == original_pis);
+    check_rank_permutations(ranked, result);
+}
+
+TEST_CASE("Count parallel edges between internal ranks", "[mincross]")
+{
+    technology_network tec{};
+    const auto         a = tec.create_pi();
+    const auto         b = tec.create_pi();
+    const auto         x = tec.create_buf(a);
+    const auto         y = tec.create_buf(b);
+    tec.create_po(tec.create_and(y, y));
+    tec.create_po(tec.create_and(x, y));
+    auto ranked = mutable_rank_view(tec);
+
+    SECTION("Count without optimization")
+    {
+        mincross_stats st{};
+        const auto     result = mincross(ranked, mincross_params{.optimize = false}, &st);
+        CHECK(st.num_crossings == 2);
+        CHECK(count_crossings(result) == 2);
+    }
+    SECTION("Minimize crossings")
+    {
+        CHECK(count_crossings(ranked) == 2);
+        mincross_stats st{};
+        const auto     result = mincross(ranked, {}, &st);
+        CHECK(st.num_crossings <= 2);
+        CHECK(count_crossings(result) == st.num_crossings);
+        check_rank_permutations(ranked, result);
+    }
+}
+
+TEST_CASE("Minimize crossings with repeated internal fanins", "[mincross]")
+{
+    technology_network tec{};
+    const auto         a = tec.create_pi();
+    const auto         b = tec.create_pi();
+    const auto         c = tec.create_pi();
+    const auto         d = tec.create_pi();
+    const auto         w = tec.create_and(d, a);
+    const auto         x = tec.create_and(b, b);
+    const auto         y = tec.create_and(a, a);
+    const auto         z = tec.create_and(a, c);
+    tec.create_po(tec.create_and(w, x));
+    tec.create_po(tec.create_and(x, y));
+    tec.create_po(tec.create_and(y, z));
+    tec.create_po(tec.create_and(z, w));
+    auto ranked = mutable_rank_view(tec);
+    CHECK(count_crossings(ranked) == 17);
+    mincross_stats st{};
+    const auto     result = mincross(ranked, {}, &st);
+
+    CHECK(st.num_crossings <= 17);
+    CHECK(count_crossings(result) == st.num_crossings);
+    check_rank_permutations(ranked, result);
+}
+
+TEST_CASE("Minimize crossings when primary inputs and gates are interleaved", "[mincross]")
+{
+    technology_network tec{};
+    const auto         a = tec.create_pi();
+    const auto         b = tec.create_pi();
+    const auto         x = tec.create_and(a, b);
+    const auto         c = tec.create_pi();
+    const auto         y = tec.create_and(b, c);
+    tec.create_po(x);
+    tec.create_po(y);
+    auto ranked = mutable_rank_view(tec);
+    ranked.set_ranks(1, {ranked.get_node(y), ranked.get_node(x)});
+    const auto original_pis = ranked.get_ranks(0);
+
+    CHECK(count_crossings(ranked) == 3);
+    mincross_stats st{};
+    const auto     result = mincross(ranked, mincross_params{.fixed_pis = true}, &st);
+    CHECK(st.num_crossings <= 3);
+    CHECK(count_crossings(result) == st.num_crossings);
+    CHECK(result.get_ranks(0) == original_pis);
+    check_rank_permutations(ranked, result);
 }

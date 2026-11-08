@@ -17,6 +17,8 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/equivalence_checking_utils.hpp"
 
@@ -71,7 +73,7 @@ TEST_CASE("Check name conservation", "[delete-virtual-pis]")
     const auto test_del = delete_virtual_pis(vpi);
     CHECK(test_del.num_virtual_pis() == 0);
     CHECK(test_del.num_pis() == 2);
-    CHECK(test_del.get_network_name() == "vpi");
+    CHECK_THAT(test_del.get_network_name(), Catch::Matchers::Equals("vpi"));
 
     // continue ntk creation
     const auto c  = vpi.create_virtual_pi(a);
@@ -87,7 +89,7 @@ TEST_CASE("Check name conservation", "[delete-virtual-pis]")
 
     const auto non_vpi = delete_virtual_pis(vpi);
     // network name
-    CHECK(non_vpi.get_network_name() == "vpi");
+    CHECK_THAT(non_vpi.get_network_name(), Catch::Matchers::Equals("vpi"));
 }
 
 TEST_CASE("Delete Virtual PIs with depth view", "[delete-virtual-pis]")

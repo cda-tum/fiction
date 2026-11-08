@@ -226,7 +226,7 @@ TEST_CASE("Ranked virtual-PI removal propagates allocation failure and preserves
         CHECK(ranked.get_all_ranks() == expected);
         CHECK(ranked.num_pis() == 3);
         CHECK(ranked.num_virtual_pis() == 1);
-        CHECK(ranked.num_pos() == 1);
+        REQUIRE(ranked.num_pos() == 1);
         CHECK(ranked.po_at(0) == gate);
         CHECK(ranked.get_real_pi(ntk.get_node(alias)) == ntk.get_node(a));
         CHECK(mockturtle::simulate<kitty::dynamic_truth_table>(

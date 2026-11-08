@@ -18,6 +18,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/progress_recorder.hpp"
@@ -308,7 +309,7 @@ TEST_CASE("Displaced layouts retain their name and stationary defects", "[displa
 
     REQUIRE(domain.operational_values.size() == 1);
     const auto& displaced = domain.operational_values.front().first;
-    CHECK(displaced.get_layout_name() == lyt.get_layout_name());
+    CHECK_THAT(displaced.get_layout_name(), Catch::Matchers::Equals(lyt.get_layout_name()));
     CHECK(displaced.defects() == lyt.defects());
     CHECK(displaced.sidbs() == lyt.sidbs());
 }

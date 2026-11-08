@@ -17,8 +17,11 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "fiction/utils/version_info.hpp"
+#include "utils/scoped_temp_directory.hpp"
 
 #include <fiction/technology/fcn/io/cell_layout_svg.hpp>
 #include <fiction/technology/mol_qca/io/write_mol_qca_layout_svg.hpp>
@@ -299,9 +302,10 @@ TEST_CASE("Generate MolQCA layout in SVG", "[write-mol-qca-layout-svg]")
     {
         const auto simple = GENERATE(false, true);
         CAPTURE(simple);
-        const write_mol_qca_layout_svg_params params{.simple = simple};
-        const auto filename = std::filesystem::temp_directory_path() /
-                              ("fiction_mol_qca_layout_" + std::to_string(std::random_device{}()) + ".svg");
+        const write_mol_qca_layout_svg_params      params{.simple = simple};
+        const fiction::test::scoped_temp_directory directory{
+            std::filesystem::temp_directory_path(), "fiction-mol-qca-svg-" + std::to_string(std::random_device{}())};
+        const auto filename = directory.path() / "layout.svg";
 
         write_mol_qca_layout_svg(layout, filename.string(), params);
 
@@ -310,12 +314,9 @@ TEST_CASE("Generate MolQCA layout in SVG", "[write-mol-qca-layout-svg]")
 
         const std::string svg{std::istreambuf_iterator<char>{file}, std::istreambuf_iterator<char>{}};
 
-        file.close();
-        std::filesystem::remove(filename);
-
         if (!simple)
         {
-            CHECK(svg.find("C0") != std::string::npos);
+            CHECK_THAT(svg, Catch::Matchers::ContainsSubstring("C0"));
         }
 
         CHECK(normalize_svg(svg) ==
@@ -355,8 +356,10 @@ TEST_CASE("MolQCA SVG reports unsupported cell types and preserves files", "[wri
 
     SECTION("file")
     {
-        const auto filename = std::filesystem::temp_directory_path() /
-                              ("fiction-mol-qca-svg-error-" + std::to_string(std::random_device{}()) + ".svg");
+        const fiction::test::scoped_temp_directory directory{std::filesystem::temp_directory_path(),
+                                                             "fiction-mol-qca-svg-error-" +
+                                                                 std::to_string(std::random_device{}())};
+        const auto                                 filename = directory.path() / "layout.svg";
         {
             std::ofstream original{filename};
             REQUIRE(original.is_open());
@@ -367,8 +370,6 @@ TEST_CASE("MolQCA SVG reports unsupported cell types and preserves files", "[wri
         std::ifstream original{filename};
         REQUIRE(original.is_open());
         const std::string contents{std::istreambuf_iterator<char>{original}, std::istreambuf_iterator<char>{}};
-        original.close();
-        std::filesystem::remove(filename);
-        CHECK(contents == "sentinel");
+        CHECK_THAT(contents, Catch::Matchers::Equals("sentinel"));
     }
 }

@@ -18,6 +18,8 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
@@ -164,7 +166,7 @@ TEST_CASE("A single crossing becomes one crossing gate", "[crossing-gate-planari
 
     std::ostringstream os{};
     st.report(os);
-    CHECK(os.str().find("crossings") != std::string::npos);
+    CHECK_THAT(os.str(), Catch::Matchers::ContainsSubstring("crossings"));
 }
 
 TEST_CASE("Planar networks are copied without crossing gates", "[crossing-gate-planarization]")

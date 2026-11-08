@@ -7509,15 +7509,15 @@ Returns:
 
 static const char *mkd_doc_fiction_networks_technology_network_create_dot = R"doc(Creates a DOT gate with the supplied signals.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_create_ge = R"doc(Creates a GE gate with the supplied signals.)doc";
+static const char *mkd_doc_fiction_networks_technology_network_create_ge = R"doc(Creates a GE gate with the function `!a | b`.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_create_gt = R"doc(Creates a GT gate with the supplied signals.)doc";
+static const char *mkd_doc_fiction_networks_technology_network_create_gt = R"doc(Creates a GT gate with the function `!a & b`.)doc";
 
 static const char *mkd_doc_fiction_networks_technology_network_create_ite = R"doc(Creates an ITE gate with the supplied signals.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_create_le = R"doc(Creates an LE gate with the supplied signals.)doc";
+static const char *mkd_doc_fiction_networks_technology_network_create_le = R"doc(Creates an LE gate with the function `a | !b`.)doc";
 
-static const char *mkd_doc_fiction_networks_technology_network_create_lt = R"doc(Creates an LT gate with the supplied signals.)doc";
+static const char *mkd_doc_fiction_networks_technology_network_create_lt = R"doc(Creates an LT gate with the function `a & !b`.)doc";
 
 static const char *mkd_doc_fiction_networks_technology_network_create_maj = R"doc(Creates a MAJ gate with the supplied signals.)doc";
 
@@ -12705,7 +12705,10 @@ every step. The heuristic must be consistent with the step costs:
 `h(u) <= cost(u, v) + h(v)` for every traversable step, with
 `h(target) = 0`. Step costs must be nonnegative. Manhattan and
 Euclidean distance satisfy this condition for unit-cost Cartesian
-steps. See `distance_functor` for implementations.
+steps. The default uses Manhattan distance for Cartesian layouts and
+Chebyshev distance for shifted Cartesian and hexagonal layouts, whose
+unit-cost steps can change both planar coordinates. See
+`distance_functor` for implementations.
 
 Paths do not pass obstructed coordinates or connections, except that
 the target is never obstructed. A coordinate or connection is
@@ -13244,7 +13247,9 @@ interface (see `gate_layout`) and respects the underlying information
 flow imposed by `layout`'s clocking scheme. This algorithm does
 neither generate duplicate nor looping paths, even in a cyclic
 clocking scheme. That is, along each path, each coordinate can occur
-at maximum once.
+at maximum once. The number of paths can grow exponentially with the
+layout size, as can the time and memory needed to enumerate and store
+them.
 
 Paths do not pass obstructed coordinates or connections, except that
 the target is never obstructed. A coordinate or connection is
@@ -13575,8 +13580,8 @@ loops from a source to a target coordinate. If :math:`k` is larger
 than the number of possible paths from source to target, the size of
 the returned path collection will be smaller than :math:`k`.
 
-This implementation uses the A* algorithm with the Manhattan distance
-function internally.
+This implementation uses A* with the default unit-cost heuristic for
+the layout geometry internally.
 
 If k is zero, this function returns an empty collection without
 checking endpoint bounds.
@@ -14052,6 +14057,10 @@ Returns:
     The black list.
 
 Raises:
+    IndexError: If a defect has an invalid basis or an affected gate
+                has no port entry.
+    OverflowError: If an absolute gate cell exceeds the coordinate
+                   range.
     MemoryError: If allocation fails while preparing or building the
                  black list.
 
@@ -15458,6 +15467,8 @@ Raises:
     fcn::unsupported_gate_orientation_exception: If a gate orientation
                                                  has no
                                                  implementation.
+    IndexError: If a surface defect has an invalid lattice basis.
+    OverflowError: If a placed gate cell exceeds the coordinate range.
     unsuccessful_pr_error: If placement and routing cannot satisfy the
                            blacklist.
 
@@ -15814,21 +15825,21 @@ static const char *mkd_doc_fiction_sidb_io_missing_position_exception =
 R"doc(Exception thrown when a missing SiDB position is encountered in the
 parsed file.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_missing_position_exception_line = R"doc(Line number in the input file.)doc";
+static const char *mkd_doc_fiction_sidb_io_missing_position_exception_line = R"doc(Zero-based index among recognized rows.)doc";
 
 static const char *mkd_doc_fiction_sidb_io_missing_position_exception_missing_position_exception =
-R"doc(Record the input line that lacks a SiDB position.
+R"doc(Record the recognized row that lacks a SiDB position.
 
 Args:
-    n: Line number in the input file.
+    n: Zero-based index among recognized rows.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_io_missing_position_exception_where =
-R"doc(Return the input line that lacks a SiDB position.
+R"doc(Return the recognized row that lacks a SiDB position.
 
 Returns:
-    Line number in the input file.
+    Zero-based index among recognized rows.
 
 )doc";
 
@@ -16349,6 +16360,10 @@ Returns:
     Sites influenced by the defect at `s`; empty if `s` holds no
     defect.
 
+Note:
+    The result materializes every influenced site and may require
+    substantial memory.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_layout_all_affected_sidbs =
@@ -16364,6 +16379,10 @@ Args:
 
 Returns:
     Sites influenced by any defect.
+
+Note:
+    The result materializes every influenced site and may require
+    substantial memory.
 
 )doc";
 
@@ -25874,8 +25893,8 @@ one of the outputs of a crossing wire multi-output function in two
 variables. The function returns a vector containing two truth tables.
 
 Returns:
-    Vector of truth tables, each representing an output of the
-    crossing wire function.
+    Truth tables for output ports 0 and 1, passing bits 0 and 1 of the
+    input index, respectively.
 
 )doc";
 
@@ -25897,8 +25916,8 @@ one of the outputs of a double wire multi-output function in two
 variables. The function returns a vector containing two truth tables.
 
 Returns:
-    Vector of truth tables, each representing an output of the double
-    wire function.
+    Truth tables for output ports 0 and 1, passing bits 1 and 0 of the
+    input index, respectively.
 
 )doc";
 
@@ -25926,7 +25945,8 @@ Returns:
 
 static const char *mkd_doc_fiction_synthesis_create_ge_tt =
 R"doc(Creates and returns a truth table that implements the greater-than-or-
-equal function in two variables.
+equal function in two variables. Variable 0 is a and variable 1 is b;
+the function is `!a | b`.
 
 Returns:
     Greater-than-or-equal function in two variables.
@@ -25935,7 +25955,8 @@ Returns:
 
 static const char *mkd_doc_fiction_synthesis_create_gt_tt =
 R"doc(Creates and returns a truth table that implements the greater-than
-function in two variables.
+function in two variables. Variable 0 is a and variable 1 is b; the
+function is `!a & b`.
 
 Returns:
     Greater-than function in two variables.
@@ -25951,8 +25972,7 @@ one of the outputs of a half adder multi-output function in two
 variables. The function returns a vector containing two truth tables.
 
 Returns:
-    Vector of truth tables, each representing an output of the half
-    adder function.
+    Truth tables for output ports 0 (sum, XOR) and 1 (carry, AND).
 
 )doc";
 
@@ -25976,7 +25996,8 @@ Returns:
 
 static const char *mkd_doc_fiction_synthesis_create_le_tt =
 R"doc(Creates and returns a truth table that implements the less-than-or-
-equal function in two variables.
+equal function in two variables. Variable 0 is a and variable 1 is b;
+the function is `a | !b`.
 
 Returns:
     Less-than-or-equal function in two variables.
@@ -25985,7 +26006,8 @@ Returns:
 
 static const char *mkd_doc_fiction_synthesis_create_lt_tt =
 R"doc(Creates and returns a truth table that implements the less-than
-function in two variables.
+function in two variables. Variable 0 is a and variable 1 is b; the
+function is `a & !b`.
 
 Returns:
     Less-than function in two variables.
@@ -28299,14 +28321,12 @@ Args:
 static const char *mkd_doc_fiction_synthesis_planarization_stats_time_total = R"doc(Runtime of the whole pipeline.)doc";
 
 static const char *mkd_doc_fiction_synthesis_technology_mapping =
-R"doc(Performs technology mapping on the given network. Technology mapping
-is the process of replacing the gates in a network with gates from a
-given technology library. This function utilizes `mockturtle::emap` to
-perform the technology mapping. This function is a wrapper around that
-interface to provide a more convenient usage.
+R"doc(Maps a combinational logic network to gates from the provided
+technology library using `mockturtle::emap`. Non-combinational inputs
+report mapping failure before library validation.
 
 Args:
-    ntk: Input logic network.
+    ntk: Combinational input logic network.
     params: Technology mapping parameters.
     pst: Technology mapping statistics.
 
@@ -28314,7 +28334,12 @@ Template Args:
     Ntk: Input logic network type.
 
 Returns:
-    Mapped network exclusively using gates from the provided library.
+    Mapped network exclusively using gates from the provided library,
+    or an empty network on mapping failure, including non-
+    combinational input. The mapper requires a library match for each
+    source gate and can reject a network whose overall function is
+    representable by the library. Check
+    `pst->mapper_stats.mapping_error` when statistics are supplied.
 
 Raises:
     missing_required_gates_exception: if the technology library does
@@ -28766,6 +28791,9 @@ Returns:
     A copy of the input network with reordered ranks to reduce edge
     crossings.
 
+Raises:
+    ValueError: If the network is not balanced.
+
 )doc";
 
 static const char *mkd_doc_fiction_utils_graph_mincross_impl =
@@ -28783,7 +28811,7 @@ arrays, once.
 
 )doc";
 
-static const char *mkd_doc_fiction_utils_graph_mincross_impl_count_crossings =
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_count_pair_crossings =
 R"doc(Adds the crossings between the edges of two nodes to a pair of
 counters, for both orders of the nodes.
 
@@ -28799,10 +28827,6 @@ Args:
     swapped: Receives the crossings with the nodes swapped.
 
 )doc";
-
-static const char *mkd_doc_fiction_utils_graph_mincross_impl_fanout_ntk =
-R"doc(Fanout-augmented view of the network for efficient traversal and
-connectivity queries.)doc";
 
 static const char *mkd_doc_fiction_utils_graph_mincross_impl_in_begin =
 R"doc(Offsets of the fanin lists in `in_nodes`: node `i` has the entries

@@ -21,6 +21,8 @@ defaults:
 
 env:
   Z3_VERSION: 5.1.0
+  FICTION_REQUIRE_Z3: "1"
+  FICTION_REQUIRE_ALGLIB: "1"
 
 jobs:
   python-tests:

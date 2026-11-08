@@ -19,6 +19,8 @@
 
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/traits.hpp>
@@ -31,7 +33,7 @@
 #include <mockturtle/networks/sequential.hpp>
 #include <mockturtle/traits.hpp>
 
-#include <algorithm>
+#include <array>
 #include <cstdint>
 #include <vector>
 
@@ -144,8 +146,7 @@ TEST_CASE("gate and fanin iteration agree with the klut network", "[technology-n
     base.foreach_gate([&base_gates](const auto& n) { base_gates.push_back(n); });
 
     CHECK(gates == base_gates);
-    std::ranges::sort(gates);
-    CHECK(gates == std::vector<uint64_t>(pool.begin() + 40, pool.end()));
+    CHECK_THAT(gates, Catch::Matchers::UnorderedRangeEquals(std::vector<uint64_t>(pool.begin() + 40, pool.end())));
 
     tec.foreach_node(
         [&tec, &base, &pool](const auto& n)
@@ -402,7 +403,10 @@ TEST_CASE("clone a node in a technology network", "[technology-network]")
     auto f2 = tec2.clone_node(tec1, tec1.get_node(f1), {a2, b2});
     CHECK(tec2.size() == 5);
 
-    tec2.foreach_fanin(tec2.get_node(f2), [&](auto const& s) { CHECK_FALSE(tec2.is_complemented(s)); });
+    std::vector<technology_network::signal> fanins{};
+    tec2.foreach_fanin(tec2.get_node(f2), [&](const auto signal) { fanins.push_back(signal); });
+    CHECK(fanins == std::vector<technology_network::signal>{a2, b2});
+    CHECK(tec2.is_and(tec2.get_node(f2)));
 }
 
 TEST_CASE("compute functions from AND and NOT gates in technology networks", "[technology-network]")
@@ -555,12 +559,9 @@ TEST_CASE("substitute node by another", "[technology-network]")
 
     CHECK(nodes == std::vector<technology_network::node>{c0, c1, a, b, n1, n2, n3, n4});
     CHECK(tec.fanout_size(n4) == 1);
-    tec.foreach_po(
-        [&](auto f)
-        {
-            CHECK(f == n4);
-            return false;
-        });
+    std::vector<technology_network::signal> outputs{};
+    tec.foreach_po([&](const auto f) { outputs.push_back(f); });
+    CHECK(outputs == std::vector<technology_network::signal>{n4});
 
     // XOR with AND and OR
     const auto n5 = tec.create_node({a, b}, tt_le);
@@ -579,12 +580,9 @@ TEST_CASE("substitute node by another", "[technology-network]")
     CHECK(tec.size() == 11);
     CHECK(tec.fanout_size(n4) == 0);
     CHECK(tec.fanout_size(n7) == 1);
-    tec.foreach_po(
-        [&](auto f)
-        {
-            CHECK(f == n7);
-            return false;
-        });
+    outputs.clear();
+    tec.foreach_po([&](const auto f) { outputs.push_back(f); });
+    CHECK(outputs == std::vector<technology_network::signal>{n7});
 }
 
 TEST_CASE("structural properties of a technology network", "[technology-network]")
@@ -733,16 +731,16 @@ TEST_CASE("node and signal iteration in a technology network", "[technology-netw
         REQUIRE(visited.size() == 6);
         /** @brief First value of the full traversal, without imposing a node order. */
         const auto first = visited.front();
-        std::ranges::sort(visited);
-        CHECK(visited == std::vector<technology_network::node>{tec.get_node(tec.get_constant(false)),
-                                                               tec.get_node(tec.get_constant(true)), x1, x2, f1, f2});
+        CHECK_THAT(visited,
+                   Catch::Matchers::UnorderedRangeEquals(std::vector<technology_network::node>{
+                       tec.get_node(tec.get_constant(false)), tec.get_node(tec.get_constant(true)), x1, x2, f1, f2}));
         CHECK(indices == std::vector<uint32_t>{0, 1, 2, 3, 4, 5});
 
         visited.clear();
         tec.foreach_node([&](const auto value) { visited.push_back(value); });
-        std::ranges::sort(visited);
-        CHECK(visited == std::vector<technology_network::node>{tec.get_node(tec.get_constant(false)),
-                                                               tec.get_node(tec.get_constant(true)), x1, x2, f1, f2});
+        CHECK_THAT(visited,
+                   Catch::Matchers::UnorderedRangeEquals(std::vector<technology_network::node>{
+                       tec.get_node(tec.get_constant(false)), tec.get_node(tec.get_constant(true)), x1, x2, f1, f2}));
 
         visited.clear();
         indices.clear();
@@ -858,20 +856,31 @@ TEST_CASE("custom node values in technology networks", "[technology-network]")
 
     CHECK(tec.size() == 6);
 
+    const std::array nodes{tec.get_node(tec.get_constant(false)),
+                           tec.get_node(tec.get_constant(true)),
+                           tec.get_node(x1),
+                           tec.get_node(x2),
+                           tec.get_node(f1),
+                           tec.get_node(f2)};
     tec.clear_values();
-    tec.foreach_node(
-        [&](auto n)
-        {
-            CHECK(tec.value(n) == 0);
-            tec.set_value(n, static_cast<uint32_t>(n));
-            CHECK(tec.value(n) == n);
-            CHECK(tec.incr_value(n) == n);
-            CHECK(tec.value(n) == n + 1);
-            CHECK(tec.decr_value(n) == n);
-            CHECK(tec.value(n) == n);
-        });
+    for (const auto n : nodes)
+    {
+        CAPTURE(n);
+        const auto value = static_cast<uint32_t>(n) + 1;
+        CHECK(tec.value(n) == 0);
+        tec.set_value(n, value);
+        CHECK(tec.value(n) == value);
+        CHECK(tec.incr_value(n) == value);
+        CHECK(tec.value(n) == value + 1);
+        CHECK(tec.decr_value(n) == value);
+        CHECK(tec.value(n) == value);
+    }
     tec.clear_values();
-    tec.foreach_node([&](auto n) { CHECK(tec.value(n) == 0); });
+    for (const auto n : nodes)
+    {
+        CAPTURE(n);
+        CHECK(tec.value(n) == 0);
+    }
 }
 
 TEST_CASE("visited values in technology networks", "[technology-network]")
@@ -891,16 +900,27 @@ TEST_CASE("visited values in technology networks", "[technology-network]")
 
     CHECK(tec.size() == 6);
 
+    const std::array nodes{tec.get_node(tec.get_constant(false)),
+                           tec.get_node(tec.get_constant(true)),
+                           tec.get_node(x1),
+                           tec.get_node(x2),
+                           tec.get_node(f1),
+                           tec.get_node(f2)};
     tec.clear_visited();
-    tec.foreach_node(
-        [&](auto n)
-        {
-            CHECK(tec.visited(n) == 0);
-            tec.set_visited(n, static_cast<uint32_t>(n));
-            CHECK(tec.visited(n) == n);
-        });
+    for (const auto n : nodes)
+    {
+        CAPTURE(n);
+        const auto value = static_cast<uint32_t>(n) + 1;
+        CHECK(tec.visited(n) == 0);
+        tec.set_visited(n, value);
+        CHECK(tec.visited(n) == value);
+    }
     tec.clear_visited();
-    tec.foreach_node([&](auto n) { CHECK(tec.visited(n) == 0); });
+    for (const auto n : nodes)
+    {
+        CAPTURE(n);
+        CHECK(tec.visited(n) == 0);
+    }
 }
 
 TEST_CASE("substitute PO signals", "[technology-network]")

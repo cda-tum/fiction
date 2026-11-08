@@ -14,7 +14,10 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
@@ -25,6 +28,7 @@
 #include <fiction/networks/mockturtle_utils.hpp>
 #include <fiction/synthesis/technology_mapping_library.hpp>
 
+#include <kitty/bit_operations.hpp>
 #include <kitty/dynamic_truth_table.hpp>
 #include <kitty/print.hpp>
 #include <lorina/common.hpp>
@@ -101,8 +105,8 @@ TEST_CASE("Extracted layout simulation", "[mockturtle]")
         const auto tables = mockturtle::simulate<kitty::dynamic_truth_table>(
             extract_layout_network(lyt), mockturtle::default_simulator<kitty::dynamic_truth_table>{lyt.num_pis()});
         REQUIRE(tables.size() == 2);
-        CHECK(kitty::to_hex(tables[0]) == "8");
-        CHECK(kitty::to_hex(tables[1]) == "e");
+        CHECK_THAT((kitty::to_hex(tables[0])), Catch::Matchers::Equals("8"));
+        CHECK_THAT((kitty::to_hex(tables[1])), Catch::Matchers::Equals("e"));
     }
     SECTION("Majority and XOR outputs")
     {
@@ -110,8 +114,8 @@ TEST_CASE("Extracted layout simulation", "[mockturtle]")
         const auto tables = mockturtle::simulate<kitty::dynamic_truth_table>(
             extract_layout_network(lyt), mockturtle::default_simulator<kitty::dynamic_truth_table>{lyt.num_pis()});
         REQUIRE(tables.size() == 2);
-        CHECK(kitty::to_hex(tables[0]) == "e8");
-        CHECK(kitty::to_hex(tables[1]) == "66");  // Two-input XOR in three variables.
+        CHECK_THAT((kitty::to_hex(tables[0])), Catch::Matchers::Equals("e8"));
+        CHECK_THAT((kitty::to_hex(tables[1])), Catch::Matchers::Equals("66"));  // Two-input XOR in three variables.
     }
     SECTION("Crossing outputs")
     {
@@ -119,8 +123,8 @@ TEST_CASE("Extracted layout simulation", "[mockturtle]")
         const auto tables = mockturtle::simulate<kitty::dynamic_truth_table>(
             extract_layout_network(lyt), mockturtle::default_simulator<kitty::dynamic_truth_table>{lyt.num_pis()});
         REQUIRE(tables.size() == 2);
-        CHECK(kitty::to_hex(tables[0]) == "8888");  // AND of the first two inputs.
-        CHECK(kitty::to_hex(tables[1]) == "f000");  // AND of the last two inputs.
+        CHECK_THAT((kitty::to_hex(tables[0])), Catch::Matchers::Equals("8888"));  // AND of the first two inputs.
+        CHECK_THAT((kitty::to_hex(tables[1])), Catch::Matchers::Equals("f000"));  // AND of the last two inputs.
     }
     SECTION("Synchronization elements")
     {
@@ -128,7 +132,7 @@ TEST_CASE("Extracted layout simulation", "[mockturtle]")
         const auto tables = mockturtle::simulate<kitty::dynamic_truth_table>(
             extract_layout_network(lyt), mockturtle::default_simulator<kitty::dynamic_truth_table>{lyt.num_pis()});
         REQUIRE(tables.size() == 1);
-        CHECK(kitty::to_hex(tables[0]) == "e");
+        CHECK_THAT((kitty::to_hex(tables[0])), Catch::Matchers::Equals("e"));
     }
 }
 
@@ -199,5 +203,32 @@ TEST_CASE("Technology mapping", "[mockturtle]")
         const mockturtle::tech_library<3> gate_lib{gates};
 
         check_all(gate_lib);
+    }
+}
+
+TEST_CASE("Half-adder blueprint names its sum and carry functions", "[mockturtle]")
+{
+    /** @brief Half-adder outputs evaluated independently of their declared order. */
+    const auto network = blueprints::half_adder_network<mockturtle::aig_network>();
+    /** @brief Complete output functions for the two primary inputs. */
+    const auto functions = mockturtle::simulate<kitty::dynamic_truth_table>(
+        network, mockturtle::default_simulator<kitty::dynamic_truth_table>{2});
+    REQUIRE(network.num_pos() == 2);
+    REQUIRE(functions.size() == 2);
+    CHECK_THAT((network.get_output_name(0)), Catch::Matchers::Equals("carry"));
+    CHECK_THAT((network.get_output_name(1)), Catch::Matchers::Equals("sum"));
+
+    for (uint32_t input{}; input < 4; ++input)
+    {
+        CAPTURE(input);
+        /** @brief Independent arithmetic sum of the two input bits. */
+        const auto sum = (input & 1u) + ((input >> 1u) & 1u);
+        for (uint32_t output{}; output < network.num_pos(); ++output)
+        {
+            CAPTURE(output, network.get_output_name(output));
+            /** @brief Named bit of the arithmetic sum. */
+            const auto expected = network.get_output_name(output) == "sum" ? (sum & 1u) != 0 : (sum & 2u) != 0;
+            CHECK(static_cast<bool>(kitty::get_bit(functions[output], input)) == expected);
+        }
     }
 }

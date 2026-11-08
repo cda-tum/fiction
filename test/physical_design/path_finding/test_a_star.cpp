@@ -14,9 +14,11 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
@@ -25,6 +27,7 @@
 #include <fiction/physical_design/path_finding/a_star.hpp>
 #include <fiction/physical_design/path_finding/cost.hpp>
 #include <fiction/physical_design/path_finding/distance.hpp>
+#include <fiction/physical_design/path_finding/k_shortest_paths.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
 
 #include <array>
@@ -332,6 +335,7 @@ TEST_CASE("A* minimizes nonuniform path costs", "[A*]")
     /** @brief The minimum-cost route has three edges. */
     const auto path = a_star(layout, {.source = {0, 0}, .target = {2, 1}}, estimate, cost);
     REQUIRE(path.size() == 4);
+    CHECK(path == layout_coordinate_path{{{0, 0}, {0, 1}, {1, 1}, {2, 1}}});
     CHECK(cost(path[0], path[1]) + cost(path[1], path[2]) + cost(path[2], path[3]) == 5);
 }
 
@@ -800,4 +804,42 @@ TEST_CASE("A* distance evaluations reject endpoints outside the layout", "[A*]")
     CHECK_THROWS_AS(a_star_distance(layout, {0, 0}, {-1, 0}), std::invalid_argument);
     CHECK_THROWS_AS(distance({2, 0}, {0, 0}), std::invalid_argument);
     CHECK_THROWS_AS(distance({0, 0}, {-1, 0}), std::invalid_argument);
+}
+
+TEST_CASE("Default A* heuristics preserve shortest offset-coordinate paths", "[A*]")
+{
+    /** @brief Coordinate geometries with unit-cost diagonal steps. */
+    const auto shifted = GENERATE(false, true);
+    CAPTURE(shifted);
+    /** @brief Checks an independent three-step route around one directed obstruction. */
+    const auto check = [](auto layout)
+    {
+        /** @brief Directed edge that excludes the misleading vertical continuation. */
+        layout.obstruct_connection({1, 1}, {1, 0});
+        layout.foreach_coordinate([&layout](const auto& site) { layout.assign_synchronization_element(site, 1); });
+        /** @brief Endpoints whose shortest route changes both axes in one step. */
+        const routing_objective objective{.source = {0, 3}, .target = {1, 0}};
+        /** @brief Independent route proving the three-step upper bound. */
+        const layout_coordinate_path expected{{0, 3}, {1, 2}, {0, 1}, {1, 0}};
+        for (std::size_t i = 1; i < expected.size(); ++i)
+        {
+            REQUIRE(layout.is_adjacent_of(expected[i - 1], expected[i]));
+            REQUIRE(layout.is_outgoing_clocked(expected[i - 1], expected[i]));
+            REQUIRE_FALSE(layout.is_obstructed_connection(expected[i - 1], expected[i]));
+        }
+        // Three is also a lower bound because each step changes y by at most one.
+        CHECK(a_star(layout, objective).size() == expected.size());
+        CHECK(a_star_distance(layout, objective.source, objective.target) == 3);
+        const auto paths = yen_k_shortest_paths(layout, objective, 1);
+        REQUIRE(paths.size() == 1);
+        CHECK(paths.front().size() == expected.size());
+    };
+    if (shifted)
+    {
+        check(shifted_cartesian_gate_layout{arrangement::ODD_ROW, {4, 4}, clocking::open()});
+    }
+    else
+    {
+        check(hexagonal_gate_layout{arrangement::ODD_ROW, {4, 4}, clocking::open()});
+    }
 }

@@ -14,7 +14,14 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
+
+#include "utils/progress_recorder.hpp"
 
 #include <fiction/utils/progress.hpp>
 
@@ -102,7 +109,7 @@ TEST_CASE("The first and the final count are always reported", "[progress]")
         }
     }
 
-    CHECK(rec.task == "items");
+    CHECK_THAT(rec.task, Catch::Matchers::Equals("items"));
     REQUIRE(rec.records.size() >= 2);
     CHECK(rec.records.front() == record{0, 10});
     CHECK(rec.records.back() == record{10, 10});
@@ -121,12 +128,12 @@ TEST_CASE("Intermediate reports are throttled to whole percents", "[progress]")
         CHECK(rec.records.size() == 1);
 
         reporter.advance(9);  // 10 of 1000 completes the first percent
-        CHECK(rec.records.size() == 2);
+        REQUIRE(rec.records.size() == 2);
         CHECK(rec.records.back() == record{10, 1000});
 
         let_throttle_pass();
         reporter.advance(25);
-        CHECK(rec.records.size() == 3);
+        REQUIRE(rec.records.size() == 3);
         CHECK(rec.records.back() == record{35, 1000});
     }
 
@@ -147,6 +154,7 @@ TEST_CASE("Intermediate reports are throttled in time", "[progress]")
     }
 
     // a tight loop of 100 items finishes well within the report interval
+    REQUIRE_FALSE(rec.records.empty());
     CHECK(rec.records.size() < 100);
     CHECK(rec.records.front() == record{0, 100});
     CHECK(rec.records.back() == record{100, 100});
@@ -165,7 +173,7 @@ TEST_CASE("An unknown total is reported as zero", "[progress]")
         CHECK(rec.records.size() == 1);
 
         reporter.advance();
-        CHECK(rec.records.size() == 2);
+        REQUIRE(rec.records.size() == 2);
         CHECK(rec.records.back() == record{64, 0});
     }
 
@@ -181,7 +189,7 @@ TEST_CASE("The total can be set once it is known", "[progress]")
         utils::progress_reporter reporter{rec.callback(), "items"};
 
         reporter.set_total(5);
-        CHECK(rec.records == std::vector<record>{{0, 0}, {0, 5}});
+        REQUIRE(rec.records == std::vector<record>{{0, 0}, {0, 5}});
 
         reporter.advance(5);
     }
@@ -242,8 +250,7 @@ TEST_CASE("Two reporters share a caller-synchronized callback", "[progress]")
     first.join();
     second.join();
 
-    std::ranges::sort(rec.records);
-    CHECK(rec.records == std::vector<record>{{0, 3}, {0, 3}, {3, 3}, {3, 3}});
+    CHECK_THAT(rec.records, Catch::Matchers::UnorderedRangeEquals(std::vector<record>{{0, 3}, {0, 3}, {3, 3}, {3, 3}}));
 }
 
 TEST_CASE("Concurrent advances are counted exactly once", "[progress]")
@@ -359,8 +366,7 @@ TEST_CASE("Worker progress preserves identities and clears activity", "[progress
         }
     }
     CHECK(valid);
-    std::ranges::sort(finished);
-    CHECK(finished == std::vector<std::size_t>{0, 1, 2, 3});
+    CHECK_THAT(finished, Catch::Matchers::UnorderedRangeEquals(std::vector<std::size_t>{0, 1, 2, 3}));
     CHECK(std::ranges::none_of(active, [](const bool running) { return running; }));
     CHECK(std::ranges::all_of(counts, [](const auto count) { return count == 3; }));
 }
@@ -380,4 +386,50 @@ TEST_CASE("Worker progress clears unfinished work during unwinding", "[progress]
     };
     CHECK_THROWS_AS(unwind(), std::runtime_error);
     CHECK_FALSE(active);
+}
+
+TEST_CASE("Progress recorder checks task histories", "[progress]")
+{
+    /** @brief Independent histories with expected consistency and final counts. */
+    const auto [name, reports, consistent, final] =
+        GENERATE(table<const char*, std::vector<progress_record>, bool, std::size_t>(
+            {{"missing", {}, false, 0},
+             {"other task", {{"other", 1, 1}}, false, 0},
+             {"nonzero start", {{"items", 1, 1}}, false, 1},
+             {"backwards", {{"items", 0, 3}, {"items", 2, 3}, {"items", 1, 3}}, false, 1},
+             {"backwards complete", {{"items", 0, 3}, {"items", 2, 3}, {"items", 1, 3}, {"items", 3, 3}}, false, 3},
+             {"incomplete", {{"items", 0, 3}, {"items", 2, 3}}, false, 2},
+             {"overshoot", {{"items", 0, 3}, {"items", 4, 3}}, false, 4},
+             {"unknown total", {{"items", 0, 0}, {"items", 2, 0}}, true, 2},
+             {"restart", {{"items", 0, 3}, {"items", 2, 3}, {"items", 0, 4}, {"items", 4, 4}}, true, 4},
+             {"interleaved", {{"items", 0, 0}, {"other", 8, 8}, {"items", 0, 3}, {"items", 3, 3}}, true, 3},
+             {"duplicates", {{"items", 0, 0}, {"items", 0, 0}}, true, 0},
+             {"last match", {{"items", 0, 9}, {"items", 8, 9}, {"other", 10, 10}, {"items", 0, 0}}, true, 0}}));
+    CAPTURE(name);
+
+    /** @brief Recorder populated before inspecting the complete history. */
+    progress_recorder rec{};
+    /** @brief Callback whose recorder outlives each invocation. */
+    const auto callback = rec.callback();
+    for (const auto& report : reports)
+    {
+        callback(report.task, report.done, report.total);
+    }
+
+    CHECK(rec.is_consistent("items") == consistent);
+    CHECK(rec.final_count("items") == final);
+    const auto  filtered = rec.reports_of("items");
+    std::size_t index{};
+    for (const auto& report : reports)
+    {
+        if (report.task == "items")
+        {
+            REQUIRE(index < filtered.size());
+            CHECK_THAT(filtered[index].task, Catch::Matchers::Equals(report.task));
+            CHECK(filtered[index].done == report.done);
+            CHECK(filtered[index].total == report.total);
+            ++index;
+        }
+    }
+    CHECK(index == filtered.size());
 }

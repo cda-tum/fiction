@@ -25,6 +25,8 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_base.hpp>
 
+#include <array>
+#include <cstddef>
 #include <cstdint>
 #include <limits>
 #include <tuple>
@@ -41,12 +43,15 @@ void check_identity_conversion(const arrangement a)
 {
     const hexagonal_layout layout{a, {10, 10}};
     CAPTURE(static_cast<int>(a));
-    layout.foreach_coordinate(
-        [&layout](const auto& coord)
+    for (int32_t y = 0; y < 10; ++y)
+    {
+        for (int32_t x = 0; x < 10; ++x)
         {
+            const layout_base::coordinate coord{x, y};
             CAPTURE(coord);
             CHECK(layout.to_offset_coordinate(layout.to_cube_coordinate(coord)) == coord);
-        });
+        }
+    }
 }
 
 TEST_CASE("Coordinate creation", "[hexagonal-layout]")
@@ -66,65 +71,75 @@ TEST_CASE("Coordinate creation", "[hexagonal-layout]")
 
 TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
 {
+    using layout = hexagonal_layout;
+    /** @brief Offset coordinates; cube literals follow the cited Red Blob row and column conversion formulas. */
+    const std::array<layout::coordinate, 10> offsets{
+        {{0, 0}, {1, 0}, {2, 0}, {0, 1}, {1, 1}, {2, 1}, {-1, -1}, {-2, -2}, {-1, -2}, {-2, -1}}};
+    /** @brief Checks a complete set of literal conversions for one arrangement. */
+    const auto check_conversion = [&](const arrangement arr, const std::array<layout::cube_coordinate, 10>& expected)
+    {
+        check_identity_conversion(arr);
+        const layout lyt{arr, {3, 3}};
+        for (std::size_t i = 0; i < offsets.size(); ++i)
+        {
+            const auto  actual = lyt.to_cube_coordinate(offsets.at(i));
+            const auto& wanted = expected.at(i);
+            CAPTURE(i, offsets.at(i), actual.x, actual.y, actual.z, wanted.x, wanted.y, wanted.z);
+            CHECK(actual == wanted);
+        }
+    };
+
     SECTION("odd row")
     {
-        using layout       = hexagonal_layout;
-        constexpr auto arr = arrangement::ODD_ROW;
-        check_identity_conversion(arr);
-
-        const layout lyt{arr, {3, 3}};
-
-        CHECK(lyt.to_cube_coordinate({0, 0}) == typename layout::cube_coordinate{0, 0, 0});
-        CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, -1, 0});
-        CHECK(lyt.to_cube_coordinate({2, 0}) == typename layout::cube_coordinate{+2, -2, 0});
-        CHECK(lyt.to_cube_coordinate({0, 1}) == typename layout::cube_coordinate{0, -1, +1});
-        CHECK(lyt.to_cube_coordinate({1, 1}) == typename layout::cube_coordinate{+1, -2, +1});
-        CHECK(lyt.to_cube_coordinate({2, 1}) == typename layout::cube_coordinate{+2, -3, +1});
+        check_conversion(arrangement::ODD_ROW, {{{0, 0, 0},
+                                                 {1, -1, 0},
+                                                 {2, -2, 0},
+                                                 {0, -1, 1},
+                                                 {1, -2, 1},
+                                                 {2, -3, 1},
+                                                 {0, 1, -1},
+                                                 {-1, 3, -2},
+                                                 {0, 2, -2},
+                                                 {-1, 2, -1}}});
     }
     SECTION("even row")
     {
-        using layout       = hexagonal_layout;
-        constexpr auto arr = arrangement::EVEN_ROW;
-        check_identity_conversion(arr);
-
-        const layout lyt{arr, {3, 3}};
-
-        CHECK(lyt.to_cube_coordinate({0, 0}) == typename layout::cube_coordinate{0, 0, 0});
-        CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, -1, 0});
-        CHECK(lyt.to_cube_coordinate({2, 0}) == typename layout::cube_coordinate{+2, -2, 0});
-        CHECK(lyt.to_cube_coordinate({0, 1}) == typename layout::cube_coordinate{-1, 0, +1});
-        CHECK(lyt.to_cube_coordinate({1, 1}) == typename layout::cube_coordinate{0, -1, +1});
-        CHECK(lyt.to_cube_coordinate({2, 1}) == typename layout::cube_coordinate{+1, -2, +1});
+        check_conversion(arrangement::EVEN_ROW, {{{0, 0, 0},
+                                                  {1, -1, 0},
+                                                  {2, -2, 0},
+                                                  {-1, 0, 1},
+                                                  {0, -1, 1},
+                                                  {1, -2, 1},
+                                                  {-1, 2, -1},
+                                                  {-1, 3, -2},
+                                                  {0, 2, -2},
+                                                  {-2, 3, -1}}});
     }
     SECTION("odd column")
     {
-        using layout       = hexagonal_layout;
-        constexpr auto arr = arrangement::ODD_COLUMN;
-        check_identity_conversion(arr);
-
-        const layout lyt{arr, {3, 3}};
-
-        CHECK(lyt.to_cube_coordinate({0, 0}) == typename layout::cube_coordinate{0, 0, 0});
-        CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, -1, 0});
-        CHECK(lyt.to_cube_coordinate({2, 0}) == typename layout::cube_coordinate{+2, -1, -1});
-        CHECK(lyt.to_cube_coordinate({0, 1}) == typename layout::cube_coordinate{0, -1, +1});
-        CHECK(lyt.to_cube_coordinate({1, 1}) == typename layout::cube_coordinate{+1, -2, +1});
-        CHECK(lyt.to_cube_coordinate({2, 1}) == typename layout::cube_coordinate{+2, -2, 0});
+        check_conversion(arrangement::ODD_COLUMN, {{{0, 0, 0},
+                                                    {1, -1, 0},
+                                                    {2, -1, -1},
+                                                    {0, -1, 1},
+                                                    {1, -2, 1},
+                                                    {2, -2, 0},
+                                                    {-1, 1, 0},
+                                                    {-2, 3, -1},
+                                                    {-1, 2, -1},
+                                                    {-2, 2, 0}}});
     }
     SECTION("even column")
     {
-        using layout       = hexagonal_layout;
-        constexpr auto arr = arrangement::EVEN_COLUMN;
-        check_identity_conversion(arr);
-
-        const layout lyt{arr, {3, 3}};
-
-        CHECK(lyt.to_cube_coordinate({0, 0}) == typename layout::cube_coordinate{0, 0, 0});
-        CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, 0, -1});
-        CHECK(lyt.to_cube_coordinate({2, 0}) == typename layout::cube_coordinate{+2, -1, -1});
-        CHECK(lyt.to_cube_coordinate({0, 1}) == typename layout::cube_coordinate{0, -1, +1});
-        CHECK(lyt.to_cube_coordinate({1, 1}) == typename layout::cube_coordinate{+1, -1, 0});
-        CHECK(lyt.to_cube_coordinate({2, 1}) == typename layout::cube_coordinate{+2, -2, 0});
+        check_conversion(arrangement::EVEN_COLUMN, {{{0, 0, 0},
+                                                     {1, 0, -1},
+                                                     {2, -1, -1},
+                                                     {0, -1, 1},
+                                                     {1, -1, 0},
+                                                     {2, -2, 0},
+                                                     {-1, 2, -1},
+                                                     {-2, 3, -1},
+                                                     {-1, 3, -2},
+                                                     {-2, 2, 0}}});
     }
 }
 

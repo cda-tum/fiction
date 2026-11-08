@@ -17,6 +17,8 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include <fiction/technology/mol_qca/layout.hpp>
 
@@ -48,7 +50,7 @@ TEST_CASE("molQCA layouts are planar", "[mol-qca-layout]")
     layout lyt{{9, 9, 1}, "wire"};
 
     CHECK(lyt.layers() == 1);
-    CHECK(lyt.get_layout_name() == "wire");
+    CHECK_THAT(lyt.get_layout_name(), Catch::Matchers::Equals("wire"));
 
     lyt.assign_cell_type({0, 4}, cell_type::INPUT);
     lyt.assign_cell_type({1, 4}, cell_type::NORMAL2);

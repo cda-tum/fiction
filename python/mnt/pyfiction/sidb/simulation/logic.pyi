@@ -980,9 +980,9 @@ class parameter_point:
 
     def __eq__(self, other: parameter_point) -> bool:
         """
-        Equality operator. Checks if this parameter point is equal to another
-        point within a specified tolerance. The tolerance is defined by
-        `constants::ERROR_MARGIN`.
+        Equality operator. Finite values within the integer grid use cells of
+        width `ERROR_MARGIN`. Values outside the grid compare exactly, and all
+        NaN values compare equal.
 
         Args:
             other: Other parameter point to compare with.
@@ -993,7 +993,7 @@ class parameter_point:
 
     def __ne__(self, other: parameter_point) -> bool:
         """
-        Inequality operator. Checks if this parameter point is not equal to another point within the tolerance defined by `constants::ERROR_MARGIN`.
+        Inequality operator. Returns the negation of equality.
 
         :param other: Other parameter point to compare with.
         :return: ``True`` iff the parameter points are not equal.

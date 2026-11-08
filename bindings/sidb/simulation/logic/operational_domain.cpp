@@ -841,11 +841,8 @@ void register_operational_domain(nb::module_& m)
 
         // NOLINTBEGIN(misc-redundant-expression)
         .def(nb::self == nb::self, nb::arg("other"), DOC(fiction_sidb_simulation_logic_parameter_point_operator_eq))
-        // `parameter_point` no longer declares an `operator!=`; C++20 rewrites `a != b` as `!(a == b)`, so the
-        // binding still works, but there is no generated docstring to reference for it anymore
         .def(nb::self != nb::self, nb::arg("other"),
-             "Inequality operator. Checks if this parameter point is not equal to another point within the "
-             "tolerance defined by `constants::ERROR_MARGIN`.\n\n"
+             "Inequality operator. Returns the negation of equality.\n\n"
              ":param other: Other parameter point to compare with.\n"
              ":return: ``True`` iff the parameter points are not equal.")
         // NOLINTEND(misc-redundant-expression)

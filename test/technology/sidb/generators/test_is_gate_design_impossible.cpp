@@ -15,10 +15,12 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include "catch2/catch_test_macros.hpp"
-#include "fiction/technology/sidb/generators/is_gate_design_impossible.hpp"
+#include <catch2/catch_test_macros.hpp>
+
+#include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
+#include <fiction/technology/sidb/generators/is_gate_design_impossible.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
@@ -42,46 +44,27 @@ TEST_CASE("Reject an empty gate specification", "[is-gate-design-impossible]")
 
 TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-gate-design-impossible]")
 {
-
-    layout lyt{};
-
-    lyt.assign_sidb({0, 0, 1}, dot_tag::INPUT);
-    lyt.assign_sidb({2, 1, 1}, dot_tag::INPUT);
-
-    lyt.assign_sidb({20, 0, 1}, dot_tag::INPUT);
+    auto lyt = blueprints::siqad_and_gate();
+    lyt.assign_sidb({18, 1, 1}, dot_tag::EMPTY);
     lyt.assign_sidb({19, 1, 1}, dot_tag::INPUT);
-
-    lyt.assign_sidb({4, 2, 1}, dot_tag::NORMAL);
-    lyt.assign_sidb({6, 3, 1}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({14, 3, 1}, dot_tag::NORMAL);
-    lyt.assign_sidb({16, 2, 1}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({10, 6, 0}, dot_tag::OUTPUT);
-    lyt.assign_sidb({10, 7, 0}, dot_tag::OUTPUT);
-
-    lyt.assign_sidb({10, 9, 1}, dot_tag::NORMAL);
+    const is_gate_design_impossible_params params{.sim_params = simulation_parameters{2, -0.28}};
+    const std::vector                      spec{create_and_tt()};
 
     SECTION("without defect")
     {
-        CHECK(!is_gate_design_impossible(
-            lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
-            is_gate_design_impossible_params{.sim_params = simulation_parameters{2, -0.28}}));
+        CHECK_FALSE(is_gate_design_impossible(lyt, spec, params));
     }
 
     SECTION("with defect")
     {
         lyt.assign_defect({12, 6, 0}, defect{defect_type::SI_VACANCY, -1, 10, 5});
         lyt.assign_defect({11, 6, 0}, defect{defect_type::SI_VACANCY, -1, 10, 5});
-        CHECK(
-            is_gate_design_impossible(lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
-                                      is_gate_design_impossible_params{.sim_params = simulation_parameters{2, -0.28}}));
+        CHECK(is_gate_design_impossible(lyt, spec, params));
     }
 }
 
 TEST_CASE("Bestagon CROSSING gate", "[is-gate-design-impossible]")
 {
-
     layout lyt{};
 
     lyt.assign_sidb({36, 1, 0}, dot_tag::INPUT);
@@ -124,19 +107,18 @@ TEST_CASE("Bestagon CROSSING gate", "[is-gate-design-impossible]")
     lyt.assign_sidb({2, 19, 0}, dot_tag::NORMAL);
     lyt.assign_sidb({36, 19, 0}, dot_tag::NORMAL);
 
+    const is_gate_design_impossible_params params{.sim_params = simulation_parameters{2, -0.32}};
+    const auto                             spec = create_crossing_wire_tt();
+
     SECTION("without defect")
     {
-        CHECK(!is_gate_design_impossible(
-            lyt, create_crossing_wire_tt(),
-            is_gate_design_impossible_params{.sim_params = simulation_parameters{2, -0.32}}));
+        CHECK_FALSE(is_gate_design_impossible(lyt, spec, params));
     }
 
     SECTION("with defect")
     {
         lyt.assign_defect({34, 18, 0}, defect{defect_type::SI_VACANCY, -1, 5, 5});
         lyt.assign_defect({34, 18, 1}, defect{defect_type::SI_VACANCY, -1, 5, 5});
-        CHECK(
-            is_gate_design_impossible(lyt, create_crossing_wire_tt(),
-                                      is_gate_design_impossible_params{.sim_params = simulation_parameters{2, -0.32}}));
+        CHECK(is_gate_design_impossible(lyt, spec, params));
     }
 }
