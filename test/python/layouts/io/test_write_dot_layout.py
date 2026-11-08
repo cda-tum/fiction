@@ -153,9 +153,17 @@ def test_crossing_projection_retains_both_paths(gate_factory: Callable, tmp_path
     destination = tmp_path / "crossing.dot"
     write_dot_layout(layout, str(destination))
     text = destination.read_text(encoding="utf-8")
-    nodes = _nodes(text)
-    assert len(nodes) == 9
-    assert [(identifier, label) for identifier, label, _color in nodes if identifier == "x1y1"] == [("x1y1", "+")]
+    assert sorted(_nodes(text)) == sorted([
+        ("x0y0", "", "white"),
+        ("x1y0", "b", "snow2"),
+        ("x2y0", "", "white"),
+        ("x0y1", "a", "snow2"),
+        ("x1y1", "+", "palegoldenrod"),
+        ("x2y1", "f", "snow2"),
+        ("x0y2", "", "white"),
+        ("x1y2", "g", "snow2"),
+        ("x2y2", "", "white"),
+    ])
     assert sorted(_edges(text)) == sorted([
         ("x0y1", "x1y1"),
         ("x1y0", "x1y1"),
