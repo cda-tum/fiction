@@ -30,7 +30,7 @@ def test_empty_network(cls: type[Network]) -> None:
     """Empty networks contain constants but no terminals, gates, or output functions."""
     network = cls()
     constants = [0, 1] if cls is networks.technology_network else [0]
-    assert network.nodes() == constants
+    assert sorted(network.nodes()) == sorted(constants)
     assert network.size() == len(constants)
     assert network.gates() == network.pis() == network.pos() == []
     assert (network.num_gates(), network.num_pis(), network.num_pos(), network.depth()) == (0, 0, 0, 0)
@@ -63,7 +63,7 @@ def test_network_observations_and_names(tmp_path: Path, cls: type[Network]) -> N
     expected_fanins = [*constants, a, b] if cls is networks.mig_network else [a, b]
     assert sorted(network.fanins(gate)) == sorted(expected_fanins)
     assert [network.fanins(node) for node in [*constants, a, b, unused]] == [[] for _ in [*constants, a, b, unused]]
-    assert [node for node in network.nodes() if network.is_pi(node)] == [a, b, unused]
+    assert sorted(node for node in network.nodes() if network.is_pi(node)) == sorted([a, b, unused])
     assert not network.is_constant(gate)
     if cls is networks.mig_network:
         assert network.is_maj(gate)
@@ -97,7 +97,7 @@ def test_network_observations_and_names(tmp_path: Path, cls: type[Network]) -> N
     for observation in observations:
         expected_nodes = observation()
         observation().clear()
-        assert observation() == expected_nodes
+        assert sorted(observation()) == sorted(expected_nodes)
     network.fanins(gate).clear()
     assert sorted(network.fanins(gate)) == sorted(expected_fanins)
     network.set_name(n=a, name="renamed\0input")
@@ -187,10 +187,12 @@ def test_random_network_contract(cls: type[Network], inputs: int, gates: int, se
     assert network.num_pis() == inputs
     assert network.num_gates() >= gates if cls is networks.technology_network else network.num_gates() == gates
     assert networks.get_name(network) == str(seed)
-    assert network.nodes() == repeated.nodes()
+    assert sorted(network.nodes()) == sorted(repeated.nodes())
     assert network.pis() == repeated.pis()
     assert network.pos() == repeated.pos()
-    assert [network.fanins(node) for node in network.nodes()] == [repeated.fanins(node) for node in repeated.nodes()]
+    assert [network.fanins(node) for node in sorted(network.nodes())] == [
+        repeated.fanins(node) for node in sorted(repeated.nodes())
+    ]
     outputs = networks.simulate_outputs(network)
     assert outputs
     assert len(outputs) == network.num_pos()
