@@ -64,7 +64,8 @@ def plane(session: Session, args: argparse.Namespace) -> Result:
     level on one diagonal of a 2DDWave-clocked Cartesian layout. Duplicated inputs appear as
     separate layout inputs that carry the name of the network input they copy; ``input_mapping``
     in the result lists, for every layout input, the index of that network input. The layout keeps
-    the mapping in the store, and ``equiv -n -g`` checks the layout against the network through it.
+    the mapping and its source network in the store. ``equiv -n -g`` requires that source network
+    to be active and checks the layout through the mapping.
     The network must not have gates with more than two inputs.
     """
     network = session.as_technology_network(session.networks.current())
@@ -87,8 +88,7 @@ def plane(session: Session, args: argparse.Namespace) -> Result:
         on_progress=session.report_progress,
     )
     input_mapping = list(original_inputs)
-    # `equiv -n -g` reads the mapping from the store, so the duplicated inputs verify against the network
-    session.gate_layouts.add(layout, input_mapping=input_mapping)
+    session.gate_layouts.add(layout, input_mapping=input_mapping, source_network=session.networks.current())
 
     return {
         **(_added(session, layout, stats, verbose=args.verbose) or {}),

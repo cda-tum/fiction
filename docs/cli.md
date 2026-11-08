@@ -339,7 +339,8 @@ the quickest way to find bugs in layouts produced by custom algorithms.
 specification and the active layout as the implementation; `equiv -n` or `equiv -g` compares the two most recent
 elements of one store. Inputs and outputs match by names that are unique on both sides, then by position. A layout
 that `plane` added carries the mapping of its inputs to the inputs of the network it was built from, and `equiv -n -g`
-checks it through that mapping, so a layout with duplicated inputs verifies against its source network. The result is
+checks it through that mapping, so a layout with duplicated inputs verifies against its source network.
+The source network must be active; selecting another network produces a usage error. The result is
 one of four:
 
 1. The implementation computes a different function under at least one input: **not** equivalent.

@@ -922,6 +922,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - CLI:
 
+  - `equiv -n -g` now requires the source network of a PLANE layout before applying its input mapping.
   - Parallel commands now use one aggregate progress row; `exact` retains candidate dimensions at count checkpoints.
   - Store listings and command summaries skip layout timing analysis; `ps -g` computes it on request.
   - Store and statistics displays use readable topology names.

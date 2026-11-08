@@ -16,6 +16,7 @@ from mnt.pyfiction.layouts import cartesian_gate_layout
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+    from pathlib import Path
 
     from .conftest import Shell
 
@@ -62,6 +63,20 @@ def test_equiv_two_layouts(mux21_shell: Shell) -> None:
     assert "equivalent" in mux21_shell.output
     assert mux21_shell.session.log[-1]["result"]["eq"] in {"STRONG", "WEAK"}
     assert "select the stores" in mux21_shell.fails("equiv")
+
+
+def test_plane_mapping_rejects_another_source_network(shell: Shell, tmp_path: Path) -> None:
+    """A layout mapping stays tied to its source when another network reorders the same named inputs."""
+    source = tmp_path / "source.blif"
+    reordered = tmp_path / "reordered.blif"
+    logic = ".outputs f\n.names a b f\n10 1\n.end\n"
+    source.write_text(".model source\n.inputs a b\n" + logic, encoding="utf-8")
+    reordered.write_text(".model reordered\n.inputs b a\n" + logic, encoding="utf-8")
+    shell.ok(f'read "{source}"; plane; equiv -n -g')
+    assert shell.session.log[-1]["result"]["eq"] == "STRONG"
+    assert "source network" in shell.fails(f'read "{reordered}"; equiv -n -g')
+    shell.ok("current -n 1; equiv -n -g")
+    assert shell.session.log[-1]["result"]["eq"] == "STRONG"
 
 
 def test_drv_blocked_equivalence_is_a_report(shell: Shell, resource: Callable[[str], str]) -> None:

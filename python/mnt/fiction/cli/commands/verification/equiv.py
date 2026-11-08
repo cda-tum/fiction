@@ -49,7 +49,8 @@ def equiv(session: Session, args: argparse.Namespace) -> Result:
 
     With -n and -g, the network is the specification and the layout the implementation; a layout
     that `plane` added is checked through the mapping of its inputs to the network inputs, so its
-    duplicated inputs verify. With only -n or only -g, the two most recent elements of that store are
+    duplicated inputs verify. The source network must be active; another network is a usage error.
+    With only -n or only -g, the two most recent elements of that store are
     compared. Strong equivalence means the same function at full throughput; weak equivalence means
     the same function with a delay, reported in clock cycles.
     """
@@ -61,6 +62,9 @@ def equiv(session: Session, args: argparse.Namespace) -> Result:
         implementation = session.gate_layouts.current()
         attached = session.gate_layouts.attached("input_mapping")
         if isinstance(attached, list):
+            if session.gate_layouts.attached("source_network") is not session.networks.current():
+                msg = "the input mapping belongs to a different source network; select the network used by plane"
+                raise CommandError(msg)
             input_mapping = attached
     elif args.network:
         specification, implementation = (
