@@ -97,19 +97,27 @@ def test_layout_logic_simulation(layout: GateLayout) -> None:
 
 def test_layout_simulation_preserves_crossings_and_synchronization(layout: GateLayout) -> None:
     """Crossing layers retain independent functions and synchronization delays preserve Boolean outputs."""
-    a, b, c, d = [layout.create_pi(name, (index, 0)) for index, name in enumerate("abcd")]
-    low = layout.create_and(a, b, (1, 1))
-    high = layout.create_and(c, d, (1, 1, 1))
-    layout.create_po(low, "low", (2, 1))
-    layout.create_po(high, "high", (1, 2, 1))
+    layout.resize((4, 3, 2))
+    a = layout.create_pi("a", (1, 0))
+    b = layout.create_pi("b", (0, 1))
+    c = layout.create_pi("c", (2, 0))
+    d = layout.create_pi("d", (0, 2))
+    first = layout.create_and(a, b, (1, 1))
+    lower = layout.create_buf(c, (2, 1))
+    other = layout.create_buf(d, (1, 2))
+    second = layout.create_and(lower, other, (2, 2))
+    upper = layout.create_buf(first, (2, 1, 1))
+    layout.create_po(upper, "f1", (3, 1))
+    layout.create_po(second, "f2", (3, 2))
+    assert layout.num_crossings() == 1
     expected = [
-        ("low", [True, False, False, False] * 4),
-        ("high", [True] * 4 + [False] * 12),
+        ("f1", [True, False, False, False] * 4),
+        ("f2", [True] * 4 + [False] * 12),
     ]
     assert simulate_outputs(layout) == expected
     assert simulate(layout) == dict(expected)
-    layout.assign_synchronization_element((1, 1), 3)
-    assert layout.get_synchronization_element((1, 1)) == 3
+    layout.assign_synchronization_element((2, 1), 3)
+    assert layout.get_synchronization_element((2, 1)) == 3
     assert simulate_outputs(layout) == expected
     assert simulate(layout) == dict(expected)
 
