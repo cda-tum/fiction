@@ -80,7 +80,7 @@ def test_read_blif_rejects_other_types(shell: Shell, tmp_path: Path, mux21_shell
 @pytest.mark.parametrize("command", ["read", "read_verilog"])
 def test_read_rejects_a_directory(shell: Shell, tmp_path: Path, command: str) -> None:
     """Readers require a file and leave the network store empty after rejection."""
-    assert "is a directory" in shell.fails(f'{command} "{tmp_path}"')
+    assert "is a directory" in " ".join(shell.fails(f'{command} "{tmp_path}"').split())
     assert not shell.session.networks.items
 
 
@@ -255,7 +255,7 @@ def test_write_defaults_to_the_element_name(
 
 
 def test_write_refuses_a_directory(mux21_shell: Shell, tmp_path: Path) -> None:
-    assert "is a directory" in mux21_shell.fails(f'write_verilog "{tmp_path}"')
+    assert "is a directory" in " ".join(mux21_shell.fails(f'write_verilog "{tmp_path}"').split())
 
 
 @pytest.mark.parametrize(
