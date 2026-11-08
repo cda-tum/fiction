@@ -42,6 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Python CLI tests check independent command results and named error cases.
   - Python verification tests cover timing, physical diagnostics, gate classifications, and counterexamples.
   - Python tests cover every module marker and report compile-flag cases independently.
   - Python tests check native version, repository, and build metadata.
@@ -978,6 +979,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Documentation:
 
+  - CLI help and examples now match explicit writers, FGL metadata, and layout simulation.
   - Surface-defect errors document zero-based recognized row indices instead of input line numbers.
   - Time-to-solution confidence documentation now names the target probability of at least one success.
   - ExGS Python documentation now describes all physically valid charge distributions.
