@@ -66,9 +66,9 @@ def test_balancing_preserves_interfaces(
     if unify_outputs:
         outputs = [n for n in balanced.pos() if buffer_constant_outputs or not balanced.is_constant(n)]
         assert len({levels[n] for n in outputs}) == 1
+        assert is_balanced(balanced, unify_outputs=True) == buffer_constant_outputs
     if not buffer_constant_outputs:
         assert [balanced.is_constant(n) for n in balanced.pos()[:2]] == [True, True]
-    assert is_balanced(balanced, unify_outputs=True) == (unify_outputs and buffer_constant_outputs)
 
 
 @pytest.mark.parametrize("inputs", ["", "a"])

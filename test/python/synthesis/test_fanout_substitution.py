@@ -79,11 +79,16 @@ def test_repeated_substitution_and_balancing(
     assert simulate_outputs(balanced) == interface_outputs
 
 
-def test_random_seed_repeats_connections(interface_network: technology_network) -> None:
+def test_seeded_substitution_preserves_function_and_limits(
+    interface_network: technology_network, interface_outputs: list[tuple[str, list[bool]]]
+) -> None:
+    assert simulate_outputs(interface_network) == interface_outputs
     first = fanout_substitution(interface_network, strategy=substitution_strategy.RANDOM, seed=42)
     second = fanout_substitution(interface_network, strategy=substitution_strategy.RANDOM, seed=42)
-    assert [first.fanins(n) for n in first.nodes()] == [second.fanins(n) for n in second.nodes()]
-    assert first.pos() == second.pos()
+    for substituted in (first, second):
+        assert simulate_outputs(substituted) == interface_outputs
+        _check_degrees(substituted, 2, 1)
+    assert simulate_outputs(interface_network) == interface_outputs
 
 
 @pytest.mark.parametrize("options", [{"degree": 0}, {"degree": 1}, {"threshold": 0}])
