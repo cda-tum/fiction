@@ -43,6 +43,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Code quality:
 
   - Python CLI tests check independent command results and named error cases.
+  - Python SiDB tests cover bound model, simulation, analysis, generator, and I/O contracts.
   - Python verification tests cover timing, physical diagnostics, gate classifications, and counterexamples.
   - Python tests cover every module marker and report compile-flag cases independently.
   - Python tests check native version, repository, and build metadata.

@@ -8,12 +8,13 @@
 
 from __future__ import annotations
 
+import math
 from typing import Any
 
 import pytest
 
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
-from mnt.pyfiction.sidb.simulation.analysis import physical_population_stability
+from mnt.pyfiction.sidb.simulation.analysis import physical_population_stability, transition_type
 
 
 def test_population_stability_documents_python_exception() -> None:
@@ -79,3 +80,74 @@ def test_zero_transition_potential() -> None:
     ]
     assert zero_transitions
     assert all(distance == float("inf") for distance in zero_transitions)
+
+
+@pytest.mark.parametrize(
+    ("precision", "screening", "distance"), [(2, 5.0, 0.77), (3, 5.0, 0.762), (2, float("inf"), 0.89)]
+)
+def test_single_sidb_transition(precision: int, screening: float, distance: float) -> None:
+    """The negative-to-neutral margin maps to the specified distance precision and screening limit."""
+    layout = sidb_layout()
+    site = lattice_site(1, 1)
+    layout.assign_sidb(site)
+    results = physical_population_stability(
+        layout,
+        base=2,
+        mu_minus=-0.29,
+        lambda_tf=screening,
+        precision_for_distance_corresponding_to_potential=precision,
+    )
+    assert len(results) == 1
+    stability = results[0]
+    assert stability.critical_dot == site
+    assert stability.transition_potentials[transition_type.NEGATIVE_TO_NEUTRAL] == (site, 0.29)
+    assert stability.distance_corresponding_to_potential[transition_type.NEGATIVE_TO_NEUTRAL] == pytest.approx(distance)
+    for transition in (transition_type.NEUTRAL_TO_POSITIVE, transition_type.POSITIVE_TO_NEUTRAL):
+        assert stability.transition_potentials[transition][1] == float("inf")
+        assert stability.distance_corresponding_to_potential[transition] == float("inf")
+
+
+def test_neutral_sidb_has_both_transition_margins() -> None:
+    """A neutral SiDB records its margins to both neighboring charge states."""
+    layout = sidb_layout()
+    layout.assign_sidb(lattice_site())
+    results = physical_population_stability(layout, base=3, mu_minus=0.5)
+    assert len(results) == 1
+    potentials = results[0].transition_potentials
+    assert potentials[transition_type.NEUTRAL_TO_NEGATIVE][1] == pytest.approx(0.5, abs=1e-14)
+    assert potentials[transition_type.NEUTRAL_TO_POSITIVE][1] == pytest.approx(0.09, abs=1e-14)
+
+
+def test_positive_charge_population_margins() -> None:
+    """Finite positive and negative transition margins retain their sites and ordered excited-state distances."""
+    layout = sidb_layout()
+    first, second, third = lattice_site(1, 1, 0), lattice_site(1, 1, 1), lattice_site(2, 1, 0)
+    for site in (first, second, third):
+        layout.assign_sidb(site)
+    results = physical_population_stability(layout)
+    assert len(results) == 3
+    assert results[0].system_energy < results[1].system_energy < results[2].system_energy
+    assert [info.critical_dot for info in results] == [third, third, second]
+    ground = results[0]
+    assert ground.transition_potentials[transition_type.POSITIVE_TO_NEUTRAL][0] == first
+    assert ground.transition_potentials[transition_type.NEGATIVE_TO_NEUTRAL][0] == third
+    coupling_scale = 8.987552e9 * 1.6021766e-19 * 1e9 / 5.6
+    first_second = coupling_scale * math.exp(-0.225 / 5.0) / 0.225
+    first_third = coupling_scale * math.exp(-0.384 / 5.0) / 0.384
+    diagonal = math.hypot(0.225, 0.384)
+    second_third = coupling_scale * math.exp(-diagonal / 5.0) / diagonal
+    assert ground.transition_potentials[transition_type.POSITIVE_TO_NEUTRAL][1] == pytest.approx(
+        abs(first_second + first_third - 0.91), abs=1e-12, rel=0
+    )
+    assert ground.transition_potentials[transition_type.NEGATIVE_TO_NEUTRAL][1] == pytest.approx(
+        abs(-first_third + second_third - 0.32), abs=1e-12, rel=0
+    )
+    assert ground.distance_corresponding_to_potential[transition_type.POSITIVE_TO_NEUTRAL] == pytest.approx(
+        0.31, abs=1e-5, rel=0
+    )
+    for info, transition, distance in [
+        (ground, transition_type.NEGATIVE_TO_NEUTRAL, 0.56),
+        (results[1], transition_type.NEGATIVE_TO_NEUTRAL, 0.94),
+        (results[2], transition_type.NEUTRAL_TO_NEGATIVE, 1.01),
+    ]:
+        assert info.distance_corresponding_to_potential[transition] == pytest.approx(distance, abs=1e-5, rel=0)
