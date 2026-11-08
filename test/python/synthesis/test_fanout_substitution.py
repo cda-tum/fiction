@@ -83,8 +83,11 @@ def test_seeded_substitution_preserves_function_and_limits(
     interface_network: technology_network, interface_outputs: list[tuple[str, list[bool]]]
 ) -> None:
     assert simulate_outputs(interface_network) == interface_outputs
+    source_size = interface_network.size()
     first = fanout_substitution(interface_network, strategy=substitution_strategy.RANDOM, seed=42)
+    assert interface_network.size() == source_size
     second = fanout_substitution(interface_network, strategy=substitution_strategy.RANDOM, seed=42)
+    assert interface_network.size() == source_size
     for substituted in (first, second):
         assert simulate_outputs(substituted) == interface_outputs
         _check_degrees(substituted, 2, 1)
