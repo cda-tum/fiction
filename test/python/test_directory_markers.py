@@ -17,7 +17,17 @@ import pytest
 
 @pytest.mark.parametrize(
     ("expression", "passed", "deselected"),
-    [("simulation", 1, 3), ("sidb and not simulation", 1, 3), ("io", 2, 2), ("", 4, 0)],
+    [
+        ("simulation", 1, 8),
+        ("sidb and not simulation", 1, 8),
+        ("io", 5, 4),
+        ("qca", 1, 8),
+        ("mol_qca", 1, 8),
+        ("inml", 1, 8),
+        ("utils", 1, 8),
+        ("cli", 1, 8),
+        ("", 9, 0),
+    ],
 )
 def test_directory_markers(
     pytester: pytest.Pytester, pytestconfig: pytest.Config, expression: str, passed: int, deselected: int
@@ -38,6 +48,11 @@ def test_directory_markers(
         "sidb/simulation/new_category/test_nested.py",
         "sidb/io/test_sidb_io.py",
         "layouts/io/test_layout_io.py",
+        "qca/io/test_qca_io.py",
+        "mol_qca/io/test_mol_qca_io.py",
+        "inml/io/test_inml_io.py",
+        "utils/test_metadata.py",
+        "cli/test_cli.py",
         "test_unmarked.py",
     ):
         test_file = pytester.path / name

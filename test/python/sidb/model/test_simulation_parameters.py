@@ -13,7 +13,7 @@ import pytest
 from mnt.pyfiction.sidb.model import sidb_simulation_parameters
 
 
-def test_initialization():
+def test_initialization() -> None:
     params = sidb_simulation_parameters()
 
     # Check if it is initialized correctly.
@@ -23,7 +23,7 @@ def test_initialization():
     assert params.base == 3
 
 
-def test_custom_initialization():
+def test_custom_initialization() -> None:
     params = sidb_simulation_parameters(
         base_number=2, mu_minus=-0.4, relative_permittivity=7.1, screening_distance=10.0
     )
@@ -33,6 +33,18 @@ def test_custom_initialization():
     assert params.lambda_tf == 10.0
     assert params.mu_minus == -0.4
     assert params.base == 2
+
+
+@pytest.mark.parametrize(("epsilon_r", "mu_minus"), [(5.6, -0.32), (4.2, -0.25), (10.2, -0.1)])
+def test_derived_parameters(epsilon_r: float, mu_minus: float) -> None:
+    """Constructor and setters preserve the Coulomb constant and transition-energy relations."""
+    params = sidb_simulation_parameters(relative_permittivity=epsilon_r, mu_minus=mu_minus)
+    assert params.k() == pytest.approx(8.987552e9 / epsilon_r, abs=1e-5)
+    assert params.mu_plus() == pytest.approx(mu_minus - 0.59, abs=1e-14)
+    params.epsilon_r = 2 * epsilon_r
+    params.mu_minus = mu_minus + 0.1
+    assert params.k() == pytest.approx(8.987552e9 / (2 * epsilon_r), abs=1e-5)
+    assert params.mu_plus() == pytest.approx(mu_minus - 0.49, abs=1e-14)
 
 
 @pytest.mark.parametrize("base", [0, 1, 4, 255])
