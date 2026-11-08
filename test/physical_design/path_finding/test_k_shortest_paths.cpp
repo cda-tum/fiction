@@ -38,8 +38,10 @@
 #include <algorithm>
 #include <array>
 #include <concepts>
+#include <cstddef>
 #include <cstdint>
 #include <stdexcept>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -259,6 +261,36 @@ TEST_CASE("Yen's algorithm enumerates every simple path on a small grid", "[k-sh
                     CHECK_THAT(actual, Catch::Matchers::UnorderedRangeEquals(expected));
                 });
         });
+}
+
+TEST_CASE("Yen's offset spur searches preserve path ranking", "[k-shortest-paths]")
+{
+    /** @brief Small offset grid with more than eleven alternative routes. */
+    const hexagonal_layout layout{arrangement::ODD_ROW, {4, 4}};
+    /** @brief Directed edge that diverts paths approaching the target. */
+    obstructions blocked{};
+    blocked.obstruct_connection({1, 1}, {2, 1});
+    /** @brief Endpoints with two shortest diagonal routes. */
+    const routing_objective objective{.source = {1, 2}, .target = {3, 1}};
+    /** @brief Independent exhaustive route oracle. */
+    const auto all = enumerate_all_paths(layout, objective, {}, blocked);
+    /** @brief Ordered subset produced by Yen's spur searches. */
+    const auto shortest = yen_k_shortest_paths(layout, objective, 11, {}, blocked);
+    /** @brief Complete path-length multiset from exhaustive traversal. */
+    std::vector<std::size_t> lengths{};
+    for (const auto& path : all)
+    {
+        lengths.push_back(path.size());
+    }
+    std::ranges::sort(lengths);
+    REQUIRE(lengths.size() > 11);
+    REQUIRE(shortest.size() == 11);
+    for (std::size_t i = 0; i < shortest.size(); ++i)
+    {
+        CAPTURE(i);
+        CHECK(all.contains(shortest[i]));
+        CHECK(shortest[i].size() == lengths[i]);
+    }
 }
 
 TEST_CASE("Yen's algorithm on 4x4 layouts", "[k-shortest-paths]")

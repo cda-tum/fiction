@@ -40,12 +40,19 @@ def test_orthogonal_with_parameters(mux21):
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
 
-def test_orthogonal_with_stats(mux21):
+def test_orthogonal_with_stats(mux21: technology_network) -> None:
     stats = orthogonal_stats()
 
     layout = orthogonal(mux21, statistics=stats)
 
     assert equivalence_checking(mux21, layout) == eq_type.STRONG
+    assert (stats.x_size, stats.y_size) == (layout.width(), layout.height())
+    assert (stats.num_gates, stats.num_wires, stats.num_crossings) == (
+        layout.num_gates(),
+        layout.num_wires(),
+        layout.num_crossings(),
+    )
+    assert stats.time_total.total_seconds() >= 0
 
 
 def test_orthogonal_reports_progress(mux21):

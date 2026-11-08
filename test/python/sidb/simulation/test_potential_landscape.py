@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import math
 from typing import Any
 
 import pytest
@@ -27,7 +28,7 @@ def three_sidbs() -> sidb_layout:
     return layout
 
 
-def test_geometry_and_potentials():
+def test_geometry_and_potentials() -> None:
     layout = three_sidbs()
     landscape = potential_landscape(layout, base=2, mu_minus=-0.32, epsilon_r=5.6, lambda_tf=5.0)
 
@@ -51,7 +52,7 @@ def test_geometry_and_potentials():
     assert thresholds[charge_transition_threshold_bounds.POSITIVE_LOWER_BOUND.value] == pytest.approx(0.91, abs=1e-5)
 
 
-def test_energies_and_validity():
+def test_energies_and_validity() -> None:
     layout = three_sidbs()
     landscape = potential_landscape(layout, base=2, mu_minus=-0.32, epsilon_r=5.6, lambda_tf=5.0)
 
@@ -80,7 +81,7 @@ def test_energies_and_validity():
     assert internal == pytest.approx(local_potentials)  # no external potential applied
 
 
-def test_external_potentials():
+def test_external_potentials() -> None:
     layout = three_sidbs()
     options: dict[str, Any] = {"base": 2, "mu_minus": -0.32, "epsilon_r": 5.6, "lambda_tf": 5.0}
     plain = potential_landscape(layout, **options)
@@ -95,7 +96,7 @@ def test_external_potentials():
     assert shifted.energy(all_negative) < plain.energy(all_negative)
 
 
-def test_charged_defect():
+def test_charged_defect() -> None:
     layout = sidb_layout()
     layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(3, 0, 0), sidb_dot_tag.NORMAL)
@@ -148,3 +149,28 @@ def test_input_boundaries() -> None:
             landscape.is_physically_valid(cd)
         with pytest.raises(ValueError, match="SiDB sites"):
             landscape.evaluate(cd)
+
+
+@pytest.mark.parametrize(
+    ("charges", "external"),
+    [((-1, -1), 0.0), ((-1, 1), 0.0), ((0, -1), 0.2)],
+)
+def test_screened_coulomb_energy(charges: tuple[int, int], external: float) -> None:
+    """Energy and local potentials agree with independently evaluated screened Coulomb terms."""
+    layout = sidb_layout()
+    for x in (0, 5):
+        layout.assign_sidb(lattice_site(x, 0))
+    landscape = potential_landscape(layout, global_external_potential=external)
+    distance = 5 * 0.384
+    coupling = 8.987552e9 * 1.6021766e-19 / (5.6 * distance * 1e-9) * math.exp(-distance / 5.0)
+    states = {-1: sidb_charge_state.NEGATIVE, 0: sidb_charge_state.NEUTRAL, 1: sidb_charge_state.POSITIVE}
+    distribution = charge_distribution(layout)
+    for index, charge in enumerate(charges):
+        distribution.assign_charge_state_by_index(index, states[charge])
+    assert landscape.chargeless_potential(0, 1) == pytest.approx(coupling, rel=1e-12)
+    assert landscape.local_potentials(distribution) == pytest.approx(
+        [charges[1] * coupling + external, charges[0] * coupling + external], rel=1e-12
+    )
+    expected_energy = charges[0] * charges[1] * coupling + sum(charges) * external
+    assert landscape.energy(distribution) == pytest.approx(expected_energy, abs=1e-12)
+    assert landscape.evaluate(distribution).energy() == pytest.approx(expected_energy, abs=1e-12)

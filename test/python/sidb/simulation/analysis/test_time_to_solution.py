@@ -9,12 +9,13 @@
 from __future__ import annotations
 
 import math
+from datetime import timedelta
 from typing import Any
 
 import pytest
 
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
-from mnt.pyfiction.sidb.simulation import exact_sidb_simulation_engine
+from mnt.pyfiction.sidb.simulation import exact_sidb_simulation_engine, sidb_simulation_result
 from mnt.pyfiction.sidb.simulation.analysis import (
     time_to_solution,
     time_to_solution_for_given_simulation_results,
@@ -160,3 +161,30 @@ def test_tts_callback_routing() -> None:
     assert all(task == "iterations" for task, _, _ in iterations)
     assert workers
     assert any(not active for _, _, _, _, _, active in workers)
+
+
+def test_tts_averages_successful_and_failed_runtimes() -> None:
+    """Failed attempts contribute runtime and reduce success probability in the closed-form TTS."""
+    layout = sidb_layout()
+    layout.assign_sidb(lattice_site())
+    exact = quickexact(layout)
+    successful = quickexact(layout)
+    successful.simulation_runtime = timedelta(seconds=2)
+    failed = sidb_simulation_result()
+    failed.simulation_runtime = timedelta(seconds=6)
+    stats = time_to_solution_stats()
+    time_to_solution_for_given_simulation_results(exact, [successful, failed], confidence_level=0.997, ps=stats)
+    assert stats.acc == 50.0
+    assert stats.mean_single_runtime == 4.0
+    assert stats.time_to_solution == pytest.approx(4 * math.log(0.003) / math.log(0.5), abs=1e-12)
+
+
+def test_tts_without_attempts() -> None:
+    """Zero attempts yield zero accuracy and mean runtime with infinite time to solution."""
+    layout = sidb_layout()
+    layout.assign_sidb(lattice_site())
+    stats = time_to_solution_stats()
+    time_to_solution(layout, repetitions=0, ps=stats)
+    assert stats.acc == 0.0
+    assert stats.mean_single_runtime == 0.0
+    assert stats.time_to_solution == math.inf
