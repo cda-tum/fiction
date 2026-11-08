@@ -37,6 +37,7 @@
 #include <mockturtle/networks/sequential.hpp>
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/networks/xmg.hpp>
+#include <mockturtle/traits.hpp>
 #include <mockturtle/views/cut_view.hpp>
 #include <mockturtle/views/names_view.hpp>
 
@@ -455,7 +456,7 @@ TEMPLATE_TEST_CASE("Sequential inputs report mapping failure", "[technology-mapp
 TEST_CASE("Mapping preserves a constant-one cut-view output", "[technology-mapping]")
 {
     /** @brief Underlying network with an otherwise unused true constant. */
-    technology_network network{};
+    const technology_network network{};
     /** @brief Distinct constant-one signal exposed only by the cut. */
     const auto one = network.get_constant(true);
     /** @brief Constant-only cut whose output does not increase the inherited fanout count. */
