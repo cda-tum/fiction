@@ -280,7 +280,8 @@ def test_network_dot_graph_and_index_labels(tmp_path: Path, cls: type[Network]) 
         text = path.read_text(encoding="utf-8")
         assert re.match(r"\s*digraph\s*\{", text)
         assert text.rstrip().endswith("}")
-        nodes = re.findall(r"^[ \t]*(\d+|po\d+)[ \t]*\[([^\n]*)\][ \t]*;?[ \t]*$", text, re.MULTILINE)
+        declarations = re.findall(r'(?<![\w".+-])(\d+|po\d+)(?:\s*->\s*(\d+|po\d+))?\s*((?:\[[^\]]*\]\s*)+)', text)
+        nodes = [(source, attrs) for source, target, attrs in declarations if not target]
         assert sorted(node for node, _ in nodes) == sorted([*(str(node) for node in network.nodes()), "po0", "po1"])
         attributes = dict(nodes)
         label = f"{gate}: AND" if indexed else "AND"
@@ -290,12 +291,12 @@ def test_network_dot_graph_and_index_labels(tmp_path: Path, cls: type[Network]) 
             label = f"{inverted}: INV" if indexed else "INV"
             assert re.findall(r'label\s*=\s*"([^"]*)"', attributes[str(inverted)]) == [label]
             assert re.findall(r"fillcolor\s*=\s*([a-z0-9]+)", attributes[str(inverted)]) == ["paleturquoise"]
-        edges = re.findall(
-            r'^[ \t]*(\d+)\s*->\s*(\d+|po\d+)\s*\[style\s*=\s*("(?:solid|dashed)"|solid|dashed)\][ \t]*;?[ \t]*$',
-            text,
-            re.MULTILINE,
-        )
-        assert sorted((source, target, style.strip('"')) for source, target, style in edges) == sorted(expected_edges)
+        edges = []
+        for source, target, attrs in declarations:
+            if target:
+                (style,) = re.findall(r'\bstyle\s*=\s*("[^"]*"|[^,\];\s]+)', attrs)
+                edges.append((source, target, style.strip('"')))
+        assert sorted(edges) == sorted(expected_edges)
 
 
 @pytest.mark.parametrize(("writer", "suffix"), WRITERS)
@@ -313,7 +314,7 @@ def test_network_writers_preserve_symlinks(
     try:
         symbolic.symlink_to(target.name)
     except OSError as error:
-        if getattr(error, "winerror", None) == 1314 or error.errno in (errno.ENOSYS, errno.EOPNOTSUPP):
+        if getattr(error, "winerror", None) == 1314 or error.errno in (errno.ENOSYS, errno.EOPNOTSUPP, errno.EPERM):
             pytest.skip("The filesystem does not permit symbolic-link creation")
         raise
     network = read_network(str(resources_dir / "mux21.v"), network_type=aig_network)

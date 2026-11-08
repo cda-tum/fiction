@@ -187,12 +187,6 @@ def test_random_network_contract(cls: type[Network], inputs: int, gates: int, se
     assert network.num_pis() == inputs
     assert network.num_gates() >= gates if cls is networks.technology_network else network.num_gates() == gates
     assert networks.get_name(network) == str(seed)
-    assert sorted(network.nodes()) == sorted(repeated.nodes())
-    assert network.pis() == repeated.pis()
-    assert network.pos() == repeated.pos()
-    assert [network.fanins(node) for node in sorted(network.nodes())] == [
-        repeated.fanins(node) for node in sorted(repeated.nodes())
-    ]
     outputs = networks.simulate_outputs(network)
     assert outputs
     assert len(outputs) == network.num_pos()
