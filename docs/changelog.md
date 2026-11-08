@@ -44,7 +44,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Python CLI tests check independent command results and named error cases.
   - Python FCN, QCA, molecular QCA, and iNML tests cover bound technology and writer contracts.
-  - Python network tests cover bound logic, interfaces, readers, writers, and random generation.
+  - Python network tests cover bound logic, interfaces, I/O, random generation, and layout extraction.
   - Python physical-design tests cover placement, paths, gate libraries, solvers, and optimization.
   - Python SiDB tests cover bound model, simulation, analysis, generator, and I/O contracts.
   - Python verification tests cover timing, physical diagnostics, gate classifications, and counterexamples.

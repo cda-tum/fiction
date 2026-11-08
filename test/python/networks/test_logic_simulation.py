@@ -95,6 +95,25 @@ def test_layout_logic_simulation(layout: GateLayout) -> None:
     assert simulate(layout=layout) == dict(expected)
 
 
+def test_layout_simulation_preserves_crossings_and_synchronization(layout: GateLayout) -> None:
+    """Crossing layers retain independent functions and synchronization delays preserve Boolean outputs."""
+    a, b, c, d = [layout.create_pi(name, (index, 0)) for index, name in enumerate("abcd")]
+    low = layout.create_and(a, b, (1, 1))
+    high = layout.create_and(c, d, (1, 1, 1))
+    layout.create_po(low, "low", (2, 1))
+    layout.create_po(high, "high", (1, 2, 1))
+    expected = [
+        ("low", [True, False, False, False] * 4),
+        ("high", [True] * 4 + [False] * 12),
+    ]
+    assert simulate_outputs(layout) == expected
+    assert simulate(layout) == dict(expected)
+    layout.assign_synchronization_element((1, 1), 3)
+    assert layout.get_synchronization_element((1, 1)) == 3
+    assert simulate_outputs(layout) == expected
+    assert simulate(layout) == dict(expected)
+
+
 @pytest.mark.parametrize("cls", NETWORK_TYPES)
 def test_duplicate_output_names_preserve_order(tmp_path: Path, cls: type[Network]) -> None:
     """Ordered simulation retains duplicate labels; dictionary simulation keeps the last output."""
