@@ -20,6 +20,7 @@ from mnt.pyfiction.layouts import (
     coordinate,
     hexagonal_gate_layout,
     hexagonal_layout,
+    obstructions,
     shifted_cartesian_gate_layout,
     shifted_cartesian_layout,
 )
@@ -105,6 +106,22 @@ def test_unclocked_cartesian_detours() -> None:
     assert [len(path) for path in shortest_paths] == sorted(len(path) for path in shortest_paths)
 
 
+@pytest.mark.parametrize("cls", [shifted_cartesian_layout, hexagonal_layout])
+def test_offset_yen_spur_paths_match_exhaustive_ranking(
+    cls: type[shifted_cartesian_layout | hexagonal_layout],
+) -> None:
+    """Rank alternative diagonal routes using an independent exhaustive traversal."""
+    layout = cls(arrangement.ODD_ROW, (4, 4))
+    blocked = obstructions()
+    blocked.obstruct_connection((1, 1), (2, 1))
+    paths = enumerate_all_paths(layout, (1, 2), (3, 1), obstructions=blocked)
+    shortest = yen_k_shortest_paths(layout, (1, 2), (3, 1), 11, obstructions=blocked)
+    assert len(paths) > 11
+    assert len(shortest) == len({tuple(path) for path in shortest}) == 11
+    assert all(path in paths for path in shortest)
+    assert [len(path) for path in shortest] == sorted(len(path) for path in paths)[:11]
+
+
 def test_clock_cycle_paths() -> None:
     """Search a clock cycle without repeating coordinates."""
     layout = cartesian_gate_layout((3, 2), "OPEN")
@@ -138,3 +155,58 @@ def test_enumeration_endpoint_bounds(
     lyt = make_lyt()
     with pytest.raises(ValueError):  # ruff: ignore[pytest-raises-too-broad] - Only the exception type is specified.
         enumerate_all_paths(lyt, source, target)
+
+
+@pytest.mark.parametrize(
+    ("scheme", "counts"),
+    [(None, (184, 108, 108)), ("2DDWave", (20, 19, 19)), ("USE", (4, 1, 1))],
+    ids=["unclocked", "twoddwave", "use"],
+)
+def test_enumeration_and_yen_cover_complete_four_by_four_routes(
+    scheme: str | None, counts: tuple[int, int, int]
+) -> None:
+    """Check path multiplicity, validity, and ranking under coordinate and directed-edge constraints."""
+    layout = cartesian_layout((4, 4)) if scheme is None else cartesian_gate_layout((4, 4), scheme)
+    for obstruction, expected_count in zip(["none", "coordinate", "connection"], counts, strict=False):
+        blocked = obstructions()
+        if obstruction == "coordinate":
+            blocked.obstruct_coordinate((3, 0))
+        if obstruction == "connection":
+            blocked.obstruct_connection((2, 0), (3, 0))
+        paths = enumerate_all_paths(layout, (0, 0), (3, 3), obstructions=blocked)
+        assert len(paths) == len({tuple(path) for path in paths}) == expected_count
+        for path in paths:
+            assert path[0] == (0, 0)
+            assert path[-1] == (3, 3)
+            assert len(path) == len(set(path))
+            assert all(0 <= site.x < 4 and 0 <= site.y < 4 and site.z == 0 for site in path)
+            assert all(abs(a.x - b.x) + abs(a.y - b.y) == 1 for a, b in itertools.pairwise(path))
+            if isinstance(layout, cartesian_gate_layout):
+                assert all(itertools.starmap(layout.is_outgoing_clocked, itertools.pairwise(path)))
+            assert all(not blocked.is_obstructed_coordinate(site) for site in path)
+            assert all(not blocked.is_obstructed_connection(a, b) for a, b in itertools.pairwise(path))
+        shortest = yen_k_shortest_paths(layout, (0, 0), (3, 3), 7, obstructions=blocked)
+        assert len(shortest) == len({tuple(path) for path in shortest}) == min(7, expected_count)
+        assert all(path in paths for path in shortest)
+        assert [len(path) for path in shortest] == sorted(len(path) for path in paths)[:7]
+
+
+def test_clock_cycle_with_a_chord() -> None:
+    """A chord adds a second simple route without revisiting the clock cycle."""
+    layout = cartesian_gate_layout((3, 3), "OPEN")
+    for site, clock in [
+        ((0, 0), 0),
+        ((1, 0), 1),
+        ((2, 0), 2),
+        ((2, 1), 3),
+        ((2, 2), 0),
+        ((1, 2), 1),
+        ((0, 2), 2),
+        ((0, 1), 3),
+        ((1, 1), 0),
+    ]:
+        layout.assign_clock_number(site, clock)
+    expected = [[(0, 1), (0, 0), (1, 0), (2, 0), (2, 1)], [(0, 1), (1, 1), (1, 0), (2, 0), (2, 1)]]
+    for _ in range(2):
+        assert sorted(enumerate_all_paths(layout, (0, 1), (2, 1))) == sorted(expected)
+        assert sorted(yen_k_shortest_paths(layout, (0, 1), (2, 1), 3)) == sorted(expected)

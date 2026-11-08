@@ -25,7 +25,6 @@
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/physical_design/path_finding/a_star.hpp>
 #include <fiction/physical_design/path_finding/cost.hpp>
-#include <fiction/physical_design/path_finding/distance.hpp>
 
 #include <optional>
 #include <vector>
@@ -73,7 +72,8 @@ void register_a_star_impl(nb::module_& m)
 
             return static_cast<std::vector<fiction::layouts::layout_base::coordinate>>(
                 fiction::physical_design::path_finding::a_star<Lyt>(
-                    lyt, {source, target}, fiction::physical_design::path_finding::manhattan_distance_functor(),
+                    lyt, {source, target},
+                    fiction::physical_design::path_finding::detail::default_distance_functor<Lyt>{},
                     fiction::physical_design::path_finding::unit_cost_functor<>(), params, obstructions));
         },
         nb::arg("layout"), nb::arg("source"), nb::arg("target"), nb::kw_only(),

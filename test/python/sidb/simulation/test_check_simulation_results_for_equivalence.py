@@ -51,3 +51,53 @@ def test_two_sidbs(lat: lattice) -> None:
     second_result.charge_distributions = [charge_distribution(layout), other]
 
     assert not check_simulation_results_for_equivalence(first_result, second_result)
+
+
+@pytest.mark.parametrize("difference", ["order", "energy", "sites", "size", "first_duplicate", "second_duplicate"])
+def test_equivalence_observes_complete_distributions(difference: str) -> None:
+    """Equivalence ignores solution order but preserves energy, geometry, and multiplicity."""
+    layout = sidb_layout()
+    layout.assign_sidb(lattice_site())
+    negative = charge_distribution(layout)
+    neutral = charge_distribution(layout, sidb_charge_state.NEUTRAL)
+    first, second = sidb_simulation_result(), sidb_simulation_result()
+    first.layout = second.layout = layout
+    first.charge_distributions = [negative, neutral]
+    second.charge_distributions = [neutral, negative]
+    if difference == "energy":
+        changed = charge_distribution(layout)
+        changed.assign_energy(1.0)
+        second.charge_distributions = [neutral, changed]
+    elif difference in ("sites", "size"):
+        shifted = sidb_layout()
+        shifted.assign_sidb(lattice_site(1, 0))
+        if difference == "size":
+            shifted.assign_sidb(lattice_site(2, 0))
+        second.charge_distributions = [charge_distribution(shifted, sidb_charge_state.NEUTRAL), negative]
+    elif difference == "first_duplicate":
+        first.charge_distributions = [negative, negative]
+    elif difference == "second_duplicate":
+        second.charge_distributions = [negative, negative]
+    assert check_simulation_results_for_equivalence(first, second) is (difference == "order")
+
+
+def test_equivalence_beyond_charge_index_range() -> None:
+    """Distinct base-3 configurations stay distinct when their 64-bit indices collide."""
+    digits = "11112220022122120101211020120210210211221"
+    layout = sidb_layout()
+    for index in range(len(digits)):
+        layout.assign_sidb(lattice_site(index, 0))
+    zero = charge_distribution(layout)
+    wrapped = charge_distribution(layout)
+    states = [sidb_charge_state.NEGATIVE, sidb_charge_state.NEUTRAL, sidb_charge_state.POSITIVE]
+    for index, digit in enumerate(digits):
+        wrapped.assign_charge_state_by_index(index, states[int(digit)])
+    assert zero.charge_index(3) == wrapped.charge_index(3)
+    first, second = sidb_simulation_result(), sidb_simulation_result()
+    first.layout = second.layout = layout
+    first.charge_distributions = [zero, wrapped]
+    second.charge_distributions = [wrapped, zero]
+    assert check_simulation_results_for_equivalence(first, first)
+    assert check_simulation_results_for_equivalence(first, second)
+    second.charge_distributions = [zero, zero]
+    assert not check_simulation_results_for_equivalence(first, second)
