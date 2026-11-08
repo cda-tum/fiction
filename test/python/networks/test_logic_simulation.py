@@ -214,6 +214,17 @@ def test_network_simulation_rejects_unrepresentable_input_count(tmp_path: Path, 
             simulate_function(network)
 
 
+def test_layout_simulation_accepts_representable_input_count(layout: GateLayout) -> None:
+    """A 37-input layout reaches dependency validation before truth-table allocation."""
+    for index in range(37):
+        layout.create_pi(f"a{index}", (index, 0))
+    assert layout.num_pis() == 37
+    layout.create_po("result", (37, 0))
+    for simulate_function in [simulate, simulate_outputs]:
+        with pytest.raises(ValueError, match="disconnected input"):
+            simulate_function(layout)
+
+
 def test_layout_simulation_rejects_unrepresentable_input_count(layout: GateLayout) -> None:
     """Layout simulation applies the same input bound as network simulation."""
     for index in range(38):

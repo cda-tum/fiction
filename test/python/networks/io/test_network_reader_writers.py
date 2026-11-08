@@ -291,9 +291,11 @@ def test_network_dot_graph_and_index_labels(tmp_path: Path, cls: type[Network]) 
             assert re.findall(r'label\s*=\s*"([^"]*)"', attributes[str(inverted)]) == [label]
             assert re.findall(r"fillcolor\s*=\s*([a-z0-9]+)", attributes[str(inverted)]) == ["paleturquoise"]
         edges = re.findall(
-            r"^[ \t]*(\d+)\s*->\s*(\d+|po\d+)\s*\[style\s*=\s*(solid|dashed)\][ \t]*;?[ \t]*$", text, re.MULTILINE
+            r'^[ \t]*(\d+)\s*->\s*(\d+|po\d+)\s*\[style\s*=\s*("(?:solid|dashed)"|solid|dashed)\][ \t]*;?[ \t]*$',
+            text,
+            re.MULTILINE,
         )
-        assert sorted(edges) == sorted(expected_edges)
+        assert sorted((source, target, style.strip('"')) for source, target, style in edges) == sorted(expected_edges)
 
 
 @pytest.mark.parametrize(("writer", "suffix"), WRITERS)
