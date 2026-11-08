@@ -12084,7 +12084,10 @@ every step. The heuristic must be consistent with the step costs:
 `h(u) <= cost(u, v) + h(v)` for every traversable step, with
 `h(target) = 0`. Step costs must be nonnegative. Manhattan and
 Euclidean distance satisfy this condition for unit-cost Cartesian
-steps. See `distance_functor` for implementations.
+steps. The default uses Manhattan distance for Cartesian layouts and
+Chebyshev distance for shifted Cartesian and hexagonal layouts, whose
+unit-cost steps can change both planar coordinates. See
+`distance_functor` for implementations.
 
 Paths do not pass obstructed coordinates or connections, except that
 the target is never obstructed. A coordinate or connection is
@@ -12956,8 +12959,8 @@ loops from a source to a target coordinate. If :math:`k` is larger
 than the number of possible paths from source to target, the size of
 the returned path collection will be smaller than :math:`k`.
 
-This implementation uses the A* algorithm with the Manhattan distance
-function internally.
+This implementation uses A* with the default unit-cost heuristic for
+the layout geometry internally.
 
 If k is zero, this function returns an empty collection without
 checking endpoint bounds.

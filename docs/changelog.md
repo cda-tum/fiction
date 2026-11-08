@@ -43,6 +43,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Code quality:
 
   - Python CLI tests check independent command results and named error cases.
+  - Python physical-design tests cover placement, paths, gate libraries, solvers, and optimization.
   - Python SiDB tests cover bound model, simulation, analysis, generator, and I/O contracts.
   - Python verification tests cover timing, physical diagnostics, gate classifications, and counterexamples.
   - Python tests cover every module marker and report compile-flag cases independently.
@@ -762,6 +763,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Default A*, A* distance, and Yen searches now return shortest paths on shifted Cartesian and hexagonal layouts.
+    Their default heuristic uses Chebyshev distance for diagonal steps.
   - Non-strict comparison truth tables now match LE and GE gates, restoring Bestagon skeleton lookup.
     Published standard-cell experiment rows labeled `le` and `ge` use NOR and `!b`, respectively.
   - Technology mapping now respects the selected LT, GT, LE, and GE gate types. Previously mapped networks may
