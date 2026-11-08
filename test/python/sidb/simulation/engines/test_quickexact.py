@@ -13,9 +13,11 @@ from __future__ import annotations
 from collections import Counter
 from typing import TYPE_CHECKING, Any
 
+import pytest
+
 from mnt.pyfiction.sidb import lattice, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.io import read_sqd_layout
-from mnt.pyfiction.sidb.model import sidb_charge_state
+from mnt.pyfiction.sidb.model import sidb_charge_state, sidb_defect, sidb_defect_type
 from mnt.pyfiction.sidb.simulation.engines import (
     automatic_base_number_detection,
     exhaustive_ground_state_simulation,
@@ -139,3 +141,50 @@ def test_simulate_all_inputs_of_and_gate(resources_dir: Path) -> None:
         # restore the original layout
         and_gate.assign_sidb(left, sidb_dot_tag.INPUT)
         and_gate.assign_sidb(right, sidb_dot_tag.INPUT)
+
+
+@pytest.mark.parametrize(
+    ("potential", "expected"),
+    [(-0.26, sidb_charge_state.NEUTRAL), (-1.0, sidb_charge_state.POSITIVE), (1.0, sidb_charge_state.NEGATIVE)],
+)
+@pytest.mark.parametrize("scope", ["local", "global"])
+def test_external_potential_changes_single_charge(scope: str, potential: float, expected: sidb_charge_state) -> None:
+    """Local and global applied potentials select the expected charge state and energy."""
+    layout = sidb_layout()
+    layout.assign_sidb(lattice_site())
+    options: dict[str, Any] = (
+        {"local_external_potential": {lattice_site(): potential}}
+        if scope == "local"
+        else {"global_potential": potential}
+    )
+    result = quickexact(layout, base=3, mu_minus=-0.25, **options)
+    assert len(result.charge_distributions) == 1
+    cd = result.charge_distributions[0]
+    assert cd.charge_states() == [expected]
+    sign = {sidb_charge_state.NEGATIVE: -1, sidb_charge_state.NEUTRAL: 0, sidb_charge_state.POSITIVE: 1}[expected]
+    assert cd.energy() == pytest.approx(sign * potential)
+    if scope == "global":
+        assert result.additional_simulation_parameters["global_potential"] == potential
+
+
+@pytest.mark.parametrize(
+    ("position", "charge", "epsilon_r", "lambda_tf", "expected"),
+    [
+        ((1, 2), -1, 5.6, 5.0, sidb_charge_state.NEUTRAL),
+        ((1, 2), -1, 5.6, 2.0, sidb_charge_state.NEGATIVE),
+        ((1, 6), -1, 0.3, 5.0, sidb_charge_state.POSITIVE),
+        ((1, 2), -10, 5.6, 5.0, sidb_charge_state.POSITIVE),
+        ((1, 2), -10, 5.6, 5e-4, sidb_charge_state.NEGATIVE),
+    ],
+)
+def test_defect_parameters_change_single_charge(
+    position: tuple[int, int], charge: int, epsilon_r: float, lambda_tf: float, expected: sidb_charge_state
+) -> None:
+    """Defect charge, permittivity, and screening enter the physical model independently."""
+    layout = sidb_layout()
+    layout.assign_sidb(lattice_site(1, 3))
+    layout.assign_defect(lattice_site(*position), sidb_defect(sidb_defect_type.UNKNOWN, charge, epsilon_r, lambda_tf))
+    result = quickexact(layout, base=2, mu_minus=-0.25)
+    assert result.layout == layout
+    assert len(result.charge_distributions) == 1
+    assert result.charge_distributions[0].charge_states() == [expected]

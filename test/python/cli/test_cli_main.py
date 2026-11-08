@@ -15,6 +15,7 @@ import os
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- bounded native crash regressions
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import Mock
 
 import pytest
@@ -32,13 +33,35 @@ from mnt.fiction.cli.app import CommandCompleter
 from mnt.pyfiction.sidb.simulation import engines
 from mnt.pyfiction.utils import __version__
 
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
-def test_commands_succeed() -> None:
-    assert main(["-c", "version; version"]) == 0
+
+@pytest.fixture
+def interactive_prompt(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[Mock]:
+    """Run an interactive prompt without terminal input or user history.
+
+    Yields:
+        The prompt mock whose side effects supply commands and interruptions.
+    """
+    monkeypatch.setattr(cli_app, "HISTORY_FILE", tmp_path / "history")
+    monkeypatch.setattr(sys.stdin, "isatty", lambda: True)
+    prompt = Mock()
+    monkeypatch.setattr(PromptSession, "prompt", prompt)
+    with create_app_session(input=DummyInput(), output=DummyOutput()):
+        yield prompt
 
 
-def test_failing_command_returns_one() -> None:
-    assert main(["-c", "version; frobnicate"]) == 1
+@pytest.mark.parametrize(
+    ("commands", "status"),
+    [
+        pytest.param("version; version", 0, id="success"),
+        pytest.param("version; frobnicate", 1, id="failure"),
+        pytest.param("version; quit; frobnicate", 0, id="quit-skips-remaining-commands"),
+    ],
+)
+def test_command_exit_status(commands: str, status: int) -> None:
+    assert main(["-c", commands]) == status
 
 
 def test_script_file(tmp_path: Path) -> None:
@@ -47,13 +70,11 @@ def test_script_file(tmp_path: Path) -> None:
     assert main(["-f", str(script)]) == 0
 
 
-def test_missing_script_returns_two(tmp_path: Path) -> None:
-    assert main(["-f", str(tmp_path / "missing.fs")]) == 2
-
-
-def test_unreadable_script_returns_two(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
-    """A path that exists but cannot be read as a file reports the reason and exits with 2."""
-    assert main(["-f", str(tmp_path)]) == 2
+@pytest.mark.parametrize("kind", ["missing", "directory"])
+def test_unreadable_script_returns_two(tmp_path: Path, capsys: pytest.CaptureFixture[str], kind: str) -> None:
+    """Missing files and directories report the script-read failure and exit with 2."""
+    path = tmp_path / "missing.fs" if kind == "missing" else tmp_path
+    assert main(["-f", str(path)]) == 2
     assert "cannot read script" in capsys.readouterr().err
 
 
@@ -79,13 +100,10 @@ def test_module_runs_as_a_process() -> None:
     assert __version__ in result.stdout
 
 
-def test_interactive_interrupt_continues_and_eof_closes_log(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(cli_app, "HISTORY_FILE", tmp_path / "history")
-    monkeypatch.setattr(sys.stdin, "isatty", lambda: True)
-    monkeypatch.setattr(PromptSession, "prompt", Mock(side_effect=[KeyboardInterrupt, "version", EOFError]))
+def test_interactive_interrupt_continues_and_eof_closes_log(tmp_path: Path, interactive_prompt: Mock) -> None:
+    interactive_prompt.side_effect = [KeyboardInterrupt, "version", EOFError]
     log = tmp_path / "interactive.json"
-    with create_app_session(input=DummyInput(), output=DummyOutput()):
-        assert main(["--log", str(log)]) == 0
+    assert main(["--log", str(log)]) == 0
     entries = json.loads(log.read_text(encoding="utf-8"))
     assert len(entries) == 1
     assert entries[0]["status"] == "ok"
@@ -94,9 +112,20 @@ def test_interactive_interrupt_continues_and_eof_closes_log(tmp_path: Path, monk
 
 @pytest.mark.parametrize(
     ("text", "expected"),
-    [("", "read"), ("version; rea", "read"), ("read --ty", "--type"), ("help;he", "help"), ("help rea", "read")],
+    [
+        pytest.param("", "read", id="command"),
+        pytest.param("version; rea", "read", id="command-after-semicolon"),
+        pytest.param("read --ty", "--type", id="option"),
+        pytest.param("help;he", "help", id="adjacent-command"),
+        pytest.param("help rea", "read", id="help-command"),
+        pytest.param("read --type ", "tec", id="network-choice"),
+        pytest.param("read --topology hex", "hexagonal", id="topology-choice"),
+        pytest.param("gold -e ", "high_effort", id="effort-choice"),
+        pytest.param("cell --library bes", "bestagon", id="library-choice"),
+        pytest.param("ortho --topology odd_row", "odd_row_hex", id="arrangement-choice"),
+    ],
 )
-def test_command_and_option_completion(text: str, expected: str) -> None:
+def test_command_option_and_choice_completion(text: str, expected: str) -> None:
     completions = cli_app.CommandCompleter().get_completions(Document(text), CompleteEvent(completion_requested=True))
     assert expected in {completion.text for completion in completions}
 
@@ -108,27 +137,6 @@ def test_file_completion(tmp_path: Path) -> None:
     assert "uit.v" in {completion.text for completion in completions}
 
 
-@pytest.mark.parametrize(
-    ("text", "expected"),
-    [
-        ("read --type ", "tec"),
-        ("read --topology hex", "hexagonal"),
-        ("gold -e ", "high_effort"),
-        ("cell --library bes", "bestagon"),
-        ("ortho --topology odd_row", "odd_row_hex"),
-    ],
-)
-def test_choice_completion(text: str, expected: str) -> None:
-    """An option that only accepts certain values offers them instead of falling through to paths."""
-    completions = cli_app.CommandCompleter().get_completions(Document(text), CompleteEvent(completion_requested=True))
-    assert expected in {completion.text for completion in completions}
-
-
-def test_quit_stops_the_rest_of_a_command_string() -> None:
-    """`quit` ends the run without failing, and the commands after it are not attempted."""
-    assert main(["-c", "version; quit; frobnicate"]) == 0
-
-
 def test_quit_stops_the_rest_of_a_script(tmp_path: Path) -> None:
     """`quit` in a script ends it, and the lines below it are not attempted."""
     script = tmp_path / "script.fs"
@@ -136,27 +144,20 @@ def test_quit_stops_the_rest_of_a_script(tmp_path: Path) -> None:
     assert main(["-f", str(script)]) == 0
 
 
-def test_interactive_continues_after_commands(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_interactive_continues_after_commands(tmp_path: Path, interactive_prompt: Mock) -> None:
     """-i runs the shell once -c is done, as the C++ shell did."""
-    monkeypatch.setattr(cli_app, "HISTORY_FILE", tmp_path / "history")
-    monkeypatch.setattr(sys.stdin, "isatty", lambda: True)
-    monkeypatch.setattr(PromptSession, "prompt", Mock(side_effect=["version", EOFError]))
+    interactive_prompt.side_effect = ["version", EOFError]
     log = tmp_path / "interactive.json"
-    with create_app_session(input=DummyInput(), output=DummyOutput()):
-        assert main(["-i", "--log", str(log), "-c", "version"]) == 0
+    assert main(["-i", "--log", str(log), "-c", "version"]) == 0
     entries = json.loads(log.read_text(encoding="utf-8"))
     assert [entry["command"] for entry in entries] == ["version", "version"]
 
 
-def test_interactive_is_not_entered_after_quit(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_interactive_is_not_entered_after_quit(interactive_prompt: Mock) -> None:
     """`quit` behind -c means it, even with -i."""
-    monkeypatch.setattr(cli_app, "HISTORY_FILE", tmp_path / "history")
-    prompt = Mock(side_effect=[EOFError])
-    monkeypatch.setattr(sys.stdin, "isatty", lambda: True)
-    monkeypatch.setattr(PromptSession, "prompt", prompt)
-    with create_app_session(input=DummyInput(), output=DummyOutput()):
-        assert main(["-i", "-c", "version; quit"]) == 0
-    assert prompt.call_count == 0
+    interactive_prompt.side_effect = [EOFError]
+    assert main(["-i", "-c", "version; quit"]) == 0
+    interactive_prompt.assert_not_called()
 
 
 def test_quiet_keeps_errors_but_drops_informational_output(capsys: pytest.CaptureFixture[str]) -> None:
@@ -184,15 +185,14 @@ def test_history_write_failure_is_reported_once_and_swallowed(tmp_path: Path, mo
     assert "cannot write the command history" in reported[0]
 
 
-def test_an_unusable_history_file_still_starts_the_shell(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_an_unusable_history_file_still_starts_the_shell(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, interactive_prompt: Mock
+) -> None:
     """A home the history cannot even be opened in leaves the shell without one, not without a prompt."""
-    monkeypatch.setattr(cli_app, "HISTORY_FILE", tmp_path / "history")
     monkeypatch.setattr(cli_app, "ForgivingFileHistory", Mock(side_effect=OSError(13, "permission denied")))
-    monkeypatch.setattr(sys.stdin, "isatty", lambda: True)
-    monkeypatch.setattr(PromptSession, "prompt", Mock(side_effect=["version", EOFError]))
+    interactive_prompt.side_effect = ["version", EOFError]
     session = Session(log_path=tmp_path / "log.json")
-    with create_app_session(input=DummyInput(), output=DummyOutput()):
-        cli_app.repl(session)
+    cli_app.repl(session)
     session.close()
     assert [entry["command"] for entry in session.log] == ["version"]
 
