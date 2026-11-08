@@ -31,6 +31,7 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
+#include <mockturtle/traits.hpp>
 #include <mockturtle/utils/tech_library.hpp>
 
 #include <cassert>
@@ -319,6 +320,15 @@ class technology_mapping_impl
     /** @brief Returns the source network mapped to the supplied technology library. */
     [[nodiscard]] fiction::networks::named_technology_network run() const
     {
+        if constexpr (mockturtle::has_is_combinational_v<Ntk>)
+        {
+            if (!ntk.is_combinational())
+            {
+                stats.mapper_stats.mapping_error = true;
+                return fiction::networks::named_technology_network{};
+            }
+        }
+
         // Validate that the library contains required gates for the base network type
         validate_required_gates();
 
@@ -643,15 +653,15 @@ class technology_mapping_impl
 }  // namespace detail
 
 /**
- * Performs technology mapping on the given network. Technology mapping is the process of replacing the gates in a
- * network with gates from a given technology library. This function utilizes `mockturtle::emap` to perform the
- * technology mapping. This function is a wrapper around that interface to provide a more convenient usage.
+ * Maps a combinational logic network to gates from the provided technology library using `mockturtle::emap`.
+ * Non-combinational inputs report mapping failure before library validation.
  *
  * @tparam Ntk Input logic network type.
- * @param ntk Input logic network.
+ * @param ntk Combinational input logic network.
  * @param params Technology mapping parameters.
  * @param pst Technology mapping statistics.
- * @return Mapped network exclusively using gates from the provided library, or an empty network on mapping failure.
+ * @return Mapped network exclusively using gates from the provided library, or an empty network on mapping failure,
+ * including non-combinational input.
  * The mapper requires a library match for each source gate and can reject a network whose overall function is
  * representable by the library. Check `pst->mapper_stats.mapping_error` when statistics are supplied.
  * @throws missing_required_gates_exception if the technology library does not contain required gates for the base

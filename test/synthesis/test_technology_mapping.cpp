@@ -34,6 +34,7 @@
 #include <mockturtle/algorithms/simulation.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
+#include <mockturtle/networks/sequential.hpp>
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/networks/xmg.hpp>
 #include <mockturtle/views/names_view.hpp>
@@ -403,4 +404,31 @@ TEST_CASE("Mapping preserves separate constant values in outputs and fanins", "[
         CHECK(kitty::to_binary(actual[output]) == expected.at(output));
         CHECK(kitty::to_binary(original[output]) == expected.at(output));
     }
+}
+
+TEST_CASE("Sequential inputs report mapping failure", "[technology-mapping]")
+{
+    /** @brief Sequential source with a used, distinct constant-one node. */
+    mockturtle::sequential<technology_network> network{};
+    /** @brief Primary input driving the register input. */
+    const auto input = network.create_pi();
+    network.create_ro();
+    network.create_po(network.get_constant(true));
+    network.create_ri(input);
+    REQUIRE_FALSE(network.is_combinational());
+    REQUIRE(network.num_registers() == 1);
+    REQUIRE(network.get_node(network.get_constant(false)) != network.get_node(network.get_constant(true)));
+    REQUIRE(network.po_at(0) == network.get_constant(true));
+    /** @brief Failure status of the unsupported source. */
+    technology_mapping_stats stats{};
+    /** @brief The unsupported source produces no mapped interface. */
+    const auto mapped = technology_mapping(network, and_or_not(), &stats);
+    CHECK(stats.mapper_stats.mapping_error);
+    CHECK(mapped.num_pis() == 0);
+    CHECK(mapped.num_pos() == 0);
+    CHECK(mapped.num_gates() == 0);
+    CHECK(network.num_pis() == 1);
+    CHECK(network.num_pos() == 1);
+    CHECK(network.num_registers() == 1);
+    CHECK(network.po_at(0) == network.get_constant(true));
 }
