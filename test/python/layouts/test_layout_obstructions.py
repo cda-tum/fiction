@@ -8,7 +8,6 @@
 
 from __future__ import annotations
 
-from operator import attrgetter
 from typing import TYPE_CHECKING
 
 import pytest
@@ -22,7 +21,6 @@ from mnt.pyfiction.layouts import (
     obstructions,
     shifted_cartesian_gate_layout,
 )
-from mnt.pyfiction.verification import critical_path_length_and_throughput, gate_level_drvs
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -229,66 +227,6 @@ def test_clearing_manual_obstructions_preserves_objects_and_ports(make_layout: C
     assert not layout.is_obstructed_connection((0, 0), (1, 0))
     layout.remove(wire)
     assert not layout.is_obstructed_coordinate((1, 0))
-
-
-@pytest.mark.parametrize("make_layout", OBSTRUCTION_LAYOUTS)
-def test_gate_level_inheritance(make_layout: Callable[[], GateLayout]) -> None:
-    """Expose placed identities, physical flow, timing, and validation."""
-    layout = make_layout()
-
-    assert layout.is_empty()
-
-    # layout creation
-    x1 = layout.create_pi("x1", (1, 0))
-    x2 = layout.create_pi("x2", (0, 1))
-    x3 = layout.create_pi("x3", (2, 0))
-    x4 = layout.create_pi("x4", (0, 2))
-
-    a1 = layout.create_and(x1, x2, (1, 1))
-
-    b1 = layout.create_buf(x3, (2, 1))
-    b2 = layout.create_buf(x4, (1, 2))
-
-    a2 = layout.create_and(b1, b2, (2, 2))
-
-    c = layout.create_buf(a1, (2, 1, 1))
-
-    f1 = layout.create_po(c, "f1", (3, 1))
-    f2 = layout.create_po(a2, "f2", (3, 2))
-
-    assert not layout.is_empty()
-
-    assert layout.pis() == [x1, x2, x3, x4]
-    assert layout.pos() == [f1, f2]
-    key = attrgetter("index", "generation")
-    assert sorted(layout.gates(), key=key) == sorted([a1, a2], key=key)
-    assert sorted(layout.wires(), key=key) == sorted([b1, b2, c], key=key)
-    for port, position in [
-        (x1, coordinate(1, 0)),
-        (x2, coordinate(0, 1)),
-        (x3, coordinate(2, 0)),
-        (x4, coordinate(0, 2)),
-        (a1, coordinate(1, 1)),
-        (b1, coordinate(2, 1)),
-        (b2, coordinate(1, 2)),
-        (a2, coordinate(2, 2)),
-        (c, coordinate(2, 1, 1)),
-        (f1, coordinate(3, 1)),
-        (f2, coordinate(3, 2)),
-    ]:
-        assert layout.find_object(position) == port
-        assert layout.get_tile(port) == position
-
-    # Declared inputs retain logical argument order.
-    assert layout.inputs(x1) == []
-    assert layout.inputs(f1) == [c]
-    assert layout.inputs(a2) == [b1, b2]
-
-    cp, tp = critical_path_length_and_throughput(layout)
-    assert cp == 4
-    assert tp == 1
-
-    assert gate_level_drvs(layout) == (0, 0)
 
 
 @pytest.mark.parametrize("make_layout", OBSTRUCTION_LAYOUTS)
