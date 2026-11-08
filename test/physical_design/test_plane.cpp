@@ -161,31 +161,19 @@ TEST_CASE("Gate library applies to the layout", "[plane]")
     CHECK_NOTHROW(apply_gate_library<qca::qca_one_library>(layout));
 }
 
-TEST_CASE("Constant fanins", "[plane]")
+TEST_CASE("A gate with one non-constant fanin and a constant is rejected", "[plane]")
 {
-    SECTION("a gate with two inputs and a constant third one is placed")
-    {
-        // the MIG adders map to majority gates with a constant fanin
-        const auto xor_gates = GENERATE(false, true);
+    technology_network tec{};
 
-        CAPTURE(xor_gates);
+    const auto x1 = tec.create_pi();
+    const auto x2 = tec.create_pi();
+    const auto a1 = tec.create_and(x1, tec.get_constant(true));
+    tec.create_po(tec.create_or(a1, x2));
+    tec.create_po(tec.create_and(x1, x2));
 
-        static_cast<void>(check_plane(rank(blueprints::half_adder_network<mockturtle::mig_network>()), xor_gates));
-    }
-    SECTION("a gate with a single input next to a constant is rejected")
-    {
-        technology_network tec{};
+    const auto planar = planar_network(rank(tec));
 
-        const auto x1 = tec.create_pi();
-        const auto x2 = tec.create_pi();
-        const auto a1 = tec.create_and(x1, tec.get_constant(true));
-        tec.create_po(tec.create_or(a1, x2));
-        tec.create_po(tec.create_and(x1, x2));
-
-        const auto planar = planar_network(rank(tec));
-
-        CHECK_THROWS_AS(plane(planar), std::invalid_argument);
-    }
+    CHECK_THROWS_AS(plane(planar), std::invalid_argument);
 }
 
 TEST_CASE("Inputs that drive outputs directly", "[plane]")

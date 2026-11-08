@@ -33,27 +33,24 @@ def _planar(network: technology_network) -> technology_network:
     return planar
 
 
-def test_plane_default(mux21: technology_network) -> None:
+@pytest.mark.parametrize("phases", [None, num_clks.THREE], ids=["default-four", "three"])
+def test_plane_layout_and_stats(mux21: technology_network, phases: num_clks | None) -> None:
+    """Both clock configurations preserve the planar function and report the returned layout."""
     planar = _planar(mux21)
-    layout = plane(planar)
+    stats = plane_stats()
+    layout = (
+        plane(planar, statistics=stats)
+        if phases is None
+        else plane(planar, statistics=stats, number_of_clock_phases=phases)
+    )
+    assert layout.num_clocks() == (4 if phases is None else 3)
     assert layout.num_crossings() == 0
     assert layout.num_pis() == planar.num_pis()
     assert equivalence_checking(planar, layout) == eq_type.STRONG
-
-
-def test_plane_three_clock_phases(mux21: technology_network) -> None:
-    layout = plane(_planar(mux21), number_of_clock_phases=num_clks.THREE)
-    assert layout.num_clocks() == 3
-    assert layout.num_crossings() == 0
-
-
-def test_plane_with_stats(mux21: technology_network) -> None:
-    stats = plane_stats()
-    layout = plane(_planar(mux21), statistics=stats)
     assert stats.x_size == layout.width()
     assert stats.y_size == layout.height()
-    assert stats.num_gates > 0
-    assert stats.num_wires > 0
+    assert stats.num_gates == layout.num_gates()
+    assert stats.num_wires == layout.num_wires()
     assert stats.num_crossings == 0
     assert "num. gates" in repr(stats)
 
