@@ -350,7 +350,7 @@ namespace fiction::synthesis
  * of a double wire multi-output function in two variables. The function returns a vector containing
  * two truth tables.
  *
- * @return Vector of truth tables, each representing an output of the double wire function.
+ * @return Truth tables for output ports 0 and 1, passing bits 1 and 0 of the input index, respectively.
  */
 [[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_double_wire_tt() noexcept
 {
@@ -372,7 +372,7 @@ namespace fiction::synthesis
  * of a crossing wire multi-output function in two variables. The function returns a vector containing
  * two truth tables.
  *
- * @return Vector of truth tables, each representing an output of the crossing wire function.
+ * @return Truth tables for output ports 0 and 1, passing bits 0 and 1 of the input index, respectively.
  */
 [[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_crossing_wire_tt() noexcept
 {
@@ -412,7 +412,7 @@ namespace fiction::synthesis
  * of a half adder multi-output function in two variables. The function returns a vector containing
  * two truth tables.
  *
- * @return Vector of truth tables, each representing an output of the half adder function.
+ * @return Truth tables for output ports 0 (sum, XOR) and 1 (carry, AND).
  */
 [[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_half_adder_tt() noexcept
 {

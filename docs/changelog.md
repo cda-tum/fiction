@@ -42,6 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Code quality:
 
+  - Python synthesis tests cover bound truth tables, conversion, mapping, and planarization.
   - Python layout tests cover bound geometry, clocking, topology, normalization, and FGL contracts.
   - Python CLI tests check independent command results and named error cases.
   - Python FCN, QCA, molecular QCA, and iNML tests cover bound technology and writer contracts.
@@ -400,6 +401,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     11.0.2 does not compile with clang 20.
 
 - Documentation:
+  - Multi-output truth-table factories now document their output-port order.
   - Color routing documentation no longer claims lexicographic ordering.
   - Progress callback docs state the input-mutation precondition, propagation from construction and updates,
     and suppression during reporter destruction.
@@ -766,6 +768,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - `synthesis::technology_mapping` now preserves constant-one outputs and gate inputs, including view outputs, and reports mapping failure for sequential inputs.
   - Default A*, A* distance, and Yen searches now return shortest paths on shifted Cartesian and hexagonal layouts.
     Their default heuristic uses Chebyshev distance for diagonal steps.
   - Non-strict comparison truth tables now match LE and GE gates, restoring Bestagon skeleton lookup.

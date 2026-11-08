@@ -107,7 +107,10 @@ def test_empty_simulation_xml_metadata(tmp_path: Path) -> None:
     assert timestamp is not None
     parsed = datetime.fromisoformat(timestamp)
     assert parsed.strftime("%Y-%m-%d %H:%M:%S") == timestamp
-    assert any(before <= parsed.replace(fold=fold).timestamp() <= after for fold in (0, 1))
+    # C and Python wall clocks can sample opposite sides of a one-second timestamp boundary.
+    assert any(before - 1 <= parsed.replace(fold=fold).timestamp() <= after + 1 for fold in (0, 1)), (
+        f"{before=}, {after=}, {timestamp=}"
+    )
 
 
 @pytest.mark.parametrize("base", [2, 3])
