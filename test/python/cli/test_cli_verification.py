@@ -79,6 +79,16 @@ def test_plane_mapping_rejects_another_source_network(shell: Shell, tmp_path: Pa
     assert shell.session.log[-1]["result"]["eq"] == "STRONG"
 
 
+def test_equiv_reports_a_malformed_plane_mapping(shell: Shell, resource: Callable[[str], str]) -> None:
+    """A malformed mapping on the source network is a usage error, not an equivalence verdict."""
+    shell.ok(f'read "{resource("FA.v")}"; plane')
+    mapping = shell.session.gate_layouts.attached("input_mapping")
+    assert isinstance(mapping, list)
+    mapping.pop()
+    assert "input mapping of the layout does not fit" in shell.fails("equiv -n -g")
+    shell.ok("version")
+
+
 def test_drv_blocked_equivalence_is_a_report(shell: Shell, resource: Callable[[str], str]) -> None:
     shell.ok(f'read "{resource("mux21.v")}"')
     layout = cartesian_gate_layout((1, 0), "2DDWave", "invalid")
