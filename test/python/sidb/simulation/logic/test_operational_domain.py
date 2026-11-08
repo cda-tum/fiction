@@ -8,6 +8,7 @@
 
 from __future__ import annotations
 
+from collections import Counter
 from typing import TYPE_CHECKING, Any
 
 import pytest
@@ -347,130 +348,46 @@ def test_operational_domain_and_gate_111_lattice(resources_dir: Path) -> None:
     assert stats_contour_tracing.num_operational_parameter_combinations > 0
 
 
-def test_temperature_operational_domain() -> None:
-    # Create an instance of critical_temperature_domain
-    temp_domain = critical_temperature_domain([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
-
-    # Create test key and value
-    key = parameter_point([1.0, 2.0])
-    value = (operational_status.OPERATIONAL, 0.1)
-
-    # Add a value to the domain using __setitem__
-    temp_domain[key] = value
-
-    # __getitem__ should return the value for an existing key
-    assert temp_domain[key] == value
-
-    # __getitem__ should raise KeyError for missing key
-    missing_key = parameter_point([4.0, 5.0])
+@pytest.mark.parametrize(
+    ("domain_type", "points", "values"),
+    [
+        (
+            critical_temperature_domain,
+            ((1.0, 2.0), (3.3, 4.4), (4.0, 5.0)),
+            ((operational_status.OPERATIONAL, 0.1), (operational_status.NON_OPERATIONAL, 0.0)),
+        ),
+        (
+            operational_domain,
+            ((10.0, 20.0), (1.1, 2.2), (7.0, 8.0)),
+            (operational_status.NON_OPERATIONAL, operational_status.OPERATIONAL),
+        ),
+    ],
+    ids=["critical-temperature", "operational"],
+)
+def test_domain_mapping_protocol(
+    domain_type: type[operational_domain | critical_temperature_domain],
+    points: tuple[tuple[float, float], ...],
+    values: tuple[Any, Any],
+) -> None:
+    """Both domain classes expose complete mapping views and missing-key errors."""
+    domain = domain_type([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
+    key, new_key, missing_key = (parameter_point(list(point)) for point in points)
+    value, new_value = values
+    domain[key] = value
+    assert domain[key] == value
     with pytest.raises(KeyError):
-        _ = temp_domain[missing_key]
-
-    # __setitem__ should add or update a value
-    new_key = parameter_point([3.3, 4.4])
-    new_value = (operational_status.NON_OPERATIONAL, 0.0)
-    temp_domain[new_key] = new_value
-    assert temp_domain[new_key] == new_value
-
-    # __contains__ should work for present and missing keys
-    assert key in temp_domain
-    assert new_key in temp_domain
-    assert missing_key not in temp_domain
-
-    # __len__ should reflect the number of items
-    assert len(temp_domain) == 2
-
-    # __iter__ should yield all keys
-    keys = list(iter(temp_domain))
-    assert key in keys
-    assert new_key in keys
-    assert set(keys) == set(temp_domain.keys())
-
-    # keys() should return all keys
-    keys_method = temp_domain.keys()
-    assert set(keys_method) == {key, new_key}
-
-    # values() should return all values
-    values_method = temp_domain.values()
-    assert value in values_method
-    assert new_value in values_method
-    assert len(values_method) == 2
-
-    # items() should return all (key, value) pairs
-    items_method = temp_domain.items()
-    assert (key, value) in items_method
-    assert (new_key, new_value) in items_method
-    assert len(items_method) == 2
-
-    # Test retrieving a value that doesn't exist using contains (should return None)
-    assert missing_key not in temp_domain
-
-    # Modify dimensions and verify
-    assert temp_domain.get_dimension(0) == sweep_parameter.EPSILON_R
-    assert temp_domain.get_dimension(1) == sweep_parameter.LAMBDA_TF
-
-
-def test_operational_domain() -> None:
-    # Create an instance of operational_domain
-    op_domain = operational_domain([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
-
-    # Create test key and value
-    key = parameter_point([10.0, 20.0])
-    value = operational_status.NON_OPERATIONAL
-
-    # Add a value to the domain
-    op_domain[key] = value
-
-    # Test retrieving a value that doesn't exist
-    missing_key = parameter_point([7.0, 8.0])
-    assert missing_key not in op_domain
-
-    # Modify dimensions and verify
-    assert op_domain.get_dimension(0) == sweep_parameter.EPSILON_R
-    assert op_domain.get_dimension(1) == sweep_parameter.LAMBDA_TF
-
-    # __getitem__ should return the value for an existing key
-    assert op_domain[key] == value
-
-    # __getitem__ should raise KeyError for missing key
-    with pytest.raises(KeyError):
-        _ = op_domain[missing_key]
-
-    # __setitem__ should add or update a value
-    new_key = parameter_point([1.1, 2.2])
-    new_value = operational_status.OPERATIONAL
-    op_domain[new_key] = operational_status.OPERATIONAL
-    assert op_domain[new_key] == new_value
-
-    # __contains__ should work for present and missing keys
-    assert key in op_domain
-    assert new_key in op_domain
-    assert missing_key not in op_domain
-
-    # __len__ should reflect the number of items
-    assert len(op_domain) == 2
-
-    # __iter__ should yield all keys
-    keys = list(iter(op_domain))
-    assert key in keys
-    assert new_key in keys
-    assert set(keys) == set(op_domain.keys())
-
-    # keys() should return all keys
-    keys_method = op_domain.keys()
-    assert set(keys_method) == {key, new_key}
-
-    # values() should return all values
-    values_method = op_domain.values()
-    assert value in values_method
-    assert new_value in values_method
-    assert len(values_method) == 2
-
-    # items() should return all (key, value) pairs
-    items_method = op_domain.items()
-    assert (key, value) in items_method
-    assert (new_key, new_value) in items_method
-    assert len(items_method) == 2
+        _ = domain[missing_key]
+    domain[new_key] = new_value
+    assert domain[new_key] == new_value
+    assert key in domain
+    assert new_key in domain
+    assert missing_key not in domain
+    assert len(domain) == 2
+    expected_keys = Counter([key, new_key])
+    assert Counter(iter(domain)) == expected_keys
+    assert Counter(domain.keys()) == expected_keys
+    assert Counter(domain.values()) == Counter(values)
+    assert Counter(domain.items()) == Counter([(key, value), (new_key, new_value)])
 
 
 def test_operational_domain_two_bdl_pair_wire() -> None:
