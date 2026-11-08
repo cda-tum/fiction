@@ -162,10 +162,17 @@ def test_exact_statistics_names_and_progress(mux21: technology_network, threads:
 
 @pytest.mark.skipif(not hasattr(physical_design, "exact"), reason="pyfiction was built without Z3")
 @pytest.mark.parametrize("bound", ["upper_bound_area", "upper_bound_x", "upper_bound_y"])
-def test_exact_unsatisfiable_upper_bounds(mux21: technology_network, bound: str) -> None:
+def test_exact_unsatisfiable_upper_bounds(tmp_path: Path, bound: str) -> None:
     """Each independent bound can exclude every feasible placement."""
-    bounds: dict[str, Any] = {"upper_bound_x": 2, "upper_bound_y": 2, bound: 1}
-    assert physical_design.exact(mux21, **bounds, timeout=1000) is None
+    source = tmp_path / "and.blif"
+    source.write_text(".model and\n.inputs a b\n.outputs f\n.names a b f\n11 1\n.end\n")
+    network = read_network(str(source))
+    bounds: dict[str, Any] = {"upper_bound_area": 9, "upper_bound_x": 3, "upper_bound_y": 3}
+    baseline = physical_design.exact(network, **bounds, timeout=1000)
+    assert baseline is not None
+    assert equivalence_checking(network, baseline) == eq_type.STRONG
+    bounds[bound] = 1
+    assert physical_design.exact(network, **bounds, timeout=1000) is None
 
 
 @pytest.mark.skipif(not hasattr(physical_design, "exact"), reason="pyfiction was built without Z3")

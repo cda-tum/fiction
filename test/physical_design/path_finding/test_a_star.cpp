@@ -814,11 +814,11 @@ TEST_CASE("Default A* heuristics preserve shortest offset-coordinate paths", "[A
     const auto shifted = GENERATE(false, true);
     CAPTURE(shifted);
     /** @brief Checks an independent three-step route around one directed obstruction. */
-    const auto check = [](const auto& layout)
+    const auto check = [](auto layout)
     {
         /** @brief Directed edge that excludes the misleading vertical continuation. */
-        obstructions blocked{};
-        blocked.obstruct_connection({1, 1}, {1, 0});
+        layout.obstruct_connection({1, 1}, {1, 0});
+        layout.foreach_coordinate([&layout](const auto& site) { layout.assign_synchronization_element(site, 1); });
         /** @brief Endpoints whose shortest route changes both axes in one step. */
         const routing_objective objective{.source = {0, 3}, .target = {1, 0}};
         /** @brief Independent route proving the three-step upper bound. */
@@ -826,21 +826,22 @@ TEST_CASE("Default A* heuristics preserve shortest offset-coordinate paths", "[A
         for (std::size_t i = 1; i < expected.size(); ++i)
         {
             REQUIRE(layout.is_adjacent_of(expected[i - 1], expected[i]));
-            REQUIRE_FALSE(blocked.is_obstructed_connection(expected[i - 1], expected[i]));
+            REQUIRE(layout.is_outgoing_clocked(expected[i - 1], expected[i]));
+            REQUIRE_FALSE(layout.is_obstructed_connection(expected[i - 1], expected[i]));
         }
         // Three is also a lower bound because each step changes y by at most one.
         CHECK(a_star(layout, objective).size() == expected.size());
-        CHECK(a_star_distance(layout, objective.source, objective.target, blocked) == 3);
-        const auto paths = yen_k_shortest_paths(layout, objective, 1, {}, blocked);
+        CHECK(a_star_distance(layout, objective.source, objective.target) == 3);
+        const auto paths = yen_k_shortest_paths(layout, objective, 1);
         REQUIRE(paths.size() == 1);
         CHECK(paths.front().size() == expected.size());
     };
     if (shifted)
     {
-        check(shifted_cartesian_layout{arrangement::ODD_ROW, {4, 4}});
+        check(shifted_cartesian_gate_layout{arrangement::ODD_ROW, {4, 4}, clocking::open()});
     }
     else
     {
-        check(hexagonal_layout{arrangement::ODD_ROW, {4, 4}});
+        check(hexagonal_gate_layout{arrangement::ODD_ROW, {4, 4}, clocking::open()});
     }
 }

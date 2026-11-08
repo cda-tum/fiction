@@ -106,6 +106,22 @@ def test_unclocked_cartesian_detours() -> None:
     assert [len(path) for path in shortest_paths] == sorted(len(path) for path in shortest_paths)
 
 
+@pytest.mark.parametrize("cls", [shifted_cartesian_layout, hexagonal_layout])
+def test_offset_yen_spur_paths_match_exhaustive_ranking(
+    cls: type[shifted_cartesian_layout | hexagonal_layout],
+) -> None:
+    """Rank alternative diagonal routes using an independent exhaustive traversal."""
+    layout = cls(arrangement.ODD_ROW, (4, 4))
+    blocked = obstructions()
+    blocked.obstruct_connection((1, 1), (2, 1))
+    paths = enumerate_all_paths(layout, (1, 2), (3, 1), obstructions=blocked)
+    shortest = yen_k_shortest_paths(layout, (1, 2), (3, 1), 11, obstructions=blocked)
+    assert len(paths) > 11
+    assert len(shortest) == len({tuple(path) for path in shortest}) == 11
+    assert all(path in paths for path in shortest)
+    assert [len(path) for path in shortest] == sorted(len(path) for path in paths)[:11]
+
+
 def test_clock_cycle_paths() -> None:
     """Search a clock cycle without repeating coordinates."""
     layout = cartesian_gate_layout((3, 2), "OPEN")

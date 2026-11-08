@@ -102,6 +102,60 @@ def test_hexagonalization_preserves_input_holes_and_declared_order() -> None:
     assert result.get_name(source) == "b"
 
 
+@pytest.mark.parametrize("outputs", [mode.EXTEND, mode.EXTEND_PLANAR])
+def test_planar_input_extension_with_output_extension(outputs: mode) -> None:
+    """Planar inputs add no crossings when the output is already on the final border."""
+    layout = cartesian_gate_layout((5, 5, 2), "2DDWave")
+    branches = [
+        [(0, 2), (1, 2), (2, 2)],
+        [(0, 0), (0, 1), (1, 1), (2, 1), (3, 1)],
+    ]
+    ends = []
+    for index, branch in enumerate(branches):
+        wire = layout.create_pi(f"x{index}", branch[0])
+        for site in branch[1:]:
+            wire = layout.create_buf(wire, site)
+        ends.append(wire)
+    wire = layout.create_and(*ends, (3, 2))
+    for site in [(4, 2), (4, 3)]:
+        wire = layout.create_buf(wire, site)
+    layout.create_po(wire, "f", (4, 4))
+    unextended = hexagonalization(layout)
+    assert layout.num_crossings() == unextended.num_crossings() == 0
+    assert unextended.get_tile(unextended.po_at(0)).y == unextended.height() - 1
+
+    result = hexagonalization(layout, input_pin_extension=mode.EXTEND_PLANAR, output_pin_extension=outputs)
+    assert equivalence_checking(layout, result) == eq_type.STRONG
+    assert result.num_crossings() == 0
+    assert all(result.get_tile(pi).y == 0 for pi in result.pis())
+    assert result.get_tile(result.po_at(0)).y == result.height() - 1
+
+
+@pytest.mark.parametrize("inputs", [mode.EXTEND, mode.EXTEND_PLANAR])
+def test_planar_output_extension_with_input_extension(inputs: mode) -> None:
+    """Planar outputs add no crossings when the input is already on the final border."""
+    layout = cartesian_gate_layout((5, 5, 2), "2DDWave")
+    source = layout.create_pi("x", (0, 0))
+    branches = [
+        [(0, 1), (1, 1), (1, 2), (1, 3), (2, 3), (3, 3), (4, 3), (4, 4)],
+        [(1, 0), (2, 0), (2, 1), (2, 2), (3, 2), (4, 2)],
+    ]
+    for index, branch in enumerate(branches):
+        wire = source
+        for site in branch[:-1]:
+            wire = layout.create_buf(wire, site)
+        layout.create_po(wire, f"f{index}", branch[-1])
+    unextended = hexagonalization(layout)
+    assert layout.num_crossings() == unextended.num_crossings() == 0
+    assert unextended.get_tile(unextended.pi_at(0)).y == 0
+
+    result = hexagonalization(layout, input_pin_extension=inputs, output_pin_extension=mode.EXTEND_PLANAR)
+    assert equivalence_checking(layout, result) == eq_type.STRONG
+    assert result.num_crossings() == 0
+    assert result.get_tile(result.pi_at(0)).y == 0
+    assert all(result.get_tile(po).y == result.height() - 1 for po in result.pos())
+
+
 def test_hexagonalization_preserves_crossing_layer() -> None:
     """A primary input on layer one retains its elevation."""
     layout = cartesian_gate_layout((1, 1, 2), "2DDWave")
