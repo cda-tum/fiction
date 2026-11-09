@@ -32,6 +32,7 @@
 #include <climits>
 #include <cstddef>
 #include <cstdint>
+#include <ios>
 #include <istream>
 #include <limits>
 #include <memory>
