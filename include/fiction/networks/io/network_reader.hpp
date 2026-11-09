@@ -115,6 +115,10 @@ namespace detail
 [[nodiscard]] inline network_format requested_network_format(const std::filesystem::path& path,
                                                              const std::string_view       format)
 {
+    if (path.native().find(std::filesystem::path::value_type{}) != std::filesystem::path::string_type::npos)
+    {
+        throw network_read_error{"could not parse a path containing a null character"};
+    }
     const auto parsed = parse_network_format(format);
     if (!format.empty() && parsed == network_format::UNKNOWN)
     {
