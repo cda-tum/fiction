@@ -256,17 +256,18 @@ flatten_planarization(const networks::virtual_pi_network<Ntk>& planar)
             original_input.push_back(real_index[planar.is_real_pi(n) ? n : planar.get_real_pi(n)]);
         });
 
+    std::vector<signal> children{};
     for (uint32_t level = 1; level <= planar.depth(); ++level)
     {
         planar.foreach_node_in_rank(level,
-                                    [&planar, &dest, &old2new, &copy](const auto& n)
+                                    [&planar, &dest, &old2new, &copy, &children](const auto& n)
                                     {
                                         if (planar.is_constant(n) || planar.is_pi(n))
                                         {
                                             return;
                                         }
 
-                                        std::vector<signal> children{};
+                                        children.clear();
                                         planar.foreach_fanin(n, [&copy, &children](const auto& f)
                                                              { children.push_back(copy(f)); });
 
@@ -281,7 +282,7 @@ flatten_planarization(const networks::virtual_pi_network<Ntk>& planar)
     networks::restore_signal_names(planar, dest, old2new);
     networks::restore_output_names(planar, dest);
 
-    return {dest, original_input};
+    return {std::move(dest), std::move(original_input)};
 }
 
 }  // namespace fiction::synthesis

@@ -1602,6 +1602,46 @@ class plane_impl
     layouts::layout_base::coordinate place_t{};
 };
 
+/**
+ * @brief Tests whether edges cross between adjacent levels of a balanced network.
+ *
+ * @param ntk Ranked network.
+ * @return Whether the rank order has a crossing.
+ */
+[[nodiscard]] inline bool
+has_rank_crossing(const networks::views::mutable_rank_view<networks::named_technology_network>& ntk)
+{
+    for (uint32_t level = 1; level <= ntk.depth(); ++level)
+    {
+        uint32_t previous_max{};
+        bool     crosses = false;
+        ntk.foreach_node_in_rank(level,
+                                 [&](const auto& target)
+                                 {
+                                     auto target_max = previous_max;
+                                     ntk.foreach_fanin(target,
+                                                       [&](const auto& signal)
+                                                       {
+                                                           const auto source = ntk.get_node(signal);
+                                                           if (!ntk.is_constant(source))
+                                                           {
+                                                               const auto position = ntk.rank_position(source);
+                                                               crosses |= position < previous_max;
+                                                               target_max = std::max(target_max, position);
+                                                           }
+                                                       });
+                                     // Edges sharing a target do not cross one another.
+                                     previous_max = target_max;
+                                     return !crosses;
+                                 });
+        if (crosses)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 }  // namespace detail
 
 /**
@@ -1725,8 +1765,9 @@ class plane_impl
             "An output is driven from above the last level; unify the outputs before placement");
     }
 
-    if (const auto crossings = utils::graph::count_crossings(ranked); crossings != 0)
+    if (detail::has_rank_crossing(ranked))
     {
+        const auto crossings = utils::graph::count_crossings(ranked);
         throw std::invalid_argument(fmt::format("The rank order of the network has {} crossings", crossings));
     }
 
