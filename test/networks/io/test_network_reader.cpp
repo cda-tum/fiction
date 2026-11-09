@@ -26,6 +26,7 @@
 #include "utils/scoped_temp_directory.hpp"
 
 #include <fiction/networks/io/network_reader.hpp>
+#include <fiction/networks/technology_network.hpp>
 #include <fiction/types.hpp>
 
 #include <kitty/constructors.hpp>
