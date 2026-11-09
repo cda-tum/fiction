@@ -37,9 +37,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
-#include <memory>
 #include <random>
-#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -127,22 +125,8 @@ TEMPLATE_TEST_CASE("Read Verilog", "[network-reader]", named_aig_network, named_
                    named_technology_network)
 {
     /** @brief Shared Verilog benchmark resolved from the test resource root. */
-    const auto mux21_file_name = (std::filesystem::path{TEST_PATH} / "../benchmarks/TOY/mux21.v").string();
-
-    std::ostringstream os{};
-
-    network_reader<std::shared_ptr<TestType>> reader{mux21_file_name, os};
-
-    // no error messages
-    REQUIRE(os.str().empty());
-
-    const auto& nets = reader.get_networks();
-
-    // exactly one net should have been created
-    REQUIRE(nets.size() == 1);
-
-    REQUIRE(nets.front());
-    const auto& mux21 = *nets.front();
+    const auto mux21_file_name = std::filesystem::path{TEST_PATH} / "../benchmarks/TOY/mux21.v";
+    const auto mux21           = read_network<TestType>(mux21_file_name);
 
     SECTION("Equality")
     {
@@ -190,12 +174,7 @@ TEST_CASE("BLIF readers accept empty lines without changing logic", "[network-re
         file.close();
         REQUIRE_FALSE(file.fail());
     }
-    std::ostringstream                                        diagnostics{};
-    network_reader<std::shared_ptr<named_technology_network>> reader{path.string(), diagnostics};
-    REQUIRE(diagnostics.str().empty());
-    REQUIRE(reader.get_networks().size() == 1);
-    REQUIRE(reader.get_networks().front());
-    const auto& network = *reader.get_networks().front();
+    const auto network = read_network<named_technology_network>(path);
     CHECK(network.num_pis() == 3);
     REQUIRE(network.num_pos() == 6);
     std::vector<std::string> input_names{};
@@ -235,8 +214,88 @@ TEST_CASE("BLIF readers report invalid declarations after empty lines", "[networ
         file.close();
         REQUIRE_FALSE(file.fail());
     }
-    std::ostringstream                                        diagnostics{};
-    network_reader<std::shared_ptr<named_technology_network>> reader{path.string(), diagnostics};
-    CHECK(reader.get_networks().empty());
-    CHECK_THAT(diagnostics.str(), Catch::Matchers::ContainsSubstring("parsing error in " + path.string()));
+    CHECK_THROWS_WITH(static_cast<void>(read_network<named_technology_network>(path)),
+                      Catch::Matchers::ContainsSubstring(path.string()) &&
+                          Catch::Matchers::ContainsSubstring("parsing error"));
+}
+
+TEST_CASE("Directory readers retain successful networks and report failed files", "[network-reader]")
+{
+    const fiction::test::scoped_temp_directory directory{
+        std::filesystem::temp_directory_path(), "fiction-network-batch-" + std::to_string(std::random_device{}())};
+    const auto& root  = directory.path();
+    const auto  empty = read_networks<named_aig_network>(root);
+    CHECK(empty.networks.empty());
+    CHECK(empty.failures.empty());
+    CHECK_THROWS_AS(static_cast<void>(read_network<named_aig_network>(root)), network_read_error);
+
+    const auto fixture = std::filesystem::path{TEST_PATH} / "../benchmarks/TOY/mux21.v";
+    REQUIRE(std::filesystem::copy_file(fixture, root / "z.v"));
+    REQUIRE(std::filesystem::copy_file(fixture, root / "b.V"));
+    REQUIRE(std::filesystem::copy_file(fixture, root / "c.data"));
+    REQUIRE(std::filesystem::create_directory(root / "ignored.v"));
+    {
+        std::ofstream broken{root / "a.v"};
+        broken << "module broken(\n";
+        broken.close();
+        REQUIRE_FALSE(broken.fail());
+    }
+
+    const auto batch = read_networks<named_aig_network>(root);
+    REQUIRE(batch.networks.size() == 2);
+    CHECK(batch.networks[0].get_network_name() == "b");
+    CHECK(batch.networks[1].get_network_name() == "z");
+    REQUIRE(batch.failures.size() == 1);
+    CHECK(batch.failures.front().path == root / "a.v");
+    CHECK_THAT(batch.failures.front().message, Catch::Matchers::ContainsSubstring("parsing error"));
+    CHECK(read_network<named_aig_network>(root).get_network_name() == "b");
+    CHECK(read_network<named_aig_network>(root / "c.data", ".V").get_network_name() == "c");
+    CHECK(read_networks<named_aig_network>(root, "v").networks.size() == 3);
+    CHECK_THROWS_AS(static_cast<void>(read_networks<named_aig_network>(fixture)), network_read_error);
+}
+
+TEST_CASE("Malformed network files report their path", "[network-reader]")
+{
+    const fiction::test::scoped_temp_directory directory{
+        std::filesystem::temp_directory_path(), "fiction-network-invalid-" + std::to_string(std::random_device{}())};
+    const auto [extension, content] = GENERATE(table<std::string, std::string>({
+        {".aig", "aig 2 1 0 1 1\n4\n\x80"},
+        {".aig", "aig 1 1 0 1 0\n4\n"},
+        {".aig", "aig 1 1 0 1 0\n2\ni1 invalid\n"},
+        {".blif", "# no network\n"},
+        {".blif", ".model broken\n.inputs a \\\n"},
+        {".blif", ".model broken\n.inputs a\n.outputs y\n.names a y\n11 1\n.end\n"},
+        {".v", "module top(a,y); input [0:1] a; output y; assign y = a[0]; endmodule\n"},
+        {".v", "// no network\n"},
+    }));
+    CAPTURE(content);
+    const auto    path = directory.path() / ("malformed" + extension);
+    std::ofstream file{path, std::ios::binary};
+    file << content;
+    file.close();
+    REQUIRE_FALSE(file.fail());
+
+    CHECK_THROWS_WITH(static_cast<void>(read_network<named_technology_network>(path)),
+                      Catch::Matchers::ContainsSubstring(path.string()));
+}
+
+TEST_CASE("Read binary AIGER with latches and bad-state outputs", "[network-reader]")
+{
+    const fiction::test::scoped_temp_directory directory{
+        std::filesystem::temp_directory_path(), "fiction-aiger-latch-" + std::to_string(std::random_device{}())};
+    const auto    path = directory.path() / "extended.aig";
+    std::ofstream file{path, std::ios::binary};
+    file << "aig 3 1 1 0 1 1\n6 4\n6\n\x02\x02i0 a\nl0 state\nb0 bad\n";
+    file.close();
+    REQUIRE_FALSE(file.fail());
+
+    const auto network = read_network<named_aig_network>(path);
+    CHECK(network.num_pis() == 2);
+    REQUIRE(network.num_pos() == 2);
+    CHECK(network.get_output_name(0) == "bad");
+    const auto outputs = mockturtle::simulate<kitty::dynamic_truth_table>(
+        network, mockturtle::default_simulator<kitty::dynamic_truth_table>{2});
+    kitty::dynamic_truth_table conjunction{2};
+    kitty::create_from_hex_string(conjunction, "8");
+    CHECK(outputs == std::vector{conjunction, conjunction});
 }

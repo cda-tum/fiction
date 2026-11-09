@@ -33,8 +33,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
-#include <memory>
-#include <sstream>
 #include <string>
 
 #include <experiments.hpp>
@@ -51,12 +49,7 @@ Ntk read_ntk(const std::string& name)
 {
     fmt::print("[i] processing {}\n", name);
 
-    std::ostringstream                                        os{};
-    network_reader<std::shared_ptr<named_technology_network>> reader{fiction_experiments::benchmark_path(name), os};
-    const auto                                                nets    = reader.get_networks();
-    const auto                                                network = *nets.front();
-
-    return network;
+    return fiction::networks::io::read_network<named_technology_network>(fiction_experiments::benchmark_path(name));
 }
 
 /** @brief Run the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */

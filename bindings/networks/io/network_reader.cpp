@@ -17,11 +17,7 @@
 #include <fiction/networks/io/network_reader.hpp>
 #include <fiction/types.hpp>
 
-#include <fmt/format.h>
-
-#include <memory>
-#include <sstream>
-#include <stdexcept>
+#include <filesystem>
 #include <string>
 #include <type_traits>
 
@@ -57,22 +53,14 @@ void register_network_reader(nb::module_& m, const char* signature)
             throw nb::next_overload();
         }
         const nb::gil_scoped_release release{};
-        std::ostringstream           diagnostics{};
-
-        auto reader = fiction::networks::io::network_reader<std::shared_ptr<Ntk>>(filename, diagnostics, format);
-
-        if (const auto ntks = reader.get_networks(); !ntks.empty())
-        {
-            return *ntks.front();
-        }
-
-        throw std::runtime_error(fmt::format("could not parse '{}': {}", filename, diagnostics.str()));
+        return fiction::networks::io::read_network<Ntk>(
+            std::filesystem::path{std::u8string{filename.begin(), filename.end()}}, format);
     };
     if constexpr (std::is_same_v<Ntk, fiction::networks::named_technology_network>)
     {
         m.def("read_network", read, nb::arg("filename"), nb::arg("format") = "", nb::kw_only(),
               nb::arg("network_type") = nb::type<Ntk>(), nb::sig(signature),
-              "Read Verilog, AIGER, or BLIF, or the first network from a directory. "
+              "Read Verilog, AIGER, or BLIF, or the first readable network in filename order from a directory. "
               "Select a registered network class with network_type (technology_network by default). "
               "Preserve output signals without adding output buffers. Raise RuntimeError with parser diagnostics "
               "when no network can be read. BLIF supports technology_network only.");

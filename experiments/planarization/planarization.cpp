@@ -45,9 +45,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
-#include <memory>
 #include <span>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -84,10 +82,7 @@ constexpr uint32_t SIMULATION_PATTERNS = 4096;
  */
 named_technology_network read_network(const std::string& name)
 {
-    std::ostringstream                                        os{};
-    network_reader<std::shared_ptr<named_technology_network>> reader{fiction_experiments::benchmark_path(name), os};
-
-    return *reader.get_networks().front();
+    return fiction::networks::io::read_network<named_technology_network>(fiction_experiments::benchmark_path(name));
 }
 
 /**

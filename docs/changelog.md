@@ -421,6 +421,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Experiments:
 
   - Parameter configurations now use designated initializers with unchanged inputs and computations.
+  - Network experiments use the value-based reader and report failed benchmark reads.
   - Experiments use canonical network types and `kitty::dynamic_truth_table` without changing their computations.
   - Clock-number assignment helpers now take concrete Cartesian gate layouts.
     Experiment parameters, inputs, and output columns are unchanged.
@@ -447,6 +448,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - I/O:
 
+  - **Breaking:** Replace the C++ `network_reader` class with `read_network<Ntk>` for a single network
+    or `read_networks<Ntk>` for a directory. Both return values, and batch reads report per-file failures.
   - SQD reads avoid copying the completed layout; SiDB text printing skips lookups for sites already drawn.
   - DOT drawers avoid copying completed rows and columns.
   - QCA SVG rendering now reuses static tile and latch templates without per-tile text copies.

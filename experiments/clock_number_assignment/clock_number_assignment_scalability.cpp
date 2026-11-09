@@ -34,12 +34,11 @@
 #include <mockturtle/utils/stopwatch.hpp>     // time measurements
 #include <mockturtle/utils/tech_library.hpp>  // technology library utils
 
+#include <algorithm>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
-#include <iostream>
-#include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -96,13 +95,14 @@ try
     // parameters for technology mapping
     const mockturtle::map_params map_params{};
 
-    // instantiate a network reader
-    network_reader<std::shared_ptr<named_aig_network>> reader{network_folder, std::cout};
-
-    for (const auto& benchmark : reader.get_networks(true))  // for each benchmark sorted by size (ascending)
+    auto batch = read_networks<named_aig_network>(network_folder);
+    for (const auto& failure : batch.failures)
     {
-        const auto& network = *benchmark;
-
+        fmt::print("[e] {}\n", failure.message);
+    }
+    std::ranges::stable_sort(batch.networks, {}, &named_aig_network::num_gates);
+    for (const auto& network : batch.networks)
+    {
         fmt::print("[i] processing {}\n", network.get_network_name());
 
         // perform technology mapping with the given library (AND, OR, NOT)
