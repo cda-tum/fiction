@@ -343,33 +343,56 @@ template <typename Ntk>
 class checked_verilog_reader final : private mockturtle::verilog_reader<Ntk>
 {
   public:
-    /** @brief Construct a reader that writes to the supplied network. */
-    using mockturtle::verilog_reader<Ntk>::verilog_reader;
+    /** @brief Construct a reader for the module named `top`. */
+    explicit checked_verilog_reader(Ntk& network) :
+            mockturtle::verilog_reader<Ntk>{network, std::string{top_module_name}}
+    {}
 
     /** @brief Parse Verilog using the checked callbacks. */
     [[nodiscard]] lorina::return_code read(std::istream& input, lorina::diagnostic_engine& diag) const
     {
         const auto result = lorina::read_verilog(input, *this, &diag);
-        if (result == lorina::return_code::success && this->name().empty())
+        if (result == lorina::return_code::success && !found_top)
         {
-            throw std::invalid_argument{"expected a Verilog module"};
+            throw std::invalid_argument{"expected a Verilog module named 'top'"};
         }
         return result;
     }
 
   private:
+    /** @brief Name of the module that supplies the network. */
+    static constexpr std::string_view top_module_name{"top"};
+    /** @brief Whether the active module supplies the network. */
+    mutable bool reading_top{};
+    /** @brief Whether the file contains the requested module. */
+    mutable bool found_top{};
+
+    /** @brief Track which module the following declarations belong to. */
+    void on_module_header(const std::string& name, const std::vector<std::string>& ports) const override
+    {
+        reading_top = name == top_module_name;
+        found_top   = found_top || reading_top;
+        mockturtle::verilog_reader<Ntk>::on_module_header(name, ports);
+    }
+
     /** @brief Validate the range of an input declaration. */
     void on_inputs(const std::vector<std::string>& names, const std::string& size) const override
     {
-        check_range(size);
-        mockturtle::verilog_reader<Ntk>::on_inputs(names, size);
+        if (reading_top)
+        {
+            check_range(size);
+            mockturtle::verilog_reader<Ntk>::on_inputs(names, size);
+        }
     }
 
     /** @brief Validate the range of an output declaration. */
     void on_outputs(const std::vector<std::string>& names, const std::string& size) const override
     {
-        check_range(size);
-        mockturtle::verilog_reader<Ntk>::on_outputs(names, size);
+        if (reading_top)
+        {
+            check_range(size);
+            mockturtle::verilog_reader<Ntk>::on_outputs(names, size);
+        }
     }
 
     /** @brief Reject ranges that the pinned reader cannot represent. */

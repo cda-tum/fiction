@@ -41,6 +41,7 @@ their native representations. Pass the exact registered class; subclasses are no
 BLIF input supports `technology_network` only.
 
 Both APIs infer Verilog (`.v`), binary AIGER (`.aig`), and BLIF (`.blif`) from the filename, ignoring case.
+For Verilog, the reader constructs the network from the module named `top`.
 An explicit format overrides the extension. Use `v`, `aig`, or `blif`, with an optional leading dot.
 For a directory, `read_network` tries files in filename order and stops at the first successful read.
 The C++ `read_networks` function returns every successful network along with the failures. Directory reads

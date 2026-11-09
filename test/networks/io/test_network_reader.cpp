@@ -267,6 +267,7 @@ TEST_CASE("Malformed network files report their path", "[network-reader]")
         {".blif", ".model broken\n.inputs a\n.outputs y\n.names a y\n11 1\n.end\n"},
         {".v", "module top(a,y); input [0:1] a; output y; assign y = a[0]; endmodule\n"},
         {".v", "// no network\n"},
+        {".v", "module helper(a,y); input a; output y; assign y = a; endmodule\n"},
     }));
     CAPTURE(content);
     const auto    path = directory.path() / ("malformed" + extension);
@@ -277,6 +278,28 @@ TEST_CASE("Malformed network files report their path", "[network-reader]")
 
     CHECK_THROWS_WITH(static_cast<void>(read_network<named_technology_network>(path)),
                       Catch::Matchers::ContainsSubstring(path.string()));
+}
+
+TEST_CASE("Verilog port checks apply to the network being read", "[network-reader]")
+{
+    const fiction::test::scoped_temp_directory directory{
+        std::filesystem::temp_directory_path(), "fiction-verilog-top-" + std::to_string(std::random_device{}())};
+    const auto    path = directory.path() / "modules.v";
+    std::ofstream file{path};
+    file << "module top(a,y); input a; output y; assign y = a; endmodule\n"
+         << "module helper(a,y); input [0:1] a; output y; assign y = 1'b0; endmodule\n";
+    file.close();
+    REQUIRE_FALSE(file.fail());
+
+    const auto network = read_network<named_aig_network>(path);
+    CHECK(network.num_pis() == 1);
+    REQUIRE(network.num_pos() == 1);
+    CHECK(network.get_output_name(0) == "y");
+    const auto outputs = mockturtle::simulate<kitty::dynamic_truth_table>(
+        network, mockturtle::default_simulator<kitty::dynamic_truth_table>{1});
+    kitty::dynamic_truth_table identity{1};
+    kitty::create_from_hex_string(identity, "2");
+    CHECK(outputs == std::vector{identity});
 }
 
 TEST_CASE("Read binary AIGER with latches and bad-state outputs", "[network-reader]")
