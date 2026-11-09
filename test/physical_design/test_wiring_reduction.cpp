@@ -16,35 +16,50 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <fiction/physical_design/wiring_reduction.hpp>
+
+// Test dependencies follow the defining header to expose missing direct includes.
+
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 #include "utils/progress_recorder.hpp"
+// Catch2 selects this specialization through its diagnostic templates.
+#include "utils/routing_objective_string_maker.hpp"  // IWYU pragma: keep
 
+#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
-#include <fiction/physical_design/wiring_reduction.hpp>
 #include <fiction/synthesis/network_conversion.hpp>
 #include <fiction/types.hpp>
 
 #include <mockturtle/networks/aig.hpp>
-#include <mockturtle/utils/stopwatch.hpp>
 
-#include <algorithm>
 #include <cstdint>
 #include <stdexcept>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::layouts;
 using namespace fiction::networks;
 using namespace fiction::physical_design;
 
+/**
+ * @brief Checks functional equivalence after wiring reduction.
+ * @tparam Lyt Gate layout type.
+ * @tparam Ntk Specification network type.
+ * @param ntk Specification network.
+ */
 template <typename Lyt, typename Ntk>
 static void check_layout_equiv(const Ntk& ntk)
 {
@@ -55,10 +70,12 @@ static void check_layout_equiv(const Ntk& ntk)
     wiring_reduction(layout, {}, &stats);
 
     check_eq(ntk, layout);
-
-    CHECK(mockturtle::to_seconds(stats.time_total) > 0);
 }
 
+/**
+ * @brief Checks distinct network shapes and gate functions.
+ * @tparam Lyt Gate layout type.
+ */
 template <typename Lyt>
 static void check_layout_equiv_all()
 {
@@ -136,36 +153,27 @@ TEST_CASE("Layout equivalence", "[wiring-reduction]")
 
     SECTION("Corner Cases")
     {
-        auto layout_corner_case_1 = blueprints::optimization_layout_corner_case_outputs_1<cartesian_gate_layout>();
-        wiring_reduction_stats stats_corner_case_1{};
-        wiring_reduction(layout_corner_case_1, {}, &stats_corner_case_1);
-        check_eq(blueprints::optimization_layout_corner_case_outputs_1<cartesian_gate_layout>(), layout_corner_case_1);
-
-        auto layout_corner_case_2 = blueprints::optimization_layout_corner_case_outputs_2<cartesian_gate_layout>();
-        wiring_reduction_stats stats_corner_case_2{};
-        wiring_reduction(layout_corner_case_2, {}, &stats_corner_case_2);
-        check_eq(blueprints::optimization_layout_corner_case_outputs_2<cartesian_gate_layout>(), layout_corner_case_2);
-
-        auto layout_corner_case_3 = blueprints::optimization_layout_corner_case_outputs_3<cartesian_gate_layout>();
-        wiring_reduction_stats stats_corner_case_3{};
-        wiring_reduction(layout_corner_case_3, {}, &stats_corner_case_3);
-        check_eq(blueprints::optimization_layout_corner_case_outputs_3<cartesian_gate_layout>(), layout_corner_case_3);
-
-        auto layout_corner_case_4 = blueprints::optimization_layout_corner_case_outputs_4<cartesian_gate_layout>();
-        wiring_reduction_stats stats_corner_case_4{};
-        wiring_reduction(layout_corner_case_4, {}, &stats_corner_case_4);
-        check_eq(blueprints::optimization_layout_corner_case_outputs_4<cartesian_gate_layout>(), layout_corner_case_4);
-
-        auto layout_corner_case_5 = blueprints::optimization_layout_corner_case_outputs_5<cartesian_gate_layout>();
-        wiring_reduction_stats stats_corner_case_5{};
-        wiring_reduction(layout_corner_case_5, {}, &stats_corner_case_5);
-        check_eq(blueprints::optimization_layout_corner_case_outputs_5<cartesian_gate_layout>(), layout_corner_case_5);
-
-        auto layout_corner_case_inputs = blueprints::optimization_layout_corner_case_inputs<cartesian_gate_layout>();
-        wiring_reduction_stats stats_corner_case_inputs{};
-        wiring_reduction(layout_corner_case_inputs, {}, &stats_corner_case_inputs);
-        check_eq(blueprints::optimization_layout_corner_case_inputs<cartesian_gate_layout>(),
-                 layout_corner_case_inputs);
+        /** @brief Blueprint factory for a Cartesian gate layout. */
+        using factory = cartesian_gate_layout (*)(arrangement);
+        /** @brief Named blueprint and its independent reference factory. */
+        const auto [name, make_layout] = GENERATE(Catch::Generators::table<const char*, factory>(
+            {{"optimization_layout_corner_case_outputs_1",
+              &blueprints::optimization_layout_corner_case_outputs_1<cartesian_gate_layout>},
+             {"optimization_layout_corner_case_outputs_2",
+              &blueprints::optimization_layout_corner_case_outputs_2<cartesian_gate_layout>},
+             {"optimization_layout_corner_case_outputs_3",
+              &blueprints::optimization_layout_corner_case_outputs_3<cartesian_gate_layout>},
+             {"optimization_layout_corner_case_outputs_4",
+              &blueprints::optimization_layout_corner_case_outputs_4<cartesian_gate_layout>},
+             {"optimization_layout_corner_case_outputs_5",
+              &blueprints::optimization_layout_corner_case_outputs_5<cartesian_gate_layout>},
+             {"optimization_layout_corner_case_inputs",
+              &blueprints::optimization_layout_corner_case_inputs<cartesian_gate_layout>}}));
+        CAPTURE(name);
+        auto                   layout = make_layout(arrangement::EVEN_ROW);
+        wiring_reduction_stats stats{};
+        wiring_reduction(layout, {}, &stats);
+        check_eq(make_layout(arrangement::EVEN_ROW), layout);
     }
 
     SECTION("Timeout")
@@ -278,10 +286,10 @@ TEST_CASE("Wiring reduction preserves identities and ordered input ports", "[wir
     CHECK(layout.contains(po));
     CHECK(layout.source({po, 0}) == gate);
     const auto objectives = extract_routing_objectives(layout);
-    CHECK(std::ranges::find(objectives, routing_objective{layout.get_tile(a), layout.get_tile(gate), 0}) !=
-          objectives.end());
-    CHECK(std::ranges::find(objectives, routing_objective{layout.get_tile(b), layout.get_tile(gate), 1}) !=
-          objectives.end());
+    CHECK_THAT(objectives, Catch::Matchers::UnorderedRangeEquals(
+                               std::vector<routing_objective>{{layout.get_tile(a), layout.get_tile(gate), 0},
+                                                              {layout.get_tile(b), layout.get_tile(gate), 1},
+                                                              {layout.get_tile(gate), layout.get_tile(po), 0}}));
     CHECK(layout.is_lt(gate));
     CHECK(layout.num_wires() < independent.num_wires());
     CHECK(independent.height() == 6);

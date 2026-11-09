@@ -18,6 +18,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
@@ -28,7 +29,10 @@
 #include <fiction/technology/sidb/simulation/potential_landscape.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
 
+#include <algorithm>
+#include <cstdint>
 #include <stdexcept>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::sidb;
@@ -99,6 +103,8 @@ TEST_CASE("Determine the groundstate from simulation results", "[sidb-simulation
 
         const auto ground_states = results.groundstates();
         REQUIRE(ground_states.size() == 2);
+        CHECK(std::ranges::count_if(ground_states, [&cd1](const auto& cd) { return cd.same_charge_states(cd1); }) == 1);
+        CHECK(std::ranges::count_if(ground_states, [&cd2](const auto& cd) { return cd.same_charge_states(cd2); }) == 1);
         CHECK_THAT(ground_states[0].energy() - ground_states[1].energy(), Catch::Matchers::WithinAbs(0.0, 0.00001));
     }
     SECTION("Empty result")
@@ -151,6 +157,13 @@ TEST_CASE("Determine the groundstate of a two BDL pair wire with input 1 applied
 
     const auto ground_state = results.groundstates();
     REQUIRE(ground_state.size() == 2);
+    std::vector<uint64_t> indices{};
+    for (const auto& distribution : ground_state)
+    {
+        REQUIRE(distribution.sites() == lyt.sidbs());
+        indices.push_back(distribution.charge_index(2));
+    }
+    CHECK_THAT(indices, Catch::Matchers::UnorderedRangeEquals(std::vector<uint64_t>{10, 20}));
 }
 
 TEST_CASE("Simulation-result distribution index boundaries", "[sidb-simulation-result]")

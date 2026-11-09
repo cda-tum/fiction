@@ -18,8 +18,10 @@
 
 #pragma once
 
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
+#endif
 
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/cartesian_layout.hpp"
@@ -792,13 +794,13 @@ class post_layout_optimization_impl
         const auto diagonal_limit = static_cast<int64_t>(original.x) + original.y;
         for (int64_t diagonal{}; diagonal < static_cast<int64_t>(lyt.width()) + lyt.height() - 1; ++diagonal)
         {
-            for (int64_t x{}; x <= diagonal; ++x)
+            /** @brief First column whose diagonal coordinate lies inside the layout. */
+            const auto first_x = std::max<int64_t>(0, diagonal - static_cast<int64_t>(lyt.height()) + 1);
+            /** @brief Last column whose diagonal coordinate lies inside the layout. */
+            const auto last_x = std::min<int64_t>(diagonal, static_cast<int64_t>(lyt.width()) - 1);
+            for (int64_t x = first_x; x <= last_x; ++x)
             {
                 const auto y = diagonal - x;
-                if (std::cmp_greater_equal(x, lyt.width()) || std::cmp_greater_equal(y, lyt.height()))
-                {
-                    continue;
-                }
                 if (x < min_x || y < min_y)
                 {
                     continue;
@@ -907,4 +909,6 @@ inline void post_layout_optimization(fiction::layouts::gate_layout<fiction::layo
 }
 
 }  // namespace fiction::physical_design
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
+#endif

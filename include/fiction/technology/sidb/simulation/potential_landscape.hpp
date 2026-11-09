@@ -380,7 +380,7 @@ class potential_landscape
     /**
      * @brief The electrostatic potential energy of a charge distribution given its local internal potentials, i.e., the
      * energy of the SiDB charges in the potential of the other SiDBs, the defects, and the external sources, plus the
-     * energy of the defect charges. O(N + D·N) for D charged defects.
+     * energy of the defect charges. O(N + D·N + D²) for N SiDBs and D charged defects.
      *
      * @param cd Charge distribution over this landscape's SiDBs.
      * @throws std::invalid_argument if the distribution sites differ from the landscape.
@@ -428,7 +428,8 @@ class potential_landscape
         return collect_ext + (0.5 * collect);
     }
     /**
-     * @brief The electrostatic potential energy of a charge distribution. O(N²).
+     * @brief The electrostatic potential energy of a charge distribution. O(N² + D·N + D²) for N SiDBs and D charged
+     * defects.
      *
      * @param cd Charge distribution over this landscape's SiDBs.
      * @throws std::invalid_argument if the distribution sites differ from the landscape.
@@ -545,7 +546,8 @@ class potential_landscape
         return is_physically_valid(cd, local_internal_potentials(cd));
     }
     /**
-     * @brief Evaluates a charge distribution: returns a copy with its energy set. O(N²).
+     * @brief Evaluates a charge distribution: returns a copy with its energy set. O(N² + D·N + D²) for N SiDBs and D
+     * charged defects.
      *
      * @param cd Charge distribution over this landscape's SiDBs.
      * @throws std::invalid_argument if the distribution sites differ from the landscape.

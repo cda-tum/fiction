@@ -46,8 +46,16 @@ list(FILTER FILENAMES EXCLUDE REGEX "^package/")
 # These tests include utils/allocation_failure.hpp and own global new/delete. A
 # second allocator replacement conflicts with their fault injection.
 set(ALLOCATION_FAILURE_TESTS
-    test_layout test_clocking_state test_gate_layout test_routing_utils
-    test_determine_clocking test_cell_writer_allocation_failure)
+    test_layout
+    test_clocking_state
+    test_gate_layout
+    test_routing_utils
+    test_determine_clocking
+    test_surface_analysis
+    test_graph_coloring
+    test_cell_writer_allocation_failure
+    test_mutable_rank_view_allocation_failure
+    test_network_balancing_allocation_failure)
 get_target_property(ALLOCATION_FAILURE_LIBRARIES libfiction
                     INTERFACE_LINK_LIBRARIES)
 list(FILTER ALLOCATION_FAILURE_LIBRARIES EXCLUDE REGEX "jemalloc")
@@ -86,7 +94,6 @@ foreach(FILE IN LISTS FILENAMES)
 
   target_link_libraries(${TEST_NAME} PRIVATE Catch2::Catch2WithMain)
 
-  # Make Catch2 ignore SIGTERMs sent to applications when timeouts are reached
   target_compile_definitions(${TEST_NAME} PRIVATE CATCH_CONFIG_NO_POSIX_SIGNALS)
 
   # The shared PCH carrier inherits libfiction's allocator dependencies.

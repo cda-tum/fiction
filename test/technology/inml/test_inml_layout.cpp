@@ -15,6 +15,8 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/technology/inml/layout.hpp>
@@ -38,12 +40,14 @@ TEST_CASE("iNML layouts hold planar, clocked magnets", "[inml-layout]")
 
     CHECK(lyt.num_cells() == 3);
     CHECK(lyt.get_cell_type({1, 1}) == magnet_type::INVERTER_MAGNET);
-    CHECK(lyt.get_cell_name({0, 1}) == "a");
+    CHECK_THAT(lyt.get_cell_name({0, 1}), Catch::Matchers::Equals("a"));
     CHECK(lyt.get_clock_number({1, 1}) == 0);
     CHECK(lyt.get_clock_number({5, 1}) == 1);
 
     auto copy = lyt;
     CHECK(copy == lyt);
     copy.assign_cell_type({1, 1}, magnet_type::NORMAL);
+    CHECK(copy.get_cell_type({1, 1}) == magnet_type::NORMAL);
     CHECK(lyt.get_cell_type({1, 1}) == magnet_type::INVERTER_MAGNET);
+    CHECK(copy != lyt);
 }

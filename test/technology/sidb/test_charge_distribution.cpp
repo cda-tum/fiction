@@ -38,25 +38,28 @@ TEST_CASE("Charge distribution over a layout", "[charge-distribution]")
     lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
     lyt.assign_sidb({1, 0, 1}, dot_tag::NORMAL);
 
+    /** @brief Canonical raster order independent of the layout and distribution accessors. */
+    const std::vector<lattice_site> expected_sites{{0, 0, 0}, {1, 0, 1}, {3, 1, 0}};
+
     SECTION("default state")
     {
         const charge_distribution cd{lyt};
 
         CHECK(cd.size() == 3);
-        CHECK(!cd.empty());
-        CHECK(cd.sites() == lyt.sidbs());
+        CHECK_FALSE(cd.empty());
+        CHECK(cd.sites() == expected_sites);
         CHECK(cd.num_negative_sidbs() == 3);
         CHECK(cd.num_neutral_sidbs() == 0);
         CHECK(cd.num_positive_sidbs() == 0);
         CHECK(cd.energy() == 0.0);
         CHECK(cd.charge_exists(charge_state::NEGATIVE));
-        CHECK(!cd.charge_exists(charge_state::NEUTRAL));
+        CHECK_FALSE(cd.charge_exists(charge_state::NEUTRAL));
         CHECK(cd.get_charge_state({0, 0, 0}) == charge_state::NEGATIVE);
         CHECK(cd.get_charge_state({9, 9, 0}) == charge_state::NONE);
         CHECK(cd.get_charge_state_by_index(2) == charge_state::NEGATIVE);
         CHECK(cd.get_charge_state_by_index(3) == charge_state::NONE);
         CHECK(cd.index_of({1, 0, 1}) == 1);
-        CHECK(!cd.index_of({1, 0, 0}).has_value());
+        CHECK_FALSE(cd.index_of({1, 0, 0}).has_value());
     }
     SECTION("assignment by site and by index")
     {
@@ -74,7 +77,7 @@ TEST_CASE("Charge distribution over a layout", "[charge-distribution]")
 
         std::vector<lattice_site> visited{};
         cd.foreach_dot([&visited](const auto& s) { visited.push_back(s); });
-        CHECK(visited == lyt.sidbs());
+        CHECK(visited == expected_sites);
 
         cd.assign_all_charge_states(charge_state::NEGATIVE);
         CHECK(cd.num_negative_sidbs() == 3);
@@ -107,7 +110,7 @@ TEST_CASE("Charge distribution over a layout", "[charge-distribution]")
         CHECK(a.same_charge_states(b));
 
         b.assign_charge_state_by_index(1, charge_state::NEUTRAL);
-        CHECK(!a.same_charge_states(b));
+        CHECK_FALSE(a.same_charge_states(b));
 
         const std::unordered_set<charge_distribution> set{a, b, a};
         CHECK(set.size() == 2);

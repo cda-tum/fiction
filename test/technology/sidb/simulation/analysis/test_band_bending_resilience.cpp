@@ -65,7 +65,7 @@ TEST_CASE("Band bending resilience rejects unusable input wires", "[band-bending
     CHECK(std::isinf(band_bending_resilience(lyt, std::vector{create_and_tt()})));
 }
 
-TEST_CASE("Single SiDB", "[band-bending-resilience]")
+TEST_CASE("Band bending resilience covers individual charge transitions", "[band-bending-resilience]")
 {
     const auto lyt = blueprints::bestagon_and_gate();
 

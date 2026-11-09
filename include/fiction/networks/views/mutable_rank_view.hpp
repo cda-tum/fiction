@@ -27,6 +27,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <ranges>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -320,8 +321,9 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      *
      * @param level Level at which to return the nodes.
      * @return The node order at the given level.
+     * @throws std::bad_alloc If copying the rank fails.
      */
-    [[nodiscard]] std::vector<node> get_ranks(const uint32_t level) const noexcept
+    [[nodiscard]] std::vector<node> get_ranks(const uint32_t level) const
     {
         assert(level < ranks.size() && "level must be less than the number of ranks");
 
@@ -332,8 +334,9 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      * Gets all associated nodes in rank order across all levels.
      *
      * @return A vector of vectors containing the node order for each level.
+     * @throws std::bad_alloc If copying the ranks fails.
      */
-    [[nodiscard]] std::vector<std::vector<node>> get_all_ranks() const noexcept
+    [[nodiscard]] std::vector<std::vector<node>> get_all_ranks() const
     {
         return ranks;
     }
@@ -433,6 +436,8 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      * Applies a given function to each node in rank order.
      *
      * This function overrides the `foreach_node` method of the base class.
+     * Constants are excluded. Optional callback indices increase across all ranks from zero.
+     * A callback returning `false` stops the entire traversal.
      *
      * @tparam Fn Functor type.
      * @param fn The function to apply.
@@ -440,10 +445,8 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     template <typename Fn>
     void foreach_node(Fn&& fn) const
     {
-        for (uint32_t l = 0; l < ranks.size(); ++l)
-        {
-            foreach_node_in_rank(l, std::forward<Fn>(fn));
-        }
+        const auto nodes = std::views::join(ranks);
+        mockturtle::detail::foreach_element(nodes.begin(), nodes.end(), std::forward<Fn>(fn));
     }
 
     /**
@@ -468,6 +471,8 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
      * Applies a given function to each gate in rank order.
      *
      * This function overrides the `foreach_gate` method of the base class.
+     * Optional callback indices increase across all ranks from zero.
+     * A callback returning `false` stops the entire traversal.
      *
      * @tparam Fn Functor type.
      * @param fn The function to apply.
@@ -475,10 +480,9 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     template <typename Fn>
     void foreach_gate(Fn&& fn) const
     {
-        for (uint32_t l = 0; l < ranks.size(); ++l)
-        {
-            foreach_gate_in_rank(l, std::forward<Fn>(fn));
-        }
+        const auto nodes = std::views::join(ranks);
+        mockturtle::detail::foreach_element_if(
+            nodes.begin(), nodes.end(), [this](const auto& n) { return !this->is_ci(n); }, std::forward<Fn>(fn));
     }
 
     /**
@@ -575,9 +579,12 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
     /**
      * Add a node to the `mutable_rank_view` and update its rank.
      *
+     * Recompute the ranks with `update_ranks` before querying them after an exception.
+     *
      * @param n Node added to the `mutable_rank_view`.
+     * @throws std::bad_alloc If rank or level storage cannot grow.
      */
-    void on_add(node const& n) noexcept
+    void on_add(node const& n)
     {
         fiction::networks::views::static_depth_view<Ntk>::on_add(n);
 

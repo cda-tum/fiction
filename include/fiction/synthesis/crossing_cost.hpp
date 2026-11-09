@@ -242,8 +242,8 @@ template <typename Ntk>
     const auto                             edge_key = [](const std::size_t t, const std::size_t p)
     { return (static_cast<uint64_t>(t) << 32u) | static_cast<uint64_t>(p); };
 
-    // per position of the lower level: the keys of the edges swept so far and their crossing counts
-    using swept_edges = std::vector<std::pair<uint64_t, uint64_t>>;
+    /** @brief Edge keys swept at one position of the lower level. */
+    using swept_edges = std::vector<uint64_t>;
 
     std::vector<swept_edges> swept(lower.size() + 1);
     std::size_t              max_pos       = 0;
@@ -258,11 +258,12 @@ template <typename Ntk>
         for (const auto p : targets)
         {
             const auto key = edge_key(t, p);
-            per_edge.try_emplace(key, 0);
+            /** @brief Crossing count of the current edge. */
+            auto& count = per_edge.try_emplace(key, 0).first->second;
 
             for (auto k = max_pos; k > p; --k)
             {
-                for (auto& [prev_key, prev_count] : swept[k])
+                for (const auto prev_key : swept[k])
                 {
                     ++num_crossings;
 
@@ -272,10 +273,11 @@ template <typename Ntk>
                         return {.cost = std::numeric_limits<uint64_t>::max(), .num_crossings = num_crossings};
                     }
 
+                    /** @brief Crossing count of the swept edge. */
+                    auto& prev_count = per_edge[prev_key];
                     ++prev_count;
-                    ++per_edge[prev_key];
-                    ++per_edge[key];
-                    max_per_edge = std::max({max_per_edge, per_edge[prev_key], per_edge[key]});
+                    ++count;
+                    max_per_edge = std::max({max_per_edge, prev_count, count});
                 }
             }
         }
@@ -283,7 +285,7 @@ template <typename Ntk>
         for (const auto p : targets)
         {
             max_pos = std::max(max_pos, p);
-            swept[p].emplace_back(edge_key(t, p), 0);
+            swept[p].push_back(edge_key(t, p));
         }
     }
 

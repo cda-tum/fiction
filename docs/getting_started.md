@@ -49,7 +49,7 @@ $ fiction
 Type `help` at the prompt for the list of commands, or run a flow without entering the shell:
 
 ```console
-$ fiction -c "read c17.v; ortho; cell; write c17.qca"
+$ fiction -c "read c17.v; ortho; cell; write_qca c17.qca"
 ```
 
 See {ref}`cli` for the full user guide.

@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+from collections import deque
+from itertools import pairwise, product, starmap
 from typing import TYPE_CHECKING
 
 import pytest
@@ -62,6 +64,13 @@ def test_non_clocked_path_finding(make_lyt: Callable[[], CoordinateLayout]) -> N
     """Find a zero-length path on unclocked geometry."""
     lyt = make_lyt()
     assert a_star(lyt, coordinate(0, 0), coordinate(0, 0)) == [(0, 0)]
+    for source, target in [((0, 0), (3, 3)), ((3, 3), (0, 0))]:
+        path = a_star(lyt, source, target)
+        assert path[0] == source
+        assert path[-1] == target
+        assert len(path) == len(set(path))
+        assert all(lyt.is_within_bounds(site) for site in path)
+        assert all(starmap(lyt.is_adjacent_of, pairwise(path)))
 
 
 @pytest.mark.parametrize("make_lyt", CLOCKED_LAYOUTS)
@@ -69,10 +78,14 @@ def test_clocked_path_finding(make_lyt: Callable[[], GateLayout]) -> None:
     """Find forward paths and reject reverse clock flow."""
     lyt = make_lyt()
     assert a_star(lyt, coordinate(0, 0), coordinate(0, 0)) == [(0, 0)]
-    assert len(a_star(lyt, coordinate(0, 0), coordinate(1, 1))) == 3
-    assert len(a_star(lyt, coordinate(0, 0), coordinate(2, 2))) == 5
-    assert len(a_star(lyt, coordinate(0, 0), coordinate(3, 3))) == 7
-    assert len(a_star(lyt, coordinate(0, 0), coordinate(4, 4))) == 9
+    for distance in range(1, 5):
+        path = a_star(lyt, (0, 0), (distance, distance))
+        assert len(path) == 2 * distance + 1
+        assert path[0] == (0, 0)
+        assert path[-1] == (distance, distance)
+        assert len(set(path)) == len(path)
+        assert all(lyt.is_within_bounds(site) and site.z == 0 for site in path)
+        assert all(lyt.is_adjacent_of(a, b) and b.x + b.y == a.x + a.y + 1 for a, b in pairwise(path))
     assert len(a_star(lyt, coordinate(1, 1), coordinate(0, 0))) == 0
     assert len(a_star(lyt, coordinate(2, 2), coordinate(1, 1))) == 0
 
@@ -94,7 +107,7 @@ def test_path_finding_with_obstructions(make_lyt: Callable[[], GateLayout]) -> N
     assert lyt.is_obstructed_coordinate(coordinate(1, 4))
 
     assert a_star(lyt, coordinate(0, 0), coordinate(0, 0)) == [(0, 0)]
-    assert len(a_star(lyt, coordinate(0, 0), coordinate(1, 1))) == 3
+    assert a_star(lyt, (0, 0), (1, 1)) == [(0, 0), (0, 1), (1, 1)]
     assert len(a_star(lyt, coordinate(0, 0), coordinate(2, 2))) == 0
     assert len(a_star(lyt, coordinate(0, 0), coordinate(3, 3))) == 0
     assert len(a_star(lyt, coordinate(0, 0), coordinate(4, 4))) == 0
@@ -137,47 +150,17 @@ def test_path_finding_with_obstructions_and_crossings(make_lyt: Callable[[], Gat
     lyt.obstruct_coordinate((1, 1, 0))
     lyt.obstruct_coordinate((1, 1, 1))
 
-    assert len(a_star(lyt, coordinate(0, 0), coordinate(0, 0), crossings=True)) == 1
-    assert len(a_star(lyt, coordinate(0, 0), coordinate(1, 0), crossings=True)) == 0
-    assert len(a_star(lyt, coordinate(0, 0), coordinate(0, 1), crossings=True)) == 2
-    assert len(a_star(lyt, coordinate(0, 0), coordinate(1, 1), crossings=True)) == 0
-    assert len(a_star(lyt, coordinate(0, 0), coordinate(2, 0), crossings=True)) == 0
-    assert len(a_star(lyt, coordinate(0, 0), coordinate(2, 1), crossings=True)) == 0
-
-    assert len(a_star(lyt, coordinate(1, 0), coordinate(0, 0), crossings=True)) == 0
-    assert len(a_star(lyt, coordinate(1, 0), coordinate(1, 0), crossings=True)) == 1
-    assert len(a_star(lyt, coordinate(1, 0), coordinate(0, 1), crossings=True)) == 0
-    assert len(a_star(lyt, coordinate(1, 0), coordinate(1, 1), crossings=True)) == 0
-    assert len(a_star(lyt, coordinate(1, 0), coordinate(2, 0), crossings=True)) == 2
-    assert len(a_star(lyt, coordinate(1, 0), coordinate(2, 1), crossings=True)) == 3
-
-    assert len(a_star(lyt, coordinate(0, 1), coordinate(0, 0), crossings=True)) == 0
-    assert len(a_star(lyt, coordinate(0, 1), coordinate(1, 0), crossings=True)) == 0
-    assert len(a_star(lyt, coordinate(0, 1), coordinate(0, 1), crossings=True)) == 1
-    assert len(a_star(lyt, coordinate(0, 1), coordinate(1, 1), crossings=True)) == 0
-    assert len(a_star(lyt, coordinate(0, 1), coordinate(2, 0), crossings=True)) == 0
-    assert len(a_star(lyt, coordinate(0, 1), coordinate(2, 1), crossings=True)) == 0
-
-    assert len(a_star(lyt, coordinate(1, 1), coordinate(0, 0), crossings=True)) == 0
-    assert len(a_star(lyt, coordinate(1, 1), coordinate(1, 0), crossings=True)) == 0
-    assert len(a_star(lyt, coordinate(1, 1), coordinate(0, 1), crossings=True)) == 0
-    assert len(a_star(lyt, coordinate(1, 1), coordinate(1, 1), crossings=True)) == 1
-    assert len(a_star(lyt, coordinate(1, 1), coordinate(2, 0), crossings=True)) == 0
-    assert len(a_star(lyt, coordinate(1, 1), coordinate(2, 1), crossings=True)) == 2
-
-    assert len(a_star(lyt, coordinate(2, 0), coordinate(0, 0), crossings=True)) == 0
-    assert len(a_star(lyt, coordinate(2, 0), coordinate(1, 0), crossings=True)) == 0
-    assert len(a_star(lyt, coordinate(2, 0), coordinate(0, 1), crossings=True)) == 0
-    assert len(a_star(lyt, coordinate(2, 0), coordinate(1, 1), crossings=True)) == 0
-    assert len(a_star(lyt, coordinate(2, 0), coordinate(2, 0), crossings=True)) == 1
-    assert len(a_star(lyt, coordinate(2, 0), coordinate(2, 1), crossings=True)) == 2
-
-    assert len(a_star(lyt, coordinate(2, 1), coordinate(0, 0), crossings=True)) == 0
-    assert len(a_star(lyt, coordinate(2, 1), coordinate(1, 0), crossings=True)) == 0
-    assert len(a_star(lyt, coordinate(2, 1), coordinate(0, 1), crossings=True)) == 0
-    assert len(a_star(lyt, coordinate(2, 1), coordinate(1, 1), crossings=True)) == 0
-    assert len(a_star(lyt, coordinate(2, 1), coordinate(2, 0), crossings=True)) == 0
-    assert len(a_star(lyt, coordinate(2, 1), coordinate(2, 1), crossings=True)) == 1
+    sites = [(0, 0), (1, 0), (0, 1), (1, 1), (2, 0), (2, 1)]
+    nontrivial = {
+        ((0, 0), (0, 1)): [(0, 0), (0, 1)],
+        ((1, 0), (2, 0)): [(1, 0), (2, 0)],
+        ((1, 0), (2, 1)): [(1, 0), (2, 0), (2, 1)],
+        ((1, 1), (2, 1)): [(1, 1), (2, 1)],
+        ((2, 0), (2, 1)): [(2, 0), (2, 1)],
+    }
+    for source, target in product(sites, repeat=2):
+        expected = [source] if source == target else nontrivial.get((source, target), [])
+        assert a_star(lyt, source, target, crossings=True) == expected, (source, target)
 
 
 @pytest.mark.parametrize("make_lyt", CLOCKED_LAYOUTS)
@@ -236,3 +219,115 @@ def test_a_star_and_distance_endpoint_bounds(
         a_star(lyt, source, target)
     with pytest.raises(ValueError):  # ruff: ignore[pytest-raises-too-broad] - Only the exception type is specified.
         a_star_distance(lyt, source, target)
+
+
+@pytest.mark.parametrize(
+    ("scheme", "expected"),
+    [
+        ("2DDWave", [(0, 0), (0, 1), (1, 1, 1), (2, 1), (2, 2)]),
+        ("USE", [(0, 0), (1, 0), (1, 1, 1), (1, 2), (2, 2)]),
+    ],
+)
+def test_searches_cross_wires_and_return_to_ground(scheme: str, expected: list[tuple[int, ...]]) -> None:
+    """Cross an occupied wire, with no route available when crossings are disabled."""
+    layout = cartesian_gate_layout((3, 3, 2), scheme)
+    source, target = ((1, 0), (1, 2)) if scheme == "2DDWave" else ((2, 1), (0, 1))
+    pi = layout.create_pi("obstruction", source)
+    wire = layout.create_buf(pi, (1, 1))
+    layout.create_po(wire, "output", target)
+    assert a_star(layout, (0, 0), (2, 2)) == []
+    assert enumerate_all_paths(layout, (0, 0), (2, 2)) == []
+    assert yen_k_shortest_paths(layout, (0, 0), (2, 2), 2) == []
+    assert a_star(layout, (0, 0), (2, 2), crossings=True) == expected
+    assert enumerate_all_paths(layout, (0, 0), (2, 2), crossings=True) == [expected]
+    assert yen_k_shortest_paths(layout, (0, 0), (2, 2), 2, crossings=True) == [expected]
+
+
+def test_searches_reach_crossing_layer_target() -> None:
+    """An occupied crossing-layer endpoint remains a valid routing target."""
+    layout = cartesian_gate_layout((2, 2, 2), "2DDWave")
+    layout.create_pi("a", (0, 0))
+    layout.obstruct_coordinate((1, 0))
+    layout.create_pi("b", (1, 0, 1))
+    expected = [(0, 0), (1, 0, 1)]
+    assert a_star(layout, (0, 0), (1, 0, 1), crossings=True) == expected
+    assert enumerate_all_paths(layout, (0, 0), (1, 0, 1), crossings=True) == [expected]
+    assert yen_k_shortest_paths(layout, (0, 0), (1, 0, 1), 10, crossings=True) == [expected]
+
+
+@pytest.mark.parametrize("cls", [shifted_cartesian_layout, hexagonal_layout])
+def test_default_searches_minimize_diagonal_routes(cls: type[shifted_cartesian_layout | hexagonal_layout]) -> None:
+    """A blocked vertical continuation cannot make a unit-cost diagonal route longer."""
+    layout = cls(arrangement.ODD_ROW, (4, 4))
+    blocked = obstructions()
+    blocked.obstruct_connection((1, 1), (1, 0))
+    source, target = (0, 3), (1, 0)
+    expected = [(0, 3), (1, 2), (0, 1), (1, 0)]
+    assert all(starmap(layout.is_adjacent_of, pairwise(expected)))
+    assert all(not blocked.is_obstructed_connection(a, b) for a, b in pairwise(expected))
+    path = a_star(layout, source, target, obstructions=blocked)
+    assert path[0] == source
+    assert path[-1] == target
+    assert len(path) == 4
+    assert a_star_distance(layout, source, target, obstructions=blocked) == 3
+    first = yen_k_shortest_paths(layout, source, target, 1, obstructions=blocked)
+    assert len(first) == 1
+    assert len(first[0]) == 4
+
+
+@pytest.mark.parametrize("cls", [shifted_cartesian_layout, hexagonal_layout])
+@pytest.mark.parametrize("a", list(arrangement))
+def test_offset_search_distances_match_breadth_first_search(
+    cls: type[shifted_cartesian_layout | hexagonal_layout], a: arrangement
+) -> None:
+    """Compare all endpoint pairs against an independent unweighted graph traversal."""
+    layout = cls(a, (4, 4))
+    blocked_site = coordinate(2, 2)
+    blocked_edge = (coordinate(1, 1), coordinate(1, 0))
+    blocked = obstructions()
+    blocked.obstruct_coordinate(blocked_site)
+    blocked.obstruct_connection(*blocked_edge)
+    sites = list(starmap(coordinate, product(range(4), repeat=2)))
+    for source, target in product(sites, repeat=2):
+        frontier = deque([(source, 0)])
+        visited = {source}
+        expected = 2**64 - 1
+        while frontier:
+            site, distance = frontier.popleft()
+            if site == target:
+                expected = distance
+                break
+            for neighbor in layout.adjacent_coordinates(site):
+                if neighbor in visited or (site, neighbor) == blocked_edge:
+                    continue
+                if neighbor == blocked_site and neighbor != target:
+                    continue
+                visited.add(neighbor)
+                frontier.append((neighbor, distance + 1))
+        path = a_star(layout, source, target, obstructions=blocked)
+        assert (len(path) - 1 if path else 2**64 - 1) == expected, (a, source, target)
+        assert a_star_distance(layout, source, target, obstructions=blocked) == expected, (a, source, target)
+        paths = yen_k_shortest_paths(layout, source, target, 1, obstructions=blocked)
+        assert (len(paths[0]) - 1 if paths else 2**64 - 1) == expected, (a, source, target)
+        if path:
+            assert path[0] == source
+            assert path[-1] == target
+            assert len(set(path)) == len(path)
+            assert all(starmap(layout.is_adjacent_of, pairwise(path)))
+            assert all((left, right) != blocked_edge for left, right in pairwise(path))
+            assert blocked_site not in path[1:-1]
+
+
+@pytest.mark.parametrize("scheme", ["RES", "ESR"])
+def test_res_and_esr_clocked_shortest_paths(scheme: str) -> None:
+    """Distinct clock flows retain a minimum path with every step clock-legal."""
+    layout = cartesian_gate_layout((10, 10), scheme)
+    path = a_star(layout, (0, 0), (9, 9))
+    assert len(path) == 19
+    assert path[0] == (0, 0)
+    assert path[-1] == (9, 9)
+    assert len(path) == len(set(path))
+    assert all(layout.is_within_bounds(site) for site in path)
+    assert all(starmap(layout.is_adjacent_of, pairwise(path)))
+    assert all(starmap(layout.is_outgoing_clocked, pairwise(path)))
+    assert a_star_distance(layout, (0, 0), (9, 9)) == 18

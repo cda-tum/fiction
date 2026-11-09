@@ -64,22 +64,24 @@ inline constexpr const char* GATE_XOR2 = "GATE  xor2  1 O=a^b;     PIN * NONINV 
  * @brief GENLIB definition of the binary XNOR function `!(a^b)`.
  */
 inline constexpr const char* GATE_XNOR2 = "GATE  xnor2 1 O=!(a^b);  PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
+
+// GENLIB lists `a` first, so kitty treats it as the least significant input variable.
 /**
- * @brief GENLIB definition of the less-than function `!a*b`.
+ * @brief GENLIB definition of the less-than function `a*!b`.
  */
-inline constexpr const char* GATE_LT2 = "GATE  lt2  1 O=(!a*b);      PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
+inline constexpr const char* GATE_LT2 = "GATE  lt2  1 O=(a*!b);      PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
 /**
- * @brief GENLIB definition of the greater-than function `a*!b`.
+ * @brief GENLIB definition of the greater-than function `!a*b`.
  */
-inline constexpr const char* GATE_GT2 = "GATE  gt2  1 O=(a*!b);      PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
+inline constexpr const char* GATE_GT2 = "GATE  gt2  1 O=(!a*b);      PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
 /**
- * @brief GENLIB definition of the less-than-or-equal function `!(a*!b)`.
+ * @brief GENLIB definition of the less-than-or-equal function `!(!a*b)`.
  */
-inline constexpr const char* GATE_LE2 = "GATE  le2  1 O=!(a*!b);     PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
+inline constexpr const char* GATE_LE2 = "GATE  le2  1 O=!(!a*b);     PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
 /**
- * @brief GENLIB definition of the greater-than-or-equal function `!(!a*b)`.
+ * @brief GENLIB definition of the greater-than-or-equal function `!(a*!b)`.
  */
-inline constexpr const char* GATE_GE2 = "GATE  ge2  1 O=!(!a*b);     PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
+inline constexpr const char* GATE_GE2 = "GATE  ge2  1 O=!(a*!b);     PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
 
 /**
  * @brief GENLIB definition of the three-input AND function `a*b*c`.

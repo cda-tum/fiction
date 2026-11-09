@@ -22,7 +22,7 @@ LATTICES = [
 ]
 
 
-def test_default_result():
+def test_default_result() -> None:
     result = sidb_simulation_result()
 
     assert not result.algorithm_name
@@ -33,7 +33,7 @@ def test_default_result():
 
 
 @pytest.mark.parametrize("lat", LATTICES)
-def test_negative_and_neutral_layout(lat):
+def test_negative_and_neutral_layout(lat: lattice) -> None:
     layout = sidb_layout(lat)
     layout.assign_sidb(lattice_site(0, 0, 1), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(0, 1, 1), sidb_dot_tag.NORMAL)
@@ -59,7 +59,7 @@ def test_negative_and_neutral_layout(lat):
 
 
 @pytest.mark.parametrize("lat", LATTICES)
-def test_empty_layout(lat):
+def test_empty_layout(lat: lattice) -> None:
     layout = sidb_layout(lat)
 
     result = sidb_simulation_result()
@@ -70,7 +70,7 @@ def test_empty_layout(lat):
 
 
 @pytest.mark.parametrize("lat", LATTICES)
-def test_three_sidbs(lat):
+def test_three_sidbs(lat: lattice) -> None:
     layout = sidb_layout(lat)
     layout.assign_sidb(lattice_site(0, 0, 1), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(4, 0, 1), sidb_dot_tag.NORMAL)
@@ -97,7 +97,7 @@ def test_three_sidbs(lat):
     assert ground_state[0].get_charge_state(lattice_site(6, 0, 1)) == sidb_charge_state.NEUTRAL
 
 
-def test_degenerate_ground_states():
+def test_degenerate_ground_states() -> None:
     layout = sidb_layout()
     layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(10, 0, 0), sidb_dot_tag.NORMAL)
@@ -115,7 +115,11 @@ def test_degenerate_ground_states():
     result = sidb_simulation_result()
     result.charge_distributions = [excited, left, right, left]
 
-    assert len(result.groundstates()) == 2
+    groundstates = result.groundstates()
+    assert len(groundstates) == 2
+    assert sorted((tuple(cd.charge_states()) for cd in groundstates), key=str) == sorted(
+        [tuple(left.charge_states()), tuple(right.charge_states())], key=str
+    )
 
 
 def test_distribution_index_boundary() -> None:

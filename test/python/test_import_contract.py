@@ -11,6 +11,7 @@
 from __future__ import annotations
 
 import importlib
+import os
 import shutil
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- runs the lazy-loading check in a fresh interpreter
 import sys
@@ -54,6 +55,20 @@ NESTED_SUBMODULES = [
 ]
 
 
+@pytest.mark.parametrize(
+    ("requirement", "module", "name"),
+    [
+        ("FICTION_REQUIRE_Z3", "mnt.pyfiction.physical_design", "exact"),
+        ("FICTION_REQUIRE_ALGLIB", "mnt.pyfiction.sidb.simulation.engines", "clustercomplete"),
+    ],
+)
+def test_required_optional_export(requirement: str, module: str, name: str) -> None:
+    """Full-feature builds expose the optional algorithms they require."""
+    if os.getenv(requirement) != "1":
+        pytest.skip(f"{requirement} is not required")
+    assert hasattr(importlib.import_module(module), name)
+
+
 def test_root_exposes_only_submodules() -> None:
     """The package root lists the submodules and the version, and no bound names."""
     assert sorted(pyfiction.__all__) == sorted(["__version__", *SUBMODULES])
@@ -85,7 +100,7 @@ def test_submodules_load_lazily() -> None:
         "assert pf.sidb.simulation.engines.quickexact\n"
         "assert 'mnt.pyfiction.sidb' in sys.modules\n"
     )
-    subprocess.run([sys.executable, "-c", script], check=True)  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed interpreter and script
+    subprocess.run([sys.executable, "-c", script], check=True, timeout=30)  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed interpreter and script
 
 
 @pytest.mark.skipif(sys.platform != "linux", reason="Inspect ELF exports with GNU nm")
@@ -130,4 +145,4 @@ def test_coordinate_namespace_in_fresh_interpreter() -> None:
         "assert area(extent(3, 4, 2)) == 12\n"
         "assert cartesian_layout((3, 4)).width() == 3\n"
     )
-    subprocess.run([sys.executable, "-c", script], check=True)  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed interpreter and script
+    subprocess.run([sys.executable, "-c", script], check=True, timeout=30)  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed interpreter and script

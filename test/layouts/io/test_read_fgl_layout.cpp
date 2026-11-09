@@ -18,6 +18,8 @@
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -32,6 +34,8 @@
 #include <fmt/format.h>
 #include <tinyxml2.h>
 
+#include <array>
+#include <cstdint>
 #include <sstream>
 #include <string>
 #include <string_view>
@@ -94,7 +98,7 @@ TEST_CASE("Read empty FGL layout", "[read-fgl-layout]")
         CHECK(lyt.width() == 1);
         CHECK(lyt.height() == 1);
         CHECK(lyt.area() == 1);
-        CHECK(lyt.get_layout_name() == "Test");
+        CHECK_THAT((lyt.get_layout_name()), Catch::Matchers::Equals("Test"));
         CHECK(lyt.is_clocking_scheme(clocking::TWODDWAVE_NAME));
     };
 
@@ -186,7 +190,7 @@ TEST_CASE("Read simple FGL layout", "[read-fgl-layout]")
         CHECK(lyt.width() == 3);
         CHECK(lyt.height() == 2);
         CHECK(lyt.area() == 6);
-        CHECK(lyt.get_layout_name() == "Test");
+        CHECK_THAT((lyt.get_layout_name()), Catch::Matchers::Equals("Test"));
         CHECK(lyt.is_clocking_scheme(clocking::TWODDWAVE_NAME));
         CHECK(lyt.is_pi_tile({0, 1}));
         /** @brief Object whose label is checked at the expected position. */
@@ -293,7 +297,7 @@ TEST_CASE("Read FGL layout with hexadecimal gate type", "[read-fgl-layout]")
         CHECK(lyt.width() == 3);
         CHECK(lyt.height() == 2);
         CHECK(lyt.area() == 6);
-        CHECK(lyt.get_layout_name() == "Test");
+        CHECK_THAT((lyt.get_layout_name()), Catch::Matchers::Equals("Test"));
         CHECK(lyt.is_clocking_scheme(clocking::TWODDWAVE_NAME));
         CHECK(lyt.is_pi_tile({0, 1}));
         /** @brief Object whose label is checked at the expected position. */
@@ -342,7 +346,7 @@ TEST_CASE("Read FGL layout without topology", "[read-fgl-layout]")
         const auto         lyt = read_fgl_layout<cartesian_layout>(layout_stream);
         CHECK(lyt.width() == 1);
         CHECK(lyt.height() == 1);
-        CHECK(lyt.get_layout_name() == "Test");
+        CHECK_THAT((lyt.get_layout_name()), Catch::Matchers::Equals("Test"));
         CHECK(lyt.is_clocking_scheme(clocking::TWODDWAVE_NAME));
     }
 
@@ -399,7 +403,7 @@ TEST_CASE("FGL preserves synchronization elements and labels", "[read-fgl-layout
     std::stringstream stream{};
     write_fgl_layout(original, stream);
     const auto restored = read_fgl_layout<cartesian_layout>(stream);
-    CHECK(restored.get_layout_name() == original.get_layout_name());
+    CHECK_THAT((restored.get_layout_name()), Catch::Matchers::Equals(original.get_layout_name()));
     CHECK(restored.num_pis() == 1);
     CHECK(restored.num_pos() == 1);
     /** @brief Object whose label is checked at the expected position. */
@@ -665,540 +669,112 @@ TEST_CASE("Parsing error: size exceeds the coordinate domain", "[read-fgl-layout
     CHECK_THROWS_AS(read_fgl_layout<cartesian_layout>(layout_stream), fgl_parsing_error);
 }
 
+/**
+ * @brief Checks unknown and valid legacy gate types at the same input arity.
+ * @param arity Number of incoming signals.
+ * @param valid_type Valid gate type or truth table for the arity.
+ */
+void check_legacy_gate_type(const uint32_t arity, const std::string_view valid_type)
+{
+    const std::array<layout_base::coordinate, 4> sources{{{0, 1}, {1, 0}, {2, 1}, {1, 2}}};
+    std::string                                  gates{}, incoming{};
+    for (uint32_t i = 0; i < arity; ++i)
+    {
+        gates += fmt::format(
+            "<gate><id>{}</id><type>PI</type><name>input</name><loc><x>{}</x><y>{}</y><z>0</z></loc></gate>", i,
+            sources.at(i).x, sources.at(i).y);
+        incoming += fmt::format("<signal><x>{}</x><y>{}</y><z>0</z></signal>", sources.at(i).x, sources.at(i).y);
+    }
+    const auto document = [&](const std::string_view type)
+    {
+        return fmt::format("<fgl><layout><topology>cartesian</topology><size><x>2</x><y>2</y><z>0</z></size>"
+                           "<clocking><name>OPEN</name><zones/></clocking></layout><gates>{}"
+                           "<gate><id>{}</id><type>{}</type><name>target</name><loc><x>1</x><y>1</y><z>0</z></loc>"
+                           "<incoming>{}</incoming></gate></gates></fgl>",
+                           gates, arity, type, incoming);
+    };
+    CAPTURE(arity, valid_type);
+    std::istringstream valid{document(valid_type)};
+    const auto         restored = read_fgl_layout<cartesian_layout>(valid);
+    const auto         gate     = restored.find_object({1, 1});
+    REQUIRE(gate.has_value());
+    /** @brief Restored gate whose presence REQUIRE checks. */
+    const auto gate_id = *gate;  // NOLINT(bugprone-unchecked-optional-access): REQUIRE checks presence.
+    CHECK(restored.input_count(gate_id) == arity);
+
+    std::istringstream invalid{document("unknown")};
+    CHECK_THROWS_AS(read_fgl_layout<cartesian_layout>(invalid), fgl_parsing_error);
+}
+
 TEST_CASE("Parsing error: unknown gate type with 0 incoming signals", "[read-fgl-layout]")
 {
-    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fgl>\n"
-                                              "  <layout>\n"
-                                              "    <name>Test</name>\n"
-                                              "    <topology>cartesian</topology>\n"
-                                              "    <size>\n"
-                                              "      <x>2</x>\n"
-                                              "      <y>1</y>\n"
-                                              "      <z>0</z>\n"
-                                              "    </size>\n"
-                                              "    <clocking>\n"
-                                              "      <name>2DDWave</name>\n"
-                                              "    </clocking>\n"
-                                              "  </layout>\n"
-                                              "  <gates>\n"
-                                              "    <gate>\n"
-                                              "      <id>0</id>\n"
-                                              "      <type>unknown</type>\n"
-                                              "      <name>pi0</name>\n"
-                                              "      <loc>\n"
-                                              "        <x>0</x>\n"
-                                              "        <y>1</y>\n"
-                                              "        <z>0</z>\n"
-                                              "      </loc>\n"
-                                              "    </gate>\n"
-                                              "    <gate>\n"
-                                              "      <id>1</id>\n"
-                                              "      <type>PI</type>\n"
-                                              "      <name>pi1</name>\n"
-                                              "      <loc>\n"
-                                              "        <x>1</x>\n"
-                                              "        <y>0</y>\n"
-                                              "        <z>0</z>\n"
-                                              "      </loc>\n"
-                                              "    </gate>\n"
-                                              "    <gate>\n"
-                                              "      <id>2</id>\n"
-                                              "      <type>AND</type>\n"
-                                              "      <loc>\n"
-                                              "        <x>1</x>\n"
-                                              "        <y>1</y>\n"
-                                              "        <z>0</z>\n"
-                                              "      </loc>\n"
-                                              "      <incoming>\n"
-                                              "        <signal>\n"
-                                              "          <x>0</x>\n"
-                                              "          <y>1</y>\n"
-                                              "          <z>0</z>\n"
-                                              "        </signal>\n"
-                                              "        <signal>\n"
-                                              "          <x>1</x>\n"
-                                              "          <y>0</y>\n"
-                                              "          <z>0</z>\n"
-                                              "        </signal>\n"
-                                              "      </incoming>\n"
-                                              "    </gate>\n"
-                                              "    <gate>\n"
-                                              "      <id>3</id>\n"
-                                              "      <type>PO</type>\n"
-                                              "      <name>po0</name>\n"
-                                              "      <loc>\n"
-                                              "        <x>2</x>\n"
-                                              "        <y>1</y>\n"
-                                              "        <z>0</z>\n"
-                                              "      </loc>\n"
-                                              "      <incoming>\n"
-                                              "        <signal>\n"
-                                              "          <x>1</x>\n"
-                                              "          <y>1</y>\n"
-                                              "          <z>0</z>\n"
-                                              "        </signal>\n"
-                                              "      </incoming>\n"
-                                              "    </gate>\n"
-                                              "  </gates>\n"
-                                              "</fgl>\n";
-
-    std::istringstream layout_stream{fgl_layout};
-
-    CHECK_THROWS_AS(read_fgl_layout<cartesian_layout>(layout_stream), fgl_parsing_error);
+    check_legacy_gate_type(0, "PI");
 }
 
 TEST_CASE("Parsing error: unknown gate type with 1 incoming signal", "[read-fgl-layout]")
 {
-    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fgl>\n"
-                                              "  <layout>\n"
-                                              "    <name>Test</name>\n"
-                                              "    <topology>cartesian</topology>\n"
-                                              "    <size>\n"
-                                              "      <x>2</x>\n"
-                                              "      <y>1</y>\n"
-                                              "      <z>0</z>\n"
-                                              "    </size>\n"
-                                              "    <clocking>\n"
-                                              "      <name>2DDWave</name>\n"
-                                              "    </clocking>\n"
-                                              "  </layout>\n"
-                                              "  <gates>\n"
-                                              "    <gate>\n"
-                                              "      <id>0</id>\n"
-                                              "      <type>PI</type>\n"
-                                              "      <name>pi0</name>\n"
-                                              "      <loc>\n"
-                                              "        <x>0</x>\n"
-                                              "        <y>1</y>\n"
-                                              "        <z>0</z>\n"
-                                              "      </loc>\n"
-                                              "    </gate>\n"
-                                              "    <gate>\n"
-                                              "      <id>1</id>\n"
-                                              "      <type>PI</type>\n"
-                                              "      <name>pi1</name>\n"
-                                              "      <loc>\n"
-                                              "        <x>1</x>\n"
-                                              "        <y>0</y>\n"
-                                              "        <z>0</z>\n"
-                                              "      </loc>\n"
-                                              "    </gate>\n"
-                                              "    <gate>\n"
-                                              "      <id>2</id>\n"
-                                              "      <type>AND</type>\n"
-                                              "      <loc>\n"
-                                              "        <x>1</x>\n"
-                                              "        <y>1</y>\n"
-                                              "        <z>0</z>\n"
-                                              "      </loc>\n"
-                                              "      <incoming>\n"
-                                              "        <signal>\n"
-                                              "          <x>0</x>\n"
-                                              "          <y>1</y>\n"
-                                              "          <z>0</z>\n"
-                                              "        </signal>\n"
-                                              "        <signal>\n"
-                                              "          <x>1</x>\n"
-                                              "          <y>0</y>\n"
-                                              "          <z>0</z>\n"
-                                              "        </signal>\n"
-                                              "      </incoming>\n"
-                                              "    </gate>\n"
-                                              "    <gate>\n"
-                                              "      <id>3</id>\n"
-                                              "      <type>unknown</type>\n"
-                                              "      <loc>\n"
-                                              "        <x>2</x>\n"
-                                              "        <y>1</y>\n"
-                                              "        <z>0</z>\n"
-                                              "      </loc>\n"
-                                              "      <incoming>\n"
-                                              "        <signal>\n"
-                                              "          <x>1</x>\n"
-                                              "          <y>1</y>\n"
-                                              "          <z>0</z>\n"
-                                              "        </signal>\n"
-                                              "      </incoming>\n"
-                                              "    </gate>\n"
-                                              "  </gates>\n"
-                                              "</fgl>\n";
-
-    std::istringstream layout_stream{fgl_layout};
-
-    CHECK_THROWS_AS(read_fgl_layout<cartesian_layout>(layout_stream), fgl_parsing_error);
+    check_legacy_gate_type(1, "BUF");
 }
 
 TEST_CASE("Parsing error: unknown gate type with 2 incoming signals", "[read-fgl-layout]")
 {
-    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fgl>\n"
-                                              "  <layout>\n"
-                                              "    <name>Test</name>\n"
-                                              "    <topology>cartesian</topology>\n"
-                                              "    <size>\n"
-                                              "      <x>2</x>\n"
-                                              "      <y>1</y>\n"
-                                              "      <z>0</z>\n"
-                                              "    </size>\n"
-                                              "    <clocking>\n"
-                                              "      <name>2DDWave</name>\n"
-                                              "    </clocking>\n"
-                                              "  </layout>\n"
-                                              "  <gates>\n"
-                                              "    <gate>\n"
-                                              "      <id>0</id>\n"
-                                              "      <type>PI</type>\n"
-                                              "      <name>pi0</name>\n"
-                                              "      <loc>\n"
-                                              "        <x>0</x>\n"
-                                              "        <y>1</y>\n"
-                                              "        <z>0</z>\n"
-                                              "      </loc>\n"
-                                              "    </gate>\n"
-                                              "    <gate>\n"
-                                              "      <id>1</id>\n"
-                                              "      <type>PI</type>\n"
-                                              "      <name>pi1</name>\n"
-                                              "      <loc>\n"
-                                              "        <x>1</x>\n"
-                                              "        <y>0</y>\n"
-                                              "        <z>0</z>\n"
-                                              "      </loc>\n"
-                                              "    </gate>\n"
-                                              "    <gate>\n"
-                                              "      <id>2</id>\n"
-                                              "      <type>unknown</type>\n"
-                                              "      <loc>\n"
-                                              "        <x>1</x>\n"
-                                              "        <y>1</y>\n"
-                                              "        <z>0</z>\n"
-                                              "      </loc>\n"
-                                              "      <incoming>\n"
-                                              "        <signal>\n"
-                                              "          <x>0</x>\n"
-                                              "          <y>1</y>\n"
-                                              "          <z>0</z>\n"
-                                              "        </signal>\n"
-                                              "        <signal>\n"
-                                              "          <x>1</x>\n"
-                                              "          <y>0</y>\n"
-                                              "          <z>0</z>\n"
-                                              "        </signal>\n"
-                                              "      </incoming>\n"
-                                              "    </gate>\n"
-                                              "    <gate>\n"
-                                              "      <id>3</id>\n"
-                                              "      <type>PO</type>\n"
-                                              "      <name>po0</name>\n"
-                                              "      <loc>\n"
-                                              "        <x>2</x>\n"
-                                              "        <y>1</y>\n"
-                                              "        <z>0</z>\n"
-                                              "      </loc>\n"
-                                              "      <incoming>\n"
-                                              "        <signal>\n"
-                                              "          <x>1</x>\n"
-                                              "          <y>1</y>\n"
-                                              "          <z>0</z>\n"
-                                              "        </signal>\n"
-                                              "      </incoming>\n"
-                                              "    </gate>\n"
-                                              "  </gates>\n"
-                                              "</fgl>\n";
-
-    std::istringstream layout_stream{fgl_layout};
-
-    CHECK_THROWS_AS(read_fgl_layout<cartesian_layout>(layout_stream), fgl_parsing_error);
+    check_legacy_gate_type(2, "AND");
 }
 
 TEST_CASE("Parsing error: unknown gate type with 3 incoming signals", "[read-fgl-layout]")
 {
-    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fgl>\n"
-                                              "  <layout>\n"
-                                              "    <name>Test</name>\n"
-                                              "    <topology>cartesian</topology>\n"
-                                              "    <size>\n"
-                                              "      <x>2</x>\n"
-                                              "      <y>2</y>\n"
-                                              "      <z>0</z>\n"
-                                              "    </size>\n"
-                                              "    <clocking>\n"
-                                              "      <name>RES</name>\n"
-                                              "    </clocking>\n"
-                                              "  </layout>\n"
-                                              "  <gates>\n"
-                                              "    <gate>\n"
-                                              "      <id>0</id>\n"
-                                              "      <type>PI</type>\n"
-                                              "      <name>pi0</name>\n"
-                                              "      <loc>\n"
-                                              "        <x>0</x>\n"
-                                              "        <y>1</y>\n"
-                                              "        <z>0</z>\n"
-                                              "      </loc>\n"
-                                              "    </gate>\n"
-                                              "    <gate>\n"
-                                              "      <id>1</id>\n"
-                                              "      <type>PI</type>\n"
-                                              "      <name>pi1</name>\n"
-                                              "      <loc>\n"
-                                              "        <x>1</x>\n"
-                                              "        <y>0</y>\n"
-                                              "        <z>0</z>\n"
-                                              "      </loc>\n"
-                                              "    </gate>\n"
-                                              "    <gate>\n"
-                                              "      <id>2</id>\n"
-                                              "      <type>PI</type>\n"
-                                              "      <name>pi2</name>\n"
-                                              "      <loc>\n"
-                                              "        <x>2</x>\n"
-                                              "        <y>1</y>\n"
-                                              "        <z>0</z>\n"
-                                              "      </loc>\n"
-                                              "    </gate>\n"
-                                              "    <gate>\n"
-                                              "      <id>3</id>\n"
-                                              "      <type>unknown</type>\n"
-                                              "      <loc>\n"
-                                              "        <x>1</x>\n"
-                                              "        <y>1</y>\n"
-                                              "        <z>0</z>\n"
-                                              "      </loc>\n"
-                                              "      <incoming>\n"
-                                              "        <signal>\n"
-                                              "          <x>0</x>\n"
-                                              "          <y>1</y>\n"
-                                              "          <z>0</z>\n"
-                                              "        </signal>\n"
-                                              "        <signal>\n"
-                                              "          <x>1</x>\n"
-                                              "          <y>0</y>\n"
-                                              "          <z>0</z>\n"
-                                              "        </signal>\n"
-                                              "        <signal>\n"
-                                              "          <x>2</x>\n"
-                                              "          <y>1</y>\n"
-                                              "          <z>0</z>\n"
-                                              "        </signal>\n"
-                                              "      </incoming>\n"
-                                              "    </gate>\n"
-                                              "    <gate>\n"
-                                              "      <id>4</id>\n"
-                                              "      <type>PO</type>\n"
-                                              "      <name>po0</name>\n"
-                                              "      <loc>\n"
-                                              "        <x>1</x>\n"
-                                              "        <y>2</y>\n"
-                                              "        <z>0</z>\n"
-                                              "      </loc>\n"
-                                              "      <incoming>\n"
-                                              "        <signal>\n"
-                                              "          <x>1</x>\n"
-                                              "          <y>1</y>\n"
-                                              "          <z>0</z>\n"
-                                              "        </signal>\n"
-                                              "      </incoming>\n"
-                                              "    </gate>\n"
-                                              "  </gates>\n"
-                                              "</fgl>\n";
-
-    std::istringstream layout_stream{fgl_layout};
-
-    CHECK_THROWS_AS(read_fgl_layout<cartesian_layout>(layout_stream), fgl_parsing_error);
+    check_legacy_gate_type(3, "MAJ");
 }
 
 TEST_CASE("Parsing error: unknown gate type with more than 3 incoming signals", "[read-fgl-layout]")
 {
-    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fgl>\n"
-                                              "  <layout>\n"
-                                              "    <name>Test</name>\n"
-                                              "    <topology>cartesian</topology>\n"
-                                              "    <size>\n"
-                                              "      <x>2</x>\n"
-                                              "      <y>2</y>\n"
-                                              "      <z>0</z>\n"
-                                              "    </size>\n"
-                                              "    <clocking>\n"
-                                              "      <name>OPEN</name>\n"
-                                              "      <zones>\n"
-                                              "        <zone>\n"
-                                              "          <x>0</x>\n"
-                                              "          <y>1</y>\n"
-                                              "          <clock>0</clock>\n"
-                                              "        </zone>\n"
-                                              "        <zone>\n"
-                                              "          <x>1</x>\n"
-                                              "          <y>0</y>\n"
-                                              "          <clock>0</clock>\n"
-                                              "        </zone>\n"
-                                              "        <zone>\n"
-                                              "          <x>2</x>\n"
-                                              "          <y>1</y>\n"
-                                              "          <clock>0</clock>\n"
-                                              "        </zone>\n"
-                                              "        <zone>\n"
-                                              "          <x>1</x>\n"
-                                              "          <y>2</y>\n"
-                                              "          <clock>0</clock>\n"
-                                              "        </zone>\n"
-                                              "        <zone>\n"
-                                              "          <x>1</x>\n"
-                                              "          <y>1</y>\n"
-                                              "          <clock>1</clock>\n"
-                                              "        </zone>\n"
-                                              "      </zones>\n"
-                                              "    </clocking>\n"
-                                              "  </layout>\n"
-                                              "  <gates>\n"
-                                              "    <gate>\n"
-                                              "      <id>0</id>\n"
-                                              "      <type>PI</type>\n"
-                                              "      <name>pi0</name>\n"
-                                              "      <loc>\n"
-                                              "        <x>0</x>\n"
-                                              "        <y>1</y>\n"
-                                              "        <z>0</z>\n"
-                                              "      </loc>\n"
-                                              "    </gate>\n"
-                                              "    <gate>\n"
-                                              "      <id>1</id>\n"
-                                              "      <type>PI</type>\n"
-                                              "      <name>pi1</name>\n"
-                                              "      <loc>\n"
-                                              "        <x>1</x>\n"
-                                              "        <y>0</y>\n"
-                                              "        <z>0</z>\n"
-                                              "      </loc>\n"
-                                              "    </gate>\n"
-                                              "    <gate>\n"
-                                              "      <id>2</id>\n"
-                                              "      <type>PI</type>\n"
-                                              "      <name>pi2</name>\n"
-                                              "      <loc>\n"
-                                              "        <x>2</x>\n"
-                                              "        <y>1</y>\n"
-                                              "        <z>0</z>\n"
-                                              "      </loc>\n"
-                                              "    </gate>\n"
-                                              "    <gate>\n"
-                                              "      <id>3</id>\n"
-                                              "      <type>PI</type>\n"
-                                              "      <name>pi3</name>\n"
-                                              "      <loc>\n"
-                                              "        <x>1</x>\n"
-                                              "        <y>2</y>\n"
-                                              "        <z>0</z>\n"
-                                              "      </loc>\n"
-                                              "    </gate>\n"
-                                              "    <gate>\n"
-                                              "      <id>4</id>\n"
-                                              "      <type>unknown</type>\n"
-                                              "      <loc>\n"
-                                              "        <x>1</x>\n"
-                                              "        <y>1</y>\n"
-                                              "        <z>0</z>\n"
-                                              "      </loc>\n"
-                                              "      <incoming>\n"
-                                              "        <signal>\n"
-                                              "          <x>0</x>\n"
-                                              "          <y>1</y>\n"
-                                              "          <z>0</z>\n"
-                                              "        </signal>\n"
-                                              "        <signal>\n"
-                                              "          <x>1</x>\n"
-                                              "          <y>0</y>\n"
-                                              "          <z>0</z>\n"
-                                              "        </signal>\n"
-                                              "        <signal>\n"
-                                              "          <x>2</x>\n"
-                                              "          <y>1</y>\n"
-                                              "          <z>0</z>\n"
-                                              "        </signal>\n"
-                                              "        <signal>\n"
-                                              "          <x>1</x>\n"
-                                              "          <y>2</y>\n"
-                                              "          <z>0</z>\n"
-                                              "        </signal>\n"
-                                              "      </incoming>\n"
-                                              "    </gate>\n"
-                                              "  </gates>\n"
-                                              "</fgl>\n";
-
-    std::istringstream layout_stream{fgl_layout};
-
-    CHECK_THROWS_AS(read_fgl_layout<cartesian_layout>(layout_stream), fgl_parsing_error);
+    check_legacy_gate_type(4, "8000");
 }
 
 TEST_CASE("FGL rejects invalid numeric metadata", "[read-fgl-layout]")
 {
-    std::string x{"0"};
-    std::string clock{"0"};
-    std::string delay{"0"};
-    std::string id{"0"};
-    SECTION("Negative gate ID")
+    /** @brief Parse numeric fields in an otherwise valid legacy FGL document. */
+    const auto read_numeric_document =
+        [](const char* x_value, const char* clock_value, const char* delay_value, const char* id_value)
     {
-        id = "-1";
-    }
-    SECTION("Trailing gate ID data")
+        std::istringstream stream{fmt::format(
+            "<fgl><layout><name>invalid</name><topology>cartesian</topology><size><x>{}</x>"
+            "<y>0</y><z>0</z></size><clocking><name>OPEN4</name><zones><zone><x>0</x><y>0</y><clock>{}</clock>"
+            "</zone></zones><synchronization_elements><element><x>0</x><y>0</y><z>0</z><delay>{}</delay>"
+            "</element></synchronization_elements></clocking></layout><gates><gate><id>{}</id>"
+            "<type>PI</type><name>input</name><loc><x>0</x><y>0</y><z>0</z></loc></gate></gates></fgl>",
+            x_value, clock_value, delay_value, id_value)};
+        return read_fgl_layout<cartesian_layout>(stream);
+    };
+    SECTION("Valid numeric metadata")
     {
-        id = "1oops";
+        /** @brief All-zero legacy fields describe one placed primary input. */
+        const auto valid = read_numeric_document("0", "0", "0", "0");
+        CHECK(valid.get_extent() == layout_base::extent{1, 1, 1});
+        REQUIRE(valid.num_pis() == 1);
+        CHECK_THAT((valid.get_input_name(0)), Catch::Matchers::Equals("input"));
     }
-    SECTION("Non-numeric gate ID")
+    SECTION("Invalid numeric metadata")
     {
-        id = "gate";
+        /** @brief Malformed field with the remaining numeric fields valid. */
+        const auto [name, x, clock, delay, id] =
+            GENERATE(Catch::Generators::table<const char*, const char*, const char*, const char*, const char*>(
+                {{"Negative gate ID", "0", "0", "0", "-1"},
+                 {"Trailing gate ID data", "0", "0", "0", "1oops"},
+                 {"Non-numeric gate ID", "0", "0", "0", "gate"},
+                 {"Empty gate ID", "0", "0", "0", " "},
+                 {"Gate ID storage overflow", "0", "0", "0", "2147483648"},
+                 {"Gate ID integer overflow", "0", "0", "0", "18446744073709551616"},
+                 {"Negative coordinate", "-1", "0", "0", "0"},
+                 {"Trailing coordinate data", "1oops", "0", "0", "0"},
+                 {"Empty coordinate", "   ", "0", "0", "0"},
+                 {"Coordinate overflow", "4294967296", "0", "0", "0"},
+                 {"Integer overflow", "18446744073709551616", "0", "0", "0"},
+                 {"Clock exceeds phase count", "0", "4", "0", "0"},
+                 {"Synchronization delay overflow", "0", "0", "256", "0"}}));
+        CAPTURE(name, x, clock, delay, id);
+        CHECK_THROWS_AS(read_numeric_document(x, clock, delay, id), fgl_parsing_error);
     }
-    SECTION("Empty gate ID")
-    {
-        id = " ";
-    }
-    SECTION("Gate ID storage overflow")
-    {
-        id = "2147483648";
-    }
-    SECTION("Gate ID integer overflow")
-    {
-        id = "18446744073709551616";
-    }
-    SECTION("Negative coordinate")
-    {
-        x = "-1";
-    }
-    SECTION("Trailing coordinate data")
-    {
-        x = "1oops";
-    }
-    SECTION("Empty coordinate")
-    {
-        x = "   ";
-    }
-    SECTION("Coordinate overflow")
-    {
-        x = "4294967296";
-    }
-    SECTION("Integer overflow")
-    {
-        x = "18446744073709551616";
-    }
-    SECTION("Clock exceeds phase count")
-    {
-        clock = "4";
-    }
-    SECTION("Synchronization delay overflow")
-    {
-        delay = "256";
-    }
-    std::istringstream stream{
-        "<fgl><layout><name>invalid</name><topology>cartesian</topology><size><x>" + x +
-        "</x><y>0</y><z>0</z></size><clocking><name>OPEN4</name><zones><zone><x>0</x><y>0</y><clock>" + clock +
-        "</clock></zone></zones><synchronization_elements><element><x>0</x><y>0</y><z>0</z><delay>" + delay +
-        "</delay></element></synchronization_elements></clocking></layout><gates><gate><id>" + id +
-        "</id><type>PI</type><name>input</name><loc><x>0</x><y>0</y><z>0</z></loc></gate></gates></fgl>"};
-    CHECK_THROWS_AS(read_fgl_layout<cartesian_layout>(stream), fgl_parsing_error);
 }
 
 TEST_CASE("FGL failed connection read leaves target unchanged", "[read-fgl-layout]")
@@ -1211,9 +787,128 @@ TEST_CASE("FGL failed connection read leaves target unchanged", "[read-fgl-layou
       <loc><x>1</x><y>0</y><z>0</z></loc><incoming><signal><source>999</source><index>0</index>
       <input>0</input></signal></incoming></gate></gates></fgl>)"};
     CHECK_THROWS_AS(read_fgl_layout(layout, stream), fgl_parsing_error);
-    CHECK(layout.get_layout_name() == "original");
+    CHECK_THAT((layout.get_layout_name()), Catch::Matchers::Equals("original"));
     CHECK(layout.num_pis() == 1);
-    CHECK(layout.get_input_name(0) == "kept");
+    CHECK_THAT((layout.get_input_name(0)), Catch::Matchers::Equals("kept"));
+}
+
+TEST_CASE("Version-2 FGL validates the selected layout name", "[read-fgl-layout]")
+{
+    /** @brief Empty version-2 layout without a stored name. */
+    std::string xml{R"(<fgl version="2"><layout><size><x>1</x><y>1</y><z>1</z></size>
+      <clocking><name>2DDWave</name></clocking><inputs/><outputs/></layout><gates/></fgl>)"};
+    SECTION("Missing name retains a valid Unicode fallback")
+    {
+        /** @brief Valid UTF-8 fallback name. */
+        const std::string name{"M\xc3\xbcnchen"};
+        /** @brief Returning-reader input. */
+        std::stringstream stream{xml};
+        CHECK_THAT((read_fgl_layout<cartesian_layout>(stream, name).get_layout_name()), Catch::Matchers::Equals(name));
+        /** @brief Existing layout whose name supplies the fallback. */
+        cartesian_gate_layout target{{2, 1, 1}, clocking::twoddwave(), name};
+        /** @brief In-place-reader input. */
+        std::stringstream inplace{xml};
+        read_fgl_layout(target, inplace);
+        CHECK_THAT((target.get_layout_name()), Catch::Matchers::Equals(name));
+        CHECK(target.width() == 1);
+    }
+    SECTION("Missing name validates the fallback before replacing the target")
+    {
+        /** @brief Invalid UTF-8 or XML character in the selected fallback. */
+        const auto name = GENERATE(std::string(1, static_cast<char>(0x80)), std::string(1, '\x01'));
+        CAPTURE(static_cast<unsigned int>(static_cast<unsigned char>(name.front())));
+        /** @brief Returning-reader input. */
+        std::stringstream stream{xml};
+        CHECK_THROWS_AS(read_fgl_layout<cartesian_layout>(stream, name), fgl_parsing_error);
+        /** @brief Existing layout whose payload a rejected read preserves. */
+        cartesian_gate_layout target{{2, 1, 1}, clocking::twoddwave(), name};
+        target.create_pi("kept", {0, 0});
+        /** @brief In-place-reader input. */
+        std::stringstream inplace{xml};
+        CHECK_THROWS_AS(read_fgl_layout(target, inplace), fgl_parsing_error);
+        CHECK_THAT((target.get_layout_name()), Catch::Matchers::Equals(name));
+        CHECK(target.width() == 2);
+        CHECK(target.num_pis() == 1);
+        CHECK_THAT((target.get_input_name(0)), Catch::Matchers::Equals("kept"));
+    }
+    SECTION("Present name overrides an unused invalid fallback")
+    {
+        /** @brief Stored name element and its decoded text. */
+        const auto [element, expected] =
+            GENERATE(table<std::string, std::string>({{"<name>stored</name>", "stored"}, {"<name/>", ""}}));
+        xml.insert(xml.find("<layout>") + std::string{"<layout>"}.size(), element);
+        /** @brief Unused fallback with invalid UTF-8. */
+        const std::string name(1, static_cast<char>(0x80));
+        /** @brief Returning-reader input. */
+        std::stringstream stream{xml};
+        CHECK_THAT((read_fgl_layout<cartesian_layout>(stream, name).get_layout_name()),
+                   Catch::Matchers::Equals(expected));
+        /** @brief Existing layout whose invalid name the file replaces. */
+        cartesian_gate_layout target{{2, 1, 1}, clocking::twoddwave(), name};
+        /** @brief In-place-reader input. */
+        std::stringstream inplace{xml};
+        read_fgl_layout(target, inplace);
+        CHECK_THAT((target.get_layout_name()), Catch::Matchers::Equals(expected));
+    }
+}
+
+TEST_CASE("Version-2 FGL rejects invalid Unicode names before assigning the target", "[read-fgl-layout]")
+{
+    /** @brief Invalid name bytes that the XML parser may accept. */
+    const auto invalid = GENERATE(std::string(1, static_cast<char>(0x80)), std::string{"\xEF\xBF\xBE"});
+    CAPTURE(invalid.size(), static_cast<unsigned int>(static_cast<unsigned char>(invalid.front())));
+    /** @brief Existing target whose complete payload a rejected read preserves. */
+    cartesian_gate_layout target{{3, 1, 1}, clocking::twoddwave(), "kept"};
+    /** @brief Named input in the preserved target. */
+    const auto input = target.create_pi("input", {0, 0});
+    /** @brief Buffer connecting the preserved target's interface. */
+    const auto wire = target.create_buf(input, {1, 0});
+    target.create_po(wire, "output", {2, 0});
+    target.assign_synchronization_element({1, 0}, 2);
+    target.obstruct_coordinate({-1, -2, -3});
+    target.obstruct_connection({-1, -2, -3}, {4, 5, 6});
+    /**
+     * @brief Return the complete serialized layout payload, excluding time-dependent fiction metadata.
+     * @param layout Layout to serialize.
+     * @return Serialized layout payload.
+     */
+    const auto payload = [](const auto& layout)
+    {
+        /** @brief Serialized complete FGL document. */
+        std::stringstream serialized{};
+        write_fgl_layout(layout, serialized);
+        /** @brief Document bytes whose layout payload follows the fiction metadata. */
+        const auto xml = serialized.str();
+        return xml.substr(xml.find("  <layout>"));
+    };
+    /** @brief Complete payload before the read. */
+    const auto original = payload(target);
+    /** @brief Independent document containing an invalid name. */
+    std::string xml = original;
+    /** @brief Reject the document through both overloads and preserve the complete existing payload. */
+    const auto check_rejection = [&]
+    {
+        xml.insert(0, "<fgl version=\"2\">\n");
+        /** @brief Returning-reader input. */
+        std::stringstream rejected{xml};
+        CHECK_THROWS_AS(read_fgl_layout<cartesian_layout>(rejected), fgl_parsing_error);
+        /** @brief In-place-reader input. */
+        std::stringstream malformed{xml};
+        CHECK_THROWS_AS(read_fgl_layout(target, malformed), fgl_parsing_error);
+        CHECK(payload(target) == original);
+    };
+    SECTION("Layout name")
+    {
+        xml.replace(xml.find("<name>kept</name>"), std::string{"<name>kept</name>"}.size(),
+                    "<name>first" + invalid + "second</name>");
+        check_rejection();
+    }
+    SECTION("Object name")
+    {
+        xml.replace(xml.find("<name>input</name>"), std::string{"<name>input</name>"}.size(),
+                    "<name>first" + invalid + "second</name>");
+        check_rejection();
+    }
 }
 
 TEST_CASE("Version-2 FGL validates explicit interfaces and ports", "[read-fgl-layout]")
@@ -1292,7 +987,7 @@ TEST_CASE("FGL rejects more than two layers", "[read-fgl-layout]")
     std::stringstream stream{xml};
     CHECK_THROWS_AS(read_fgl_layout(target, stream), fgl_parsing_error);
     CHECK(target.get_extent() == layout_base::extent{2, 3, 1});
-    CHECK(target.get_layout_name() == "kept");
+    CHECK_THAT((target.get_layout_name()), Catch::Matchers::Equals("kept"));
 }
 
 TEST_CASE("Malformed manual FGL obstructions leave the target unchanged", "[read-fgl-layout]")
@@ -1314,7 +1009,7 @@ TEST_CASE("Malformed manual FGL obstructions leave the target unchanged", "[read
     xml.insert(xml.find("</layout>"), "<obstructions>" + invalid + "</obstructions>");
     std::stringstream malformed{xml};
     CHECK_THROWS_AS(read_fgl_layout(target, malformed), fgl_parsing_error);
-    CHECK(target.get_layout_name() == "kept");
+    CHECK_THAT((target.get_layout_name()), Catch::Matchers::Equals("kept"));
     /** @brief Object retained after the failed read. */
     const auto retained = target.find_object({0, 0});
     CHECK((retained.has_value() && *retained == id));
@@ -1332,39 +1027,49 @@ TEST_CASE("Version-2 FGL requires a finished layout before assigning the target"
     std::stringstream serialized{};
     write_fgl_layout(original, serialized);
     auto xml = serialized.str();
+    /** @brief Reject the document through both overloads and retain the existing target. */
+    const auto check_rejection = [&xml]
+    {
+        cartesian_gate_layout target{{1, 1, 1}, clocking::twoddwave(), "kept"};
+        const auto            kept = target.create_pi("input", {0, 0});
+        target.obstruct_coordinate({-1, -2, -3});
+        std::stringstream malformed{xml};
+        CHECK_THROWS_AS(read_fgl_layout(target, malformed), fgl_parsing_error);
+        CHECK_THAT((target.get_layout_name()), Catch::Matchers::Equals("kept"));
+        /** @brief Object retained after the failed read. */
+        const auto retained = target.find_object({0, 0});
+        CHECK((retained.has_value() && *retained == kept));
+        CHECK(target.size() == 1);
+        CHECK(target.is_obstructed_coordinate({-1, -2, -3}));
+        std::stringstream rejected{xml};
+        CHECK_THROWS_AS(read_fgl_layout<cartesian_layout>(rejected), fgl_parsing_error);
+    };
     SECTION("PO self-cycle")
     {
         xml.replace(xml.find("<source>0</source>"), 18, "<source>1</source>");
+        check_rejection();
     }
     SECTION("Dangling cycle")
     {
         xml.replace(xml.rfind("<source>0</source>"), 18, "<source>3</source>");
+        check_rejection();
     }
     SECTION("Outside extent")
     {
         const auto width = xml.find("<x>3</x>", xml.find("<size>"));
         xml.replace(width, 8, "<x>1</x>");
+        check_rejection();
     }
     SECTION("Nonadjacent connection")
     {
         const auto po = xml.find("<type>PO</type>");
         const auto x  = xml.find("<x>1</x>", po);
         xml.replace(x, 8, "<x>2</x>");
+        check_rejection();
     }
     SECTION("Wrong clock")
     {
         xml.insert(xml.find("</zones>"), "<zone><x>1</x><y>0</y><clock>0</clock></zone>");
+        check_rejection();
     }
-    cartesian_gate_layout target{{1, 1, 1}, clocking::twoddwave(), "kept"};
-    const auto            kept = target.create_pi("input", {0, 0});
-    target.obstruct_coordinate({-1, -2, -3});
-    std::stringstream malformed{xml};
-    CHECK_THROWS_AS(read_fgl_layout(target, malformed), fgl_parsing_error);
-    CHECK(target.get_layout_name() == "kept");
-    /** @brief Object retained after the failed read. */
-    const auto retained = target.find_object({0, 0});
-    CHECK((retained.has_value() && *retained == kept));
-    CHECK(target.is_obstructed_coordinate({-1, -2, -3}));
-    std::stringstream rejected{xml};
-    CHECK_THROWS_AS(read_fgl_layout<cartesian_layout>(rejected), fgl_parsing_error);
 }

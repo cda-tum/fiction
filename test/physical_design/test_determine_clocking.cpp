@@ -14,7 +14,9 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "utils/allocation_failure.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
@@ -34,9 +36,10 @@
 #include <bill/sat/interface/common.hpp>
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
-#include <mockturtle/utils/stopwatch.hpp>
 
+#include <algorithm>
 #include <cstddef>
+#include <cstdint>
 #include <new>
 #include <stdexcept>
 #include <vector>
@@ -60,6 +63,32 @@ void remove_clocking(gate_layout<Geometry>& lyt)
 }
 
 /**
+ * @brief Checks every declared connection's clock direction.
+ * @tparam Geometry Coordinate geometry of the gate-level layout.
+ * @param lyt Layout to check.
+ */
+template <typename Geometry>
+void check_clocked_connections(const gate_layout<Geometry>& lyt)
+{
+    std::vector<layout_object_id> objects{};
+    lyt.foreach_object([&](const auto id) { objects.push_back(id); });
+    CHECK(objects.size() == lyt.size());
+    std::ranges::sort(objects);
+    CHECK(std::ranges::adjacent_find(objects) == objects.end());
+    for (const auto id : objects)
+    {
+        for (uint32_t input{}; input < lyt.input_count(id); ++input)
+        {
+            CAPTURE(id.index, input);
+            const auto source = lyt.source({id, input});
+            REQUIRE(source.has_value());
+            // NOLINTNEXTLINE(bugprone-unchecked-optional-access): REQUIRE checks the value.
+            CHECK(lyt.is_incoming_clocked(lyt.get_tile(id), lyt.get_tile(*source)));
+        }
+    }
+}
+
+/**
  * @brief Checks clock assignment with each supported solver.
  * @tparam Geometry Coordinate geometry of the gate-level layout.
  * @param lyt Layout to clock and compare.
@@ -80,16 +109,17 @@ void remove_assign_and_check_clocking(gate_layout<Geometry> lyt)
 #endif
          })
     {
+        CAPTURE(solver);
         remove_clocking(lyt);
 
         determine_clocking_stats st{};
 
         const auto result = determine_clocking(lyt, determine_clocking_params{.sat_engine = solver}, &st);
 
-        REQUIRE(result == true);
-        CHECK(mockturtle::to_seconds(st.time_total) > 0);
+        REQUIRE(result);
 
         check_eq(lyt, lyt_clone);
+        check_clocked_connections(lyt);
     }
 }
 
@@ -97,7 +127,7 @@ TEST_CASE("Determine clock numbers for an empty layout", "[determine-clocking]")
 {
     cartesian_gate_layout layout{{5, 5}};
 
-    CHECK(determine_clocking(layout) == true);
+    CHECK(determine_clocking(layout));
 }
 
 TEST_CASE("Determine clock numbers for simple layouts", "[determine-clocking]")
@@ -168,7 +198,7 @@ TEST_CASE("Determine clock numbers for a non-clockable layout", "[determine-cloc
     auto lyt = blueprints::unclockable_gate_layout<cartesian_gate_layout>();
 
     const auto scheme = lyt.get_clocking_scheme();
-    CHECK(determine_clocking(lyt) == false);
+    CHECK_FALSE(determine_clocking(lyt));
     CHECK(lyt.get_clocking_scheme() == scheme);
 }
 
@@ -179,15 +209,21 @@ TEST_CASE("Clock determination rejects incomplete or invalid editing states", "[
     SECTION("Missing input outside output dependencies")
     {
         lyt.create_buf({1, 1});
+        CHECK_THROWS_AS(determine_clocking(lyt), std::invalid_argument);
+        CHECK(lyt.get_clocking_scheme() == original_scheme);
     }
     SECTION("Nonadjacent declared connection")
     {
         const auto pi = lyt.create_pi("a", {0, 0});
         lyt.create_buf(pi, {3, 3});
+        CHECK_THROWS_AS(determine_clocking(lyt), std::invalid_argument);
+        CHECK(lyt.get_clocking_scheme() == original_scheme);
     }
     SECTION("Outside the frame")
     {
         lyt.create_pi("a", {-1, 0});
+        CHECK_THROWS_AS(determine_clocking(lyt), std::invalid_argument);
+        CHECK(lyt.get_clocking_scheme() == original_scheme);
     }
     SECTION("Complete adjacent cycle")
     {
@@ -196,45 +232,46 @@ TEST_CASE("Clock determination rejects incomplete or invalid editing states", "[
         const auto c = lyt.create_buf(b, {1, 1});
         const auto d = lyt.create_buf(c, {0, 1});
         lyt.connect(d, {a, 0});
+        CHECK_THROWS_AS(determine_clocking(lyt), std::invalid_argument);
+        CHECK(lyt.get_clocking_scheme() == original_scheme);
     }
-    CHECK_THROWS_AS(determine_clocking(lyt), std::invalid_argument);
-    CHECK(lyt.get_clocking_scheme() == original_scheme);
 }
 
 TEST_CASE("Clock determination uses explicit constants and logical input ports", "[determine-clocking]")
 {
     cartesian_gate_layout lyt{{3, 1}, clocking::open()};
-    SECTION("Placed constant without PIs")
+    /** @brief Independent source topology. */
+    const auto constant_source = GENERATE(true, false);
+    CAPTURE(constant_source);
+    if (constant_source)
     {
         const auto constant = lyt.create_gate({}, kitty::dynamic_truth_table{0}, {0, 0});
         lyt.create_po(constant, "zero", {1, 0});
     }
-    SECTION("Duplicate source input ports")
+    else
     {
         const auto pi   = lyt.create_pi("a", {0, 0});
         const auto gate = lyt.create_lt(pi, pi, {1, 0});
         lyt.create_po(gate, "less", {2, 0});
     }
     REQUIRE(determine_clocking(lyt));
-    lyt.foreach_object(
-        [&](const auto id)
-        {
-            lyt.foreach_fanin(id, [&](const auto src)
-                              { CHECK(lyt.is_incoming_clocked(lyt.get_tile(id), lyt.get_tile(src))); });
-        });
+    check_clocked_connections(lyt);
 }
 
 TEST_CASE("Clock zones span occupied layers without phantom ground objects", "[determine-clocking]")
 {
     cartesian_gate_layout lyt{{3, 1, 2}, clocking::open()};
-    SECTION("Floating crossing wire")
+    /** @brief Whether the crossing wire has an occupied ground layer. */
+    const auto floating = GENERATE(true, false);
+    CAPTURE(floating);
+    if (floating)
     {
         const auto pi   = lyt.create_pi("a", {0, 0});
         const auto wire = lyt.create_buf(pi, {1, 0, 1});
         lyt.create_po(wire, "out", {2, 0});
         CHECK_FALSE(lyt.find_object({1, 0}).has_value());
     }
-    SECTION("Occupied ground and crossing layers")
+    else
     {
         for (const auto layer : {0, 1})
         {
@@ -244,12 +281,12 @@ TEST_CASE("Clock zones span occupied layers without phantom ground objects", "[d
         }
     }
     REQUIRE(determine_clocking(lyt));
+    check_clocked_connections(lyt);
     lyt.foreach_object(
         [&](const auto id)
         {
             const auto t = lyt.get_tile(id);
             CHECK(lyt.get_clock_number(t) == lyt.get_clock_number({t.x, t.y, 0}));
-            lyt.foreach_fanin(id, [&](const auto src) { CHECK(lyt.is_incoming_clocked(t, lyt.get_tile(src))); });
         });
 }
 

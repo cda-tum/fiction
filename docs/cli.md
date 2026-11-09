@@ -423,7 +423,9 @@ The x and y axes sweep `epsilon_r` from 1 to 10 and `lambda_tf` from 1 to 10 in 
 `-x`, `-y`, and `-z` name the swept parameter of each axis (`epsilon_r`, `lambda_tf`, or `mu_minus`), and
 `--x-min`, `--x-max`, `--x-step` and their `y` and `z` counterparts set the ranges. The z axis is unused unless
 `-z` names a parameter; its default range is -0.5 to -0.1 in steps of 0.025, made for `mu_minus`. Every axis
-needs its own parameter; sweeping one on two axes would produce a degenerate domain and is refused.
+needs its own parameter; sweeping one on two axes would produce a degenerate domain and is refused. Changing an
+axis parameter does not change its range, so set the bounds and step to match. Steps must be positive, minima must
+not exceed maxima, and `epsilon_r` and `lambda_tf` minima must be positive.
 
 Both entry points accept `--algorithm grid_search|random_sampling|flood_fill|contour_tracing`.
 Help groups the logic specification, reconstruction, sweeps, plotting, and advanced operational analysis.
@@ -431,9 +433,8 @@ Examples use the named algorithm selector; the legacy algorithm flags remain acc
 Grid search is the default and evaluates every point. Random sampling, flood fill, and contour tracing require
 `--samples N`. Add `--sketch` to any reconstruction method for filter-only analysis. The named selector and
 the existing `-g`, `-r N`, `-f N`, and `-c N` flags are mutually exclusive. The short flags keep their sample
-counts. Grid search and random sampling accept any number of dimensions; flood fill and contour tracing
-follow the operational region and need at least two, and in three dimensions contour tracing collects the
-boundary surface. `-s` computes the _operational domain sketch_, which judges every point by
+counts. The command sweeps two or three dimensions. Flood fill and contour tracing follow the operational region.
+In three dimensions contour tracing collects the boundary surface. `-s` computes the _operational domain sketch_, which judges every point by
 filtering alone instead of by simulation: dramatically faster, never rejecting an operational point, but
 reporting some non-operational points as operational. The sketch implies kink rejection and needs a layout with
 `LOGIC` dots for the filters to enumerate; it pairs best with grid search and random sampling. `-o` writes only

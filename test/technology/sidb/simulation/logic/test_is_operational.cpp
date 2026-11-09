@@ -17,12 +17,15 @@
  * @author Simon Hofmann (simon1hofmann)
  */
 
+#include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
+
+// Test dependencies follow the defining header to expose missing direct includes.
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
-#include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
@@ -31,7 +34,6 @@
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
-#include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/potential_landscape.hpp>
 #include <fiction/utils/execution_timeout.hpp>
 
@@ -57,6 +59,7 @@ TEST_CASE("Operational checks honor a shared caller deadline", "[is-operational]
 
     for (const auto sim_engine : {engine::QUICKEXACT, engine::EXGS, engine::QUICKSIM})
     {
+        CAPTURE(sim_engine);
         const is_operational_params params{.sim_params = simulation_parameters{2, -0.32},
                                            .sim_engine = sim_engine,
                                            .deadline   = std::chrono::steady_clock::now()};
@@ -113,7 +116,7 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
     // from now on, we will reject kinks
     op_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
 
-    SECTION("determine if layout is operational, accept kinks")
+    SECTION("determine if layout is operational, reject kinks")
     {
         CHECK(is_operational(lat, std::vector<kitty::dynamic_truth_table>{create_or_tt()}, op_params).first ==
               operational_status::NON_OPERATIONAL);
@@ -386,23 +389,11 @@ TEST_CASE("Bestagon AND gate", "[is-operational]")
                              is_operational_params{.sim_params = params, .sim_engine = engine::QUICKEXACT})
                   .first == operational_status::NON_OPERATIONAL);
     }
-    SECTION("Check operation for different values of mu")
-    {
-        CHECK(is_operational(lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
-                             is_operational_params{.sim_params = simulation_parameters{2, -0.32},
-                                                   .sim_engine = engine::QUICKEXACT})
-                  .first == operational_status::OPERATIONAL);
-        CHECK(is_operational(lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
-                             is_operational_params{.sim_params = simulation_parameters{2, -0.30},
-                                                   .sim_engine = engine::QUICKEXACT})
-                  .first == operational_status::NON_OPERATIONAL);
-    }
     SECTION("Count the number of non-operational input combinations, accepting kinks")
     {
         const auto op_inputs = operational_input_patterns(
             lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
             is_operational_params{.sim_params = simulation_parameters{2, -0.30}, .sim_engine = engine::QUICKEXACT});
-        CHECK(op_inputs.size() == 1);
         CHECK(op_inputs == std::set<uint64_t>{3});
     }
 }
@@ -501,7 +492,6 @@ TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]")
         const auto op_inputs = operational_input_patterns(
             lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
             is_operational_params{.sim_params = simulation_parameters{2, -0.32}, .sim_engine = engine::QUICKEXACT});
-        CHECK(op_inputs.size() == 4);
         CHECK(op_inputs == std::set<uint64_t>{0, 1, 2, 3});
     }
     SECTION("count the number of non-operational input combinations")
@@ -509,7 +499,6 @@ TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]")
         const auto op_inputs = operational_input_patterns(
             lyt, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
             is_operational_params{.sim_params = simulation_parameters{2, -0.30}, .sim_engine = engine::QUICKEXACT});
-        CHECK(op_inputs.size() == 2);
         CHECK(op_inputs == std::set<uint64_t>{0, 3});
     }
 
@@ -520,7 +509,6 @@ TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]")
         const auto op_inputs      = operational_input_patterns(
             lyt_mirrored_x, std::vector<kitty::dynamic_truth_table>{create_and_tt()},
             is_operational_params{.sim_params = simulation_parameters{2, -0.32}, .sim_engine = engine::QUICKEXACT});
-        CHECK(op_inputs.size() == 4);
         CHECK(op_inputs == std::set<uint64_t>{0, 1, 2, 3});
     }
 }
@@ -573,23 +561,8 @@ TEST_CASE(
 
 TEST_CASE("BDL wire", "[is-operational]")
 {
-
-    layout lyt{lattice::si_100_2x1(), "BDL wire"};
-
-    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_sidb({3, 0, 0}, dot_tag::INPUT);
-
-    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({14, 0, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({18, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_sidb({20, 0, 0}, dot_tag::OUTPUT);
-
-    // output perturber
-    lyt.assign_sidb({24, 0, 0}, dot_tag::NORMAL);
+    /** @brief BDL wire with an output perturber. */
+    const auto lyt = blueprints::bdl_wire();
 
     simulation_parameters sim_params{};
 
@@ -599,60 +572,6 @@ TEST_CASE("BDL wire", "[is-operational]")
 
     CHECK(is_operational(lyt, std::vector<kitty::dynamic_truth_table>{create_id_tt()}, params).first ==
           operational_status::OPERATIONAL);
-}
-
-TEST_CASE("Special wire that cannot be pruned, but is non-operational when kinks are rejected", "[is-operational]")
-{
-    layout lyt{};
-
-    // input wires
-    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_sidb({2, 1, 0}, dot_tag::INPUT);
-
-    lyt.assign_sidb({6, 2, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({8, 3, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({14, 5, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({12, 4, 0}, dot_tag::NORMAL);
-
-    // canvas SiDBs
-    lyt.assign_sidb({11, 7, 0}, dot_tag::LOGIC);
-    lyt.assign_sidb({13, 13, 0}, dot_tag::LOGIC);
-
-    // output wires
-    lyt.assign_sidb({14, 15, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({12, 16, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({8, 17, 0}, dot_tag::OUTPUT);
-    lyt.assign_sidb({6, 18, 0}, dot_tag::OUTPUT);
-
-    lyt.assign_sidb({2, 19, 0}, dot_tag::NORMAL);
-
-    simulation_parameters sim_params{};
-
-    sim_params.base = 2;
-
-    is_operational_params params{.sim_params = sim_params};
-
-    SECTION("Rejecting Kinks")
-    {
-        params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
-        params.strategy_to_analyze_operational_status =
-            is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION;
-
-        CHECK(is_operational(lyt, std::vector<kitty::dynamic_truth_table>{create_id_tt()}, params).first ==
-              operational_status::NON_OPERATIONAL);
-    }
-
-    SECTION("Only conducting pruning and tolerating kinks")
-    {
-        params.op_condition = is_operational_params::operational_condition::TOLERATE_KINKS;
-        params.strategy_to_analyze_operational_status =
-            is_operational_params::operational_analysis_strategy::FILTER_ONLY;
-
-        CHECK(is_operational(lyt, std::vector<kitty::dynamic_truth_table>{create_id_tt()}, params).first ==
-              operational_status::NON_OPERATIONAL);
-    }
 }
 
 // to save runtime in the CI, this test is only run in RELEASE mode
@@ -685,7 +604,7 @@ TEST_CASE("flipped CX bestagon gate", "[is-operational]")
                               .input_bdl_iterator_params = bdl_input_iterator_params{},
                               .op_condition              = is_operational_params::operational_condition::REJECT_KINKS});
 
-    CHECK(!kink_induced_non_operational);
+    CHECK_FALSE(kink_induced_non_operational);
 }
 
 TEST_CASE("is operational check for Bestagon CX gate", "[is-operational], [quality]")
@@ -723,7 +642,7 @@ TEST_CASE("is operational check for Bestagon CX gate", "[is-operational], [quali
                                                    .sim_engine = engine::QUICKEXACT},
                              input_bdl_wires, output_bdl_wires)
                   .first == operational_status::NON_OPERATIONAL);
-        CHECK(!is_kink_induced_non_operational(
+        CHECK_FALSE(is_kink_induced_non_operational(
             lat, create_crossing_wire_tt(),
             is_operational_params{.sim_params = simulation_parameters{2, -0.30}, .sim_engine = engine::QUICKEXACT},
             input_bdl_wires, output_bdl_wires));
@@ -822,6 +741,7 @@ TEST_CASE("Pre-generated input pattern layouts match the layout-based overload",
             // all-patterns-simulated paths are covered
             for (const auto mu_minus : {-0.32, -0.15})
             {
+                CAPTURE(condition, mu_minus);
                 const is_operational_params params{.sim_params   = simulation_parameters{2, mu_minus},
                                                    .sim_engine   = engine::QUICKEXACT,
                                                    .op_condition = condition};
@@ -924,6 +844,7 @@ TEST_CASE("Both is_operational entry points apply the same canvas rule", "[is-op
                                     is_operational_params::operational_analysis_strategy::FILTER_ONLY,
                                     is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION})
         {
+            CAPTURE(condition, strategy);
             const is_operational_params params{.sim_params                             = simulation_parameters{2},
                                                .op_condition                           = condition,
                                                .strategy_to_analyze_operational_status = strategy};
@@ -943,12 +864,7 @@ TEST_CASE("Both is_operational entry points apply the same canvas rule", "[is-op
             CHECK(status_with_wires == status_without_wires);
             CHECK(calls_with_wires == calls_without_wires);
 
-            // this wire cannot be pruned, so `FILTER_ONLY` combined with `REJECT_KINKS` reports it operational by
-            // approximation. Every other combination reaches the simulation and finds it non-operational. Before the
-            // canvas rule was unified, `FILTER_ONLY` combined with `TOLERATE_KINKS` also reported it operational
-            // through the overload taking pre-detected wires: the canvas was built, so the `FILTER_ONLY` early return
-            // fired, but the filtering steps that would have populated it never ran, because they require
-            // `REJECT_KINKS`
+            // FILTER_ONLY accepts this wire when kinks are rejected; every other row simulates and rejects it.
             const auto expected_status =
                 (strategy == is_operational_params::operational_analysis_strategy::FILTER_ONLY &&
                  condition == is_operational_params::operational_condition::REJECT_KINKS) ?
@@ -975,6 +891,8 @@ TEST_CASE("Operational checks reject invalid specifications", "[is-operational][
     for (const auto& spec : {std::vector<kitty::dynamic_truth_table>{},
                              std::vector<kitty::dynamic_truth_table>{create_and_tt(), create_id_tt()}})
     {
+        CAPTURE(spec.size());
+
         CHECK_THROWS_AS(is_operational(lyt, spec), std::invalid_argument);
         CHECK_THROWS_AS(is_operational(lyt, spec, {}, input_wires, output_wires), std::invalid_argument);
         CHECK_THROWS_AS(is_operational(layouts, spec, {}, input_wires, output_wires), std::invalid_argument);
@@ -1015,6 +933,7 @@ TEST_CASE("Operational checks reject charged defects with QuickSim", "[is-operat
 
     SECTION("A charged defect occurs only in a later supplied layout")
     {
+        REQUIRE(layouts.size() == 4);
         /** @brief Input-pattern layout with its charged defect removed. */
         for (auto& pattern : layouts)
         {
@@ -1035,7 +954,8 @@ TEST_CASE("An empty simulation result cannot establish an operational pattern", 
     const auto output_wires = detect_bdl_wires(lyt, {}, bdl_wire_selection::OUTPUT);
     /** @brief Layouts with the Boolean input patterns applied. */
     auto layouts = generate_bdl_input_pattern_layouts(lyt, {}, input_wires);
-    layouts[1]   = layout{};
+    REQUIRE(layouts.size() == 4);
+    layouts[1] = layout{};
     /** @brief AND truth-table specification. */
     const std::vector<kitty::dynamic_truth_table> spec{create_and_tt()};
     /** @brief Physical and simulation settings for the operational check. */

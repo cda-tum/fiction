@@ -11,17 +11,23 @@ from __future__ import annotations
 from mnt.pyfiction.layouts import cartesian_layout
 
 
-def test_coordinate_iteration():
-    layout = cartesian_layout((10, 10, 2))
+def test_coordinate_iteration() -> None:
+    """Check coordinate order, bounds, and Cartesian neighbors."""
+    layout = cartesian_layout((10, 8, 2))
 
-    for t in layout.coordinates():
-        assert t <= (9, 9, 1)
-        assert layout.is_within_bounds(t)
+    coordinates = layout.coordinates()
+    assert [(t.x, t.y, t.z) for t in coordinates] == [(x, y, z) for z in range(2) for y in range(8) for x in range(10)]
+    assert all(layout.is_within_bounds(t) for t in coordinates)
+    assert not layout.is_within_bounds((10, 0, 0))
+    assert not layout.is_within_bounds((0, 8, 0))
+    assert not layout.is_within_bounds((0, 0, 2))
 
-    for t in layout.ground_coordinates():
-        assert t.z == 0
-        assert t <= (9, 9, 0)
-        assert layout.is_within_bounds(t)
+    ground_coordinates = layout.ground_coordinates()
+    assert [(t.x, t.y, t.z) for t in ground_coordinates] == [(x, y, 0) for y in range(8) for x in range(10)]
+    assert all(layout.is_within_bounds(t) for t in ground_coordinates)
 
-    for t in layout.adjacent_coordinates((2, 2)):
-        assert t in [(1, 2), (2, 1), (3, 2), (2, 3)]
+    neighbors = layout.adjacent_coordinates((2, 2))
+    assert sorted((t.x, t.y, t.z) for t in neighbors) == [(1, 2, 0), (2, 1, 0), (2, 3, 0), (3, 2, 0)]
+
+    assert sorted((t.x, t.y, t.z) for t in layout.adjacent_coordinates((0, 0))) == [(0, 1, 0), (1, 0, 0)]
+    assert sorted((t.x, t.y, t.z) for t in layout.adjacent_coordinates((9, 7))) == [(8, 7, 0), (9, 6, 0)]

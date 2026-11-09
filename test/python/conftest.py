@@ -16,8 +16,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from mnt.pyfiction.networks.io import read_network
-from mnt.pyfiction.physical_design import orthogonal
+from mnt import pyfiction
 from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
 
 if TYPE_CHECKING:
@@ -44,7 +43,11 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
         "verification",
         "fcn",
         "inml",
+        "qca",
+        "mol_qca",
         "sidb",
+        "utils",
+        "cli",
         "simulation",
         "io",
         "generators",
@@ -176,7 +179,7 @@ def mux21(resources_dir: Path) -> technology_network:
     Returns:
         The ``mux21.v`` network as a ``technology_network``.
     """
-    return read_network(str(resources_dir / "mux21.v"))
+    return pyfiction.networks.io.read_network(str(resources_dir / "mux21.v"))
 
 
 @pytest.fixture
@@ -186,7 +189,7 @@ def interface_network(resources_dir: Path) -> technology_network:
     Returns:
         The network used to check conversion and file round trips.
     """
-    return read_network(str(resources_dir / "network_interfaces.blif"))
+    return pyfiction.networks.io.read_network(str(resources_dir / "network_interfaces.blif"))
 
 
 @pytest.fixture
@@ -196,7 +199,7 @@ def mux21_layout(mux21: technology_network) -> cartesian_gate_layout:
     Returns:
         A 2DDWave-clocked Cartesian gate-level layout.
     """
-    return orthogonal(mux21)
+    return pyfiction.physical_design.orthogonal(mux21)
 
 
 @pytest.fixture

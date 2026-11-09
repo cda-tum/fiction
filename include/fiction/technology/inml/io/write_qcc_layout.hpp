@@ -372,7 +372,7 @@ class write_qcc_layout_impl
  * @param lyt The layout to be written.
  * @param os The output stream to write into.
  * @param ps Parameters.
- * @throws std::invalid_argument If the layout has no designated I/O pins or the pins are not routed to its borders.
+ * @throws std::invalid_argument If an input or output cell is not at its designated horizontal border.
  */
 inline void write_qcc_layout(const inml::layout& lyt, std::ostream& os, write_qcc_layout_params ps = {})
 {
@@ -390,7 +390,7 @@ inline void write_qcc_layout(const inml::layout& lyt, std::ostream& os, write_qc
  * @param lyt The layout to be written.
  * @param filename The file name to create and write into. Should preferably use the `.qcc` extension.
  * @param ps Parameters.
- * @throws std::invalid_argument If the layout has no designated I/O pins or the pins are not routed to its borders.
+ * @throws std::invalid_argument If an input or output cell is not at its designated horizontal border.
  * @throws std::ios_base::failure If creating, writing, closing, or replacing the output file fails.
  */
 inline void write_qcc_layout(const inml::layout& lyt, const std::string_view& filename, write_qcc_layout_params ps = {})

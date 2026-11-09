@@ -27,15 +27,20 @@
 
 #include <algorithm>
 #include <cassert>
+#include <charconv>
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <map>
 #include <memory>
 #include <numeric>
 #include <optional>
+#include <stdexcept>
 #include <string>
+#include <system_error>
 #include <tuple>
+#include <type_traits>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -83,10 +88,10 @@ enum class graph_coloring_engine : std::uint8_t
      */
     LMXRLF,  // randomized
     /**
-     * A \f$k\f$-coloring algorithm using tabu search proposed in \"Using Tabu Search Techniques for Graph Coloring\"
-     * by A. Hertz and D. de Werra in Computing 1987. The authors claim that it significantly outperforms simulated
-     * annealing. However, since it is a \f$k\f$-coloring algorithm, it is required to set `k_color_value` in
-     * `determine_vertex_coloring_params` to the chromatic number that is to be checked for.
+     * Randomized local search for a fixed color bound with a bounded iteration budget. Set
+     * `heuristic_params.k_color_value` in `determine_vertex_coloring_params` to the color bound to search. A zero bound
+     * or an unsuccessful search returns an empty coloring. An unsuccessful search does not prove that the graph cannot
+     * be colored within the bound.
      */
     TABUCOL,  // k-coloring
     /**
@@ -149,7 +154,7 @@ struct determine_vertex_coloring_sat_params
 struct determine_vertex_coloring_heuristic_params
 {
     /**
-     * \f$k\f$-color value for \f$k\f$-coloring algorithms, e.g., TABUCOL.
+     * \f$k\f$-color bound for TABUCOL, capped to the number of graph vertices. Zero permits no colors.
      */
     std::size_t k_color_value = 0;
 };
@@ -188,7 +193,7 @@ struct determine_vertex_coloring_stats
      */
     mockturtle::stopwatch<>::duration time_total{0};
     /**
-     * The determined chromatic number (could be non-optimal depending on the applied engine).
+     * The determined chromatic number (could be non-optimal depending on the applied engine). Zero for an empty result.
      */
     std::size_t chromatic_number{0};
     /**
@@ -246,7 +251,7 @@ class sat_coloring_handler
         at_least_one_color_per_vertex(k_color_instance);
         at_most_one_color_per_vertex(k_color_instance);
         exclude_identical_adjacent_colors(k_color_instance);
-        symmetry_breaking(k_color_instance);
+        pre_assign_largest_clique(k_color_instance);
 
         // NOTE There is a problem with this color frequency constraint. It's best explained using an example: Let there
         // be two cliques of size 1. Color frequency says, they must both be assigned color 0 for frequency reasons. Now
@@ -403,7 +408,7 @@ class sat_coloring_handler
     /**
      * Alias for a vertex-color pair.
      */
-    using vertex_color = std::pair<typename Graph::vertex_id_type, Color>;
+    using vertex_color = std::pair<typename Graph::vertex_id_type, std::size_t>;
 
     struct solver_instance
     {
@@ -538,18 +543,11 @@ class sat_coloring_handler
         instance->solver.add_clause(same_color_in_each_clique);
     }
     /**
-     * Reduce the search space by symmetry breaking. To this end, each vertex in the provided clique gets a different
-     * color assigned from the beginning.
-     *
+     * @brief Preassigns colors to the largest supplied clique, or the first vertex and one neighbor.
      * @param instance Pointer to the solver instance.
-     * @return A clique-first ordering of the vertices that assigns the clique vertices the lowest indices.
      */
-    std::vector<typename Graph::vertex_id_type> pre_assign_largest_clique(const solver_instance_ptr& instance) const
+    void pre_assign_largest_clique(const solver_instance_ptr& instance) const
     {
-        // a particular ordering of the graph's vertices to use in the subsequent lexicographical solution transformer
-        // that ensures that the pre-assigned clique vertices are of the lowest indices
-        std::vector<typename Graph::vertex_id_type> clique_first_ordering{};
-
         // if there is no clique given, this symmetry breaking cannot be performed
         if (largest_clique != ps.cliques.cend() && !largest_clique->empty())
         {
@@ -559,108 +557,35 @@ class sat_coloring_handler
                 // assign color c to vertex at index c
                 const auto v = (*largest_clique)[c];
                 instance->solver.add_clause(bill::lit_type{instance->variables[{v, c}], bill::positive_polarity});
-
-                // create a clique first vertex ordering
-                clique_first_ordering.push_back(v);
             }
         }
-        else  // without clique information, at least the first vertex can be painted
+        else if (instance->k > 0)  // without clique information, paint the first vertex when a color exists
         {
             std::ignore = std::ranges::find_if(
                 graph.begin_vertices(), graph.end_vertices(),
-                [this, &instance, &clique_first_ordering](const auto& vp)
+                [this, &instance](const auto& vp)
                 {
                     const auto& v = vp.first;
                     // assign color 0 to any vertex
                     instance->solver.add_clause(bill::lit_type{instance->variables[{v, 0}], bill::positive_polarity});
 
-                    // create a clique first vertex ordering
-                    clique_first_ordering.push_back(v);
+                    if (instance->k > 1)
+                    {
+                        std::ignore =
+                            std::ranges::find_if(graph.begin_adjacent(v), graph.end_adjacent(v),
+                                                 [&instance](const auto& av)
+                                                 {
+                                                     // assign color 1 to an adjacent vertex
+                                                     instance->solver.add_clause(bill::lit_type{
+                                                         instance->variables[{av, 1}], bill::positive_polarity});
 
-                    std::ignore = std::ranges::find_if(graph.begin_adjacent(v), graph.end_adjacent(v),
-                                                       [&instance, &clique_first_ordering](const auto& av)
-                                                       {
-                                                           // assign color 1 to an adjacent vertex
-                                                           instance->solver.add_clause(bill::lit_type{
-                                                               instance->variables[{av, 1}], bill::positive_polarity});
-
-                                                           // create a clique first vertex ordering
-                                                           clique_first_ordering.push_back(av);
-
-                                                           return true;  // abort loop after first iteration
-                                                       });
+                                                     return true;  // abort loop after first iteration
+                                                 });
+                    }
 
                     return true;  // abort loop after first iteration
                 });
         }
-
-        // thus far, the ordering only contains the clique vertices; add the missing ones in an arbitrary order
-        std::ranges::for_each(graph.begin_vertices(), graph.end_vertices(),
-                              [&clique_first_ordering](const auto& vp)
-                              {
-                                  const auto& v = vp.first;
-                                  // if vertex v is not yet in the ordering
-                                  if (std::ranges::find(clique_first_ordering, v) == clique_first_ordering.cend())
-                                  {
-                                      clique_first_ordering.push_back(v);
-                                  }
-                              });
-
-        return clique_first_ordering;
-    }
-    /**
-     * Reduce the search space by symmetry breaking. To this end, the solution is transformed to be lexicographical
-     * minimal, i.e., no vertex is assigned color c unless color c - 1 has been assigned to any vertex of lower index.
-     *
-     * @param instance Pointer to the solver instance.
-     * @param clique_first_ordering Vertex ordering with clique vertices first.
-     */
-    void transform_solution_to_lexicographical_minimum(
-        const solver_instance_ptr&                         instance,
-        const std::vector<typename Graph::vertex_id_type>& clique_first_ordering) const
-    {
-        // for each vertex v1
-        for (auto v1i = clique_first_ordering.cbegin(); v1i != clique_first_ordering.cend(); ++v1i)
-        {
-            const auto& v1 = *v1i;
-
-            // for each color c1 starting with the second
-            for (std::size_t c1 = 1; c1 < instance->k; ++c1)
-            {
-                // create a vector of literals and already add the first one being NOT assign color c1 to vertex v1
-                std::vector<bill::lit_type> vc{
-                    {bill::lit_type{instance->variables[{v1, c1}], bill::negative_polarity}}};
-
-                // for each vertex v2 up to v1
-                for (auto v2i = clique_first_ordering.cbegin(); v2i != v1i + 1; ++v2i)
-                {
-                    const auto& v2 = *v2i;
-
-                    // for each color c2 starting from c1 - 1
-                    for (std::size_t c2 = c1 - 1; c2 < instance->k; ++c2)
-                    {
-                        // add a literal to the vector stating assign c2 to v2
-                        vc.emplace_back(instance->variables[{v2, c2}], bill::positive_polarity);
-                    }
-                }
-
-                // add the disjunction of literals to the solver
-                instance->solver.add_clause(vc);
-            }
-        }
-    }
-    /**
-     * Reduce the search space by symmetry breaking. Two tactics are implemented:
-     *
-     *  - pre-assigning different colors to the largest given clique, and
-     *  - transforming the coloring solution to be lexicographically minimal
-     *
-     * @param instance Pointer to the solver instance.
-     */
-    void symmetry_breaking(const solver_instance_ptr& instance) const
-    {
-        const auto clique_first_ordering = pre_assign_largest_clique(instance);
-        transform_solution_to_lexicographical_minimum(instance, clique_first_ordering);
     }
 
     auto check_sat(const solver_instance_ptr& instance) const
@@ -692,9 +617,11 @@ class sat_coloring_handler
                                       if (model.at(instance->variables.at({v, c})) == bill::lbool_type::true_)
                                       {
                                           // paint the vertex
-                                          coloring[v] = c;
+                                          /** @brief Output label checked against the type's capacity before return. */
+                                          const auto color = static_cast<Color>(c);
+                                          coloring[v]      = color;
                                           // increment the color frequency
-                                          color_frequency[c]++;
+                                          color_frequency[color]++;
                                       }
                                   }
                               });
@@ -729,6 +656,15 @@ class graph_coloring_impl
     {
         // measure runtime
         mockturtle::stopwatch stop{pst.time_total};
+
+        if (graph.size_vertices() == 0)
+        {
+            if (ps.verify_coloring_after_computation)
+            {
+                pst.coloring_verified = true;
+            }
+            return {};
+        }
 
         std::optional<vertex_coloring<Graph, Color>> coloring = std::nullopt;
 
@@ -841,7 +777,7 @@ class graph_coloring_impl
      * @param node Node ID to convert between graph structures.
      * @return Corresponding node ID in Graph.
      */
-    [[nodiscard]] static typename Graph::vertex_id_type convert_node_index(const std::string& node) noexcept
+    [[nodiscard]] static typename Graph::vertex_id_type convert_node_index(const std::string& node)
     {
         if constexpr (std::is_same_v<typename Graph::vertex_id_type, std::string>)
         {
@@ -849,7 +785,19 @@ class graph_coloring_impl
         }
         else
         {
-            return static_cast<typename Graph::vertex_id_type>(std::stoi(node));
+            /** @brief Integer promotion preserves bool, enum, and narrow integral ID conversions. */
+            using parsed_id = decltype(+typename Graph::vertex_id_type{});
+            /** @brief Vertex identifier parsed without a narrower integer intermediate. */
+            parsed_id value{};
+            /** @brief End of the serialized identifier. */
+            const auto* const end = std::to_address(node.cend());
+            /** @brief Parse status and first unconsumed character. */
+            const auto result = std::from_chars(node.data(), end, value);
+            if (result.ec != std::errc{} || result.ptr != end)
+            {
+                throw std::invalid_argument("Invalid graph vertex ID");
+            }
+            return static_cast<typename Graph::vertex_id_type>(value);
         }
     }
     /**
@@ -860,10 +808,11 @@ class graph_coloring_impl
      * @tparam GraphProxy Graph type used to distinguish the vertex ID overload.
      * @param node Node ID to convert between graph structures.
      * @return Corresponding node ID in the Brian Crites graph.
+     * @throws std::bad_alloc If decimal conversion cannot allocate storage.
      */
     template <typename GraphProxy = Graph>
         requires(!std::same_as<typename GraphProxy::vertex_id_type, std::string>)
-    [[nodiscard]] static std::string convert_node_index(const typename Graph::vertex_id_type& node) noexcept
+    [[nodiscard]] static std::string convert_node_index(const typename Graph::vertex_id_type& node)
     {
         return std::to_string(node);
     }
@@ -872,8 +821,9 @@ class graph_coloring_impl
      *
      * @param g Graph to translate.
      * @return Translated graph.
+     * @throws std::bad_alloc If the translated graph or its identifiers cannot allocate storage.
      */
-    [[nodiscard]] brian_crites_graph translate_to_brian_crites_graph(const Graph& g) const noexcept
+    [[nodiscard]] brian_crites_graph translate_to_brian_crites_graph(const Graph& g) const
     {
         brian_crites_graph translated_graph{};
 
@@ -915,12 +865,12 @@ class graph_coloring_impl
      * @return Translated vertex coloring.
      */
     [[nodiscard]] vertex_coloring<Graph, Color>
-    translate_to_vertex_coloring(const brian_crites_coloring& bc_coloring) const noexcept
+    translate_to_vertex_coloring(const brian_crites_coloring& bc_coloring) const
     {
         vertex_coloring<Graph, Color> v_coloring{};
 
         // determine the color frequency alongside; index represents the color, value its frequency
-        std::vector<Color> color_frequency(pst.chromatic_number, Color{0});
+        std::vector<std::size_t> color_frequency(pst.chromatic_number, std::size_t{0});
 
         std::ranges::for_each(bc_coloring,
                               [&v_coloring, &color_frequency](const auto& c_pair)
@@ -931,11 +881,7 @@ class graph_coloring_impl
                                   color_frequency[static_cast<std::size_t>(c_pair.second)]++;
                               });
 
-        // the explicit comparator keeps the `Color` requirements at `operator<` instead of `std::ranges::less`'s
-        // stricter `std::totally_ordered_with`
-        if (const auto it =
-                std::ranges::max_element(color_frequency, [](const Color& c1, const Color& c2) { return c1 < c2; });
-            it != color_frequency.cend())
+        if (const auto it = std::ranges::max_element(color_frequency); it != color_frequency.cend())
         {
             // get index from iterator; index represents the color
             pst.most_frequent_color = static_cast<Color>(it - color_frequency.cbegin());
@@ -946,7 +892,8 @@ class graph_coloring_impl
         return v_coloring;
     }
 
-    [[nodiscard]] vertex_coloring<Graph, Color> run_brian_crites_engine() const noexcept
+    /** @brief Runs the selected external heuristic with checked vertex ID restoration. */
+    [[nodiscard]] vertex_coloring<Graph, Color> run_brian_crites_engine() const
     {
         const auto translated_graph = translate_to_brian_crites_graph(graph);
 
@@ -972,8 +919,9 @@ class graph_coloring_impl
             }
             case graph_coloring_engine::TABUCOL:
             {
-                coloring_engine_ptr =
-                    std::make_unique<GraphColoring::Tabucol>(translated_graph, ps.heuristic_params.k_color_value);
+                coloring_engine_ptr = std::make_unique<GraphColoring::Tabucol>(
+                    translated_graph,
+                    static_cast<int>(std::min(ps.heuristic_params.k_color_value, translated_graph.size())));
                 break;
             }
             default:
@@ -986,7 +934,8 @@ class graph_coloring_impl
         if (coloring_engine_ptr != nullptr)
         {
             const auto brian_crites_clr = coloring_engine_ptr->color();
-            pst.chromatic_number        = static_cast<std::size_t>(coloring_engine_ptr->get_num_colors());
+            pst.chromatic_number =
+                brian_crites_clr.empty() ? 0 : static_cast<std::size_t>(coloring_engine_ptr->get_num_colors());
 
             return translate_to_vertex_coloring(brian_crites_clr);
         }
@@ -1042,18 +991,37 @@ class graph_coloring_impl
  * @param graph The graph whose vertices are to be colored.
  * @param ps Parameters.
  * @param pst Statistics.
+ * @throws std::invalid_argument If the TabuCol color bound capped to the vertex count exceeds the int range.
+ * @throws std::bad_alloc If heuristic graph or identifier translation cannot allocate storage.
+ * @throws std::overflow_error If the coloring needs an integral color label outside the Color type's range.
  * @return An assignment of graph vertices to colors such that no two adjacent vertices share the same color.
+ * The assignment is empty for an empty graph or when the selected engine finds no coloring within its bounds.
  */
 template <typename Graph, typename Color = std::size_t>
 vertex_coloring<Graph, Color> determine_vertex_coloring(const Graph&                            graph,
                                                         determine_vertex_coloring_params<Graph> ps  = {},
                                                         determine_vertex_coloring_stats<Color>* pst = nullptr)
 {
-    determine_vertex_coloring_stats st{};
+    if (ps.engine == graph_coloring_engine::TABUCOL &&
+        std::cmp_greater(ps.heuristic_params.k_color_value, std::numeric_limits<int>::max()) &&
+        std::cmp_greater(graph.size_vertices(), std::numeric_limits<int>::max()))
+    {
+        throw std::invalid_argument("TabuCol color count exceeds the int range");
+    }
+
+    determine_vertex_coloring_stats<Color> st{};
 
     detail::graph_coloring_impl<Graph, Color> p{graph, ps, st};
 
     const auto result = p.run();
+
+    if constexpr (std::is_integral_v<Color>)
+    {
+        if (st.chromatic_number != 0 && std::cmp_greater(st.chromatic_number - 1, +std::numeric_limits<Color>::max()))
+        {
+            throw std::overflow_error("Graph color exceeds the output type's range");
+        }
+    }
 
     if (pst)
     {

@@ -15,6 +15,10 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <fiction/technology/sidb/simulation/logic/operational_domain_ratio.hpp>
+
+// Test dependencies follow the defining header to expose missing direct includes.
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
@@ -22,13 +26,11 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
-#include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
-#include <fiction/technology/sidb/simulation/logic/operational_domain_ratio.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
 #include <kitty/dynamic_truth_table.hpp>
@@ -47,24 +49,8 @@ using namespace fiction::utils::math;
 TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio]")
 {
 
-    layout lyt{lattice::si_100_2x1(), "BDL wire"};
-
-    lyt.assign_sidb({0, 0, 0}, dot_tag::INPUT);
-    lyt.assign_sidb({3, 0, 0}, dot_tag::INPUT);
-
-    lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({8, 0, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({12, 0, 0}, dot_tag::NORMAL);
-    lyt.assign_sidb({14, 0, 0}, dot_tag::NORMAL);
-
-    lyt.assign_sidb({18, 0, 0}, dot_tag::OUTPUT);
-    lyt.assign_sidb({20, 0, 0}, dot_tag::OUTPUT);
-
-    // output perturber
-    lyt.assign_sidb({24, 0, 0}, dot_tag::NORMAL);
-
-    const auto& lat = lyt;
+    /** @brief BDL wire with an output perturber. */
+    const auto lat = blueprints::bdl_wire();
 
     simulation_parameters sim_params{};
     sim_params.base = 2;
@@ -102,7 +88,7 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
                                      parameter_point({5.5, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size (1.0)
-        CHECK_THAT(op_domain_ratio - 1.0, Catch::Matchers::WithinAbs(0.0, ERROR_MARGIN));
+        CHECK_THAT(op_domain_ratio, Catch::Matchers::WithinAbs(1.0, ERROR_MARGIN));
     }
 
     SECTION("semi-operational domain")
@@ -123,7 +109,22 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
             operational_domain_ratio(lat, std::vector<kitty::dynamic_truth_table>{create_id_tt()},
                                      parameter_point({4.25, 4.25}), op_ratio_params);
 
-        CHECK_THAT(op_domain_ratio - (80.0 / 256.0), Catch::Matchers::WithinAbs(0.0, ERROR_MARGIN));
+        CHECK_THAT(op_domain_ratio, Catch::Matchers::WithinAbs(80.0 / 256.0, ERROR_MARGIN));
+    }
+
+    SECTION("A single non-operational point has zero operational ratio")
+    {
+        op_domain_params.sweep_dimensions[0].min = op_domain_params.sweep_dimensions[0].max = 1.5;
+        op_domain_params.sweep_dimensions[1].min = op_domain_params.sweep_dimensions[1].max = 0.5;
+        op_domain_params.operational_params.sim_params.epsilon_r                            = 1.5;
+        op_domain_params.operational_params.sim_params.lambda_tf                            = 0.5;
+        /** @brief Sweep and identity-function specification for the single point. */
+        const operational_domain_ratio_params params{.op_domain_params = op_domain_params};
+        const std::vector                     spec{create_id_tt()};
+        REQUIRE(is_operational(lat, spec, op_domain_params.operational_params).first ==
+                operational_status::NON_OPERATIONAL);
+        CHECK_THAT(operational_domain_ratio(lat, spec, parameter_point{{1.5, 0.5}}, params),
+                   Catch::Matchers::WithinAbs(0.0, ERROR_MARGIN));
     }
 }
 
@@ -195,7 +196,7 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
                                      parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size
-        CHECK_THAT(op_domain_ratio - (23.0 / 121.0), Catch::Matchers::WithinAbs(0.0, ERROR_MARGIN));
+        CHECK_THAT(op_domain_ratio, Catch::Matchers::WithinAbs(23.0 / 121.0, ERROR_MARGIN));
     }
 
     SECTION("semi-operational domain, reject kinks")
@@ -210,7 +211,7 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
                                      parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size
-        CHECK_THAT(op_domain_ratio - (23.0 / 121.0), Catch::Matchers::WithinAbs(0.0, ERROR_MARGIN));
+        CHECK_THAT(op_domain_ratio, Catch::Matchers::WithinAbs(23.0 / 121.0, ERROR_MARGIN));
     }
 
     SECTION(
@@ -260,6 +261,7 @@ TEST_CASE("Operational-domain ratios reject malformed seeds", "[compute-operatio
                                                              {4.9, 5.0},
                                                              {5.0, 6.1}})
     {
+        CAPTURE(seed);
         CHECK_THROWS_AS(operational_domain_ratio(layout{}, std::vector<kitty::dynamic_truth_table>{create_id_tt()},
                                                  parameter_point{seed}, params),
                         std::invalid_argument);

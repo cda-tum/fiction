@@ -78,7 +78,7 @@ class bestagon_library : public fcn::gate_library<sidb::layout, 60, 46>  // widt
             {
                 if (p.out.size() == 2)
                 {
-                    return FANOUT_MAP.at(p);
+                    return fcn::detail::checked_lookup(FANOUT_MAP, p);
                 }
             }
 
@@ -92,11 +92,11 @@ class bestagon_library : public fcn::gate_library<sidb::layout, 60, 46>  // widt
                         // two possible options: actual crossover and (parallel) hourglass wire
                         const auto pa = skeleton_bestagon_library::determine_port_routing(lyt, *at);
 
-                        return CROSSING_MAP.at({p, pa});
+                        return fcn::detail::checked_lookup(CROSSING_MAP, {p, pa});
                     }
                     // regular wire: look-up in the wire_map
 
-                    return WIRE_MAP.at(p);
+                    return fcn::detail::checked_lookup(WIRE_MAP, p);
                 }
 
                 return EMPTY_GATE;
@@ -104,37 +104,37 @@ class bestagon_library : public fcn::gate_library<sidb::layout, 60, 46>  // widt
 
             if (lyt.is_inv(n))
             {
-                return INVERTER_MAP.at(p);
+                return fcn::detail::checked_lookup(INVERTER_MAP, p);
             }
 
             if (lyt.is_and(n))
             {
-                return CONJUNCTION_MAP.at(p);
+                return fcn::detail::checked_lookup(CONJUNCTION_MAP, p);
             }
 
             if (lyt.is_or(n))
             {
-                return DISJUNCTION_MAP.at(p);
+                return fcn::detail::checked_lookup(DISJUNCTION_MAP, p);
             }
 
             if (lyt.is_nand(n))
             {
-                return NEGATED_CONJUNCTION_MAP.at(p);
+                return fcn::detail::checked_lookup(NEGATED_CONJUNCTION_MAP, p);
             }
 
             if (lyt.is_nor(n))
             {
-                return NEGATED_DISJUNCTION_MAP.at(p);
+                return fcn::detail::checked_lookup(NEGATED_DISJUNCTION_MAP, p);
             }
 
             if (lyt.is_xor(n))
             {
-                return EXCLUSIVE_DISJUNCTION_MAP.at(p);
+                return fcn::detail::checked_lookup(EXCLUSIVE_DISJUNCTION_MAP, p);
             }
 
             if (lyt.is_xnor(n))
             {
-                return NEGATED_EXCLUSIVE_DISJUNCTION_MAP.at(p);
+                return fcn::detail::checked_lookup(NEGATED_EXCLUSIVE_DISJUNCTION_MAP, p);
             }
         }
         catch (const std::out_of_range&)

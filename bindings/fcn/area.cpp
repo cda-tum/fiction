@@ -65,9 +65,11 @@ void register_area(nb::module_& m, const char* doc)
                 const nb::gil_scoped_release release{};
                 return fiction::fcn::area(lyt, params);
             }
-
-            // Keep the GIL: cell-grid area uses only scalar dimensions.
-            return fiction::fcn::area(lyt, params);
+            else
+            {
+                // Keep the GIL: cell-grid area uses only scalar dimensions.
+                return fiction::fcn::area(lyt, params);
+            }
         },
         nb::arg("layout"), nb::arg("width") = Lyt::CELL_WIDTH, nb::arg("height") = Lyt::CELL_HEIGHT,
         nb::arg("hspace") = Lyt::CELL_HSPACE, nb::arg("vspace") = Lyt::CELL_VSPACE, doc);

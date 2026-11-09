@@ -863,8 +863,7 @@ void register_operational_domain(nb::module_& m)
         .def(nb::self == nb::self, nb::arg("other"), DOC(fiction_sidb_simulation_logic_parameter_point_operator_eq))
         // C++20 derives `operator!=` from `operator==`, so inequality needs an explicit binding docstring.
         .def(nb::self != nb::self, nb::arg("other"),
-             "Inequality operator. Checks if this parameter point is not equal to another point within the "
-             "tolerance defined by `constants::ERROR_MARGIN`.\n\n"
+             "Inequality operator. Returns the negation of equality.\n\n"
              ":param other: Other parameter point to compare with.\n"
              ":return: ``True`` iff the parameter points are not equal.")
         // NOLINTEND(misc-redundant-expression)

@@ -15,6 +15,10 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
+
+#include "utils/scoped_temp_directory.hpp"
 
 #include <fiction/utils/atomic_write.hpp>
 
@@ -36,10 +40,10 @@ using namespace fiction;
 
 TEST_CASE("Failed serialization preserves the destination", "[atomic-write]")
 {
-    const auto directory =
-        std::filesystem::temp_directory_path() / ("fiction-write-test-" + std::to_string(std::random_device{}()));
-    REQUIRE(std::filesystem::create_directory(directory));
-    const auto destination = directory / "output.fgl";
+    const fiction::test::scoped_temp_directory cleanup{std::filesystem::temp_directory_path(),
+                                                       "fiction-write-test-" + std::to_string(std::random_device{}())};
+    const auto&                                directory   = cleanup.path();
+    const auto                                 destination = directory / "output.fgl";
     CHECK_THROWS_AS(detail::atomic_write((directory / "missing" / "output.fgl").string(),
                                          [](std::ostream& stream) { stream << "content"; }),
                     std::ios_base::failure);
@@ -51,63 +55,78 @@ TEST_CASE("Failed serialization preserves the destination", "[atomic-write]")
     std::filesystem::permissions(destination, permissions);
 #endif
 
-    CHECK_THROWS_AS(detail::atomic_write(destination.string(),
-                                         [](std::ostream& stream)
-                                         {
-                                             stream << "partial";
-                                             throw std::runtime_error("serialization failed");
-                                         }),
-                    std::runtime_error);
-    CHECK_THROWS_AS(detail::atomic_write(destination.string(),
-                                         [](std::ostream& stream)
-                                         {
-                                             stream << "partial";
-                                             stream.setstate(std::ios::badbit);
-                                         }),
-                    std::ios_base::failure);
+    SECTION("writer exception")
+    {
+        CHECK_THROWS_AS(detail::atomic_write(destination.string(),
+                                             [](std::ostream& stream)
+                                             {
+                                                 stream << "partial";
+                                                 throw std::runtime_error("serialization failed");
+                                             }),
+                        std::runtime_error);
+    }
+    SECTION("stream failure")
+    {
+        CHECK_THROWS_AS(detail::atomic_write(destination.string(),
+                                             [](std::ostream& stream)
+                                             {
+                                                 stream << "partial";
+                                                 stream.setstate(std::ios::badbit);
+                                             }),
+                        std::ios_base::failure);
+    }
+    CHECK(std::distance(std::filesystem::directory_iterator{directory}, std::filesystem::directory_iterator{}) == 1);
     {
         std::ifstream     stream{destination};
         const std::string content{std::istreambuf_iterator<char>{stream}, std::istreambuf_iterator<char>{}};
-        CHECK(content == "original");
+        CHECK_THAT(content, Catch::Matchers::Equals("original"));
     }
     detail::atomic_write(destination.string(), [](std::ostream& stream) { stream << "complete"; });
     {
         std::ifstream     stream{destination};
         const std::string content{std::istreambuf_iterator<char>{stream}, std::istreambuf_iterator<char>{}};
-        CHECK(content == "complete");
+        CHECK_THAT(content, Catch::Matchers::Equals("complete"));
     }
 #ifndef _WIN32
     CHECK(std::filesystem::status(destination).permissions() == permissions);
 #else
     std::filesystem::permissions(destination, std::filesystem::perms::owner_read);
-    CHECK_THROWS_AS(detail::atomic_write(destination.string(), [](std::ostream& stream) { stream << "replacement"; }),
-                    std::ios_base::failure);
-    CHECK(std::distance(std::filesystem::directory_iterator{directory}, std::filesystem::directory_iterator{}) == 1);
+    try
+    {
+        CHECK_THROWS_AS(
+            detail::atomic_write(destination.string(), [](std::ostream& stream) { stream << "replacement"; }),
+            std::ios_base::failure);
+        CHECK(std::distance(std::filesystem::directory_iterator{directory}, std::filesystem::directory_iterator{}) ==
+              1);
+    }
+    catch (...)
+    {
+        std::error_code ignored{};
+        std::filesystem::permissions(destination, std::filesystem::perms::owner_all, ignored);
+        throw;
+    }
     std::filesystem::permissions(destination, std::filesystem::perms::owner_all);
 #endif
-    std::filesystem::remove_all(directory);
 }
 
 TEST_CASE("Transactional output preserves symbolic links", "[atomic-write]")
 {
-    const auto directory =
-        std::filesystem::temp_directory_path() / ("fiction-symlink-test-" + std::to_string(std::random_device{}()));
-    REQUIRE(std::filesystem::create_directory(directory));
-    const auto destination = directory / "output.svg";
-    const auto link        = directory / "latest.svg";
+    const fiction::test::scoped_temp_directory cleanup{
+        std::filesystem::temp_directory_path(), "fiction-symlink-test-" + std::to_string(std::random_device{}())};
+    const auto& directory   = cleanup.path();
+    const auto  destination = directory / "output.svg";
+    const auto  link        = directory / "latest.svg";
     detail::atomic_write(destination.string(), [](std::ostream& stream) { stream << "original"; });
     std::error_code link_error{};
     std::filesystem::create_symlink(destination.filename(), link, link_error);
 #ifdef _WIN32
     if (link_error.value() == 1314)  // Windows requires symbolic-link privileges unless Developer Mode is enabled.
     {
-        std::filesystem::remove_all(directory);
         SKIP("Windows did not grant symbolic-link creation privileges");
     }
 #endif
     if (link_error == std::errc::function_not_supported)
     {
-        std::filesystem::remove_all(directory);
         SKIP("The filesystem runtime does not implement symbolic links");
     }
     REQUIRE_FALSE(link_error);
@@ -121,7 +140,7 @@ TEST_CASE("Transactional output preserves symbolic links", "[atomic-write]")
     {
         std::ifstream     stream{destination};
         const std::string content{std::istreambuf_iterator<char>{stream}, std::istreambuf_iterator<char>{}};
-        CHECK(content == "original");
+        CHECK_THAT(content, Catch::Matchers::Equals("original"));
     }
     detail::atomic_write(link.string(), [](std::ostream& stream) { stream << "complete"; });
     CHECK(std::filesystem::is_symlink(link));
@@ -129,25 +148,24 @@ TEST_CASE("Transactional output preserves symbolic links", "[atomic-write]")
     {
         std::ifstream     stream{destination};
         const std::string content{std::istreambuf_iterator<char>{stream}, std::istreambuf_iterator<char>{}};
-        CHECK(content == "complete");
+        CHECK_THAT(content, Catch::Matchers::Equals("complete"));
     }
     std::filesystem::remove(destination);
     CHECK_THROWS_AS(detail::atomic_write(link.string(), [](std::ostream& stream) { stream << "new"; }),
                     std::ios_base::failure);
     CHECK(std::filesystem::is_symlink(link));
     CHECK_FALSE(std::filesystem::exists(destination));
-    std::filesystem::remove_all(directory);
 }
 
 #ifndef _WIN32
 TEST_CASE("Transactional output rejects named pipes", "[atomic-write]")
 {
-    const auto destination =
-        std::filesystem::temp_directory_path() / ("fiction-fifo-test-" + std::to_string(std::random_device{}()));
+    const fiction::test::scoped_temp_directory cleanup{std::filesystem::temp_directory_path(),
+                                                       "fiction-fifo-test-" + std::to_string(std::random_device{}())};
+    const auto                                 destination = cleanup.path() / "fifo";
     REQUIRE(::mkfifo(destination.c_str(), 0600) == 0);
     CHECK_THROWS_AS(detail::atomic_write(destination.string(), [](std::ostream& stream) { stream << "content"; }),
                     std::ios_base::failure);
     CHECK(std::filesystem::is_fifo(destination));
-    std::filesystem::remove(destination);
 }
 #endif

@@ -62,18 +62,20 @@ void register_read_fgl_layout(nb::module_& m, const char* signature)
               R"doc(Reads a gate-level layout from an FGL file.
 
 Supports legacy maximum-index extents and version-2 extent counts, declared interface order, and manual obstructions.
-Version 2 requires a complete, acyclic, physically valid layout.
+Version 2 requires a complete, acyclic, physically valid layout whose names contain valid UTF-8 XML 1.0 text.
 
 Args:
     filename: Input file path.
     layout_name: Initial layout name, overridden by a name stored in the file. Defaults to an empty string.
+        Version 2 validates this name as UTF-8 XML 1.0 text when the file has no name element.
     layout_type: Registered gate layout class. Defaults to cartesian_gate_layout.
 
 Returns:
     A new layout of the selected layout_type.
 
 Raises:
-    fgl_parsing_error: If the FGL file is malformed or incompatible with the selected layout type.
+    fgl_parsing_error: If the FGL file is malformed, incompatible with the selected layout type, or produces an invalid
+        version-2 layout.
     RuntimeError: If the file cannot be opened.
     TypeError: If layout_type is not a registered gate layout class.
 )doc");

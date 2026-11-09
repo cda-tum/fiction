@@ -338,3 +338,20 @@ def test_extent_argument_docstrings_name_the_keyword() -> None:
     ):
         assert api.__doc__ is not None
         assert "\n    extent:" in api.__doc__
+
+
+def test_coordinate_ordering_and_hashing_preserve_signed_positions() -> None:
+    positions = [coordinate(1, 1), coordinate(0, 0, 1), coordinate(2, 0), coordinate(0, 1)]
+    assert sorted(positions) == [coordinate(2, 0), coordinate(0, 1), coordinate(1, 1), coordinate(0, 0, 1)]
+    assert coordinate(1, 2) <= coordinate(1, 2)
+    assert coordinate(1, 2) >= coordinate(1, 2)
+    assert not coordinate(2, 2) < coordinate(2, 2)
+    assert len({coordinate(0, 0), coordinate(0, 0, 2), coordinate(-(2**31), 0), coordinate(2**31 - 1, 0)}) == 4
+    assert coordinate(coordinate(-3, 2, 7)) == coordinate(-3, 2, 7)
+
+
+def test_extent_area_uses_counts_and_ignores_layers() -> None:
+    assert extent() == extent(0, 0, 0)
+    assert area(extent(2, 3, 4)) == 6
+    assert area(extent()) == 0
+    assert area(extent(2**31, 2**31)) == 2**62

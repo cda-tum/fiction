@@ -35,7 +35,7 @@ from mnt.pyfiction.networks.io import read_network
 from mnt.pyfiction.physical_design import orthogonal, orthogonal_stats
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Iterator
     from pathlib import Path
 
     from rich.console import RenderableType
@@ -44,6 +44,22 @@ if TYPE_CHECKING:
     from mnt.pyfiction.networks import technology_network
 
     from .conftest import Shell
+
+
+@pytest.fixture
+def progress_display(monkeypatch: pytest.MonkeyPatch) -> Iterator[tuple[Session, Progress]]:
+    """Record terminal progress without a background refresh thread.
+
+    Yields:
+        A session and its recording display, closed after the test.
+    """
+    session = Session(console=Console(file=io.StringIO(), force_terminal=True))
+    display = Progress(console=session.console, auto_refresh=False)
+    monkeypatch.setattr("mnt.fiction.cli.output.Progress", lambda *_args, **_kwargs: display)
+    try:
+        yield session, display
+    finally:
+        session.close()
 
 
 @pytest.mark.parametrize(
@@ -281,11 +297,11 @@ def test_progress_resets_a_restarted_task(monkeypatch: pytest.MonkeyPatch) -> No
     assert "wire paths" in buffer.getvalue()
 
 
-def test_progress_serializes_shared_task_reports(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_progress_serializes_shared_task_reports(
+    progress_display: tuple[Session, Progress], monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Concurrent reporters create one bar for a shared task name."""
-    session = Session(console=Console(file=io.StringIO(), force_terminal=True))
-    display = Progress(console=session.console, auto_refresh=False)
-    monkeypatch.setattr("mnt.fiction.cli.output.Progress", lambda *_args, **_kwargs: display)
+    session, display = progress_display
     add_task = display.add_task
 
     def delayed_add_task(description: str, *, total: float | None = 100, spinner: bool = False) -> TaskID:
@@ -312,11 +328,9 @@ def test_progress_serializes_shared_task_reports(monkeypatch: pytest.MonkeyPatch
     assert sum(task.description == "compositions" for task in display.tasks) == 1
 
 
-def test_progress_restarts_with_an_unknown_total(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_progress_restarts_with_an_unknown_total(progress_display: tuple[Session, Progress]) -> None:
     """A new pass clears the old total even if the old pass completed no items."""
-    session = Session(console=Console(file=io.StringIO(), force_terminal=True))
-    display = Progress(console=session.console, auto_refresh=False)
-    monkeypatch.setattr("mnt.fiction.cli.output.Progress", lambda *_args, **_kwargs: display)
+    session, display = progress_display
     with session.progress("simulation") as report:
         report("compositions", 0, 4)
         report("compositions", 0, 0)
@@ -387,11 +401,9 @@ def test_parallel_progress_has_one_aggregate_row(
         assert "active" not in display.tasks[0].description
 
 
-def test_exact_retains_an_active_candidate(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_exact_retains_an_active_candidate(progress_display: tuple[Session, Progress]) -> None:
     """When the latest candidate finishes, the remaining active candidate supplies the dimensions."""
-    session = Session(console=Console(file=io.StringIO(), force_terminal=True))
-    display = Progress(console=session.console, auto_refresh=False)
-    monkeypatch.setattr("mnt.fiction.cli.output.Progress", lambda *_args, **_kwargs: display)
+    session, display = progress_display
     active, inactive = True, False
     with session.progress("exact") as report:
         session.report_worker_progress(0, 2, "worker 1: 4 \N{MULTIPLICATION SIGN} 6", 0, 0, active)
@@ -434,29 +446,31 @@ def test_exact_command_displays_current_dimensions(
     assert re.search(r"\d+ \N{MULTIPLICATION SIGN} \d+", output.getvalue())
 
 
-def test_worker_callback_restored_after_failure() -> None:
-    """Progress state cannot leak from a failed command into the next command."""
+@pytest.mark.parametrize(
+    "failure", [pytest.param(ValueError, id="failure"), pytest.param(KeyboardInterrupt, id="interrupt")]
+)
+def test_worker_callbacks_restored_after_failure(failure: type[BaseException]) -> None:
+    """Failure and interruption restore both callbacks after a worker becomes active."""
     session = Session(console=Console(file=io.StringIO(), force_terminal=True))
 
     def fail() -> None:
-        """Fail while a worker has an active row."""
+        """Raise the selected failure while a worker is active."""
         active = True
         with session.progress("exact"):
             session.report_worker_progress(0, 1, "candidate", 0, 0, active)
-            int("failed")
+            msg = "failed"
+            raise failure(msg)
 
-    with pytest.raises(ValueError, match="failed"):
+    with pytest.raises(failure, match="failed"):
         fail()
     assert session.report_worker_progress is ignore_worker_progress
     assert session.report_progress is ignore_progress
 
 
 @pytest.mark.parametrize("workers", [4, 5])
-def test_gold_retains_best_accepted_solution(workers: int, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_gold_retains_best_accepted_solution(workers: int, progress_display: tuple[Session, Progress]) -> None:
     """A completed graph and an older report cannot erase the best accepted solution."""
-    session = Session(console=Console(file=io.StringIO(), force_terminal=True))
-    display = Progress(console=session.console, auto_refresh=False)
-    monkeypatch.setattr("mnt.fiction.cli.output.Progress", lambda *_args, **_kwargs: display)
+    session, display = progress_display
     active, inactive = True, False
     with session.progress("gold") as aggregate:
         report = session.report_worker_progress
@@ -469,25 +483,6 @@ def test_gold_retains_best_accepted_solution(workers: int, monkeypatch: pytest.M
         assert "best 3 by 6, cost 18" in display.tasks[0].description
         assert "best 4 by 6, cost 24" not in display.tasks[0].description
         assert display.tasks[0].completed == 128
-
-
-def test_worker_callback_restored_after_interruption() -> None:
-    """An interrupt removes the live display and restores both callbacks."""
-    session = Session(console=Console(file=io.StringIO(), force_terminal=True))
-
-    def interrupt() -> None:
-        """Interrupt an active progress context.
-
-        Raises:
-            KeyboardInterrupt: Simulated user interruption.
-        """
-        with session.progress("exact"):
-            raise KeyboardInterrupt
-
-    with pytest.raises(KeyboardInterrupt):
-        interrupt()
-    assert session.report_progress is ignore_progress
-    assert session.report_worker_progress is ignore_worker_progress
 
 
 def test_spinner_refreshes_during_native_read(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

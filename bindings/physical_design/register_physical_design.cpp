@@ -91,9 +91,6 @@ void register_path_finding(nb::module_& m);
 
 }  // namespace pyfiction
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
-
 NB_MODULE(physical_design, m)
 {
     m.doc() = "Placement and routing of logic networks into gate-level layouts.";
@@ -137,5 +134,3 @@ NB_MODULE(physical_design, m)
     auto path_finding = pyfiction::def_submodule(m, "path_finding", "Path finding and distance functions on layouts.");
     pyfiction::register_path_finding(path_finding);
 }
-
-#pragma GCC diagnostic pop

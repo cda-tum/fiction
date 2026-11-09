@@ -15,7 +15,9 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
@@ -29,6 +31,17 @@ using namespace fiction::sidb;
 using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation::analysis;
 
+/** @brief Checks positive-charge outcomes for the same physical parameters. @param lyt Layout to analyze. */
+void check_positive_charge_parameters(const layout& lyt)
+{
+    const auto [params, expected] = GENERATE(
+        (Catch::Generators::table<simulation_parameters, bool>({{simulation_parameters{2, -0.32}, false},
+                                                                {simulation_parameters{2, -0.32, 1, 1}, true},
+                                                                {simulation_parameters{2, -0.32, 1, 10}, true}})));
+    CAPTURE(params.epsilon_r, params.lambda_tf);
+    CHECK(can_positive_charges_occur(lyt, params) == expected);
+}
+
 TEST_CASE("One BDL pair with one perturber", "[can-positive-charges-occur]")
 {
     layout lyt{};
@@ -37,23 +50,7 @@ TEST_CASE("One BDL pair with one perturber", "[can-positive-charges-occur]")
     lyt.assign_sidb({4, 0, 0}, dot_tag::NORMAL);
     lyt.assign_sidb({6, 0, 0}, dot_tag::NORMAL);
 
-    SECTION("Default values")
-    {
-        const simulation_parameters params{2, -0.32};
-        CHECK(!can_positive_charges_occur(lyt, params));
-    }
-
-    SECTION("epsilon = 1, lambda = 1")
-    {
-        const simulation_parameters params{2, -0.32, 1, 1};
-        CHECK(can_positive_charges_occur(lyt, params));
-    }
-
-    SECTION("epsilon = 1, lambda = 10")
-    {
-        const simulation_parameters params{2, -0.32, 1, 10};
-        CHECK(can_positive_charges_occur(lyt, params));
-    }
+    check_positive_charge_parameters(lyt);
 }
 
 TEST_CASE("Y-shaped SiDB OR gate with input 01", "[can-positive-charges-occur]")
@@ -71,23 +68,7 @@ TEST_CASE("Y-shaped SiDB OR gate with input 01", "[can-positive-charges-occur]")
     lyt.assign_sidb({10, 8, 1}, dot_tag::NORMAL);
     lyt.assign_sidb({16, 1, 0}, dot_tag::NORMAL);
 
-    SECTION("Default values")
-    {
-        const simulation_parameters params{2, -0.32};
-        CHECK(!can_positive_charges_occur(lyt, params));
-    }
-
-    SECTION("epsilon = 1, lambda = 1")
-    {
-        const simulation_parameters params{2, -0.32, 1, 1};
-        CHECK(can_positive_charges_occur(lyt, params));
-    }
-
-    SECTION("epsilon = 1, lambda = 10")
-    {
-        const simulation_parameters params{2, -0.32, 1, 10};
-        CHECK(can_positive_charges_occur(lyt, params));
-    }
+    check_positive_charge_parameters(lyt);
 }
 
 TEST_CASE("Positive-charge analysis propagates invalid lattice-basis errors", "[can-positive-charges-occur]")

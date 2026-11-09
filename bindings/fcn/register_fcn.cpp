@@ -41,9 +41,6 @@ void register_fcn_io(nb::module_& m);
 
 }  // namespace pyfiction
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
-
 NB_MODULE(fcn, m)
 {
     m.doc() = "Technology-independent FCN layout properties.";
@@ -58,5 +55,3 @@ NB_MODULE(fcn, m)
     auto io = pyfiction::def_submodule(m, "io", "Technology-independent readers and writers of cell-level layouts.");
     pyfiction::register_fcn_io(io);
 }
-
-#pragma GCC diagnostic pop

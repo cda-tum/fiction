@@ -56,7 +56,7 @@ static_assert(!minimum_energy_range<std::istream_iterator<charge_distribution>>)
 static_assert(!minimum_distribution_range<const int*>);
 static_assert(!minimum_energy_range<const int*>);
 
-TEST_CASE("Test minimum energy function", "[minimum-energy]")
+TEST_CASE("Minimum energy searches charge distributions", "[minimum-energy]")
 {
     layout lyt{};
 
@@ -107,7 +107,9 @@ TEST_CASE("Test minimum energy function", "[minimum-energy]")
         all_cds.push_back(land.evaluate(second));
 
         CHECK_THAT(minimum_energy(all_cds.cbegin(), all_cds.cend()), Catch::Matchers::WithinAbs(0.0, 0.00001));
-        CHECK(minimum_energy_distribution(all_cds.cbegin(), all_cds.cend())->same_charge_states(second));
+        const auto minimum = minimum_energy_distribution(all_cds.cbegin(), all_cds.cend());
+        REQUIRE(minimum != all_cds.cend());
+        CHECK(minimum->same_charge_states(second));
 
         const auto transformed = all_cds | std::views::transform([](const auto& cd) -> const auto& { return cd; });
         CHECK_THAT(minimum_energy(transformed.begin(), transformed.end()), Catch::Matchers::WithinAbs(0.0, 0.00001));
@@ -115,11 +117,15 @@ TEST_CASE("Test minimum energy function", "[minimum-energy]")
         /** @brief Forward transform range that produces charge-distribution values. */
         const auto values = all_cds | std::views::transform([](const auto& cd) { return cd; });
         CHECK_THAT(minimum_energy(values.begin(), values.end()), Catch::Matchers::WithinAbs(0.0, 0.00001));
-        CHECK((*minimum_energy_distribution(values.begin(), values.end())).same_charge_states(second));
+        const auto minimum_value = minimum_energy_distribution(values.begin(), values.end());
+        REQUIRE(minimum_value != values.end());
+        CHECK((*minimum_value).same_charge_states(second));
 
         const std::forward_list<charge_distribution> forward_cds{all_cds.front(), all_cds.back()};
         CHECK_THAT(minimum_energy(forward_cds.cbegin(), forward_cds.cend()), Catch::Matchers::WithinAbs(0.0, 0.00001));
-        CHECK(minimum_energy_distribution(forward_cds.cbegin(), forward_cds.cend())->same_charge_states(second));
+        const auto forward_minimum = minimum_energy_distribution(forward_cds.cbegin(), forward_cds.cend());
+        REQUIRE(forward_minimum != forward_cds.cend());
+        CHECK(forward_minimum->same_charge_states(second));
     }
 }
 

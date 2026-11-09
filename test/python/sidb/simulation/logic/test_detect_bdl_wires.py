@@ -8,11 +8,25 @@
 
 from __future__ import annotations
 
+from collections import Counter
+
+import pytest
+
 from mnt.pyfiction.sidb import lattice_site, sidb_dot_tag, sidb_layout
-from mnt.pyfiction.sidb.simulation.logic import bdl_wire_selection, detect_bdl_wires
+from mnt.pyfiction.sidb.simulation.logic import bdl_pair, bdl_wire, bdl_wire_selection, detect_bdl_wires
 
 
-def test_detect_bdl_wires_100_lattice():
+def pair_identities(
+    pairs: list[bdl_pair] | tuple[bdl_pair, ...],
+) -> tuple[tuple[sidb_dot_tag, lattice_site, lattice_site], ...]:
+    return tuple((pair.type, pair.upper, pair.lower) for pair in sorted(pairs))
+
+
+def wire_pairs(wires: list[bdl_wire]) -> Counter[tuple[tuple[sidb_dot_tag, lattice_site, lattice_site], ...]]:
+    return Counter(pair_identities(wire.pairs) for wire in wires)
+
+
+def test_detect_bdl_wires_100_lattice() -> None:
     lyt = sidb_layout()
 
     lyt.assign_sidb(lattice_site(38, 0, 0), sidb_dot_tag.OUTPUT)
@@ -43,9 +57,32 @@ def test_detect_bdl_wires_100_lattice():
     output_bdl_wires = detect_bdl_wires(lyt, wire_selection=bdl_wire_selection.OUTPUT)
     input_bdl_wires = detect_bdl_wires(lyt, wire_selection=bdl_wire_selection.INPUT)
 
-    assert len(all_bdl_wires) == 3
-    assert len(output_bdl_wires) == 2
-    assert len(input_bdl_wires) == 1
+    left_output = (
+        bdl_pair(sidb_dot_tag.OUTPUT, lattice_site(0, 0, 0), lattice_site(2, 1, 0)),
+        bdl_pair(sidb_dot_tag.NORMAL, lattice_site(6, 2, 0), lattice_site(8, 3, 0)),
+        bdl_pair(sidb_dot_tag.NORMAL, lattice_site(12, 4, 0), lattice_site(14, 5, 0)),
+    )
+    right_output = (
+        bdl_pair(sidb_dot_tag.OUTPUT, lattice_site(38, 0, 0), lattice_site(36, 1, 0)),
+        bdl_pair(sidb_dot_tag.NORMAL, lattice_site(32, 2, 0), lattice_site(30, 3, 0)),
+        bdl_pair(sidb_dot_tag.NORMAL, lattice_site(26, 4, 0), lattice_site(24, 5, 0)),
+    )
+    input_wire = (
+        bdl_pair(sidb_dot_tag.NORMAL, lattice_site(24, 15, 0), lattice_site(26, 16, 0)),
+        bdl_pair(sidb_dot_tag.INPUT, lattice_site(30, 17, 0), lattice_site(32, 18, 0)),
+    )
+    expected_output = Counter(pair_identities(pairs) for pairs in (left_output, right_output))
+    expected_input = Counter([pair_identities(input_wire)])
+
+    assert wire_pairs(output_bdl_wires) == expected_output
+    assert wire_pairs(input_bdl_wires) == expected_input
+    assert wire_pairs(all_bdl_wires) == expected_output + expected_input
+
+    outputs_by_last = {wire.last_bdl_pair: wire for wire in output_bdl_wires}
+    assert outputs_by_last[left_output[0]].first_bdl_pair == left_output[-1]
+    assert outputs_by_last[right_output[0]].first_bdl_pair == right_output[-1]
+    assert input_bdl_wires[0].first_bdl_pair == input_wire[-1]
+    assert input_bdl_wires[0].last_bdl_pair == input_wire[0]
 
 
 def test_wire_distance_keyword() -> None:
@@ -53,5 +90,76 @@ def test_wire_distance_keyword() -> None:
     layout = sidb_layout()
     for x, y in [(0, 0), (2, 1), (6, 2), (8, 3)]:
         layout.assign_sidb(lattice_site(x, y, 0), sidb_dot_tag.INPUT)
-    assert len(detect_bdl_wires(layout, threshold_bdl_interdistance=0.9)) == 2
-    assert len(detect_bdl_wires(layout, threshold_bdl_interdistance=2.0)) == 1
+    first = bdl_pair(sidb_dot_tag.INPUT, lattice_site(0, 0, 0), lattice_site(2, 1, 0))
+    second = bdl_pair(sidb_dot_tag.INPUT, lattice_site(6, 2, 0), lattice_site(8, 3, 0))
+    assert wire_pairs(detect_bdl_wires(layout, threshold_bdl_interdistance=0.9)) == Counter([
+        pair_identities((first,)),
+        pair_identities((second,)),
+    ])
+    assert wire_pairs(detect_bdl_wires(layout, threshold_bdl_interdistance=2.0)) == Counter([
+        pair_identities((first, second))
+    ])
+
+
+@pytest.mark.parametrize(
+    ("vertical", "input_at_end", "direction"),
+    [
+        (False, False, bdl_wire.port_direction.cardinal.EAST),
+        (False, True, bdl_wire.port_direction.cardinal.WEST),
+        (True, False, bdl_wire.port_direction.cardinal.SOUTH),
+        (True, True, bdl_wire.port_direction.cardinal.NORTH),
+    ],
+)
+def test_wire_port_directions(
+    *, vertical: bool, input_at_end: bool, direction: bdl_wire.port_direction.cardinal
+) -> None:
+    """Wire ports follow the input-to-internal direction, including mirrored wires."""
+    layout = sidb_layout()
+    pairs = []
+    for index in range(4):
+        x, y = (0, 3 * index) if vertical else (6 * index, 0)
+        tag = sidb_dot_tag.INPUT if index == (3 if input_at_end else 0) else sidb_dot_tag.NORMAL
+        upper, lower = lattice_site(x, y), lattice_site(x + 2, y)
+        layout.assign_sidb(upper, tag)
+        layout.assign_sidb(lower, tag)
+        pairs.append(bdl_pair(tag, upper, lower))
+    wires = detect_bdl_wires(layout, threshold_bdl_interdistance=3.0, wire_selection=bdl_wire_selection.INPUT)
+    assert wire_pairs(wires) == Counter([pair_identities(pairs)])
+    assert wires[0].direction.dir == direction.value
+    assert wires[0].first_bdl_pair == pairs[-1 if input_at_end else 0]
+    assert wires[0].last_bdl_pair == pairs[0 if input_at_end else -1]
+
+
+@pytest.mark.parametrize(
+    ("last", "input_at_end", "threshold", "direction"),
+    [
+        ((18, 0, 0), False, 2.5, bdl_wire.port_direction.cardinal.EAST),
+        ((18, 0, 0), True, 2.5, bdl_wire.port_direction.cardinal.WEST),
+        ((18, 1, 0), False, 2.5, bdl_wire.port_direction.cardinal.SOUTH),
+        ((18, -1, 1), False, 3.0, bdl_wire.port_direction.cardinal.NORTH),
+    ],
+    ids=["east", "west", "south", "north"],
+)
+def test_undulating_wire_endpoints(
+    *,
+    last: tuple[int, int, int],
+    input_at_end: bool,
+    threshold: float,
+    direction: bdl_wire.port_direction.cardinal,
+) -> None:
+    """Wire directions follow physical endpoints despite intermediate changes in height."""
+    layout = sidb_layout()
+    pairs = []
+    for index, (x, y, z) in enumerate([(0, 0, 0), (6, 1, 0), (12, 0, 1), last]):
+        tag = sidb_dot_tag.INPUT if index == (3 if input_at_end else 0) else sidb_dot_tag.NORMAL
+        upper, lower = lattice_site(x, y, z), lattice_site(x + 2, y, z)
+        layout.assign_sidb(upper, tag)
+        layout.assign_sidb(lower, tag)
+        pairs.append(bdl_pair(tag, upper, lower))
+    wires = detect_bdl_wires(
+        layout, minimum_distance=0.5, threshold_bdl_interdistance=threshold, wire_selection=bdl_wire_selection.INPUT
+    )
+    assert wire_pairs(wires) == Counter([pair_identities(pairs)])
+    assert wires[0].direction.dir == direction.value
+    assert wires[0].first_bdl_pair == pairs[-1 if input_at_end else 0]
+    assert wires[0].last_bdl_pair == pairs[0 if input_at_end else -1]

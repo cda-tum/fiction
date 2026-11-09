@@ -171,6 +171,8 @@ struct on_the_fly_circuit_design_on_defective_surface_stats
  * @throws utils::timeout_error If a circuit or gate-design timeout expires.
  * @throws std::invalid_argument If the simulation engine does not support the requested gate-design timeout.
  * @throws fcn::unsupported_gate_orientation_exception If a gate orientation has no implementation.
+ * @throws std::out_of_range If a surface defect has an invalid lattice basis.
+ * @throws std::overflow_error If a placed gate cell exceeds the coordinate range.
  * @throws unsuccessful_pr_error If placement and routing cannot satisfy the blacklist.
  */
 [[nodiscard]] inline layout on_the_fly_circuit_design_on_defective_surface(
@@ -198,7 +200,7 @@ struct on_the_fly_circuit_design_on_defective_surface_stats
         // generating the blacklist based on neutral defects. The long-range electrostatic influence of charged defects
         // is not considered as gates are designed on-the-fly.
         auto black_list = physical_design::surface_analysis<sidb::skeleton_bestagon_library>(
-            lattice_tiling, defective_surface, std::pair<uint16_t, uint16_t>{0, 0});
+            lattice_tiling, defective_surface, std::pair<uint16_t, uint16_t>{});
 
         while (!gate_layout.has_value())
         {

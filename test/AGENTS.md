@@ -67,3 +67,18 @@ so `technology/sidb/model/charge_state.hpp` is tested by
 - A bug fix ships with a test that fails before the fix.
 - Keep runtime bounded. Every test runs on Linux, macOS, and Windows on every pull
   request.
+- Follow the [Catch2 guide](../docs/contributing.md#writing-catch2-tests). Use the
+  gate-layout tests as examples, not a mandatory list of macros to include.
+- Use sections for independent operations, generators for independent data rows,
+  and typed tests for distinct type contracts. Keep dependent state transitions
+  and allocation-failure sweeps as sequences. Avoid accidental Cartesian products.
+- Reuse blueprints before adding fixtures. Share nontrivial per-test setup with a
+  small local fixture only when multiple cases need it; never share mutable state.
+- Use `REQUIRE` for prerequisites and `CHECK` for independent observations. Capture
+  the values needed to reproduce a failed row or loop iteration.
+- Compare complete visitor results, including multiplicity. Ignore order only
+  when the contract permits it; converting observations to sets can hide defects.
+- Before deleting coverage, name the surviving oracle and justify its input and
+  failure classes. Coverage percentages and mutation counts alone are insufficient.
+- Keep Catch2 calls outside active allocation-failure injection. Reset the budget
+  before assertions and diagnostics, including when an unexpected exception escapes.

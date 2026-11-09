@@ -17,9 +17,13 @@
  * @author Simon Hofmann (simon1hofmann)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #ifdef NDEBUG
 #include "utils/blueprints/layout_blueprints.hpp"
@@ -41,10 +45,12 @@
 #include <algorithm>
 #include <any>
 #include <chrono>
+#include <cmath>
 #include <cstdint>
 #include <set>
 #include <stdexcept>
 #include <thread>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::sidb;
@@ -62,6 +68,7 @@ TEST_CASE("QuickExact rejects incomplete simulations after the caller deadline",
     SECTION("Already expired")
     {
         params.deadline = std::chrono::steady_clock::now();
+        CHECK_THROWS_AS(quickexact(lyt, params), utils::timeout_error);
     }
     SECTION("Expires while enumerating")
     {
@@ -82,14 +89,14 @@ TEST_CASE("QuickExact rejects incomplete simulations after the caller deadline",
         SECTION("Two-state enumeration")
         {
             params.sim_params.base = 2;
+            CHECK_THROWS_AS(quickexact(lyt, params), utils::timeout_error);
         }
         SECTION("Three-state enumeration")
         {
             params.sim_params.base = 3;
+            CHECK_THROWS_AS(quickexact(lyt, params), utils::timeout_error);
         }
     }
-
-    CHECK_THROWS_AS(quickexact(lyt, params), utils::timeout_error);
 }
 
 TEST_CASE("QuickExact returns completed results after a slow final callback", "[quickexact]")
@@ -97,14 +104,15 @@ TEST_CASE("QuickExact returns completed results after a slow final callback", "[
     layout lyt{};
     for (int32_t i = 0; i < 8; ++i)
     {
-        lyt.assign_sidb({i, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({i * 4, 0, 0}, dot_tag::NORMAL);
     }
     quickexact_params params{.sim_params            = simulation_parameters{2, -0.32},
                              .base_number_detection = quickexact_params::automatic_base_number_detection::OFF};
     const auto        expected = quickexact(lyt, params);
-    params.deadline            = std::chrono::steady_clock::now() + std::chrono::seconds{1};
-    bool completed             = false;
-    params.on_progress         = [&](auto, auto done, auto total)
+    REQUIRE_FALSE(expected.charge_distributions.empty());
+    params.deadline    = std::chrono::steady_clock::now() + std::chrono::seconds{1};
+    bool completed     = false;
+    params.on_progress = [&](auto, auto done, auto total)
     {
         if (done == total)
         {
@@ -114,7 +122,14 @@ TEST_CASE("QuickExact returns completed results after a slow final callback", "[
     };
     const auto actual = quickexact(lyt, params);
     CHECK(completed);
-    CHECK(actual.charge_distributions.size() == expected.charge_distributions.size());
+    CHECK_THAT(actual.charge_distributions,
+               Catch::Matchers::UnorderedRangeEquals(expected.charge_distributions,
+                                                     [](const auto& lhs, const auto& rhs)
+                                                     {
+                                                         return lhs.sites() == rhs.sites() &&
+                                                                lhs.same_charge_states(rhs) &&
+                                                                std::abs(lhs.energy() - rhs.energy()) <= ERROR_MARGIN;
+                                                     }));
 }
 
 TEST_CASE("Empty layout QuickExact simulation", "[quickexact]")
@@ -126,7 +141,7 @@ TEST_CASE("Empty layout QuickExact simulation", "[quickexact]")
     const auto simulation_results = quickexact(lyt, params);
 
     CHECK(simulation_results.charge_distributions.empty());
-    CHECK(simulation_results.algorithm_name == "QuickExact");
+    CHECK_THAT(simulation_results.algorithm_name, Catch::Matchers::Equals("QuickExact"));
 }
 
 TEST_CASE("Single SiDB QuickExact simulation", "[quickexact]")
@@ -343,24 +358,15 @@ TEST_CASE("QuickExact simulation of a BDL pair", "[quickexact]")
     const auto simulation_results = quickexact(lyt, params);
 
     REQUIRE(simulation_results.charge_distributions.size() == 2);
-    for (const auto& layouts : simulation_results.charge_distributions)
+    std::vector<uint64_t> charge_indices{};
+    for (const auto& distribution : simulation_results.charge_distributions)
     {
-        uint64_t counter_negative = 0;
-        uint64_t counter_neutral  = 0;
-        for (uint64_t i = 0; i < 2; i++)
-        {
-            if (layouts.get_charge_state_by_index(i) == charge_state::NEGATIVE)
-            {
-                counter_negative += 1;
-            }
-            else
-            {
-                counter_neutral += 1;
-            }
-        }
-        CHECK(counter_neutral == 1);
-        CHECK(counter_negative == 1);
+        CHECK(distribution.size() == 2);
+        charge_indices.push_back(distribution.charge_index(3));
     }
+    // Base-3 digits 01 and 10 place the negative charge on either site.
+    const std::vector<uint64_t> expected{1, 3};
+    CHECK_THAT(charge_indices, Catch::Matchers::UnorderedRangeEquals(expected));
 }
 
 TEST_CASE("QuickExact simulation of a two-pair BDL wire with one perturber", "[quickexact]")
@@ -388,7 +394,7 @@ TEST_CASE("QuickExact simulation of a two-pair BDL wire with one perturber", "[q
     CHECK(size_before == 1);
     CHECK(size_after == 1);
 
-    REQUIRE(!simulation_results_new.charge_distributions.empty());
+    REQUIRE_FALSE(simulation_results_new.charge_distributions.empty());
 
     const auto& charge_lyt_first = simulation_results_new.charge_distributions.front();
 
@@ -416,7 +422,7 @@ TEST_CASE("QuickExact simulation of a one-pair BDL wire with two perturbers", "[
 
     const auto simulation_results = quickexact(lyt, sim_params);
 
-    REQUIRE(!simulation_results.charge_distributions.empty());
+    REQUIRE_FALSE(simulation_results.charge_distributions.empty());
 
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
@@ -446,7 +452,7 @@ TEST_CASE("QuickExact simulation of a Y-shaped SiDB arrangement", "[quickexact]"
 
     const auto simulation_results = quickexact(lyt, sim_params);
 
-    REQUIRE(!simulation_results.charge_distributions.empty());
+    REQUIRE_FALSE(simulation_results.charge_distributions.empty());
 
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
@@ -483,7 +489,7 @@ TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 01, check
 
     const auto simulation_results = quickexact(lyt, sim_params);
 
-    REQUIRE(!simulation_results.charge_distributions.empty());
+    REQUIRE_FALSE(simulation_results.charge_distributions.empty());
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
     CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
@@ -494,7 +500,6 @@ TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 01, check
     CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == charge_state::NEUTRAL);
     CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == charge_state::NEUTRAL);
     CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
 
     CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.4662582096, ERROR_MARGIN));
 }
@@ -520,7 +525,7 @@ TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 01 and lo
 
     const auto simulation_results = quickexact(lyt, params);
 
-    REQUIRE(!simulation_results.charge_distributions.empty());
+    REQUIRE_FALSE(simulation_results.charge_distributions.empty());
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
     CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEUTRAL);
@@ -553,7 +558,7 @@ TEST_CASE("QuickExact simulation  of a Y-shaped SiDB OR gate with input 01 and g
 
     const auto simulation_results = quickexact(lyt, params);
 
-    REQUIRE(!simulation_results.charge_distributions.empty());
+    REQUIRE_FALSE(simulation_results.charge_distributions.empty());
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
     CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEUTRAL);
@@ -586,7 +591,7 @@ TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 01 and gl
 
     const auto simulation_results = quickexact(lyt, params);
 
-    REQUIRE(!simulation_results.charge_distributions.empty());
+    REQUIRE_FALSE(simulation_results.charge_distributions.empty());
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
     CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::POSITIVE);
@@ -612,7 +617,7 @@ TEST_CASE("QuickExact simulation of four SiDBs (far away)", "[quickexact]")
 
     const auto simulation_results = quickexact(lyt, params);
 
-    REQUIRE(!simulation_results.charge_distributions.empty());
+    REQUIRE_FALSE(simulation_results.charge_distributions.empty());
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
     CHECK(charge_lyt_first.get_charge_state({0, 0, 0}) == charge_state::NEGATIVE);
@@ -632,7 +637,7 @@ TEST_CASE("QuickExact with one SiDB and one negatively charged defect in proximi
                       defect{defect_type::UNKNOWN, -1, params.sim_params.epsilon_r, params.sim_params.lambda_tf});
     const auto simulation_results = quickexact(lyt, params);
 
-    REQUIRE(!simulation_results.charge_distributions.empty());
+    REQUIRE_FALSE(simulation_results.charge_distributions.empty());
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
     CHECK(charge_lyt_first.get_charge_state({0, 0, 0}) == charge_state::NEUTRAL);
@@ -653,7 +658,7 @@ TEST_CASE("QuickExact simulation  of four SiDBs (far away) with one negatively c
                       defect{defect_type::UNKNOWN, -1, params.sim_params.epsilon_r, params.sim_params.lambda_tf});
     const auto simulation_results = quickexact(lyt, params);
 
-    REQUIRE(!simulation_results.charge_distributions.empty());
+    REQUIRE_FALSE(simulation_results.charge_distributions.empty());
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
     CHECK(charge_lyt_first.get_charge_state({0, 0, 0}) == charge_state::NEUTRAL);
@@ -681,7 +686,7 @@ TEST_CASE("QuickExact simulation of four SiDBs (far away) with two negatively ch
 
     const auto simulation_results = quickexact(lyt, params);
 
-    REQUIRE(!simulation_results.charge_distributions.empty());
+    REQUIRE_FALSE(simulation_results.charge_distributions.empty());
     CHECK(simulation_results.lyt.num_defects() == 2);
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
@@ -710,7 +715,7 @@ TEST_CASE(
                       defect{defect_type::UNKNOWN, -1, params.sim_params.epsilon_r, params.sim_params.lambda_tf});
     const auto simulation_results = quickexact(lyt, params);
 
-    REQUIRE(!simulation_results.charge_distributions.empty());
+    REQUIRE_FALSE(simulation_results.charge_distributions.empty());
     CHECK(simulation_results.lyt.num_defects() == 2);
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
@@ -740,7 +745,16 @@ TEST_CASE("Seven randomly distributed DBs, test if dependent dot calculation wor
 
     const auto simulation_results_exgs = exhaustive_ground_state_simulation(lyt, params.sim_params);
 
-    REQUIRE(simulation_results.charge_distributions.size() == simulation_results_exgs.charge_distributions.size());
+    CHECK_THAT(simulation_results.charge_distributions,
+               Catch::Matchers::UnorderedRangeEquals(simulation_results_exgs.charge_distributions,
+                                                     [](const auto& lhs, const auto& rhs)
+                                                     {
+                                                         return lhs.sites() == rhs.sites() &&
+                                                                lhs.same_charge_states(rhs) &&
+                                                                std::abs(lhs.energy() - rhs.energy()) <= ERROR_MARGIN;
+                                                     }));
+
+    REQUIRE_FALSE(simulation_results.charge_distributions.empty());
 
     const auto highest_state =
         std::ranges::min_element(simulation_results.charge_distributions,
@@ -793,9 +807,9 @@ TEST_CASE("three DBs next to each other, small mu-", "[quickexact]")
 
     const auto simulation_results = quickexact(lyt, params);
 
-    REQUIRE(!simulation_results.charge_distributions.empty());
+    REQUIRE(simulation_results.charge_distributions.size() == 1);
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-    CHECK(charge_lyt_first.get_charge_state({1, 3, 0}) == charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state({-1, 3, 0}) == charge_state::NEGATIVE);
     CHECK(charge_lyt_first.get_charge_state({1, 3, 0}) == charge_state::NEGATIVE);
     CHECK(charge_lyt_first.get_charge_state({2, 3, 0}) == charge_state::POSITIVE);
     CHECK(charge_lyt_first.get_charge_state({3, 3, 0}) == charge_state::NEGATIVE);
@@ -836,9 +850,12 @@ TEST_CASE("seven DBs next to each other, small mu-", "[quickexact]")
     const auto simulation_results = quickexact(lyt, params);
 
     REQUIRE(simulation_results.charge_distributions.size() == 10);
-    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
-    CHECK(charge_lyt_first.energy() < 0.08);
-    CHECK(charge_lyt_first.energy() > -2.74);
+    for (const auto& distribution : simulation_results.charge_distributions)
+    {
+        CAPTURE(distribution.charge_index(3));
+        CHECK(distribution.energy() < 0.08);
+        CHECK(distribution.energy() > -2.74);
+    }
 }
 
 TEST_CASE("7 DBs next to each other (positively charged DBs occur)", "[quickexact]")
@@ -881,7 +898,12 @@ TEST_CASE("7 DBs next to each other | only one physically valid charge distribut
 
     const auto simulation_results = quickexact(lyt, params);
 
-    CHECK(simulation_results.charge_distributions.size() == 1);
+    REQUIRE(simulation_results.charge_distributions.size() == 1);
+    const auto& distribution = simulation_results.charge_distributions.front();
+    REQUIRE(distribution.sites() == lyt.sidbs());
+    CHECK(distribution.num_negative_sidbs() == 6);
+    CHECK(distribution.num_neutral_sidbs() == 1);
+    CHECK(distribution.get_charge_state({2, 4, 1}) == charge_state::NEUTRAL);
 }
 
 TEST_CASE("4 DBs next to each other (positively charged DBs occur)", "[quickexact]")
@@ -933,7 +955,7 @@ TEST_CASE("4 DBs close to each other", "[quickexact]")
 
     const auto simulation_results = quickexact(lyt, params);
 
-    CHECK(!simulation_results.charge_distributions.empty());
+    CHECK_FALSE(simulation_results.charge_distributions.empty());
 }
 
 TEST_CASE("3 DBs next to each other (positively charged DBs occur)", "[quickexact]")
@@ -948,6 +970,11 @@ TEST_CASE("3 DBs next to each other (positively charged DBs occur)", "[quickexac
     const quickexact_params params{.sim_params = simulation_parameters{3, -0.32}};
 
     const auto simulation_results = quickexact(lyt, params);
+
+    REQUIRE_FALSE(simulation_results.charge_distributions.empty());
+
+    CHECK(std::ranges::any_of(simulation_results.charge_distributions,
+                              [](const auto& distribution) { return distribution.num_positive_sidbs() > 0; }));
 
     for (const auto& layout : simulation_results.charge_distributions)
     {
@@ -967,7 +994,7 @@ TEST_CASE("3 DBs next to each other with automatic base number detection", "[qui
 
     const auto simulation_results = quickexact(lyt, params);
 
-    REQUIRE(!simulation_results.additional_simulation_parameters.empty());
+    REQUIRE_FALSE(simulation_results.additional_simulation_parameters.empty());
     CHECK(std::any_cast<uint64_t>(simulation_results.additional_simulation_parameters.at("base_number")) == 3);
 
     const quickexact_params params_new{.sim_params = simulation_parameters{2, -0.32},
@@ -976,7 +1003,7 @@ TEST_CASE("3 DBs next to each other with automatic base number detection", "[qui
 
     const auto simulation_results_new = quickexact(lyt, params_new);
 
-    REQUIRE(!simulation_results_new.additional_simulation_parameters.empty());
+    REQUIRE_FALSE(simulation_results_new.additional_simulation_parameters.empty());
     CHECK(std::any_cast<uint64_t>(simulation_results_new.additional_simulation_parameters.at("base_number")) == 2);
 }
 
@@ -1008,12 +1035,15 @@ TEST_CASE("13 DBs which are all negatively charged", "[quickexact]")
 
     const auto simulation_results = quickexact(lyt, params);
 
-    REQUIRE(!simulation_results.charge_distributions.empty());
+    REQUIRE_FALSE(simulation_results.charge_distributions.empty());
 
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
-    charge_lyt_first.foreach_dot([&](const auto& cell)
-                                 { CHECK(charge_lyt_first.get_charge_state(cell) == charge_state::NEGATIVE); });
+    REQUIRE(charge_lyt_first.sites() == lyt.sidbs());
+    for (const auto& cell : lyt.sidbs())
+    {
+        CHECK(charge_lyt_first.get_charge_state(cell) == charge_state::NEGATIVE);
+    }
 
     CHECK(lyt.num_dots() == 13);
 }
@@ -1045,8 +1075,10 @@ TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 01", "[qu
             std::set<uint64_t> charge_index{};
             for (auto i = 0; i < 10000; i++)
             {
-                const auto  simulation_results = quickexact(lyt, params);
-                const auto& charge_lyt_first   = simulation_results.charge_distributions.front();
+                const auto simulation_results = quickexact(lyt, params);
+                CAPTURE(i);
+                REQUIRE_FALSE(simulation_results.charge_distributions.empty());
+                const auto& charge_lyt_first = simulation_results.charge_distributions.front();
                 ground_state.insert(charge_lyt_first.energy());
                 charge_index.insert(charge_lyt_first.charge_index(3));
             }
@@ -1060,8 +1092,10 @@ TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 01", "[qu
             std::set<uint64_t> charge_index{};
             for (auto i = 0; i < 10000; i++)
             {
-                const auto  simulation_results = quickexact(lyt, params);
-                const auto& charge_lyt_first   = simulation_results.charge_distributions.front();
+                const auto simulation_results = quickexact(lyt, params);
+                CAPTURE(i);
+                REQUIRE_FALSE(simulation_results.charge_distributions.empty());
+                const auto& charge_lyt_first = simulation_results.charge_distributions.front();
                 ground_state.insert(charge_lyt_first.energy());
                 charge_index.insert(charge_lyt_first.charge_index(3));
             }
@@ -1077,6 +1111,7 @@ TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 01", "[qu
         lyt.assign_sidb({15, 2, 0}, dot_tag::NORMAL);
 
         const auto simulation_results = quickexact(lyt, params);
+        REQUIRE_FALSE(simulation_results.charge_distributions.empty());
         // find the ground state, which is the charge distribution with the lowest energy
         const auto ground_state =
             std::ranges::min_element(simulation_results.charge_distributions,
@@ -1089,7 +1124,7 @@ TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 01", "[qu
     {
         const auto simulation_results = quickexact(lyt, params);
 
-        REQUIRE(!simulation_results.charge_distributions.empty());
+        REQUIRE_FALSE(simulation_results.charge_distributions.empty());
         const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
         CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
@@ -1110,7 +1145,7 @@ TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 01", "[qu
 
         const auto simulation_results = quickexact(lyt, params);
 
-        REQUIRE(!simulation_results.charge_distributions.empty());
+        REQUIRE_FALSE(simulation_results.charge_distributions.empty());
         const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
         CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
@@ -1131,7 +1166,7 @@ TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 01", "[qu
 
         const auto simulation_results = quickexact(lyt, params);
 
-        REQUIRE(!simulation_results.charge_distributions.empty());
+        REQUIRE_FALSE(simulation_results.charge_distributions.empty());
         const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
         CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
@@ -1152,7 +1187,7 @@ TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 01", "[qu
 
         const auto simulation_results = quickexact(lyt, params);
 
-        REQUIRE(!simulation_results.charge_distributions.empty());
+        REQUIRE_FALSE(simulation_results.charge_distributions.empty());
         const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
         CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
@@ -1173,7 +1208,7 @@ TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 01", "[qu
 
         const auto simulation_results = quickexact(lyt, params);
 
-        REQUIRE(!simulation_results.charge_distributions.empty());
+        REQUIRE_FALSE(simulation_results.charge_distributions.empty());
         const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
         CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
@@ -1194,7 +1229,7 @@ TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 01", "[qu
 
         const auto simulation_results = quickexact(lyt, params);
 
-        REQUIRE(!simulation_results.charge_distributions.empty());
+        REQUIRE_FALSE(simulation_results.charge_distributions.empty());
         const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
         CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == charge_state::NEGATIVE);
@@ -1237,8 +1272,10 @@ TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 01", "[qu
         std::set<uint64_t> charge_index{};
         for (auto i = 0; i < 100000; i++)
         {
-            const auto  simulation_results = quickexact(lyt, params);
-            const auto& charge_lyt_first   = simulation_results.charge_distributions.front();
+            const auto simulation_results = quickexact(lyt, params);
+            CAPTURE(i);
+            REQUIRE_FALSE(simulation_results.charge_distributions.empty());
+            const auto& charge_lyt_first = simulation_results.charge_distributions.front();
             ground_state.insert(charge_lyt_first.energy());
             charge_index.insert(charge_lyt_first.charge_index(3));
         }
@@ -1307,7 +1344,7 @@ TEST_CASE("QuickExact simulation of a 3 DB Wire", "[quickexact]")
         const auto simulation_results = quickexact(lyt, params);
 
         // check that physically valid charge distributions were found
-        REQUIRE(!simulation_results.charge_distributions.empty());
+        REQUIRE_FALSE(simulation_results.charge_distributions.empty());
 
         // find the ground state, which is the charge distribution with the lowest energy
         const auto ground_states = simulation_results.groundstates();
@@ -1341,7 +1378,7 @@ TEST_CASE("QuickExact simulation of a 3 DB Wire", "[quickexact]")
 
         const auto simulation_results = quickexact(lyt, params);
 
-        REQUIRE(!simulation_results.charge_distributions.empty());
+        REQUIRE_FALSE(simulation_results.charge_distributions.empty());
 
         // find the ground state, which is the charge distribution with the lowest energy
         const auto ground_states = simulation_results.groundstates();
@@ -1371,7 +1408,7 @@ TEST_CASE("QuickExact simulation of a 3 DB Wire", "[quickexact]")
 
         const auto simulation_results = quickexact(lyt, params);
 
-        REQUIRE(!simulation_results.charge_distributions.empty());
+        REQUIRE_FALSE(simulation_results.charge_distributions.empty());
 
         // find the ground state, which is the charge distribution with the lowest energy
         const auto ground_states = simulation_results.groundstates();
@@ -1402,7 +1439,7 @@ TEST_CASE("QuickExact simulation of a 3 DB Wire", "[quickexact]")
 
         const auto simulation_results = quickexact(lyt, params);
 
-        REQUIRE(!simulation_results.charge_distributions.empty());
+        REQUIRE_FALSE(simulation_results.charge_distributions.empty());
 
         const auto ground_states = simulation_results.groundstates();
 
@@ -1432,7 +1469,7 @@ TEST_CASE("QuickExact simulation of a 3 DB Wire", "[quickexact]")
 
         const auto simulation_results = quickexact(lyt, params);
 
-        REQUIRE(!simulation_results.charge_distributions.empty());
+        REQUIRE_FALSE(simulation_results.charge_distributions.empty());
 
         // find the ground state, which is the charge distribution with the lowest energy
         const auto ground_state = simulation_results.groundstates();
@@ -1462,7 +1499,7 @@ TEST_CASE("QuickExact simulation of a 3 DB Wire", "[quickexact]")
 
         const auto simulation_results = quickexact(lyt, params);
 
-        REQUIRE(!simulation_results.charge_distributions.empty());
+        REQUIRE_FALSE(simulation_results.charge_distributions.empty());
 
         const auto ground_states = simulation_results.groundstates();
 
@@ -1492,7 +1529,7 @@ TEST_CASE("QuickExact simulation of a 3 DB Wire", "[quickexact]")
 
         const auto simulation_results = quickexact(lyt, params);
 
-        REQUIRE(!simulation_results.charge_distributions.empty());
+        REQUIRE_FALSE(simulation_results.charge_distributions.empty());
 
         const auto ground_states = simulation_results.groundstates();
 
@@ -1561,6 +1598,19 @@ TEST_CASE("QuickExact simulation of positively charged SiDBs", "[quickexact]")
     lyt.assign_sidb({18, 0, 0}, dot_tag::NORMAL);
     lyt.assign_sidb({20, 0, 0}, dot_tag::NORMAL);
 
+    /** @brief Checks all valid three-state assignments for this layout. */
+    const auto check_distributions = [&lyt](const result& simulation_results)
+    {
+        std::vector<uint64_t> indices{};
+        for (const auto& distribution : simulation_results.charge_distributions)
+        {
+            REQUIRE(distribution.sites() == lyt.sidbs());
+            CHECK(distribution.num_positive_sidbs() == 2);
+            indices.push_back(distribution.charge_index(3));
+        }
+        CHECK_THAT(indices, Catch::Matchers::UnorderedRangeEquals(std::vector<uint64_t>{2195, 2355, 2675, 2835}));
+    };
+
     SECTION("automatic base number detection is off, base number is 3")
     {
         const quickexact_params params{.sim_params = simulation_parameters{3, -0.32},
@@ -1570,6 +1620,7 @@ TEST_CASE("QuickExact simulation of positively charged SiDBs", "[quickexact]")
         const auto simulation_results = quickexact(lyt, params);
 
         CHECK(simulation_results.charge_distributions.size() == 4);
+        check_distributions(simulation_results);
     }
 
     SECTION("automatic base number detection is on, base number is 2")
@@ -1580,6 +1631,7 @@ TEST_CASE("QuickExact simulation of positively charged SiDBs", "[quickexact]")
         const auto simulation_results = quickexact(lyt, params);
 
         CHECK(simulation_results.charge_distributions.size() == 4);
+        check_distributions(simulation_results);
     }
 }
 
@@ -1646,44 +1698,26 @@ TEST_CASE("Special test cases", "[quickexact]")
         lyt.assign_sidb({3, 0, 0}, dot_tag::NORMAL);
         lyt.assign_sidb({0, 1, 0}, dot_tag::NORMAL);
 
-        SECTION("automatic base number detection on")
-        {
-            const quickexact_params params{.sim_params = simulation_parameters{2, -0.32},
-                                           .base_number_detection =
-                                               quickexact_params::automatic_base_number_detection::ON};
+        const quickexact_params automatic_params{.sim_params = simulation_parameters{2, -0.32},
+                                                 .base_number_detection =
+                                                     quickexact_params::automatic_base_number_detection::ON};
+        const quickexact_params three_state_params{.sim_params = simulation_parameters{3, -0.32},
+                                                   .base_number_detection =
+                                                       quickexact_params::automatic_base_number_detection::OFF};
 
-            const auto simulation_results = quickexact(lyt, params);
-            CHECK(simulation_results.charge_distributions.size() == 3);
-        }
-
-        SECTION("automatic base number detection off")
-        {
-            const quickexact_params params{.sim_params = simulation_parameters{3, -0.32},
-                                           .base_number_detection =
-                                               quickexact_params::automatic_base_number_detection::OFF};
-
-            const auto simulation_results = quickexact(lyt, params);
-            CHECK(simulation_results.charge_distributions.size() == 3);
-        }
+        const auto automatic   = quickexact(lyt, automatic_params);
+        const auto three_state = quickexact(lyt, three_state_params);
+        CHECK(automatic.charge_distributions.size() == 3);
+        CHECK(three_state.charge_distributions.size() == 3);
+        CHECK_THAT(automatic.charge_distributions, Catch::Matchers::UnorderedRangeEquals(
+                                                       three_state.charge_distributions,
+                                                       [](const auto& lhs, const auto& rhs)
+                                                       {
+                                                           return lhs.sites() == rhs.sites() &&
+                                                                  lhs.same_charge_states(rhs) &&
+                                                                  std::abs(lhs.energy() - rhs.energy()) <= ERROR_MARGIN;
+                                                       }));
     }
-
-    // Test case disabled for now until a small bug in QuickExact is fixed.
-    // SECTION("Test case 3")
-    // {
-    //     layout lyt{};
-    //
-    //     lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({0, 1, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({9, 3, 0}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({2, 4, 0}, dot_tag::NORMAL);
-    //
-    //     const quickexact_params params{
-    //         sidb_simulation_parameters{3, -0.32},
-    //         quickexact_params::automatic_base_number_detection::ON};
-    //
-    //     const auto simulation_results = quickexact(lyt, params);
-    //     CHECK(simulation_results.charge_distributions.size() == 2);
-    // }
 
     SECTION("Test case 4")
     {
@@ -1784,49 +1818,6 @@ TEST_CASE("Special test cases", "[quickexact]")
         CHECK(excitedstate.get_charge_state({13, 12, 0}) == charge_state::NEGATIVE);
         CHECK(excitedstate.get_charge_state({24, 12, 0}) == charge_state::NEGATIVE);
     }
-
-    // Test case disabled for now until a small bug in QuickExact is fixed.
-    // SECTION("Test case 6")
-    // {
-    //     layout lyt{};
-    //
-    //     lyt.assign_sidb({11, 1, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({15, 1, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({5, 2, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({17, 2, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({20, 3, 0}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({13, 3, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({9, 4, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({2, 5, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({17, 5, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({2, 6, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({9, 6, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({10, 7, 0}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({8, 7, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({17, 9, 0}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({11, 9, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({12, 9, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({5, 10, 0}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({5, 10, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({7, 11, 1}, dot_tag::NORMAL);
-    //     lyt.assign_sidb({13, 11, 1}, dot_tag::NORMAL);
-    //
-    //     const sidb_simulation_parameters params{2, -0.32};
-    //
-    //     sidb_simulation_result qe_res = quickexact(
-    //         lyt,
-    //         quickexact_params{params,
-    //                                           quickexact_params::automatic_base_number_detection::OFF,
-    //                                           {},
-    //                                           0});
-    //
-    //     std::sort(qe_res.charge_distributions.begin(), qe_res.charge_distributions.end(),
-    //               [](const auto& lhs, const auto& rhs) { return lhs.energy() <
-    //               rhs.energy();
-    //               });
-    //
-    //     CHECK(qe_res.charge_distributions.size() == 2);
-    // }
 }
 
 TEST_CASE("QuickExact gate simulation of Si-111 surface", "[quickexact]")
@@ -1967,18 +1958,13 @@ TEST_CASE("QuickExact reports progress", "[quickexact]")
     quickexact_params params{.base_number_detection = quickexact_params::automatic_base_number_detection::OFF,
                              .on_progress           = rec.callback()};
 
-    SECTION("two-state simulation")
-    {
-        params.sim_params = simulation_parameters{2, -0.32};
-    }
-    SECTION("three-state simulation")
-    {
-        params.sim_params = simulation_parameters{3, -0.32};
-    }
+    const auto base = GENERATE(uint8_t{2}, uint8_t{3});
+    CAPTURE(base);
+    params.sim_params = simulation_parameters{base, -0.32};
 
     const auto simulation_results = quickexact(lyt, params);
 
-    CHECK(!simulation_results.charge_distributions.empty());
+    CHECK_FALSE(simulation_results.charge_distributions.empty());
     CHECK(rec.is_consistent("charge configurations"));
     CHECK(rec.final_count("charge configurations") > 0);
 }

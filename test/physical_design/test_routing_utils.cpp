@@ -14,17 +14,21 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include "fiction/layouts/layout_base.hpp"
 #include "utils/allocation_failure.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
+// Catch2 selects this specialization through its diagnostic templates.
+#include "utils/routing_objective_string_maker.hpp"  // IWYU pragma: keep
 
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/physical_design/routing_utils.hpp>
 
-#include <algorithm>
 #include <new>
 #include <stdexcept>
 #include <vector>
@@ -37,24 +41,40 @@ using namespace fiction::physical_design;
 /** @brief Checks objective coordinates and logical input indices.
  * @param objectives Extracted objectives. @param expected_objectives Expected connections.
  */
-void check_containing_objectives(const std::vector<routing_objective>& objectives,
-                                 const std::vector<routing_objective>& expected_objectives)
+void check_objectives(const std::vector<routing_objective>& objectives,
+                      const std::vector<routing_objective>& expected_objectives)
 {
-    CHECK(objectives.size() == expected_objectives.size());
-
-    std::ranges::for_each(objectives, [&expected_objectives](const auto& obj)
-                          { CHECK(std::ranges::find(expected_objectives, obj) != expected_objectives.cend()); });
+    CHECK_THAT(objectives, Catch::Matchers::UnorderedRangeEquals(expected_objectives));
 }
 
-/** @brief Checks a retained tile after clearing its connections. @tparam Lyt Layout type.
- * @param lyt Layout. @param t Retained tile.
+/** @brief Checks all retained tiles and their disconnected signals.
+ * @param lyt Layout. @param expected Expected retained tiles.
  */
-template <typename Lyt>
-void check_non_empty_tile(const Lyt& lyt, const fiction::layouts::layout_base::coordinate& t)
+void check_retained_tiles(const cartesian_gate_layout& lyt, const std::vector<layout_base::coordinate>& expected)
 {
-    CHECK(!lyt.is_empty_tile(t));
-    CHECK(lyt.has_no_incoming_signal(t));
-    CHECK(lyt.has_no_outgoing_signal(t));
+    std::vector<layout_base::coordinate> actual{};
+    lyt.foreach_object(
+        [&](const auto id)
+        {
+            const auto t = lyt.get_tile(id);
+            CAPTURE(t.x, t.y, t.z);
+            actual.push_back(t);
+            for (auto input = 0u; input < lyt.input_count(id); ++input)
+            {
+                CAPTURE(input);
+                CHECK_FALSE(lyt.source({id, input}));
+            }
+            CHECK(lyt.fanout_size(id) == 0);
+        });
+    CHECK_THAT(actual, Catch::Matchers::UnorderedRangeEquals(expected));
+    CHECK(lyt.size() == expected.size());
+    for (const auto& t : expected)
+    {
+        CAPTURE(t.x, t.y, t.z);
+        CHECK_FALSE(lyt.is_empty_tile(t));
+        CHECK(lyt.has_no_incoming_signal(t));
+        CHECK(lyt.has_no_outgoing_signal(t));
+    }
 }
 
 TEST_CASE("Coordinate paths expose construction and edits", "[routing-utils]")
@@ -67,7 +87,7 @@ TEST_CASE("Coordinate paths expose construction and edits", "[routing-utils]")
     path.back()  = {3, 0};
     CHECK(path.source() == fiction::layouts::layout_base::coordinate{1, 1});
     CHECK(path.target() == fiction::layouts::layout_base::coordinate{3, 0});
-    CHECK(path.size() == 4);
+    CHECK(path == layout_coordinate_path{{1, 1}, {0, 0}, {1, 0}, {3, 0}});
 }
 
 TEST_CASE("Extract routing objectives", "[routing-utils]")
@@ -77,47 +97,47 @@ TEST_CASE("Extract routing objectives", "[routing-utils]")
         const auto layout     = blueprints::straight_wire_gate_layout<cartesian_gate_layout>();
         const auto objectives = extract_routing_objectives(layout);
 
-        check_containing_objectives(objectives, {{.source = {0, 1}, .target = {2, 1}}});
+        check_objectives(objectives, {{.source = {0, 1}, .target = {2, 1}}});
     }
     SECTION("Two paths wire connections")
     {
         const auto layout     = blueprints::unbalanced_and_layout<cartesian_gate_layout>();
         const auto objectives = extract_routing_objectives(layout);
 
-        check_containing_objectives(objectives, {{.source = {0, 2}, .target = {2, 0}},
-                                                 {.source = {1, 0}, .target = {2, 0}, .input_index = 1},
-                                                 {.source = {2, 0}, .target = {3, 0}}});
+        check_objectives(objectives, {{.source = {0, 2}, .target = {2, 0}},
+                                      {.source = {1, 0}, .target = {2, 0}, .input_index = 1},
+                                      {.source = {2, 0}, .target = {3, 0}}});
     }
     SECTION("Three paths wire connections")
     {
         const auto layout     = blueprints::three_wire_paths_gate_layout<cartesian_gate_layout>();
         const auto objectives = extract_routing_objectives(layout);
 
-        check_containing_objectives(objectives, {{.source = {0, 0}, .target = {4, 0}},
-                                                 {.source = {0, 2}, .target = {4, 2}},
-                                                 {.source = {0, 4}, .target = {4, 4}}});
+        check_objectives(objectives, {{.source = {0, 0}, .target = {4, 0}},
+                                      {.source = {0, 2}, .target = {4, 2}},
+                                      {.source = {0, 4}, .target = {4, 4}}});
     }
     SECTION("Direct gate connections")
     {
         const auto layout     = blueprints::xor_maj_gate_layout<cartesian_gate_layout>();
         const auto objectives = extract_routing_objectives(layout);
 
-        check_containing_objectives(objectives, {{.source = {1, 1}, .target = {2, 1}},
-                                                 {.source = {2, 0}, .target = {2, 1}, .input_index = 1},
-                                                 {.source = {3, 1}, .target = {2, 1}, .input_index = 2},
-                                                 {.source = {1, 1}, .target = {1, 0}},
-                                                 {.source = {2, 0}, .target = {1, 0}, .input_index = 1},
-                                                 {.source = {2, 1}, .target = {2, 2}},
-                                                 {.source = {1, 0}, .target = {0, 0}}});
+        check_objectives(objectives, {{.source = {1, 1}, .target = {2, 1}},
+                                      {.source = {2, 0}, .target = {2, 1}, .input_index = 1},
+                                      {.source = {3, 1}, .target = {2, 1}, .input_index = 2},
+                                      {.source = {1, 1}, .target = {1, 0}},
+                                      {.source = {2, 0}, .target = {1, 0}, .input_index = 1},
+                                      {.source = {2, 1}, .target = {2, 2}},
+                                      {.source = {1, 0}, .target = {0, 0}}});
     }
     SECTION("Two incoming gate wires")
     {
         const auto layout     = blueprints::use_and_gate_layout<cartesian_gate_layout>();
         const auto objectives = extract_routing_objectives(layout);
 
-        check_containing_objectives(objectives, {{.source = {0, 1}, .target = {1, 2}},
-                                                 {.source = {3, 3}, .target = {1, 2}, .input_index = 1},
-                                                 {.source = {1, 2}, .target = {3, 2}}});
+        check_objectives(objectives, {{.source = {0, 1}, .target = {1, 2}},
+                                      {.source = {3, 3}, .target = {1, 2}, .input_index = 1},
+                                      {.source = {1, 2}, .target = {3, 2}}});
     }
 }
 
@@ -130,8 +150,7 @@ TEST_CASE("Clear routing", "[routing-utils]")
         clear_routing(layout);
 
         CHECK(layout.is_empty_tile({1, 1}));
-        check_non_empty_tile(layout, {0, 1});
-        check_non_empty_tile(layout, {2, 1});
+        check_retained_tiles(layout, {{0, 1}, {2, 1}});
     }
     SECTION("Direct gate connections")
     {
@@ -139,13 +158,13 @@ TEST_CASE("Clear routing", "[routing-utils]")
 
         clear_routing(layout);
 
-        check_non_empty_tile(layout, {1, 1});
-        check_non_empty_tile(layout, {2, 0});
-        check_non_empty_tile(layout, {3, 1});
-        check_non_empty_tile(layout, {2, 1});
-        check_non_empty_tile(layout, {1, 0});
-        check_non_empty_tile(layout, {2, 2});
-        check_non_empty_tile(layout, {0, 0});
+        check_retained_tiles(layout, {{1, 1}, {2, 0}, {3, 1}, {2, 1}, {1, 0}, {2, 2}, {0, 0}});
+        const auto majority = layout.find_object({2, 1});
+        REQUIRE(majority.has_value());
+        if (majority)  // The optional-access check does not model REQUIRE.
+        {
+            CHECK(layout.input_count(*majority) == 3);
+        }
     }
     SECTION("Crossings")
     {
@@ -153,14 +172,7 @@ TEST_CASE("Clear routing", "[routing-utils]")
 
         clear_routing(layout);
 
-        check_non_empty_tile(layout, {1, 0});
-        check_non_empty_tile(layout, {0, 1});
-        check_non_empty_tile(layout, {2, 0});
-        check_non_empty_tile(layout, {0, 2});
-        check_non_empty_tile(layout, {1, 1});
-        check_non_empty_tile(layout, {2, 2});
-        check_non_empty_tile(layout, {3, 1});
-        check_non_empty_tile(layout, {3, 2});
+        check_retained_tiles(layout, {{1, 0}, {0, 1}, {2, 0}, {0, 2}, {1, 1}, {2, 2}, {3, 1}, {3, 2}});
 
         CHECK(layout.is_empty_tile({2, 1}));
         CHECK(layout.is_empty_tile({1, 2}));
@@ -172,12 +184,7 @@ TEST_CASE("Clear routing", "[routing-utils]")
 
         clear_routing(layout);
 
-        check_non_empty_tile(layout, {0, 1});
-        check_non_empty_tile(layout, {1, 1});
-        check_non_empty_tile(layout, {2, 1});
-        check_non_empty_tile(layout, {1, 0});
-        check_non_empty_tile(layout, {2, 0});
-        check_non_empty_tile(layout, {1, 2});
+        check_retained_tiles(layout, {{0, 1}, {1, 1}, {2, 1}, {1, 0}, {2, 0}, {1, 2}});
 
         CHECK(layout.is_empty_tile({2, 2}));
     }
@@ -198,12 +205,16 @@ TEST_CASE("Rerouting distinct sources preserves noncommutative input order", "[r
     const auto first_source = layout.source({gate, 0});
     /** @brief Routed source connected to the second input port. */
     const auto second_source = layout.source({gate, 1});
-    CHECK((first_source.has_value() && layout.source({*first_source, 0}) == a));
-    CHECK((second_source.has_value() && layout.source({*second_source, 0}) == b));
+    REQUIRE(first_source.has_value());
+    REQUIRE(second_source.has_value());
+    if (first_source && second_source)  // The optional-access check does not model REQUIRE.
+    {
+        CHECK(layout.source({*first_source, 0}) == a);
+        CHECK(layout.source({*second_source, 0}) == b);
+    }
     CHECK(layout.is_lt(gate));
     const auto objectives = extract_routing_objectives(layout);
-    CHECK(std::ranges::find(objectives, routing_objective{{0, 0}, {4, 1}, 0}) != objectives.end());
-    CHECK(std::ranges::find(objectives, routing_objective{{0, 1}, {4, 1}, 1}) != objectives.end());
+    check_objectives(objectives, {{{0, 0}, {4, 1}, 0}, {{0, 1}, {4, 1}, 1}});
 }
 
 TEST_CASE("Routing preserves duplicate destination ports and retained identities", "[routing-utils]")
@@ -213,15 +224,19 @@ TEST_CASE("Routing preserves duplicate destination ports and retained identities
     const auto            gate       = layout.create_lt(a, a, {4, 2});
     const auto            po         = layout.create_po(gate, "f", {5, 2});
     const auto            objectives = extract_routing_objectives(layout);
-    CHECK(std::ranges::find(objectives, routing_objective{{0, 0}, {4, 2}, 0}) != objectives.end());
-    CHECK(std::ranges::find(objectives, routing_objective{{0, 0}, {4, 2}, 1}) != objectives.end());
+    check_objectives(objectives, {{{0, 0}, {4, 2}, 0}, {{0, 0}, {4, 2}, 1}, {{4, 2}, {5, 2}, 0}});
     CHECK((routing_objective{{0, 0}, {4, 2}, 0} != routing_objective{{0, 0}, {4, 2}, 1}));
     clear_routing(layout);
-    CHECK(layout.contains(a));
-    CHECK(layout.contains(gate));
-    CHECK(layout.contains(po));
+    REQUIRE(layout.contains(a));
+    REQUIRE(layout.contains(gate));
+    REQUIRE(layout.contains(po));
+    REQUIRE(layout.input_count(gate) == 2);
+    REQUIRE(layout.input_count(po) == 1);
     CHECK_FALSE(layout.source({gate, 0}));
     CHECK_FALSE(layout.source({gate, 1}));
+    CHECK_FALSE(layout.source({po, 0}));
+    CHECK(layout.fanout_size(a) == 0);
+    CHECK(layout.fanout_size(gate) == 0);
     const layout_coordinate_path second{{0, 0}, {1, 0}, {4, 2}};
     route_path(layout, second, {gate, 1});
     CHECK_FALSE(layout.source({gate, 0}));

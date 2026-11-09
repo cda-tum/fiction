@@ -15,6 +15,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
@@ -30,7 +31,10 @@
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 
 #include <limits>
+#include <optional>
 #include <stdexcept>
+#include <tuple>
+#include <unordered_set>
 #include <vector>
 
 using namespace fiction;
@@ -124,6 +128,15 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
         op_domain_params.operational_params.sim_engine = engine::EXGS;
         const auto valid_parameters_exgs               = physically_valid_parameters(lyt, cd, op_domain_params);
         CHECK(valid_parameters_exgs.size() == 43);
+        std::unordered_set<parameter_point> visited{};
+        valid_parameters_exgs.for_each(
+            [&](const auto& point, const auto& value)
+            {
+                CAPTURE(point.get_parameters());
+                CHECK(visited.insert(point).second);
+                CHECK(valid_parameters.contains(point) == std::optional{value});
+            });
+        CHECK(visited.size() == valid_parameters_exgs.size());
 
         op_domain_params.operational_params.sim_engine = engine::QUICKSIM;
         const auto valid_parameters_quicksim           = physically_valid_parameters(lyt, cd, op_domain_params);
@@ -146,19 +159,15 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
 
         const auto p1 = valid_parameters.contains(parameter_point{{5.9, 5.5}});
         REQUIRE(p1.has_value());
-        CHECK(std::get<0>(p1.value_or(decltype(p1)::value_type{})) == 1);
+        CHECK(p1 == std::tuple{1});
 
         const auto p2 = valid_parameters.contains(parameter_point{{5.8, 4.4}});
         REQUIRE(p2.has_value());
-        CHECK(std::get<0>(p2.value_or(decltype(p2)::value_type{})) == 0);
+        CHECK(p2 == std::tuple{0});
 
-        const auto p3 = valid_parameters.contains(parameter_point{{5.8, 4.4}});
+        const auto p3 = valid_parameters.contains(parameter_point{{6.0, 6.0}});
         REQUIRE(p3.has_value());
-        CHECK(std::get<0>(p3.value_or(decltype(p3)::value_type{})) == 0);
-
-        const auto p4 = valid_parameters.contains(parameter_point{{6.0, 6.0}});
-        REQUIRE(p4.has_value());
-        CHECK(std::get<0>(p4.value_or(decltype(p4)::value_type{})) == 1);
+        CHECK(p3 == std::tuple{1});
     }
 }
 
@@ -178,6 +187,35 @@ TEST_CASE(
 
     operational_domain_params op_domain_params{.operational_params = {.sim_params = sim_params}};
 
+    cd.assign_charge_state({38, 0, 0}, charge_state::NEGATIVE);
+    cd.assign_charge_state({2, 1, 0}, charge_state::NEGATIVE);
+
+    cd.assign_charge_state({6, 2, 0}, charge_state::NEUTRAL);
+    cd.assign_charge_state({32, 2, 0}, charge_state::NEGATIVE);
+    cd.assign_charge_state({8, 3, 0}, charge_state::NEGATIVE);
+    cd.assign_charge_state({30, 3, 0}, charge_state::NEUTRAL);
+
+    cd.assign_charge_state({12, 4, 0}, charge_state::NEUTRAL);
+    cd.assign_charge_state({26, 4, 0}, charge_state::NEGATIVE);
+    cd.assign_charge_state({14, 5, 0}, charge_state::NEGATIVE);
+    cd.assign_charge_state({24, 5, 0}, charge_state::NEUTRAL);
+
+    cd.assign_charge_state({19, 8, 0}, charge_state::NEUTRAL);
+    cd.assign_charge_state({18, 9, 0}, charge_state::NEGATIVE);
+    cd.assign_charge_state({23, 9, 0}, charge_state::NEGATIVE);
+    cd.assign_charge_state({18, 11, 1}, charge_state::NEUTRAL);
+
+    cd.assign_charge_state({19, 13, 0}, charge_state::NEGATIVE);
+    cd.assign_charge_state({20, 14, 0}, charge_state::NEUTRAL);
+
+    cd.assign_charge_state({24, 15, 0}, charge_state::NEGATIVE);
+    cd.assign_charge_state({26, 16, 0}, charge_state::NEUTRAL);
+
+    cd.assign_charge_state({30, 17, 0}, charge_state::NEGATIVE);
+    cd.assign_charge_state({32, 18, 0}, charge_state::NEUTRAL);
+
+    cd.assign_charge_state({36, 19, 0}, charge_state::NEGATIVE);
+
     SECTION("Using the ground state of default physical parameters as given CDS, two dimensional sweep")
     {
         op_domain_params.sweep_dimensions = {operational_domain_value_range{.dimension = sweep_parameter::EPSILON_R,
@@ -189,53 +227,24 @@ TEST_CASE(
                                                                             .max       = 5.9,
                                                                             .step      = 0.1}};
 
-        cd.assign_charge_state({38, 0, 0}, charge_state::NEGATIVE);
-        cd.assign_charge_state({2, 1, 0}, charge_state::NEGATIVE);
-
-        cd.assign_charge_state({6, 2, 0}, charge_state::NEUTRAL);
-        cd.assign_charge_state({32, 2, 0}, charge_state::NEGATIVE);
-        cd.assign_charge_state({8, 3, 0}, charge_state::NEGATIVE);
-        cd.assign_charge_state({30, 3, 0}, charge_state::NEUTRAL);
-
-        cd.assign_charge_state({12, 4, 0}, charge_state::NEUTRAL);
-        cd.assign_charge_state({26, 4, 0}, charge_state::NEGATIVE);
-        cd.assign_charge_state({14, 5, 0}, charge_state::NEGATIVE);
-        cd.assign_charge_state({24, 5, 0}, charge_state::NEUTRAL);
-
-        cd.assign_charge_state({19, 8, 0}, charge_state::NEUTRAL);
-        cd.assign_charge_state({18, 9, 0}, charge_state::NEGATIVE);
-        cd.assign_charge_state({23, 9, 0}, charge_state::NEGATIVE);
-        cd.assign_charge_state({18, 11, 1}, charge_state::NEUTRAL);
-
-        cd.assign_charge_state({19, 13, 0}, charge_state::NEGATIVE);
-        cd.assign_charge_state({20, 14, 0}, charge_state::NEUTRAL);
-
-        cd.assign_charge_state({24, 15, 0}, charge_state::NEGATIVE);
-        cd.assign_charge_state({26, 16, 0}, charge_state::NEUTRAL);
-
-        cd.assign_charge_state({30, 17, 0}, charge_state::NEGATIVE);
-        cd.assign_charge_state({32, 18, 0}, charge_state::NEUTRAL);
-
-        cd.assign_charge_state({36, 19, 0}, charge_state::NEGATIVE);
-
         const auto valid_parameters = physically_valid_parameters(bestagon_and, cd, op_domain_params);
         REQUIRE(valid_parameters.size() == 100);
 
         const auto p1 = valid_parameters.contains(parameter_point{{5.6, 5.0}});
         REQUIRE(p1.has_value());
-        CHECK(std::get<0>(p1.value_or(decltype(p1)::value_type{})) == 0);
+        CHECK(p1 == std::tuple{0});
 
         const auto p2 = valid_parameters.contains(parameter_point{{5.0, 5.9}});
         REQUIRE(p2.has_value());
-        CHECK(std::get<0>(p2.value_or(decltype(p2)::value_type{})) == 2);
+        CHECK(p2 == std::tuple{2});
 
         const auto p3 = valid_parameters.contains(parameter_point{{5.4, 5.3}});
         REQUIRE(p3.has_value());
-        CHECK(std::get<0>(p3.value_or(decltype(p3)::value_type{})) == 1);
+        CHECK(p3 == std::tuple{1});
 
         const auto p4 = valid_parameters.contains(parameter_point{{5.8, 5.3}});
         REQUIRE(p4.has_value());
-        CHECK(std::get<0>(p4.value_or(decltype(p4)::value_type{})) == 0);
+        CHECK(p4 == std::tuple{0});
     }
 
     SECTION("Using the ground state of default physical parameters as given CDS, three dimensional sweep")
@@ -253,52 +262,23 @@ TEST_CASE(
                                                                             .max       = -0.31,
                                                                             .step      = 0.01}};
 
-        cd.assign_charge_state({38, 0, 0}, charge_state::NEGATIVE);
-        cd.assign_charge_state({2, 1, 0}, charge_state::NEGATIVE);
-
-        cd.assign_charge_state({6, 2, 0}, charge_state::NEUTRAL);
-        cd.assign_charge_state({32, 2, 0}, charge_state::NEGATIVE);
-        cd.assign_charge_state({8, 3, 0}, charge_state::NEGATIVE);
-        cd.assign_charge_state({30, 3, 0}, charge_state::NEUTRAL);
-
-        cd.assign_charge_state({12, 4, 0}, charge_state::NEUTRAL);
-        cd.assign_charge_state({26, 4, 0}, charge_state::NEGATIVE);
-        cd.assign_charge_state({14, 5, 0}, charge_state::NEGATIVE);
-        cd.assign_charge_state({24, 5, 0}, charge_state::NEUTRAL);
-
-        cd.assign_charge_state({19, 8, 0}, charge_state::NEUTRAL);
-        cd.assign_charge_state({18, 9, 0}, charge_state::NEGATIVE);
-        cd.assign_charge_state({23, 9, 0}, charge_state::NEGATIVE);
-        cd.assign_charge_state({18, 11, 1}, charge_state::NEUTRAL);
-
-        cd.assign_charge_state({19, 13, 0}, charge_state::NEGATIVE);
-        cd.assign_charge_state({20, 14, 0}, charge_state::NEUTRAL);
-
-        cd.assign_charge_state({24, 15, 0}, charge_state::NEGATIVE);
-        cd.assign_charge_state({26, 16, 0}, charge_state::NEUTRAL);
-
-        cd.assign_charge_state({30, 17, 0}, charge_state::NEGATIVE);
-        cd.assign_charge_state({32, 18, 0}, charge_state::NEUTRAL);
-
-        cd.assign_charge_state({36, 19, 0}, charge_state::NEGATIVE);
-
         const auto valid_parameters = physically_valid_parameters(bestagon_and, cd, op_domain_params);
         REQUIRE(valid_parameters.size() == 27);
         const auto p1 = valid_parameters.contains(parameter_point{{5.6, 5.0, -0.32}});
         REQUIRE(p1.has_value());
-        CHECK(std::get<0>(p1.value_or(decltype(p1)::value_type{})) == 0);
+        CHECK(p1 == std::tuple{0});
 
         const auto p2 = valid_parameters.contains(parameter_point{{5.6, 5.0, -0.33}});
         REQUIRE(p2.has_value());
-        CHECK(std::get<0>(p2.value_or(decltype(p2)::value_type{})) == 0);
+        CHECK(p2 == std::tuple{0});
 
         const auto p3 = valid_parameters.contains(parameter_point{{5.6, 5.0, -0.31}});
         REQUIRE(p3.has_value());
-        CHECK(std::get<0>(p3.value_or(decltype(p3)::value_type{})) == 1);
+        CHECK(p3 == std::tuple{1});
 
         const auto p4 = valid_parameters.contains(parameter_point{{5.7, 5.2, -0.33}});
         REQUIRE(p4.has_value());
-        CHECK(std::get<0>(p4.value_or(decltype(p4)::value_type{})) == 0);
+        CHECK(p4 == std::tuple{0});
     }
 }
 
@@ -338,6 +318,7 @@ TEST_CASE("Physical-validity sweep boundaries", "[determine-physically-valid-par
              {.dimension = sweep_parameter::EPSILON_R, .step = std::numeric_limits<double>::infinity()},
              {.dimension = sweep_parameter::EPSILON_R, .step = std::numeric_limits<double>::min()}})
     {
+        CAPTURE(range.min, range.max, range.step);
         params.sweep_dimensions = {range};
         CHECK_THROWS_AS(physically_valid_parameters(lyt, cd, params), std::invalid_argument);
         CHECK(physically_valid_parameters(lyt, charge_distribution{}, params).empty());

@@ -14,9 +14,11 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 
 #include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/layout.hpp>
@@ -28,7 +30,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
-#include <set>
 #include <vector>
 
 using namespace fiction;
@@ -40,6 +41,10 @@ using namespace Catch::Matchers;
 namespace
 {
 
+/**
+ * @brief Creates one isolated SiDB and one BDL pair.
+ * @return The three-SiDB layout.
+ */
 layout three_sidbs()
 {
     layout lyt{};
@@ -78,30 +83,18 @@ TEST_CASE("Simulation state over a landscape", "[simulation-state]")
             CHECK_THAT(state.local_internal_potential(i), WithinAbs(pot[i], 1E-12));
         }
     }
-    SECTION("enumerating every charge index visits every distribution once")
-    {
-        detail::simulation_state state{land, charge_state::NEGATIVE};
-
-        std::set<uint64_t> seen{state.snapshot().charge_index(2)};
-
-        while (state.charge_index() < state.max_charge_index())
-        {
-            state.increase_charge_index_by_one();
-            CHECK(seen.insert(state.snapshot().charge_index(2)).second);
-            CHECK(state.snapshot().charge_index(2) == state.charge_index());
-        }
-
-        CHECK(seen.size() == 8);
-    }
-    SECTION("physical validity and energy agree with the landscape along the enumeration")
+    SECTION("every charge index has the expected distribution, physical validity, and energy")
     {
         detail::simulation_state state{land, charge_state::NEGATIVE};
 
         std::size_t valid = 0;
 
-        while (true)
+        for (uint64_t index = 0; index < 8; ++index)
         {
+            CAPTURE(index);
             const auto cd = state.snapshot();
+            CHECK(state.charge_index() == index);
+            CHECK(cd.charge_index(2) == index);
             CHECK(state.is_physically_valid() == land.is_physically_valid(cd));
             CHECK_THAT(state.energy(), WithinAbs(land.energy(cd), 1E-12));
             if (state.is_physically_valid())
@@ -109,10 +102,6 @@ TEST_CASE("Simulation state over a landscape", "[simulation-state]")
                 ++valid;
             }
 
-            if (state.charge_index() == state.max_charge_index())
-            {
-                break;
-            }
             state.increase_charge_index_by_one();
         }
 
@@ -176,6 +165,15 @@ TEST_CASE("Simulation state over a landscape", "[simulation-state]")
         state.adjacent_search(0.7, negatives);
         CHECK(negatives.size() == 2);
         CHECK(state.num_negative_sidbs() == 2);
+        std::vector<std::size_t> expected_negatives{};
+        for (std::size_t i = 0; i < state.num_sidbs(); ++i)
+        {
+            if (state.get_charge_state_by_index(i) == charge_state::NEGATIVE)
+            {
+                expected_negatives.push_back(i);
+            }
+        }
+        CHECK(negatives == expected_negatives);
 
         // the incremental energy equals the internal-only energy of the new charges
         double collect = 0.0;
@@ -201,6 +199,9 @@ TEST_CASE("Simulation state over a landscape", "[simulation-state]")
         CHECK(state.index_base() == 2);
         CHECK(!state.three_state_sidbs().empty());
         CHECK(state.three_state_sidbs().size() + state.two_state_sidbs().size() == 3);
+        auto classified = state.three_state_sidbs();
+        classified.insert(classified.end(), state.two_state_sidbs().cbegin(), state.two_state_sidbs().cend());
+        CHECK_THAT(classified, UnorderedRangeEquals(std::vector<std::size_t>{0, 1, 2}));
         CHECK(state.max_charge_index() == (uint64_t{1} << state.two_state_sidbs().size()) - 1);
     }
     SECTION("large charge indices saturate")

@@ -15,7 +15,8 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/technology/sidb/model/physical_constants.hpp>
@@ -24,26 +25,27 @@
 using namespace fiction;
 using namespace fiction::sidb::model;
 
-TEST_CASE("Test sidb_simulation_parameters", "[sidb-simulation-parameters]")
+TEST_CASE("Simulation parameter construction and derived values", "[sidb-simulation-parameters]")
 {
     SECTION("Test constructor, parameter values and overwrite values")
     {
         const simulation_parameters params{};
 
         // Default values
-        REQUIRE(params.base == 3);
-        REQUIRE(params.mu_minus == -0.32);
-        REQUIRE(params.epsilon_r == 5.6);
-        REQUIRE(params.lambda_tf == 5.0);
-        REQUIRE(params.base == 3);
+        CHECK(params.base == 3);
+        CHECK(params.mu_minus == -0.32);
+        CHECK(params.epsilon_r == 5.6);
+        CHECK(params.lambda_tf == 5.0);
 
         // Constructor
-        simulation_parameters custom_params(2, -0.25, 4.2, 6.0);
-        REQUIRE(custom_params.base == 2);
-        REQUIRE(custom_params.mu_minus == -0.25);
-        REQUIRE(custom_params.epsilon_r == 4.2);
-        REQUIRE(custom_params.lambda_tf == 6.0);
-        REQUIRE(custom_params.base == 2);
+        simulation_parameters custom_params{2, -0.25, 4.2, 6.0};
+        CHECK(custom_params.base == 2);
+        CHECK(custom_params.mu_minus == -0.25);
+        CHECK(custom_params.epsilon_r == 4.2);
+        CHECK(custom_params.lambda_tf == 6.0);
+
+        CHECK_THAT(custom_params.k(), Catch::Matchers::WithinAbs(K_E / 4.2, 0.00001));
+        CHECK_THAT(custom_params.mu_plus(), Catch::Matchers::WithinAbs(-0.84, 0.00001));
 
         // Change values
         custom_params.base      = 3;
@@ -51,10 +53,12 @@ TEST_CASE("Test sidb_simulation_parameters", "[sidb-simulation-parameters]")
         custom_params.epsilon_r = 10.2;
         custom_params.lambda_tf = 1.0;
 
-        REQUIRE(custom_params.base == 3);
-        REQUIRE(custom_params.mu_minus == -0.1);
-        REQUIRE(custom_params.epsilon_r == 10.2);
-        REQUIRE(custom_params.lambda_tf == 1.0);
+        CHECK(custom_params.base == 3);
+        CHECK(custom_params.mu_minus == -0.1);
+        CHECK(custom_params.epsilon_r == 10.2);
+        CHECK(custom_params.lambda_tf == 1.0);
+        CHECK_THAT(custom_params.k(), Catch::Matchers::WithinAbs(K_E / 10.2, 0.00001));
+        CHECK_THAT(custom_params.mu_plus(), Catch::Matchers::WithinAbs(-0.69, 0.00001));
     }
 
     SECTION("Test calculated values")
@@ -63,10 +67,10 @@ TEST_CASE("Test sidb_simulation_parameters", "[sidb-simulation-parameters]")
 
         const double epsilon_r  = 5.6;
         const double k_expected = K_E / epsilon_r;
-        CHECK_THAT(params.k() - k_expected, Catch::Matchers::WithinAbs(0.0, 0.00001));
+        CHECK_THAT(params.k(), Catch::Matchers::WithinAbs(k_expected, 0.00001));
 
         const double mu_minus         = -0.32;
         const double mu_plus_expected = mu_minus - 0.59;
-        CHECK_THAT(params.mu_plus() - mu_plus_expected, Catch::Matchers::WithinAbs(0.0, 0.00001));
+        CHECK_THAT(params.mu_plus(), Catch::Matchers::WithinAbs(mu_plus_expected, 0.00001));
     }
 }

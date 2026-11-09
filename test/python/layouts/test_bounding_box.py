@@ -22,9 +22,10 @@ from mnt.pyfiction.layouts import (
 )
 from mnt.pyfiction.networks.io import read_network
 from mnt.pyfiction.physical_design import orthogonal
-from mnt.pyfiction.qca import qca_layout
+from mnt.pyfiction.qca import qca_cell_type, qca_layout
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from pathlib import Path
 
 
@@ -96,3 +97,21 @@ def test_bounding_box_around_cell_level_layout(make_layout):
     min_coord, max_coord = layout.bounding_box()
     assert min_coord is None
     assert max_coord is None
+
+
+def test_occupied_bounds_include_objects_outside_frame(gate_factory: Callable) -> None:
+    layout = gate_factory((10**9, 10**9))
+    a = layout.create_pi("a", (-5, 12))
+    assert layout.bounding_box() == (layout.coord(-5, 12), layout.coord(-5, 12))
+    b = layout.create_pi("b", (9, -3, 7))
+    assert layout.bounding_box() == (layout.coord(-5, -3), layout.coord(9, 12))
+    layout.remove(a)
+    layout.remove(b)
+    assert layout.bounding_box() == (None, None)
+
+
+def test_occupied_cell_bounds_span_signed_axes_and_ignore_elevation() -> None:
+    layout = qca_layout()
+    layout.assign_cell_type((-(2**31), 3, 1), qca_cell_type.INPUT)
+    layout.assign_cell_type((2**31 - 1, -7), qca_cell_type.OUTPUT)
+    assert layout.bounding_box() == (layout.coord(-(2**31), -7), layout.coord(2**31 - 1, 3))

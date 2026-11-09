@@ -18,16 +18,24 @@
 
 #include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
+
+#include "utils/scoped_temp_directory.hpp"
 
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 
+#include <tinyxml2.h>
+
+#include <filesystem>
 #include <fstream>
+#include <ios>
+#include <random>
 #include <sstream>
 #include <string>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -112,7 +120,7 @@ TEST_CASE("Read single-dot SQD layout", "[sqd]")
 
     const auto lyt = read_sqd_layout(layout_stream);
 
-    CHECK(lyt.get_lattice().name == "Si(111) 1x1");
+    CHECK_THAT(lyt.get_lattice().name, Catch::Matchers::Equals("Si(111) 1x1"));
     CHECK(lyt.num_dots() == 1);
     CHECK(lyt.get_dot_tag({0, 0, 0}) == dot_tag::NORMAL);
     CHECK(lyt.bounding_box() == std::pair{lattice_site{0, 0, 0}, lattice_site{0, 0, 0}});
@@ -536,19 +544,17 @@ TEST_CASE("Read multi-dot SQD layout with multi-cell defect", "[sqd]")
     CHECK(lyt.get_dot_tag({2, 2, 0}) == dot_tag::NORMAL);
     CHECK(lyt.get_dot_tag({2, 2, 1}) == dot_tag::NORMAL);
 
-    const std::unordered_set<lattice_site> defect_positions{{5, 2, 0}, {5, 2, 1}, {4, 2, 0}, {4, 2, 1}};
+    /** @brief Every included defect site and its Coulomb parameters, in raster order. */
+    const std::vector<std::pair<lattice_site, defect>> expected{{{4, 2, 0}, defect{defect_type::DB, -1, 5.6, 5.0}},
+                                                                {{5, 2, 0}, defect{defect_type::DB, -1, 5.6, 5.0}},
+                                                                {{4, 2, 1}, defect{defect_type::DB, -1, 5.6, 5.0}},
+                                                                {{5, 2, 1}, defect{defect_type::DB, -1, 5.6, 5.0}}};
+    /** @brief Complete visitor output retains order and multiplicity. */
+    std::vector<std::pair<lattice_site, defect>> observed{};
+    lyt.foreach_defect([&observed](const auto& sd) { observed.push_back(sd); });
 
-    CHECK(lyt.num_defects() == defect_positions.size());
-
-    lyt.foreach_defect(
-        [&defect_positions](const auto& sd)
-        {
-            const auto& [s, d]{sd};
-
-            CHECK(defect_positions.count(s) > 0);
-
-            CHECK(d == defect{defect_type::DB, -1, 5.6, 5.0});
-        });
+    CHECK(lyt.num_defects() == expected.size());
+    CHECK(observed == expected);
 }
 
 TEST_CASE("Read SQD defect despite missing <coulomb> element", "[sqd]")
@@ -667,10 +673,12 @@ TEST_CASE("SQD parsing error: missing <latcoord> element in <dbdot> element", "[
                                               "          <layer_id>2</layer_id>\n"
                                               "      </dbdot>\n"
                                               "    </layer>\n"
-                                              "    </layer>\n"
                                               "  </design>\n"
                                               "</siqad>\n";
 
+    /** @brief Well-formed XML isolates the missing coordinate from XML syntax errors. */
+    tinyxml2::XMLDocument document{};
+    REQUIRE(document.Parse(sqd_layout) == tinyxml2::XML_SUCCESS);
     std::istringstream layout_stream{sqd_layout};
 
     CHECK_THROWS_AS(read_sqd_layout(layout_stream), sqd_parsing_error);
@@ -813,7 +821,7 @@ TEST_CASE("SQD parsing error: missing <latcoord> element in <incl_coords> elemen
     CHECK_THROWS_AS(read_sqd_layout(layout_stream), sqd_parsing_error);
 }
 
-TEST_CASE("SQD parsing error: missing <type> element in <dbdot> element")
+TEST_CASE("SQD parsing error: empty <type> text in <dbdot> element", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
@@ -841,7 +849,7 @@ TEST_CASE("SQD parsing error: missing <type> element in <dbdot> element")
     CHECK_THROWS_AS(read_sqd_layout(layout_stream), sqd_parsing_error);
 }
 
-TEST_CASE("SQD parsing error: invalid <type> element in <dbdot> element")
+TEST_CASE("SQD parsing error: invalid <type> element in <dbdot> element", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
@@ -1022,7 +1030,7 @@ TEST_CASE("Read SQD layout into an sidb::layout", "[sqd]")
 
     const auto lyt = read_sqd_layout(layout_stream, "gate");
 
-    CHECK(lyt.get_layout_name() == "gate");
+    CHECK_THAT(lyt.get_layout_name(), Catch::Matchers::Equals("gate"));
     CHECK(lyt.get_lattice() == sidb::lattice::si_111_1x1());
     CHECK(lyt.num_dots() == 4);
     CHECK(lyt.get_dot_tag({0, 0, 0}) == dot_tag::INPUT);
@@ -1075,6 +1083,7 @@ TEST_CASE("Malformed SQD defect values", "[sqd]")
           R"(<coulomb charge="-1" eps_r="5.6" lambda_tf="-1"/>)",
           R"(<coulomb charge="-1" eps_r="5.6" lambda_tf="inf"/>)"})
     {
+        CAPTURE(value);
         const std::string document =
             std::string{"<siqad><layers><layer_prop><lat_vec/></layer_prop></layers><design>"
                         R"(<layer type="Defects"><defect><incl_coords><latcoord n="0" m="0" l="0"/>)"
@@ -1093,6 +1102,7 @@ TEST_CASE("SQD parsing error into an sidb::layout", "[sqd]")
                                        R"(n="999999999999999999999999" m="0" l="0")", R"(n="2147483648" m="0" l="0")",
                                        R"(n="0" m="-2147483649" l="0")"})
         {
+            CAPTURE(attributes);
             std::istringstream stream{std::string{"<siqad><layers><layer_prop><lat_vec/></layer_prop></layers><design>"
                                                   R"(<layer type="DB"><dbdot><latcoord )"} +
                                       attributes + " /></dbdot></layer></design></siqad>"};
@@ -1193,6 +1203,7 @@ TEST_CASE("SQD coordinates consume complete numeric attributes", "[sqd]")
 {
     for (const auto* attributes : {R"(n="1junk" m="2" l="1")", R"(n="1" m="2.7" l="1")", R"(n="1" m="2" l="1tail")"})
     {
+        CAPTURE(attributes);
         const auto         document = std::string{"<siqad><layers><layer_prop><lat_vec/></layer_prop></layers><design>"
                                                   R"(<layer type="DB"><dbdot><latcoord )"} +
                                       attributes + " /></dbdot></layer></design></siqad>";
@@ -1203,4 +1214,37 @@ TEST_CASE("SQD coordinates consume complete numeric attributes", "[sqd]")
                               R"(<layer type="DB"><dbdot><latcoord n=" 1 " m=" 2 " l=" 1 "/>)"
                               "</dbdot></layer></design></siqad>"};
     CHECK(read_sqd_layout(stream).sidbs() == std::vector<lattice_site>{{1, 2, 1}});
+}
+
+TEST_CASE("SQD readers reject incomplete document consumption", "[sqd]")
+{
+    /** @brief Minimal valid SQD document. */
+    const std::string xml{"<siqad><layers><layer_prop><lat_vec/></layer_prop></layers><design/></siqad>"};
+    for (const auto& malformed : {xml + '\0' + "<invalid>", xml + "<other/>", "<other/>" + xml, xml + xml, xml + "text",
+                                  xml.substr(0, xml.size() - 1), "text" + xml, xml + "text<!-- after -->",
+                                  xml + "<!-- before -->text<!-- after -->", xml + "<![CDATA[text]]>"})
+    {
+        CAPTURE(malformed);
+        /** @brief Stream whose valid SQD portion must not hide other input. */
+        std::istringstream stream{malformed};
+        CHECK_THROWS_AS(read_sqd_layout(stream), sqd_parsing_error);
+    }
+    /** @brief Comments and whitespace outside the root remain valid XML. */
+    std::istringstream valid{"<?xml version=\"1.0\"?><!-- before -->\r\n" + xml + "\r\n<!-- after -->"};
+    CHECK(read_sqd_layout(valid).is_empty());
+
+    const fiction::test::scoped_temp_directory directory{std::filesystem::temp_directory_path(),
+                                                         "fiction-sqd-input-" + std::to_string(std::random_device{}())};
+    for (const auto control : {char{0}, char{26}})
+    {
+        /** @brief Temporary SQD file containing the complete byte sequence. */
+        const auto filename = directory.path() / "input.sqd";
+        {
+            /** @brief Binary output preserves control bytes. */
+            std::ofstream output{filename, std::ios::binary};
+            REQUIRE(output.is_open());
+            output << xml << control << "<invalid>";
+        }
+        CHECK_THROWS_AS(read_sqd_layout(filename.string()), sqd_parsing_error);
+    }
 }

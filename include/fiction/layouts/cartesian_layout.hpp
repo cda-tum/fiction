@@ -401,7 +401,7 @@ class cartesian_layout : public layout_base
      * Returns whether the given coordinate is located at the layout's eastern border where x is maximal.
      *
      * @param c Coordinate to check for border location.
-     * @return `true` iff `c` is located at the layout's northern border.
+     * @return `true` iff `c` is located at the layout's eastern border.
      */
     [[nodiscard]] bool is_at_eastern_border(const coordinate& c) const noexcept
     {

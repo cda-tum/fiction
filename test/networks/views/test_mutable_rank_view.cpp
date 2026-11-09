@@ -43,6 +43,7 @@
 #include <functional>
 #include <optional>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
@@ -111,9 +112,7 @@ std::optional<bool> virtual_miter_equivalent(const Spec& spec, const Impl& impl)
         return std::nullopt;
     }
 
-    mockturtle::equivalence_checking_stats st{};
-
-    return mockturtle::equivalence_checking(*miter, {}, &st);
+    return mockturtle::equivalence_checking(*miter);
 }
 
 }  // namespace
@@ -123,36 +122,36 @@ TEMPLATE_TEST_CASE("Traits", "[mutable-rank-view]", mockturtle::aig_network, moc
                    mockturtle::cover_network, mockturtle::buffered_aig_network, mockturtle::buffered_mig_network,
                    mockturtle::crossed_klut_network, mockturtle::buffered_crossed_klut_network)
 {
-    CHECK(mockturtle::is_network_type_v<TestType>);
-    CHECK(!mockturtle::has_rank_position_v<TestType>);
-    CHECK(!mockturtle::has_at_rank_position_v<TestType>);
-    CHECK(!mockturtle::has_width_v<TestType>);
-    CHECK(!mockturtle::has_sort_rank_v<TestType>);
-    CHECK(!mockturtle::has_foreach_node_in_rank_v<TestType>);
-    CHECK(!mockturtle::has_foreach_gate_in_rank_v<TestType>);
-    CHECK(!mockturtle::is_topologically_sorted_v<TestType>);
+    STATIC_REQUIRE(mockturtle::is_network_type_v<TestType>);
+    STATIC_REQUIRE_FALSE(mockturtle::has_rank_position_v<TestType>);
+    STATIC_REQUIRE_FALSE(mockturtle::has_at_rank_position_v<TestType>);
+    STATIC_REQUIRE_FALSE(mockturtle::has_width_v<TestType>);
+    STATIC_REQUIRE_FALSE(mockturtle::has_sort_rank_v<TestType>);
+    STATIC_REQUIRE_FALSE(mockturtle::has_foreach_node_in_rank_v<TestType>);
+    STATIC_REQUIRE_FALSE(mockturtle::has_foreach_gate_in_rank_v<TestType>);
+    STATIC_REQUIRE_FALSE(mockturtle::is_topologically_sorted_v<TestType>);
 
     using rank_ntk = mutable_rank_view<TestType>;
 
-    CHECK(mockturtle::is_network_type_v<rank_ntk>);
-    CHECK(mockturtle::has_rank_position_v<rank_ntk>);
-    CHECK(mockturtle::has_at_rank_position_v<rank_ntk>);
-    CHECK(mockturtle::has_width_v<rank_ntk>);
-    CHECK(mockturtle::has_sort_rank_v<rank_ntk>);
-    CHECK(mockturtle::has_foreach_node_in_rank_v<rank_ntk>);
-    CHECK(mockturtle::has_foreach_gate_in_rank_v<rank_ntk>);
-    CHECK(mockturtle::is_topologically_sorted_v<rank_ntk>);
+    STATIC_REQUIRE(mockturtle::is_network_type_v<rank_ntk>);
+    STATIC_REQUIRE(mockturtle::has_rank_position_v<rank_ntk>);
+    STATIC_REQUIRE(mockturtle::has_at_rank_position_v<rank_ntk>);
+    STATIC_REQUIRE(mockturtle::has_width_v<rank_ntk>);
+    STATIC_REQUIRE(mockturtle::has_sort_rank_v<rank_ntk>);
+    STATIC_REQUIRE(mockturtle::has_foreach_node_in_rank_v<rank_ntk>);
+    STATIC_REQUIRE(mockturtle::has_foreach_gate_in_rank_v<rank_ntk>);
+    STATIC_REQUIRE(mockturtle::is_topologically_sorted_v<rank_ntk>);
 
     using rank_rank_ntk = mutable_rank_view<rank_ntk>;
 
-    CHECK(mockturtle::is_network_type_v<rank_rank_ntk>);
-    CHECK(mockturtle::has_rank_position_v<rank_rank_ntk>);
-    CHECK(mockturtle::has_at_rank_position_v<rank_rank_ntk>);
-    CHECK(mockturtle::has_width_v<rank_rank_ntk>);
-    CHECK(mockturtle::has_sort_rank_v<rank_rank_ntk>);
-    CHECK(mockturtle::has_foreach_node_in_rank_v<rank_rank_ntk>);
-    CHECK(mockturtle::has_foreach_gate_in_rank_v<rank_rank_ntk>);
-    CHECK(mockturtle::is_topologically_sorted_v<rank_rank_ntk>);
+    STATIC_REQUIRE(mockturtle::is_network_type_v<rank_rank_ntk>);
+    STATIC_REQUIRE(mockturtle::has_rank_position_v<rank_rank_ntk>);
+    STATIC_REQUIRE(mockturtle::has_at_rank_position_v<rank_rank_ntk>);
+    STATIC_REQUIRE(mockturtle::has_width_v<rank_rank_ntk>);
+    STATIC_REQUIRE(mockturtle::has_sort_rank_v<rank_rank_ntk>);
+    STATIC_REQUIRE(mockturtle::has_foreach_node_in_rank_v<rank_rank_ntk>);
+    STATIC_REQUIRE(mockturtle::has_foreach_gate_in_rank_v<rank_rank_ntk>);
+    STATIC_REQUIRE(mockturtle::is_topologically_sorted_v<rank_rank_ntk>);
 }
 
 TEST_CASE("Test constructors", "[mutable-rank-view]")
@@ -174,17 +173,21 @@ TEST_CASE("Test constructors", "[mutable-rank-view]")
     const auto                                                           tec_r_cpy(tec_r);
     const auto                                                           tec_r_eq     = tec_r;
     const auto                                                           tec_r_create = mutable_rank_view(tec);
-    const std::vector<std::vector<mockturtle::node<technology_network>>> ranks        = {{2, 3}, {4}};
+    const std::vector<std::vector<mockturtle::node<technology_network>>> ranks = {{tec.get_node(x2), tec.get_node(x1)},
+                                                                                  {tec.get_node(a1)}};
     const auto                                                           tec_r_vector = mutable_rank_view(tec, ranks);
-    CHECK(tec_r_vector.rank_position(2) == tec_r.rank_position(2));
-    CHECK(tec_r_vector.rank_position(3) == tec_r.rank_position(3));
-    CHECK(tec_r_vector.rank_position(4) == tec_r.rank_position(4));
+    CHECK(tec_r_vector.rank_position(tec.get_node(x1)) == 1u);
+    CHECK(tec_r_vector.rank_position(tec.get_node(x2)) == 0u);
+    CHECK(tec_r_vector.rank_position(tec.get_node(a1)) == 0u);
+    CHECK(tec_r.rank_position(tec_r.get_node(x1_r)) == 0u);
+    CHECK(tec_r.rank_position(tec_r.get_node(x2_r)) == 1u);
+    CHECK(tec_r.rank_position(tec_r.get_node(a1_r)) == 0u);
 
-    CHECK(tec_r_create.check_validity() == 1);
-    CHECK(tec_r_vector.check_validity() == 1);
-    CHECK(tec_r.check_validity() == 1);
-    CHECK(tec_r_cpy.check_validity() == 1);
-    CHECK(tec_r_eq.check_validity() == 1);
+    CHECK(tec_r_create.check_validity());
+    CHECK(tec_r_vector.check_validity());
+    CHECK(tec_r.check_validity());
+    CHECK(tec_r_cpy.check_validity());
+    CHECK(tec_r_eq.check_validity());
 }
 
 TEST_CASE("Foreach", "[mutable-rank-view]")
@@ -195,7 +198,7 @@ TEST_CASE("Foreach", "[mutable-rank-view]")
     const auto x2_r = tec_r.create_pi();
     const auto a1_r = tec_r.create_and(x1_r, x2_r);
     tec_r.create_po(a1_r);
-    CHECK(has_update_ranks_v<decltype(tec_r)>);
+    STATIC_REQUIRE(has_update_ranks_v<decltype(tec_r)>);
     tec_r.update_ranks();
 
     std::vector<mockturtle::node<technology_network>> pis{};
@@ -203,15 +206,18 @@ TEST_CASE("Foreach", "[mutable-rank-view]")
     tec_r.foreach_pi([&pis](const auto& n) { pis.push_back(n); });
 
     tec_r.foreach_ci([&cis](const auto& n) { cis.push_back(n); });
-    CHECK(pis == cis);
+    const std::vector<technology_network::node> inputs{tec_r.get_node(x1_r), tec_r.get_node(x2_r)};
+    CHECK(pis == inputs);
+    CHECK(cis == inputs);
 
     cis.clear();
     tec_r.foreach_node_in_rank(0, [&cis](const auto& n) { cis.push_back(n); });
-    CHECK(pis == cis);
+    CHECK(cis == inputs);
 
     std::vector<mockturtle::node<technology_network>> node_vector{};
     tec_r.foreach_node([&node_vector](const auto& n) { node_vector.push_back(n); });
-    CHECK(node_vector.size() == tec_r.size() - 2);
+    CHECK(node_vector ==
+          std::vector<technology_network::node>{tec_r.get_node(x1_r), tec_r.get_node(x2_r), tec_r.get_node(a1_r)});
 
     pis.clear();
     tec_r.foreach_gate_in_rank(0, [&pis](const auto& n) { pis.push_back(n); });
@@ -219,16 +225,66 @@ TEST_CASE("Foreach", "[mutable-rank-view]")
 
     node_vector.clear();
     tec_r.foreach_gate([&node_vector](const auto& n) { node_vector.push_back(n); });
-    CHECK(node_vector.size() == tec_r.num_gates());
+    CHECK(node_vector == std::vector<technology_network::node>{tec_r.get_node(a1_r)});
+}
+
+TEST_CASE("Rank traversal keeps global indices and stops across levels", "[mutable-rank-view]")
+{
+    technology_network ntk{};
+    const auto         a  = ntk.create_pi();
+    const auto         b  = ntk.create_pi();
+    const auto         g1 = ntk.create_and(a, b);
+    const auto         g2 = ntk.create_not(g1);
+    ntk.create_po(g2);
+    const mutable_rank_view ranked{ntk};
+
+    uint32_t                              count{0};
+    std::vector<technology_network::node> visited{};
+    SECTION("Node indices")
+    {
+        ranked.foreach_node(
+            [&](const auto n, const auto index)
+            {
+                CHECK(index == count++);
+                visited.push_back(n);
+            });
+        CHECK(visited == std::vector<technology_network::node>{ntk.get_node(a), ntk.get_node(b), ntk.get_node(g1),
+                                                               ntk.get_node(g2)});
+    }
+    SECTION("Gate indices")
+    {
+        ranked.foreach_gate(
+            [&](const auto n, const auto index)
+            {
+                CHECK(index == count++);
+                visited.push_back(n);
+            });
+        CHECK(visited == std::vector<technology_network::node>{ntk.get_node(g1), ntk.get_node(g2)});
+    }
+    SECTION("Stop node traversal across levels")
+    {
+        ranked.foreach_node([&](const auto&) { return ++count != 2; });
+        CHECK(count == 2);
+    }
+    SECTION("Stop gate traversal across levels")
+    {
+        ranked.foreach_gate(
+            [&](const auto&, const auto index)
+            {
+                CHECK(index == count++);
+                return false;
+            });
+        CHECK(count == 1);
+    }
 }
 
 TEST_CASE("Construct mutable_rank_view with given rank order", "[mutable-rank-view]")
 {
     technology_network tec{};
 
-    CHECK(mockturtle::has_clear_visited_v<technology_network>);
-    CHECK(mockturtle::has_visited_v<technology_network>);
-    CHECK(mockturtle::has_set_visited_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_clear_visited_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_visited_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_set_visited_v<technology_network>);
 
     const auto x1 = tec.create_pi();
     const auto x2 = tec.create_pi();
@@ -265,9 +321,9 @@ TEST_CASE("Check modify ranks", "[mutable-rank-view]")
 {
     technology_network tec{};
 
-    CHECK(mockturtle::has_clear_visited_v<technology_network>);
-    CHECK(mockturtle::has_visited_v<technology_network>);
-    CHECK(mockturtle::has_set_visited_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_clear_visited_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_visited_v<technology_network>);
+    STATIC_REQUIRE(mockturtle::has_set_visited_v<technology_network>);
 
     const auto x1 = tec.create_pi();
     const auto x2 = tec.create_pi();
@@ -288,10 +344,14 @@ TEST_CASE("Check modify ranks", "[mutable-rank-view]")
 
     auto vpi_r = mutable_rank_view(tec_balanced);
 
-    const std::vector<technology_network::node> nodes = {13, 10, 14};
+    auto nodes = vpi_r.get_ranks(2);
+    REQUIRE(nodes.size() == 3);
+    REQUIRE(nodes[0] != nodes[1]);
+    std::swap(nodes[0], nodes[1]);
     vpi_r.set_ranks(2, nodes);
 
-    CHECK(vpi_r.check_validity() == 1);
+    CHECK(vpi_r.get_ranks(2) == nodes);
+    CHECK(vpi_r.check_validity());
 }
 
 TEST_CASE("Rank assignments that do not fit the network are rejected", "[mutable-rank-view]")
@@ -311,6 +371,7 @@ TEST_CASE("Rank assignments that do not fit the network are rejected", "[mutable
     const auto n2 = tec.get_node(g2);
 
     const auto before = ranked.get_all_ranks();
+    REQUIRE_FALSE(before.empty());
 
     SECTION("a level beyond the depth")
     {
@@ -392,9 +453,8 @@ TEMPLATE_TEST_CASE("Check equivalence checking", "[mutable-rank-view]", mockturt
 
     const auto maybe_cec_m = virtual_miter_equivalent(ntk, ntk_r);
     REQUIRE(maybe_cec_m.has_value());
-    const bool cec_m = maybe_cec_m.value_or(false);
-    CHECK(cec_m == 1);
-    CHECK(ntk_r.check_validity() == 1);
+    CHECK(maybe_cec_m.value_or(false));
+    CHECK(ntk_r.check_validity());
 }
 
 TEST_CASE("Check equivalence checking for virtual PIs", "[mutable-rank-view]")
@@ -431,9 +491,8 @@ TEST_CASE("Check equivalence checking for virtual PIs", "[mutable-rank-view]")
 
     const auto maybe_cec_m = virtual_miter_equivalent(tec, vpi_r);
     REQUIRE(maybe_cec_m.has_value());
-    const bool cec_m = maybe_cec_m.value_or(false);
-    CHECK(cec_m == 1);
-    CHECK(vpi_r.check_validity() == 1);
+    CHECK(maybe_cec_m.value_or(false));
+    CHECK(vpi_r.check_validity());
 }
 
 TEST_CASE("Check PI order for equivalence checking", "[mutable-rank-view]")
@@ -454,21 +513,25 @@ TEST_CASE("Check PI order for equivalence checking", "[mutable-rank-view]")
 
     // the swap changes the order in which `foreach_pi` visits the inputs; the miter pairs them by creation order, so
     // the equivalence is unaffected
-    vpi_r.swap(2, 3);
+    vpi_r.swap(tec.get_node(a), tec.get_node(b));
+    /** @brief Input nodes in rank order. */
+    std::vector<technology_network::node> inputs{};
+    vpi_r.foreach_pi([&](const auto n) { inputs.push_back(n); });
+    CHECK(inputs == std::vector<technology_network::node>{tec.get_node(b), tec.get_node(a), tec.get_node(c)});
 
     auto maybe_cec_m = virtual_miter_equivalent(tec, vpi_r);
     REQUIRE(maybe_cec_m.has_value());
-    bool cec_m = maybe_cec_m.value_or(false);
-    CHECK(cec_m == 1);
+    CHECK(maybe_cec_m.value_or(false));
 
-    // this rearranges the order of the PI as stored in the underlying static_depth_view (corresponds to the order in
-    // _storage)
+    // Restore the underlying input order in rank zero.
     vpi_r.rearrange_pis();
+    inputs.clear();
+    vpi_r.foreach_pi([&](const auto n) { inputs.push_back(n); });
+    CHECK(inputs == std::vector<technology_network::node>{tec.get_node(a), tec.get_node(b), tec.get_node(c)});
 
     maybe_cec_m = virtual_miter_equivalent(tec, vpi_r);
     REQUIRE(maybe_cec_m.has_value());
-    cec_m = maybe_cec_m.value_or(false);
-    CHECK(cec_m == 1);
+    CHECK(maybe_cec_m.value_or(false));
 }
 
 TEST_CASE("Dangling gates are rejected", "[mutable-rank-view]")
@@ -517,14 +580,11 @@ TEST_CASE("Primary inputs without fanout are ranked", "[mutable-rank-view]")
     std::vector<mockturtle::node<technology_network>> visited{};
     ranked.foreach_pi([&visited](const auto& n) { visited.push_back(n); });
 
-    REQUIRE(visited.size() == 3);
-    CHECK(visited[0] == tec.get_node(unused));
-    CHECK(visited[1] == tec.get_node(x1));
-    CHECK(visited[2] == tec.get_node(x2));
+    CHECK(visited == std::vector<technology_network::node>{tec.get_node(unused), tec.get_node(x1), tec.get_node(x2)});
 
     std::vector<mockturtle::node<technology_network>> cis{};
     ranked.foreach_ci([&cis](const auto& n) { cis.push_back(n); });
-    CHECK(cis == visited);
+    CHECK(cis == std::vector<technology_network::node>{tec.get_node(unused), tec.get_node(x1), tec.get_node(x2)});
 
     // copying the view through mockturtle keeps every input
     const auto copy = mockturtle::cleanup_dangling(ranked);
@@ -556,9 +616,6 @@ TEST_CASE("Rearranging primary inputs keeps unused inputs in rank 0", "[mutable-
     std::vector<mockturtle::node<technology_network>> visited{};
     ranked.foreach_pi([&visited](const auto& n) { visited.push_back(n); });
 
-    REQUIRE(visited.size() == 4);
-    CHECK(visited[0] == tec.get_node(unused_1));
-    CHECK(visited[1] == tec.get_node(x1));
-    CHECK(visited[2] == tec.get_node(unused_2));
-    CHECK(visited[3] == tec.get_node(x2));
+    CHECK(visited == std::vector<technology_network::node>{tec.get_node(unused_1), tec.get_node(x1),
+                                                           tec.get_node(unused_2), tec.get_node(x2)});
 }

@@ -15,9 +15,12 @@
  * @author Simon Hofmann (simon1hofmann)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
@@ -62,43 +65,72 @@ static_assert(std::same_as<decltype(&orthogonal<cartesian_layout>),
                            cartesian_gate_layout (*)(const named_technology_network&, orthogonal_physical_design_params,
                                                      orthogonal_physical_design_stats*)>);
 
-void check_stats(const orthogonal_physical_design_stats& st) noexcept
+/**
+ * @brief Checks the reported statistics against the returned layout.
+ * @tparam Lyt Gate-level layout type.
+ * @param st Reported physical-design statistics.
+ * @param lyt Returned layout.
+ */
+template <typename Lyt>
+void check_stats(const orthogonal_physical_design_stats& st, const Lyt& lyt)
 {
-    CHECK(st.x_size > 0);
-    CHECK(st.y_size > 0);
-    CHECK(st.num_gates > 0);
-    CHECK(st.num_wires > 0);
+    CHECK(st.time_total >= decltype(st.time_total)::zero());
+    CHECK(st.x_size == lyt.width());
+    CHECK(st.y_size == lyt.height());
+    CHECK(st.num_gates == lyt.num_gates());
+    CHECK(st.num_wires == lyt.num_wires());
+    CHECK(st.num_crossings == lyt.num_crossings());
 }
 
+/**
+ * @brief Checks layout equivalence and reported physical-design statistics.
+ * @tparam Lyt Gate-level layout type.
+ * @tparam Ntk Network type.
+ * @param ntk Network to place and route.
+ * @param blueprint Blueprint name reported on failure.
+ * @param a Layout arrangement.
+ */
 template <typename Lyt, typename Ntk>
-void check_ortho_equiv(const Ntk& ntk, const std::optional<arrangement> a = std::nullopt)
+void check_ortho_equiv(const Ntk& ntk, const char* blueprint, const std::optional<arrangement> a = std::nullopt)
 {
+    CAPTURE(blueprint);
     orthogonal_physical_design_stats        stats{};
     const orthogonal_physical_design_params ps{.layout_arrangement = a};
 
     auto layout =
         orthogonal<typename Lyt::coordinate_layout>(convert_network<named_technology_network>(ntk), ps, &stats);
 
-    check_stats(stats);
+    check_stats(stats, layout);
     check_eq(ntk, layout);
 }
 
+/**
+ * @brief Checks every orthogonal-equivalence blueprint in order.
+ * @tparam Lyt Gate-level layout type.
+ * @param a Layout arrangement.
+ */
 template <typename Lyt>
 void check_ortho_equiv_all(const std::optional<arrangement> a = std::nullopt)
 {
-    check_ortho_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(), a);
-    check_ortho_equiv<Lyt>(blueprints::maj1_network<mockturtle::aig_network>(), a);
-    check_ortho_equiv<Lyt>(blueprints::maj4_network<mockturtle::aig_network>(), a);
-    check_ortho_equiv<Lyt>(blueprints::se_coloring_corner_case_network<technology_network>(), a);
-    check_ortho_equiv<Lyt>(blueprints::fanout_substitution_corner_case_network<technology_network>(), a);
-    check_ortho_equiv<Lyt>(blueprints::nary_operation_network<technology_network>(), a);
-    check_ortho_equiv<Lyt>(blueprints::clpl<technology_network>(), a);
+    check_ortho_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(),
+                           "unbalanced_and_inv_network<aig_network>", a);
+    check_ortho_equiv<Lyt>(blueprints::maj1_network<mockturtle::aig_network>(), "maj1_network<aig_network>", a);
+    check_ortho_equiv<Lyt>(blueprints::maj4_network<mockturtle::aig_network>(), "maj4_network<aig_network>", a);
+    check_ortho_equiv<Lyt>(blueprints::se_coloring_corner_case_network<technology_network>(),
+                           "se_coloring_corner_case_network<technology_network>", a);
+    check_ortho_equiv<Lyt>(blueprints::fanout_substitution_corner_case_network<technology_network>(),
+                           "fanout_substitution_corner_case_network<technology_network>", a);
+    check_ortho_equiv<Lyt>(blueprints::nary_operation_network<technology_network>(),
+                           "nary_operation_network<technology_network>", a);
+    check_ortho_equiv<Lyt>(blueprints::clpl<technology_network>(), "clpl<technology_network>", a);
 
     // constant input network
-    check_ortho_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>(), a);
+    check_ortho_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>(),
+                           "unbalanced_and_inv_network<mig_network>", a);
 
     // multi-output network
-    check_ortho_equiv<Lyt>(blueprints::multi_output_network<technology_network>(), a);
+    check_ortho_equiv<Lyt>(blueprints::multi_output_network<technology_network>(),
+                           "multi_output_network<technology_network>", a);
 }
 
 TEST_CASE("East-south coloring", "[orthogonal]")
@@ -151,12 +183,14 @@ TEST_CASE("East-south coloring owns its named traversal", "[orthogonal]")
 
     const auto& ntk = container.color_ntk;
     CHECK(physical_design::detail::is_east_south_colored(ntk));
+    REQUIRE(ntk.num_pis() == 2);
+    REQUIRE(ntk.num_pos() == 1);
     CHECK(ntk.get_node(ntk.po_at(0)) == output);
-    CHECK(ntk.get_network_name() == "owned_coloring");
-    CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(0))) == "left");
-    CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(1))) == "right");
-    CHECK(ntk.get_name(ntk.po_at(0)) == "conjunction");
-    CHECK(ntk.get_output_name(0) == "result");
+    CHECK_THAT(ntk.get_network_name(), Catch::Matchers::Equals("owned_coloring"));
+    CHECK_THAT(ntk.get_name(ntk.make_signal(ntk.pi_at(0))), Catch::Matchers::Equals("left"));
+    CHECK_THAT(ntk.get_name(ntk.make_signal(ntk.pi_at(1))), Catch::Matchers::Equals("right"));
+    CHECK_THAT(ntk.get_name(ntk.po_at(0)), Catch::Matchers::Equals("conjunction"));
+    CHECK_THAT(ntk.get_output_name(0), Catch::Matchers::Equals("result"));
 }
 
 TEST_CASE("Orthogonal physical design of a network without primary inputs", "[orthogonal]")
@@ -181,6 +215,7 @@ TEST_CASE("Layout equivalence", "[orthogonal]")
         const auto a =
             GENERATE(arrangement::ODD_ROW, arrangement::EVEN_ROW, arrangement::ODD_COLUMN, arrangement::EVEN_COLUMN);
 
+        CAPTURE(a);
         check_ortho_equiv_all<hexagonal_gate_layout>(a);
     }
 }
@@ -190,6 +225,7 @@ TEST_CASE("Repeated gate inputs have valid physical routing", "[orthogonal]")
     named_technology_network ntk{};
     const auto               a        = ntk.create_pi();
     const auto               function = GENERATE(0, 1, 2);
+    CAPTURE(function);
     /** @brief Gate with repeated input ports for the selected Boolean function. */
     const auto output = [&ntk, a, function]()
     {
@@ -203,7 +239,10 @@ TEST_CASE("Repeated gate inputs have valid physical routing", "[orthogonal]")
         }
         return ntk.create_xor(a, a);
     }();
-    if (GENERATE(false, true))
+    /** @brief Whether the repeated input also drives a primary output. */
+    const auto direct_output = GENERATE(false, true);
+    CAPTURE(direct_output);
+    if (direct_output)
     {
         ntk.create_po(a);
     }
@@ -226,7 +265,7 @@ TEST_CASE("Orthogonal placement preserves noncommutative input order", "[orthogo
     const auto               unused = ntk.create_pi();
     ntk.create_po(ntk.create_lt(b, a));
     const auto lyt = orthogonal<cartesian_layout>(ntk);
-    CHECK(lyt.num_pis() == 3);
+    REQUIRE(lyt.num_pis() == 3);
     CHECK(lyt.is_pi(lyt.pi_at(2)));
     const auto extracted = extract_layout_network(lyt);
     CHECK(extracted.num_pis() == 3);
@@ -242,15 +281,17 @@ TEST_CASE("Name conservation after orthogonal physical design", "[orthogonal]")
     const auto layout = orthogonal<cartesian_layout>(convert_network<named_technology_network>(maj));
 
     // network name
-    CHECK(layout.get_layout_name() == "maj");
+    CHECK_THAT(layout.get_layout_name(), Catch::Matchers::Equals("maj"));
 
     // PI names
-    CHECK(layout.get_name(layout.pi_at(0)) == "a");  // first PI
-    CHECK(layout.get_name(layout.pi_at(1)) == "b");  // second PI
-    CHECK(layout.get_name(layout.pi_at(2)) == "c");  // third PI
+    REQUIRE(layout.num_pis() == 3);
+    CHECK_THAT(layout.get_name(layout.pi_at(0)), Catch::Matchers::Equals("a"));  // first PI
+    CHECK_THAT(layout.get_name(layout.pi_at(1)), Catch::Matchers::Equals("b"));  // second PI
+    CHECK_THAT(layout.get_name(layout.pi_at(2)), Catch::Matchers::Equals("c"));  // third PI
 
     // PO names
-    CHECK(layout.get_output_name(0) == "f");
+    REQUIRE(layout.num_pos() == 1);
+    CHECK_THAT(layout.get_output_name(0), Catch::Matchers::Equals("f"));
 }
 
 TEST_CASE("Orthogonal physical design requires an arrangement for hexagonal layouts", "[orthogonal]")
@@ -261,8 +302,14 @@ TEST_CASE("Orthogonal physical design requires an arrangement for hexagonal layo
 
 TEST_CASE("Gate library application", "[orthogonal]")
 {
-    const auto check = [](const auto& ntk)
+    /**
+     * @brief Checks QCA gate-library application for one blueprint.
+     * @param ntk Network to place and route.
+     * @param blueprint Blueprint name reported on failure.
+     */
+    const auto check = [](const auto& ntk, const char* blueprint)
     {
+        CAPTURE(blueprint);
         orthogonal_physical_design_stats stats{};
 
         auto layout = orthogonal<cartesian_layout>(convert_network<named_technology_network>(ntk), {}, &stats);
@@ -270,16 +317,18 @@ TEST_CASE("Gate library application", "[orthogonal]")
         CHECK_NOTHROW(apply_gate_library<qca_one_library>(layout));
     };
 
-    check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
-    check(blueprints::maj1_network<mockturtle::aig_network>());
-    check(blueprints::maj4_network<mockturtle::aig_network>());
-    check(blueprints::se_coloring_corner_case_network<technology_network>());
-    check(blueprints::fanout_substitution_corner_case_network<technology_network>());
-    check(blueprints::clpl<technology_network>());
-    check(blueprints::half_adder_network<mockturtle::mig_network>());
+    check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>(), "unbalanced_and_inv_network<aig_network>");
+    check(blueprints::maj1_network<mockturtle::aig_network>(), "maj1_network<aig_network>");
+    check(blueprints::maj4_network<mockturtle::aig_network>(), "maj4_network<aig_network>");
+    check(blueprints::se_coloring_corner_case_network<technology_network>(),
+          "se_coloring_corner_case_network<technology_network>");
+    check(blueprints::fanout_substitution_corner_case_network<technology_network>(),
+          "fanout_substitution_corner_case_network<technology_network>");
+    check(blueprints::clpl<technology_network>(), "clpl<technology_network>");
+    check(blueprints::half_adder_network<mockturtle::mig_network>(), "half_adder_network<mig_network>");
 
     // constant input network
-    check(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());
+    check(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>(), "unbalanced_and_inv_network<mig_network>");
 }
 
 TEST_CASE("Orthogonal physical design reports progress", "[orthogonal]")
@@ -306,25 +355,33 @@ TEMPLATE_TEST_CASE("Named specification conversion for orthogonal", "[physical-n
     const auto b = source.create_pi("right");
     source.create_po(source.create_and(a, b), "result");
     const auto ntk = fiction::synthesis::convert_network<named_technology_network>(source);
-    CHECK(ntk.get_network_name() == "named_spec");
-    CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(0))) == "left");
-    CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(1))) == "right");
-    CHECK(ntk.get_output_name(0) == "result");
+    REQUIRE(ntk.num_pis() == 2);
+    REQUIRE(ntk.num_pos() == 1);
+    CHECK_THAT(ntk.get_network_name(), Catch::Matchers::Equals("named_spec"));
+    CHECK_THAT(ntk.get_name(ntk.make_signal(ntk.pi_at(0))), Catch::Matchers::Equals("left"));
+    CHECK_THAT(ntk.get_name(ntk.make_signal(ntk.pi_at(1))), Catch::Matchers::Equals("right"));
+    CHECK_THAT(ntk.get_output_name(0), Catch::Matchers::Equals("result"));
     const auto lyt = orthogonal<cartesian_layout>(ntk);
-    CHECK(lyt.get_layout_name() == "named_spec");
-    CHECK(lyt.get_name(lyt.pi_at(0)) == "left");
-    CHECK(lyt.get_name(lyt.pi_at(1)) == "right");
-    CHECK(lyt.get_output_name(0) == "result");
+    REQUIRE(lyt.num_pis() == 2);
+    REQUIRE(lyt.num_pos() == 1);
+    CHECK_THAT(lyt.get_layout_name(), Catch::Matchers::Equals("named_spec"));
+    CHECK_THAT(lyt.get_name(lyt.pi_at(0)), Catch::Matchers::Equals("left"));
+    CHECK_THAT(lyt.get_name(lyt.pi_at(1)), Catch::Matchers::Equals("right"));
+    CHECK_THAT(lyt.get_output_name(0), Catch::Matchers::Equals("result"));
     const auto extracted = extract_layout_network(lyt);
-    CHECK(extracted.get_network_name() == "named_spec");
-    CHECK(extracted.get_name(extracted.make_signal(extracted.pi_at(0))) == "left");
-    CHECK(extracted.get_name(extracted.make_signal(extracted.pi_at(1))) == "right");
-    CHECK(extracted.get_output_name(0) == "result");
+    REQUIRE(extracted.num_pis() == 2);
+    REQUIRE(extracted.num_pos() == 1);
+    CHECK_THAT(extracted.get_network_name(), Catch::Matchers::Equals("named_spec"));
+    CHECK_THAT(extracted.get_name(extracted.make_signal(extracted.pi_at(0))), Catch::Matchers::Equals("left"));
+    CHECK_THAT(extracted.get_name(extracted.make_signal(extracted.pi_at(1))), Catch::Matchers::Equals("right"));
+    CHECK_THAT(extracted.get_output_name(0), Catch::Matchers::Equals("result"));
     check_eq(source, extracted);
     const auto roundtrip = orthogonal<cartesian_layout>(convert_network<named_technology_network>(extracted));
-    CHECK(roundtrip.get_layout_name() == "named_spec");
-    CHECK(roundtrip.get_name(roundtrip.pi_at(0)) == "left");
-    CHECK(roundtrip.get_name(roundtrip.pi_at(1)) == "right");
-    CHECK(roundtrip.get_output_name(0) == "result");
+    REQUIRE(roundtrip.num_pis() == 2);
+    REQUIRE(roundtrip.num_pos() == 1);
+    CHECK_THAT(roundtrip.get_layout_name(), Catch::Matchers::Equals("named_spec"));
+    CHECK_THAT(roundtrip.get_name(roundtrip.pi_at(0)), Catch::Matchers::Equals("left"));
+    CHECK_THAT(roundtrip.get_name(roundtrip.pi_at(1)), Catch::Matchers::Equals("right"));
+    CHECK_THAT(roundtrip.get_output_name(0), Catch::Matchers::Equals("result"));
     check_eq(extracted, roundtrip);
 }

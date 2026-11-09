@@ -175,16 +175,17 @@ class convert_network_impl<NtkDest, NtkSrc, false>
                     old2new[g] = ntk_dest.create_node(children, ntk.node_function(g));
                     return true;
                 }
-
-                if constexpr (mockturtle::has_node_function_v<TopoNtkSrc>)
+                else if constexpr (mockturtle::has_node_function_v<TopoNtkSrc>)
                 {
                     mockturtle::shannon_resynthesis<NtkDest>{}(ntk_dest, ntk.node_function(g), children.begin(),
                                                                children.end(),
                                                                [&](const auto& signal) { old2new[g] = signal; });
                     return true;
                 }
-
-                throw std::invalid_argument("network conversion requires a supported gate or its truth table");
+                else
+                {
+                    throw std::invalid_argument("network conversion requires a supported gate or its truth table");
+                }
             });
 
         ntk.foreach_po(
@@ -220,6 +221,7 @@ class convert_network_impl<NtkDest, NtkSrc, false>
  * @tparam NtkSrc Logic network with node, interface, and fanin traversal.
  * @param ntk The input logic network.
  * @return A logic network of type `NtkDest` that is logically equivalent to `ntk`.
+ * @throws std::invalid_argument If a source gate has neither a supported gate operation nor a truth table.
  */
 template <typename NtkDest, typename NtkSrc>
     requires mockturtle::is_network_type_v<NtkSrc> && mockturtle::is_network_type_v<NtkDest> &&
@@ -237,11 +239,7 @@ NtkDest convert_network(const NtkSrc& ntk)
 
     assert(ntk.is_combinational() && "Network has to be combinational");
 
-    detail::convert_network_impl<NtkDest, NtkSrc> p{ntk};
-
-    auto result = p.run();
-
-    return result;
+    return detail::convert_network_impl<NtkDest, NtkSrc>{ntk}.run();
 }
 
 }  // namespace fiction::synthesis

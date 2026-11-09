@@ -11,6 +11,7 @@
 /**
  * @file
  * @brief Matches declared primary interfaces by unique names and position.
+ * @author Marcel Walter (marcelwa)
  */
 
 #pragma once
@@ -19,6 +20,7 @@
 #include <limits>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -104,15 +106,16 @@ std::vector<std::string> interface_output_names(const NtkOrLyt& ntk)
 inline std::vector<uint32_t> match_interface_names(const std::vector<std::string>& left,
                                                    const std::vector<std::string>& right)
 {
-    /** @brief Name occurrence count and its last interface index. */
+    /** @brief Right name occurrence count and its last interface index. */
     using occurrence = std::pair<uint32_t, uint32_t>;
-    std::unordered_map<std::string, occurrence> left_names{}, right_names{};
+    std::unordered_map<std::string_view, uint32_t>   left_names{};
+    std::unordered_map<std::string_view, occurrence> right_names{};
     for (uint32_t i{}; i < left.size(); ++i)
     {
-        ++left_names[left[i]].first;
-        left_names[left[i]].second = i;
-        ++right_names[right[i]].first;
-        right_names[right[i]].second = i;
+        ++left_names[left[i]];
+        auto& right_name = right_names[right[i]];
+        ++right_name.first;
+        right_name.second = i;
     }
     constexpr auto        unmatched = std::numeric_limits<uint32_t>::max();
     std::vector<uint32_t> permutation(left.size(), unmatched);
@@ -120,7 +123,7 @@ inline std::vector<uint32_t> match_interface_names(const std::vector<std::string
     for (uint32_t i{}; i < left.size(); ++i)
     {
         const auto candidate = right_names.find(left[i]);
-        if (!left[i].empty() && left_names.at(left[i]).first == 1 && candidate != right_names.end() &&
+        if (!left[i].empty() && left_names.at(left[i]) == 1 && candidate != right_names.end() &&
             candidate->second.first == 1)
         {
             permutation[i]       = candidate->second.second;
@@ -163,7 +166,10 @@ template <typename Left, typename Right>
     {
         throw std::invalid_argument("Primary interface sizes differ");
     }
-    return {detail::match_interface_names(detail::interface_input_names(left), detail::interface_input_names(right)),
+    /** @brief Input permutation; temporary input names expire before output matching. */
+    auto inputs =
+        detail::match_interface_names(detail::interface_input_names(left), detail::interface_input_names(right));
+    return {std::move(inputs),
             detail::match_interface_names(detail::interface_output_names(left), detail::interface_output_names(right))};
 }
 

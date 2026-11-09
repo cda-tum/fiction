@@ -117,6 +117,8 @@ void register_write_dot_layout(nb::module_& m)
         nb::arg("on_progress").none() = nb::none(),
         R"doc(Writes a gate-level layout to a DOT file. Terminal names use quoted DOT strings.
 
+The writer borrows layout without taking a snapshot. The callback and other threads must not modify layout until the call returns.
+
 Args:
     layout: Gate-level layout to draw.
     filename: Output file path.

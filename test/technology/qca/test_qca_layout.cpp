@@ -15,6 +15,8 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/layout_base.hpp>
@@ -28,10 +30,12 @@ using namespace fiction::qca;
 
 TEST_CASE("QCA cell types", "[qca-layout]")
 {
-    CHECK(is_constant(cell_type::CONST_0));
-    CHECK(is_constant(cell_type::CONST_1));
-    CHECK(!is_constant(cell_type::NORMAL));
-    CHECK(!is_constant(cell_type::INPUT));
+    STATIC_REQUIRE(is_constant(cell_type::CONST_0));
+    STATIC_REQUIRE(is_constant(cell_type::CONST_1));
+    STATIC_REQUIRE_FALSE(is_constant(cell_type::EMPTY));
+    STATIC_REQUIRE_FALSE(is_constant(cell_type::NORMAL));
+    STATIC_REQUIRE_FALSE(is_constant(cell_type::INPUT));
+    STATIC_REQUIRE_FALSE(is_constant(cell_type::OUTPUT));
 }
 
 TEST_CASE("QCA layout construction", "[qca-layout]")
@@ -43,7 +47,7 @@ TEST_CASE("QCA layout construction", "[qca-layout]")
 
     CHECK(lyt.width() == 5);
     CHECK(lyt.layers() == 2);
-    CHECK(lyt.get_layout_name() == "crossing");
+    CHECK_THAT(lyt.get_layout_name(), Catch::Matchers::Equals("crossing"));
     CHECK(lyt.is_clocking_scheme(clocking::USE_NAME));
     CHECK(lyt.get_tile_size_x() == 5);
     CHECK(lyt.get_tile_size_y() == 5);
@@ -90,7 +94,7 @@ TEST_CASE("QCA synchronization elements belong to clock zones", "[qca-layout]")
     CHECK(original.get_synchronization_element({3, 3}) == 2);
     CHECK(original.is_synchronization_element({3, 2, 1}));
     CHECK(original.get_synchronization_element({4, 4}) == 0);
-    CHECK(!original.is_synchronization_element({1, 1}));
+    CHECK_FALSE(original.is_synchronization_element({1, 1}));
 
     SECTION("copies are independent")
     {

@@ -145,6 +145,7 @@ namespace fiction::synthesis
 }
 /**
  * Creates and returns a truth table that implements the less-than function in two variables.
+ * Variable 0 is a and variable 1 is b; the function is `a & !b`.
  *
  * @return Less-than function in two variables.
  */
@@ -159,6 +160,7 @@ namespace fiction::synthesis
 }
 /**
  * Creates and returns a truth table that implements the greater-than function in two variables.
+ * Variable 0 is a and variable 1 is b; the function is `!a & b`.
  *
  * @return Greater-than function in two variables.
  */
@@ -173,12 +175,13 @@ namespace fiction::synthesis
 }
 /**
  * Creates and returns a truth table that implements the less-than-or-equal function in two variables.
+ * Variable 0 is a and variable 1 is b; the function is `a | !b`.
  *
  * @return Less-than-or-equal function in two variables.
  */
 [[nodiscard]] inline kitty::dynamic_truth_table create_le_tt() noexcept
 {
-    constexpr const uint64_t lit = 0x11;
+    constexpr const uint64_t lit = 0xb;
 
     kitty::dynamic_truth_table table{2};
     kitty::create_from_words(table, &lit, &lit + 1);
@@ -187,12 +190,13 @@ namespace fiction::synthesis
 }
 /**
  * Creates and returns a truth table that implements the greater-than-or-equal function in two variables.
+ * Variable 0 is a and variable 1 is b; the function is `!a | b`.
  *
  * @return Greater-than-or-equal function in two variables.
  */
 [[nodiscard]] inline kitty::dynamic_truth_table create_ge_tt() noexcept
 {
-    constexpr const uint64_t lit = 0x13;
+    constexpr const uint64_t lit = 0xd;
 
     kitty::dynamic_truth_table table{2};
     kitty::create_from_words(table, &lit, &lit + 1);
@@ -346,7 +350,7 @@ namespace fiction::synthesis
  * of a double wire multi-output function in two variables. The function returns a vector containing
  * two truth tables.
  *
- * @return Vector of truth tables, each representing an output of the double wire function.
+ * @return Truth tables for output ports 0 and 1, passing bits 1 and 0 of the input index, respectively.
  */
 [[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_double_wire_tt() noexcept
 {
@@ -368,7 +372,7 @@ namespace fiction::synthesis
  * of a crossing wire multi-output function in two variables. The function returns a vector containing
  * two truth tables.
  *
- * @return Vector of truth tables, each representing an output of the crossing wire function.
+ * @return Truth tables for output ports 0 and 1, passing bits 0 and 1 of the input index, respectively.
  */
 [[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_crossing_wire_tt() noexcept
 {
@@ -408,7 +412,7 @@ namespace fiction::synthesis
  * of a half adder multi-output function in two variables. The function returns a vector containing
  * two truth tables.
  *
- * @return Vector of truth tables, each representing an output of the half adder function.
+ * @return Truth tables for output ports 0 (sum, XOR) and 1 (carry, AND).
  */
 [[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_half_adder_tt() noexcept
 {

@@ -10,13 +10,18 @@
 
 /**
  * @file
- * @brief Cell writers propagate terminal-list allocation failures.
+ * @brief Allocation failures in cell writers and gate-orientation diagnostics.
+ * @author Marcel Walter (marcelwa)
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/allocation_failure.hpp"
 
+#include <fiction/technology/fcn/cell_ports.hpp>
+#include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/fcn/io/write_qll_layout.hpp>
 #include <fiction/technology/inml/io/write_qcc_layout.hpp>
 #include <fiction/technology/inml/layout.hpp>
@@ -27,10 +32,86 @@
 #include <string>
 
 using namespace fiction;
+using namespace fiction::fcn;
 using namespace fiction::fcn::io;
 using namespace fiction::inml;
 using namespace fiction::inml::io;
 using namespace fiction::test;
+
+/** @brief Copying gate-orientation diagnostics propagates allocation failure and preserves the source. */
+TEST_CASE("Gate-orientation diagnostics propagate port-copy allocation failures", "[fcn-gate-library]")
+{
+    require_allocation_failure_support();
+    /** @brief Coordinate and port payload of an unsupported gate orientation. */
+    using orientation_exception = unsupported_gate_orientation_exception<layout::coordinate, port_position>;
+    /** @brief Independently supplied gate coordinate. */
+    const layout::coordinate coordinate{1, 2};
+    /** @brief Nonempty input and output lists with distinct terminal flags. */
+    const port_list<port_position> ports{{port_position{0u, 0u, true, false}}, {port_position{3u, 2u, false, true}}};
+    /** @brief Diagnostic prepared before arming allocation failure. */
+    const orientation_exception error{coordinate, ports};
+
+    SECTION("constructor")
+    {
+        /** @brief Whether the payload-copy failure reaches its caller. */
+        bool propagated{};
+        try
+        {
+            allocation_budget = 0;
+            const orientation_exception copy{coordinate, ports};
+            allocation_budget.reset();
+            CHECK(copy.where() == coordinate);
+        }
+        catch (const std::bad_alloc&)
+        {
+            allocation_budget.reset();
+            propagated = true;
+        }
+        catch (...)
+        {
+            allocation_budget.reset();
+            throw;
+        }
+        CHECK(propagated);
+    }
+    SECTION("accessor")
+    {
+        /** @brief Whether the returned port-copy failure reaches its caller. */
+        bool propagated{};
+        try
+        {
+            allocation_budget = 0;
+            const auto copy   = error.which_ports();
+            allocation_budget.reset();
+            CHECK(copy == ports);
+        }
+        catch (const std::bad_alloc&)
+        {
+            allocation_budget.reset();
+            propagated = true;
+        }
+        catch (...)
+        {
+            allocation_budget.reset();
+            throw;
+        }
+        CHECK(propagated);
+    }
+    /** @brief A fresh diagnostic proves recovery after the one-shot failure. */
+    const orientation_exception recovered_error{coordinate, ports};
+    /** @brief Complete port payload returned after recovery. */
+    const auto recovered = recovered_error.which_ports();
+    CHECK(error.where() == coordinate);
+    CHECK(recovered_error.where() == coordinate);
+    CHECK(error.which_ports() == ports);
+    CHECK(recovered == ports);
+    REQUIRE(recovered.inp.size() == 1);
+    REQUIRE(recovered.out.size() == 1);
+    CHECK(recovered.inp.begin()->pi);
+    CHECK_FALSE(recovered.inp.begin()->po);
+    CHECK_FALSE(recovered.out.begin()->pi);
+    CHECK(recovered.out.begin()->po);
+}
 
 /** @brief QCC and QLL propagate allocation failures while preparing either terminal list. */
 TEST_CASE("Cell writers propagate terminal-list allocation failures", "[cell-writer-allocation]")
@@ -48,6 +129,19 @@ TEST_CASE("Cell writers propagate terminal-list allocation failures", "[cell-wri
                 lyt.assign_cell_name({0, 0}, "terminal");
                 /** @brief Destination prepared before fault injection. */
                 std::ostringstream stream{};
+                // Warm formatting and stream state before arming terminal-list allocation failure.
+                if (qcc)
+                {
+                    write_qcc_layout(lyt, stream);
+                }
+                else
+                {
+                    write_qll_layout(lyt, stream);
+                }
+                /** @brief Complete output used to check recovery after the injected failure. */
+                const auto expected = stream.str();
+                CHECK_THAT(expected, Catch::Matchers::ContainsSubstring("name=\"terminal\""));
+                stream.str(std::string{});
                 /** @brief Records an allocation failure propagated through the public writer. */
                 bool propagated{};
                 try
@@ -74,6 +168,7 @@ TEST_CASE("Cell writers propagate terminal-list allocation failures", "[cell-wri
                     throw;
                 }
                 CHECK(propagated);
+                CHECK(stream.str().empty());
 
                 if (qcc)
                 {
@@ -83,7 +178,7 @@ TEST_CASE("Cell writers propagate terminal-list allocation failures", "[cell-wri
                 {
                     CHECK_NOTHROW(write_qll_layout(lyt, stream));
                 }
-                CHECK(stream.str().find("name=\"terminal\"") != std::string::npos);
+                CHECK_THAT(stream.str(), Catch::Matchers::Equals(expected));
             }
         }
     }

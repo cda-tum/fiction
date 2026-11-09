@@ -41,9 +41,6 @@ void register_inml_io(nb::module_& m);
 
 }  // namespace pyfiction
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
-
 NB_MODULE(inml, m)
 {
     m.doc() = "In-plane Nanomagnet Logic (iNML) cell-level layouts.";
@@ -55,5 +52,3 @@ NB_MODULE(inml, m)
     auto io = pyfiction::def_submodule(m, "io", "Readers and writers of iNML cell-level layouts.");
     pyfiction::register_inml_io(io);
 }
-
-#pragma GCC diagnostic pop

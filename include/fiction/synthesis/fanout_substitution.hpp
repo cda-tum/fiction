@@ -126,7 +126,7 @@ class fanout_substitution_impl
     {
         if (ps.strategy == fanout_substitution_params::substitution_strategy::RANDOM)
         {
-            rng.emplace(ps.seed.value_or(std::random_device{}()));
+            rng.emplace(ps.seed.has_value() ? ps.seed.value() : std::random_device{}());
         }
     }
 
@@ -493,11 +493,7 @@ NtkDest fanout_substitution(const NtkSrc& ntk_src, fanout_substitution_params ps
         throw std::invalid_argument("Fanout degree must be at least two and threshold must be at least one");
     }
 
-    detail::fanout_substitution_impl<NtkDest, NtkSrc> p{ntk_src, ps};
-
-    auto result = p.run();
-
-    return result;
+    return detail::fanout_substitution_impl<NtkDest, NtkSrc>{ntk_src, ps}.run();
 }
 /**
  * Checks if a logic network is properly fanout-substituted with regard to the provided parameters, i.e., if no node
@@ -513,11 +509,7 @@ template <typename Ntk>
              mockturtle::has_fanout_size_v<Ntk>
 bool is_fanout_substituted(const Ntk& ntk, fanout_substitution_params ps = {}) noexcept
 {
-    detail::is_fanout_substituted_impl<Ntk> p{ntk, ps};
-
-    auto result = p.run();
-
-    return result;
+    return detail::is_fanout_substituted_impl<Ntk>{ntk, std::move(ps)}.run();
 }
 
 }  // namespace fiction::synthesis

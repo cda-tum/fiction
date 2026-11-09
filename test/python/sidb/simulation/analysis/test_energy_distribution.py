@@ -10,8 +10,6 @@
 
 from __future__ import annotations
 
-from itertools import pairwise
-
 import pytest
 
 from mnt.pyfiction.sidb import charge_distribution, lattice, lattice_site, sidb_dot_tag, sidb_layout
@@ -37,6 +35,7 @@ def test_degeneracy_returns_state_count() -> None:
     distribution.add_energy_state(energy_state(-1.0, 7))
     distribution.add_energy_state(energy_state(0.0, 3))
     assert distribution.degeneracy(-1.0) == 7
+    assert distribution.degeneracy(-1.0 + 1e-7) == 7
     assert distribution.degeneracy(0.0) == 3
     assert distribution.degeneracy(1.0) is None
 
@@ -48,7 +47,7 @@ def test_degeneracy_returns_state_count() -> None:
         pytest.param(lattice.si_111_1x1(), 0.233980661373219, id="111"),
     ],
 )
-def test_three_sidbs(lat, all_negative_energy):
+def test_three_sidbs(lat: lattice, all_negative_energy: float) -> None:
     layout = sidb_layout(lat)
 
     layout.assign_sidb(lattice_site(0, 0, 1), sidb_dot_tag.NORMAL)
@@ -85,13 +84,12 @@ def test_three_sidbs(lat, all_negative_energy):
         assert state is not None
         states.append(state)
     assert all(s.degeneracy == 1 for s in states)
-    assert all(
-        lower.electrostatic_potential_energy < higher.electrostatic_potential_energy
-        for lower, higher in pairwise(states)
+    assert [s.electrostatic_potential_energy for s in states] == pytest.approx(
+        sorted([cd1.energy(), cd2.energy(), cd3.energy(), cd4.energy()]), abs=1e-7
     )
 
 
-def test_degenerate_states():
+def test_degenerate_states() -> None:
     layout = sidb_layout()
     layout.assign_sidb(lattice_site(0, 0, 0), sidb_dot_tag.NORMAL)
     layout.assign_sidb(lattice_site(10, 0, 0), sidb_dot_tag.NORMAL)
@@ -112,6 +110,31 @@ def test_degenerate_states():
     second = distribution.get_nth_state(1)
     assert first is not None
     assert second is not None
-    assert first.electrostatic_potential_energy == pytest.approx(0.5)
-    assert first.degeneracy == 2
-    assert second.degeneracy == 1
+    assert [
+        (first.electrostatic_potential_energy, first.degeneracy),
+        (second.electrostatic_potential_energy, second.degeneracy),
+    ] == [(pytest.approx(0.5), 2), (pytest.approx(1.0), 1)]
+    assert distribution.get_nth_state(2) is None
+
+
+def test_duplicate_configurations_do_not_inflate_degeneracy() -> None:
+    """Degeneracy counts distinct charge configurations rather than repeated input entries."""
+    layout = sidb_layout()
+    layout.assign_sidb(lattice_site())
+    neutral = charge_distribution(layout, sidb_charge_state.NEUTRAL)
+    negative = charge_distribution(layout)
+    positive = charge_distribution(layout, sidb_charge_state.POSITIVE)
+    positive.assign_energy(1.0)
+    distribution = calculate_energy_distribution([neutral] * 3 + [negative] * 4 + [positive] * 3)
+    assert distribution.size() == 2
+    assert distribution.degeneracy(0.0) == 2
+    assert distribution.degeneracy(1.0) == 1
+
+
+def test_empty_configuration_has_one_zero_energy_state() -> None:
+    """An empty configuration is distinct from an absent distribution."""
+    distribution = calculate_energy_distribution([charge_distribution()])
+    assert distribution.size() == 1
+    state = distribution.get_nth_state(0)
+    assert state is not None
+    assert (state.electrostatic_potential_energy, state.degeneracy) == (0.0, 1)

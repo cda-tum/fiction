@@ -31,42 +31,39 @@ if TYPE_CHECKING:
     from .conftest import Shell
 
 
-def test_map_on_a_technology_network(mux21_shell: Shell) -> None:
-    mux21_shell.ok("map --and --or --inv")
-    mapped = mux21_shell.session.networks.current()
-    assert isinstance(mapped, technology_network)
-    assert "stats" in mux21_shell.session.log[-1]["result"]
-
-
-def test_map_on_an_aig(shell: Shell, resource: Callable[[str], str]) -> None:
-    shell.ok(f'read "{resource("mux21.v")}" --type aig; map --all2')
+@pytest.mark.parametrize(
+    ("network_type", "gates"),
+    [
+        pytest.param("tec", "--and --or --inv", id="technology-selected-gates"),
+        pytest.param("aig", "--all2", id="aig-two-input-gates"),
+        pytest.param("tec", "--all", id="technology-all-gates"),
+        pytest.param("tec", "--all3", id="technology-three-input-gates"),
+    ],
+)
+def test_map_preserves_outputs(shell: Shell, resource: Callable[[str], str], network_type: str, gates: str) -> None:
+    shell.ok(f'read "{resource("mux21.v")}" --type {network_type}; map {gates}')
     assert isinstance(shell.session.networks.current(), technology_network)
     assert len(shell.session.networks) == 2
+    assert "stats" in shell.session.log[-1]["result"]
+    shell.ok("simulate -n --store")
+    assert shell.session.truth_tables.current().to_binary() == "11001010"
 
 
 def test_map_needs_gates(mux21_shell: Shell) -> None:
     assert "at least one gate type" in mux21_shell.fails("map")
 
 
-@pytest.mark.parametrize("gates", ["--all", "--all3"])
-def test_map_complete_gate_sets_preserves_outputs(mux21_shell: Shell, gates: str) -> None:
-    mux21_shell.ok("simulate -n --store")
-    expected = mux21_shell.session.truth_tables.current().to_binary()
-    mux21_shell.ok(f"map {gates}; simulate -n --store")
-    assert mux21_shell.session.truth_tables.current().to_binary() == expected
-
-
 def test_fanouts_and_balance(mux21_shell: Shell) -> None:
     mux21_shell.ok("fanouts -d 3 -s depth; balance -u")
     assert len(mux21_shell.session.networks) == 3
+    mux21_shell.ok("simulate -n --store")
+    assert mux21_shell.session.truth_tables.current().to_binary() == "11001010"
     assert "usage" in mux21_shell.fails("fanouts -d 4")
 
 
 def test_seeded_fanout_substitution_preserves_outputs(mux21_shell: Shell) -> None:
-    mux21_shell.ok("simulate -n --store")
-    expected = mux21_shell.session.truth_tables.current().to_binary()
     mux21_shell.ok("fanouts -s random --seed 7; simulate -n --store")
-    assert mux21_shell.session.truth_tables.current().to_binary() == expected
+    assert mux21_shell.session.truth_tables.current().to_binary() == "11001010"
 
 
 def test_gates(mux21_shell: Shell) -> None:
@@ -141,10 +138,8 @@ def test_bridge_round_trip(mux21_shell: Shell, resource: Callable[[str], str]) -
     aig = mux21_shell.session.networks.current()
     assert isinstance(aig, aig_network)
     back = from_aigverse(mux21_shell.session, to_aigverse(mux21_shell.session, aig), "back", like=aig)
-    assert back.num_gates() == aig.num_gates()
-    assert back.num_pis() == aig.num_pis()
-    assert [back.get_name(pi) for pi in back.pis()] == [aig.get_name(pi) for pi in aig.pis()]
-    assert back.get_output_name(0) == aig.get_output_name(0)
+    assert [back.get_name(pi) for pi in back.pis()] == ["in0", "in1", "in2"]
+    assert simulate_outputs(back) == [("out", [True, True, False, False, True, False, True, False])]
 
 
 def test_abc(shell: Shell, resource: Callable[[str], str]) -> None:
@@ -203,9 +198,10 @@ session.close()
 
 
 def test_mapping_with_statistics_preserves_function(mux21_shell: Shell) -> None:
-    expected = simulate_outputs(mux21_shell.session.networks.current())
     mux21_shell.ok("map --and --inv --verbose")
-    assert simulate_outputs(mux21_shell.session.networks.current()) == expected
+    assert simulate_outputs(mux21_shell.session.networks.current()) == [
+        ("out", [True, True, False, False, True, False, True, False])
+    ]
     result = mux21_shell.session.log[-1]["result"]
     assert isinstance(result, dict)
     assert isinstance(result["stats"], dict)

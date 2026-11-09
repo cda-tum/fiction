@@ -226,6 +226,7 @@ class delete_virtual_pis_impl
  * @tparam Ntk The type of network.
  * @param ntk The input network.
  * @return The resulting network after virtual primary inputs are deleted.
+ * @throws std::bad_alloc If copying or rebuilding network storage fails.
  */
 template <typename Ntk>
     requires mockturtle::is_network_type_v<Ntk> && mockturtle::has_get_node_v<Ntk> &&
@@ -234,7 +235,7 @@ template <typename Ntk>
              mockturtle::has_foreach_fanin_v<Ntk> && mockturtle::has_get_constant_v<Ntk> &&
              mockturtle::has_create_pi_v<Ntk> && mockturtle::has_create_po_v<Ntk> &&
              mockturtle::has_create_not_v<Ntk> && fiction::is_virtual_network_type_v<Ntk>
-Ntk delete_virtual_pis(const Ntk& ntk) noexcept
+Ntk delete_virtual_pis(const Ntk& ntk)
 {
     assert(ntk.is_combinational() && "Network has to be combinational");
 
@@ -246,9 +247,7 @@ Ntk delete_virtual_pis(const Ntk& ntk) noexcept
 
     detail::delete_virtual_pis_impl<Ntk> p{ntk};
 
-    const auto result = p.run();
-
-    return result;
+    return p.run();
 }
 
 }  // namespace fiction::synthesis

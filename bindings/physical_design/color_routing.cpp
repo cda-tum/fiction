@@ -88,12 +88,13 @@ void register_color_routing_impl(nb::module_& m)
 Returns True when all objectives are satisfied or conduct_partial_routing is enabled.
 With path_limit=0, no candidate paths are generated and endpoint bounds are not checked.
 Raises ValueError for an out-of-extent objective endpoint when path_limit is None or nonzero.
+Raises ValueError for TABUCOL, which requires a color bound that this API does not accept.
 
 Args:
     conduct_partial_routing: Do not abort if some objectives cannot be fulfilled, but partially route the layout as much as possible.
     crossings: Allow wires to cross on separate layers.
     path_limit: Maximum paths considered per objective; None enumerates all paths.
-    engine: The engine to use.
+    engine: MCS, DSATUR, LMXRLF, or SAT.
     partial_sat: Allow partial solutions when the SAT coloring engine is selected.
 )doc");
 }

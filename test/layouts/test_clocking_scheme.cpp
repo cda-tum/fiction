@@ -15,13 +15,17 @@
  * @author Simon Hofmann (simon1hofmann)
  */
 
-#include <catch2/catch_message.hpp>
-#include <catch2/catch_test_macros.hpp>
-
-#include <fiction/layouts/arrangement.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 
+// Test dependencies follow the defining header to expose missing direct includes.
+#include <catch2/catch_message.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
+
+#include <fiction/layouts/arrangement.hpp>
+
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <optional>
 #include <stdexcept>
@@ -30,6 +34,32 @@
 
 using namespace fiction;
 using namespace fiction::layouts;
+
+namespace
+{
+/**
+ * @brief Checks a catalog period and its translations along both axes.
+ * @tparam Width Number of sampled columns.
+ * @tparam Height Number of sampled rows.
+ * @param scm Clocking scheme to query.
+ * @param expected Clock numbers indexed by x, then y.
+ */
+template <std::size_t Width, std::size_t Height>
+void check_period(const clocking::scheme& scm, const std::array<std::array<uint8_t, Height>, Width>& expected)
+{
+    for (uint32_t x = 0; x < Width; ++x)
+    {
+        for (uint32_t y = 0; y < Height; ++y)
+        {
+            CAPTURE(x, y);
+            CHECK(scm(x, y) == expected.at(x).at(y));
+            CHECK(scm(x + static_cast<uint32_t>(Width), y) == expected.at(x).at(y));
+            CHECK(scm(x, y + static_cast<uint32_t>(Height)) == expected.at(x).at(y));
+            CHECK(scm(x + static_cast<uint32_t>(Width), y + static_cast<uint32_t>(Height)) == expected.at(x).at(y));
+        }
+    }
+}
+}  // namespace
 
 TEST_CASE("Clocking scheme construction validates its cutout", "[clocking-scheme]")
 {
@@ -87,7 +117,8 @@ TEST_CASE("Clocking lookup", "[clocking-scheme]")
     {
         for (const auto& n : vec)
         {
-            auto cs = clocking::get_scheme(n);
+            CAPTURE(n);
+            const auto cs = clocking::get_scheme(n);
             REQUIRE(cs.has_value());
             CHECK(cs->name() == name);
         }
@@ -160,118 +191,47 @@ TEST_CASE("Clocking lookup by phase count and hexagonal arrangement", "[clocking
           clocking::twoddwave_hex(arrangement::ODD_COLUMN, clocking::num_clks::THREE));
 }
 
-TEST_CASE("3-phase open clocking", "[clocking-scheme]")
+TEST_CASE("Open clocking supports both phase counts", "[clocking-scheme]")
 {
-    auto open3 = clocking::open(clocking::num_clks::THREE);
+    const auto [phase_kind, phase_count] = GENERATE((Catch::Generators::table<clocking::num_clks, unsigned>(
+        {{clocking::num_clks::THREE, 3u}, {clocking::num_clks::FOUR, 4u}})));
+    CAPTURE(phase_count);
+    auto open = clocking::open(phase_kind);
 
-    CHECK(open3.num_clocks() == 3u);
-    CHECK(open3.max_in_degree() == clocking::scheme::UNBOUNDED);
-    CHECK(open3.max_out_degree() == clocking::scheme::UNBOUNDED);
-    CHECK(!open3.is_regular());
+    CHECK(open.num_clocks() == phase_count);
+    CHECK(open.max_in_degree() == clocking::scheme::UNBOUNDED);
+    CHECK(open.max_out_degree() == clocking::scheme::UNBOUNDED);
+    CHECK_FALSE(open.is_regular());
 
-    CHECK(open3(0, 0) == 0);
-    CHECK(open3(0, 1) == 0);
-    CHECK(open3(0, 2) == 0);
-    CHECK(open3(0, 3) == 0);
-    CHECK(open3(1, 0) == 0);
-    CHECK(open3(1, 1) == 0);
-    CHECK(open3(1, 2) == 0);
-    CHECK(open3(1, 3) == 0);
-    CHECK(open3(2, 0) == 0);
-    CHECK(open3(2, 1) == 0);
-    CHECK(open3(2, 2) == 0);
-    CHECK(open3(2, 3) == 0);
-    CHECK(open3(3, 0) == 0);
-    CHECK(open3(3, 1) == 0);
-    CHECK(open3(3, 2) == 0);
-    CHECK(open3(3, 3) == 0);
+    for (uint32_t x = 0; x < 4; ++x)
+    {
+        for (uint32_t y = 0; y < 4; ++y)
+        {
+            CAPTURE(x, y);
+            CHECK(open(x, y) == 0);
+        }
+    }
 
-    open3.override_clock_number(0, 0, 0);
-    open3.override_clock_number(0, 1, 1);
-    open3.override_clock_number(0, 2, 2);
-    open3.override_clock_number(0, 3, 3);
-    open3.override_clock_number(0, 4, 4);
-    open3.override_clock_number(0, 5, 5);
-    open3.override_clock_number(0, 6, 6);
+    for (uint8_t y = 0; y < 7; ++y)
+    {
+        open.override_clock_number(0, y, y);
+    }
 
-    CHECK(!open3.is_regular());
+    CHECK_FALSE(open.is_regular());
 
-    CHECK(open3(0, 0) == 0);
-    CHECK(open3(0, 1) == 1);
-    CHECK(open3(0, 2) == 2);
-    CHECK(open3(0, 3) == 0);
-    CHECK(open3(0, 4) == 1);
-    CHECK(open3(0, 5) == 2);
-    CHECK(open3(0, 6) == 0);
-    CHECK(open3(1, 0) == 0);
-    CHECK(open3(1, 1) == 0);
-    CHECK(open3(1, 2) == 0);
-    CHECK(open3(1, 3) == 0);
-    CHECK(open3(2, 0) == 0);
-    CHECK(open3(2, 1) == 0);
-    CHECK(open3(2, 2) == 0);
-    CHECK(open3(2, 3) == 0);
-    CHECK(open3(3, 0) == 0);
-    CHECK(open3(3, 1) == 0);
-    CHECK(open3(3, 2) == 0);
-    CHECK(open3(3, 3) == 0);
-}
-
-TEST_CASE("4-phase open clocking", "[clocking-scheme]")
-{
-    auto open4 = clocking::open(clocking::num_clks::FOUR);
-
-    CHECK(open4.num_clocks() == 4u);
-    CHECK(open4.max_in_degree() == clocking::scheme::UNBOUNDED);
-    CHECK(open4.max_out_degree() == clocking::scheme::UNBOUNDED);
-    CHECK(!open4.is_regular());
-
-    CHECK(open4(0, 0) == 0);
-    CHECK(open4(0, 1) == 0);
-    CHECK(open4(0, 2) == 0);
-    CHECK(open4(0, 3) == 0);
-    CHECK(open4(1, 0) == 0);
-    CHECK(open4(1, 1) == 0);
-    CHECK(open4(1, 2) == 0);
-    CHECK(open4(1, 3) == 0);
-    CHECK(open4(2, 0) == 0);
-    CHECK(open4(2, 1) == 0);
-    CHECK(open4(2, 2) == 0);
-    CHECK(open4(2, 3) == 0);
-    CHECK(open4(3, 0) == 0);
-    CHECK(open4(3, 1) == 0);
-    CHECK(open4(3, 2) == 0);
-    CHECK(open4(3, 3) == 0);
-
-    open4.override_clock_number(0, 0, 0);
-    open4.override_clock_number(0, 1, 1);
-    open4.override_clock_number(0, 2, 2);
-    open4.override_clock_number(0, 3, 3);
-    open4.override_clock_number(0, 4, 4);
-    open4.override_clock_number(0, 5, 5);
-    open4.override_clock_number(0, 6, 6);
-
-    CHECK(!open4.is_regular());
-
-    CHECK(open4(0, 0) == 0);
-    CHECK(open4(0, 1) == 1);
-    CHECK(open4(0, 2) == 2);
-    CHECK(open4(0, 3) == 3);
-    CHECK(open4(0, 4) == 0);
-    CHECK(open4(0, 5) == 1);
-    CHECK(open4(0, 6) == 2);
-    CHECK(open4(1, 0) == 0);
-    CHECK(open4(1, 1) == 0);
-    CHECK(open4(1, 2) == 0);
-    CHECK(open4(1, 3) == 0);
-    CHECK(open4(2, 0) == 0);
-    CHECK(open4(2, 1) == 0);
-    CHECK(open4(2, 2) == 0);
-    CHECK(open4(2, 3) == 0);
-    CHECK(open4(3, 0) == 0);
-    CHECK(open4(3, 1) == 0);
-    CHECK(open4(3, 2) == 0);
-    CHECK(open4(3, 3) == 0);
+    for (uint32_t y = 0; y < 7; ++y)
+    {
+        CAPTURE(y);
+        CHECK(open(0, y) == y % phase_count);
+    }
+    for (uint32_t x = 1; x < 4; ++x)
+    {
+        for (uint32_t y = 0; y < 4; ++y)
+        {
+            CAPTURE(x, y);
+            CHECK(open(x, y) == 0);
+        }
+    }
 }
 
 TEST_CASE("3-phase columnar clocking", "[clocking-scheme]")
@@ -283,45 +243,9 @@ TEST_CASE("3-phase columnar clocking", "[clocking-scheme]")
     CHECK(columnar3.max_out_degree() == 2u);
     CHECK(columnar3.is_regular());
 
-    CHECK(columnar3(0, 0) == 0);
-    CHECK(columnar3(0, 1) == 0);
-    CHECK(columnar3(0, 2) == 0);
-    CHECK(columnar3(1, 0) == 1);
-    CHECK(columnar3(1, 1) == 1);
-    CHECK(columnar3(1, 2) == 1);
-    CHECK(columnar3(2, 0) == 2);
-    CHECK(columnar3(2, 1) == 2);
-    CHECK(columnar3(2, 2) == 2);
-
-    CHECK(columnar3(0 + 3, 0) == 0);
-    CHECK(columnar3(0 + 3, 1) == 0);
-    CHECK(columnar3(0 + 3, 2) == 0);
-    CHECK(columnar3(1 + 3, 0) == 1);
-    CHECK(columnar3(1 + 3, 1) == 1);
-    CHECK(columnar3(1 + 3, 2) == 1);
-    CHECK(columnar3(2 + 3, 0) == 2);
-    CHECK(columnar3(2 + 3, 1) == 2);
-    CHECK(columnar3(2 + 3, 2) == 2);
-
-    CHECK(columnar3(0, 0 + 3) == 0);
-    CHECK(columnar3(0, 1 + 3) == 0);
-    CHECK(columnar3(0, 2 + 3) == 0);
-    CHECK(columnar3(1, 0 + 3) == 1);
-    CHECK(columnar3(1, 1 + 3) == 1);
-    CHECK(columnar3(1, 2 + 3) == 1);
-    CHECK(columnar3(2, 0 + 3) == 2);
-    CHECK(columnar3(2, 1 + 3) == 2);
-    CHECK(columnar3(2, 2 + 3) == 2);
-
-    CHECK(columnar3(0 + 3, 0 + 3) == 0);
-    CHECK(columnar3(0 + 3, 1 + 3) == 0);
-    CHECK(columnar3(0 + 3, 2 + 3) == 0);
-    CHECK(columnar3(1 + 3, 0 + 3) == 1);
-    CHECK(columnar3(1 + 3, 1 + 3) == 1);
-    CHECK(columnar3(1 + 3, 2 + 3) == 1);
-    CHECK(columnar3(2 + 3, 0 + 3) == 2);
-    CHECK(columnar3(2 + 3, 1 + 3) == 2);
-    CHECK(columnar3(2 + 3, 2 + 3) == 2);
+    /** @brief Expected clock numbers indexed by x, then y. */
+    static constexpr std::array<std::array<uint8_t, 3>, 3> expected{{{{0, 0, 0}}, {{1, 1, 1}}, {{2, 2, 2}}}};
+    check_period(columnar3, expected);
 }
 
 TEST_CASE("4-phase columnar clocking", "[clocking-scheme]")
@@ -333,73 +257,10 @@ TEST_CASE("4-phase columnar clocking", "[clocking-scheme]")
     CHECK(columnar4.max_out_degree() == 2u);
     CHECK(columnar4.is_regular());
 
-    CHECK(columnar4(0, 0) == 0);
-    CHECK(columnar4(0, 1) == 0);
-    CHECK(columnar4(0, 2) == 0);
-    CHECK(columnar4(0, 3) == 0);
-    CHECK(columnar4(1, 0) == 1);
-    CHECK(columnar4(1, 1) == 1);
-    CHECK(columnar4(1, 2) == 1);
-    CHECK(columnar4(1, 3) == 1);
-    CHECK(columnar4(2, 0) == 2);
-    CHECK(columnar4(2, 1) == 2);
-    CHECK(columnar4(2, 2) == 2);
-    CHECK(columnar4(2, 3) == 2);
-    CHECK(columnar4(3, 0) == 3);
-    CHECK(columnar4(3, 1) == 3);
-    CHECK(columnar4(3, 2) == 3);
-    CHECK(columnar4(3, 3) == 3);
-
-    CHECK(columnar4(0 + 4, 0) == 0);
-    CHECK(columnar4(0 + 4, 1) == 0);
-    CHECK(columnar4(0 + 4, 2) == 0);
-    CHECK(columnar4(0 + 4, 3) == 0);
-    CHECK(columnar4(1 + 4, 0) == 1);
-    CHECK(columnar4(1 + 4, 1) == 1);
-    CHECK(columnar4(1 + 4, 2) == 1);
-    CHECK(columnar4(1 + 4, 3) == 1);
-    CHECK(columnar4(2 + 4, 0) == 2);
-    CHECK(columnar4(2 + 4, 1) == 2);
-    CHECK(columnar4(2 + 4, 2) == 2);
-    CHECK(columnar4(2 + 4, 3) == 2);
-    CHECK(columnar4(3 + 4, 0) == 3);
-    CHECK(columnar4(3 + 4, 1) == 3);
-    CHECK(columnar4(3 + 4, 2) == 3);
-    CHECK(columnar4(3 + 4, 3) == 3);
-
-    CHECK(columnar4(0, 0 + 4) == 0);
-    CHECK(columnar4(0, 1 + 4) == 0);
-    CHECK(columnar4(0, 2 + 4) == 0);
-    CHECK(columnar4(0, 3 + 4) == 0);
-    CHECK(columnar4(1, 0 + 4) == 1);
-    CHECK(columnar4(1, 1 + 4) == 1);
-    CHECK(columnar4(1, 2 + 4) == 1);
-    CHECK(columnar4(1, 3 + 4) == 1);
-    CHECK(columnar4(2, 0 + 4) == 2);
-    CHECK(columnar4(2, 1 + 4) == 2);
-    CHECK(columnar4(2, 2 + 4) == 2);
-    CHECK(columnar4(2, 3 + 4) == 2);
-    CHECK(columnar4(3, 0 + 4) == 3);
-    CHECK(columnar4(3, 1 + 4) == 3);
-    CHECK(columnar4(3, 2 + 4) == 3);
-    CHECK(columnar4(3, 3 + 4) == 3);
-
-    CHECK(columnar4(0 + 4, 0 + 4) == 0);
-    CHECK(columnar4(0 + 4, 1 + 4) == 0);
-    CHECK(columnar4(0 + 4, 2 + 4) == 0);
-    CHECK(columnar4(0 + 4, 3 + 4) == 0);
-    CHECK(columnar4(1 + 4, 0 + 4) == 1);
-    CHECK(columnar4(1 + 4, 1 + 4) == 1);
-    CHECK(columnar4(1 + 4, 2 + 4) == 1);
-    CHECK(columnar4(1 + 4, 3 + 4) == 1);
-    CHECK(columnar4(2 + 4, 0 + 4) == 2);
-    CHECK(columnar4(2 + 4, 1 + 4) == 2);
-    CHECK(columnar4(2 + 4, 2 + 4) == 2);
-    CHECK(columnar4(2 + 4, 3 + 4) == 2);
-    CHECK(columnar4(3 + 4, 0 + 4) == 3);
-    CHECK(columnar4(3 + 4, 1 + 4) == 3);
-    CHECK(columnar4(3 + 4, 2 + 4) == 3);
-    CHECK(columnar4(3 + 4, 3 + 4) == 3);
+    /** @brief Expected clock numbers indexed by x, then y. */
+    static constexpr std::array<std::array<uint8_t, 4>, 4> expected{
+        {{{0, 0, 0, 0}}, {{1, 1, 1, 1}}, {{2, 2, 2, 2}}, {{3, 3, 3, 3}}}};
+    check_period(columnar4, expected);
 }
 
 TEST_CASE("3-phase row clocking", "[clocking-scheme]")
@@ -411,45 +272,9 @@ TEST_CASE("3-phase row clocking", "[clocking-scheme]")
     CHECK(row3.max_out_degree() == 2u);
     CHECK(row3.is_regular());
 
-    CHECK(row3(0, 0) == 0);
-    CHECK(row3(0, 1) == 1);
-    CHECK(row3(0, 2) == 2);
-    CHECK(row3(1, 0) == 0);
-    CHECK(row3(1, 1) == 1);
-    CHECK(row3(1, 2) == 2);
-    CHECK(row3(2, 0) == 0);
-    CHECK(row3(2, 1) == 1);
-    CHECK(row3(2, 2) == 2);
-
-    CHECK(row3(0 + 3, 0) == 0);
-    CHECK(row3(0 + 3, 1) == 1);
-    CHECK(row3(0 + 3, 2) == 2);
-    CHECK(row3(1 + 3, 0) == 0);
-    CHECK(row3(1 + 3, 1) == 1);
-    CHECK(row3(1 + 3, 2) == 2);
-    CHECK(row3(2 + 3, 0) == 0);
-    CHECK(row3(2 + 3, 1) == 1);
-    CHECK(row3(2 + 3, 2) == 2);
-
-    CHECK(row3(0, 0 + 3) == 0);
-    CHECK(row3(0, 1 + 3) == 1);
-    CHECK(row3(0, 2 + 3) == 2);
-    CHECK(row3(1, 0 + 3) == 0);
-    CHECK(row3(1, 1 + 3) == 1);
-    CHECK(row3(1, 2 + 3) == 2);
-    CHECK(row3(2, 0 + 3) == 0);
-    CHECK(row3(2, 1 + 3) == 1);
-    CHECK(row3(2, 2 + 3) == 2);
-
-    CHECK(row3(0 + 3, 0 + 3) == 0);
-    CHECK(row3(0 + 3, 1 + 3) == 1);
-    CHECK(row3(0 + 3, 2 + 3) == 2);
-    CHECK(row3(1 + 3, 0 + 3) == 0);
-    CHECK(row3(1 + 3, 1 + 3) == 1);
-    CHECK(row3(1 + 3, 2 + 3) == 2);
-    CHECK(row3(2 + 3, 0 + 3) == 0);
-    CHECK(row3(2 + 3, 1 + 3) == 1);
-    CHECK(row3(2 + 3, 2 + 3) == 2);
+    /** @brief Expected clock numbers indexed by x, then y. */
+    static constexpr std::array<std::array<uint8_t, 3>, 3> expected{{{{0, 1, 2}}, {{0, 1, 2}}, {{0, 1, 2}}}};
+    check_period(row3, expected);
 }
 
 TEST_CASE("4-phase row clocking", "[clocking-scheme]")
@@ -461,73 +286,10 @@ TEST_CASE("4-phase row clocking", "[clocking-scheme]")
     CHECK(row4.max_out_degree() == 2u);
     CHECK(row4.is_regular());
 
-    CHECK(row4(0, 0) == 0);
-    CHECK(row4(0, 1) == 1);
-    CHECK(row4(0, 2) == 2);
-    CHECK(row4(0, 3) == 3);
-    CHECK(row4(1, 0) == 0);
-    CHECK(row4(1, 1) == 1);
-    CHECK(row4(1, 2) == 2);
-    CHECK(row4(1, 3) == 3);
-    CHECK(row4(2, 0) == 0);
-    CHECK(row4(2, 1) == 1);
-    CHECK(row4(2, 2) == 2);
-    CHECK(row4(2, 3) == 3);
-    CHECK(row4(3, 0) == 0);
-    CHECK(row4(3, 1) == 1);
-    CHECK(row4(3, 2) == 2);
-    CHECK(row4(3, 3) == 3);
-
-    CHECK(row4(0 + 4, 0) == 0);
-    CHECK(row4(0 + 4, 1) == 1);
-    CHECK(row4(0 + 4, 2) == 2);
-    CHECK(row4(0 + 4, 3) == 3);
-    CHECK(row4(1 + 4, 0) == 0);
-    CHECK(row4(1 + 4, 1) == 1);
-    CHECK(row4(1 + 4, 2) == 2);
-    CHECK(row4(1 + 4, 3) == 3);
-    CHECK(row4(2 + 4, 0) == 0);
-    CHECK(row4(2 + 4, 1) == 1);
-    CHECK(row4(2 + 4, 2) == 2);
-    CHECK(row4(2 + 4, 3) == 3);
-    CHECK(row4(3 + 4, 0) == 0);
-    CHECK(row4(3 + 4, 1) == 1);
-    CHECK(row4(3 + 4, 2) == 2);
-    CHECK(row4(3 + 4, 3) == 3);
-
-    CHECK(row4(0, 0 + 4) == 0);
-    CHECK(row4(0, 1 + 4) == 1);
-    CHECK(row4(0, 2 + 4) == 2);
-    CHECK(row4(0, 3 + 4) == 3);
-    CHECK(row4(1, 0 + 4) == 0);
-    CHECK(row4(1, 1 + 4) == 1);
-    CHECK(row4(1, 2 + 4) == 2);
-    CHECK(row4(1, 3 + 4) == 3);
-    CHECK(row4(2, 0 + 4) == 0);
-    CHECK(row4(2, 1 + 4) == 1);
-    CHECK(row4(2, 2 + 4) == 2);
-    CHECK(row4(2, 3 + 4) == 3);
-    CHECK(row4(3, 0 + 4) == 0);
-    CHECK(row4(3, 1 + 4) == 1);
-    CHECK(row4(3, 2 + 4) == 2);
-    CHECK(row4(3, 3 + 4) == 3);
-
-    CHECK(row4(0 + 4, 0 + 4) == 0);
-    CHECK(row4(0 + 4, 1 + 4) == 1);
-    CHECK(row4(0 + 4, 2 + 4) == 2);
-    CHECK(row4(0 + 4, 3 + 4) == 3);
-    CHECK(row4(1 + 4, 0 + 4) == 0);
-    CHECK(row4(1 + 4, 1 + 4) == 1);
-    CHECK(row4(1 + 4, 2 + 4) == 2);
-    CHECK(row4(1 + 4, 3 + 4) == 3);
-    CHECK(row4(2 + 4, 0 + 4) == 0);
-    CHECK(row4(2 + 4, 1 + 4) == 1);
-    CHECK(row4(2 + 4, 2 + 4) == 2);
-    CHECK(row4(2 + 4, 3 + 4) == 3);
-    CHECK(row4(3 + 4, 0 + 4) == 0);
-    CHECK(row4(3 + 4, 1 + 4) == 1);
-    CHECK(row4(3 + 4, 2 + 4) == 2);
-    CHECK(row4(3 + 4, 3 + 4) == 3);
+    /** @brief Expected clock numbers indexed by x, then y. */
+    static constexpr std::array<std::array<uint8_t, 4>, 4> expected{
+        {{{0, 1, 2, 3}}, {{0, 1, 2, 3}}, {{0, 1, 2, 3}}, {{0, 1, 2, 3}}}};
+    check_period(row4, expected);
 }
 
 TEST_CASE("3-phase 2DDWave", "[clocking-scheme]")
@@ -539,45 +301,9 @@ TEST_CASE("3-phase 2DDWave", "[clocking-scheme]")
     CHECK(twoddwave3.max_out_degree() == 2u);
     CHECK(twoddwave3.is_regular());
 
-    CHECK(twoddwave3(0, 0) == 0);
-    CHECK(twoddwave3(0, 1) == 1);
-    CHECK(twoddwave3(0, 2) == 2);
-    CHECK(twoddwave3(1, 0) == 1);
-    CHECK(twoddwave3(1, 1) == 2);
-    CHECK(twoddwave3(1, 2) == 0);
-    CHECK(twoddwave3(2, 0) == 2);
-    CHECK(twoddwave3(2, 1) == 0);
-    CHECK(twoddwave3(2, 2) == 1);
-
-    CHECK(twoddwave3(0 + 3, 0) == 0);
-    CHECK(twoddwave3(0 + 3, 1) == 1);
-    CHECK(twoddwave3(0 + 3, 2) == 2);
-    CHECK(twoddwave3(1 + 3, 0) == 1);
-    CHECK(twoddwave3(1 + 3, 1) == 2);
-    CHECK(twoddwave3(1 + 3, 2) == 0);
-    CHECK(twoddwave3(2 + 3, 0) == 2);
-    CHECK(twoddwave3(2 + 3, 1) == 0);
-    CHECK(twoddwave3(2 + 3, 2) == 1);
-
-    CHECK(twoddwave3(0, 0 + 3) == 0);
-    CHECK(twoddwave3(0, 1 + 3) == 1);
-    CHECK(twoddwave3(0, 2 + 3) == 2);
-    CHECK(twoddwave3(1, 0 + 3) == 1);
-    CHECK(twoddwave3(1, 1 + 3) == 2);
-    CHECK(twoddwave3(1, 2 + 3) == 0);
-    CHECK(twoddwave3(2, 0 + 3) == 2);
-    CHECK(twoddwave3(2, 1 + 3) == 0);
-    CHECK(twoddwave3(2, 2 + 3) == 1);
-
-    CHECK(twoddwave3(0 + 3, 0 + 3) == 0);
-    CHECK(twoddwave3(0 + 3, 1 + 3) == 1);
-    CHECK(twoddwave3(0 + 3, 2 + 3) == 2);
-    CHECK(twoddwave3(1 + 3, 0 + 3) == 1);
-    CHECK(twoddwave3(1 + 3, 1 + 3) == 2);
-    CHECK(twoddwave3(1 + 3, 2 + 3) == 0);
-    CHECK(twoddwave3(2 + 3, 0 + 3) == 2);
-    CHECK(twoddwave3(2 + 3, 1 + 3) == 0);
-    CHECK(twoddwave3(2 + 3, 2 + 3) == 1);
+    /** @brief Expected clock numbers indexed by x, then y. */
+    static constexpr std::array<std::array<uint8_t, 3>, 3> expected{{{{0, 1, 2}}, {{1, 2, 0}}, {{2, 0, 1}}}};
+    check_period(twoddwave3, expected);
 }
 
 TEST_CASE("4-phase 2DDWave", "[clocking-scheme]")
@@ -589,73 +315,10 @@ TEST_CASE("4-phase 2DDWave", "[clocking-scheme]")
     CHECK(twoddwave4.max_out_degree() == 2u);
     CHECK(twoddwave4.is_regular());
 
-    CHECK(twoddwave4(0, 0) == 0);
-    CHECK(twoddwave4(0, 1) == 1);
-    CHECK(twoddwave4(0, 2) == 2);
-    CHECK(twoddwave4(0, 3) == 3);
-    CHECK(twoddwave4(1, 0) == 1);
-    CHECK(twoddwave4(1, 1) == 2);
-    CHECK(twoddwave4(1, 2) == 3);
-    CHECK(twoddwave4(1, 3) == 0);
-    CHECK(twoddwave4(2, 0) == 2);
-    CHECK(twoddwave4(2, 1) == 3);
-    CHECK(twoddwave4(2, 2) == 0);
-    CHECK(twoddwave4(2, 3) == 1);
-    CHECK(twoddwave4(3, 0) == 3);
-    CHECK(twoddwave4(3, 1) == 0);
-    CHECK(twoddwave4(3, 2) == 1);
-    CHECK(twoddwave4(3, 3) == 2);
-
-    CHECK(twoddwave4(0 + 4, 0) == 0);
-    CHECK(twoddwave4(0 + 4, 1) == 1);
-    CHECK(twoddwave4(0 + 4, 2) == 2);
-    CHECK(twoddwave4(0 + 4, 3) == 3);
-    CHECK(twoddwave4(1 + 4, 0) == 1);
-    CHECK(twoddwave4(1 + 4, 1) == 2);
-    CHECK(twoddwave4(1 + 4, 2) == 3);
-    CHECK(twoddwave4(1 + 4, 3) == 0);
-    CHECK(twoddwave4(2 + 4, 0) == 2);
-    CHECK(twoddwave4(2 + 4, 1) == 3);
-    CHECK(twoddwave4(2 + 4, 2) == 0);
-    CHECK(twoddwave4(2 + 4, 3) == 1);
-    CHECK(twoddwave4(3 + 4, 0) == 3);
-    CHECK(twoddwave4(3 + 4, 1) == 0);
-    CHECK(twoddwave4(3 + 4, 2) == 1);
-    CHECK(twoddwave4(3 + 4, 3) == 2);
-
-    CHECK(twoddwave4(0, 0 + 4) == 0);
-    CHECK(twoddwave4(0, 1 + 4) == 1);
-    CHECK(twoddwave4(0, 2 + 4) == 2);
-    CHECK(twoddwave4(0, 3 + 4) == 3);
-    CHECK(twoddwave4(1, 0 + 4) == 1);
-    CHECK(twoddwave4(1, 1 + 4) == 2);
-    CHECK(twoddwave4(1, 2 + 4) == 3);
-    CHECK(twoddwave4(1, 3 + 4) == 0);
-    CHECK(twoddwave4(2, 0 + 4) == 2);
-    CHECK(twoddwave4(2, 1 + 4) == 3);
-    CHECK(twoddwave4(2, 2 + 4) == 0);
-    CHECK(twoddwave4(2, 3 + 4) == 1);
-    CHECK(twoddwave4(3, 0 + 4) == 3);
-    CHECK(twoddwave4(3, 1 + 4) == 0);
-    CHECK(twoddwave4(3, 2 + 4) == 1);
-    CHECK(twoddwave4(3, 3 + 4) == 2);
-
-    CHECK(twoddwave4(0 + 4, 0 + 4) == 0);
-    CHECK(twoddwave4(0 + 4, 1 + 4) == 1);
-    CHECK(twoddwave4(0 + 4, 2 + 4) == 2);
-    CHECK(twoddwave4(0 + 4, 3 + 4) == 3);
-    CHECK(twoddwave4(1 + 4, 0 + 4) == 1);
-    CHECK(twoddwave4(1 + 4, 1 + 4) == 2);
-    CHECK(twoddwave4(1 + 4, 2 + 4) == 3);
-    CHECK(twoddwave4(1 + 4, 3 + 4) == 0);
-    CHECK(twoddwave4(2 + 4, 0 + 4) == 2);
-    CHECK(twoddwave4(2 + 4, 1 + 4) == 3);
-    CHECK(twoddwave4(2 + 4, 2 + 4) == 0);
-    CHECK(twoddwave4(2 + 4, 3 + 4) == 1);
-    CHECK(twoddwave4(3 + 4, 0 + 4) == 3);
-    CHECK(twoddwave4(3 + 4, 1 + 4) == 0);
-    CHECK(twoddwave4(3 + 4, 2 + 4) == 1);
-    CHECK(twoddwave4(3 + 4, 3 + 4) == 2);
+    /** @brief Expected clock numbers indexed by x, then y. */
+    static constexpr std::array<std::array<uint8_t, 4>, 4> expected{
+        {{{0, 1, 2, 3}}, {{1, 2, 3, 0}}, {{2, 3, 0, 1}}, {{3, 0, 1, 2}}}};
+    check_period(twoddwave4, expected);
 }
 
 TEST_CASE("3-phase 2DDWaveHex: odd row", "[clocking-scheme]")
@@ -667,81 +330,10 @@ TEST_CASE("3-phase 2DDWaveHex: odd row", "[clocking-scheme]")
     CHECK(twoddwave_hex_3.max_out_degree() == 2u);
     CHECK(twoddwave_hex_3.is_regular());
 
-    CHECK(twoddwave_hex_3(0, 0) == 0);
-    CHECK(twoddwave_hex_3(0, 1) == 1);
-    CHECK(twoddwave_hex_3(0, 2) == 1);
-    CHECK(twoddwave_hex_3(0, 3) == 2);
-    CHECK(twoddwave_hex_3(0, 4) == 2);
-    CHECK(twoddwave_hex_3(0, 5) == 0);
-    CHECK(twoddwave_hex_3(1, 0) == 1);
-    CHECK(twoddwave_hex_3(1, 1) == 2);
-    CHECK(twoddwave_hex_3(1, 2) == 2);
-    CHECK(twoddwave_hex_3(1, 3) == 0);
-    CHECK(twoddwave_hex_3(1, 4) == 0);
-    CHECK(twoddwave_hex_3(1, 5) == 1);
-    CHECK(twoddwave_hex_3(2, 0) == 2);
-    CHECK(twoddwave_hex_3(2, 1) == 0);
-    CHECK(twoddwave_hex_3(2, 2) == 0);
-    CHECK(twoddwave_hex_3(2, 3) == 1);
-    CHECK(twoddwave_hex_3(2, 4) == 1);
-    CHECK(twoddwave_hex_3(2, 5) == 2);
-
-    CHECK(twoddwave_hex_3(0 + 3, 0) == 0);
-    CHECK(twoddwave_hex_3(0 + 3, 1) == 1);
-    CHECK(twoddwave_hex_3(0 + 3, 2) == 1);
-    CHECK(twoddwave_hex_3(0 + 3, 3) == 2);
-    CHECK(twoddwave_hex_3(0 + 3, 4) == 2);
-    CHECK(twoddwave_hex_3(0 + 3, 5) == 0);
-    CHECK(twoddwave_hex_3(1 + 3, 0) == 1);
-    CHECK(twoddwave_hex_3(1 + 3, 1) == 2);
-    CHECK(twoddwave_hex_3(1 + 3, 2) == 2);
-    CHECK(twoddwave_hex_3(1 + 3, 3) == 0);
-    CHECK(twoddwave_hex_3(1 + 3, 4) == 0);
-    CHECK(twoddwave_hex_3(1 + 3, 5) == 1);
-    CHECK(twoddwave_hex_3(2 + 3, 0) == 2);
-    CHECK(twoddwave_hex_3(2 + 3, 1) == 0);
-    CHECK(twoddwave_hex_3(2 + 3, 2) == 0);
-    CHECK(twoddwave_hex_3(2 + 3, 3) == 1);
-    CHECK(twoddwave_hex_3(2 + 3, 4) == 1);
-    CHECK(twoddwave_hex_3(2 + 3, 5) == 2);
-
-    CHECK(twoddwave_hex_3(0, 0 + 6) == 0);
-    CHECK(twoddwave_hex_3(0, 1 + 6) == 1);
-    CHECK(twoddwave_hex_3(0, 2 + 6) == 1);
-    CHECK(twoddwave_hex_3(0, 3 + 6) == 2);
-    CHECK(twoddwave_hex_3(0, 4 + 6) == 2);
-    CHECK(twoddwave_hex_3(0, 5 + 6) == 0);
-    CHECK(twoddwave_hex_3(1, 0 + 6) == 1);
-    CHECK(twoddwave_hex_3(1, 1 + 6) == 2);
-    CHECK(twoddwave_hex_3(1, 2 + 6) == 2);
-    CHECK(twoddwave_hex_3(1, 3 + 6) == 0);
-    CHECK(twoddwave_hex_3(1, 4 + 6) == 0);
-    CHECK(twoddwave_hex_3(1, 5 + 6) == 1);
-    CHECK(twoddwave_hex_3(2, 0 + 6) == 2);
-    CHECK(twoddwave_hex_3(2, 1 + 6) == 0);
-    CHECK(twoddwave_hex_3(2, 2 + 6) == 0);
-    CHECK(twoddwave_hex_3(2, 3 + 6) == 1);
-    CHECK(twoddwave_hex_3(2, 4 + 6) == 1);
-    CHECK(twoddwave_hex_3(2, 5 + 6) == 2);
-
-    CHECK(twoddwave_hex_3(0 + 3, 0 + 6) == 0);
-    CHECK(twoddwave_hex_3(0 + 3, 1 + 6) == 1);
-    CHECK(twoddwave_hex_3(0 + 3, 2 + 6) == 1);
-    CHECK(twoddwave_hex_3(0 + 3, 3 + 6) == 2);
-    CHECK(twoddwave_hex_3(0 + 3, 4 + 6) == 2);
-    CHECK(twoddwave_hex_3(0 + 3, 5 + 6) == 0);
-    CHECK(twoddwave_hex_3(1 + 3, 0 + 6) == 1);
-    CHECK(twoddwave_hex_3(1 + 3, 1 + 6) == 2);
-    CHECK(twoddwave_hex_3(1 + 3, 2 + 6) == 2);
-    CHECK(twoddwave_hex_3(1 + 3, 3 + 6) == 0);
-    CHECK(twoddwave_hex_3(1 + 3, 4 + 6) == 0);
-    CHECK(twoddwave_hex_3(1 + 3, 5 + 6) == 1);
-    CHECK(twoddwave_hex_3(2 + 3, 0 + 6) == 2);
-    CHECK(twoddwave_hex_3(2 + 3, 1 + 6) == 0);
-    CHECK(twoddwave_hex_3(2 + 3, 2 + 6) == 0);
-    CHECK(twoddwave_hex_3(2 + 3, 3 + 6) == 1);
-    CHECK(twoddwave_hex_3(2 + 3, 4 + 6) == 1);
-    CHECK(twoddwave_hex_3(2 + 3, 5 + 6) == 2);
+    /** @brief Expected clock numbers indexed by x, then y. */
+    static constexpr std::array<std::array<uint8_t, 6>, 3> expected{
+        {{{0, 1, 1, 2, 2, 0}}, {{1, 2, 2, 0, 0, 1}}, {{2, 0, 0, 1, 1, 2}}}};
+    check_period(twoddwave_hex_3, expected);
 }
 
 TEST_CASE("3-phase 2DDWaveHex: even row", "[clocking-scheme]")
@@ -753,81 +345,10 @@ TEST_CASE("3-phase 2DDWaveHex: even row", "[clocking-scheme]")
     CHECK(twoddwave_hex_3.max_out_degree() == 2u);
     CHECK(twoddwave_hex_3.is_regular());
 
-    CHECK(twoddwave_hex_3(0, 0) == 0);
-    CHECK(twoddwave_hex_3(0, 1) == 0);
-    CHECK(twoddwave_hex_3(0, 2) == 1);
-    CHECK(twoddwave_hex_3(0, 3) == 1);
-    CHECK(twoddwave_hex_3(0, 4) == 2);
-    CHECK(twoddwave_hex_3(0, 5) == 2);
-    CHECK(twoddwave_hex_3(1, 0) == 1);
-    CHECK(twoddwave_hex_3(1, 1) == 1);
-    CHECK(twoddwave_hex_3(1, 2) == 2);
-    CHECK(twoddwave_hex_3(1, 3) == 2);
-    CHECK(twoddwave_hex_3(1, 4) == 0);
-    CHECK(twoddwave_hex_3(1, 5) == 0);
-    CHECK(twoddwave_hex_3(2, 0) == 2);
-    CHECK(twoddwave_hex_3(2, 1) == 2);
-    CHECK(twoddwave_hex_3(2, 2) == 0);
-    CHECK(twoddwave_hex_3(2, 3) == 0);
-    CHECK(twoddwave_hex_3(2, 4) == 1);
-    CHECK(twoddwave_hex_3(2, 5) == 1);
-
-    CHECK(twoddwave_hex_3(0 + 3, 0) == 0);
-    CHECK(twoddwave_hex_3(0 + 3, 1) == 0);
-    CHECK(twoddwave_hex_3(0 + 3, 2) == 1);
-    CHECK(twoddwave_hex_3(0 + 3, 3) == 1);
-    CHECK(twoddwave_hex_3(0 + 3, 4) == 2);
-    CHECK(twoddwave_hex_3(0 + 3, 5) == 2);
-    CHECK(twoddwave_hex_3(1 + 3, 0) == 1);
-    CHECK(twoddwave_hex_3(1 + 3, 1) == 1);
-    CHECK(twoddwave_hex_3(1 + 3, 2) == 2);
-    CHECK(twoddwave_hex_3(1 + 3, 3) == 2);
-    CHECK(twoddwave_hex_3(1 + 3, 4) == 0);
-    CHECK(twoddwave_hex_3(1 + 3, 5) == 0);
-    CHECK(twoddwave_hex_3(2 + 3, 0) == 2);
-    CHECK(twoddwave_hex_3(2 + 3, 1) == 2);
-    CHECK(twoddwave_hex_3(2 + 3, 2) == 0);
-    CHECK(twoddwave_hex_3(2 + 3, 3) == 0);
-    CHECK(twoddwave_hex_3(2 + 3, 4) == 1);
-    CHECK(twoddwave_hex_3(2 + 3, 5) == 1);
-
-    CHECK(twoddwave_hex_3(0, 0 + 6) == 0);
-    CHECK(twoddwave_hex_3(0, 1 + 6) == 0);
-    CHECK(twoddwave_hex_3(0, 2 + 6) == 1);
-    CHECK(twoddwave_hex_3(0, 3 + 6) == 1);
-    CHECK(twoddwave_hex_3(0, 4 + 6) == 2);
-    CHECK(twoddwave_hex_3(0, 5 + 6) == 2);
-    CHECK(twoddwave_hex_3(1, 0 + 6) == 1);
-    CHECK(twoddwave_hex_3(1, 1 + 6) == 1);
-    CHECK(twoddwave_hex_3(1, 2 + 6) == 2);
-    CHECK(twoddwave_hex_3(1, 3 + 6) == 2);
-    CHECK(twoddwave_hex_3(1, 4 + 6) == 0);
-    CHECK(twoddwave_hex_3(1, 5 + 6) == 0);
-    CHECK(twoddwave_hex_3(2, 0 + 6) == 2);
-    CHECK(twoddwave_hex_3(2, 1 + 6) == 2);
-    CHECK(twoddwave_hex_3(2, 2 + 6) == 0);
-    CHECK(twoddwave_hex_3(2, 3 + 6) == 0);
-    CHECK(twoddwave_hex_3(2, 4 + 6) == 1);
-    CHECK(twoddwave_hex_3(2, 5 + 6) == 1);
-
-    CHECK(twoddwave_hex_3(0 + 3, 0 + 6) == 0);
-    CHECK(twoddwave_hex_3(0 + 3, 1 + 6) == 0);
-    CHECK(twoddwave_hex_3(0 + 3, 2 + 6) == 1);
-    CHECK(twoddwave_hex_3(0 + 3, 3 + 6) == 1);
-    CHECK(twoddwave_hex_3(0 + 3, 4 + 6) == 2);
-    CHECK(twoddwave_hex_3(0 + 3, 5 + 6) == 2);
-    CHECK(twoddwave_hex_3(1 + 3, 0 + 6) == 1);
-    CHECK(twoddwave_hex_3(1 + 3, 1 + 6) == 1);
-    CHECK(twoddwave_hex_3(1 + 3, 2 + 6) == 2);
-    CHECK(twoddwave_hex_3(1 + 3, 3 + 6) == 2);
-    CHECK(twoddwave_hex_3(1 + 3, 4 + 6) == 0);
-    CHECK(twoddwave_hex_3(1 + 3, 5 + 6) == 0);
-    CHECK(twoddwave_hex_3(2 + 3, 0 + 6) == 2);
-    CHECK(twoddwave_hex_3(2 + 3, 1 + 6) == 2);
-    CHECK(twoddwave_hex_3(2 + 3, 2 + 6) == 0);
-    CHECK(twoddwave_hex_3(2 + 3, 3 + 6) == 0);
-    CHECK(twoddwave_hex_3(2 + 3, 4 + 6) == 1);
-    CHECK(twoddwave_hex_3(2 + 3, 5 + 6) == 1);
+    /** @brief Expected clock numbers indexed by x, then y. */
+    static constexpr std::array<std::array<uint8_t, 6>, 3> expected{
+        {{{0, 0, 1, 1, 2, 2}}, {{1, 1, 2, 2, 0, 0}}, {{2, 2, 0, 0, 1, 1}}}};
+    check_period(twoddwave_hex_3, expected);
 }
 
 TEST_CASE("3-phase 2DDWaveHex: odd column", "[clocking-scheme]")
@@ -839,81 +360,10 @@ TEST_CASE("3-phase 2DDWaveHex: odd column", "[clocking-scheme]")
     CHECK(twoddwave_hex_3.max_out_degree() == 2u);
     CHECK(twoddwave_hex_3.is_regular());
 
-    CHECK(twoddwave_hex_3(0, 0) == 0);
-    CHECK(twoddwave_hex_3(0, 1) == 1);
-    CHECK(twoddwave_hex_3(0, 2) == 2);
-    CHECK(twoddwave_hex_3(1, 0) == 1);
-    CHECK(twoddwave_hex_3(1, 1) == 2);
-    CHECK(twoddwave_hex_3(1, 2) == 0);
-    CHECK(twoddwave_hex_3(2, 0) == 1);
-    CHECK(twoddwave_hex_3(2, 1) == 2);
-    CHECK(twoddwave_hex_3(2, 2) == 0);
-    CHECK(twoddwave_hex_3(3, 0) == 2);
-    CHECK(twoddwave_hex_3(3, 1) == 0);
-    CHECK(twoddwave_hex_3(3, 2) == 1);
-    CHECK(twoddwave_hex_3(4, 0) == 2);
-    CHECK(twoddwave_hex_3(4, 1) == 0);
-    CHECK(twoddwave_hex_3(4, 2) == 1);
-    CHECK(twoddwave_hex_3(5, 0) == 0);
-    CHECK(twoddwave_hex_3(5, 1) == 1);
-    CHECK(twoddwave_hex_3(5, 2) == 2);
-
-    CHECK(twoddwave_hex_3(0 + 6, 0) == 0);
-    CHECK(twoddwave_hex_3(0 + 6, 1) == 1);
-    CHECK(twoddwave_hex_3(0 + 6, 2) == 2);
-    CHECK(twoddwave_hex_3(1 + 6, 0) == 1);
-    CHECK(twoddwave_hex_3(1 + 6, 1) == 2);
-    CHECK(twoddwave_hex_3(1 + 6, 2) == 0);
-    CHECK(twoddwave_hex_3(2 + 6, 0) == 1);
-    CHECK(twoddwave_hex_3(2 + 6, 1) == 2);
-    CHECK(twoddwave_hex_3(2 + 6, 2) == 0);
-    CHECK(twoddwave_hex_3(3 + 6, 0) == 2);
-    CHECK(twoddwave_hex_3(3 + 6, 1) == 0);
-    CHECK(twoddwave_hex_3(3 + 6, 2) == 1);
-    CHECK(twoddwave_hex_3(4 + 6, 0) == 2);
-    CHECK(twoddwave_hex_3(4 + 6, 1) == 0);
-    CHECK(twoddwave_hex_3(4 + 6, 2) == 1);
-    CHECK(twoddwave_hex_3(5 + 6, 0) == 0);
-    CHECK(twoddwave_hex_3(5 + 6, 1) == 1);
-    CHECK(twoddwave_hex_3(5 + 6, 2) == 2);
-
-    CHECK(twoddwave_hex_3(0, 0 + 3) == 0);
-    CHECK(twoddwave_hex_3(0, 1 + 3) == 1);
-    CHECK(twoddwave_hex_3(0, 2 + 3) == 2);
-    CHECK(twoddwave_hex_3(1, 0 + 3) == 1);
-    CHECK(twoddwave_hex_3(1, 1 + 3) == 2);
-    CHECK(twoddwave_hex_3(1, 2 + 3) == 0);
-    CHECK(twoddwave_hex_3(2, 0 + 3) == 1);
-    CHECK(twoddwave_hex_3(2, 1 + 3) == 2);
-    CHECK(twoddwave_hex_3(2, 2 + 3) == 0);
-    CHECK(twoddwave_hex_3(3, 0 + 3) == 2);
-    CHECK(twoddwave_hex_3(3, 1 + 3) == 0);
-    CHECK(twoddwave_hex_3(3, 2 + 3) == 1);
-    CHECK(twoddwave_hex_3(4, 0 + 3) == 2);
-    CHECK(twoddwave_hex_3(4, 1 + 3) == 0);
-    CHECK(twoddwave_hex_3(4, 2 + 3) == 1);
-    CHECK(twoddwave_hex_3(5, 0 + 3) == 0);
-    CHECK(twoddwave_hex_3(5, 1 + 3) == 1);
-    CHECK(twoddwave_hex_3(5, 2 + 3) == 2);
-
-    CHECK(twoddwave_hex_3(0 + 6, 0 + 3) == 0);
-    CHECK(twoddwave_hex_3(0 + 6, 1 + 3) == 1);
-    CHECK(twoddwave_hex_3(0 + 6, 2 + 3) == 2);
-    CHECK(twoddwave_hex_3(1 + 6, 0 + 3) == 1);
-    CHECK(twoddwave_hex_3(1 + 6, 1 + 3) == 2);
-    CHECK(twoddwave_hex_3(1 + 6, 2 + 3) == 0);
-    CHECK(twoddwave_hex_3(2 + 6, 0 + 3) == 1);
-    CHECK(twoddwave_hex_3(2 + 6, 1 + 3) == 2);
-    CHECK(twoddwave_hex_3(2 + 6, 2 + 3) == 0);
-    CHECK(twoddwave_hex_3(3 + 6, 0 + 3) == 2);
-    CHECK(twoddwave_hex_3(3 + 6, 1 + 3) == 0);
-    CHECK(twoddwave_hex_3(3 + 6, 2 + 3) == 1);
-    CHECK(twoddwave_hex_3(4 + 6, 0 + 3) == 2);
-    CHECK(twoddwave_hex_3(4 + 6, 1 + 3) == 0);
-    CHECK(twoddwave_hex_3(4 + 6, 2 + 3) == 1);
-    CHECK(twoddwave_hex_3(5 + 6, 0 + 3) == 0);
-    CHECK(twoddwave_hex_3(5 + 6, 1 + 3) == 1);
-    CHECK(twoddwave_hex_3(5 + 6, 2 + 3) == 2);
+    /** @brief Expected clock numbers indexed by x, then y. */
+    static constexpr std::array<std::array<uint8_t, 3>, 6> expected{
+        {{{0, 1, 2}}, {{1, 2, 0}}, {{1, 2, 0}}, {{2, 0, 1}}, {{2, 0, 1}}, {{0, 1, 2}}}};
+    check_period(twoddwave_hex_3, expected);
 }
 
 TEST_CASE("3-phase 2DDWaveHex: even column", "[clocking-scheme]")
@@ -925,81 +375,10 @@ TEST_CASE("3-phase 2DDWaveHex: even column", "[clocking-scheme]")
     CHECK(twoddwave_hex_3.max_out_degree() == 2u);
     CHECK(twoddwave_hex_3.is_regular());
 
-    CHECK(twoddwave_hex_3(0, 0) == 0);
-    CHECK(twoddwave_hex_3(0, 1) == 1);
-    CHECK(twoddwave_hex_3(0, 2) == 2);
-    CHECK(twoddwave_hex_3(1, 0) == 0);
-    CHECK(twoddwave_hex_3(1, 1) == 1);
-    CHECK(twoddwave_hex_3(1, 2) == 2);
-    CHECK(twoddwave_hex_3(2, 0) == 1);
-    CHECK(twoddwave_hex_3(2, 1) == 2);
-    CHECK(twoddwave_hex_3(2, 2) == 0);
-    CHECK(twoddwave_hex_3(3, 0) == 1);
-    CHECK(twoddwave_hex_3(3, 1) == 2);
-    CHECK(twoddwave_hex_3(3, 2) == 0);
-    CHECK(twoddwave_hex_3(4, 0) == 2);
-    CHECK(twoddwave_hex_3(4, 1) == 0);
-    CHECK(twoddwave_hex_3(4, 2) == 1);
-    CHECK(twoddwave_hex_3(5, 0) == 2);
-    CHECK(twoddwave_hex_3(5, 1) == 0);
-    CHECK(twoddwave_hex_3(5, 2) == 1);
-
-    CHECK(twoddwave_hex_3(0 + 6, 0) == 0);
-    CHECK(twoddwave_hex_3(0 + 6, 1) == 1);
-    CHECK(twoddwave_hex_3(0 + 6, 2) == 2);
-    CHECK(twoddwave_hex_3(1 + 6, 0) == 0);
-    CHECK(twoddwave_hex_3(1 + 6, 1) == 1);
-    CHECK(twoddwave_hex_3(1 + 6, 2) == 2);
-    CHECK(twoddwave_hex_3(2 + 6, 0) == 1);
-    CHECK(twoddwave_hex_3(2 + 6, 1) == 2);
-    CHECK(twoddwave_hex_3(2 + 6, 2) == 0);
-    CHECK(twoddwave_hex_3(3 + 6, 0) == 1);
-    CHECK(twoddwave_hex_3(3 + 6, 1) == 2);
-    CHECK(twoddwave_hex_3(3 + 6, 2) == 0);
-    CHECK(twoddwave_hex_3(4 + 6, 0) == 2);
-    CHECK(twoddwave_hex_3(4 + 6, 1) == 0);
-    CHECK(twoddwave_hex_3(4 + 6, 2) == 1);
-    CHECK(twoddwave_hex_3(5 + 6, 0) == 2);
-    CHECK(twoddwave_hex_3(5 + 6, 1) == 0);
-    CHECK(twoddwave_hex_3(5 + 6, 2) == 1);
-
-    CHECK(twoddwave_hex_3(0, 0 + 3) == 0);
-    CHECK(twoddwave_hex_3(0, 1 + 3) == 1);
-    CHECK(twoddwave_hex_3(0, 2 + 3) == 2);
-    CHECK(twoddwave_hex_3(1, 0 + 3) == 0);
-    CHECK(twoddwave_hex_3(1, 1 + 3) == 1);
-    CHECK(twoddwave_hex_3(1, 2 + 3) == 2);
-    CHECK(twoddwave_hex_3(2, 0 + 3) == 1);
-    CHECK(twoddwave_hex_3(2, 1 + 3) == 2);
-    CHECK(twoddwave_hex_3(2, 2 + 3) == 0);
-    CHECK(twoddwave_hex_3(3, 0 + 3) == 1);
-    CHECK(twoddwave_hex_3(3, 1 + 3) == 2);
-    CHECK(twoddwave_hex_3(3, 2 + 3) == 0);
-    CHECK(twoddwave_hex_3(4, 0 + 3) == 2);
-    CHECK(twoddwave_hex_3(4, 1 + 3) == 0);
-    CHECK(twoddwave_hex_3(4, 2 + 3) == 1);
-    CHECK(twoddwave_hex_3(5, 0 + 3) == 2);
-    CHECK(twoddwave_hex_3(5, 1 + 3) == 0);
-    CHECK(twoddwave_hex_3(5, 2 + 3) == 1);
-
-    CHECK(twoddwave_hex_3(0 + 6, 0 + 3) == 0);
-    CHECK(twoddwave_hex_3(0 + 6, 1 + 3) == 1);
-    CHECK(twoddwave_hex_3(0 + 6, 2 + 3) == 2);
-    CHECK(twoddwave_hex_3(1 + 6, 0 + 3) == 0);
-    CHECK(twoddwave_hex_3(1 + 6, 1 + 3) == 1);
-    CHECK(twoddwave_hex_3(1 + 6, 2 + 3) == 2);
-    CHECK(twoddwave_hex_3(2 + 6, 0 + 3) == 1);
-    CHECK(twoddwave_hex_3(2 + 6, 1 + 3) == 2);
-    CHECK(twoddwave_hex_3(2 + 6, 2 + 3) == 0);
-    CHECK(twoddwave_hex_3(3 + 6, 0 + 3) == 1);
-    CHECK(twoddwave_hex_3(3 + 6, 1 + 3) == 2);
-    CHECK(twoddwave_hex_3(3 + 6, 2 + 3) == 0);
-    CHECK(twoddwave_hex_3(4 + 6, 0 + 3) == 2);
-    CHECK(twoddwave_hex_3(4 + 6, 1 + 3) == 0);
-    CHECK(twoddwave_hex_3(4 + 6, 2 + 3) == 1);
-    CHECK(twoddwave_hex_3(5 + 6, 0 + 3) == 2);
-    CHECK(twoddwave_hex_3(5 + 6, 1 + 3) == 0);
-    CHECK(twoddwave_hex_3(5 + 6, 2 + 3) == 1);
+    /** @brief Expected clock numbers indexed by x, then y. */
+    static constexpr std::array<std::array<uint8_t, 3>, 6> expected{
+        {{{0, 1, 2}}, {{0, 1, 2}}, {{1, 2, 0}}, {{1, 2, 0}}, {{2, 0, 1}}, {{2, 0, 1}}}};
+    check_period(twoddwave_hex_3, expected);
 }
 
 TEST_CASE("4-phase 2DDWaveHex: odd row", "[clocking-scheme]")
@@ -1016,17 +395,7 @@ TEST_CASE("4-phase 2DDWaveHex: odd row", "[clocking-scheme]")
                                                                      {{1, 2, 2, 3, 3, 0, 0, 1}},
                                                                      {{2, 3, 3, 0, 0, 1, 1, 2}},
                                                                      {{3, 0, 0, 1, 1, 2, 2, 3}}}};
-    for (uint32_t x = 0; x < 4; ++x)
-    {
-        for (uint32_t y = 0; y < 8; ++y)
-        {
-            CAPTURE(x, y);
-            CHECK(twoddwave_hex_4(x, y) == expected.at(x).at(y));
-            CHECK(twoddwave_hex_4(x + 4, y) == expected.at(x).at(y));
-            CHECK(twoddwave_hex_4(x, y + 8) == expected.at(x).at(y));
-            CHECK(twoddwave_hex_4(x + 4, y + 8) == expected.at(x).at(y));
-        }
-    }
+    check_period(twoddwave_hex_4, expected);
 }
 
 TEST_CASE("4-phase 2DDWaveHex: even row", "[clocking-scheme]")
@@ -1043,17 +412,7 @@ TEST_CASE("4-phase 2DDWaveHex: even row", "[clocking-scheme]")
                                                                      {{1, 1, 2, 2, 3, 3, 0, 0}},
                                                                      {{2, 2, 3, 3, 0, 0, 1, 1}},
                                                                      {{3, 3, 0, 0, 1, 1, 2, 2}}}};
-    for (uint32_t x = 0; x < 4; ++x)
-    {
-        for (uint32_t y = 0; y < 8; ++y)
-        {
-            CAPTURE(x, y);
-            CHECK(twoddwave_hex_4(x, y) == expected.at(x).at(y));
-            CHECK(twoddwave_hex_4(x + 4, y) == expected.at(x).at(y));
-            CHECK(twoddwave_hex_4(x, y + 8) == expected.at(x).at(y));
-            CHECK(twoddwave_hex_4(x + 4, y + 8) == expected.at(x).at(y));
-        }
-    }
+    check_period(twoddwave_hex_4, expected);
 }
 
 TEST_CASE("4-phase 2DDWaveHex: odd column", "[clocking-scheme]")
@@ -1074,17 +433,7 @@ TEST_CASE("4-phase 2DDWaveHex: odd column", "[clocking-scheme]")
                                                                      {{3, 0, 1, 2}},
                                                                      {{3, 0, 1, 2}},
                                                                      {{0, 1, 2, 3}}}};
-    for (uint32_t x = 0; x < 8; ++x)
-    {
-        for (uint32_t y = 0; y < 4; ++y)
-        {
-            CAPTURE(x, y);
-            CHECK(twoddwave_hex_4(x, y) == expected.at(x).at(y));
-            CHECK(twoddwave_hex_4(x + 8, y) == expected.at(x).at(y));
-            CHECK(twoddwave_hex_4(x, y + 4) == expected.at(x).at(y));
-            CHECK(twoddwave_hex_4(x + 8, y + 4) == expected.at(x).at(y));
-        }
-    }
+    check_period(twoddwave_hex_4, expected);
 }
 
 TEST_CASE("4-phase 2DDWaveHex: even column", "[clocking-scheme]")
@@ -1105,17 +454,7 @@ TEST_CASE("4-phase 2DDWaveHex: even column", "[clocking-scheme]")
                                                                      {{2, 3, 0, 1}},
                                                                      {{3, 0, 1, 2}},
                                                                      {{3, 0, 1, 2}}}};
-    for (uint32_t x = 0; x < 8; ++x)
-    {
-        for (uint32_t y = 0; y < 4; ++y)
-        {
-            CAPTURE(x, y);
-            CHECK(twoddwave_hex_4(x, y) == expected.at(x).at(y));
-            CHECK(twoddwave_hex_4(x + 8, y) == expected.at(x).at(y));
-            CHECK(twoddwave_hex_4(x, y + 4) == expected.at(x).at(y));
-            CHECK(twoddwave_hex_4(x + 8, y + 4) == expected.at(x).at(y));
-        }
-    }
+    check_period(twoddwave_hex_4, expected);
 }
 
 TEST_CASE("4-phase USE", "[clocking-scheme]")
@@ -1127,73 +466,10 @@ TEST_CASE("4-phase USE", "[clocking-scheme]")
     CHECK(use4.max_out_degree() == 2u);
     CHECK(use4.is_regular());
 
-    CHECK(use4(0, 0) == 0);
-    CHECK(use4(0, 1) == 3);
-    CHECK(use4(0, 2) == 2);
-    CHECK(use4(0, 3) == 1);
-    CHECK(use4(1, 0) == 1);
-    CHECK(use4(1, 1) == 2);
-    CHECK(use4(1, 2) == 3);
-    CHECK(use4(1, 3) == 0);
-    CHECK(use4(2, 0) == 2);
-    CHECK(use4(2, 1) == 1);
-    CHECK(use4(2, 2) == 0);
-    CHECK(use4(2, 3) == 3);
-    CHECK(use4(3, 0) == 3);
-    CHECK(use4(3, 1) == 0);
-    CHECK(use4(3, 2) == 1);
-    CHECK(use4(3, 3) == 2);
-
-    CHECK(use4(0 + 4, 0) == 0);
-    CHECK(use4(0 + 4, 1) == 3);
-    CHECK(use4(0 + 4, 2) == 2);
-    CHECK(use4(0 + 4, 3) == 1);
-    CHECK(use4(1 + 4, 0) == 1);
-    CHECK(use4(1 + 4, 1) == 2);
-    CHECK(use4(1 + 4, 2) == 3);
-    CHECK(use4(1 + 4, 3) == 0);
-    CHECK(use4(2 + 4, 0) == 2);
-    CHECK(use4(2 + 4, 1) == 1);
-    CHECK(use4(2 + 4, 2) == 0);
-    CHECK(use4(2 + 4, 3) == 3);
-    CHECK(use4(3 + 4, 0) == 3);
-    CHECK(use4(3 + 4, 1) == 0);
-    CHECK(use4(3 + 4, 2) == 1);
-    CHECK(use4(3 + 4, 3) == 2);
-
-    CHECK(use4(0, 0 + 4) == 0);
-    CHECK(use4(0, 1 + 4) == 3);
-    CHECK(use4(0, 2 + 4) == 2);
-    CHECK(use4(0, 3 + 4) == 1);
-    CHECK(use4(1, 0 + 4) == 1);
-    CHECK(use4(1, 1 + 4) == 2);
-    CHECK(use4(1, 2 + 4) == 3);
-    CHECK(use4(1, 3 + 4) == 0);
-    CHECK(use4(2, 0 + 4) == 2);
-    CHECK(use4(2, 1 + 4) == 1);
-    CHECK(use4(2, 2 + 4) == 0);
-    CHECK(use4(2, 3 + 4) == 3);
-    CHECK(use4(3, 0 + 4) == 3);
-    CHECK(use4(3, 1 + 4) == 0);
-    CHECK(use4(3, 2 + 4) == 1);
-    CHECK(use4(3, 3 + 4) == 2);
-
-    CHECK(use4(0 + 4, 0 + 4) == 0);
-    CHECK(use4(0 + 4, 1 + 4) == 3);
-    CHECK(use4(0 + 4, 2 + 4) == 2);
-    CHECK(use4(0 + 4, 3 + 4) == 1);
-    CHECK(use4(1 + 4, 0 + 4) == 1);
-    CHECK(use4(1 + 4, 1 + 4) == 2);
-    CHECK(use4(1 + 4, 2 + 4) == 3);
-    CHECK(use4(1 + 4, 3 + 4) == 0);
-    CHECK(use4(2 + 4, 0 + 4) == 2);
-    CHECK(use4(2 + 4, 1 + 4) == 1);
-    CHECK(use4(2 + 4, 2 + 4) == 0);
-    CHECK(use4(2 + 4, 3 + 4) == 3);
-    CHECK(use4(3 + 4, 0 + 4) == 3);
-    CHECK(use4(3 + 4, 1 + 4) == 0);
-    CHECK(use4(3 + 4, 2 + 4) == 1);
-    CHECK(use4(3 + 4, 3 + 4) == 2);
+    /** @brief Expected clock numbers indexed by x, then y. */
+    static constexpr std::array<std::array<uint8_t, 4>, 4> expected{
+        {{{0, 3, 2, 1}}, {{1, 2, 3, 0}}, {{2, 1, 0, 3}}, {{3, 0, 1, 2}}}};
+    check_period(use4, expected);
 }
 
 TEST_CASE("4-phase RES", "[clocking-scheme]")
@@ -1205,73 +481,10 @@ TEST_CASE("4-phase RES", "[clocking-scheme]")
     CHECK(res4.max_out_degree() == 3u);
     CHECK(res4.is_regular());
 
-    CHECK(res4(0, 0) == 3);
-    CHECK(res4(0, 1) == 0);
-    CHECK(res4(0, 2) == 1);
-    CHECK(res4(0, 3) == 0);
-    CHECK(res4(1, 0) == 0);
-    CHECK(res4(1, 1) == 1);
-    CHECK(res4(1, 2) == 2);
-    CHECK(res4(1, 3) == 3);
-    CHECK(res4(2, 0) == 1);
-    CHECK(res4(2, 1) == 0);
-    CHECK(res4(2, 2) == 3);
-    CHECK(res4(2, 3) == 2);
-    CHECK(res4(3, 0) == 2);
-    CHECK(res4(3, 1) == 3);
-    CHECK(res4(3, 2) == 0);
-    CHECK(res4(3, 3) == 1);
-
-    CHECK(res4(0 + 4, 0) == 3);
-    CHECK(res4(0 + 4, 1) == 0);
-    CHECK(res4(0 + 4, 2) == 1);
-    CHECK(res4(0 + 4, 3) == 0);
-    CHECK(res4(1 + 4, 0) == 0);
-    CHECK(res4(1 + 4, 1) == 1);
-    CHECK(res4(1 + 4, 2) == 2);
-    CHECK(res4(1 + 4, 3) == 3);
-    CHECK(res4(2 + 4, 0) == 1);
-    CHECK(res4(2 + 4, 1) == 0);
-    CHECK(res4(2 + 4, 2) == 3);
-    CHECK(res4(2 + 4, 3) == 2);
-    CHECK(res4(3 + 4, 0) == 2);
-    CHECK(res4(3 + 4, 1) == 3);
-    CHECK(res4(3 + 4, 2) == 0);
-    CHECK(res4(3 + 4, 3) == 1);
-
-    CHECK(res4(0, 0 + 4) == 3);
-    CHECK(res4(0, 1 + 4) == 0);
-    CHECK(res4(0, 2 + 4) == 1);
-    CHECK(res4(0, 3 + 4) == 0);
-    CHECK(res4(1, 0 + 4) == 0);
-    CHECK(res4(1, 1 + 4) == 1);
-    CHECK(res4(1, 2 + 4) == 2);
-    CHECK(res4(1, 3 + 4) == 3);
-    CHECK(res4(2, 0 + 4) == 1);
-    CHECK(res4(2, 1 + 4) == 0);
-    CHECK(res4(2, 2 + 4) == 3);
-    CHECK(res4(2, 3 + 4) == 2);
-    CHECK(res4(3, 0 + 4) == 2);
-    CHECK(res4(3, 1 + 4) == 3);
-    CHECK(res4(3, 2 + 4) == 0);
-    CHECK(res4(3, 3 + 4) == 1);
-
-    CHECK(res4(0 + 4, 0 + 4) == 3);
-    CHECK(res4(0 + 4, 1 + 4) == 0);
-    CHECK(res4(0 + 4, 2 + 4) == 1);
-    CHECK(res4(0 + 4, 3 + 4) == 0);
-    CHECK(res4(1 + 4, 0 + 4) == 0);
-    CHECK(res4(1 + 4, 1 + 4) == 1);
-    CHECK(res4(1 + 4, 2 + 4) == 2);
-    CHECK(res4(1 + 4, 3 + 4) == 3);
-    CHECK(res4(2 + 4, 0 + 4) == 1);
-    CHECK(res4(2 + 4, 1 + 4) == 0);
-    CHECK(res4(2 + 4, 2 + 4) == 3);
-    CHECK(res4(2 + 4, 3 + 4) == 2);
-    CHECK(res4(3 + 4, 0 + 4) == 2);
-    CHECK(res4(3 + 4, 1 + 4) == 3);
-    CHECK(res4(3 + 4, 2 + 4) == 0);
-    CHECK(res4(3 + 4, 3 + 4) == 1);
+    /** @brief Expected clock numbers indexed by x, then y. */
+    static constexpr std::array<std::array<uint8_t, 4>, 4> expected{
+        {{{3, 0, 1, 0}}, {{0, 1, 2, 3}}, {{1, 0, 3, 2}}, {{2, 3, 0, 1}}}};
+    check_period(res4, expected);
 }
 
 TEST_CASE("4-phase CFE", "[clocking-scheme]")
@@ -1283,73 +496,10 @@ TEST_CASE("4-phase CFE", "[clocking-scheme]")
     CHECK(cfe4.max_out_degree() == 3u);
     CHECK(cfe4.is_regular());
 
-    CHECK(cfe4(0, 0) == 0);
-    CHECK(cfe4(0, 1) == 3);
-    CHECK(cfe4(0, 2) == 0);
-    CHECK(cfe4(0, 3) == 3);
-    CHECK(cfe4(1, 0) == 1);
-    CHECK(cfe4(1, 1) == 2);
-    CHECK(cfe4(1, 2) == 1);
-    CHECK(cfe4(1, 3) == 2);
-    CHECK(cfe4(2, 0) == 0);
-    CHECK(cfe4(2, 1) == 3);
-    CHECK(cfe4(2, 2) == 0);
-    CHECK(cfe4(2, 3) == 3);
-    CHECK(cfe4(3, 0) == 1);
-    CHECK(cfe4(3, 1) == 2);
-    CHECK(cfe4(3, 2) == 1);
-    CHECK(cfe4(3, 3) == 2);
-
-    CHECK(cfe4(0 + 4, 0) == 0);
-    CHECK(cfe4(0 + 4, 1) == 3);
-    CHECK(cfe4(0 + 4, 2) == 0);
-    CHECK(cfe4(0 + 4, 3) == 3);
-    CHECK(cfe4(1 + 4, 0) == 1);
-    CHECK(cfe4(1 + 4, 1) == 2);
-    CHECK(cfe4(1 + 4, 2) == 1);
-    CHECK(cfe4(1 + 4, 3) == 2);
-    CHECK(cfe4(2 + 4, 0) == 0);
-    CHECK(cfe4(2 + 4, 1) == 3);
-    CHECK(cfe4(2 + 4, 2) == 0);
-    CHECK(cfe4(2 + 4, 3) == 3);
-    CHECK(cfe4(3 + 4, 0) == 1);
-    CHECK(cfe4(3 + 4, 1) == 2);
-    CHECK(cfe4(3 + 4, 2) == 1);
-    CHECK(cfe4(3 + 4, 3) == 2);
-
-    CHECK(cfe4(0, 0 + 4) == 0);
-    CHECK(cfe4(0, 1 + 4) == 3);
-    CHECK(cfe4(0, 2 + 4) == 0);
-    CHECK(cfe4(0, 3 + 4) == 3);
-    CHECK(cfe4(1, 0 + 4) == 1);
-    CHECK(cfe4(1, 1 + 4) == 2);
-    CHECK(cfe4(1, 2 + 4) == 1);
-    CHECK(cfe4(1, 3 + 4) == 2);
-    CHECK(cfe4(2, 0 + 4) == 0);
-    CHECK(cfe4(2, 1 + 4) == 3);
-    CHECK(cfe4(2, 2 + 4) == 0);
-    CHECK(cfe4(2, 3 + 4) == 3);
-    CHECK(cfe4(3, 0 + 4) == 1);
-    CHECK(cfe4(3, 1 + 4) == 2);
-    CHECK(cfe4(3, 2 + 4) == 1);
-    CHECK(cfe4(3, 3 + 4) == 2);
-
-    CHECK(cfe4(0 + 4, 0 + 4) == 0);
-    CHECK(cfe4(0 + 4, 1 + 4) == 3);
-    CHECK(cfe4(0 + 4, 2 + 4) == 0);
-    CHECK(cfe4(0 + 4, 3 + 4) == 3);
-    CHECK(cfe4(1 + 4, 0 + 4) == 1);
-    CHECK(cfe4(1 + 4, 1 + 4) == 2);
-    CHECK(cfe4(1 + 4, 2 + 4) == 1);
-    CHECK(cfe4(1 + 4, 3 + 4) == 2);
-    CHECK(cfe4(2 + 4, 0 + 4) == 0);
-    CHECK(cfe4(2 + 4, 1 + 4) == 3);
-    CHECK(cfe4(2 + 4, 2 + 4) == 0);
-    CHECK(cfe4(2 + 4, 3 + 4) == 3);
-    CHECK(cfe4(3 + 4, 0 + 4) == 1);
-    CHECK(cfe4(3 + 4, 1 + 4) == 2);
-    CHECK(cfe4(3 + 4, 2 + 4) == 1);
-    CHECK(cfe4(3 + 4, 3 + 4) == 2);
+    /** @brief Expected clock numbers indexed by x, then y. */
+    static constexpr std::array<std::array<uint8_t, 4>, 4> expected{
+        {{{0, 3, 0, 3}}, {{1, 2, 1, 2}}, {{0, 3, 0, 3}}, {{1, 2, 1, 2}}}};
+    check_period(cfe4, expected);
 }
 
 TEST_CASE("4-phase Ripple", "[clocking-scheme]")
@@ -1361,73 +511,10 @@ TEST_CASE("4-phase Ripple", "[clocking-scheme]")
     CHECK(ripple4.max_out_degree() == 3u);
     CHECK(ripple4.is_regular());
 
-    CHECK(ripple4(0, 0) == 0);
-    CHECK(ripple4(0, 1) == 3);
-    CHECK(ripple4(0, 2) == 0);
-    CHECK(ripple4(0, 3) == 3);
-    CHECK(ripple4(1, 0) == 1);
-    CHECK(ripple4(1, 1) == 2);
-    CHECK(ripple4(1, 2) == 1);
-    CHECK(ripple4(1, 3) == 2);
-    CHECK(ripple4(2, 0) == 2);
-    CHECK(ripple4(2, 1) == 1);
-    CHECK(ripple4(2, 2) == 2);
-    CHECK(ripple4(2, 3) == 1);
-    CHECK(ripple4(3, 0) == 3);
-    CHECK(ripple4(3, 1) == 0);
-    CHECK(ripple4(3, 2) == 3);
-    CHECK(ripple4(3, 3) == 0);
-
-    CHECK(ripple4(0 + 4, 0) == 0);
-    CHECK(ripple4(0 + 4, 1) == 3);
-    CHECK(ripple4(0 + 4, 2) == 0);
-    CHECK(ripple4(0 + 4, 3) == 3);
-    CHECK(ripple4(1 + 4, 0) == 1);
-    CHECK(ripple4(1 + 4, 1) == 2);
-    CHECK(ripple4(1 + 4, 2) == 1);
-    CHECK(ripple4(1 + 4, 3) == 2);
-    CHECK(ripple4(2 + 4, 0) == 2);
-    CHECK(ripple4(2 + 4, 1) == 1);
-    CHECK(ripple4(2 + 4, 2) == 2);
-    CHECK(ripple4(2 + 4, 3) == 1);
-    CHECK(ripple4(3 + 4, 0) == 3);
-    CHECK(ripple4(3 + 4, 1) == 0);
-    CHECK(ripple4(3 + 4, 2) == 3);
-    CHECK(ripple4(3 + 4, 3) == 0);
-
-    CHECK(ripple4(0, 0 + 4) == 0);
-    CHECK(ripple4(0, 1 + 4) == 3);
-    CHECK(ripple4(0, 2 + 4) == 0);
-    CHECK(ripple4(0, 3 + 4) == 3);
-    CHECK(ripple4(1, 0 + 4) == 1);
-    CHECK(ripple4(1, 1 + 4) == 2);
-    CHECK(ripple4(1, 2 + 4) == 1);
-    CHECK(ripple4(1, 3 + 4) == 2);
-    CHECK(ripple4(2, 0 + 4) == 2);
-    CHECK(ripple4(2, 1 + 4) == 1);
-    CHECK(ripple4(2, 2 + 4) == 2);
-    CHECK(ripple4(2, 3 + 4) == 1);
-    CHECK(ripple4(3, 0 + 4) == 3);
-    CHECK(ripple4(3, 1 + 4) == 0);
-    CHECK(ripple4(3, 2 + 4) == 3);
-    CHECK(ripple4(3, 3 + 4) == 0);
-
-    CHECK(ripple4(0 + 4, 0 + 4) == 0);
-    CHECK(ripple4(0 + 4, 1 + 4) == 3);
-    CHECK(ripple4(0 + 4, 2 + 4) == 0);
-    CHECK(ripple4(0 + 4, 3 + 4) == 3);
-    CHECK(ripple4(1 + 4, 0 + 4) == 1);
-    CHECK(ripple4(1 + 4, 1 + 4) == 2);
-    CHECK(ripple4(1 + 4, 2 + 4) == 1);
-    CHECK(ripple4(1 + 4, 3 + 4) == 2);
-    CHECK(ripple4(2 + 4, 0 + 4) == 2);
-    CHECK(ripple4(2 + 4, 1 + 4) == 1);
-    CHECK(ripple4(2 + 4, 2 + 4) == 2);
-    CHECK(ripple4(2 + 4, 3 + 4) == 1);
-    CHECK(ripple4(3 + 4, 0 + 4) == 3);
-    CHECK(ripple4(3 + 4, 1 + 4) == 0);
-    CHECK(ripple4(3 + 4, 2 + 4) == 3);
-    CHECK(ripple4(3 + 4, 3 + 4) == 0);
+    /** @brief Expected clock numbers indexed by x, then y. */
+    static constexpr std::array<std::array<uint8_t, 4>, 4> expected{
+        {{{0, 3, 0, 3}}, {{1, 2, 1, 2}}, {{2, 1, 2, 1}}, {{3, 0, 3, 0}}}};
+    check_period(ripple4, expected);
 }
 
 TEST_CASE("4-phase SRS", "[clocking-scheme]")
@@ -1439,73 +526,10 @@ TEST_CASE("4-phase SRS", "[clocking-scheme]")
     CHECK(srs4.max_out_degree() == 3u);
     CHECK(srs4.is_regular());
 
-    CHECK(srs4(0, 0) == 1);
-    CHECK(srs4(0, 1) == 2);
-    CHECK(srs4(0, 2) == 3);
-    CHECK(srs4(0, 3) == 0);
-    CHECK(srs4(1, 0) == 0);
-    CHECK(srs4(1, 1) == 3);
-    CHECK(srs4(1, 2) == 2);
-    CHECK(srs4(1, 3) == 1);
-    CHECK(srs4(2, 0) == 3);
-    CHECK(srs4(2, 1) == 0);
-    CHECK(srs4(2, 2) == 3);
-    CHECK(srs4(2, 3) == 2);
-    CHECK(srs4(3, 0) == 2);
-    CHECK(srs4(3, 1) == 1);
-    CHECK(srs4(3, 2) == 0);
-    CHECK(srs4(3, 3) == 1);
-
-    CHECK(srs4(0 + 4, 0) == 1);
-    CHECK(srs4(0 + 4, 1) == 2);
-    CHECK(srs4(0 + 4, 2) == 3);
-    CHECK(srs4(0 + 4, 3) == 0);
-    CHECK(srs4(1 + 4, 0) == 0);
-    CHECK(srs4(1 + 4, 1) == 3);
-    CHECK(srs4(1 + 4, 2) == 2);
-    CHECK(srs4(1 + 4, 3) == 1);
-    CHECK(srs4(2 + 4, 0) == 3);
-    CHECK(srs4(2 + 4, 1) == 0);
-    CHECK(srs4(2 + 4, 2) == 3);
-    CHECK(srs4(2 + 4, 3) == 2);
-    CHECK(srs4(3 + 4, 0) == 2);
-    CHECK(srs4(3 + 4, 1) == 1);
-    CHECK(srs4(3 + 4, 2) == 0);
-    CHECK(srs4(3 + 4, 3) == 1);
-
-    CHECK(srs4(0, 0 + 4) == 1);
-    CHECK(srs4(0, 1 + 4) == 2);
-    CHECK(srs4(0, 2 + 4) == 3);
-    CHECK(srs4(0, 3 + 4) == 0);
-    CHECK(srs4(1, 0 + 4) == 0);
-    CHECK(srs4(1, 1 + 4) == 3);
-    CHECK(srs4(1, 2 + 4) == 2);
-    CHECK(srs4(1, 3 + 4) == 1);
-    CHECK(srs4(2, 0 + 4) == 3);
-    CHECK(srs4(2, 1 + 4) == 0);
-    CHECK(srs4(2, 2 + 4) == 3);
-    CHECK(srs4(2, 3 + 4) == 2);
-    CHECK(srs4(3, 0 + 4) == 2);
-    CHECK(srs4(3, 1 + 4) == 1);
-    CHECK(srs4(3, 2 + 4) == 0);
-    CHECK(srs4(3, 3 + 4) == 1);
-
-    CHECK(srs4(0 + 4, 0 + 4) == 1);
-    CHECK(srs4(0 + 4, 1 + 4) == 2);
-    CHECK(srs4(0 + 4, 2 + 4) == 3);
-    CHECK(srs4(0 + 4, 3 + 4) == 0);
-    CHECK(srs4(1 + 4, 0 + 4) == 0);
-    CHECK(srs4(1 + 4, 1 + 4) == 3);
-    CHECK(srs4(1 + 4, 2 + 4) == 2);
-    CHECK(srs4(1 + 4, 3 + 4) == 1);
-    CHECK(srs4(2 + 4, 0 + 4) == 3);
-    CHECK(srs4(2 + 4, 1 + 4) == 0);
-    CHECK(srs4(2 + 4, 2 + 4) == 3);
-    CHECK(srs4(2 + 4, 3 + 4) == 2);
-    CHECK(srs4(3 + 4, 0 + 4) == 2);
-    CHECK(srs4(3 + 4, 1 + 4) == 1);
-    CHECK(srs4(3 + 4, 2 + 4) == 0);
-    CHECK(srs4(3 + 4, 3 + 4) == 1);
+    /** @brief Expected clock numbers indexed by x, then y. */
+    static constexpr std::array<std::array<uint8_t, 4>, 4> expected{
+        {{{1, 2, 3, 0}}, {{0, 3, 2, 1}}, {{3, 0, 3, 2}}, {{2, 1, 0, 1}}}};
+    check_period(srs4, expected);
 }
 
 TEST_CASE("3-phase BANCS", "[clocking-scheme]")
@@ -1517,81 +541,10 @@ TEST_CASE("3-phase BANCS", "[clocking-scheme]")
     CHECK(bancs3.max_out_degree() == 2u);
     CHECK(bancs3.is_regular());
 
-    CHECK(bancs3(0, 0) == 0);
-    CHECK(bancs3(0, 1) == 2);
-    CHECK(bancs3(0, 2) == 2);
-    CHECK(bancs3(0, 3) == 1);
-    CHECK(bancs3(0, 4) == 1);
-    CHECK(bancs3(0, 5) == 0);
-    CHECK(bancs3(1, 0) == 1);
-    CHECK(bancs3(1, 1) == 1);
-    CHECK(bancs3(1, 2) == 0);
-    CHECK(bancs3(1, 3) == 0);
-    CHECK(bancs3(1, 4) == 2);
-    CHECK(bancs3(1, 5) == 2);
-    CHECK(bancs3(2, 0) == 2);
-    CHECK(bancs3(2, 1) == 0);
-    CHECK(bancs3(2, 2) == 1);
-    CHECK(bancs3(2, 3) == 2);
-    CHECK(bancs3(2, 4) == 0);
-    CHECK(bancs3(2, 5) == 1);
-
-    CHECK(bancs3(0 + 3, 0) == 0);
-    CHECK(bancs3(0 + 3, 1) == 2);
-    CHECK(bancs3(0 + 3, 2) == 2);
-    CHECK(bancs3(0 + 3, 3) == 1);
-    CHECK(bancs3(0 + 3, 4) == 1);
-    CHECK(bancs3(0 + 3, 5) == 0);
-    CHECK(bancs3(1 + 3, 0) == 1);
-    CHECK(bancs3(1 + 3, 1) == 1);
-    CHECK(bancs3(1 + 3, 2) == 0);
-    CHECK(bancs3(1 + 3, 3) == 0);
-    CHECK(bancs3(1 + 3, 4) == 2);
-    CHECK(bancs3(1 + 3, 5) == 2);
-    CHECK(bancs3(2 + 3, 0) == 2);
-    CHECK(bancs3(2 + 3, 1) == 0);
-    CHECK(bancs3(2 + 3, 2) == 1);
-    CHECK(bancs3(2 + 3, 3) == 2);
-    CHECK(bancs3(2 + 3, 4) == 0);
-    CHECK(bancs3(2 + 3, 5) == 1);
-
-    CHECK(bancs3(0, 0 + 6) == 0);
-    CHECK(bancs3(0, 1 + 6) == 2);
-    CHECK(bancs3(0, 2 + 6) == 2);
-    CHECK(bancs3(0, 3 + 6) == 1);
-    CHECK(bancs3(0, 4 + 6) == 1);
-    CHECK(bancs3(0, 5 + 6) == 0);
-    CHECK(bancs3(1, 0 + 6) == 1);
-    CHECK(bancs3(1, 1 + 6) == 1);
-    CHECK(bancs3(1, 2 + 6) == 0);
-    CHECK(bancs3(1, 3 + 6) == 0);
-    CHECK(bancs3(1, 4 + 6) == 2);
-    CHECK(bancs3(1, 5 + 6) == 2);
-    CHECK(bancs3(2, 0 + 6) == 2);
-    CHECK(bancs3(2, 1 + 6) == 0);
-    CHECK(bancs3(2, 2 + 6) == 1);
-    CHECK(bancs3(2, 3 + 6) == 2);
-    CHECK(bancs3(2, 4 + 6) == 0);
-    CHECK(bancs3(2, 5 + 6) == 1);
-
-    CHECK(bancs3(0 + 3, 0 + 6) == 0);
-    CHECK(bancs3(0 + 3, 1 + 6) == 2);
-    CHECK(bancs3(0 + 3, 2 + 6) == 2);
-    CHECK(bancs3(0 + 3, 3 + 6) == 1);
-    CHECK(bancs3(0 + 3, 4 + 6) == 1);
-    CHECK(bancs3(0 + 3, 5 + 6) == 0);
-    CHECK(bancs3(1 + 3, 0 + 6) == 1);
-    CHECK(bancs3(1 + 3, 1 + 6) == 1);
-    CHECK(bancs3(1 + 3, 2 + 6) == 0);
-    CHECK(bancs3(1 + 3, 3 + 6) == 0);
-    CHECK(bancs3(1 + 3, 4 + 6) == 2);
-    CHECK(bancs3(1 + 3, 5 + 6) == 2);
-    CHECK(bancs3(2 + 3, 0 + 6) == 2);
-    CHECK(bancs3(2 + 3, 1 + 6) == 0);
-    CHECK(bancs3(2 + 3, 2 + 6) == 1);
-    CHECK(bancs3(2 + 3, 3 + 6) == 2);
-    CHECK(bancs3(2 + 3, 4 + 6) == 0);
-    CHECK(bancs3(2 + 3, 5 + 6) == 1);
+    /** @brief Expected clock numbers indexed by x, then y. */
+    static constexpr std::array<std::array<uint8_t, 6>, 3> expected{
+        {{{0, 2, 2, 1, 1, 0}}, {{1, 1, 0, 0, 2, 2}}, {{2, 0, 1, 2, 0, 1}}}};
+    check_period(bancs3, expected);
 }
 
 TEST_CASE("4-phase ESR", "[clocking-scheme]")
@@ -1603,73 +556,10 @@ TEST_CASE("4-phase ESR", "[clocking-scheme]")
     CHECK(esr4.max_out_degree() == 3u);
     CHECK(esr4.is_regular());
 
-    CHECK(esr4(0, 0) == 3);
-    CHECK(esr4(0, 1) == 0);
-    CHECK(esr4(0, 2) == 1);
-    CHECK(esr4(0, 3) == 0);
-    CHECK(esr4(1, 0) == 0);
-    CHECK(esr4(1, 1) == 1);
-    CHECK(esr4(1, 2) == 2);
-    CHECK(esr4(1, 3) == 3);
-    CHECK(esr4(2, 0) == 1);
-    CHECK(esr4(2, 1) == 2);
-    CHECK(esr4(2, 2) == 3);
-    CHECK(esr4(2, 3) == 2);
-    CHECK(esr4(3, 0) == 2);
-    CHECK(esr4(3, 1) == 3);
-    CHECK(esr4(3, 2) == 0);
-    CHECK(esr4(3, 3) == 1);
-
-    CHECK(esr4(0 + 4, 0) == 3);
-    CHECK(esr4(0 + 4, 1) == 0);
-    CHECK(esr4(0 + 4, 2) == 1);
-    CHECK(esr4(0 + 4, 3) == 0);
-    CHECK(esr4(1 + 4, 0) == 0);
-    CHECK(esr4(1 + 4, 1) == 1);
-    CHECK(esr4(1 + 4, 2) == 2);
-    CHECK(esr4(1 + 4, 3) == 3);
-    CHECK(esr4(2 + 4, 0) == 1);
-    CHECK(esr4(2 + 4, 1) == 2);
-    CHECK(esr4(2 + 4, 2) == 3);
-    CHECK(esr4(2 + 4, 3) == 2);
-    CHECK(esr4(3 + 4, 0) == 2);
-    CHECK(esr4(3 + 4, 1) == 3);
-    CHECK(esr4(3 + 4, 2) == 0);
-    CHECK(esr4(3 + 4, 3) == 1);
-
-    CHECK(esr4(0, 0 + 4) == 3);
-    CHECK(esr4(0, 1 + 4) == 0);
-    CHECK(esr4(0, 2 + 4) == 1);
-    CHECK(esr4(0, 3 + 4) == 0);
-    CHECK(esr4(1, 0 + 4) == 0);
-    CHECK(esr4(1, 1 + 4) == 1);
-    CHECK(esr4(1, 2 + 4) == 2);
-    CHECK(esr4(1, 3 + 4) == 3);
-    CHECK(esr4(2, 0 + 4) == 1);
-    CHECK(esr4(2, 1 + 4) == 2);
-    CHECK(esr4(2, 2 + 4) == 3);
-    CHECK(esr4(2, 3 + 4) == 2);
-    CHECK(esr4(3, 0 + 4) == 2);
-    CHECK(esr4(3, 1 + 4) == 3);
-    CHECK(esr4(3, 2 + 4) == 0);
-    CHECK(esr4(3, 3 + 4) == 1);
-
-    CHECK(esr4(0 + 4, 0 + 4) == 3);
-    CHECK(esr4(0 + 4, 1 + 4) == 0);
-    CHECK(esr4(0 + 4, 2 + 4) == 1);
-    CHECK(esr4(0 + 4, 3 + 4) == 0);
-    CHECK(esr4(1 + 4, 0 + 4) == 0);
-    CHECK(esr4(1 + 4, 1 + 4) == 1);
-    CHECK(esr4(1 + 4, 2 + 4) == 2);
-    CHECK(esr4(1 + 4, 3 + 4) == 3);
-    CHECK(esr4(2 + 4, 0 + 4) == 1);
-    CHECK(esr4(2 + 4, 1 + 4) == 2);
-    CHECK(esr4(2 + 4, 2 + 4) == 3);
-    CHECK(esr4(2 + 4, 3 + 4) == 2);
-    CHECK(esr4(3 + 4, 0 + 4) == 2);
-    CHECK(esr4(3 + 4, 1 + 4) == 3);
-    CHECK(esr4(3 + 4, 2 + 4) == 0);
-    CHECK(esr4(3 + 4, 3 + 4) == 1);
+    /** @brief Expected clock numbers indexed by x, then y. */
+    static constexpr std::array<std::array<uint8_t, 4>, 4> expected{
+        {{{3, 0, 1, 0}}, {{0, 1, 2, 3}}, {{1, 2, 3, 2}}, {{2, 3, 0, 1}}}};
+    check_period(esr4, expected);
 }
 
 TEST_CASE("Implicit OPEN cutouts compare by clocking behavior", "[clocking-scheme]")
@@ -1696,32 +586,33 @@ TEST_CASE("Override clocking", "[clocking-scheme]")
 
     CHECK(!twoddwave4.is_regular());
 
-    twoddwave4.override_clock_number(0, 1, 1);
-    twoddwave4.override_clock_number(0, 2, 2);
-    twoddwave4.override_clock_number(0, 3, 3);
-    twoddwave4.override_clock_number(0, 4, 4);
-    twoddwave4.override_clock_number(0, 5, 5);
-    twoddwave4.override_clock_number(0, 6, 6);
+    for (uint8_t y = 1; y < 7; ++y)
+    {
+        twoddwave4.override_clock_number(0, y, y);
+    }
 
-    CHECK(twoddwave4(0, 0) == 0);
-    CHECK(twoddwave4(0, 1) == 1);
-    CHECK(twoddwave4(0, 2) == 2);
-    CHECK(twoddwave4(0, 3) == 3);
-    CHECK(twoddwave4(0, 4) == 0);
-    CHECK(twoddwave4(0, 5) == 1);
-    CHECK(twoddwave4(0, 6) == 2);
-    CHECK(twoddwave4(1, 0) == 1);
+    /** @brief Expected values at the seven overridden coordinates. */
+    static constexpr std::array<uint8_t, 7> overridden{0, 1, 2, 3, 0, 1, 2};
+    for (uint32_t y = 0; y < overridden.size(); ++y)
+    {
+        CAPTURE(y);
+        CHECK(twoddwave4(0, y) == overridden.at(y));
+    }
+    /** @brief Expected values at coordinates outside the overridden column. */
+    static constexpr std::array<std::array<uint8_t, 4>, 3> untouched{{{1, 2, 3, 0}, {2, 3, 0, 1}, {3, 0, 1, 2}}};
+    for (uint32_t x = 1; x < 4; ++x)
+    {
+        for (uint32_t y = 0; y < 4; ++y)
+        {
+            CAPTURE(x, y);
+            CHECK(twoddwave4(x, y) == untouched.at(x - 1).at(y));
+        }
+    }
+
+    // A different phase confirms that lookups use the override instead of the periodic cutout.
+    twoddwave4.override_clock_number(0, 1, 3);
+    CHECK(twoddwave4(0, 1) == 3);
     CHECK(twoddwave4(1, 1) == 2);
-    CHECK(twoddwave4(1, 2) == 3);
-    CHECK(twoddwave4(1, 3) == 0);
-    CHECK(twoddwave4(2, 0) == 2);
-    CHECK(twoddwave4(2, 1) == 3);
-    CHECK(twoddwave4(2, 2) == 0);
-    CHECK(twoddwave4(2, 3) == 1);
-    CHECK(twoddwave4(3, 0) == 3);
-    CHECK(twoddwave4(3, 1) == 0);
-    CHECK(twoddwave4(3, 2) == 1);
-    CHECK(twoddwave4(3, 3) == 2);
 }
 
 TEST_CASE("Linear schemes", "[clocking-scheme]")
@@ -1738,6 +629,7 @@ TEST_CASE("Linear schemes", "[clocking-scheme]")
     check_linear_scheme(clocking::ROW_NAME, true);
     check_linear_scheme(clocking::TWODDWAVE_NAME, true);
     check_linear_scheme(clocking::TWODDWAVE_HEX_NAME, true);
+    CHECK(clocking::is_linear(clocking::twoddwave_hex(arrangement::ODD_ROW)));
 
     // Non-linear clocking schemes
     check_linear_scheme(clocking::OPEN_NAME, false);
@@ -1761,9 +653,9 @@ TEST_CASE("Clocking schemes repeat at negative coordinates", "[clocking-scheme]"
 
     const auto bancs3 = clocking::bancs();
 
-    CHECK(bancs3(0, -1) == bancs3(0, 5));
-    CHECK(bancs3(-1, -1) == bancs3(2, 5));
-    CHECK(bancs3(-3, -6) == bancs3(0, 0));
+    CHECK(bancs3(0, -1) == 0);
+    CHECK(bancs3(-1, -1) == 1);
+    CHECK(bancs3(-3, -6) == 0);
 
     const auto twoddwave4 = clocking::twoddwave();
 

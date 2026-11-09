@@ -30,6 +30,7 @@ from mnt.pyfiction.physical_design import hexagonalization, orthogonal
 from mnt.pyfiction.verification import eq_type, equivalence_checking
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from pathlib import Path
 
     from mnt.pyfiction.networks import technology_network
@@ -119,9 +120,48 @@ def test_fgl_failure_preserves_file(tmp_path: Path) -> None:
     assert path.read_text(encoding="utf-8") == "sentinel"
 
 
-def test_fgl_preserves_manual_obstructions(tmp_path: Path) -> None:
+@pytest.mark.parametrize("location", ["layout", "input", "wire", "output"])
+@pytest.mark.parametrize("invalid", ["\0", "\x01", "\x08", "\x0b", "\x0c", "\x0e", "\x1f", "\ufffe"])
+def test_fgl_rejects_illegal_unicode_before_replacing_file(tmp_path: Path, location: str, invalid: str) -> None:
+    """Reject forbidden XML characters in every name without replacing a file."""
+    layout = cartesian_gate_layout((3, 1, 1), "2DDWave", "valid")
+    source = layout.create_pi("a", (0, 0))
+    wire = layout.create_buf(source, (1, 0))
+    output = layout.create_po(wire, "f", (2, 0))
+    label = f"first{invalid}second"
+    if location == "layout":
+        layout.set_layout_name(label)
+    else:
+        layout.set_name({"input": source, "wire": wire, "output": output}[location], label)
+    path = tmp_path / "kept.fgl"
+    path.write_bytes(b"sentinel")
+    with pytest.raises(ValueError):  # ruff: ignore[pytest-raises-too-broad] - The API promises the exception type, not diagnostic wording.
+        write_fgl_layout(layout, str(path))
+    assert path.read_bytes() == b"sentinel"
+
+
+def test_fgl_preserves_unicode_names(tmp_path: Path) -> None:
+    """Preserve accented, CJK, and supplementary characters in every name."""
+    label = "Caf\u00e9 \u6c34 \U0001f600"
+    layout = cartesian_gate_layout((3, 1, 1), "2DDWave", label)
+    source = layout.create_pi(label, (0, 0))
+    wire = layout.create_buf(source, (1, 0))
+    layout.set_name(wire, label)
+    layout.create_po(wire, label, (2, 0))
+    path = tmp_path / "unicode.fgl"
+    write_fgl_layout(layout, str(path))
+    restored = read_fgl_layout(str(path))
+    assert restored.get_layout_name() == label
+    for position in [(0, 0), (1, 0), (2, 0)]:
+        object_id = restored.find_object(position)
+        assert object_id is not None
+        assert restored.get_name(object_id) == label
+    assert equivalence_checking(restored, layout) == eq_type.STRONG
+
+
+def test_fgl_preserves_manual_obstructions(tmp_path: Path, gate_factory: Callable) -> None:
     """Preserve signed manual constraints independently of occupied objects."""
-    layout = cartesian_gate_layout((3, 2, 1), "2DDWave", "manual")
+    layout = gate_factory((3, 2, 1), "2DDWave", "manual")
     source = layout.create_pi("a", (0, 0))
     wire = layout.create_buf(source, (1, 0))
     layout.create_po(wire, "f", (2, 0))
@@ -131,10 +171,8 @@ def test_fgl_preserves_manual_obstructions(tmp_path: Path) -> None:
     layout.obstruct_connection(positions[1], positions[2])
     path = tmp_path / "manual.fgl"
     write_fgl_layout(layout, str(path))
-    restored = read_fgl_layout(str(path))
-    assert len(restored.obstructed_coordinates()) == len(positions)
-    for position in positions:
-        assert position in restored.obstructed_coordinates()
+    restored = read_fgl_layout(str(path), layout_type=type(layout))
+    assert sorted(restored.obstructed_coordinates()) == sorted(positions)
     assert restored.obstructed_connections() == [(positions[1], positions[2])]
     wire_id = restored.find_object((1, 0))
     assert wire_id is not None

@@ -11,9 +11,12 @@
 /**
  * @file
  * @brief Tests for extraction of layout logic.
+ * @author Marcel Walter (marcelwa)
  */
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
@@ -72,16 +75,17 @@ TEMPLATE_TEST_CASE("Extraction preserves interface order and truth-table argumen
     const auto ntk = extract_layout_network(lyt);
     REQUIRE(ntk.num_pis() == 3);
     REQUIRE(ntk.num_pos() == 2);
-    CHECK(ntk.get_network_name() == "ordered");
-    CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(0))) == "b");
-    CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(1))) == "a");
-    CHECK(ntk.get_name(ntk.make_signal(ntk.pi_at(2))) == "unused");
-    CHECK(ntk.get_output_name(0) == "pass");
-    CHECK(ntk.get_output_name(1) == "result");
+    CHECK_THAT((ntk.get_network_name()), Catch::Matchers::Equals("ordered"));
+    CHECK_THAT((ntk.get_name(ntk.make_signal(ntk.pi_at(0)))), Catch::Matchers::Equals("b"));
+    CHECK_THAT((ntk.get_name(ntk.make_signal(ntk.pi_at(1)))), Catch::Matchers::Equals("a"));
+    CHECK_THAT((ntk.get_name(ntk.make_signal(ntk.pi_at(2)))), Catch::Matchers::Equals("unused"));
+    CHECK_THAT((ntk.get_output_name(0)), Catch::Matchers::Equals("pass"));
+    CHECK_THAT((ntk.get_output_name(1)), Catch::Matchers::Equals("result"));
     const auto tables = mockturtle::simulate<kitty::dynamic_truth_table>(
         ntk, mockturtle::default_simulator<kitty::dynamic_truth_table>{ntk.num_pis()});
-    CHECK(kitty::to_hex(tables[0]) == "cc");
-    CHECK(kitty::to_hex(tables[1]) == "22");
+    REQUIRE(tables.size() == 2);
+    CHECK_THAT((kitty::to_hex(tables[0])), Catch::Matchers::Equals("cc"));
+    CHECK_THAT((kitty::to_hex(tables[1])), Catch::Matchers::Equals("22"));
 }
 
 TEMPLATE_TEST_CASE("Extraction follows connections across allocation order and reused identities",
@@ -103,7 +107,8 @@ TEMPLATE_TEST_CASE("Extraction follows connections across allocation order and r
     REQUIRE(ntk.num_pis() == 2);
     const auto tables = mockturtle::simulate<kitty::dynamic_truth_table>(
         ntk, mockturtle::default_simulator<kitty::dynamic_truth_table>{ntk.num_pis()});
-    CHECK(kitty::to_hex(tables[0]) == "2");
+    REQUIRE(tables.size() == 1);
+    CHECK_THAT((kitty::to_hex(tables[0])), Catch::Matchers::Equals("2"));
 }
 
 TEMPLATE_TEST_CASE("Extraction validates only dependencies of primary outputs", "[extract-layout-network]",

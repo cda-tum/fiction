@@ -47,9 +47,6 @@ void register_equivalence_checking(nb::module_& m);
 
 }  // namespace pyfiction
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
-
 NB_MODULE(verification, m)
 {
     m.doc() = "Design rule, equivalence, and performance checks of gate-level layouts.";
@@ -63,5 +60,3 @@ NB_MODULE(verification, m)
     pyfiction::register_design_rule_violations(m);
     pyfiction::register_equivalence_checking(m);
 }
-
-#pragma GCC diagnostic pop

@@ -29,6 +29,7 @@
 #include "fiction/technology/sidb/model/charge_state.hpp"
 
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
+#include <map>
 #include <set>
 #include <unordered_map>
 #include <unordered_set>

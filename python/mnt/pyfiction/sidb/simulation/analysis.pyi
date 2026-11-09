@@ -310,8 +310,7 @@ class energy_distribution:
 
     def get_nth_state(self, state_index: int) -> energy_state | None:
         """
-        Returns the nth state (energy + degeneracy) in the energy
-        distribution.
+        Returns the nth state (energy + degeneracy) in ascending energy order.
 
         Args:
             state_index: The index of the state to be retrieved.
