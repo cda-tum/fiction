@@ -384,7 +384,7 @@ template <typename Ntk>
     if constexpr (mockturtle::has_create_node_v<Ntk> || mockturtle::has_create_cover_node_v<Ntk>)
     {
         std::string normalized{};
-        std::string logical_line{};
+        std::size_t record_start{};
         bool        continuation{};
         for (std::string line{}; !lorina::detail::getline(input, line).eof();)
         {
@@ -393,13 +393,12 @@ template <typename Ntk>
             if (const auto last = record.find_last_not_of(whitespace); last != std::string_view::npos)
             {
                 continuation = record.at(last) == '\\';
-                logical_line.append(record.substr(0, last + (continuation ? 0u : 1u)));
+                normalized.append(record.substr(0, last + (continuation ? 0u : 1u)));
                 if (!continuation)
                 {
-                    check_blif_cover_line(logical_line);
-                    normalized += logical_line;
+                    check_blif_cover_line(std::string_view{normalized}.substr(record_start));
                     normalized += '\n';
-                    logical_line.clear();
+                    record_start = normalized.size();
                 }
             }
         }
