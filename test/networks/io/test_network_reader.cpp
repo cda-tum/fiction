@@ -333,23 +333,32 @@ TEST_CASE("Verilog port checks apply to the network being read", "[network-reade
     CHECK(outputs == std::vector{identity});
 }
 
-TEST_CASE("Read binary AIGER with latches and bad-state outputs", "[network-reader]")
+TEST_CASE("Read binary AIGER interfaces and output functions", "[network-reader]")
 {
-    const fiction::test::scoped_temp_directory directory{
-        std::filesystem::temp_directory_path(), "fiction-aiger-latch-" + std::to_string(std::random_device{}())};
-    const auto    path = directory.path() / "extended.aig";
-    std::ofstream file{path, std::ios::binary};
-    file << "aig 3 1 1 0 1 1\n6 4\n6\n\x02\x02i0 a\nl0 state\nb0 bad\n";
+    const auto [content, output_name, functions] = GENERATE(table<std::string, std::string, std::vector<std::string>>({
+        {"aig 3 2 0 1 1\n6\n\x02\x02i0 a\ni1 b\no0 y\n", "y", {"8"}},
+        {"aig 3 1 1 0 1 1\n6 4\n4\n\x02\x02i0 a\nl0 state\nb0 bad\n", "bad", {"c", "8"}},
+    }));
+    CAPTURE(output_name);
+    const fiction::test::scoped_temp_directory directory{std::filesystem::temp_directory_path(),
+                                                         "fiction-aiger-" + std::to_string(std::random_device{}())};
+    const auto                                 path = directory.path() / "interfaces.aig";
+    std::ofstream                              file{path, std::ios::binary};
+    file << content;
     file.close();
     REQUIRE_FALSE(file.fail());
 
     const auto network = read_network<named_aig_network>(path);
     CHECK(network.num_pis() == 2);
-    REQUIRE(network.num_pos() == 2);
-    CHECK(network.get_output_name(0) == "bad");
+    REQUIRE(network.num_pos() == functions.size());
+    CHECK(network.get_output_name(0) == output_name);
     const auto outputs = mockturtle::simulate<kitty::dynamic_truth_table>(
         network, mockturtle::default_simulator<kitty::dynamic_truth_table>{2});
-    kitty::dynamic_truth_table conjunction{2};
-    kitty::create_from_hex_string(conjunction, "8");
-    CHECK(outputs == std::vector{conjunction, conjunction});
+    REQUIRE(outputs.size() == functions.size());
+    for (std::size_t index{}; index < functions.size(); ++index)
+    {
+        kitty::dynamic_truth_table expected{2};
+        kitty::create_from_hex_string(expected, functions.at(index));
+        CHECK(outputs.at(index) == expected);
+    }
 }
