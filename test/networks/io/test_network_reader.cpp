@@ -166,8 +166,8 @@ TEST_CASE("BLIF readers accept empty lines without changing logic", "[network-re
         std::ofstream file{path};
         REQUIRE(file.is_open());
         file << whitespace << "\n# before model\n.model whitespace\n"
-             << whitespace << "\n.inputs a b \\\n"
-             << whitespace << "\n unused\n.outputs zero one inverted xor lut copy\n"
+             << whitespace << "\n.inputs a\\\n"
+             << whitespace << "\nb unused\n.outputs zero one inverted xor lut copy\n"
              << whitespace << "\n.names a zero\n"
              << whitespace << "\n.names one\n"
              << whitespace << "\n1\n# between gates\n.names a inverted\n"
@@ -347,6 +347,12 @@ TEST_CASE("Malformed network files report their path", "[network-reader]")
                "endmodule\n"},
         {".v", "module ripple_carry_adder(a,b,s); input a,b; output s; endmodule\n"
                "module top(a,b,y); input a,b; output y; ripple_carry_adder add(.a(a),.b(b),.s(y)); endmodule\n"},
+        {".v", "module ripple_carry_adder(a,b,s); input a,b; output s; endmodule\n"
+               "module top(a,b,y); input [1:0] a,b; output [2:0] y; "
+               "ripple_carry_adder #(0) add(.a(a),.b(b),.s(y)); endmodule\n"},
+        {".v", "module montgomery_multiplier(a,b,s); input a,b; output s; endmodule\n"
+               "module top(a,b,y); input [1:0] a,b; output [1:0] y; "
+               "montgomery_multiplier #(4'h0,3,1) multiply(.a(a),.b(b),.s(y)); endmodule\n"},
         {".v", "module montgomery_multiplier(a,b,s); input a,b; output s; endmodule\n"
                "module top(a,b,y); input a,b; output y; montgomery_multiplier #(2,8'h03,invalid) "
                "multiply(.a(a),.b(b),.s(y)); endmodule\n"},

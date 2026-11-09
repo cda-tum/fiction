@@ -395,7 +395,11 @@ template <typename Ntk>
             {
                 continuation = record.at(last) == '\\';
                 normalized.append(record.substr(0, last + (continuation ? 0u : 1u)));
-                if (!continuation)
+                if (continuation)
+                {
+                    normalized += ' ';
+                }
+                else
                 {
                     check_blif_cover_line(std::string_view{normalized}.substr(record_start));
                     normalized += '\n';
@@ -494,7 +498,7 @@ class checked_verilog_reader final : private mockturtle::verilog_reader<Ntk>
             {
                 throw std::invalid_argument{"invalid Verilog arithmetic module arguments"};
             }
-            check_number(parameters.front(), std::numeric_limits<uint32_t>::max());
+            check_number(parameters.front(), std::numeric_limits<uint32_t>::max(), 1u);
             if (multiplier)
             {
                 check_number(parameters.at(1));
@@ -519,7 +523,8 @@ class checked_verilog_reader final : private mockturtle::verilog_reader<Ntk>
     }
 
     /** @brief Validate a decimal or sized hex literal before mockturtle converts it. */
-    static void check_number(const std::string_view token, const std::optional<uint64_t> maximum = std::nullopt)
+    static void check_number(const std::string_view token, const std::optional<uint64_t> maximum = std::nullopt,
+                             const uint64_t minimum = 0)
     {
         const auto hex = token.find("'h");
         if (hex != std::string_view::npos)
@@ -535,7 +540,7 @@ class checked_verilog_reader final : private mockturtle::verilog_reader<Ntk>
             {
                 const auto     value            = parse_unsigned(digits, 16);
                 constexpr auto digits_in_uint64 = static_cast<uint64_t>(std::numeric_limits<uint64_t>::digits);
-                if (!value || *value > *maximum || *bits > digits_in_uint64 ||
+                if (!value || *value < minimum || *value > *maximum || *bits > digits_in_uint64 ||
                     (*bits < digits_in_uint64 && (*value >> *bits) != 0))
                 {
                     throw std::invalid_argument{"Verilog numeric literal is out of range"};
@@ -545,7 +550,7 @@ class checked_verilog_reader final : private mockturtle::verilog_reader<Ntk>
         }
 
         const auto value = parse_unsigned(token);
-        if (!value || *value > maximum.value_or(ULONG_MAX))
+        if (!value || *value < minimum || *value > maximum.value_or(ULONG_MAX))
         {
             throw std::invalid_argument{"unsupported Verilog numeric literal"};
         }
