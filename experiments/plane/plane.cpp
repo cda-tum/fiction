@@ -42,6 +42,7 @@
 #include <optional>
 #include <span>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -67,10 +68,10 @@ constexpr uint32_t MAX_BALANCED_NODES = 8000;
  */
 constexpr uint32_t MAX_NODES_FOR_SAT = 200000;
 /**
- * Layouts above this many gates are not checked for equivalence: the simulation of such a layout needs several
- * gigabytes. They are still checked for crossings and the diagonal invariant, and the table reports them as unchecked.
+ * Layouts above this many objects skip equivalence checking. Extraction visits wires as well as gates and terminals.
+ * The table reports these layouts as unchecked; crossing and diagonal checks still apply.
  */
-constexpr uint32_t MAX_NODES_FOR_EQUIVALENCE = 1000000;
+constexpr uint32_t MAX_OBJECTS_FOR_EQUIVALENCE = 1000000;
 /**
  * Random patterns of the simulation fallback.
  */
@@ -80,23 +81,34 @@ constexpr uint32_t SIMULATION_PATTERNS = 4096;
  */
 constexpr uint64_t MAX_DUPLICATIONS = 2000000;
 
+/**
+ * @brief Reads a benchmark technology network.
+ * @param name Benchmark name.
+ * @return Parsed network.
+ * @throws std::runtime_error If the benchmark could not be read.
+ */
 named_technology_network read_network(const std::string& name)
 {
     std::ostringstream                                        os{};
     network_reader<std::shared_ptr<named_technology_network>> reader{fiction_experiments::benchmark_path(name), os};
 
-    return *reader.get_networks().front();
+    const auto& networks = reader.get_networks();
+    if (networks.empty())
+    {
+        throw std::runtime_error(os.str());
+    }
+    return *networks.front();
 }
 
 /**
  * Compares the layout with the planar network it was built from. Both have the same inputs in the same order (the
  * layout creates its inputs in the input order of the network), so a plain miter suffices. Returns `std::nullopt` for
- * a layout above `MAX_NODES_FOR_EQUIVALENCE` gates, which is not checked.
+ * a layout above `MAX_OBJECTS_FOR_EQUIVALENCE` objects, which is not checked.
  */
 template <typename Ntk, typename Lyt>
 std::pair<std::optional<bool>, std::string> layout_equivalent(const Ntk& ntk, const Lyt& lyt)
 {
-    if (lyt.num_gates() > MAX_NODES_FOR_EQUIVALENCE)
+    if (lyt.size() > MAX_OBJECTS_FOR_EQUIVALENCE)
     {
         return {std::nullopt, "skipped"};
     }
@@ -130,8 +142,8 @@ std::pair<std::optional<bool>, std::string> layout_equivalent(const Ntk& ntk, co
  * @param argc The number of command-line arguments.
  * @param argv An array of C-style strings containing the command-line arguments.
  * @return `EXIT_SUCCESS` if every benchmark was placed, is crossing-free, and passed every equivalence check that ran,
- * `EXIT_FAILURE` otherwise. Layouts above 1000000 gates are only checked for crossings; the table shows them as
- * unchecked and the summary line counts them.
+ * `EXIT_FAILURE` otherwise. Layouts above 1000000 objects are checked for crossings and the diagonal invariant; the
+ * table shows them as unchecked and the summary line counts them.
  *
  * Command-line Options:
  *   <filter>      Runs only the benchmarks whose name contains the given text; "" runs all of them.
@@ -278,8 +290,8 @@ try
 
     if (unchecked != 0)
     {
-        fmt::print("[w] {} layout(s) above {} gates were only checked for crossings\n", unchecked,
-                   MAX_NODES_FOR_EQUIVALENCE);
+        fmt::print("[w] {} layout(s) above {} objects were checked for crossings and the diagonal invariant only\n",
+                   unchecked, MAX_OBJECTS_FOR_EQUIVALENCE);
     }
 
     return failures == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
