@@ -7077,6 +7077,26 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_networks_inputs_in_traversal_order =
+R"doc(Reorders values indexed by declared primary input into primary input
+traversal order.
+
+A ranked network lists its inputs in rank order, so its leaves are
+permuted accordingly; any other network takes `pis` as they are.
+
+Args:
+    ntk: Source network.
+    pis: Values in declared primary input order.
+
+Template Args:
+    T: Value type.
+    Ntk: Source network type.
+
+Returns:
+    Values in the order of `ntk.foreach_pi`.
+
+)doc";
+
 static const char *mkd_doc_fiction_networks_interface_matching = R"doc(Complete permutations from the left interface to the right interface.)doc";
 
 static const char *mkd_doc_fiction_networks_interface_matching_inputs = R"doc(Right primary input index for each left primary input index.)doc";
@@ -10628,6 +10648,18 @@ Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_has_rank_crossing =
+R"doc(Tests whether edges cross between adjacent levels of a balanced
+network.
+
+Args:
+    ntk: Ranked network.
+
+Returns:
+    Whether the rank order has a crossing.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_hexagonalization_impl = R"doc(Maps placed objects and ordered ports to a hexagonal layout.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_hexagonalization_impl_hexagonalization_impl =
@@ -13839,11 +13871,12 @@ Raises:
                                            non-constant fanins.
     ValueError: If `ntk` has no primary inputs, if a node drives more
                 than two fanouts, if no output reaches a gate, if a
-                gate has only constant fanins or a constant fanin next
-                to a single non-constant one, if `ntk` is not
-                balanced, if a non-constant output is driven from
-                above the last level, or if the rank order of `ntk`
-                has crossings.
+                gate has repeated non-constant fanins, if a gate has
+                constant fanins without exactly two non-constant
+                fanins or has more than one constant fanin, if `ntk`
+                is not balanced, if a non-constant output is driven
+                from above the last level, or if the rank order of
+                `ntk` has crossings.
     std::logic_error: If placement or routing cannot keep the layout
                       planar; such an input is a defect.
 
@@ -30476,27 +30509,6 @@ Template Args:
 Returns:
     The network with virtual primary inputs removed, or the original
     network if unsupported.
-
-)doc";
-
-static const char *mkd_doc_fiction_verification_detail_leaves_by_creation_order =
-R"doc(Leaf signals for copying a network such that the primary input created
-i-th receives `pis[i]`.
-
-A ranked network lists its inputs in rank order, so its leaves are
-permuted accordingly; any other network takes `pis` as they are.
-
-Args:
-    ntk: Source network.
-    pis: Signals of the destination's primary inputs in creation
-         order.
-
-Template Args:
-    NtkDest: Destination network type.
-    Ntk: Source network type.
-
-Returns:
-    Leaf signals in the order of `ntk.foreach_pi`.
 
 )doc";
 
