@@ -37,6 +37,7 @@
 
 #include <cstdint>
 #include <stdexcept>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -365,4 +366,13 @@ TEST_CASE("Equivalence input mapping uses declared rather than ranked input orde
     CHECK(equivalence_checking(ranked_spec, impl, identity) == eq_type::NO);
     CHECK(equivalence_checking(spec, ranked_impl, identity) == eq_type::NO);
     CHECK(equivalence_checking(ranked_spec, ranked_impl, {.input_mapping = {1, 0}}) == eq_type::STRONG);
+
+    technology_network restricted_impl{};
+    const auto         first  = restricted_impl.create_pi();
+    const auto         second = restricted_impl.create_pi();
+    restricted_impl.create_po(restricted_impl.create_and(first, second));
+
+    equivalence_checking_stats stats{};
+    CHECK(equivalence_checking(ranked_spec, restricted_impl, identity, &stats) == eq_type::NO);
+    CHECK(stats.counter_example == std::vector<bool>{true, false});
 }

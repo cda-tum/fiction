@@ -10,8 +10,11 @@
 
 from __future__ import annotations
 
+from argparse import Namespace
 from typing import TYPE_CHECKING
 
+from mnt.fiction.cli.commands.physical_design.plane import plane
+from mnt.fiction.cli.commands.verification.equiv import equiv
 from mnt.pyfiction.layouts import cartesian_gate_layout
 
 if TYPE_CHECKING:
@@ -56,6 +59,28 @@ def test_equiv_checks_a_plane_layout_through_its_input_mapping(shell: Shell, res
     assert result["input_mapping"] == shell.session.gate_layouts.attached("input_mapping")
     # a network the mapping does not fit is a usage error, not a verdict
     assert "input mapping" in shell.fails(f'read "{resource("xor2.v")}"; equiv -n -g')
+
+
+def test_plane_command_results_do_not_change_the_stored_mapping(shell: Shell, resource: Callable[[str], str]) -> None:
+    """Editing a command result leaves the source mapping used by the next check intact."""
+    shell.ok(f'read "{resource("FA.v")}"')
+    placement = plane(shell.session, Namespace(clock_phases=4, xor_gates=False, verbose=False))
+    assert isinstance(placement, dict)
+    mapping = placement["input_mapping"]
+    assert isinstance(mapping, list)
+    mapping.clear()
+
+    options = Namespace(network=True, gate_layout=True)
+    result = equiv(shell.session, options)
+    assert isinstance(result, dict)
+    assert result["eq"] in {"STRONG", "WEAK"}
+    mapping = result["input_mapping"]
+    assert isinstance(mapping, list)
+    mapping.clear()
+
+    result = equiv(shell.session, options)
+    assert isinstance(result, dict)
+    assert result["eq"] in {"STRONG", "WEAK"}
 
 
 def test_equiv_checks_a_plane_layout_without_logging(unlogged_shell: Shell, resource: Callable[[str], str]) -> None:
