@@ -29,6 +29,7 @@
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/types.hpp>
 
+#include <kitty/bit_operations.hpp>
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
@@ -40,6 +41,7 @@
 #include <filesystem>
 #include <fstream>
 #include <ios>
+#include <limits>
 #include <random>
 #include <stdexcept>
 #include <string>
@@ -229,7 +231,7 @@ TEST_CASE("BLIF readers accept carriage-return line endings", "[network-reader]"
                                                          "fiction-blif-cr-" + std::to_string(std::random_device{}())};
     const auto                                 path = directory.path() / "carriage-return.blif";
     std::ofstream                              file{path, std::ios::binary};
-    file << "# unnamed model\r\r.inputs \\\ra # primary input\r.outputs y\r.names a y\r1 1";
+    file << "# unnamed model\r\r.inputs \\\ra\\\r# end of the input declaration\r.outputs y\r.names a y\r1 1";
     file.close();
     REQUIRE_FALSE(file.fail());
 
@@ -429,5 +431,37 @@ TEST_CASE("Read binary AIGER interfaces and output functions", "[network-reader]
         kitty::dynamic_truth_table expected{2};
         kitty::create_from_hex_string(expected, functions.at(index));
         CHECK(outputs.at(index) == expected);
+    }
+}
+
+/** @brief Check that a sized parameter's padding does not change the arithmetic. */
+TEST_CASE("Read Verilog multipliers with padded literals", "[network-reader]")
+{
+    const fiction::test::scoped_temp_directory directory{
+        std::filesystem::temp_directory_path(), "fiction-verilog-multiplier-" + std::to_string(std::random_device{}())};
+    const auto    width = GENERATE(std::string{"2"}, std::to_string(std::numeric_limits<unsigned long>::max()));
+    const auto    path  = directory.path() / "multiplier.v";
+    std::ofstream file{path};
+    file << "module montgomery_multiplier(a,b,s); input a,b; output s; endmodule\n"
+         << "module top(a,b,y); input [1:0] a,b; output [1:0] y; montgomery_multiplier #(2," << width << "'h3," << width
+         << "'h1) multiply(.a(a),.b(b),.s(y)); endmodule\n";
+    file.close();
+    REQUIRE_FALSE(file.fail());
+
+    const auto network = read_network<named_aig_network>(path);
+    REQUIRE(network.num_pis() == 4);
+    REQUIRE(network.num_pos() == 2);
+    const auto outputs = mockturtle::simulate<kitty::dynamic_truth_table>(
+        network, mockturtle::default_simulator<kitty::dynamic_truth_table>{4});
+    for (uint32_t a{}; a < 3; ++a)
+    {
+        for (uint32_t b{}; b < 3; ++b)
+        {
+            CAPTURE(a, b, width);
+            const auto input = a | (b << 2u);
+            const auto value = (a * b) % 3;
+            CHECK(kitty::get_bit(outputs.at(0), input) == ((value & 1u) != 0));
+            CHECK(kitty::get_bit(outputs.at(1), input) == ((value & 2u) != 0));
+        }
     }
 }

@@ -361,7 +361,7 @@ inline void check_blif_cover_line(std::string_view line)
     {
         return;
     }
-    line.remove_prefix(first);
+    line = line.substr(first, line.find_last_not_of(whitespace) - first + 1);
     if (line.back() != '0' && line.back() != '1')
     {
         throw std::invalid_argument{"invalid BLIF cover row"};
@@ -384,27 +384,46 @@ template <typename Ntk>
 {
     if constexpr (mockturtle::has_create_node_v<Ntk> || mockturtle::has_create_cover_node_v<Ntk>)
     {
-        std::string normalized{};
-        std::size_t record_start{};
-        bool        continuation{};
+        constexpr std::string_view whitespace{" \t\r\f\v"};
+        std::string                normalized{};
+        std::size_t                record_start{};
+        bool                       continuation{};
+        bool                       blank_after_continuation{};
+        /** @brief Validate and terminate a nonempty logical record. */
+        const auto finish_record = [&]
+        {
+            check_blif_cover_line(std::string_view{normalized}.substr(record_start));
+            normalized += '\n';
+            record_start = normalized.size();
+        };
         for (std::string line{}; !lorina::detail::getline(input, line).eof();)
         {
-            constexpr std::string_view whitespace{" \t\r\f\v"};
-            const auto                 record = std::string_view{line}.substr(0, line.find('#'));
-            if (const auto last = record.find_last_not_of(whitespace); last != std::string_view::npos)
+            const auto record = std::string_view{line}.substr(0, line.find('#'));
+            const auto first  = record.find_first_not_of(whitespace);
+            if (first == std::string_view::npos)
             {
-                continuation = record.at(last) == '\\';
-                normalized.append(record.substr(0, last + (continuation ? 0u : 1u)));
-                if (continuation)
+                blank_after_continuation = continuation;
+                continue;
+            }
+            if (continuation && normalized.size() != record_start)
+            {
+                // Skip blank continuation lines unless the next line starts a directive.
+                if (blank_after_continuation && record.at(first) == '.')
                 {
-                    normalized += ' ';
+                    finish_record();
                 }
                 else
                 {
-                    check_blif_cover_line(std::string_view{normalized}.substr(record_start));
-                    normalized += '\n';
-                    record_start = normalized.size();
+                    normalized += ' ';
                 }
+            }
+            blank_after_continuation = false;
+            const auto last          = record.find_last_not_of(whitespace);
+            continuation             = record.at(last) == '\\';
+            normalized.append(record.substr(first, last - first + (continuation ? 0u : 1u)));
+            if (!continuation)
+            {
+                finish_record();
             }
         }
         if (continuation)
@@ -501,8 +520,27 @@ class checked_verilog_reader final : private mockturtle::verilog_reader<Ntk>
             check_number(parameters.front(), std::numeric_limits<uint32_t>::max(), 1u);
             if (multiplier)
             {
-                check_number(parameters.at(1));
-                check_number(parameters.at(2));
+                /** @brief Remove padding that mockturtle would allocate before resizing the operand. */
+                const auto normalize_literal = [](const std::string& token)
+                {
+                    check_number(token);
+                    if (const auto hex = token.find("'h"); hex != std::string::npos)
+                    {
+                        constexpr uint64_t bits_per_digit{4};
+                        const auto         width  = parse_unsigned(std::string_view{token}.substr(0, hex)).value();
+                        const auto         digits = token.size() - hex - 2;
+                        if (digits <= (width - 1) / bits_per_digit)
+                        {
+                            return std::to_string(digits * bits_per_digit) + token.substr(hex);
+                        }
+                    }
+                    return token;
+                };
+                mockturtle::verilog_reader<Ntk>::on_module_instantiation(
+                    module,
+                    {parameters.front(), normalize_literal(parameters.at(1)), normalize_literal(parameters.at(2))},
+                    instance, arguments);
+                return;
             }
         }
         mockturtle::verilog_reader<Ntk>::on_module_instantiation(module, parameters, instance, arguments);
