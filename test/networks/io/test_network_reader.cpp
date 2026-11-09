@@ -31,6 +31,7 @@
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
+#include <mockturtle/networks/sequential.hpp>
 
 #include <array>
 #include <cstddef>
@@ -211,13 +212,14 @@ TEST_CASE("BLIF readers report invalid declarations after empty lines", "[networ
     {
         std::ofstream file{path};
         REQUIRE(file.is_open());
-        file << "\n.model invalid\n \t\n.unsupported declaration\n\n.end\n";
+        file << "\n.model invalid\n \t\n.unsupported first\n\n.unsupported second\n.end\n";
         file.close();
         REQUIRE_FALSE(file.fail());
     }
     CHECK_THROWS_WITH(static_cast<void>(read_network<named_technology_network>(path)),
                       Catch::Matchers::ContainsSubstring(path.string()) &&
-                          Catch::Matchers::ContainsSubstring("parsing error"));
+                          Catch::Matchers::ContainsSubstring(".unsupported first") &&
+                          Catch::Matchers::ContainsSubstring(".unsupported second"));
 }
 
 TEST_CASE("BLIF readers accept carriage-return line endings", "[network-reader]")
@@ -239,6 +241,22 @@ TEST_CASE("BLIF readers accept carriage-return line endings", "[network-reader]"
     kitty::dynamic_truth_table identity{1};
     kitty::create_from_hex_string(identity, "2");
     CHECK(outputs == std::vector{identity});
+    CHECK_THROWS_WITH(static_cast<void>(read_network<named_aig_network>(path)),
+                      Catch::Matchers::ContainsSubstring("requires a network that supports truth-table nodes"));
+}
+
+TEST_CASE("Read network rejects sequential results", "[network-reader]")
+{
+    const fiction::test::scoped_temp_directory directory{
+        std::filesystem::temp_directory_path(), "fiction-blif-latch-" + std::to_string(std::random_device{}())};
+    const auto    path = directory.path() / "sequential.blif";
+    std::ofstream file{path};
+    file << ".inputs a\n.outputs y\n.latch a y\n.end\n";
+    file.close();
+    REQUIRE_FALSE(file.fail());
+
+    CHECK_THROWS_WITH(static_cast<void>(read_network<mockturtle::sequential<technology_network>>(path)),
+                      Catch::Matchers::ContainsSubstring("not combinational"));
 }
 
 TEST_CASE("Directory readers retain successful networks and report failed files", "[network-reader]")
@@ -263,6 +281,17 @@ TEST_CASE("Directory readers retain successful networks and report failed files"
         REQUIRE_FALSE(broken.fail());
     }
 
+    CHECK_THROWS_WITH(static_cast<void>(read_network<named_aig_network>(root / "missing.v")),
+                      Catch::Matchers::ContainsSubstring("missing.v"));
+    CHECK_THROWS_WITH(static_cast<void>(read_network<named_aig_network>(root / "c.data")),
+                      Catch::Matchers::ContainsSubstring("unsupported network extension"));
+    CHECK_THROWS_WITH(static_cast<void>(read_network<named_aig_network>(root / "b.V", "unknown")),
+                      Catch::Matchers::ContainsSubstring("unsupported network format"));
+    auto embedded_null = (root / "b.V").native();
+    embedded_null += std::filesystem::path::value_type{};
+    CHECK_THROWS_WITH(static_cast<void>(read_network<named_aig_network>(embedded_null)),
+                      Catch::Matchers::ContainsSubstring("null character"));
+
     const auto batch = read_networks<named_aig_network>(root);
     REQUIRE(batch.networks.size() == 2);
     CHECK(batch.networks[0].get_network_name() == "b");
@@ -274,6 +303,10 @@ TEST_CASE("Directory readers retain successful networks and report failed files"
     CHECK(read_network<named_aig_network>(root / "c.data", ".V").get_network_name() == "c");
     CHECK(read_networks<named_aig_network>(root, "v").networks.size() == 3);
     CHECK_THROWS_AS(static_cast<void>(read_networks<named_aig_network>(fixture)), network_read_error);
+    REQUIRE(std::filesystem::remove(root / "b.V"));
+    REQUIRE(std::filesystem::remove(root / "z.v"));
+    CHECK_THROWS_WITH(static_cast<void>(read_network<named_aig_network>(root)),
+                      Catch::Matchers::ContainsSubstring("a.v") && Catch::Matchers::ContainsSubstring("parsing error"));
 }
 
 TEST_CASE("Malformed network files report their path", "[network-reader]")
@@ -282,6 +315,11 @@ TEST_CASE("Malformed network files report their path", "[network-reader]")
         std::filesystem::temp_directory_path(), "fiction-network-invalid-" + std::to_string(std::random_device{}())};
     const auto [extension, content] = GENERATE(table<std::string, std::string>({
         {".aig", ""},
+        {".aig", "aag 1 1 0 1 0\n2\n2\n"},
+        {".aig", "aig 2 1 0 1 0\n2\n"},
+        {".aig", "aig 2 1 1 1 0\n2 2\n4\n"},
+        {".aig", "aig 1 1 0 1 0 0 0 1\n2\n100\n"},
+        {".aig", "aig 2 1 0 1 1\n4\n\x04\x05"},
         {".aig", "aig 2 1 0 1 1\n4\n\x80"},
         {".aig", "aig 1 1 0 1 0\n4\n"},
         {".aig", "aig 1 1 0 1 0\n2\ni1 invalid\n"},
@@ -292,12 +330,25 @@ TEST_CASE("Malformed network files report their path", "[network-reader]")
         {".blif", ".model broken\n.inputs a \\\n"},
         {".blif", ".model broken\n.inputs a\n.outputs y\n.names a y\n11 1\n.end\n"},
         {".blif", ".model broken\n.inputs a\n.outputs y\n.names a y\n1 1 garbage\n.end\n"},
+        {".blif", ".inputs a\n.outputs y\n.names a y\nx 1\n.end\n"},
+        {".blif", ".outputs y\n.names y\n1\n0\n.end\n"},
+        {".blif", ".inputs a\n.outputs y\n.latch a y\n.end\n"},
         {".v", "module top(a,y); input [0:1] a; output y; assign y = a[0]; endmodule\n"},
+        {".v", "module top(a,y); input [1'h2:0] a; output y; assign y = a[0]; endmodule\n"},
+        {".v", "module top(a,y); input [2'hx:0] a; output y; assign y = a[0]; endmodule\n"},
+        {".v", "module top(a,y); input [:0] a; output y; assign y = a[0]; endmodule\n"},
+        {".v", "module helper(a,y); input [99999999999999999999:0] a; output y; assign y = a[0]; endmodule\n"
+               "module top(a,y); input a; output y; assign y = a; endmodule\n"},
         {".v", "// no network\n"},
         {".v", "module helper(a,y); input a; output y; assign y = a; endmodule\n"},
         {".v", "module ripple_carry_adder(a,b,s); input a,b; output s; endmodule\n"
                "module top(a,b,y); input a,b; output y; ripple_carry_adder #(invalid) add(.a(a),.b(b),.s(y)); "
                "endmodule\n"},
+        {".v", "module ripple_carry_adder(a,b,s); input a,b; output s; endmodule\n"
+               "module top(a,b,y); input a,b; output y; ripple_carry_adder add(.a(a),.b(b),.s(y)); endmodule\n"},
+        {".v", "module montgomery_multiplier(a,b,s); input a,b; output s; endmodule\n"
+               "module top(a,b,y); input a,b; output y; montgomery_multiplier #(2,8'h03,invalid) "
+               "multiply(.a(a),.b(b),.s(y)); endmodule\n"},
         {".v", "module top(a,y); input a; output y; assign y = a; endmodule\n"
                "module top(b,z); input b; output z; assign z = b; endmodule\n"},
     }));
@@ -318,27 +369,37 @@ TEST_CASE("Verilog port checks apply to the network being read", "[network-reade
         std::filesystem::temp_directory_path(), "fiction-verilog-top-" + std::to_string(std::random_device{}())};
     const auto    path = directory.path() / "modules.v";
     std::ofstream file{path};
-    file << "module top(a,y); input a; output y; assign y = a; endmodule\n"
-         << "module helper(a,y); input [0:1] a; output y; assign y = 1'b0; endmodule\n";
+    file << "module ripple_carry_adder(a,b,s); input a,b; output s; endmodule\n"
+         << "module top(a,b,y); input [1:0] a,b; output [4'h2:0] y; "
+            "ripple_carry_adder #(4'h2) add(.a(a),.b(b),.s(y)); endmodule\n"
+         << "module helper(a,b,y); input [0:1] a,b; output y; "
+            "ripple_carry_adder #(invalid) add(.a(a),.b(b),.s(y)); endmodule\n";
     file.close();
     REQUIRE_FALSE(file.fail());
 
     const auto network = read_network<named_aig_network>(path);
-    CHECK(network.num_pis() == 1);
-    REQUIRE(network.num_pos() == 1);
-    CHECK(network.get_output_name(0) == "y");
+    CHECK(network.num_pis() == 4);
+    REQUIRE(network.num_pos() == 3);
+    CHECK(network.get_output_name(0) == "y[0]");
     const auto outputs = mockturtle::simulate<kitty::dynamic_truth_table>(
-        network, mockturtle::default_simulator<kitty::dynamic_truth_table>{1});
-    kitty::dynamic_truth_table identity{1};
-    kitty::create_from_hex_string(identity, "2");
-    CHECK(outputs == std::vector{identity});
+        network, mockturtle::default_simulator<kitty::dynamic_truth_table>{4});
+    const std::array functions{"5a5a", "936c", "ec80"};
+    for (std::size_t index{}; index < functions.size(); ++index)
+    {
+        kitty::dynamic_truth_table expected{4};
+        kitty::create_from_hex_string(expected, functions.at(index));
+        CHECK(outputs.at(index) == expected);
+    }
 }
 
 TEST_CASE("Read binary AIGER interfaces and output functions", "[network-reader]")
 {
     const auto [content, output_name, functions] = GENERATE(table<std::string, std::string, std::vector<std::string>>({
-        {"aig 3 2 0 1 1\n6\n\x02\x02i0 a\ni1 b\no0 y\n", "y", {"8"}},
+        {"aig 3 2 0 1 1\n6\n\x02\x02i0 a\ni1 b\no0 y", "y", {"8"}},
         {"aig 3 1 1 0 1 1\n6 4\n4\n\x02\x02i0 a\nl0 state\nb0 bad\n", "bad", {"c", "8"}},
+        {"aig 3 2 0 1 1 0 1 1 1\n6\n2\n1\n4\n2\n\x02\x02\ni0 a\ni1 b\no0 y\nc0 c\nj0 j\nf0 f\nc\ncomment\n",
+         "y",
+         {"8"}},
     }));
     CAPTURE(output_name);
     const fiction::test::scoped_temp_directory directory{std::filesystem::temp_directory_path(),
