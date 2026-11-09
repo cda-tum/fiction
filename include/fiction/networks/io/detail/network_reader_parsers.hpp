@@ -18,6 +18,7 @@
 #include <lorina/aiger.hpp>
 #include <lorina/blif.hpp>
 #include <lorina/common.hpp>
+#include <lorina/detail/utils.hpp>
 #include <lorina/diagnostics.hpp>
 #include <lorina/verilog.hpp>
 #include <mockturtle/io/aiger_reader.hpp>
@@ -28,6 +29,7 @@
 #include <algorithm>
 #include <array>
 #include <charconv>
+#include <climits>
 #include <cstddef>
 #include <cstdint>
 #include <istream>
@@ -39,6 +41,7 @@
 #include <string>
 #include <string_view>
 #include <system_error>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -67,7 +70,7 @@ enum class network_format : uint8_t
     }
     uint64_t          value{};
     const auto* const end        = std::to_address(token.end());
-    const auto [position, error] = std::from_chars(token.data(), end, value, base);
+    const auto [position, error] = std::from_chars(std::to_address(token.begin()), end, value, base);
     return error == std::errc{} && position == end ? std::optional{value} : std::nullopt;
 }
 
@@ -115,11 +118,9 @@ enum class network_format : uint8_t
 }
 
 /** @brief Check the index of each symbol that Lorina passes to mockturtle. */
-inline void validate_aiger_symbols(std::string_view bytes, const std::array<uint64_t, 9>& counts)
+inline void validate_aiger_symbols(std::string_view bytes, const std::array<uint64_t, 7>& limits)
 {
-    // The first four symbol classes index mockturtle's inputs, latches, and outputs.
-    constexpr std::string_view symbols{"ilob"};
-    const std::array           limits{counts[1], counts[2], counts[3], counts[5]};
+    constexpr std::string_view symbols{"ilobcjf"};
     while (!bytes.empty())
     {
         const auto line = take_aiger_line(bytes);
@@ -163,7 +164,7 @@ inline void validate_binary_aiger(std::string_view bytes)
     // M I L O A and the optional AIGER 1.9 counts B C J F.
     std::array<uint64_t, 9> counts{};
     std::size_t             field{};
-    constexpr auto          max_long  = static_cast<uint64_t>(std::numeric_limits<long>::max());
+    constexpr auto          max_long  = static_cast<uint64_t>(LONG_MAX);
     constexpr auto          max_count = std::min<uint64_t>(max_long, std::numeric_limits<uint32_t>::max());
     while (!header.empty() && field < counts.size())
     {
@@ -186,7 +187,7 @@ inline void validate_binary_aiger(std::string_view bytes)
         throw std::invalid_argument{"inconsistent AIGER header counts"};
     }
 
-    const auto max_literal = std::min(2 * variables + 1, max_long);
+    const auto max_literal = std::min((2 * variables) + 1, max_long);
     for (uint64_t latch{}; latch < latches; ++latch)
     {
         const auto line      = take_aiger_line(bytes);
@@ -229,7 +230,7 @@ inline void validate_binary_aiger(std::string_view bytes)
             throw std::invalid_argument{"invalid AIGER gate literal"};
         }
     }
-    validate_aiger_symbols(bytes, counts);
+    validate_aiger_symbols(bytes, {inputs, latches, outputs, bad, constraints, justice, fairness});
 }
 
 /** @brief Validate the same immutable bytes that Lorina parses. */
@@ -238,9 +239,9 @@ template <typename Ntk>
 {
     std::ostringstream buffer{};
     buffer << input.rdbuf();
-    if (buffer.bad())
+    if (buffer.fail())
     {
-        throw std::ios_base::failure{"could not read AIGER data"};
+        throw std::ios_base::failure{"empty or unreadable AIGER data"};
     }
     validate_binary_aiger(buffer.view());
     std::istringstream checked{std::move(buffer).str()};
@@ -258,10 +259,55 @@ class checked_blif_reader final : private mockturtle::blif_reader<Ntk>
     /** @brief Parse BLIF using the checked callbacks. */
     [[nodiscard]] lorina::return_code read(std::istream& input, lorina::diagnostic_engine& diag) const
     {
-        return lorina::read_blif(input, *this, &diag);
+        const auto result = lorina::read_blif(input, *this, &diag);
+        if (result != lorina::return_code::success)
+        {
+            return result;
+        }
+
+        if (defined_signals.empty() && !found_model)
+        {
+            throw std::invalid_argument{"expected a BLIF network"};
+        }
+        for (const auto& output : output_names)
+        {
+            if (!defined_signals.contains(output))
+            {
+                throw std::invalid_argument{"undriven BLIF output '" + output + "'"};
+            }
+            mockturtle::blif_reader<Ntk>::on_output(output);
+        }
+        return result;
     }
 
   private:
+    /** @brief Signals with a primary input or gate as their driver. */
+    mutable std::unordered_set<std::string> defined_signals{};
+    /** @brief Output names in declaration order. */
+    mutable std::vector<std::string> output_names{};
+    /** @brief Whether a model was explicitly declared. */
+    mutable bool found_model{};
+
+    /** @brief Record an explicit model, even when it has no interface. */
+    void on_model(const std::string& name) const override
+    {
+        found_model = true;
+        mockturtle::blif_reader<Ntk>::on_model(name);
+    }
+
+    /** @brief Record a primary input as a signal driver. */
+    void on_input(const std::string& name) const override
+    {
+        mockturtle::blif_reader<Ntk>::on_input(name);
+        defined_signals.insert(name);
+    }
+
+    /** @brief Defer the output until its driver can be checked. */
+    void on_output(const std::string& name) const override
+    {
+        output_names.push_back(name);
+    }
+
     /** @brief Reject latches when the destination cannot represent them. */
     void on_latch(const std::string& input, const std::string& output,
                   const std::optional<lorina::blif_reader::latch_type>& type, const std::optional<std::string>& control,
@@ -270,6 +316,7 @@ class checked_blif_reader final : private mockturtle::blif_reader<Ntk>
         if constexpr (mockturtle::has_create_ro_v<Ntk> && mockturtle::has_create_ri_v<Ntk>)
         {
             mockturtle::blif_reader<Ntk>::on_latch(input, output, type, control, reset);
+            defined_signals.insert(output);
         }
         else
         {
@@ -284,6 +331,7 @@ class checked_blif_reader final : private mockturtle::blif_reader<Ntk>
         if (cover.empty())
         {
             mockturtle::blif_reader<Ntk>::on_gate({}, output, {});
+            defined_signals.insert(output);
             return;
         }
         // kitty::cube stores one bit per input in a 32-bit mask.
@@ -299,35 +347,65 @@ class checked_blif_reader final : private mockturtle::blif_reader<Ntk>
             }
         }
         mockturtle::blif_reader<Ntk>::on_gate(inputs, output, cover);
+        defined_signals.insert(output);
     }
 };
 
-/** @brief Skip blank and comment lines before Lorina handles BLIF continuations. */
+/** @brief Check a complete BLIF cover row before Lorina can accept only a matching substring. */
+inline void check_blif_cover_line(std::string_view line)
+{
+    constexpr std::string_view whitespace{" \t\r\f\v"};
+    const auto                 first = line.find_first_not_of(whitespace);
+    if (first == std::string_view::npos || line.at(first) == '.')
+    {
+        return;
+    }
+    line.remove_prefix(first);
+    if (line.back() != '0' && line.back() != '1')
+    {
+        throw std::invalid_argument{"invalid BLIF cover row"};
+    }
+    if (line.size() == 1)
+    {
+        return;
+    }
+    const auto separator = line.find_first_of(whitespace);
+    if (separator == std::string_view::npos || line.find_first_not_of(whitespace, separator) != line.size() - 1 ||
+        line.substr(0, separator).find_first_not_of("01-") != std::string_view::npos)
+    {
+        throw std::invalid_argument{"invalid BLIF cover row"};
+    }
+}
+
+/** @brief Normalize physical BLIF lines and validate complete cover rows before parsing. */
 template <typename Ntk>
 [[nodiscard]] lorina::return_code parse_blif_network(std::istream& input, Ntk& network, lorina::diagnostic_engine& diag)
 {
     if constexpr (mockturtle::has_create_node_v<Ntk> || mockturtle::has_create_cover_node_v<Ntk>)
     {
         std::string normalized{};
+        std::string logical_line{};
         bool        continuation{};
-        for (std::string line{}; std::getline(input, line);)
+        for (std::string line{}; !lorina::detail::getline(input, line).eof();)
         {
             constexpr std::string_view whitespace{" \t\r\f\v"};
-            const auto                 first = line.find_first_not_of(whitespace);
-            if (first != std::string::npos && line[first] != '#')
+            const auto                 record = std::string_view{line}.substr(0, line.find('#'));
+            if (const auto last = record.find_last_not_of(whitespace); last != std::string_view::npos)
             {
-                continuation = line.at(line.find_last_not_of(whitespace)) == '\\';
-                normalized += line;
-                normalized += '\n';
+                continuation = record.at(last) == '\\';
+                logical_line.append(record.substr(0, last + (continuation ? 0u : 1u)));
+                if (!continuation)
+                {
+                    check_blif_cover_line(logical_line);
+                    normalized += logical_line;
+                    normalized += '\n';
+                    logical_line.clear();
+                }
             }
         }
         if (continuation)
         {
             throw std::invalid_argument{"unfinished BLIF continuation"};
-        }
-        if (normalized.empty())
-        {
-            throw std::invalid_argument{"expected a BLIF network"};
         }
         std::istringstream checked{std::move(normalized)};
         return checked_blif_reader<Ntk>{network}.read(checked, diag);
@@ -371,7 +449,11 @@ class checked_verilog_reader final : private mockturtle::verilog_reader<Ntk>
     void on_module_header(const std::string& name, const std::vector<std::string>& ports) const override
     {
         reading_top = name == top_module_name;
-        found_top   = found_top || reading_top;
+        if (reading_top && found_top)
+        {
+            throw std::invalid_argument{"duplicate Verilog module named 'top'"};
+        }
+        found_top = found_top || reading_top;
         mockturtle::verilog_reader<Ntk>::on_module_header(name, ports);
     }
 
@@ -395,6 +477,33 @@ class checked_verilog_reader final : private mockturtle::verilog_reader<Ntk>
         }
     }
 
+    /** @brief Validate numeric parameters used by mockturtle's arithmetic modules. */
+    void on_module_instantiation(const std::string& module, const std::vector<std::string>& parameters,
+                                 const std::string&                                      instance,
+                                 const std::vector<std::pair<std::string, std::string>>& arguments) const override
+    {
+        if (!reading_top)
+        {
+            return;
+        }
+
+        const bool multiplier = module == "montgomery_multiplier";
+        if (multiplier || module == "ripple_carry_adder")
+        {
+            if (arguments.size() != 3 || parameters.size() != (multiplier ? 3u : 1u))
+            {
+                throw std::invalid_argument{"invalid Verilog arithmetic module arguments"};
+            }
+            check_number(parameters.front(), std::numeric_limits<uint32_t>::max());
+            if (multiplier)
+            {
+                check_number(parameters.at(1));
+                check_number(parameters.at(2));
+            }
+        }
+        mockturtle::verilog_reader<Ntk>::on_module_instantiation(module, parameters, instance, arguments);
+    }
+
     /** @brief Reject ranges that the pinned reader cannot represent. */
     static void check_range(const std::string_view size)
     {
@@ -406,21 +515,39 @@ class checked_verilog_reader final : private mockturtle::verilog_reader<Ntk>
         {
             throw std::invalid_argument{"unsupported Verilog port range"};
         }
-        const auto high  = size.substr(0, size.size() - 2);
-        const auto hex   = high.find("'h");
-        auto       value = parse_unsigned(high);
+        check_number(size.substr(0, size.size() - 2), std::numeric_limits<uint32_t>::max() - 1u);
+    }
+
+    /** @brief Validate a decimal or sized hex literal before mockturtle converts it. */
+    static void check_number(const std::string_view token, const std::optional<uint64_t> maximum = std::nullopt)
+    {
+        const auto hex = token.find("'h");
         if (hex != std::string_view::npos)
         {
-            const auto bits = parse_unsigned(high.substr(0, hex));
-            value           = parse_unsigned(high.substr(hex + 2), 16);
-            if (!bits || *bits == 0 || *bits > 64 || (value && *bits < 64 && (*value >> *bits) != 0))
+            const auto bits   = parse_unsigned(token.substr(0, hex));
+            const auto digits = token.substr(hex + 2);
+            if (!bits || *bits == 0 || *bits > ULONG_MAX || digits.empty() ||
+                digits.find_first_not_of("0123456789abcdefABCDEF") != std::string_view::npos)
             {
-                throw std::invalid_argument{"unsupported Verilog port range"};
+                throw std::invalid_argument{"unsupported Verilog numeric literal"};
             }
+            if (maximum)
+            {
+                const auto     value            = parse_unsigned(digits, 16);
+                constexpr auto digits_in_uint64 = static_cast<uint64_t>(std::numeric_limits<uint64_t>::digits);
+                if (!value || *value > *maximum || *bits > digits_in_uint64 ||
+                    (*bits < digits_in_uint64 && (*value >> *bits) != 0))
+                {
+                    throw std::invalid_argument{"Verilog numeric literal is out of range"};
+                }
+            }
+            return;
         }
-        if (!value || *value >= std::numeric_limits<uint32_t>::max())
+
+        const auto value = parse_unsigned(token);
+        if (!value || *value > maximum.value_or(ULONG_MAX))
         {
-            throw std::invalid_argument{"unsupported Verilog port range"};
+            throw std::invalid_argument{"unsupported Verilog numeric literal"};
         }
     }
 };

@@ -158,7 +158,7 @@ struct network_candidate
             std::error_code error{};
             if (entry.is_regular_file(error) || (error && error != std::errc::no_such_file_or_directory))
             {
-                candidates.push_back({entry.path(), resolved, error});
+                candidates.push_back({.path = entry.path(), .format = resolved, .status_error = error});
             }
         }
     }
@@ -269,7 +269,8 @@ template <typename Ntk>
     }
     if (std::filesystem::is_regular_file(status))
     {
-        return detail::read_network_file<Ntk>({path, detail::file_network_format(path, requested), {}});
+        return detail::read_network_file<Ntk>(
+            {.path = path, .format = detail::file_network_format(path, requested), .status_error = {}});
     }
     if (!std::filesystem::is_directory(status))
     {
@@ -316,7 +317,7 @@ template <typename Ntk>
         }
         catch (const network_read_error& failure)
         {
-            result.failures.push_back({candidate.path, failure.what()});
+            result.failures.push_back({.path = candidate.path, .message = failure.what()});
         }
     }
     return result;

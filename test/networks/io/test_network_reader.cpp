@@ -165,7 +165,7 @@ TEST_CASE("BLIF readers accept empty lines without changing logic", "[network-re
         file << whitespace << "\n# before model\n.model whitespace\n"
              << whitespace << "\n.inputs a b \\\n"
              << whitespace << "\n unused\n.outputs zero one inverted xor lut copy\n"
-             << whitespace << "\n.names zero\n"
+             << whitespace << "\n.names a zero\n"
              << whitespace << "\n.names one\n"
              << whitespace << "\n1\n# between gates\n.names a inverted\n"
              << whitespace << "\n0 1\n.names a b xor\n01 1\n"
@@ -219,6 +219,27 @@ TEST_CASE("BLIF readers report invalid declarations after empty lines", "[networ
                           Catch::Matchers::ContainsSubstring("parsing error"));
 }
 
+TEST_CASE("BLIF readers accept carriage-return line endings", "[network-reader]")
+{
+    const fiction::test::scoped_temp_directory directory{std::filesystem::temp_directory_path(),
+                                                         "fiction-blif-cr-" + std::to_string(std::random_device{}())};
+    const auto                                 path = directory.path() / "carriage-return.blif";
+    std::ofstream                              file{path, std::ios::binary};
+    file << "# unnamed model\r\r.inputs \\\ra # primary input\r.outputs y\r.names a y\r1 1";
+    file.close();
+    REQUIRE_FALSE(file.fail());
+
+    const auto network = read_network<named_technology_network>(path);
+    REQUIRE(network.num_pis() == 1);
+    REQUIRE(network.num_pos() == 1);
+    CHECK(network.get_output_name(0) == "y");
+    const auto outputs = mockturtle::simulate<kitty::dynamic_truth_table>(
+        network, mockturtle::default_simulator<kitty::dynamic_truth_table>{1});
+    kitty::dynamic_truth_table identity{1};
+    kitty::create_from_hex_string(identity, "2");
+    CHECK(outputs == std::vector{identity});
+}
+
 TEST_CASE("Directory readers retain successful networks and report failed files", "[network-reader]")
 {
     const fiction::test::scoped_temp_directory directory{
@@ -259,15 +280,25 @@ TEST_CASE("Malformed network files report their path", "[network-reader]")
     const fiction::test::scoped_temp_directory directory{
         std::filesystem::temp_directory_path(), "fiction-network-invalid-" + std::to_string(std::random_device{}())};
     const auto [extension, content] = GENERATE(table<std::string, std::string>({
+        {".aig", ""},
         {".aig", "aig 2 1 0 1 1\n4\n\x80"},
         {".aig", "aig 1 1 0 1 0\n4\n"},
         {".aig", "aig 1 1 0 1 0\n2\ni1 invalid\n"},
+        {".aig", "aig 1 1 0 1 0\n2\nc999999999999999999999999 invalid\n"},
         {".blif", "# no network\n"},
+        {".blif", ".end\n"},
+        {".blif", ".model broken\n.inputs a\n.outputs undriven\n.end\n"},
         {".blif", ".model broken\n.inputs a \\\n"},
         {".blif", ".model broken\n.inputs a\n.outputs y\n.names a y\n11 1\n.end\n"},
+        {".blif", ".model broken\n.inputs a\n.outputs y\n.names a y\n1 1 garbage\n.end\n"},
         {".v", "module top(a,y); input [0:1] a; output y; assign y = a[0]; endmodule\n"},
         {".v", "// no network\n"},
         {".v", "module helper(a,y); input a; output y; assign y = a; endmodule\n"},
+        {".v", "module ripple_carry_adder(a,b,s); input a,b; output s; endmodule\n"
+               "module top(a,b,y); input a,b; output y; ripple_carry_adder #(invalid) add(.a(a),.b(b),.s(y)); "
+               "endmodule\n"},
+        {".v", "module top(a,y); input a; output y; assign y = a; endmodule\n"
+               "module top(b,z); input b; output z; assign z = b; endmodule\n"},
     }));
     CAPTURE(content);
     const auto    path = directory.path() / ("malformed" + extension);
