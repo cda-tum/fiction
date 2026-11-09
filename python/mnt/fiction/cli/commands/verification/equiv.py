@@ -109,7 +109,7 @@ def equiv(session: Session, args: argparse.Namespace) -> Result:
     return {
         "specification": spec_name,
         "implementation": impl_name,
-        **({"input_mapping": input_mapping} if input_mapping else {}),
+        **({"input_mapping": input_mapping.copy()} if input_mapping else {}),
         **stats_to_dict(stats),
     }
 

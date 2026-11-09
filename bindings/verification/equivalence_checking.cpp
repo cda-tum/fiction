@@ -22,6 +22,7 @@
 #include <fiction/verification/equivalence_checking.hpp>
 
 #include <cstdint>
+#include <utility>
 #include <vector>
 
 #include <nanobind/nanobind.h>
@@ -53,11 +54,15 @@ void register_equivalence_checking_impl(nb::module_& m)
     m.def(
         "equivalence_checking",
         [](const Spec& spec, const Impl& impl, fiction::verification::equivalence_checking_stats* pst,
-           const std::vector<uint32_t>& input_mapping) -> fiction::verification::eq_type
+           std::vector<uint32_t> input_mapping) -> fiction::verification::eq_type
         {
-            const fiction::verification::equivalence_checking_params parameters{.input_mapping = input_mapping};
+            const fiction::verification::equivalence_checking_params parameters{.input_mapping =
+                                                                                    std::move(input_mapping)};
             fiction::verification::equivalence_checking_stats        stats{};
-            fiction::verification::equivalence_checking(spec, impl, parameters, &stats);
+            {
+                const nb::gil_scoped_release release{};
+                fiction::verification::equivalence_checking(spec, impl, parameters, &stats);
+            }
 
             if (pst != nullptr)
             {
@@ -91,8 +96,7 @@ Returns:
 
 Raises:
     ValueError: If `input_mapping` is non-empty and does not name one specification input for every implementation
-        input.)doc",
-        nb::call_guard<nb::gil_scoped_release>());
+        input.)doc");
 }
 
 /**

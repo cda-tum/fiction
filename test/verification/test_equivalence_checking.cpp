@@ -24,6 +24,7 @@
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
+#include <fiction/networks/views/mutable_rank_view.hpp>
 #include <fiction/verification/equivalence_checking.hpp>
 
 #include <kitty/constructors.hpp>
@@ -341,4 +342,27 @@ TEST_CASE("Physical equivalence returns NO for a clocked required cycle", "[equi
     CHECK(equivalence_checking(spec, lyt, &stats) == eq_type::NO);
     CHECK(stats.impl_drv_stats.drvs == 0);
     CHECK(stats.eq == eq_type::NO);
+}
+
+TEST_CASE("Equivalence input mapping uses declared rather than ranked input order", "[equivalence_checking]")
+{
+    technology_network spec{};
+    const auto         x = spec.create_pi();
+    const auto         y = spec.create_pi();
+    spec.create_po(x);
+
+    technology_network impl{};
+    const auto         a = impl.create_pi();
+    const auto         b = impl.create_pi();
+    impl.create_po(b);
+
+    views::mutable_rank_view ranked_spec{spec};
+    views::mutable_rank_view ranked_impl{impl};
+    ranked_spec.swap(x, y);
+    ranked_impl.swap(a, b);
+
+    const equivalence_checking_params identity{.input_mapping = {0, 1}};
+    CHECK(equivalence_checking(ranked_spec, impl, identity) == eq_type::NO);
+    CHECK(equivalence_checking(spec, ranked_impl, identity) == eq_type::NO);
+    CHECK(equivalence_checking(ranked_spec, ranked_impl, {.input_mapping = {1, 0}}) == eq_type::STRONG);
 }

@@ -75,9 +75,17 @@ void register_plane(nb::module_& m)
             parameters.number_of_clock_phases = number_of_clock_phases;
             parameters.on_progress            = on_progress;
 
-            const nb::gil_scoped_release release{};
-
-            return fiction::physical_design::plane(network, parameters, statistics);
+            stats local{};
+            auto  layout = [&]
+            {
+                const nb::gil_scoped_release release{};
+                return fiction::physical_design::plane(network, parameters, &local);
+            }();
+            if (statistics != nullptr)
+            {
+                *statistics = local;
+            }
+            return layout;
         },
         nb::arg("network"), nb::kw_only(), nb::arg("statistics") = nullptr,
         nb::arg("number_of_clock_phases") = plane_options{}.number_of_clock_phases,
@@ -100,9 +108,8 @@ Returns:
 
 Raises:
     ValueError: If a gate of `network` is reached by no output, if `network` has no primary inputs, if a node drives
-        more than two fanouts, if a gate has only constant fanins or a constant fanin next to a single non-constant one,
-        if `network` is not balanced, if an output is driven from above the last level, or if its node order has
-        crossings.
+        more than two fanouts, if a gate has repeated non-constant fanins or unsupported constant fanins,
+        if `network` is not balanced, if an output is driven from above the last level, or if its node order has crossings.
     high_degree_fanin_exception: If a node has more than two non-constant fanins.)doc");
 }
 

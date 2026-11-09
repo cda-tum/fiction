@@ -20,6 +20,8 @@
 #include "fiction/layouts/gate_layout.hpp"
 #include "fiction/networks/extract_layout_network.hpp"
 #include "fiction/networks/interface_matching.hpp"
+#include "fiction/networks/network_utils.hpp"
+#include "fiction/traits.hpp"
 #include "fiction/verification/critical_path_length_and_throughput.hpp"
 #include "fiction/verification/design_rule_violations.hpp"
 
@@ -32,11 +34,14 @@
 
 #include <algorithm>
 #include <concepts>
+#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
+#include <numeric>
 #include <sstream>
 #include <stdexcept>
+#include <type_traits>
 #include <vector>
 
 namespace fiction::verification
@@ -205,9 +210,15 @@ class equivalence_checking_impl
         mockturtle::klut_network aligned{};
         // the aligned copy of the implementation reads the specification inputs in their declared order
         std::vector<mockturtle::klut_network::signal> spec_inputs(spec_ntk.num_pis());
-        for (auto& input : spec_inputs)
+        std::vector<uint32_t>                         spec_order(spec_inputs.size());
+        std::iota(spec_order.begin(), spec_order.end(), 0u);
+        if constexpr (has_foreach_pi_unranked_v<std::remove_cvref_t<decltype(spec_ntk)>>)
         {
-            input = aligned.create_pi();
+            spec_order = networks::inputs_in_traversal_order(spec_ntk, spec_order);
+        }
+        for (const auto input : spec_order)
+        {
+            spec_inputs[input] = aligned.create_pi();
         }
         std::vector<mockturtle::klut_network::signal> inputs(impl_ntk.num_pis());
         std::vector<uint32_t>                         output_order{};
@@ -227,6 +238,10 @@ class equivalence_checking_impl
                 inputs[input] = spec_inputs[ps.input_mapping[input]];
             }
             output_order = networks::match_outputs(spec, impl);
+        }
+        if constexpr (has_foreach_pi_unranked_v<std::remove_cvref_t<decltype(impl_ntk)>>)
+        {
+            inputs = networks::inputs_in_traversal_order(impl_ntk, inputs);
         }
         const auto outputs = mockturtle::cleanup_dangling(impl_ntk, aligned, inputs.begin(), inputs.end());
         for (const auto output : output_order)
@@ -278,7 +293,18 @@ class equivalence_checking_impl
 
                 if (!(*eq))
                 {
-                    pst.counter_example = st.counter_example;
+                    if constexpr (has_foreach_pi_unranked_v<std::remove_cvref_t<decltype(spec_ntk)>>)
+                    {
+                        pst.counter_example.resize(st.counter_example.size());
+                        for (std::size_t i = 0; i < st.counter_example.size(); ++i)
+                        {
+                            pst.counter_example[spec_order[i]] = st.counter_example[i];
+                        }
+                    }
+                    else
+                    {
+                        pst.counter_example = st.counter_example;
+                    }
                 }
             }
             else

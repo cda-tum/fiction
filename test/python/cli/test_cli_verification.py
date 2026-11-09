@@ -58,6 +58,14 @@ def test_equiv_checks_a_plane_layout_through_its_input_mapping(shell: Shell, res
     assert "input mapping" in shell.fails(f'read "{resource("xor2.v")}"; equiv -n -g')
 
 
+def test_equiv_checks_a_plane_layout_without_logging(unlogged_shell: Shell, resource: Callable[[str], str]) -> None:
+    """The full-adder mapping is available in a normal session."""
+    unlogged_shell.ok(f'read "{resource("FA.v")}"; plane; equiv -n -g')
+    assert "not equivalent" not in unlogged_shell.output
+    assert "equivalent" in unlogged_shell.output
+    assert not unlogged_shell.session.log
+
+
 def test_equiv_two_layouts(mux21_shell: Shell) -> None:
     mux21_shell.ok("ortho; optimize; equiv -g")
     assert "equivalent" in mux21_shell.output

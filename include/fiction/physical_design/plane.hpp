@@ -1497,7 +1497,8 @@ class plane_impl
 
         // row of every output: the driver's row, pushed down below the rows already taken
         std::vector<uint64_t> row_of(ntk.num_pos(), 0);
-        uint64_t              next_free_row = 0;
+        // With no routed outputs, the first input still occupies the output column on row zero.
+        uint64_t next_free_row = outputs.empty() ? 1 : 0;
 
         for (const auto& slot : outputs)
         {
@@ -1627,9 +1628,9 @@ class plane_impl
  * @return Crossing-free gate-level layout that implements `ntk`.
  * @throws networks::high_degree_fanin_exception If a node has more than two non-constant fanins.
  * @throws std::invalid_argument If `ntk` has no primary inputs, if a node drives more than two fanouts, if no output
- * reaches a gate, if a gate has only constant fanins or a constant fanin next to a single non-constant one, if `ntk` is
- * not balanced, if a non-constant output is driven from above the last level, or if the rank order of `ntk` has
- * crossings.
+ * reaches a gate, if a gate has repeated non-constant fanins, if a gate has constant fanins without exactly two
+ * non-constant fanins or has more than one constant fanin, if `ntk` is not balanced, if a non-constant output is driven
+ * from above the last level, or if the rank order of `ntk` has crossings.
  * @throws std::logic_error If placement or routing cannot keep the layout planar; such an input is a defect.
  */
 [[nodiscard]] inline layouts::cartesian_gate_layout plane(const networks::named_technology_network& ntk,
@@ -1667,32 +1668,39 @@ class plane_impl
     // from the diagonal before the gate's own.
     const networks::views::mutable_rank_view ranked{ntk};
 
-    bool constant_gate = false;
-    bool unbalanced    = false;
+    bool constant_gate  = false;
+    bool repeated_fanin = false;
+    bool unbalanced     = false;
     ranked.foreach_gate(
-        [&ranked, &constant_gate, &unbalanced](const auto& n)
+        [&ranked, &constant_gate, &repeated_fanin, &unbalanced](const auto& n)
         {
-            const auto fc = networks::fanins(ranked, n);
-
-            if (fc.fanin_nodes.empty() || (fc.constant_fanin.has_value() && fc.fanin_nodes.size() == 1))
-            {
-                constant_gate = true;
-            }
-
-            for (const auto& fi : fc.fanin_nodes)
-            {
-                if (ranked.level(fi) + 1 != ranked.level(n))
-                {
-                    unbalanced = true;
-                }
-            }
+            uint32_t                              constants{};
+            std::optional<detail::placement_node> first_fanin{};
+            ranked.foreach_fanin(n,
+                                 [&](const auto& signal)
+                                 {
+                                     const auto fi = ranked.get_node(signal);
+                                     if (ranked.is_constant(fi))
+                                     {
+                                         ++constants;
+                                         return;
+                                     }
+                                     repeated_fanin |= first_fanin == fi;
+                                     first_fanin = fi;
+                                     unbalanced |= ranked.level(fi) + 1 != ranked.level(n);
+                                 });
+            const auto fanins = ranked.fanin_size(n) - constants;
+            constant_gate |= fanins == 0 || (constants != 0 && (constants != 1 || fanins != detail::MAX_DEGREE));
         });
 
     if (constant_gate)
     {
-        throw std::invalid_argument(
-            "A gate has only constant fanins or a constant fanin besides a single non-constant one; propagate "
-            "constants before placement");
+        throw std::invalid_argument("A gate has unsupported constant fanins; propagate constants before placement");
+    }
+
+    if (repeated_fanin)
+    {
+        throw std::invalid_argument("A gate has repeated non-constant fanins; simplify it before placement");
     }
 
     if (unbalanced)

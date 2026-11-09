@@ -241,6 +241,19 @@ TEST_CASE("Constant outputs keep their position", "[plane]")
     CHECK(layout.is_po_tile(layout.get_tile(layout.po_at(1))));
 }
 
+TEST_CASE("PLANE places constant outputs with an unused primary input", "[plane]")
+{
+    named_technology_network tec{};
+    tec.create_pi();
+    tec.create_po(tec.get_constant(true));
+    tec.create_po(tec.get_constant(false));
+
+    const auto layout = plane(tec);
+    CHECK(layout.num_pis() == 1);
+    CHECK(layout.num_crossings() == 0);
+    check_eq(tec, extract_layout_network(layout));
+}
+
 TEST_CASE("Unused inputs stay at the border", "[plane]")
 {
     technology_network tec{};
@@ -345,6 +358,20 @@ TEST_CASE("Invalid inputs are rejected", "[plane]")
         const auto x2 = tec.create_pi();
         const auto x3 = tec.create_pi();
         tec.create_po(tec.create_and(tec.create_and(x1, x2), x3));
+
+        CHECK_THROWS_AS(plane(tec), std::invalid_argument);
+    }
+    SECTION("a gate with two constant fanins")
+    {
+        const auto pi = tec.create_pi();
+        tec.create_po(tec.create_maj(pi, tec.get_constant(false), tec.get_constant(true)));
+
+        CHECK_THROWS_AS(plane(tec), std::invalid_argument);
+    }
+    SECTION("a gate with repeated non-constant fanins")
+    {
+        const auto buf = tec.create_buf(tec.create_pi());
+        tec.create_po(tec.create_and(buf, buf));
 
         CHECK_THROWS_AS(plane(tec), std::invalid_argument);
     }

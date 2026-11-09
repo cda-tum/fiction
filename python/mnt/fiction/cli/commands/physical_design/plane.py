@@ -87,11 +87,10 @@ def plane(session: Session, args: argparse.Namespace) -> Result:
         number_of_clock_phases=num_clks.THREE if args.clock_phases == THREE_CLOCK_PHASES else num_clks.FOUR,
         on_progress=session.report_progress,
     )
-    input_mapping = list(original_inputs)
-    session.gate_layouts.add(layout, input_mapping=input_mapping, source_network=session.networks.current())
+    session.gate_layouts.add(layout, input_mapping=original_inputs.copy(), source_network=session.networks.current())
 
     return {
         **(_added(session, layout, stats, verbose=args.verbose) or {}),
-        "input_mapping": input_mapping,
+        "input_mapping": original_inputs,
         "planarization": stats_to_dict(planarization_statistics),
     }
