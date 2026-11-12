@@ -334,59 +334,21 @@ class checked_blif_reader final : private mockturtle::blif_reader<Ntk>
         }
     }
 
-    /** @brief Forward a valid cover or materialize an empty cover as constant false. */
+    /** @brief Record a gate driver and forward the cover. */
     void on_gate(const std::vector<std::string>& inputs, const std::string& output,
                  const lorina::blif_reader::output_cover_t& cover) const override
     {
         define_signal(output);
-        if (cover.empty())
-        {
-            mockturtle::blif_reader<Ntk>::on_gate({}, output, {});
-            return;
-        }
         // kitty::cube stores one bit per input in a 32-bit mask.
-        if (inputs.size() > 32 || (inputs.empty() && cover.size() != 1))
+        if (!cover.empty() && inputs.size() > 32)
         {
             throw std::invalid_argument{"unsupported BLIF cover size"};
-        }
-        for (const auto& [pattern, value] : cover)
-        {
-            if (pattern.size() != inputs.size() || (value != "0" && value != "1") || value != cover.front().second)
-            {
-                throw std::invalid_argument{"invalid BLIF cover row"};
-            }
         }
         mockturtle::blif_reader<Ntk>::on_gate(inputs, output, cover);
     }
 };
 
-/** @brief Check a complete BLIF cover row before Lorina can accept only a matching substring. */
-inline void check_blif_cover_line(std::string_view line)
-{
-    constexpr std::string_view whitespace{" \t\r\f\v"};
-    const auto                 first = line.find_first_not_of(whitespace);
-    if (first == std::string_view::npos || line.at(first) == '.')
-    {
-        return;
-    }
-    line = line.substr(first, line.find_last_not_of(whitespace) - first + 1);
-    if (line.back() != '0' && line.back() != '1')
-    {
-        throw std::invalid_argument{"invalid BLIF cover row"};
-    }
-    if (line.size() == 1)
-    {
-        return;
-    }
-    const auto separator = line.find_first_of(whitespace);
-    if (separator == std::string_view::npos || line.find_first_not_of(whitespace, separator) != line.size() - 1 ||
-        line.substr(0, separator).find_first_not_of("01-") != std::string_view::npos)
-    {
-        throw std::invalid_argument{"invalid BLIF cover row"};
-    }
-}
-
-/** @brief Normalize physical BLIF lines and validate complete cover rows before parsing. */
+/** @brief Select the first flat BLIF model before parsing. */
 template <typename Ntk>
 [[nodiscard]] lorina::return_code parse_blif_network(std::istream& input, Ntk& network, lorina::diagnostic_engine& diag)
 {
@@ -397,10 +359,9 @@ template <typename Ntk>
         std::size_t                record_start{};
         bool                       continuation{};
         bool                       blank_after_continuation{};
-        /** @brief Validate and terminate a nonempty logical record. */
+        /** @brief Terminate a nonempty logical record. */
         const auto finish_record = [&]
         {
-            check_blif_cover_line(std::string_view{normalized}.substr(record_start));
             normalized += '\n';
             record_start = normalized.size();
         };
@@ -487,30 +448,11 @@ class checked_verilog_reader final : private mockturtle::verilog_reader<Ntk>
     mutable bool reading_top{};
     /** @brief Whether the file contains the requested module. */
     mutable bool found_top{};
-    /** @brief Formal output of the ripple-carry adder. */
-    mutable std::string adder_output{};
-    /** @brief Formal output of the Montgomery multiplier. */
-    mutable std::string multiplier_output{};
-    /** @brief Output of the arithmetic module whose ports are being declared. */
-    mutable std::string* arithmetic_output{};
 
     /** @brief Track which module the following declarations belong to. */
     void on_module_header(const std::string& name, const std::vector<std::string>& ports) const override
     {
-        reading_top       = name == top_module_name;
-        arithmetic_output = nullptr;
-        if (name == "ripple_carry_adder")
-        {
-            arithmetic_output = &adder_output;
-        }
-        else if (name == "montgomery_multiplier")
-        {
-            arithmetic_output = &multiplier_output;
-        }
-        if (arithmetic_output != nullptr)
-        {
-            arithmetic_output->clear();
-        }
+        reading_top = name == top_module_name;
         if (reading_top && found_top)
         {
             throw std::invalid_argument{"duplicate Verilog module named 'top'"};
@@ -525,87 +467,25 @@ class checked_verilog_reader final : private mockturtle::verilog_reader<Ntk>
         if (reading_top)
         {
             check_range(size);
-            mockturtle::verilog_reader<Ntk>::on_inputs(names, size);
         }
         else if (const auto colon = size.find(':');
                  colon != std::string::npos && size.find_first_not_of("0123456789:") == std::string::npos)
         {
             // Lorina expands decimal ranges in every module with an inclusive unsigned loop.
-            check_number(std::string_view{size}.substr(0, colon), ULONG_MAX - 1u);
-            check_number(std::string_view{size}.substr(colon + 1), ULONG_MAX - 1u);
+            check_range_bound(std::string_view{size}.substr(0, colon), ULONG_MAX - 1u);
+            check_range_bound(std::string_view{size}.substr(colon + 1), ULONG_MAX - 1u);
         }
+        mockturtle::verilog_reader<Ntk>::on_inputs(names, size);
     }
 
     /** @brief Validate the range of an output declaration. */
     void on_outputs(const std::vector<std::string>& names, const std::string& size) const override
     {
-        if (arithmetic_output != nullptr)
-        {
-            *arithmetic_output = names.size() == 1 ? names.front() : std::string{};
-        }
         if (reading_top)
         {
             check_range(size);
-            mockturtle::verilog_reader<Ntk>::on_outputs(names, size);
         }
-    }
-
-    /** @brief Validate numeric parameters used by mockturtle's arithmetic modules. */
-    void on_module_instantiation(const std::string& module, const std::vector<std::string>& parameters,
-                                 const std::string&                                      instance,
-                                 const std::vector<std::pair<std::string, std::string>>& arguments) const override
-    {
-        if (!reading_top)
-        {
-            return;
-        }
-
-        const bool multiplier = module == "montgomery_multiplier";
-        if (multiplier || module == "ripple_carry_adder")
-        {
-            if (arguments.size() != 3 || parameters.size() != (multiplier ? 3u : 1u))
-            {
-                throw std::invalid_argument{"invalid Verilog arithmetic module arguments"};
-            }
-            check_number(parameters.front(), std::numeric_limits<uint32_t>::max(), 1u);
-            const auto& output  = multiplier ? multiplier_output : adder_output;
-            auto        ordered = arguments;
-            // Mockturtle expects both input connections before the output connection.
-            const auto output_pin =
-                std::stable_partition(ordered.begin(), ordered.end(), [&output](const auto& connection)
-                                      { return std::string_view{connection.first}.substr(1) != output; });
-            if (output.empty() || output_pin != ordered.end() - 1 || ordered[0].first == ordered[1].first)
-            {
-                throw std::invalid_argument{"invalid Verilog arithmetic module ports"};
-            }
-            if (multiplier)
-            {
-                /** @brief Remove padding that mockturtle would allocate before resizing the operand. */
-                const auto normalize_literal = [](const std::string& token)
-                {
-                    check_number(token);
-                    if (const auto hex = token.find("'h"); hex != std::string::npos)
-                    {
-                        constexpr uint64_t bits_per_digit{4};
-                        const auto         width  = parse_unsigned(std::string_view{token}.substr(0, hex)).value();
-                        const auto         digits = token.size() - hex - 2;
-                        if (digits <= (width - 1) / bits_per_digit)
-                        {
-                            return std::to_string(digits * bits_per_digit) + token.substr(hex);
-                        }
-                    }
-                    return token;
-                };
-                mockturtle::verilog_reader<Ntk>::on_module_instantiation(
-                    module,
-                    {parameters.front(), normalize_literal(parameters.at(1)), normalize_literal(parameters.at(2))},
-                    instance, ordered);
-                return;
-            }
-            mockturtle::verilog_reader<Ntk>::on_module_instantiation(module, parameters, instance, ordered);
-            return;
-        }
-        mockturtle::verilog_reader<Ntk>::on_module_instantiation(module, parameters, instance, arguments);
+        mockturtle::verilog_reader<Ntk>::on_outputs(names, size);
     }
 
     /** @brief Reject ranges that the pinned reader cannot represent. */
@@ -619,12 +499,11 @@ class checked_verilog_reader final : private mockturtle::verilog_reader<Ntk>
         {
             throw std::invalid_argument{"unsupported Verilog port range"};
         }
-        check_number(size.substr(0, size.size() - 2), std::numeric_limits<uint32_t>::max() - 1u);
+        check_range_bound(size.substr(0, size.size() - 2), std::numeric_limits<uint32_t>::max() - 1u);
     }
 
-    /** @brief Validate a decimal or sized hex literal before mockturtle converts it. */
-    static void check_number(const std::string_view token, const std::optional<uint64_t> maximum = std::nullopt,
-                             const uint64_t minimum = 0)
+    /** @brief Validate a decimal or sized hexadecimal bound before expanding the range. */
+    static void check_range_bound(const std::string_view token, const uint64_t maximum)
     {
         const auto hex = token.find("'h");
         if (hex != std::string_view::npos)
@@ -636,21 +515,18 @@ class checked_verilog_reader final : private mockturtle::verilog_reader<Ntk>
             {
                 throw std::invalid_argument{"unsupported Verilog numeric literal"};
             }
-            if (maximum)
+            const auto     value            = parse_unsigned(digits, 16);
+            constexpr auto digits_in_uint64 = static_cast<uint64_t>(std::numeric_limits<uint64_t>::digits);
+            if (!value || *value > maximum || *bits > digits_in_uint64 ||
+                (*bits < digits_in_uint64 && (*value >> *bits) != 0))
             {
-                const auto     value            = parse_unsigned(digits, 16);
-                constexpr auto digits_in_uint64 = static_cast<uint64_t>(std::numeric_limits<uint64_t>::digits);
-                if (!value || *value < minimum || *value > *maximum || *bits > digits_in_uint64 ||
-                    (*bits < digits_in_uint64 && (*value >> *bits) != 0))
-                {
-                    throw std::invalid_argument{"Verilog numeric literal is out of range"};
-                }
+                throw std::invalid_argument{"Verilog numeric literal is out of range"};
             }
             return;
         }
 
         const auto value = parse_unsigned(token);
-        if (!value || *value < minimum || *value > maximum.value_or(ULONG_MAX))
+        if (!value || *value > maximum)
         {
             throw std::invalid_argument{"unsupported Verilog numeric literal"};
         }
