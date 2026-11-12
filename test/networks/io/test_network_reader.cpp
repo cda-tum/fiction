@@ -43,6 +43,7 @@
 #include <ios>
 #include <limits>
 #include <random>
+#include <regex>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -229,7 +230,7 @@ TEST_CASE("BLIF readers report invalid declarations after empty lines", "[networ
 
 TEST_CASE("BLIF readers return the first model", "[network-reader]")
 {
-    const auto                                 end = GENERATE("", ".end\n");
+    const auto* const                          end = GENERATE("", ".end\n");
     const fiction::test::scoped_temp_directory directory{
         std::filesystem::temp_directory_path(), "fiction-blif-model-" + std::to_string(std::random_device{}())};
     const auto    path = directory.path() / "models.blif";
@@ -331,6 +332,57 @@ TEST_CASE("Directory readers retain successful networks and report failed files"
                       Catch::Matchers::ContainsSubstring("a.v") && Catch::Matchers::ContainsSubstring("parsing error"));
 }
 
+TEST_CASE("Directory reads continue after a regex complexity limit", "[network-reader]")
+{
+    /** @brief Emits the regex exception without depending on a platform-specific limit. */
+    struct regex_limited_network : named_aig_network
+    {
+        /** @brief Construct an empty test network. */
+        regex_limited_network() = default;
+
+        /** @brief Assign the name or simulate a matching limit for the selected input. */
+        void set_name(const signal& input_signal, const std::string& name)
+        {
+            if (name == "limited" || name == "memory")
+            {
+                throw std::regex_error{name == "limited" ? std::regex_constants::error_complexity :
+                                                           std::regex_constants::error_stack};
+            }
+            named_aig_network::set_name(input_signal, name);
+        }
+    };
+
+    const bool                                 memory_limit = GENERATE(false, true);
+    const auto* const                          input        = memory_limit ? "memory" : "limited";
+    const fiction::test::scoped_temp_directory directory{std::filesystem::temp_directory_path(),
+                                                         "fiction-network-regex-limit-" +
+                                                             std::to_string(std::random_device{}())};
+    const auto                                 limited = directory.path() / "a.v";
+    {
+        std::ofstream file{limited};
+        file << "module top(" << input << ",y); input " << input << "; output y; assign y = " << input
+             << "; endmodule\n";
+        file.close();
+        REQUIRE_FALSE(file.fail());
+    }
+    const auto fixture = std::filesystem::path{TEST_PATH} / "../benchmarks/TOY/mux21.v";
+    REQUIRE(std::filesystem::copy_file(fixture, directory.path() / "b.v"));
+
+    if (memory_limit)
+    {
+        CHECK_THROWS_AS(static_cast<void>(read_networks<regex_limited_network>(directory.path())), std::regex_error);
+        return;
+    }
+
+    const auto batch = read_networks<regex_limited_network>(directory.path());
+    REQUIRE(batch.failures.size() == 1);
+    CHECK(batch.failures.front().path == limited);
+    CHECK_THAT(batch.failures.front().message, Catch::Matchers::ContainsSubstring("parsing error"));
+    REQUIRE(batch.networks.size() == 1);
+    CHECK(batch.networks.front().get_network_name() == "b");
+    CHECK(read_network<regex_limited_network>(directory.path()).get_network_name() == "b");
+}
+
 TEST_CASE("Malformed network files report their path", "[network-reader]")
 {
     const fiction::test::scoped_temp_directory directory{
@@ -399,7 +451,7 @@ TEST_CASE("Malformed network files report their path", "[network-reader]")
 
 TEST_CASE("Verilog port checks apply to the network being read", "[network-reader]")
 {
-    const auto connections = GENERATE(".a(a),.b(b),.s(y)", ".s(y),.b(b),.a(a)");
+    const auto* const connections = GENERATE(".a(a),.b(b),.s(y)", ".s(y),.b(b),.a(a)");
     CAPTURE(connections);
     const fiction::test::scoped_temp_directory directory{
         std::filesystem::temp_directory_path(), "fiction-verilog-top-" + std::to_string(std::random_device{}())};

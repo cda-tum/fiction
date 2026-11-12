@@ -29,6 +29,7 @@
 #include <filesystem>
 #include <fstream>
 #include <ios>
+#include <regex>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -238,6 +239,14 @@ template <typename Ntk>
     catch (const std::ios_base::failure& error)
     {
         fail_network_read(path, fmt::format("read error: {}", error.what()));
+    }
+    catch (const std::regex_error& error)
+    {
+        if (error.code() != std::regex_constants::error_complexity)
+        {
+            throw;
+        }
+        fail_network_read(path, fmt::format("parsing error: {}", error.what()));
     }
 
     if (!network.is_combinational())

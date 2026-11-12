@@ -49,8 +49,9 @@ BLIF reads the first flat model and accepts blank lines, comments, and continued
 The `.model` and `.end` declarations are optional.
 An explicit format overrides the extension. Use `v`, `aig`, or `blif`, with an optional leading dot.
 For a directory, `read_network` tries files in filename order and stops at the first successful read.
-The C++ `read_networks` function returns every successful network along with the failures. Directory reads
-visit regular files directly in the given directory. They skip unrelated extensions when inferring the format.
+The C++ `read_networks` function returns successful networks and reports file-level parsing and I/O failures.
+Allocation failures can propagate to the caller. Directory reads visit regular files directly in the given directory.
+They skip unrelated extensions when inferring the format.
 
 ```python
 from mnt.pyfiction.networks import aig_network
