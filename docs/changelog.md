@@ -1067,7 +1067,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Surface-defect import avoids exponential backtracking on malformed digit runs.
   - SQD import now rejects NUL bytes, multiple XML roots, and text outside the root. SiDB filename readers preserve bytes after Ctrl-Z on Windows.
   - BLIF network readers now accept empty and whitespace-only lines without aborting.
-  - BLIF reads now accept tab-separated fields and return the first flat model. A gate cannot drive a primary input.
+  - BLIF reads now accept empty port lists and whitespace-separated fields, and return the first flat model. A gate cannot drive a primary input.
   - Verilog reads now preserve named arithmetic connections in any order and reject unsupported modules and undriven outputs.
   - Network directory reads now continue after a file exceeds a regular-expression match limit.
   - QCC and QLL writers now propagate allocation failures while sorting terminal cells.

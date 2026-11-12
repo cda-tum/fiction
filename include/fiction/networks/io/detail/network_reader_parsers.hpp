@@ -308,6 +308,11 @@ class checked_blif_reader final : private mockturtle::blif_reader<Ntk>
     /** @brief Record a primary input as a signal driver. */
     void on_input(const std::string& name) const override
     {
+        // Lorina emits an empty name for an empty port list.
+        if (name.empty())
+        {
+            return;
+        }
         define_signal(name);
         mockturtle::blif_reader<Ntk>::on_input(name);
     }
@@ -315,7 +320,10 @@ class checked_blif_reader final : private mockturtle::blif_reader<Ntk>
     /** @brief Defer the output until its driver can be checked. */
     void on_output(const std::string& name) const override
     {
-        output_names.push_back(name);
+        if (!name.empty())
+        {
+            output_names.push_back(name);
+        }
     }
 
     /** @brief Reject latches when the destination cannot represent them. */
@@ -367,7 +375,7 @@ template <typename Ntk>
         };
         for (std::string line{}; !lorina::detail::getline(input, line).eof();)
         {
-            std::ranges::replace(line, '\t', ' ');
+            std::ranges::replace_if(line, [](const char c) { return c == '\t' || c == '\f' || c == '\v'; }, ' ');
             const auto record = std::string_view{line}.substr(0, line.find('#'));
             const auto first  = record.find_first_not_of(whitespace);
             if (first == std::string_view::npos)

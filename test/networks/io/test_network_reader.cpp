@@ -230,12 +230,14 @@ TEST_CASE("BLIF readers report invalid declarations after empty lines", "[networ
 
 TEST_CASE("BLIF readers return the first model", "[network-reader]")
 {
-    const auto* const                          end = GENERATE("", ".end\n");
+    const auto [end, separator] =
+        GENERATE(table<const char*, char>({{"", ' '}, {".end\n", ' '}, {"", '\f'}, {"", '\v'}}));
     const fiction::test::scoped_temp_directory directory{
         std::filesystem::temp_directory_path(), "fiction-blif-model-" + std::to_string(std::random_device{}())};
     const auto    path = directory.path() / "models.blif";
     std::ofstream file{path};
-    file << ".model first\n.inputs a\n.outputs a\n" << end << ".model second\n.inputs b\n.outputs b\n.end\n";
+    file << ".model first\n.inputs a\n.outputs a\n"
+         << end << ".model" << separator << "second\n.inputs b\n.outputs b\n.end\n";
     file.close();
     REQUIRE_FALSE(file.fail());
 
@@ -243,6 +245,23 @@ TEST_CASE("BLIF readers return the first model", "[network-reader]")
     REQUIRE(network.num_pis() == 1);
     REQUIRE(network.num_pos() == 1);
     CHECK(network.get_output_name(0) == "a");
+}
+
+TEST_CASE("BLIF readers accept empty port lists", "[network-reader]")
+{
+    const auto [body, inputs, outputs] = GENERATE(table<const char*, uint32_t, uint32_t>(
+        {{".inputs\n.outputs y\n.names y\n1\n", 0, 1}, {".inputs a\n.outputs\n", 1, 0}}));
+    const fiction::test::scoped_temp_directory directory{
+        std::filesystem::temp_directory_path(), "fiction-blif-empty-ports-" + std::to_string(std::random_device{}())};
+    const auto    path = directory.path() / "empty-ports.blif";
+    std::ofstream file{path};
+    file << ".model top\n" << body << ".end\n";
+    file.close();
+    REQUIRE_FALSE(file.fail());
+
+    const auto network = read_network<named_technology_network>(path);
+    CHECK(network.num_pis() == inputs);
+    CHECK(network.num_pos() == outputs);
 }
 
 TEST_CASE("BLIF readers accept carriage-return line endings", "[network-reader]")
