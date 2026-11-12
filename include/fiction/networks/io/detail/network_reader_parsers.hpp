@@ -249,7 +249,7 @@ template <typename Ntk>
     return lorina::read_aiger(checked, mockturtle::aiger_reader<Ntk>{network}, &diag);
 }
 
-/** @brief Validate covers before forwarding them to the mockturtle BLIF reader. */
+/** @brief Check BLIF drivers, outputs, and cover size for the destination network. */
 template <typename Ntk>
 class checked_blif_reader final : private mockturtle::blif_reader<Ntk>
 {

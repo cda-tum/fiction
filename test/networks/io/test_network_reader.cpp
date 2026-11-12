@@ -411,6 +411,7 @@ TEST_CASE("Malformed network files report their path", "[network-reader]")
         {".blif", ".model broken\n.inputs a \\\n"},
         {".blif", ".model broken\n.inputs a\n.outputs y\n.names a y\n11 1\n.end\n"},
         {".blif", ".model broken\n.inputs a\n.outputs y\n.names a y\n1 1 garbage\n.end\n"},
+        {".blif", ".inputs a\n.outputs y\n.names a y\n1 1\n0 0\n.end\n"},
         {".blif", ".inputs a\n.outputs y\n.names a y\nx 1\n.end\n"},
         {".blif", ".inputs a\n.outputs a\n.names a\n1\n.end\n"},
         {".blif", ".outputs y\n.names y\n1\n0\n.end\n"},
@@ -425,6 +426,11 @@ TEST_CASE("Malformed network files report their path", "[network-reader]")
                "module top(a,y); input a; output y; assign y = a; endmodule\n"},
         {".v", "// no network\n"},
         {".v", "module helper(a,y); input a; output y; assign y = a; endmodule\n"},
+        {".v", "module top(a,y); input a; output y; endmodule\n"},
+        {".v", "module helper(a,z); input a; output z; assign z = a; endmodule\n"
+               "module top(a,y); input a; output y; assign y = z; endmodule\n"},
+        {".v", "module helper(a,y); input a; output y; assign y = a; endmodule\n"
+               "module top(a,y); input a; output y; helper h(.a(a),.y(y)); endmodule\n"},
         {".v", "module ripple_carry_adder(a,b,s); input a,b; output s; endmodule\n"
                "module top(a,b,y); input a,b; output y; ripple_carry_adder #(invalid) add(.a(a),.b(b),.s(y)); "
                "endmodule\n"},
@@ -521,17 +527,18 @@ TEST_CASE("Read binary AIGER interfaces and output functions", "[network-reader]
     }
 }
 
-/** @brief Check that a sized parameter's padding does not change the arithmetic. */
-TEST_CASE("Read Verilog multipliers with padded literals", "[network-reader]")
+/** @brief Check that the multiplier uses the low bits of its parameters. */
+TEST_CASE("Read Verilog multipliers with sized literals", "[network-reader]")
 {
     const fiction::test::scoped_temp_directory directory{
         std::filesystem::temp_directory_path(), "fiction-verilog-multiplier-" + std::to_string(std::random_device{}())};
-    const auto    width = GENERATE(std::string{"2"}, std::to_string(std::numeric_limits<unsigned long>::max()));
-    const auto    path  = directory.path() / "multiplier.v";
+    const auto [width, modulus] = GENERATE(table<std::string, std::string>(
+        {{"2", "3"}, {std::to_string(std::numeric_limits<unsigned long>::max()), "3"}, {"8", "ff"}}));
+    const auto    path          = directory.path() / "multiplier.v";
     std::ofstream file{path};
     file << "module montgomery_multiplier(a,b,s); input a,b; output s; endmodule\n"
-         << "module top(a,b,y); input [1:0] a,b; output [1:0] y; montgomery_multiplier #(2," << width << "'h3," << width
-         << "'h1) multiply(.a(a),.b(b),.s(y)); endmodule\n";
+         << "module top(a,b,y); input [1:0] a,b; output [1:0] y; montgomery_multiplier #(2," << width << "'h" << modulus
+         << ',' << width << "'h1) multiply(.a(a),.b(b),.s(y)); endmodule\n";
     file.close();
     REQUIRE_FALSE(file.fail());
 
@@ -544,7 +551,7 @@ TEST_CASE("Read Verilog multipliers with padded literals", "[network-reader]")
     {
         for (uint32_t b{}; b < 3; ++b)
         {
-            CAPTURE(a, b, width);
+            CAPTURE(a, b, width, modulus);
             const auto input = a | (b << 2u);
             const auto value = (a * b) % 3;
             CHECK(kitty::get_bit(outputs.at(0), input) == ((value & 1u) != 0));
