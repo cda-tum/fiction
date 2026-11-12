@@ -332,7 +332,7 @@ TEST_CASE("Directory readers retain successful networks and report failed files"
                       Catch::Matchers::ContainsSubstring("a.v") && Catch::Matchers::ContainsSubstring("parsing error"));
 }
 
-TEST_CASE("Directory reads continue after a regex complexity limit", "[network-reader]")
+TEST_CASE("Directory reads continue after a regex match limit", "[network-reader]")
 {
     /** @brief Emits the regex exception without depending on a platform-specific limit. */
     struct regex_limited_network : named_aig_network
@@ -340,20 +340,27 @@ TEST_CASE("Directory reads continue after a regex complexity limit", "[network-r
         /** @brief Construct an empty test network. */
         regex_limited_network() = default;
 
-        /** @brief Assign the name or simulate a matching limit for the selected input. */
+        /** @brief Assign the name or simulate a regex error for the selected input. */
         void set_name(const signal& input_signal, const std::string& name)
         {
-            if (name == "limited" || name == "memory")
+            if (name == "complexity")
             {
-                throw std::regex_error{name == "limited" ? std::regex_constants::error_complexity :
-                                                           std::regex_constants::error_stack};
+                throw std::regex_error{std::regex_constants::error_complexity};
+            }
+            if (name == "depth")
+            {
+                throw std::regex_error{std::regex_constants::error_stack};
+            }
+            if (name == "allocation")
+            {
+                throw std::regex_error{std::regex_constants::error_space};
             }
             named_aig_network::set_name(input_signal, name);
         }
     };
 
-    const bool                                 memory_limit = GENERATE(false, true);
-    const auto* const                          input        = memory_limit ? "memory" : "limited";
+    const auto input =
+        GENERATE(std::string_view{"complexity"}, std::string_view{"depth"}, std::string_view{"allocation"});
     const fiction::test::scoped_temp_directory directory{std::filesystem::temp_directory_path(),
                                                          "fiction-network-regex-limit-" +
                                                              std::to_string(std::random_device{}())};
@@ -368,7 +375,7 @@ TEST_CASE("Directory reads continue after a regex complexity limit", "[network-r
     const auto fixture = std::filesystem::path{TEST_PATH} / "../benchmarks/TOY/mux21.v";
     REQUIRE(std::filesystem::copy_file(fixture, directory.path() / "b.v"));
 
-    if (memory_limit)
+    if (input == "allocation")
     {
         CHECK_THROWS_AS(static_cast<void>(read_networks<regex_limited_network>(directory.path())), std::regex_error);
         return;

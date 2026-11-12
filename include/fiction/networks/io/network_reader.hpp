@@ -242,7 +242,8 @@ template <typename Ntk>
     }
     catch (const std::regex_error& error)
     {
-        if (error.code() != std::regex_constants::error_complexity)
+        // MSVC uses error_stack for its fixed match depth limit.
+        if (error.code() != std::regex_constants::error_complexity && error.code() != std::regex_constants::error_stack)
         {
             throw;
         }
