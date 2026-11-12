@@ -289,6 +289,15 @@ class checked_blif_reader final : private mockturtle::blif_reader<Ntk>
     /** @brief Whether a model was explicitly declared. */
     mutable bool found_model{};
 
+    /** @brief Record a signal driver and reject a second driver for the same signal. */
+    void define_signal(const std::string& name) const
+    {
+        if (!defined_signals.insert(name).second)
+        {
+            throw std::invalid_argument{"duplicate BLIF driver for '" + name + "'"};
+        }
+    }
+
     /** @brief Record an explicit model, even when it has no interface. */
     void on_model(const std::string& name) const override
     {
@@ -299,8 +308,8 @@ class checked_blif_reader final : private mockturtle::blif_reader<Ntk>
     /** @brief Record a primary input as a signal driver. */
     void on_input(const std::string& name) const override
     {
+        define_signal(name);
         mockturtle::blif_reader<Ntk>::on_input(name);
-        defined_signals.insert(name);
     }
 
     /** @brief Defer the output until its driver can be checked. */
@@ -316,8 +325,8 @@ class checked_blif_reader final : private mockturtle::blif_reader<Ntk>
     {
         if constexpr (mockturtle::has_create_ro_v<Ntk> && mockturtle::has_create_ri_v<Ntk>)
         {
+            define_signal(output);
             mockturtle::blif_reader<Ntk>::on_latch(input, output, type, control, reset);
-            defined_signals.insert(output);
         }
         else
         {
@@ -329,10 +338,10 @@ class checked_blif_reader final : private mockturtle::blif_reader<Ntk>
     void on_gate(const std::vector<std::string>& inputs, const std::string& output,
                  const lorina::blif_reader::output_cover_t& cover) const override
     {
+        define_signal(output);
         if (cover.empty())
         {
             mockturtle::blif_reader<Ntk>::on_gate({}, output, {});
-            defined_signals.insert(output);
             return;
         }
         // kitty::cube stores one bit per input in a 32-bit mask.
@@ -348,7 +357,6 @@ class checked_blif_reader final : private mockturtle::blif_reader<Ntk>
             }
         }
         mockturtle::blif_reader<Ntk>::on_gate(inputs, output, cover);
-        defined_signals.insert(output);
     }
 };
 
@@ -398,6 +406,7 @@ template <typename Ntk>
         };
         for (std::string line{}; !lorina::detail::getline(input, line).eof();)
         {
+            std::ranges::replace(line, '\t', ' ');
             const auto record = std::string_view{line}.substr(0, line.find('#'));
             const auto first  = record.find_first_not_of(whitespace);
             if (first == std::string_view::npos)
@@ -423,7 +432,18 @@ template <typename Ntk>
             normalized.append(record.substr(first, last - first + (continuation ? 0u : 1u)));
             if (!continuation)
             {
+                const auto logical_record = std::string_view{normalized}.substr(record_start);
+                if (record_start != 0 && logical_record.starts_with(".model "))
+                {
+                    normalized.resize(record_start);
+                    break;
+                }
+                const bool end_of_model = logical_record == ".end";
                 finish_record();
+                if (end_of_model)
+                {
+                    break;
+                }
             }
         }
         if (continuation)
@@ -467,11 +487,30 @@ class checked_verilog_reader final : private mockturtle::verilog_reader<Ntk>
     mutable bool reading_top{};
     /** @brief Whether the file contains the requested module. */
     mutable bool found_top{};
+    /** @brief Formal output of the ripple-carry adder. */
+    mutable std::string adder_output{};
+    /** @brief Formal output of the Montgomery multiplier. */
+    mutable std::string multiplier_output{};
+    /** @brief Output of the arithmetic module whose ports are being declared. */
+    mutable std::string* arithmetic_output{};
 
     /** @brief Track which module the following declarations belong to. */
     void on_module_header(const std::string& name, const std::vector<std::string>& ports) const override
     {
-        reading_top = name == top_module_name;
+        reading_top       = name == top_module_name;
+        arithmetic_output = nullptr;
+        if (name == "ripple_carry_adder")
+        {
+            arithmetic_output = &adder_output;
+        }
+        else if (name == "montgomery_multiplier")
+        {
+            arithmetic_output = &multiplier_output;
+        }
+        if (arithmetic_output != nullptr)
+        {
+            arithmetic_output->clear();
+        }
         if (reading_top && found_top)
         {
             throw std::invalid_argument{"duplicate Verilog module named 'top'"};
@@ -488,11 +527,22 @@ class checked_verilog_reader final : private mockturtle::verilog_reader<Ntk>
             check_range(size);
             mockturtle::verilog_reader<Ntk>::on_inputs(names, size);
         }
+        else if (const auto colon = size.find(':');
+                 colon != std::string::npos && size.find_first_not_of("0123456789:") == std::string::npos)
+        {
+            // Lorina expands decimal ranges in every module with an inclusive unsigned loop.
+            check_number(std::string_view{size}.substr(0, colon), ULONG_MAX - 1u);
+            check_number(std::string_view{size}.substr(colon + 1), ULONG_MAX - 1u);
+        }
     }
 
     /** @brief Validate the range of an output declaration. */
     void on_outputs(const std::vector<std::string>& names, const std::string& size) const override
     {
+        if (arithmetic_output != nullptr)
+        {
+            *arithmetic_output = names.size() == 1 ? names.front() : std::string{};
+        }
         if (reading_top)
         {
             check_range(size);
@@ -518,6 +568,16 @@ class checked_verilog_reader final : private mockturtle::verilog_reader<Ntk>
                 throw std::invalid_argument{"invalid Verilog arithmetic module arguments"};
             }
             check_number(parameters.front(), std::numeric_limits<uint32_t>::max(), 1u);
+            const auto& output  = multiplier ? multiplier_output : adder_output;
+            auto        ordered = arguments;
+            // Mockturtle expects both input connections before the output connection.
+            const auto output_pin =
+                std::stable_partition(ordered.begin(), ordered.end(), [&output](const auto& connection)
+                                      { return std::string_view{connection.first}.substr(1) != output; });
+            if (output.empty() || output_pin != ordered.end() - 1 || ordered[0].first == ordered[1].first)
+            {
+                throw std::invalid_argument{"invalid Verilog arithmetic module ports"};
+            }
             if (multiplier)
             {
                 /** @brief Remove padding that mockturtle would allocate before resizing the operand. */
@@ -539,9 +599,11 @@ class checked_verilog_reader final : private mockturtle::verilog_reader<Ntk>
                 mockturtle::verilog_reader<Ntk>::on_module_instantiation(
                     module,
                     {parameters.front(), normalize_literal(parameters.at(1)), normalize_literal(parameters.at(2))},
-                    instance, arguments);
+                    instance, ordered);
                 return;
             }
+            mockturtle::verilog_reader<Ntk>::on_module_instantiation(module, parameters, instance, ordered);
+            return;
         }
         mockturtle::verilog_reader<Ntk>::on_module_instantiation(module, parameters, instance, arguments);
     }

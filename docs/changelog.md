@@ -422,6 +422,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Parameter configurations now use designated initializers with unchanged inputs and computations.
   - Network experiments use the value-based reader and report failed benchmark reads.
+  - Clock-number assignment sorts benchmark indices, and planarization reuses the reader's cleaned networks.
   - Experiments use canonical network types and `kitty::dynamic_truth_table` without changing their computations.
   - Clock-number assignment helpers now take concrete Cartesian gate layouts.
     Experiment parameters, inputs, and output columns are unchanged.
@@ -1065,6 +1066,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Surface-defect import avoids exponential backtracking on malformed digit runs.
   - SQD import now rejects NUL bytes, multiple XML roots, and text outside the root. SiDB filename readers preserve bytes after Ctrl-Z on Windows.
   - BLIF network readers now accept empty and whitespace-only lines without aborting.
+  - BLIF reads now accept tab-separated fields and return the first flat model. A gate cannot drive a primary input.
+  - Verilog reads now preserve named connections to arithmetic modules in any order.
   - QCC and QLL writers now propagate allocation failures while sorting terminal cells.
   - QCADesigner output now rejects names containing CR, LF, or null bytes before changing output.
   - QCADesigner and cell-based QCA SVG output now avoid scanning empty cell positions in sparse layouts.

@@ -160,7 +160,8 @@ TEMPLATE_TEST_CASE("Read Verilog", "[network-reader]", named_aig_network, named_
 TEST_CASE("BLIF readers accept empty lines without changing logic", "[network-reader]")
 {
     const auto whitespace = GENERATE(std::string{}, std::string{" \t\r"});
-    CAPTURE(whitespace);
+    const auto separator  = GENERATE(' ', '\t');
+    CAPTURE(whitespace, separator);
     const fiction::test::scoped_temp_directory directory{
         std::filesystem::temp_directory_path(), "fiction-blif-whitespace-" + std::to_string(std::random_device{}())};
     const auto path = directory.path() / "whitespace.blif";
@@ -169,11 +170,12 @@ TEST_CASE("BLIF readers accept empty lines without changing logic", "[network-re
         REQUIRE(file.is_open());
         file << whitespace << "\n# before model\n.model whitespace\n"
              << whitespace << "\n.inputs a\\\n"
-             << whitespace << "\nb unused\n.outputs zero one inverted xor lut copy\n"
+             << whitespace << "\nb" << separator << "unused\n.outputs zero" << separator
+             << "one inverted xor lut copy\n"
              << whitespace << "\n.names a zero\n"
              << whitespace << "\n.names one\n"
              << whitespace << "\n1\n# between gates\n.names a inverted\n"
-             << whitespace << "\n0 1\n.names a b xor\n01 1\n"
+             << whitespace << "\n0 1\n.names a" << separator << "b xor\n01 1\n"
              << whitespace << "\n# between cover rows\n10 1\n.names a b \\\n lut\n01 1\n.names a copy\n1 1\n.end\n"
              << whitespace << '\n';
         file.close();
@@ -223,6 +225,23 @@ TEST_CASE("BLIF readers report invalid declarations after empty lines", "[networ
                       Catch::Matchers::ContainsSubstring(path.string()) &&
                           Catch::Matchers::ContainsSubstring(".unsupported first") &&
                           Catch::Matchers::ContainsSubstring(".unsupported second"));
+}
+
+TEST_CASE("BLIF readers return the first model", "[network-reader]")
+{
+    const auto                                 end = GENERATE("", ".end\n");
+    const fiction::test::scoped_temp_directory directory{
+        std::filesystem::temp_directory_path(), "fiction-blif-model-" + std::to_string(std::random_device{}())};
+    const auto    path = directory.path() / "models.blif";
+    std::ofstream file{path};
+    file << ".model first\n.inputs a\n.outputs a\n" << end << ".model second\n.inputs b\n.outputs b\n.end\n";
+    file.close();
+    REQUIRE_FALSE(file.fail());
+
+    const auto network = read_network<named_technology_network>(path);
+    REQUIRE(network.num_pis() == 1);
+    REQUIRE(network.num_pos() == 1);
+    CHECK(network.get_output_name(0) == "a");
 }
 
 TEST_CASE("BLIF readers accept carriage-return line endings", "[network-reader]")
@@ -334,6 +353,7 @@ TEST_CASE("Malformed network files report their path", "[network-reader]")
         {".blif", ".model broken\n.inputs a\n.outputs y\n.names a y\n11 1\n.end\n"},
         {".blif", ".model broken\n.inputs a\n.outputs y\n.names a y\n1 1 garbage\n.end\n"},
         {".blif", ".inputs a\n.outputs y\n.names a y\nx 1\n.end\n"},
+        {".blif", ".inputs a\n.outputs a\n.names a\n1\n.end\n"},
         {".blif", ".outputs y\n.names y\n1\n0\n.end\n"},
         {".blif", ".inputs a\n.outputs y\n.latch a y\n.end\n"},
         {".v", "module top(a,y); input [0:1] a; output y; assign y = a[0]; endmodule\n"},
@@ -342,6 +362,8 @@ TEST_CASE("Malformed network files report their path", "[network-reader]")
         {".v", "module top(a,y); input [:0] a; output y; assign y = a[0]; endmodule\n"},
         {".v", "module helper(a,y); input [99999999999999999999:0] a; output y; assign y = a[0]; endmodule\n"
                "module top(a,y); input a; output y; assign y = a; endmodule\n"},
+        {".v", "module helper(a); input [1:2:3] a; endmodule\n"
+               "module top(a,y); input a; output y; assign y = a; endmodule\n"},
         {".v", "// no network\n"},
         {".v", "module helper(a,y); input a; output y; assign y = a; endmodule\n"},
         {".v", "module ripple_carry_adder(a,b,s); input a,b; output s; endmodule\n"
@@ -349,6 +371,9 @@ TEST_CASE("Malformed network files report their path", "[network-reader]")
                "endmodule\n"},
         {".v", "module ripple_carry_adder(a,b,s); input a,b; output s; endmodule\n"
                "module top(a,b,y); input a,b; output y; ripple_carry_adder add(.a(a),.b(b),.s(y)); endmodule\n"},
+        {".v", "module ripple_carry_adder(a,b,s); input a,b; output s; endmodule\n"
+               "module top(a,b,y); input [1:0] a,b; output [2:0] y; "
+               "ripple_carry_adder #(2) add(.a(a),.a(b),.s(y)); endmodule\n"},
         {".v", "module ripple_carry_adder(a,b,s); input a,b; output s; endmodule\n"
                "module top(a,b,y); input [1:0] a,b; output [2:0] y; "
                "ripple_carry_adder #(0) add(.a(a),.b(b),.s(y)); endmodule\n"},
@@ -374,13 +399,16 @@ TEST_CASE("Malformed network files report their path", "[network-reader]")
 
 TEST_CASE("Verilog port checks apply to the network being read", "[network-reader]")
 {
+    const auto connections = GENERATE(".a(a),.b(b),.s(y)", ".s(y),.b(b),.a(a)");
+    CAPTURE(connections);
     const fiction::test::scoped_temp_directory directory{
         std::filesystem::temp_directory_path(), "fiction-verilog-top-" + std::to_string(std::random_device{}())};
     const auto    path = directory.path() / "modules.v";
     std::ofstream file{path};
     file << "module ripple_carry_adder(a,b,s); input a,b; output s; endmodule\n"
          << "module top(a,b,y); input [1:0] a,b; output [4'h2:0] y; "
-            "ripple_carry_adder #(4'h2) add(.a(a),.b(b),.s(y)); endmodule\n"
+            "ripple_carry_adder #(4'h2) add("
+         << connections << "); endmodule\n"
          << "module helper(a,b,y); input [0:1] a,b; output y; "
             "ripple_carry_adder #(invalid) add(.a(a),.b(b),.s(y)); endmodule\n";
     file.close();
