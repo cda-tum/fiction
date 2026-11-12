@@ -930,6 +930,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Coverage collection, extraction, and listing now tolerate GCC 13 function-range and hit-count inconsistencies reported by lcov 2.4.
   - Allocation-failure layout tests now link independently of the optional jemalloc allocator.
   - Change detection now allows five minutes for runner setup and file comparisons.
+  - Renovate now logs the expected missing release timestamp warning at info level.
 
 - Data structures:
 

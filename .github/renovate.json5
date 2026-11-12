@@ -134,6 +134,13 @@
     commitMessagePrefix: "⬆️🐍",
   },
   minimumReleaseAge: "3 days",
+  logLevelRemap: [
+    {
+      // The package rules allow updates without timestamps for selected datasources.
+      matchMessage: "/^Some release\\(s\\) did not have a releaseTimestamp, but as we're running with minimumReleaseAgeBehaviour=timestamp-optional, proceeding\\. See debug logs for more information$/",
+      newLogLevel: "info",
+    },
+  ],
   schedule: [
     "every weekend"
   ],
