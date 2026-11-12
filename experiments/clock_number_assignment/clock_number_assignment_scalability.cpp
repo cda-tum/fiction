@@ -35,10 +35,12 @@
 #include <mockturtle/utils/tech_library.hpp>  // technology library utils
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
+#include <numeric>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -95,14 +97,17 @@ try
     // parameters for technology mapping
     const mockturtle::map_params map_params{};
 
-    auto batch = read_networks<named_aig_network>(network_folder);
+    const auto batch = read_networks<named_aig_network>(network_folder);
     for (const auto& failure : batch.failures)
     {
         fmt::print("[e] {}\n", failure.message);
     }
-    std::ranges::stable_sort(batch.networks, {}, &named_aig_network::num_gates);
-    for (const auto& network : batch.networks)
+    std::vector<std::size_t> order(batch.networks.size());
+    std::iota(order.begin(), order.end(), std::size_t{0});
+    std::ranges::stable_sort(order, {}, [&](const auto index) { return batch.networks[index].num_gates(); });
+    for (const auto index : order)
     {
+        const auto& network = batch.networks[index];
         fmt::print("[i] processing {}\n", network.get_network_name());
 
         // perform technology mapping with the given library (AND, OR, NOT)

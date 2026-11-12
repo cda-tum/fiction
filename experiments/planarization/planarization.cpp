@@ -33,7 +33,6 @@
 
 #include <fmt/base.h>
 #include <kitty/partial_truth_table.hpp>
-#include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/algorithms/equivalence_checking.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
 #include <mockturtle/utils/node_map.hpp>
@@ -279,7 +278,7 @@ try
 
         try
         {
-            const auto ntk = mockturtle::cleanup_dangling(read_network(benchmark));
+            const auto ntk = read_network(benchmark);
 
             const network_balancing_params b_ps{.unify_outputs = true, .buffer_constant_outputs = false};
 

@@ -18,11 +18,11 @@
 #pragma once
 
 #include "fiction/networks/io/detail/network_reader_parsers.hpp"
-#include "fiction/synthesis/network_conversion.hpp"
 
 #include <fmt/format.h>
 #include <lorina/common.hpp>
 #include <lorina/diagnostics.hpp>
+#include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/traits.hpp>
 
 #include <algorithm>
@@ -248,7 +248,7 @@ template <typename Ntk>
     {
         network.set_network_name(network_path_text(path.stem()));
     }
-    return synthesis::convert_network<Ntk>(network);
+    return mockturtle::cleanup_dangling(network);
 }
 
 }  // namespace detail

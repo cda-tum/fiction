@@ -44,14 +44,6 @@ using namespace fiction::networks::io;
 using namespace fiction::physical_design;
 using namespace fiction::verification;
 
-template <typename Ntk>
-Ntk read_ntk(const std::string& name)
-{
-    fmt::print("[i] processing {}\n", name);
-
-    return fiction::networks::io::read_network<named_technology_network>(fiction_experiments::benchmark_path(name));
-}
-
 /** @brief Run the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
 int main()
 try
@@ -83,7 +75,8 @@ try
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        auto network = read_ntk<named_technology_network>(benchmark);
+        fmt::print("[i] processing {}\n", benchmark);
+        auto network = read_network<named_technology_network>(fiction_experiments::benchmark_path(benchmark));
 
         auto gate_layout = graph_oriented_layout_design(network, graph_oriented_layout_design_params,
                                                         &graph_oriented_layout_design_stats);
