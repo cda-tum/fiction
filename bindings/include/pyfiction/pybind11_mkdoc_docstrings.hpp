@@ -7131,6 +7131,8 @@ matching substring.
 
 static const char *mkd_doc_fiction_networks_io_detail_checked_blif_reader = R"doc(Validate covers before forwarding them to the mockturtle BLIF reader.)doc";
 
+static const char *mkd_doc_fiction_networks_io_detail_checked_blif_reader_define_signal = R"doc(Record a signal driver and reject a second driver for the same signal.)doc";
+
 static const char *mkd_doc_fiction_networks_io_detail_checked_blif_reader_defined_signals = R"doc(Signals with a primary input or gate as their driver.)doc";
 
 static const char *mkd_doc_fiction_networks_io_detail_checked_blif_reader_found_model = R"doc(Whether a model was explicitly declared.)doc";
@@ -7151,6 +7153,10 @@ static const char *mkd_doc_fiction_networks_io_detail_checked_blif_reader_read =
 
 static const char *mkd_doc_fiction_networks_io_detail_checked_verilog_reader = R"doc(Check vector ranges before mockturtle interprets them as [high:0].)doc";
 
+static const char *mkd_doc_fiction_networks_io_detail_checked_verilog_reader_adder_output = R"doc(Formal output of the ripple-carry adder.)doc";
+
+static const char *mkd_doc_fiction_networks_io_detail_checked_verilog_reader_arithmetic_output = R"doc(Output of the arithmetic module whose ports are being declared.)doc";
+
 static const char *mkd_doc_fiction_networks_io_detail_checked_verilog_reader_check_number = R"doc(Validate a decimal or sized hex literal before mockturtle converts it.)doc";
 
 static const char *mkd_doc_fiction_networks_io_detail_checked_verilog_reader_check_range = R"doc(Reject ranges that the pinned reader cannot represent.)doc";
@@ -7158,6 +7164,8 @@ static const char *mkd_doc_fiction_networks_io_detail_checked_verilog_reader_che
 static const char *mkd_doc_fiction_networks_io_detail_checked_verilog_reader_checked_verilog_reader = R"doc(Construct a reader for the module named `top`.)doc";
 
 static const char *mkd_doc_fiction_networks_io_detail_checked_verilog_reader_found_top = R"doc(Whether the file contains the requested module.)doc";
+
+static const char *mkd_doc_fiction_networks_io_detail_checked_verilog_reader_multiplier_output = R"doc(Formal output of the Montgomery multiplier.)doc";
 
 static const char *mkd_doc_fiction_networks_io_detail_checked_verilog_reader_on_inputs = R"doc(Validate the range of an input declaration.)doc";
 
