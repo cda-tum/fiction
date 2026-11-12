@@ -7123,13 +7123,9 @@ conversion.
 
 )doc";
 
-static const char *mkd_doc_fiction_networks_io_detail_check_blif_cover_line =
-R"doc(Check a complete BLIF cover row before Lorina can accept only a
-matching substring.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_io_detail_checked_blif_reader = R"doc(Validate covers before forwarding them to the mockturtle BLIF reader.)doc";
+static const char *mkd_doc_fiction_networks_io_detail_checked_blif_reader =
+R"doc(Check BLIF drivers, outputs, and cover size for the destination
+network.)doc";
 
 static const char *mkd_doc_fiction_networks_io_detail_checked_blif_reader_define_signal = R"doc(Record a signal driver and reject a second driver for the same signal.)doc";
 
@@ -7137,7 +7133,7 @@ static const char *mkd_doc_fiction_networks_io_detail_checked_blif_reader_define
 
 static const char *mkd_doc_fiction_networks_io_detail_checked_blif_reader_found_model = R"doc(Whether a model was explicitly declared.)doc";
 
-static const char *mkd_doc_fiction_networks_io_detail_checked_blif_reader_on_gate = R"doc(Forward a valid cover or materialize an empty cover as constant false.)doc";
+static const char *mkd_doc_fiction_networks_io_detail_checked_blif_reader_on_gate = R"doc(Record a gate driver and forward the cover.)doc";
 
 static const char *mkd_doc_fiction_networks_io_detail_checked_blif_reader_on_input = R"doc(Record a primary input as a signal driver.)doc";
 
@@ -7153,25 +7149,21 @@ static const char *mkd_doc_fiction_networks_io_detail_checked_blif_reader_read =
 
 static const char *mkd_doc_fiction_networks_io_detail_checked_verilog_reader = R"doc(Check vector ranges before mockturtle interprets them as [high:0].)doc";
 
-static const char *mkd_doc_fiction_networks_io_detail_checked_verilog_reader_adder_output = R"doc(Formal output of the ripple-carry adder.)doc";
-
-static const char *mkd_doc_fiction_networks_io_detail_checked_verilog_reader_arithmetic_output = R"doc(Output of the arithmetic module whose ports are being declared.)doc";
-
-static const char *mkd_doc_fiction_networks_io_detail_checked_verilog_reader_check_number = R"doc(Validate a decimal or sized hex literal before mockturtle converts it.)doc";
-
 static const char *mkd_doc_fiction_networks_io_detail_checked_verilog_reader_check_range = R"doc(Reject ranges that the pinned reader cannot represent.)doc";
+
+static const char *mkd_doc_fiction_networks_io_detail_checked_verilog_reader_check_range_bound =
+R"doc(Validate a decimal or sized hexadecimal bound before expanding the
+range.
+
+)doc";
 
 static const char *mkd_doc_fiction_networks_io_detail_checked_verilog_reader_checked_verilog_reader = R"doc(Construct a reader for the module named `top`.)doc";
 
 static const char *mkd_doc_fiction_networks_io_detail_checked_verilog_reader_found_top = R"doc(Whether the file contains the requested module.)doc";
 
-static const char *mkd_doc_fiction_networks_io_detail_checked_verilog_reader_multiplier_output = R"doc(Formal output of the Montgomery multiplier.)doc";
-
 static const char *mkd_doc_fiction_networks_io_detail_checked_verilog_reader_on_inputs = R"doc(Validate the range of an input declaration.)doc";
 
 static const char *mkd_doc_fiction_networks_io_detail_checked_verilog_reader_on_module_header = R"doc(Track which module the following declarations belong to.)doc";
-
-static const char *mkd_doc_fiction_networks_io_detail_checked_verilog_reader_on_module_instantiation = R"doc(Validate numeric parameters used by mockturtle's arithmetic modules.)doc";
 
 static const char *mkd_doc_fiction_networks_io_detail_checked_verilog_reader_on_outputs = R"doc(Validate the range of an output declaration.)doc";
 
@@ -7217,11 +7209,7 @@ static const char *mkd_doc_fiction_networks_io_detail_network_path_text = R"doc(
 
 static const char *mkd_doc_fiction_networks_io_detail_parse_binary_aiger = R"doc(Validate the same immutable bytes that Lorina parses.)doc";
 
-static const char *mkd_doc_fiction_networks_io_detail_parse_blif_network =
-R"doc(Normalize physical BLIF lines and validate complete cover rows before
-parsing.
-
-)doc";
+static const char *mkd_doc_fiction_networks_io_detail_parse_blif_network = R"doc(Select the first flat BLIF model before parsing.)doc";
 
 static const char *mkd_doc_fiction_networks_io_detail_parse_network = R"doc(Dispatch a stream to the parser for its resolved format.)doc";
 
