@@ -412,7 +412,7 @@ TEST_CASE("Directory reads continue after recoverable reader errors", "[network-
     const auto batch = read_networks<failing_reader_network>(directory.path());
     REQUIRE(batch.failures.size() == 1);
     CHECK(batch.failures.front().path == limited);
-    const auto reason = input == "io_error" ? "read error" : "parsing error";
+    const std::string reason{input == "io_error" ? "read error" : "parsing error"};
     CHECK_THAT(batch.failures.front().message, Catch::Matchers::ContainsSubstring(reason));
     REQUIRE(batch.networks.size() == 1);
     CHECK(batch.networks.front().get_network_name() == "b");
