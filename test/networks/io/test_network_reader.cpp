@@ -351,15 +351,15 @@ TEST_CASE("Directory readers retain successful networks and report failed files"
                       Catch::Matchers::ContainsSubstring("a.v") && Catch::Matchers::ContainsSubstring("parsing error"));
 }
 
-TEST_CASE("Directory reads continue after a regex match limit", "[network-reader]")
+TEST_CASE("Directory reads continue after recoverable reader errors", "[network-reader]")
 {
-    /** @brief Emits the regex exception without depending on a platform-specific limit. */
-    struct regex_limited_network : named_aig_network
+    /** @brief Simulates reader errors without depending on platform-specific limits. */
+    struct failing_reader_network : named_aig_network
     {
         /** @brief Construct an empty test network. */
-        regex_limited_network() = default;
+        failing_reader_network() = default;
 
-        /** @brief Assign the name or simulate a regex error for the selected input. */
+        /** @brief Assign the name or simulate a reader error for the selected input. */
         void set_name(const signal& input_signal, const std::string& name)
         {
             if (name == "complexity")
@@ -374,14 +374,23 @@ TEST_CASE("Directory reads continue after a regex match limit", "[network-reader
             {
                 throw std::regex_error{std::regex_constants::error_space};
             }
+            if (name == "range_error")
+            {
+                throw std::out_of_range{"conversion failed"};
+            }
+            if (name == "io_error")
+            {
+                throw std::ios_base::failure{"stream failed"};
+            }
             named_aig_network::set_name(input_signal, name);
         }
     };
 
     const auto input =
-        GENERATE(std::string_view{"complexity"}, std::string_view{"depth"}, std::string_view{"allocation"});
+        GENERATE(std::string_view{"complexity"}, std::string_view{"depth"}, std::string_view{"allocation"},
+                 std::string_view{"range_error"}, std::string_view{"io_error"});
     const fiction::test::scoped_temp_directory directory{std::filesystem::temp_directory_path(),
-                                                         "fiction-network-regex-limit-" +
+                                                         "fiction-network-reader-error-" +
                                                              std::to_string(std::random_device{}())};
     const auto                                 limited = directory.path() / "a.v";
     {
@@ -396,17 +405,18 @@ TEST_CASE("Directory reads continue after a regex match limit", "[network-reader
 
     if (input == "allocation")
     {
-        CHECK_THROWS_AS(static_cast<void>(read_networks<regex_limited_network>(directory.path())), std::regex_error);
+        CHECK_THROWS_AS(static_cast<void>(read_networks<failing_reader_network>(directory.path())), std::regex_error);
         return;
     }
 
-    const auto batch = read_networks<regex_limited_network>(directory.path());
+    const auto batch = read_networks<failing_reader_network>(directory.path());
     REQUIRE(batch.failures.size() == 1);
     CHECK(batch.failures.front().path == limited);
-    CHECK_THAT(batch.failures.front().message, Catch::Matchers::ContainsSubstring("parsing error"));
+    const auto reason = input == "io_error" ? "read error" : "parsing error";
+    CHECK_THAT(batch.failures.front().message, Catch::Matchers::ContainsSubstring(reason));
     REQUIRE(batch.networks.size() == 1);
     CHECK(batch.networks.front().get_network_name() == "b");
-    CHECK(read_network<regex_limited_network>(directory.path()).get_network_name() == "b");
+    CHECK(read_network<failing_reader_network>(directory.path()).get_network_name() == "b");
 }
 
 TEST_CASE("Malformed network files report their path", "[network-reader]")
