@@ -17,18 +17,24 @@
 
 #pragma once
 
-#include "fiction/networks/io/detail/network_reader_parsers.hpp"
-
 #include <fmt/format.h>
+#include <lorina/aiger.hpp>
+#include <lorina/blif.hpp>
 #include <lorina/common.hpp>
 #include <lorina/diagnostics.hpp>
+#include <lorina/verilog.hpp>
 #include <mockturtle/algorithms/cleanup.hpp>
+#include <mockturtle/io/aiger_reader.hpp>
+#include <mockturtle/io/blif_reader.hpp>
+#include <mockturtle/io/verilog_reader.hpp>
 #include <mockturtle/traits.hpp>
 
 #include <algorithm>
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <ios>
+#include <istream>
 #include <regex>
 #include <stdexcept>
 #include <string>
@@ -71,6 +77,19 @@ struct network_read_batch
 
 namespace detail
 {
+
+/** @brief Input formats supported by the network reader. */
+enum class network_format : uint8_t
+{
+    /** @brief Infer the format from the filename or skip an unsupported extension. */
+    UNKNOWN,
+    /** @brief Structural Verilog. */
+    VERILOG,
+    /** @brief Binary AIGER. */
+    AIGER,
+    /** @brief Berkeley Logic Interchange Format. */
+    BLIF
+};
 
 /** @brief Represent a native path as UTF-8 for names and diagnostics. */
 [[nodiscard]] inline std::string network_path_text(const std::filesystem::path& path)
@@ -195,6 +214,38 @@ class network_diagnostics : public lorina::diagnostic_consumer
     /** @brief Diagnostics in emission order. */
     mutable std::string messages{};
 };
+
+/** @brief Dispatch a stream to the parser for its resolved format. */
+template <typename Ntk>
+[[nodiscard]] lorina::return_code parse_network(std::istream& input, const network_format format, Ntk& network,
+                                                lorina::diagnostic_engine& diag)
+{
+    switch (format)
+    {
+        case network_format::VERILOG:
+        {
+            mockturtle::verilog_reader<Ntk> reader{network, "top"};
+            const auto                      result = lorina::read_verilog(input, reader, &diag);
+            if (result == lorina::return_code::success && !reader.found_top())
+            {
+                throw std::invalid_argument{"expected a Verilog module named 'top'"};
+            }
+            return result;
+        }
+        case network_format::AIGER: return lorina::read_aiger(input, mockturtle::aiger_reader<Ntk>{network}, &diag);
+        case network_format::BLIF:
+            if constexpr (mockturtle::has_create_node_v<Ntk> || mockturtle::has_create_cover_node_v<Ntk>)
+            {
+                return lorina::read_blif_model(input, mockturtle::blif_reader<Ntk>{network}, &diag);
+            }
+            else
+            {
+                throw std::invalid_argument{"BLIF requires a network that supports truth-table nodes"};
+            }
+        case network_format::UNKNOWN: return lorina::return_code::parse_error;
+    }
+    return lorina::return_code::parse_error;
+}
 
 /** @brief Parse and clean up one candidate before exposing its network. */
 template <typename Ntk>
