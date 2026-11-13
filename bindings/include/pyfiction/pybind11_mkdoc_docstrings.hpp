@@ -11149,10 +11149,6 @@ constant output takes a row of its own below the others, driven by a
 constant gate next to the border. The outputs of the layout keep the
 order of the network.
 
-Returns:
-    `1` plus the number of rows the shifts add below the last
-    diagonal, `0` if none were needed.
-
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_plane_impl_run =
@@ -27854,13 +27850,14 @@ order encodes the rank order.
 
 The result lists the primary inputs in the order of level 0, then the
 gates level by level in rank order. Virtual primary inputs become
-ordinary primary inputs of the result; all names are kept. A
-complemented fanin or output signal reads its node through an inverter
-node that sits right before the node that reads it, and a complemented
-constant becomes the other constant. Such inverters leave the copy
-unbalanced; they occur only in a planar network built by hand over a
-type with complemented signals, such as an AIG, because
-`planarization` works on technology networks.
+ordinary primary inputs of the result. The copy keeps names on nodes
+and on complemented signals used by fanins or outputs. A complemented
+fanin or output signal reads its node through an inverter node that
+sits right before the node that reads it, and a complemented constant
+becomes the other constant. Such inverters leave the copy unbalanced;
+they occur only in a planar network built by hand over a type with
+complemented signals, such as an AIG, because `planarization` works on
+technology networks.
 
 Args:
     planar: Planar network, the result of `planarization`.
