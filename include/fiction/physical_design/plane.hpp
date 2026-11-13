@@ -1288,8 +1288,12 @@ class plane_impl
         route_outputs();
         progress.advance();
 
-        const auto last_tile = layouts::bounding_box{layout}.get_max().value();
-        layout.resize({static_cast<uint64_t>(last_tile.x) + 1, static_cast<uint64_t>(last_tile.y) + 1, 1});
+        const auto last_tile = layouts::bounding_box{layout}.get_max();
+        if (!last_tile)
+        {
+            throw std::logic_error{"PLANE produced an empty layout"};
+        }
+        layout.resize({static_cast<uint64_t>(last_tile->x) + 1, static_cast<uint64_t>(last_tile->y) + 1, 1});
 
         networks::restore_names(ntk, layout, node2pos);
 
