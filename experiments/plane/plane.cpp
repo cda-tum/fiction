@@ -29,7 +29,6 @@
 
 #include <fmt/format.h>
 #include <kitty/partial_truth_table.hpp>
-#include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -38,11 +37,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
-#include <memory>
 #include <optional>
 #include <span>
-#include <sstream>
-#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -80,25 +76,6 @@ constexpr uint32_t SIMULATION_PATTERNS = 4096;
  * Duplication cap of the pipeline.
  */
 constexpr uint64_t MAX_DUPLICATIONS = 2000000;
-
-/**
- * @brief Reads a benchmark technology network.
- * @param name Benchmark name.
- * @return Parsed network.
- * @throws std::runtime_error If the benchmark could not be read.
- */
-named_technology_network read_network(const std::string& name)
-{
-    std::ostringstream                                        os{};
-    network_reader<std::shared_ptr<named_technology_network>> reader{fiction_experiments::benchmark_path(name), os};
-
-    const auto& networks = reader.get_networks();
-    if (networks.empty())
-    {
-        throw std::runtime_error(os.str());
-    }
-    return *networks.front();
-}
 
 /**
  * Compares the layout with the planar network it was built from. Both have the same inputs in the same order (the
@@ -207,7 +184,7 @@ try
 
         try
         {
-            const auto ntk = mockturtle::cleanup_dangling(read_network(benchmark));
+            const auto ntk = read_network<named_technology_network>(fiction_experiments::benchmark_path(benchmark));
 
             network_balancing_params b_ps{};
             b_ps.unify_outputs           = true;
