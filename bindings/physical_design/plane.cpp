@@ -71,9 +71,8 @@ void register_plane(nb::module_& m)
            const decltype(plane_options{}.number_of_clock_phases) number_of_clock_phases,
            const decltype(plane_options{}.on_progress)&           on_progress)
         {
-            plane_options parameters{};
-            parameters.number_of_clock_phases = number_of_clock_phases;
-            parameters.on_progress            = on_progress;
+            const plane_options parameters{.number_of_clock_phases = number_of_clock_phases,
+                                           .on_progress            = on_progress};
 
             stats local{};
             auto  layout = [&]

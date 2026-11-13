@@ -650,6 +650,37 @@ TEST_CASE("Flattening keeps the functions and the rank order of a planar network
     check_flat_eq(ntk, flat, original_input);
 }
 
+TEST_CASE("Flattening preserves names of both signal polarities", "[planarization]")
+{
+    virtual_pi_network<mutable_rank_view<named_aig_network>> planar{};
+    const auto                                               a = planar.create_pi();
+    const auto                                               b = planar.create_pi();
+    planar.set_name(a, "a");
+    planar.set_name(!a, "not_a");
+    planar.set_name(b, "b");
+    planar.create_po(planar.create_and(!a, b));
+    planar.create_po(!a);
+    planar.update_ranks();
+
+    const auto [flat, original_input] = flatten_planarization(planar);
+    REQUIRE(original_input == std::vector<uint32_t>{0, 1});
+    const auto input           = flat.make_signal(flat.pi_at(0));
+    const auto inverted_output = flat.po_at(1);
+    REQUIRE(flat.has_name(input));
+    CHECK(flat.get_name(input) == "a");
+    REQUIRE(flat.has_name(inverted_output));
+    CHECK(flat.get_name(inverted_output) == "not_a");
+
+    std::vector<std::string> fanin_names{};
+    flat.foreach_fanin(flat.get_node(flat.po_at(0)),
+                       [&flat, &fanin_names](const auto signal)
+                       {
+                           REQUIRE(flat.has_name(signal));
+                           fanin_names.push_back(flat.get_name(signal));
+                       });
+    CHECK(fanin_names == std::vector<std::string>{"not_a", "b"});
+}
+
 TEST_CASE("Flattening keeps the polarity of fanins and outputs and the constants", "[planarization]")
 {
     SECTION("planar AIG with complemented signals and shared constant node")

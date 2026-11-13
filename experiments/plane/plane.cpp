@@ -23,6 +23,7 @@
 #include <fiction/networks/views/mutable_rank_view.hpp>
 #include <fiction/physical_design/plane.hpp>
 #include <fiction/synthesis/network_balancing.hpp>
+#include <fiction/synthesis/node_duplication_planarization.hpp>
 #include <fiction/synthesis/planarization.hpp>
 #include <fiction/types.hpp>
 #include <fiction/verification/equivalence_checking.hpp>
@@ -186,10 +187,8 @@ try
         {
             const auto ntk = read_network<named_technology_network>(fiction_experiments::benchmark_path(benchmark));
 
-            network_balancing_params b_ps{};
-            b_ps.unify_outputs           = true;
-            b_ps.buffer_constant_outputs = false;
-            const auto balanced          = network_balancing<technology_network>(ntk, b_ps);
+            const auto balanced =
+                network_balancing<technology_network>(ntk, {.unify_outputs = true, .buffer_constant_outputs = false});
 
             if (balanced.size() > MAX_BALANCED_NODES)
             {
@@ -200,9 +199,10 @@ try
             const mutable_rank_view ranked{balanced};
 
             fmt::print("[i]   planarizing {} nodes\n", balanced.size());
-            planarization_params p_ps{};
-            p_ps.duplication.max_duplications         = MAX_DUPLICATIONS;
-            p_ps.duplication.crossing_gates.xor_gates = xor_gates;
+            const planarization_params p_ps{
+                .duplication = {.strategy       = node_duplication_planarization_params::planarization_strategy::HYBRID,
+                                .crossing_gates = {.xor_gates = xor_gates},
+                                .max_duplications = MAX_DUPLICATIONS}};
             planarization_stats p_st{};
             const auto          planar = planarization(ranked, p_ps, &p_st);
 

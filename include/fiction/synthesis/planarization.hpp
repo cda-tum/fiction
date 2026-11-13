@@ -198,7 +198,8 @@ template <typename Ntk>
  * @brief Copies a planar network into a named technology network whose node order encodes the rank order.
  *
  * The result lists the primary inputs in the order of level 0, then the gates level by level in rank order. Virtual
- * primary inputs become ordinary primary inputs of the result; all names are kept. A complemented fanin or output
+ * primary inputs become ordinary primary inputs of the result. The copy keeps names on nodes and on complemented
+ * signals used by fanins or outputs. A complemented fanin or output
  * signal reads its node through an inverter node that sits right before the node that reads it, and a complemented
  * constant becomes the other constant. Such inverters leave the copy unbalanced; they occur only in a planar network
  * built by hand over a type with complemented signals, such as an AIG, because `planarization` works on technology
@@ -220,6 +221,21 @@ flatten_planarization(const networks::virtual_pi_network<Ntk>& planar)
     mockturtle::node_map<signal, planar_network> old2new{planar};
     std::vector<uint32_t>                        original_input{};
 
+    /** @brief Copy a source signal name to the corresponding destination signal. */
+    const auto copy_name = [&planar, &dest](const auto& source, const signal target)
+    {
+        if constexpr (mockturtle::has_has_name_v<planar_network> && mockturtle::has_get_name_v<planar_network>)
+        {
+            if (planar.has_name(source))
+            {
+                dest.set_name(target, planar.get_name(source));
+            }
+        }
+    };
+
+    copy_name(planar.get_constant(false), dest.get_constant(false));
+    copy_name(planar.get_constant(true), dest.get_constant(true));
+
     // network types whose constants share one node, such as an AIG, keep the polarity in the signal
     old2new[planar.get_node(planar.get_constant(false))] = dest.get_constant(false);
     if (planar.get_node(planar.get_constant(true)) != planar.get_node(planar.get_constant(false)))
@@ -229,11 +245,18 @@ flatten_planarization(const networks::virtual_pi_network<Ntk>& planar)
 
     // a complemented signal reads its node through an inverter; `create_not` turns a complemented constant into the
     // other constant
-    const auto copy = [&planar, &dest, &old2new](const auto& f)
+    const auto copy = [&planar, &dest, &old2new, &copy_name](const auto& f)
     {
         const auto s = old2new[planar.get_node(f)];
 
-        return planar.is_complemented(f) ? dest.create_not(s) : s;
+        if (!planar.is_complemented(f))
+        {
+            return s;
+        }
+
+        const auto inverted = dest.create_not(s);
+        copy_name(f, inverted);
+        return inverted;
     };
 
     // the index of every real input in the original network is its creation order
@@ -250,9 +273,10 @@ flatten_planarization(const networks::virtual_pi_network<Ntk>& planar)
         });
 
     planar.foreach_pi(
-        [&planar, &dest, &old2new, &real_index, &original_input](const auto& n)
+        [&planar, &dest, &old2new, &real_index, &original_input, &copy_name](const auto& n)
         {
             old2new[n] = dest.create_pi();
+            copy_name(planar.make_signal(n), old2new[n]);
             original_input.push_back(real_index[planar.is_real_pi(n) ? n : planar.get_real_pi(n)]);
         });
 
@@ -260,7 +284,7 @@ flatten_planarization(const networks::virtual_pi_network<Ntk>& planar)
     for (uint32_t level = 1; level <= planar.depth(); ++level)
     {
         planar.foreach_node_in_rank(level,
-                                    [&planar, &dest, &old2new, &copy, &children](const auto& n)
+                                    [&planar, &dest, &old2new, &copy, &children, &copy_name](const auto& n)
                                     {
                                         if (planar.is_constant(n) || planar.is_pi(n))
                                         {
@@ -272,14 +296,13 @@ flatten_planarization(const networks::virtual_pi_network<Ntk>& planar)
                                                              { children.push_back(copy(f)); });
 
                                         old2new[n] = dest.create_node(children, planar.node_function(n));
+                                        copy_name(planar.make_signal(n), old2new[n]);
                                     });
     }
 
     planar.foreach_po([&dest, &copy](const auto& po) { dest.create_po(copy(po)); });
 
-    // the inputs of the copy follow the rank order, not the creation order, so their names come via `old2new`
     networks::restore_network_name(planar, dest);
-    networks::restore_signal_names(planar, dest, old2new);
     networks::restore_output_names(planar, dest);
 
     return {std::move(dest), std::move(original_input)};

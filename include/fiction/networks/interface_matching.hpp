@@ -191,7 +191,7 @@ template <typename Left, typename Right>
     /** @brief Input permutation; temporary input names expire before output matching. */
     auto inputs =
         detail::match_interface_names(detail::interface_input_names(left), detail::interface_input_names(right));
-    return {std::move(inputs), match_outputs(left, right)};
+    return {.inputs = std::move(inputs), .outputs = match_outputs(left, right)};
 }
 
 }  // namespace fiction::networks

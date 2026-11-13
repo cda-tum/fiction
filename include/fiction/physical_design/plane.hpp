@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/layout_base.hpp"
@@ -1284,10 +1285,11 @@ class plane_impl
             progress.advance();
         }
 
-        const auto extra_rows = route_outputs();
+        route_outputs();
         progress.advance();
 
-        layout.resize({static_cast<uint64_t>(first_pos.x) + 2, static_cast<uint64_t>(place_t.y) + extra_rows + 1, 1});
+        const auto last_tile = layouts::bounding_box{layout}.get_max().value();
+        layout.resize({static_cast<uint64_t>(last_tile.x) + 1, static_cast<uint64_t>(last_tile.y) + 1, 1});
 
         networks::restore_names(ntk, layout, node2pos);
 
@@ -1476,10 +1478,8 @@ class plane_impl
      * nodes absorbs the shift; a pushed node first runs south to its row, then east. Rows are assigned in rank order. A
      * constant output takes a row of its own below the others, driven by a constant gate next to the border. The
      * outputs of the layout keep the order of the network.
-     *
-     * @return `1` plus the number of rows the shifts add below the last diagonal, `0` if none were needed.
      */
-    [[nodiscard]] uint64_t route_outputs()
+    void route_outputs()
     {
         // the non-constant outputs by the rank position of their driver, then by output index
         std::vector<output_slot> outputs{};
@@ -1508,12 +1508,10 @@ class plane_impl
             next_free_row      = row + 1;
         }
 
-        uint64_t last_row = 0;
-
         std::vector<layouts::layout_object_id> output_order(ntk.num_pos());
 
         ntk.foreach_po(
-            [this, &row_of, &last_row, &next_free_row, &output_order](const auto& po, const auto i)
+            [this, &row_of, &next_free_row, &output_order](const auto& po, const auto i)
             {
                 const auto drv      = ntk.get_node(po);
                 const auto po_index = static_cast<uint32_t>(i);
@@ -1530,7 +1528,6 @@ class plane_impl
 
                     const auto constant    = layout.create_gate({}, function, {first_pos.x, row});
                     output_order[po_index] = layout.create_po(constant, output_name(po_index), {first_pos.x + 1, row});
-                    last_row               = std::max(last_row, row);
 
                     return;
                 }
@@ -1547,15 +1544,9 @@ class plane_impl
 
                 output_order[po_index] =
                     layout.create_po(wire_straight(layout, anchor, border), output_name(po_index), border);
-
-                last_row = std::max(last_row, static_cast<uint64_t>(anchor.y));
             });
 
         layout.set_output_order(output_order);
-
-        const auto bottom = static_cast<uint64_t>(place_t.y);
-
-        return last_row > bottom ? last_row - bottom : 0;
     }
     /**
      * @brief Name of a primary output, the network's name if it has one and `po<index>` otherwise.

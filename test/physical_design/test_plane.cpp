@@ -31,6 +31,7 @@
 #include <fiction/networks/views/mutable_rank_view.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/physical_design/plane.hpp>
+#include <fiction/synthesis/node_duplication_planarization.hpp>
 #include <fiction/synthesis/planarization.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/types.hpp>
@@ -86,8 +87,9 @@ void check_stats(const plane_stats& st, const cartesian_gate_layout& layout)
  */
 named_technology_network planar_network(const ranked_network& ranked, const bool xor_gates = false)
 {
-    planarization_params ps{};
-    ps.duplication.crossing_gates.xor_gates = xor_gates;
+    const planarization_params ps{
+        .duplication = {.strategy       = node_duplication_planarization_params::planarization_strategy::HYBRID,
+                        .crossing_gates = {.xor_gates = xor_gates}}};
 
     return flatten_planarization(planarization(ranked, ps)).first;
 }
@@ -276,6 +278,20 @@ TEST_CASE("Unused inputs stay at the border", "[plane]")
     uint32_t unused = 0;
     layout.foreach_pi([&layout, &unused](const auto& pi) { unused += layout.fanout_size(pi) == 0; });
     CHECK(unused == 2);
+}
+
+TEST_CASE("PLANE contains unused inputs below the output row", "[plane]")
+{
+    named_technology_network network{};
+    const auto               a = network.create_pi();
+    const auto               b = network.create_pi();
+    network.create_pi();
+    network.create_pi();
+    network.create_po(network.create_and(a, b));
+
+    const auto layout = plane(network);
+    layout.foreach_object([&layout](const auto object) { CHECK(layout.is_within_bounds(layout.get_tile(object))); });
+    check_eq(network, extract_layout_network(layout));
 }
 
 TEST_CASE("Progress is reported", "[plane]")

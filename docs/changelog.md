@@ -23,9 +23,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     with shared buffers while keeping ranks and planarity
   - `utils::graph::count_crossings` counts the edge crossings of a ranked, balanced network without copying it
   - `physical_design::plane` places and routes a planar technology network, whose node order is its rank order, on
-    the diagonals of a 2DDWave layout without wire crossings (PLANE)
+    the diagonals of a 2DDWave layout without wire crossings (PLANE). The layout extent includes unused inputs.
   - `synthesis::flatten_planarization` copies a planar network into a named technology network whose node order
-    encodes the rank order, the input form of `physical_design::plane`
+    encodes the rank order, the input form of `physical_design::plane`. It preserves names for both signal polarities.
   - `verification::equivalence_checking_params::input_mapping` names the specification input that every
     implementation input reads, so that an implementation with duplicated inputs, such as a layout from
     `physical_design::plane`, verifies against its source network; `networks::match_outputs` matches the outputs
