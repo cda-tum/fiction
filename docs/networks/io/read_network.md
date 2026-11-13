@@ -54,8 +54,10 @@ Both APIs infer Verilog (`.v`), binary AIGER (`.aig`), and BLIF (`.blif`) from t
 For Verilog, the reader constructs the network from the module named `top`.
 BLIF reads the first flat model and accepts blank lines, comments, and continued declarations.
 The `.model` and `.end` declarations are optional.
-For an AIGER file with latches, a network type without registers exposes latch outputs as primary inputs
-and next-state functions as primary outputs.
+AIGER bad-state properties become primary outputs after the declared outputs.
+The reader discards invariant constraints, justice properties, and fairness constraints.
+For a network type without registers, latch outputs become primary inputs and next-state functions
+are appended as primary outputs.
 If parsing creates registers in the destination network, the reader reports a file failure.
 An explicit format overrides the extension. Use `v`, `aig`, or `blif`, with an optional leading dot.
 For a directory, `read_network` tries files in native filename order and stops at the first successful read.
