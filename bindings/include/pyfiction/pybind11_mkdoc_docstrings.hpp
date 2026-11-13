@@ -7137,6 +7137,54 @@ static const char *mkd_doc_fiction_networks_io_color_view_drawer_node_fillcolor 
 
 static const char *mkd_doc_fiction_networks_io_color_view_drawer_node_label = R"doc(Returns the DOT label for a network node.)doc";
 
+static const char *mkd_doc_fiction_networks_io_detail_fail_network_read = R"doc(Report a read failure with the source path.)doc";
+
+static const char *mkd_doc_fiction_networks_io_detail_file_network_format =
+R"doc(Resolve a candidate's format from its extension when the caller did
+not specify one.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_io_detail_network_candidate = R"doc(A directory candidate and the information needed to read it.)doc";
+
+static const char *mkd_doc_fiction_networks_io_detail_network_candidate_format = R"doc(Resolved input format.)doc";
+
+static const char *mkd_doc_fiction_networks_io_detail_network_candidate_path = R"doc(Candidate path.)doc";
+
+static const char *mkd_doc_fiction_networks_io_detail_network_candidate_status_error = R"doc(Error from checking the candidate's filesystem status, if any.)doc";
+
+static const char *mkd_doc_fiction_networks_io_detail_network_candidates = R"doc(List supported regular files in filename order.)doc";
+
+static const char *mkd_doc_fiction_networks_io_detail_network_diagnostics = R"doc(Collect Lorina diagnostics without writing to the terminal.)doc";
+
+static const char *mkd_doc_fiction_networks_io_detail_network_diagnostics_handle_diagnostic = R"doc(Append a diagnostic for a failed parse.)doc";
+
+static const char *mkd_doc_fiction_networks_io_detail_network_diagnostics_messages = R"doc(Diagnostics in emission order.)doc";
+
+static const char *mkd_doc_fiction_networks_io_detail_network_format = R"doc(Input formats supported by the network reader.)doc";
+
+static const char *mkd_doc_fiction_networks_io_detail_network_format_AIGER = R"doc(Binary AIGER.)doc";
+
+static const char *mkd_doc_fiction_networks_io_detail_network_format_BLIF = R"doc(Berkeley Logic Interchange Format.)doc";
+
+static const char *mkd_doc_fiction_networks_io_detail_network_format_UNKNOWN = R"doc(Infer the format from the filename or skip an unsupported extension.)doc";
+
+static const char *mkd_doc_fiction_networks_io_detail_network_format_VERILOG = R"doc(Structural Verilog.)doc";
+
+static const char *mkd_doc_fiction_networks_io_detail_network_path_text = R"doc(Represent a native path as UTF-8 for names and diagnostics.)doc";
+
+static const char *mkd_doc_fiction_networks_io_detail_parse_network = R"doc(Dispatch a stream to the parser for its resolved format.)doc";
+
+static const char *mkd_doc_fiction_networks_io_detail_parse_network_format =
+R"doc(Resolve a format token or extension using ASCII case-insensitive
+matching.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_io_detail_read_network_file = R"doc(Parse and clean up one candidate before exposing its network.)doc";
+
+static const char *mkd_doc_fiction_networks_io_detail_requested_network_format = R"doc(Validate an explicit format override before accessing the filesystem.)doc";
+
 static const char *mkd_doc_fiction_networks_io_edge_color_view_drawer =
 R"doc(A DOT drawer for networks with colored edges. Node colors represent
 their painted color instead of their gate type.
@@ -7157,52 +7205,61 @@ on the way mockturtle's dot drawer works.
 
 static const char *mkd_doc_fiction_networks_io_edge_color_view_drawer_signal_style = R"doc(Returns the DOT edge style for a colored signal.)doc";
 
-static const char *mkd_doc_fiction_networks_io_network_reader =
-R"doc(Helper class to read directories of mockturtle networks of certain
-types. BLIF input permits empty and whitespace-only lines, comments,
-and continued declarations.
+static const char *mkd_doc_fiction_networks_io_network_read_batch =
+R"doc(Results from reading a directory. Each vector follows filename order.
 
 Template Args:
-    NtkPtr: Pointer type to a logic network.)doc";
+    Ntk: Logic network type.)doc";
 
-static const char *mkd_doc_fiction_networks_io_network_reader_get_networks =
-R"doc(Getter for networks generated from given files.
+static const char *mkd_doc_fiction_networks_io_network_read_batch_failures = R"doc(Failed files.)doc";
+
+static const char *mkd_doc_fiction_networks_io_network_read_batch_networks = R"doc(Successfully parsed networks.)doc";
+
+static const char *mkd_doc_fiction_networks_io_network_read_error = R"doc(Failure to read a network or list a network directory.)doc";
+
+static const char *mkd_doc_fiction_networks_io_network_read_failure = R"doc(A file that could not be read during a directory scan.)doc";
+
+static const char *mkd_doc_fiction_networks_io_network_read_failure_message = R"doc(Diagnostic with the failure reason.)doc";
+
+static const char *mkd_doc_fiction_networks_io_network_read_failure_path = R"doc(Path to the failed file.)doc";
+
+static const char *mkd_doc_fiction_networks_io_read_network =
+R"doc(Read a file or the first readable network in a directory in filename
+order.
 
 Args:
-    sorted: Flag to indicate that the networks are to be returned in
-            ascending order of their vertex count.
+    path: File or directory to read.
+    format: Explicit format (v, aig, or blif), or empty to infer it
+            from the extension.
+
+Template Args:
+    Ntk: Logic network type.
 
 Returns:
-    Vector of read and constructed logic networks.
+    The parsed combinational network.
+
+Raises:
+    network_read_error: If no network can be read.
 
 )doc";
 
-static const char *mkd_doc_fiction_networks_io_network_reader_network_reader =
-R"doc(Standard constructor. Reads and constructs logic networks. May throw.
+static const char *mkd_doc_fiction_networks_io_read_networks =
+R"doc(Read all supported files in a directory without recursing.
 
 Args:
-    filename: Path to the file or folder of files to read.
-    format: Explicit format without a dot, or empty to infer the
-            extension.
-    o: Output stream to write status updates into.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_io_network_reader_networks = R"doc(Vector of logic networks read from files given at construction.)doc";
-
-static const char *mkd_doc_fiction_networks_io_network_reader_out = R"doc(Output stream to which status updates are to be written.)doc";
-
-static const char *mkd_doc_fiction_networks_io_network_reader_read =
-R"doc(Actual read function that constructs the logic network from a file.
-
-Args:
-    file: The file name.
-    rfun: The actual parsing function.
+    directory: Directory to read.
+    format: Explicit format (v, aig, or blif) for all regular files,
+            or empty to infer it from each extension.
 
 Template Args:
-    Reader: The functor type which constructs the network, i.e.
-            handles the callbacks.
-    ReadFun: The file parser type.
+    Ntk: Logic network type.
+
+Returns:
+    Successful networks and file failures, each in filename order.
+
+Raises:
+    network_read_error: If the format is unknown or the directory
+                        cannot be listed.
 
 )doc";
 

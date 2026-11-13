@@ -437,6 +437,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Experiments:
 
   - Parameter configurations now use designated initializers with unchanged inputs and computations.
+  - Network experiments use the value-based reader and report failed benchmark reads.
+  - Clock-number assignment sorts benchmark indices, and planarization reuses the reader's cleaned networks.
   - Experiments use canonical network types and `kitty::dynamic_truth_table` without changing their computations.
   - Clock-number assignment helpers now take concrete Cartesian gate layouts.
     Experiment parameters, inputs, and output columns are unchanged.
@@ -463,6 +465,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - I/O:
 
+  - **Breaking:** Replace the C++ `network_reader` class with `read_network<Ntk>` for a single network
+    or `read_networks<Ntk>` for a directory. Both return values, and batch reads report per-file failures.
   - SQD reads avoid copying the completed layout; SiDB text printing skips lookups for sites already drawn.
   - DOT drawers avoid copying completed rows and columns.
   - QCA SVG rendering now reuses static tile and latch templates without per-tile text copies.
@@ -949,6 +953,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Coverage collection, extraction, and listing now tolerate GCC 13 function-range and hit-count inconsistencies reported by lcov 2.4.
   - Allocation-failure layout tests now link independently of the optional jemalloc allocator.
   - Change detection now allows five minutes for runner setup and file comparisons.
+  - Renovate now logs the expected missing release timestamp warning at info level.
 
 - Data structures:
 
@@ -1081,6 +1086,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Surface-defect import avoids exponential backtracking on malformed digit runs.
   - SQD import now rejects NUL bytes, multiple XML roots, and text outside the root. SiDB filename readers preserve bytes after Ctrl-Z on Windows.
   - BLIF network readers now accept empty and whitespace-only lines without aborting.
+  - BLIF reads now accept empty port lists and whitespace-separated fields, and return the first flat model. A gate cannot drive a primary input.
+  - Verilog reads now preserve named arithmetic connections in any order and reject unsupported modules and undriven outputs.
+  - Network directory reads now continue after a file exceeds a regular-expression match limit.
   - QCC and QLL writers now propagate allocation failures while sorting terminal cells.
   - QCADesigner output now rejects names containing CR, LF, or null bytes before changing output.
   - QCADesigner and cell-based QCA SVG output now avoid scanning empty cell positions in sparse layouts.
