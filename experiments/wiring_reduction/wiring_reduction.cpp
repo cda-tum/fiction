@@ -35,8 +35,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
-#include <memory>
-#include <sstream>
 #include <string>
 
 using namespace fiction;
@@ -45,20 +43,6 @@ using namespace fiction::networks;
 using namespace fiction::networks::io;
 using namespace fiction::physical_design;
 using namespace fiction::verification;
-
-template <typename Ntk>
-static Ntk read_ntk(const std::string& name)
-{
-    fmt::print("[i] processing {}\n", name);
-
-    std::ostringstream os{};
-
-    network_reader<std::shared_ptr<named_technology_network>> reader{fiction_experiments::benchmark_path(name), os};
-
-    const auto nets = reader.get_networks();
-
-    return *nets.front();
-}
 
 /** @brief Run the experiment. @return EXIT_SUCCESS on success, EXIT_FAILURE on error. */
 int main()
@@ -101,7 +85,9 @@ try
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        const auto benchmark_network = read_ntk<named_technology_network>(benchmark);
+        fmt::print("[i] processing {}\n", benchmark);
+        const auto benchmark_network =
+            read_network<named_technology_network>(fiction_experiments::benchmark_path(benchmark));
 
         // perform layout generation with an OGD-based heuristic algorithm
         auto       gate_layout = orthogonal<cartesian_layout>(benchmark_network, {}, &orthogonal_stats);

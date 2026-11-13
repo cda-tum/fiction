@@ -103,6 +103,9 @@ foreach(FILE IN LISTS FILENAMES)
   endif()
 
   add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME}) # group tests by file
+  if(TEST_NAME STREQUAL "test_network_reader")
+    set_tests_properties(${TEST_NAME} PROPERTIES TIMEOUT 30)
+  endif()
   if(TEST_NAME IN_LIST ALLOCATION_FAILURE_TESTS)
     # Catch2 returns 4 when every test case skips the unsupported configuration.
     set_tests_properties(${TEST_NAME} PROPERTIES SKIP_RETURN_CODE 4)

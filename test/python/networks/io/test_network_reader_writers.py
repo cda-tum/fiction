@@ -184,6 +184,28 @@ def test_reader_specialization_names_are_removed(name: str) -> None:
     assert not hasattr(io, name)
 
 
+def test_reader_selects_first_readable_filename(tmp_path: Path) -> None:
+    """Skip malformed files and select the first readable filename in a Unicode directory."""
+    directory = tmp_path / "réseaux"
+    directory.mkdir()
+    (directory / "z.v").write_text("module top(a,y); input a; output y; assign y = ~a; endmodule\n", encoding="utf-8")
+    source = directory / "b-é.V"
+    source.write_text("module top(a,y); input a; output y; assign y = a; endmodule\n", encoding="utf-8")
+    (directory / "a.v").write_text("module broken(\n", encoding="utf-8")
+
+    network = read_network(str(directory))
+    assert get_name(network) == "b-é"
+    assert simulate_outputs(network) == [("y", [True, False])]
+    assert get_name(read_network(str(source), format=".V")) == "b-é"
+
+
+def test_reader_rejects_embedded_null_path(resources_dir: Path) -> None:
+    """Reject a filename that the operating system would truncate."""
+    source = resources_dir / "mux21.v"
+    with pytest.raises(RuntimeError, match="null character"):
+        read_network(f"{source}\x00suffix", format="v")
+
+
 def expected_interface_outputs() -> list[tuple[str, list[bool]]]:
     """Evaluate the BLIF fixture's functions from its declared input bits.
 
