@@ -182,8 +182,9 @@ TEST_CASE("Verilog reader removes unused gates", "[network-reader]")
     CHECK(network.num_gates() == 1);
     const auto outputs = mockturtle::simulate<kitty::dynamic_truth_table>(
         network, mockturtle::default_simulator<kitty::dynamic_truth_table>{network.num_pis()});
-    CHECK(kitty::get_bit(outputs.front(), 3));
-    CHECK_FALSE(kitty::get_bit(outputs.front(), 1));
+    kitty::dynamic_truth_table expected{2};
+    kitty::create_from_hex_string(expected, "8");
+    CHECK(outputs.front() == expected);
 }
 
 TEST_CASE("BLIF readers accept empty lines without changing logic", "[network-reader]")
