@@ -18,6 +18,13 @@
 :members:
 ```
 
+```{doxygenstruct} fiction::networks::io::network_read_failure
+:members:
+```
+
+```{doxygenclass} fiction::networks::io::network_read_error
+```
+
 ```cpp
 #include <fiction/networks/io/network_reader.hpp>
 #include <fiction/types.hpp>
@@ -47,8 +54,11 @@ Both APIs infer Verilog (`.v`), binary AIGER (`.aig`), and BLIF (`.blif`) from t
 For Verilog, the reader constructs the network from the module named `top`.
 BLIF reads the first flat model and accepts blank lines, comments, and continued declarations.
 The `.model` and `.end` declarations are optional.
+For an AIGER file with latches, a network type without registers exposes latch outputs as primary inputs
+and next-state functions as primary outputs.
+If parsing creates registers in the destination network, the reader reports a file failure.
 An explicit format overrides the extension. Use `v`, `aig`, or `blif`, with an optional leading dot.
-For a directory, `read_network` tries files in filename order and stops at the first successful read.
+For a directory, `read_network` tries files in native filename order and stops at the first successful read.
 The C++ `read_networks` function returns successful networks and reports file-level parsing and I/O failures.
 Allocation failures can propagate to the caller. Directory reads visit regular files directly in the given directory.
 They skip unrelated extensions when inferring the format.
