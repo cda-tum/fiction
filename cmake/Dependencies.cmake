@@ -79,7 +79,7 @@ endif()
 
 # parallel-hashmap
 set(PARALLEL_HASHMAP_VERSION
-    2.0.0
+    2.1.0
     CACHE STRING "parallel-hashmap version")
 if(NOT DEFINED PARALLEL_HASHMAP_URL)
   set(PARALLEL_HASHMAP_URL
