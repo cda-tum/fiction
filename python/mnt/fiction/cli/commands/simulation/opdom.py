@@ -6,32 +6,18 @@
 #
 # Licensed under the MIT License
 
-"""The opdom command."""
+"""Operational domains of the shell's active SiDB layout."""
 
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
-from mnt.fiction.cli.errors import CommandError
-from mnt.fiction.cli.parsing import finite_float, positive_int
+from mnt.fiction.cli.opdom import domain_arguments, run_domain
+from mnt.fiction.cli.opdom_plotting import validate_outputs
 from mnt.fiction.cli.registry import Category, command
-from mnt.fiction.cli.statistics import stats_to_dict
-from mnt.pyfiction.sidb.simulation.io import (
-    sample_writing_mode,
-    write_operational_domain,
-)
-from mnt.pyfiction.sidb.simulation.logic import (
-    operational_analysis_strategy,
-    operational_condition,
-    operational_domain_contour_tracing,
-    operational_domain_flood_fill,
-    operational_domain_grid_search,
-    operational_domain_random_sampling,
-    operational_domain_stats,
-    operational_domain_value_range,
-    sweep_parameter,
-)
+
+from ._common import _active_sidb_layout
 
 if TYPE_CHECKING:
     import argparse
@@ -39,58 +25,12 @@ if TYPE_CHECKING:
     from mnt.fiction.cli.parsing import Parser
     from mnt.fiction.cli.registry import Result
     from mnt.fiction.cli.session import Session
-from ._common import ENGINES, _active_sidb_layout, _engine_argument, _physical_arguments, _physical_options
-
-SWEEPS = {
-    "epsilon_r": sweep_parameter.EPSILON_R,
-    "lambda_tf": sweep_parameter.LAMBDA_TF,
-    "mu_minus": sweep_parameter.MU_MINUS,
-}
-"""The ``--x-sweep`` names and the parameters they sweep."""
-
-
-DEFAULT_SWEEPS = {
-    "x": ("epsilon_r", 1.0, 10.0, 0.1),
-    "y": ("lambda_tf", 1.0, 10.0, 0.1),
-    "z": ("mu_minus", -0.5, -0.1, 0.025),
-}
-"""The default sweep of each axis of ``opdom``."""
 
 
 def _opdom_arguments(parser: Parser) -> None:
     """Add the command's arguments to the parser."""
     parser.add_argument("file", type=Path, help="the CSV file to write the domain to")
-    algorithm = parser.add_mutually_exclusive_group()
-    algorithm.add_argument(
-        "-g", "--grid-search", action="store_true", help="reconstruct the domain by grid search; the default"
-    )
-    algorithm.add_argument("-r", "--random-sampling", type=positive_int, metavar="N", help="sample N random points")
-    algorithm.add_argument("-f", "--flood-fill", type=positive_int, metavar="N", help="flood fill from N random points")
-    algorithm.add_argument(
-        "-c", "--contour-tracing", type=positive_int, metavar="N", help="trace contours from N random points"
-    )
-    parser.add_argument(
-        "-s",
-        "--sketch",
-        action="store_true",
-        help="judge points by filtering alone, without simulation; implies kink rejection",
-    )
-    parser.add_argument("-o", "--operational-only", action="store_true", help="write only the operational points")
-    for axis in ("x", "y", "z"):
-        sweep = parser.add_argument_group(f"{axis} axis")
-        default = DEFAULT_SWEEPS[axis]
-        sweep.add_argument(
-            f"-{axis}",
-            f"--{axis}-sweep",
-            choices=list(SWEEPS),
-            default=default[0] if axis != "z" else None,
-            help="the parameter",
-        )
-        sweep.add_argument(f"--{axis}-min", type=finite_float, default=default[1], help="lower bound of the sweep")
-        sweep.add_argument(f"--{axis}-max", type=finite_float, default=default[2], help="upper bound of the sweep")
-        sweep.add_argument(f"--{axis}-step", type=finite_float, default=default[3], help="step between samples")
-    _physical_arguments(parser, base=True)
-    _engine_argument(parser)
+    domain_arguments(parser)
 
 
 @command(
@@ -102,85 +42,13 @@ def _opdom_arguments(parser: Parser) -> None:
     progress=True,
 )
 def opdom(session: Session, args: argparse.Namespace) -> Result:
-    """Compute the operational domain of the active SiDB gate and write it as CSV.
+    """Compute the operational domain of the active SiDB gate and export CSV or plots.
 
-    The domain is the set of parameter points where the gate implements the active truth table.
+    The domain is the set of parameter points where the gate implements the expected functions.
     Grid search is the default; random sampling, flood fill, and contour tracing start from N
     random samples. The x and y axes sweep epsilon_r and lambda_tf by default; -z adds a third.
     """
+    validate_outputs(args, log_path=session.log_path)
     layout = _active_sidb_layout(session)
-    spec = [session.truth_tables.current()]
-    samples = next((n for n in (args.random_sampling, args.flood_fill, args.contour_tracing) if n is not None), None)
-
-    options: dict[str, Any] = {
-        "on_progress": session.report_progress,
-        "on_worker_progress": session.report_worker_progress,
-        "sim_engine": ENGINES[args.engine],
-    }
-    parameters = _physical_options(args)
-    options.update(parameters)
-    if args.sketch:
-        options["strategy_to_analyze_operational_status"] = operational_analysis_strategy.FILTER_ONLY
-        options["op_condition"] = operational_condition.REJECT_KINKS
-    options["sweep_dimensions"] = _sweep_dimensions(args)
-
-    stats = operational_domain_stats()
-    if args.random_sampling is not None:
-        domain = operational_domain_random_sampling(layout, spec, args.random_sampling, stats=stats, **options)
-    elif args.flood_fill is not None:
-        domain = operational_domain_flood_fill(layout, spec, args.flood_fill, stats=stats, **options)
-    elif args.contour_tracing is not None:
-        domain = operational_domain_contour_tracing(layout, spec, args.contour_tracing, stats=stats, **options)
-    else:
-        domain = operational_domain_grid_search(layout, spec, stats=stats, **options)
-
-    writing_mode = sample_writing_mode.OPERATIONAL_ONLY if args.operational_only else sample_writing_mode.ALL_SAMPLES
-    write_operational_domain(domain, str(args.file), writing_mode=writing_mode)
-    session.info(
-        f"{stats.num_operational_parameter_combinations} of {stats.num_evaluated_parameter_combinations} "
-        f"evaluated points are operational; wrote {args.file}"
-    )
-    return {
-        **stats_to_dict(stats),
-        "engine": args.engine,
-        "grid_search": samples is None,
-        "sketch": args.sketch,
-        "sweeps": [
-            {"parameter": getattr(args, f"{axis}_sweep")} for axis in ("x", "y", "z") if getattr(args, f"{axis}_sweep")
-        ],
-        "file": str(args.file),
-        "parameters": parameters,
-    }
-
-
-def _sweep_dimensions(args: argparse.Namespace) -> list[operational_domain_value_range]:
-    """Validate and construct the physical parameter sweeps.
-
-    Args:
-        args: Operational-domain options.
-
-    Returns:
-        Distinct, bounded sweeps with positive steps.
-
-    Raises:
-        CommandError: An axis is repeated or has invalid bounds.
-    """
-    sweeps = []
-    swept: set[str] = set()
-    for axis in ("x", "y", "z"):
-        name = getattr(args, f"{axis}_sweep")
-        if name is None:
-            continue
-        if name in swept:
-            msg = f"'{name}' is swept on more than one axis; every axis needs its own parameter"
-            raise CommandError(msg)
-        swept.add(name)
-        low, high, step = (getattr(args, f"{axis}_{key}") for key in ("min", "max", "step"))
-        if name in {"epsilon_r", "lambda_tf"} and low <= 0:
-            msg = f"the {axis} axis needs positive {name} values"
-            raise CommandError(msg)
-        if step <= 0 or low > high:
-            msg = f"the {axis} axis needs min <= max and a positive step"
-            raise CommandError(msg)
-        sweeps.append(operational_domain_value_range(SWEEPS[name], low, high, step))
-    return sweeps
+    fallback = None if args.gate or args.table or args.expression else [session.truth_tables.current()]
+    return run_domain(layout, session, args, fallback)

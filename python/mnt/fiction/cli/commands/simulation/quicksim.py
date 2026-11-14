@@ -22,12 +22,14 @@ if TYPE_CHECKING:
     from mnt.fiction.cli.parsing import Parser
     from mnt.fiction.cli.registry import Result
     from mnt.fiction.cli.session import Session
-from ._common import _active_sidb_layout, _physical_arguments, _physical_options, _store_result
+from mnt.fiction.cli.simulation import physical_arguments, physical_options
+
+from ._common import _active_sidb_layout, _store_result
 
 
 def _quicksim_arguments(parser: Parser) -> None:
     """Add the command's arguments to the parser."""
-    _physical_arguments(parser, base=False)
+    physical_arguments(parser, base=False)
     parser.add_argument("-i", "--iterations", type=positive_int, default=80, help="iteration steps")
     parser.add_argument("-a", "--alpha", type=probability, default=0.7, help="alpha parameter")
 
@@ -43,7 +45,7 @@ def _quicksim_arguments(parser: Parser) -> None:
 def quicksim_command(session: Session, args: argparse.Namespace) -> Result:
     """Simulate the active SiDB layout heuristically with QuickSim, approximating the ground state."""
     layout = _active_sidb_layout(session)
-    parameters = _physical_options(args)
+    parameters = physical_options(args)
     result = quicksim(
         layout,
         on_progress=session.report_progress,

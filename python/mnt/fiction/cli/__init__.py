@@ -14,8 +14,28 @@ in-process, which is how the test suite drives it.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from .app import main
 from .errors import CommandError
-from .session import Session
+
+if TYPE_CHECKING:
+    from .session import Session
 
 __all__ = ["CommandError", "Session", "main"]
+
+
+def __getattr__(name: str) -> type[Session]:
+    """Retain the Session import without loading shell state for other consumers.
+
+    Returns:
+        The shell session class.
+
+    Raises:
+        AttributeError: The requested export does not exist.
+    """
+    if name == "Session":
+        from .session import Session  # ruff: ignore[import-outside-top-level] -- compatibility export
+
+        return Session
+    raise AttributeError(name)

@@ -25,7 +25,7 @@ To help you getting started with _fiction_, pick the interface that best fits yo
 
 | Goal                                   | Recommended Path          | Section                                  |
 | -------------------------------------- | ------------------------- | ---------------------------------------- |
-| Try the tool immediately               | 🐍 `pip install`          | {ref}`CLI (pip) <cli-pip>`               |
+| Try the tool immediately               | 🐍 `uv tool install`      | {ref}`CLI <cli-pip>`                     |
 | Run the CLI without installing Python  | 🐳 Docker CLI image       | {ref}`CLI (Docker) <cli-docker>`         |
 | Develop the C++ library                | 💻 Native build           | {ref}`Building from source <cli-source>` |
 | Integrate into a C++ project           | 📚 Header-only library    | {ref}`C++ Library <header-only>`         |
@@ -37,12 +37,12 @@ For a full CLI command list or API reference, see the respective documentation s
 
 (cli-pip)=
 
-## CLI (pip)
+## CLI
 
 The `fiction` command-line interface is part of the `mnt.pyfiction` Python package:
 
 ```console
-$ pip install mnt.pyfiction
+$ uv tool install mnt.pyfiction
 $ fiction
 ```
 
@@ -143,7 +143,7 @@ $ ctest --preset ci-debug
 ```
 
 Any preset can still be combined with additional `-D` overrides on the command line. The `fiction` shell is not
-part of the CMake build; it comes with the Python package, see {ref}`CLI (pip) <cli-pip>`.
+part of the CMake build; it comes with the Python package, see {ref}`CLI <cli-pip>`.
 
 (header-only)=
 
@@ -196,13 +196,14 @@ level: its subdirectories map straight to `fiction::fcn`, `fiction::qca`,
 
 Ideal for notebooks, exploratory scripts, and integration with Python tooling.
 
-Install the library from PyPI:
+Install the library from PyPI in a virtual environment with [uv](https://docs.astral.sh/uv/):
 
 ```console
-$ pip install mnt.pyfiction
+$ uv venv
+$ uv pip install mnt.pyfiction
 ```
 
-Import what you need from the submodule that mirrors its C++ namespace:
+Activate the virtual environment before running Python, then import from the submodule that mirrors its C++ namespace:
 
 ```python
 from mnt.pyfiction.layouts import cartesian_layout
@@ -249,14 +250,14 @@ and `potential_landscape.params()`. Its keyword-only constructor uses `base_numb
 In order to set up a virtual environment on UNIX-like systems, you can use the following commands:
 
 ```console
-$ python3 -m venv venv
+$ uv venv venv
 $ source venv/bin/activate
 ```
 
 If you are using Windows, you can use the following commands instead:
 
 ```console
-$ python3 -m venv venv
+$ uv venv venv
 $ venv\Scripts\activate.bat
 ```
 
@@ -313,7 +314,7 @@ sources with `file(GLOB_RECURSE ...)`. Wire the new function into the directory'
 The bindings are built with [nanobind](https://github.com/wjakob/nanobind), which (unlike the previous
 [pybind11](https://github.com/pybind/pybind11)-based setup) is resolved as an installed Python package rather
 than fetched by CMake. When configuring the `pyfiction` preset directly (e.g. for IDE-based iteration, outside
-of `pip install`), make sure the Python interpreter CMake picks up has `nanobind` installed — the project's
+of `uv pip install`), make sure the Python interpreter CMake picks up has `nanobind` installed — the project's
 `uv`-managed virtual environment already does, so pass
 `-DPython_EXECUTABLE=<path_to_repo>/.venv/bin/python3` (or the equivalent `.venv\Scripts\python.exe` on
 Windows) if CMake would otherwise pick up a different interpreter.

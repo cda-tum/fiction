@@ -1,0 +1,508 @@
+# Copyright (c) 2018 - 2023 Marcel Walter
+# Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+# All rights reserved.
+#
+# SPDX-License-Identifier: MIT
+#
+# Licensed under the MIT License
+
+"""The opdom command."""
+
+from __future__ import annotations
+
+import argparse
+from functools import partial
+from typing import TYPE_CHECKING, Any
+
+from rich.table import Table
+
+from mnt.fiction.cli.errors import CommandError
+from mnt.fiction.cli.opdom_plotting import plot_arguments, write_plot
+from mnt.fiction.cli.output import CommandOutput, open_viewer
+from mnt.fiction.cli.parsing import finite_float, integer, positive_float, positive_int
+from mnt.fiction.cli.statistics import stats_to_dict
+from mnt.fiction.cli.truth_tables import table_from_string
+from mnt.pyfiction import synthesis
+from mnt.pyfiction.sidb import sidb_dot_tag
+from mnt.pyfiction.sidb.simulation.io import (
+    sample_writing_mode,
+    write_operational_domain,
+)
+from mnt.pyfiction.sidb.simulation.logic import (
+    bdl_wire_selection,
+    detect_bdl_pairs,
+    detect_bdl_wires,
+    input_bdl_configuration,
+    operational_analysis_strategy,
+    operational_condition,
+    operational_domain,
+    operational_domain_contour_tracing,
+    operational_domain_flood_fill,
+    operational_domain_grid_search,
+    operational_domain_random_sampling,
+    operational_domain_stats,
+    operational_domain_value_range,
+    sweep_parameter,
+)
+
+from .simulation import ENGINES, engine_argument, physical_arguments, physical_options
+
+if TYPE_CHECKING:
+    from mnt.fiction.cli.parsing import Parser
+    from mnt.pyfiction.sidb import sidb_layout
+    from mnt.pyfiction.synthesis import dynamic_truth_table
+
+SWEEPS = {
+    "epsilon_r": sweep_parameter.EPSILON_R,
+    "lambda_tf": sweep_parameter.LAMBDA_TF,
+    "mu_minus": sweep_parameter.MU_MINUS,
+}
+"""The ``--x-sweep`` names and the parameters they sweep."""
+
+
+DEFAULT_SWEEPS = {
+    "x": ("epsilon_r", 1.0, 10.0, 0.1),
+    "y": ("lambda_tf", 1.0, 10.0, 0.1),
+    "z": ("mu_minus", -0.5, -0.1, 0.025),
+}
+"""The default sweep of each axis of ``opdom``."""
+
+
+GATES = {
+    "id": synthesis.create_id_tt,
+    "not": synthesis.create_not_tt,
+    "and": synthesis.create_and_tt,
+    "nand": synthesis.create_nand_tt,
+    "or": synthesis.create_or_tt,
+    "nor": synthesis.create_nor_tt,
+    "xor": synthesis.create_xor_tt,
+    "xnor": synthesis.create_xnor_tt,
+    "maj": synthesis.create_maj_tt,
+}
+"""Named single-output gate specifications."""
+
+TWO_CHARGE_STATES = 2
+"""Charge-state count supported by QuickSim."""
+
+MAX_BDL_INPUTS = 63
+"""Maximum input count representable by the native pattern iterator."""
+
+MAX_EXPRESSION_INPUTS = 16
+"""Maximum input count of an expression: variables run from ``a`` to ``p``."""
+
+
+def domain_arguments(parser: Parser, *, require_spec: bool = False) -> None:
+    """Add shared operational domain computation options.
+
+    Args:
+        parser: The command parser.
+        require_spec: Require an explicit logic specification.
+    """
+    logic = parser.add_argument_group("logic specification").add_mutually_exclusive_group(required=require_spec)
+    logic.add_argument("--gate", choices=list(GATES), help="expected gate function")
+    logic.add_argument(
+        "--table", action="append", metavar="BITS", help="binary or 0x-prefixed hex table; repeat per output"
+    )
+    logic.add_argument("--expression", action="append", metavar="EXPR", help="Boolean expression; repeat per output")
+    reconstruction = parser.add_argument_group("reconstruction")
+    algorithm = reconstruction.add_mutually_exclusive_group()
+    algorithm.add_argument(
+        "--algorithm",
+        choices=["grid_search", "random_sampling", "flood_fill", "contour_tracing"],
+        help="reconstruction method; grid_search by default; add --sketch for filters only",
+    )
+    reconstruction.add_argument(
+        "--samples", type=positive_int, metavar="N", help="random samples for a named sampling method"
+    )
+    algorithm.add_argument("-g", "--grid-search", action="store_true", help=argparse.SUPPRESS)
+    algorithm.add_argument("-r", "--random-sampling", type=positive_int, metavar="N", help=argparse.SUPPRESS)
+    algorithm.add_argument("-f", "--flood-fill", type=positive_int, metavar="N", help=argparse.SUPPRESS)
+    algorithm.add_argument("-c", "--contour-tracing", type=positive_int, metavar="N", help=argparse.SUPPRESS)
+    parser.add_argument(
+        "-s",
+        "--sketch",
+        action="store_true",
+        help="judge points by filtering alone, without simulation; implies kink rejection",
+    )
+    parser.add_argument("-o", "--operational-only", action="store_true", help="write only the operational points")
+    for axis in ("x", "y", "z"):
+        sweep = parser.add_argument_group(f"{axis} axis")
+        default = DEFAULT_SWEEPS[axis]
+        sweep.add_argument(
+            f"-{axis}",
+            f"--{axis}-sweep",
+            choices=list(SWEEPS),
+            default=default[0] if axis != "z" else None,
+            help="the parameter",
+        )
+        sweep.add_argument(f"--{axis}-min", type=finite_float, default=default[1], help="lower bound of the sweep")
+        sweep.add_argument(f"--{axis}-max", type=finite_float, default=default[2], help="upper bound of the sweep")
+        sweep.add_argument(f"--{axis}-step", type=finite_float, default=default[3], help="step between samples")
+    physical_arguments(parser, base=True)
+    engine_argument(parser)
+
+    advanced = parser.add_argument_group("operational analysis (advanced)")
+    advanced.add_argument("--threads", type=positive_int, help="worker threads; native default when omitted")
+    advanced.add_argument(
+        "--timeout-ms",
+        type=partial(integer, maximum=2**64 - 1),
+        help="complete computation budget in milliseconds; unlimited by default",
+    )
+    advanced.add_argument(
+        "--condition", choices=["tolerate_kinks", "reject_kinks"], help="kink handling; Sketch requires rejection"
+    )
+    advanced.add_argument(
+        "--strategy",
+        choices=["simulation_only", "filter_only", "filter_then_simulation"],
+        help="analysis strategy; simulation_only by default",
+    )
+    advanced.add_argument(
+        "--input-encoding", choices=["distance", "absence"], default="distance", help="BDL input encoding"
+    )
+    advanced.add_argument(
+        "--bdl-pair-min",
+        type=finite_float,
+        default=0.75,
+        help="minimum BDL pair distance in nm",
+    )
+    advanced.add_argument(
+        "--bdl-pair-max",
+        type=finite_float,
+        default=1.5,
+        help="maximum BDL pair distance in nm",
+    )
+    advanced.add_argument(
+        "--bdl-wire-distance",
+        type=positive_float,
+        default=2.0,
+        help="BDL wire distance threshold in nm",
+    )
+    plot_arguments(parser)
+
+
+def normalize_options(args: argparse.Namespace) -> argparse.Namespace:
+    """Resolve legacy algorithm flags and Sketch into a copy of the requested options.
+
+    Args:
+        args: Parsed options owned by the caller.
+
+    Returns:
+        Options with one effective algorithm, sample count, and Sketch selection.
+
+    Raises:
+        CommandError: The algorithm and sample count do not agree.
+    """
+    normalized = argparse.Namespace(**vars(args))
+    sampling_methods = ("random_sampling", "flood_fill", "contour_tracing")
+    if args.samples is not None and args.algorithm not in sampling_methods:
+        msg = "--samples requires --algorithm random_sampling, flood_fill, or contour_tracing"
+        raise CommandError(msg)
+    legacy = next((name for name in sampling_methods if getattr(args, name) is not None), None)
+    normalized.algorithm = args.algorithm or legacy or "grid_search"
+    normalized.samples = getattr(args, legacy) if legacy else args.samples
+    if normalized.algorithm in sampling_methods and normalized.samples is None:
+        msg = f"--algorithm {normalized.algorithm} requires --samples N"
+        raise CommandError(msg)
+    normalized.sketch = args.sketch or args.strategy == "filter_only"
+    return normalized
+
+
+def run_domain(
+    layout: sidb_layout,
+    output: CommandOutput,
+    args: argparse.Namespace,
+    fallback_spec: list[dynamic_truth_table] | None = None,
+) -> dict[str, object]:
+    """Compute the supplied gate's domain and write the requested outputs.
+
+    Callers validate the outputs first, because validation must precede any log write.
+
+    Args:
+        layout: The SiDB layout to analyze.
+        output: Progress and console output.
+        fallback_spec: Shell specification used when no explicit override is given.
+        args: Parsed domain, output, and plot options.
+
+    Returns:
+        Statistics and output paths for the log.
+    """
+    args = normalize_options(args)
+
+    params, parameters = domain_parameters(output, args)
+    spec = gate_specification(layout, args, params, fallback_spec)
+    domain, stats = compute_domain(layout, spec, args, params)
+    write_csv(domain, args)
+    for path in args.plot:
+        write_plot(domain, path, args)
+        output.info(f"wrote {path}")
+    report_statistics(output, stats, sketch=args.sketch)
+    if args.file is not None:
+        output.info(
+            f"{stats.num_operational_parameter_combinations} of {stats.num_evaluated_parameter_combinations} "
+            f"evaluated points are operational; wrote {args.file}"
+        )
+    if args.show:
+        for path in args.plot:
+            try:
+                open_viewer(path)
+            except (CommandError, OSError) as error:  # ruff: ignore[try-except-in-loop] -- attempt each viewer after a failure
+                output.error(f"cannot open plot '{path}': {error}")
+    return {
+        **stats_to_dict(stats),
+        "engine": args.engine,
+        "grid_search": args.algorithm == "grid_search",
+        "sketch": args.sketch,
+        "sweeps": [
+            {"parameter": getattr(args, f"{axis}_sweep")} for axis in ("x", "y", "z") if getattr(args, f"{axis}_sweep")
+        ],
+        "file": str(args.file) if args.file is not None else None,
+        "plots": [str(path) for path in args.plot],
+        "parameters": parameters,
+        "threads": args.threads,
+        "operational_parameters": {
+            "simulation_parameters": parameters,
+            "sim_engine": params["sim_engine"],
+            "timeout": params["timeout"],
+            "op_condition": params["op_condition"],
+            "strategy_to_analyze_operational_status": params["strategy_to_analyze_operational_status"],
+            "input_bdl_iterator_params": {
+                "input_bdl_config": params["input_bdl_config"],
+                "bdl_wire_params": {
+                    "threshold_bdl_interdistance": args.bdl_wire_distance,
+                    "bdl_pairs_params": {"minimum_distance": args.bdl_pair_min, "maximum_distance": args.bdl_pair_max},
+                },
+            },
+        },
+    }
+
+
+def domain_parameters(output: CommandOutput, args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Build native keyword options and describe the fixed physical values.
+
+    Args:
+        output: Supplies progress callbacks.
+        args: Parsed domain options.
+
+    Returns:
+        Native parameters and physical values for the log.
+
+    Raises:
+        CommandError: Simulation or sweep options are invalid.
+    """
+    parameters = physical_options(args)
+    params: dict[str, Any] = {
+        **parameters,
+        "on_progress": output.report_progress,
+        "on_worker_progress": output.report_worker_progress,
+        "sim_engine": ENGINES[args.engine],
+    }
+    if args.sketch and args.strategy not in {None, "filter_only"}:
+        msg = "--sketch requires --strategy filter_only"
+        raise CommandError(msg)
+    if args.sketch and args.condition == "tolerate_kinks":
+        msg = "Filter-only analysis requires --condition reject_kinks"
+        raise CommandError(msg)
+    params["strategy_to_analyze_operational_status"] = operational_analysis_strategy[
+        (args.strategy or ("filter_only" if args.sketch else "simulation_only")).upper()
+    ]
+    params["op_condition"] = operational_condition[
+        (args.condition or ("reject_kinks" if args.sketch else "tolerate_kinks")).upper()
+    ]
+    if args.engine == "quicksim" and args.base != TWO_CHARGE_STATES:
+        msg = "QuickSim requires --base 2"
+        raise CommandError(msg)
+    if args.timeout_ms is not None and args.engine == "clustercomplete" and args.timeout_ms != 2**64 - 1:
+        msg = "ClusterComplete does not support a finite timeout"
+        raise CommandError(msg)
+    params["timeout"] = args.timeout_ms if args.timeout_ms is not None else 2**64 - 1
+    params["number_of_threads"] = args.threads
+    params["input_bdl_config"] = (
+        input_bdl_configuration.PERTURBER_DISTANCE_ENCODED
+        if args.input_encoding == "distance"
+        else input_bdl_configuration.PERTURBER_ABSENCE_ENCODED
+    )
+    if not 0 <= args.bdl_pair_min <= args.bdl_pair_max:
+        msg = "BDL pair distances require 0 <= min <= max"
+        raise CommandError(msg)
+    params["minimum_distance"] = args.bdl_pair_min
+    params["maximum_distance"] = args.bdl_pair_max
+    params["threshold_bdl_interdistance"] = args.bdl_wire_distance
+    params["sweep_dimensions"] = _sweep_dimensions(args)
+
+    return params, parameters
+
+
+def compute_domain(
+    layout: sidb_layout,
+    spec: list[dynamic_truth_table],
+    args: argparse.Namespace,
+    params: dict[str, Any],
+) -> tuple[operational_domain, operational_domain_stats]:
+    """Run the selected reconstruction method once.
+
+    Args:
+        layout: The gate layout.
+        spec: Expected functions, one per output.
+        args: Selects the algorithm and sample count.
+        params: Native domain parameters.
+
+    Returns:
+        The domain and native statistics.
+    """
+    stats = operational_domain_stats()
+    if args.algorithm == "random_sampling":
+        domain = operational_domain_random_sampling(layout, spec, args.samples, stats=stats, **params)
+    elif args.algorithm == "flood_fill":
+        domain = operational_domain_flood_fill(layout, spec, args.samples, stats=stats, **params)
+    elif args.algorithm == "contour_tracing":
+        domain = operational_domain_contour_tracing(layout, spec, args.samples, stats=stats, **params)
+    else:
+        domain = operational_domain_grid_search(layout, spec, stats=stats, **params)
+
+    return domain, stats
+
+
+def write_csv(domain: operational_domain, args: argparse.Namespace) -> None:
+    """Write the domain with the requested sample visibility.
+
+    Args:
+        domain: The computed samples.
+        args: The output path and writing options.
+    """
+    if args.file is None:
+        return
+    writing_mode = sample_writing_mode.OPERATIONAL_ONLY if args.operational_only else sample_writing_mode.ALL_SAMPLES
+    write_operational_domain(domain, str(args.file), writing_mode=writing_mode)
+
+
+def gate_specification(
+    layout: sidb_layout,
+    args: argparse.Namespace,
+    params: dict[str, Any],
+    fallback_spec: list[dynamic_truth_table] | None = None,
+) -> list[dynamic_truth_table]:
+    """Resolve expected functions and validate the gate's detected BDL ports.
+
+    Args:
+        fallback_spec: Expected functions used when no override is given.
+        layout: The gate layout.
+        args: Named gate, tables, or expressions.
+        params: Supplies the BDL detection settings and analysis strategy.
+
+    Returns:
+        One truth table per output with the detected input width.
+
+    Raises:
+        CommandError: Ports or specifications do not match, or Sketch lacks a canvas.
+    """
+    pair_options = {key: params[key] for key in ("minimum_distance", "maximum_distance")}
+    inputs = detect_bdl_wires(
+        layout,
+        wire_selection=bdl_wire_selection.INPUT,
+        threshold_bdl_interdistance=params["threshold_bdl_interdistance"],
+        **pair_options,
+    )
+    outputs = detect_bdl_pairs(layout, sidb_dot_tag.OUTPUT, **pair_options)
+    if not inputs or not outputs:
+        msg = "the layout needs detected BDL input and output ports"
+        raise CommandError(msg)
+    if len(inputs) > MAX_BDL_INPUTS:
+        msg = "the layout supports at most 63 BDL inputs"
+        raise CommandError(msg)
+    _validate_layout(layout, args)
+    if args.gate:
+        spec = [GATES[args.gate]()]
+    elif args.table:
+        spec = [table_from_string(text) for text in args.table]
+    elif args.expression:
+        if len(inputs) > MAX_EXPRESSION_INPUTS:
+            msg = f"--expression supports at most {MAX_EXPRESSION_INPUTS} BDL inputs"
+            raise CommandError(msg)
+        spec = []
+        for expression in args.expression:
+            table = synthesis.dynamic_truth_table(len(inputs))
+            table.create_from_expression(expression)
+            spec.append(table)
+    else:
+        if fallback_spec is None:
+            msg = "provide --gate, --table, or --expression"
+            raise CommandError(msg)
+        spec = fallback_spec
+    if len(spec) != len(outputs) or any(table.num_vars() != len(inputs) for table in spec):
+        msg = f"the specification must have {len(outputs)} output table(s), each with {len(inputs)} input(s)"
+        raise CommandError(msg)
+    return spec
+
+
+def _validate_layout(layout: sidb_layout, args: argparse.Namespace) -> None:
+    """Reject layout features unsupported by the requested analysis.
+
+    Args:
+        layout: The gate layout.
+        args: Engine and Sketch options.
+
+    Raises:
+        CommandError: QuickSim encounters charged defects or Sketch has no canvas.
+    """
+    if args.engine == "quicksim" and layout.num_positively_charged_defects() + layout.num_negatively_charged_defects():
+        msg = "QuickSim does not support charged defects"
+        raise CommandError(msg)
+    if args.sketch and not layout.dots_with_tag(sidb_dot_tag.LOGIC):
+        msg = "Sketch requires LOGIC dots for its canvas"
+        raise CommandError(msg)
+
+
+def report_statistics(output: CommandOutput, stats: operational_domain_stats, *, sketch: bool) -> None:
+    """Print native computation statistics, including in quiet mode.
+
+    Args:
+        output: Supplies the Rich console.
+        stats: Native computation statistics.
+        sketch: Label positive classifications as potentially operational.
+    """
+    table = Table(title="Operational domain sketch" if sketch else "Operational domain", show_header=False)
+    table.add_column("Statistic", style="cyan")
+    table.add_column("Value", justify="right")
+    for label, value in (
+        ("Computation runtime (s)", f"{stats.time_total.total_seconds():.6f}"),
+        ("Samples evaluated", str(stats.num_evaluated_parameter_combinations)),
+        ("Potentially operational" if sketch else "Operational", str(stats.num_operational_parameter_combinations)),
+        ("Non-operational", str(stats.num_non_operational_parameter_combinations)),
+        ("Total parameter points", str(stats.num_total_parameter_points)),
+        ("Simulator calls", str(stats.num_simulator_invocations)),
+    ):
+        table.add_row(label, value)
+    output.console.print(table)
+
+
+def _sweep_dimensions(args: argparse.Namespace) -> list[operational_domain_value_range]:
+    """Validate and construct the physical parameter sweeps.
+
+    Args:
+        args: Operational-domain options.
+
+    Returns:
+        Distinct, bounded sweeps with positive steps.
+
+    Raises:
+        CommandError: An axis is repeated or has invalid bounds.
+    """
+    sweeps = []
+    swept: set[str] = set()
+    for axis in ("x", "y", "z"):
+        name = getattr(args, f"{axis}_sweep")
+        if name is None:
+            continue
+        if name in swept:
+            msg = f"'{name}' is swept on more than one axis; every axis needs its own parameter"
+            raise CommandError(msg)
+        swept.add(name)
+        low, high, step = (getattr(args, f"{axis}_{key}") for key in ("min", "max", "step"))
+        if name in {"epsilon_r", "lambda_tf"} and low <= 0:
+            msg = f"the {axis} axis needs positive {name} values"
+            raise CommandError(msg)
+        if step <= 0 or low > high:
+            msg = f"the {axis} axis needs min <= max and a positive step"
+            raise CommandError(msg)
+        sweeps.append(operational_domain_value_range(SWEEPS[name], low, high, step))
+    return sweeps
