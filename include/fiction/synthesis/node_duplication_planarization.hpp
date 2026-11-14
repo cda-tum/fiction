@@ -945,11 +945,32 @@ class node_duplication_planarization_impl
         return std::all_of(level.cbegin(), level.cend(), [this](const auto& n) { return ntk.is_pi(origin(n)); });
     }
     /**
+     * @brief Gives a primary input of the destination the name of the source input it stands for, if it has one.
+     *
+     * @param src Source primary input.
+     * @param dst Signal of the destination input, real or virtual.
+     * @param dest Destination network.
+     */
+    void copy_input_name(const mockturtle::node<Ntk>&                                 src,
+                         const mockturtle::signal<networks::virtual_pi_network<Ntk>>& dst,
+                         networks::virtual_pi_network<Ntk>&                           dest) const
+    {
+        if constexpr (mockturtle::has_has_name_v<Ntk> && mockturtle::has_get_name_v<Ntk> &&
+                      mockturtle::has_set_name_v<networks::virtual_pi_network<Ntk>>)
+        {
+            if (const auto s = ntk.make_signal(src); ntk.has_name(s))
+            {
+                dest.set_name(dst, ntk.get_name(s));
+            }
+        }
+    }
+    /**
      * @brief Builds the planar `virtual_pi_network` from the levelized duplication order.
      *
-     * Levels are processed from the primary inputs upwards. A repeated primary input becomes a virtual primary input;
-     * every other repeated node becomes a fresh gate with the same function. Fanins are connected in the fanin order
-     * of the source node, matched by origin against the ids recorded in `fanins_of`, and keep their complementation.
+     * Levels are processed from the primary inputs upwards. A repeated primary input becomes a virtual primary input
+     * named after its real one; every other repeated node becomes a fresh gate with the same function. Fanins are
+     * connected in the fanin order of the source node, matched by origin against the ids recorded in `fanins_of`, and
+     * keep their complementation.
      *
      * @return The planar destination network.
      */
@@ -973,7 +994,12 @@ class node_duplication_planarization_impl
             old2new[ntk.get_node(ntk.get_constant(true))] = dest.get_constant(true);
         }
 
-        ntk.foreach_pi_unranked([&old2new, &dest](const auto& n) { old2new[n] = dest.create_pi(); });
+        ntk.foreach_pi_unranked(
+            [this, &old2new, &dest](const auto& n)
+            {
+                old2new[n] = dest.create_pi();
+                copy_input_name(n, old2new[n], dest);
+            });
 
         levelized_node_order<ntk_dest_t> lvls_new(levels.size());
 
@@ -993,6 +1019,7 @@ class node_duplication_planarization_impl
                     if (n != o)
                     {
                         old2new[n] = dest.create_virtual_pi(old2new[o]);
+                        copy_input_name(o, old2new[n], dest);
                     }
 
                     lvl_new.push_back(dest.get_node(old2new[n]));
@@ -1531,7 +1558,8 @@ class node_duplication_planarization_impl
  * duplication crossing elimination problem level by level from the primary outputs to the primary inputs. For each
  * level, an H-graph enumerates the fanin orderings of every node; the shortest path through it gives an ordering of the
  * level below in which every edge can be drawn without a crossing, at the cost of duplicating the nodes that would
- * otherwise be crossed. Duplicated primary inputs become virtual primary inputs of the result.
+ * otherwise be crossed. Duplicated primary inputs become virtual primary inputs of the result; every primary input
+ * keeps its name, and a virtual primary input carries the name of its real one.
  *
  * Consecutive consumers in a level share one copy of their common fanin, so the result is not fanout-substituted;
  * `planar_fanout_substitution` restores that property while keeping ranks and planarity.

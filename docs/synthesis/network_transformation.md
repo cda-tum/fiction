@@ -304,6 +304,10 @@ result for crossings and for balance with unified outputs; `is_fanout_substitute
 :members:
 ```
 
+```{doxygenfunction} fiction::synthesis::flatten_planarization
+
+```
+
 ```{doxygenfunction} fiction::synthesis::planarization
 
 ```

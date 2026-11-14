@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from . import exact, gold, optimize, ortho
+from . import exact, gold, optimize, ortho, plane
 from . import hex as hex_command
 
-__all__ = ["exact", "gold", "hex_command", "optimize", "ortho"]
+__all__ = ["exact", "gold", "hex_command", "optimize", "ortho", "plane"]

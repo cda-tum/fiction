@@ -158,6 +158,35 @@ TEMPLATE_TEST_CASE("Read Verilog", "[network-reader]", named_aig_network, named_
     }
 }
 
+TEST_CASE("Verilog reader removes unused gates", "[network-reader]")
+{
+    const fiction::test::scoped_temp_directory directory{
+        std::filesystem::temp_directory_path(), "fiction-verilog-cleanup-" + std::to_string(std::random_device{}())};
+    const auto path = directory.path() / "unused.v";
+    {
+        std::ofstream file{path, std::ios::binary};
+        file << "module top(a,b,y);\r\n"
+                "  input a,b;\r\n"
+                "  output y;\r\n"
+                "  wire unused;\r\n"
+                "  assign unused = a | b;\r\n"
+                "  assign y = a & b;\r\n"
+                "endmodule\r\n";
+        file.close();
+        REQUIRE_FALSE(file.fail());
+    }
+
+    const auto network = read_network<named_technology_network>(path);
+    CHECK(network.num_pis() == 2);
+    REQUIRE(network.num_pos() == 1);
+    CHECK(network.num_gates() == 1);
+    const auto outputs = mockturtle::simulate<kitty::dynamic_truth_table>(
+        network, mockturtle::default_simulator<kitty::dynamic_truth_table>{network.num_pis()});
+    kitty::dynamic_truth_table expected{2};
+    kitty::create_from_hex_string(expected, "8");
+    CHECK(outputs.front() == expected);
+}
+
 TEST_CASE("BLIF readers accept empty lines without changing logic", "[network-reader]")
 {
     const auto whitespace = GENERATE(std::string{}, std::string{" \t\r"});

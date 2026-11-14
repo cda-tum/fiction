@@ -62,6 +62,7 @@ If parsing creates registers in the destination network, the reader reports a fi
 An explicit format overrides the extension. Use `v`, `aig`, or `blif`, with an optional leading dot.
 For a directory, `read_network` tries files in native filename order and stops at the first successful read.
 The C++ `read_networks` function returns successful networks and reports file-level parsing and I/O failures.
+The readers remove dangling gates before returning a network.
 Allocation failures can propagate to the caller. Directory reads visit regular files directly in the given directory.
 They skip unrelated extensions when inferring the format.
 

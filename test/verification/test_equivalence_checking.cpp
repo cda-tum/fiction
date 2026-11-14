@@ -24,6 +24,7 @@
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
+#include <fiction/networks/views/mutable_rank_view.hpp>
 #include <fiction/verification/equivalence_checking.hpp>
 
 #include <kitty/constructors.hpp>
@@ -35,6 +36,8 @@
 #include <mockturtle/views/names_view.hpp>
 
 #include <cstdint>
+#include <stdexcept>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -225,6 +228,52 @@ TEST_CASE("Physical equivalence matches named primary interfaces", "[equiv][plac
     CHECK(equivalence_checking(left, right) == eq_type::NO);
 }
 
+TEST_CASE("An explicit input mapping ties implementation inputs to specification inputs", "[equiv]")
+{
+    mockturtle::names_view<mockturtle::klut_network> spec{}, impl{};
+    const auto                                       a = spec.create_pi("a");
+    const auto                                       b = spec.create_pi("b");
+    spec.create_po(spec.create_and(a, b), "f");
+
+    SECTION("more implementation inputs than specification inputs")
+    {
+        // x & (y | z) computes a & b once y and z both read b
+        const auto x = impl.create_pi("x");
+        const auto y = impl.create_pi("y");
+        const auto z = impl.create_pi("z");
+        impl.create_po(impl.create_and(x, impl.create_or(y, z)), "f");
+
+        CHECK(equivalence_checking(spec, impl) == eq_type::NO);
+        CHECK(equivalence_checking(spec, impl, {.input_mapping = {0, 1, 1}}) == eq_type::STRONG);
+        CHECK(equivalence_checking(spec, impl, {.input_mapping = {1, 0, 0}}) == eq_type::STRONG);
+
+        equivalence_checking_stats st{};
+        CHECK(equivalence_checking(spec, impl, {.input_mapping = {0, 0, 1}}, &st) == eq_type::NO);
+        CHECK_FALSE(st.counter_example.empty());
+    }
+    SECTION("the mapping overrides the names")
+    {
+        const auto ib = impl.create_pi("b");
+        const auto ia = impl.create_pi("a");
+        impl.create_po(impl.create_lt(ia, ib), "f");
+        spec.create_po(spec.create_lt(a, b), "g");
+        impl.create_po(impl.create_and(ia, ib), "g");
+
+        // outputs match by name, inputs by the mapping
+        CHECK(equivalence_checking(spec, impl, {.input_mapping = {1, 0}}) == eq_type::NO);
+    }
+    SECTION("malformed mappings are rejected")
+    {
+        impl.create_pi("x");
+        impl.create_pi("y");
+        impl.create_pi("z");
+        impl.create_po(impl.get_constant(false), "f");
+
+        CHECK_THROWS_AS(equivalence_checking(spec, impl, {.input_mapping = {0, 1}}), std::invalid_argument);
+        CHECK_THROWS_AS(equivalence_checking(spec, impl, {.input_mapping = {0, 1, 2}}), std::invalid_argument);
+    }
+}
+
 TEST_CASE("Physical equivalence extracts placed objects and rejects physical defects", "[equiv][placed-objects]")
 {
     mockturtle::names_view<mockturtle::klut_network> spec{};
@@ -294,4 +343,36 @@ TEST_CASE("Physical equivalence returns NO for a clocked required cycle", "[equi
     CHECK(equivalence_checking(spec, lyt, &stats) == eq_type::NO);
     CHECK(stats.impl_drv_stats.drvs == 0);
     CHECK(stats.eq == eq_type::NO);
+}
+
+TEST_CASE("Equivalence input mapping uses declared rather than ranked input order", "[equivalence_checking]")
+{
+    technology_network spec{};
+    const auto         x = spec.create_pi();
+    const auto         y = spec.create_pi();
+    spec.create_po(x);
+
+    technology_network impl{};
+    const auto         a = impl.create_pi();
+    const auto         b = impl.create_pi();
+    impl.create_po(b);
+
+    views::mutable_rank_view ranked_spec{spec};
+    views::mutable_rank_view ranked_impl{impl};
+    ranked_spec.swap(x, y);
+    ranked_impl.swap(a, b);
+
+    const equivalence_checking_params identity{.input_mapping = {0, 1}};
+    CHECK(equivalence_checking(ranked_spec, impl, identity) == eq_type::NO);
+    CHECK(equivalence_checking(spec, ranked_impl, identity) == eq_type::NO);
+    CHECK(equivalence_checking(ranked_spec, ranked_impl, {.input_mapping = {1, 0}}) == eq_type::STRONG);
+
+    technology_network restricted_impl{};
+    const auto         first  = restricted_impl.create_pi();
+    const auto         second = restricted_impl.create_pi();
+    restricted_impl.create_po(restricted_impl.create_and(first, second));
+
+    equivalence_checking_stats stats{};
+    CHECK(equivalence_checking(ranked_spec, restricted_impl, identity, &stats) == eq_type::NO);
+    CHECK(stats.counter_example == std::vector<bool>{true, false});
 }

@@ -10,12 +10,16 @@
 
 from __future__ import annotations
 
+from argparse import Namespace
 from typing import TYPE_CHECKING
 
+from mnt.fiction.cli.commands.physical_design.plane import plane
+from mnt.fiction.cli.commands.verification.equiv import equiv
 from mnt.pyfiction.layouts import cartesian_gate_layout
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+    from pathlib import Path
 
     from .conftest import Shell
 
@@ -44,11 +48,78 @@ def test_equiv_network_against_layout(mux21_shell: Shell) -> None:
     assert mux21_shell.session.log[-1]["result"]["eq"] == "STRONG"
 
 
+def test_equiv_checks_a_plane_layout_through_its_input_mapping(shell: Shell, resource: Callable[[str], str]) -> None:
+    """The full adder's planarization duplicates inputs; the stored mapping ties them back to the network."""
+    shell.ok(f'read "{resource("FA.v")}"; plane; equiv -n -g')
+    assert "not equivalent" not in shell.output
+    assert "equivalent" in shell.output
+    result = shell.session.log[-1]["result"]
+    assert isinstance(result, dict)
+    assert result["eq"] in {"STRONG", "WEAK"}
+    assert result["input_mapping"] == shell.session.gate_layouts.attached("input_mapping")
+    # a network the mapping does not fit is a usage error, not a verdict
+    assert "input mapping" in shell.fails(f'read "{resource("xor2.v")}"; equiv -n -g')
+
+
+def test_plane_command_results_do_not_change_the_stored_mapping(shell: Shell, resource: Callable[[str], str]) -> None:
+    """Editing a command result leaves the source mapping used by the next check intact."""
+    shell.ok(f'read "{resource("FA.v")}"')
+    placement = plane(shell.session, Namespace(clock_phases=4, xor_gates=False, verbose=False))
+    assert isinstance(placement, dict)
+    mapping = placement["input_mapping"]
+    assert isinstance(mapping, list)
+    mapping.clear()
+
+    options = Namespace(network=True, gate_layout=True)
+    result = equiv(shell.session, options)
+    assert isinstance(result, dict)
+    assert result["eq"] in {"STRONG", "WEAK"}
+    mapping = result["input_mapping"]
+    assert isinstance(mapping, list)
+    mapping.clear()
+
+    result = equiv(shell.session, options)
+    assert isinstance(result, dict)
+    assert result["eq"] in {"STRONG", "WEAK"}
+
+
+def test_equiv_checks_a_plane_layout_without_logging(unlogged_shell: Shell, resource: Callable[[str], str]) -> None:
+    """The full-adder mapping is available in a normal session."""
+    unlogged_shell.ok(f'read "{resource("FA.v")}"; plane; equiv -n -g')
+    assert "not equivalent" not in unlogged_shell.output
+    assert "equivalent" in unlogged_shell.output
+    assert not unlogged_shell.session.log
+
+
 def test_equiv_two_layouts(mux21_shell: Shell) -> None:
     mux21_shell.ok("ortho; optimize; equiv -g")
     assert "equivalent" in mux21_shell.output
     assert mux21_shell.session.log[-1]["result"]["eq"] in {"STRONG", "WEAK"}
     assert "select the stores" in mux21_shell.fails("equiv")
+
+
+def test_plane_mapping_rejects_another_source_network(shell: Shell, tmp_path: Path) -> None:
+    """A layout mapping stays tied to its source when another network reorders the same named inputs."""
+    source = tmp_path / "source.blif"
+    reordered = tmp_path / "reordered.blif"
+    logic = ".outputs f\n.names a b f\n10 1\n.end\n"
+    source.write_text(".model source\n.inputs a b\n" + logic, encoding="utf-8")
+    reordered.write_text(".model reordered\n.inputs b a\n" + logic, encoding="utf-8")
+    shell.ok(f'read "{source}"; plane; equiv -n -g')
+    assert shell.session.log[-1]["result"]["eq"] == "STRONG"
+    assert "source network" in shell.fails(f'read "{reordered}"; equiv -n -g')
+    shell.ok("current -n 1; equiv -n -g")
+    assert shell.session.log[-1]["result"]["eq"] == "STRONG"
+
+
+def test_equiv_reports_a_malformed_plane_mapping(shell: Shell, resource: Callable[[str], str]) -> None:
+    """A malformed mapping on the source network is a usage error, not an equivalence verdict."""
+    shell.ok(f'read "{resource("FA.v")}"; plane')
+    mapping = shell.session.gate_layouts.attached("input_mapping")
+    assert isinstance(mapping, list)
+    mapping.pop()
+    assert "input mapping of the layout does not fit" in shell.fails("equiv -n -g")
+    shell.ok("version")
 
 
 def test_drv_blocked_equivalence_is_a_report(shell: Shell, resource: Callable[[str], str]) -> None:
