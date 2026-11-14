@@ -53,6 +53,7 @@ set(ALLOCATION_FAILURE_TESTS
     test_determine_clocking
     test_surface_analysis
     test_graph_coloring
+    test_network_utils
     test_cell_writer_allocation_failure
     test_mutable_rank_view_allocation_failure
     test_network_balancing_allocation_failure)
