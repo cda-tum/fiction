@@ -28,6 +28,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <new>
 #include <optional>
 #include <stdexcept>
 #include <utility>
@@ -199,11 +200,12 @@ struct fanin_container
  * @param ntk Network in which the fanins are to be gathered.
  * @param n Node whose fanins are desired.
  * @return A container of all incoming nodes directly adjacent to `n` in `ntk`.
+ * @throws std::bad_alloc If allocating storage for the fanin nodes fails.
  */
 template <typename Ntk>
     requires mockturtle::has_foreach_fanin_v<Ntk> && mockturtle::has_get_node_v<Ntk> &&
              mockturtle::has_is_constant_v<Ntk>
-fanin_container<Ntk> fanins(const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
+fanin_container<Ntk> fanins(const Ntk& ntk, const mockturtle::node<Ntk>& n)
 {
     fanin_container<Ntk> fc{};
 
