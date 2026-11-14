@@ -167,6 +167,31 @@ TEST_CASE("Mapped placement preserves three ordered inputs", "[placement-utils]"
     CHECK(lyt.object_function(placed) == function);
 }
 
+TEST_CASE("Mapped placement rejects fanins outside the placement map", "[placement-utils]")
+{
+    /** @brief Network with one input when the placement maps are created. */
+    named_technology_network ntk{};
+    /** @brief Input covered by both maps. */
+    const auto a = ntk.create_pi();
+    /** @brief Layout receiving the mapped gate. */
+    gate_layout<cartesian_layout> lyt{{3, 3}};
+    /** @brief Layout port for the first input. */
+    const auto left = lyt.create_pi("a", {0, 0});
+    /** @brief Port map sized before the second input is created. */
+    mockturtle::node_map<layout_object_id, named_technology_network> ports{ntk};
+    /** @brief Branch map sized before the second input is created. */
+    mockturtle::node_map<branching_signal_container<>, named_technology_network> branches{ntk};
+    /** @brief Input outside both maps. */
+    const auto b = ntk.create_pi();
+    /** @brief Gate whose second fanin is outside both maps. */
+    const auto n = ntk.get_node(ntk.create_and(a, b));
+
+    ports[a] = left;
+    branches[a].update_branch(n, left);
+    CHECK_THROWS_AS(place(lyt, {1, 1}, ntk, n, ports), std::out_of_range);
+    CHECK_THROWS_AS(place(lyt, {1, 1}, ntk, n, branches), std::out_of_range);
+}
+
 TEST_CASE("Two-input placement validates constant reduction", "[placement-utils]")
 {
     /** @brief Source specification for invalid reductions. */

@@ -6940,6 +6940,9 @@ Returns:
     A container of all incoming nodes directly adjacent to `n` in
     `ntk`.
 
+Raises:
+    MemoryError: If allocating storage for the fanin nodes fails.
+
 )doc";
 
 static const char *mkd_doc_fiction_networks_fanouts =
@@ -13858,6 +13861,9 @@ Template Args:
 Returns:
     Output port of the newly placed gate in `lyt`.
 
+Raises:
+    IndexError: If a fanin node index is outside `node2pos`.
+
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_place_6 =
@@ -13882,6 +13888,9 @@ Template Args:
 
 Returns:
     Output port of the newly placed gate in `lyt`.
+
+Raises:
+    IndexError: If a fanin node index is outside `node2pos`.
 
 )doc";
 

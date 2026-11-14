@@ -789,6 +789,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Gate placement now throws `std::out_of_range` when a fanin index falls outside its placement map.
+  - `networks::fanins` now propagates allocation failures.
   - `synthesis::technology_mapping` now preserves constant-one outputs and gate inputs, including view outputs, and reports mapping failure for sequential inputs.
   - Default A*, A* distance, and Yen searches now return shortest paths on shifted Cartesian and hexagonal layouts.
     Their default heuristic uses Chebyshev distance for diagonal steps.
