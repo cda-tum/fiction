@@ -14,12 +14,18 @@
 
 ```
 
+```{doxygenstruct} fiction::verification::equivalence_checking_params
+:members:
+```
+
 ```{doxygenstruct} fiction::verification::equivalence_checking_stats
 :members:
 ```
 
-```{doxygenfunction} fiction::verification::equivalence_checking
+```{doxygenfunction} fiction::verification::equivalence_checking(const Spec&, const Impl&, const equivalence_checking_params&, equivalence_checking_stats*)
+```
 
+```{doxygenfunction} fiction::verification::equivalence_checking(const Spec&, const Impl&, equivalence_checking_stats*)
 ```
 
 :::

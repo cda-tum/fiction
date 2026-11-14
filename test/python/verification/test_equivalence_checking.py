@@ -59,6 +59,26 @@ def test_equivalence_matches_named_interfaces(tmp_path: Path) -> None:
     assert equivalence_checking(left, extra) == eq_type.NO
 
 
+def test_input_mapping_ties_duplicated_inputs(tmp_path: Path) -> None:
+    """An explicit mapping lets an implementation read one specification input through several inputs."""
+    spec_file = tmp_path / "spec.blif"
+    impl_file = tmp_path / "impl.blif"
+    spec_file.write_text(".model spec\n.inputs a b\n.outputs f\n.names a b f\n11 1\n.end\n")
+    # x & (y | z) computes a & b once y and z both read b
+    impl_file.write_text(".model impl\n.inputs x y z\n.outputs f\n.names x y z f\n11- 1\n1-1 1\n.end\n")
+    spec = read_network(str(spec_file))
+    impl = read_network(str(impl_file))
+    assert equivalence_checking(spec, impl) == eq_type.NO
+    assert equivalence_checking(spec, impl, input_mapping=[0, 1, 1]) == eq_type.STRONG
+    stats = equivalence_checking_stats()
+    assert equivalence_checking(spec, impl, stats, input_mapping=[0, 0, 1]) == eq_type.NO
+    assert stats.counter_example
+    with pytest.raises(ValueError, match="input mapping"):
+        equivalence_checking(spec, impl, input_mapping=[0, 1])
+    with pytest.raises(ValueError, match="input mapping"):
+        equivalence_checking(spec, impl, input_mapping=[0, 1, 2])
+
+
 def test_empty_layout_and_network_equivalence(
     make_layout: Callable[[tuple[int, int, int], str], GateLayout],
 ) -> None:

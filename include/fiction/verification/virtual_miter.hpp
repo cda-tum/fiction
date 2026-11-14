@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "fiction/networks/network_utils.hpp"
 #include "fiction/traits.hpp"
 
 #include <fiction/synthesis/delete_virtual_pis.hpp>
@@ -25,10 +26,8 @@
 #include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/traits.hpp>
-#include <mockturtle/utils/node_map.hpp>
 
 #include <algorithm>
-#include <cstddef>
 #include <iterator>
 #include <optional>
 #include <type_traits>
@@ -66,39 +65,6 @@ Ntk handle_virtual_pis(const Ntk& network)
     else
     {
         return network;
-    }
-}
-
-/**
- * @brief Leaf signals for copying a network such that the primary input created i-th receives `pis[i]`.
- *
- * A ranked network lists its inputs in rank order, so its leaves are permuted accordingly; any other network takes
- * `pis` as they are.
- *
- * @tparam NtkDest Destination network type.
- * @tparam Ntk Source network type.
- * @param ntk Source network.
- * @param pis Signals of the destination's primary inputs in creation order.
- * @return Leaf signals in the order of `ntk.foreach_pi`.
- */
-template <typename NtkDest, typename Ntk>
-[[nodiscard]] std::vector<mockturtle::signal<NtkDest>>
-leaves_by_creation_order(const Ntk& ntk, const std::vector<mockturtle::signal<NtkDest>>& pis)
-{
-    if constexpr (has_foreach_pi_unranked_v<Ntk>)
-    {
-        mockturtle::node_map<std::size_t, Ntk> creation_index{ntk};
-        ntk.foreach_pi_unranked([&creation_index](const auto& n, const auto i) { creation_index[n] = i; });
-
-        std::vector<mockturtle::signal<NtkDest>> leaves{};
-        leaves.reserve(pis.size());
-        ntk.foreach_pi([&pis, &creation_index, &leaves](const auto& n) { leaves.push_back(pis[creation_index[n]]); });
-
-        return leaves;
-    }
-    else
-    {
-        return pis;
     }
 }
 
@@ -156,8 +122,8 @@ template <typename NtkDest, typename NtkSrc1, typename NtkSrc2>
     }
 
     // copy networks, pairing the primary inputs by creation order
-    const auto leaves1 = detail::leaves_by_creation_order<NtkDest>(ntk1, pis);
-    const auto leaves2 = detail::leaves_by_creation_order<NtkDest>(ntk2, pis);
+    const auto leaves1 = networks::inputs_in_traversal_order(ntk1, pis);
+    const auto leaves2 = networks::inputs_in_traversal_order(ntk2, pis);
 
     const auto pos1 = cleanup_dangling(ntk1, dest, leaves1.cbegin(), leaves1.cend());
     const auto pos2 = cleanup_dangling(ntk2, dest, leaves2.cbegin(), leaves2.cend());

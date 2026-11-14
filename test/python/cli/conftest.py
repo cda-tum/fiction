@@ -127,6 +127,18 @@ def shell(tmp_path: Path) -> Iterator[Shell]:
 
 
 @pytest.fixture
+def unlogged_shell() -> Iterator[Shell]:
+    """An empty shell, closed after the test.
+
+    Yields:
+        A session with a recording console and no log.
+    """
+    current = Shell()
+    yield current
+    current.session.close()
+
+
+@pytest.fixture
 def resource(resources_dir: Path) -> Callable[[str], str]:
     """Resolve a file under the shared test resources.
 

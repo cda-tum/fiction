@@ -16,7 +16,6 @@
 
 #include "pyfiction/documentation.hpp"
 
-#include <fiction/networks/name_utils.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>
 #include <fiction/synthesis/network_balancing.hpp>
 #include <fiction/synthesis/node_duplication_planarization.hpp>
@@ -24,14 +23,9 @@
 #include <fiction/types.hpp>
 
 #include <mockturtle/algorithms/cleanup.hpp>
-#include <mockturtle/traits.hpp>
-#include <mockturtle/utils/node_map.hpp>
 
-#include <cstdint>
 #include <sstream>
 #include <stdexcept>
-#include <utility>
-#include <vector>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/chrono.h>       // NOLINT(misc-include-cleaner): converts the runtime of the statistics
@@ -49,77 +43,6 @@ namespace nb = nanobind;
 
 namespace pyfiction
 {
-
-namespace detail
-{
-
-/**
- * Copies a planar `virtual_pi_network` into a plain network whose node order encodes the rank order: the primary
- * inputs in the order of level 0, then the gates level by level in rank order. The returned vector holds, for every
- * primary input of the result in that order, the index of the input of the original network it stands for; a virtual
- * input maps to the index of its real input.
- *
- * @tparam Planar Planar network type.
- * @param planar Planar network.
- * @return The plain network and the original input index of every input.
- */
-template <typename Planar>
-std::pair<fiction::networks::named_technology_network, std::vector<uint32_t>> flatten(const Planar& planar)
-{
-    fiction::networks::named_technology_network                                                   dest{};
-    mockturtle::node_map<mockturtle::signal<fiction::networks::named_technology_network>, Planar> old2new{planar};
-    std::vector<uint32_t>                                                                         original_input{};
-
-    old2new[planar.get_constant(false)] = dest.get_constant(false);
-    old2new[planar.get_constant(true)]  = dest.get_constant(true);
-
-    // the index of every real input in the original network is its creation order
-    mockturtle::node_map<uint32_t, Planar> real_index{planar};
-    uint32_t                               next_real = 0;
-
-    planar.foreach_pi_unranked(
-        [&](const auto& n)
-        {
-            if (planar.is_real_pi(n))
-            {
-                real_index[n] = next_real++;
-            }
-        });
-
-    // inputs in rank order
-    planar.foreach_pi(
-        [&](const auto& n)
-        {
-            old2new[n] = dest.create_pi();
-            original_input.push_back(real_index[planar.is_real_pi(n) ? n : planar.get_real_pi(n)]);
-        });
-
-    for (uint32_t level = 1; level <= planar.depth(); ++level)
-    {
-        planar.foreach_node_in_rank(
-            level,
-            [&](const auto& n)
-            {
-                if (planar.is_constant(n) || planar.is_pi(n))
-                {
-                    return;
-                }
-
-                std::vector<mockturtle::signal<fiction::networks::named_technology_network>> children{};
-                planar.foreach_fanin(n, [&](const auto& f) { children.push_back(old2new[planar.get_node(f)]); });
-
-                old2new[n] = dest.create_node(children, planar.node_function(n));
-            });
-    }
-
-    planar.foreach_po([&](const auto& po) { dest.create_po(old2new[planar.get_node(po)]); });
-
-    fiction::networks::restore_names(planar, dest, old2new);
-
-    return {dest, original_input};
-}
-
-}  // namespace detail
 
 /**
  * @brief Binds the planarization pipeline.
@@ -222,7 +145,7 @@ void register_planarization(nb::module_& m)
 
             const fiction::networks::views::mutable_rank_view ranked{cleaned};
 
-            return detail::flatten(fiction::synthesis::planarization(ranked, ps, statistics));
+            return fiction::synthesis::flatten_planarization(fiction::synthesis::planarization(ranked, ps, statistics));
         },
         nb::arg("network"), nb::kw_only(), nb::arg("on_progress").none() = nb::none(),
         nb::arg("strategy") = defaults.duplication.strategy, nb::arg("criterion") = defaults.duplication.criterion,
@@ -262,8 +185,8 @@ Args:
 
 Returns:
     A pair of the planar, balanced, fanout-substituted network in rank order and, for every input of that
-    network, the index of the input of `network` it stands for. A duplicated input appears several times; tie
-    those inputs together when simulating or checking equivalence.
+    network, the index of the input of `network` it stands for. A duplicated input appears several times, each
+    copy named after the input it stands for; tie those inputs together when simulating or checking equivalence.
 
 Raises:
     ValueError: If `network` is not balanced with unified outputs, if a gate has only constant fanins, if

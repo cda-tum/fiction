@@ -13,7 +13,8 @@ const auto layout = fiction::physical_design::orthogonal<fiction::layouts::carte
 ```
 
 `orthogonal` and `exact` normalize fanout for the selected layout and clocking scheme. GOLD removes dangling gates
-while preparing its search networks.
+while preparing its search networks. `plane` is the exception to the input type: it consumes the ranked technology
+network that `planarization` returns, because the layout follows its rank order.
 
 ```{toctree}
 :maxdepth: 1
@@ -25,6 +26,7 @@ exact
 graph_oriented_layout_design
 hexagonalization
 orthogonal
+plane
 post_layout_optimization
 surface_analysis
 wiring_reduction

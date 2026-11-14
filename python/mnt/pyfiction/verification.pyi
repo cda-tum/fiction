@@ -12,7 +12,7 @@ Design rule, equivalence, and performance checks of gate-level layouts.
 
 import datetime as dt
 import enum
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from typing import overload
 
 import mnt.pyfiction.layouts
@@ -284,135 +284,152 @@ def equivalence_checking(
     specification: mnt.pyfiction.networks.technology_network,
     implementation: mnt.pyfiction.networks.technology_network,
     statistics: equivalence_checking_stats | None = None,
+    *,
+    input_mapping: Sequence[int] = [],
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
     specification: mnt.pyfiction.networks.technology_network,
     implementation: mnt.pyfiction.layouts.cartesian_gate_layout,
     statistics: equivalence_checking_stats | None = None,
+    *,
+    input_mapping: Sequence[int] = [],
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
     specification: mnt.pyfiction.networks.technology_network,
     implementation: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
     statistics: equivalence_checking_stats | None = None,
+    *,
+    input_mapping: Sequence[int] = [],
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
     specification: mnt.pyfiction.networks.technology_network,
     implementation: mnt.pyfiction.layouts.hexagonal_gate_layout,
     statistics: equivalence_checking_stats | None = None,
+    *,
+    input_mapping: Sequence[int] = [],
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
     specification: mnt.pyfiction.layouts.cartesian_gate_layout,
     implementation: mnt.pyfiction.networks.technology_network,
     statistics: equivalence_checking_stats | None = None,
+    *,
+    input_mapping: Sequence[int] = [],
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
     specification: mnt.pyfiction.layouts.cartesian_gate_layout,
     implementation: mnt.pyfiction.layouts.cartesian_gate_layout,
     statistics: equivalence_checking_stats | None = None,
+    *,
+    input_mapping: Sequence[int] = [],
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
     specification: mnt.pyfiction.layouts.cartesian_gate_layout,
     implementation: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
     statistics: equivalence_checking_stats | None = None,
+    *,
+    input_mapping: Sequence[int] = [],
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
     specification: mnt.pyfiction.layouts.cartesian_gate_layout,
     implementation: mnt.pyfiction.layouts.hexagonal_gate_layout,
     statistics: equivalence_checking_stats | None = None,
+    *,
+    input_mapping: Sequence[int] = [],
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
     specification: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
     implementation: mnt.pyfiction.networks.technology_network,
     statistics: equivalence_checking_stats | None = None,
+    *,
+    input_mapping: Sequence[int] = [],
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
     specification: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
     implementation: mnt.pyfiction.layouts.cartesian_gate_layout,
     statistics: equivalence_checking_stats | None = None,
+    *,
+    input_mapping: Sequence[int] = [],
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
     specification: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
     implementation: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
     statistics: equivalence_checking_stats | None = None,
+    *,
+    input_mapping: Sequence[int] = [],
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
     specification: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
     implementation: mnt.pyfiction.layouts.hexagonal_gate_layout,
     statistics: equivalence_checking_stats | None = None,
+    *,
+    input_mapping: Sequence[int] = [],
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
     specification: mnt.pyfiction.layouts.hexagonal_gate_layout,
     implementation: mnt.pyfiction.networks.technology_network,
     statistics: equivalence_checking_stats | None = None,
+    *,
+    input_mapping: Sequence[int] = [],
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
     specification: mnt.pyfiction.layouts.hexagonal_gate_layout,
     implementation: mnt.pyfiction.layouts.cartesian_gate_layout,
     statistics: equivalence_checking_stats | None = None,
+    *,
+    input_mapping: Sequence[int] = [],
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
     specification: mnt.pyfiction.layouts.hexagonal_gate_layout,
     implementation: mnt.pyfiction.layouts.shifted_cartesian_gate_layout,
     statistics: equivalence_checking_stats | None = None,
+    *,
+    input_mapping: Sequence[int] = [],
 ) -> eq_type: ...
 @overload
 def equivalence_checking(
     specification: mnt.pyfiction.layouts.hexagonal_gate_layout,
     implementation: mnt.pyfiction.layouts.hexagonal_gate_layout,
     statistics: equivalence_checking_stats | None = None,
+    *,
+    input_mapping: Sequence[int] = [],
 ) -> eq_type:
     """
-    Performs SAT-based equivalence checking between a specification of
-    type `Spec` and an implementation of type `Impl`. Each operand is a
-    logic network or a placed gate-level layout. Layout logic is extracted
-    before SAT checking. Interfaces match by names unique on both sides,
-    then by remaining declared positions. Unequal interface sizes, missing
-    required inputs, and required dependency cycles return `NO`.
-
-    This implementation enables the comparison of two logic networks, a
-    logic network and a gate-level layout or two gate-level layouts. Since
-    gate-level layouts have a notion of timing that logic networks do not,
-    this function does not simply prove logical equivalence but,
-    additionally, takes timing aspects into account as well.
-
-    Thereby, three different types of equivalences arise:
-
-    - `NO` equivalence: Spec and Impl are not logically equivalent or one
-      of them is a gate-level layout that contains
-    DRVs and, thus, cannot be checked for equivalence.
-    - `WEAK` equivalence: Spec and Impl are logically equivalent and have
-      different throughput denominators. - `STRONG` equivalence: Spec and
-      Impl are logically equivalent and have equal throughput
-      denominators.
-    Logic networks have throughput denominator one.
-
-    This approach was first proposed in \\"Verification for Field-coupled
-    Nanocomputing Circuits\\" by M. Walter, R. Wille, F. Sill Torres, D.
-    Große, and R. Drechsler in DAC 2020.
+    Check a specification against an implementation by SAT, taking layout timing into account.
+    Each operand is a logic network or a gate-level layout; layout logic is extracted first. The inputs match by names
+    unique on both sides, then by remaining declared positions, unless `input_mapping` names the specification input of
+    every implementation input. The outputs match by names and positions either way. The approach was first proposed in
+    "Verification for Field-coupled Nanocomputing Circuits" by M. Walter, R. Wille, F. Sill Torres, D. Große, and
+    R. Drechsler in DAC 2020.
 
     Args:
         specification: The specification.
         implementation: The implementation.
-        statistics: Statistics.
-
-    Template Args:
-        Spec: Specification type.
-        Impl: Implementation type.
+        statistics: Statistics object filled by the check; None discards statistics.
+        input_mapping: For every implementation input in declared order, the index of the specification input it reads.
+            Empty matches the inputs by names and positions, which requires equal input counts. With a mapping, several
+            implementation inputs may read the same specification input, as the duplicated inputs of a planarized layout
+            do.
 
     Returns:
-        The equivalence type of `specification` and `implementation`.
+        `eq_type.NO` when the functions differ, the interfaces do not match, or a layout has design rule violations;
+        `eq_type.STRONG` when the functions agree at equal throughput; `eq_type.WEAK` when they agree with different
+        throughput.
+
+    Raises:
+        ValueError: If `input_mapping` is non-empty and does not name one specification input for every implementation
+            input.
     """

@@ -547,4 +547,36 @@ initialize_copy_network_with_virtual_pis(const Ntk& src)
     return {std::move(dest), std::move(old2new)};
 }
 
+/**
+ * @brief Reorders values indexed by declared primary input into primary input traversal order.
+ *
+ * A ranked network lists its inputs in rank order, so its leaves are permuted accordingly; any other network takes
+ * `pis` as they are.
+ *
+ * @tparam T Value type.
+ * @tparam Ntk Source network type.
+ * @param ntk Source network.
+ * @param pis Values in declared primary input order.
+ * @return Values in the order of `ntk.foreach_pi`.
+ */
+template <typename T, typename Ntk>
+[[nodiscard]] std::vector<T> inputs_in_traversal_order(const Ntk& ntk, const std::vector<T>& pis)
+{
+    if constexpr (has_foreach_pi_unranked_v<Ntk>)
+    {
+        mockturtle::node_map<std::size_t, Ntk> creation_index{ntk};
+        ntk.foreach_pi_unranked([&creation_index](const auto& n, const auto i) { creation_index[n] = i; });
+
+        std::vector<T> leaves{};
+        leaves.reserve(pis.size());
+        ntk.foreach_pi([&pis, &creation_index, &leaves](const auto& n) { leaves.push_back(pis[creation_index[n]]); });
+
+        return leaves;
+    }
+    else
+    {
+        return pis;
+    }
+}
+
 }  // namespace fiction::networks

@@ -12,13 +12,12 @@ from __future__ import annotations
 
 from collections import Counter
 from datetime import timedelta
-from itertools import combinations, starmap
+from itertools import combinations
 from typing import TYPE_CHECKING, Any
 
 import pytest
 
 from mnt.pyfiction.networks import simulate_outputs, technology_network
-from mnt.pyfiction.networks.io import read_network
 from mnt.pyfiction.synthesis import (
     decision_criterion,
     fanout_substitution,
@@ -33,7 +32,6 @@ from mnt.pyfiction.synthesis import (
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-    from pathlib import Path
 
 
 UNIFIED: dict[str, Any] = {
@@ -103,56 +101,6 @@ def _check_structure(network: technology_network, degree: int = 2) -> None:
     for node in network.nodes():
         if not network.is_constant(node):
             assert uses[node] <= (degree if network.is_buf(node) else 1), (node, uses[node])
-
-
-def _parity_verilog() -> str:
-    """The 16-input parity tree of the C++ blueprints as Verilog.
-
-    Pairs of signals are combined by an XNOR built from AND and NOT gates, the root by an XOR built from AND, NOT
-    and OR gates; the hybrid strategy keeps crossings on this network where pure duplication copies whole levels.
-
-    Returns:
-        Verilog source of the network with inputs ``pi00`` to ``pi15`` and output ``po0``.
-    """
-    inputs = [f"pi{i:02d}" for i in range(16)]
-    wires: list[str] = []
-    assigns: list[str] = []
-
-    def xnor(x: str, y: str) -> str:
-        a, b, c = (f"n{len(wires) + k}" for k in range(3))
-        wires.extend((a, b, c))
-        assigns.extend((f"assign {a} = {x} & ~{y};", f"assign {b} = ~{x} & {y};", f"assign {c} = ~{a} & ~{b};"))
-        return c
-
-    def tree(pairs: list[tuple[str, str]]) -> str:
-        # the blueprint pairs inputs from the highest index down and combines neighbouring pairs
-        signals = list(starmap(xnor, pairs))
-        while len(signals) > 1:
-            signals = [xnor(signals[i], signals[i + 1]) for i in range(0, len(signals), 2)]
-        return signals[0]
-
-    pairs = [(inputs[i], inputs[i + 1]) for i in range(14, -1, -2)]
-    left = tree(pairs[:4])
-    right = tree(pairs[4:])
-    wires.extend(("n_left", "n_right"))
-    assigns.extend((f"assign n_left = {left} & ~{right};", f"assign n_right = ~{left} & {right};"))
-
-    return (
-        f"module top({', '.join(inputs)}, po0);\n"
-        f"input {', '.join(inputs)};\n"
-        "output po0;\n"
-        f"wire {', '.join(wires)};\n" + "\n".join(assigns) + "\nassign po0 = n_left | n_right;\nendmodule\n"
-    )
-
-
-@pytest.fixture
-def full_adder(resources_dir: Path) -> technology_network:
-    """A full adder, whose planarization duplicates inputs.
-
-    Returns:
-        The ``FA.v`` network as a ``technology_network``.
-    """
-    return read_network(str(resources_dir / "FA.v"))
 
 
 def test_unbalanced_networks_are_rejected(mux21: technology_network) -> None:
@@ -281,11 +229,9 @@ def test_statistics_and_progress(full_adder: technology_network) -> None:
     assert _equivalent_with_tied_inputs(balanced, planar, original_input)
 
 
-def test_default_strategy_is_hybrid(tmp_path: Path) -> None:
+def test_default_strategy_is_hybrid(parity_network: technology_network) -> None:
     """The keyword defaults are the pipeline's: the default call plans like ``HYBRID``, not like ``DUPLICATION``."""
-    path = tmp_path / "parity.v"
-    path.write_text(_parity_verilog(), encoding="utf-8")
-    balanced = _balanced(read_network(str(path)))
+    balanced = _balanced(parity_network)
 
     by_default, _ = planarization(balanced)
     hybrid, _ = planarization(balanced, strategy=planarization_strategy.HYBRID)

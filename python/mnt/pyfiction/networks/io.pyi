@@ -17,7 +17,7 @@ def read_network(
     filename: str, format: str = "", *, network_type: type[mnt.pyfiction.networks.technology_network] = ...
 ) -> mnt.pyfiction.networks.technology_network:
     """
-    Read Verilog, AIGER, or BLIF, or the first network from a directory. Select a registered network class with network_type (technology_network by default). Preserve output signals without adding output buffers. Raise RuntimeError with parser diagnostics when no network can be read. BLIF supports technology_network only.
+    Read Verilog, AIGER, or BLIF, or the first readable network in filename order from a directory. Select a registered network class with network_type (technology_network by default). Preserve output signals without adding output buffers. Raise RuntimeError with parser diagnostics when no network can be read. BLIF supports technology_network only.
     """
 
 @overload
