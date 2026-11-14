@@ -122,7 +122,7 @@ FetchContent_MakeAvailable(tinyxml2)
 # fiction supplies fmt explicitly so its headers are available in both the build
 # tree and the installed package.
 set(FMT_VERSION
-    12.2.0
+    12.2.1
     CACHE STRING "fmt version")
 if(NOT DEFINED FMT_URL)
   set(FMT_URL
