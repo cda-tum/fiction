@@ -23,6 +23,7 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_string.hpp>
 
+#include "utils/allocation_failure.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 
 #include <fiction/networks/technology_network.hpp>
@@ -36,11 +37,40 @@
 #include <mockturtle/views/fanout_view.hpp>
 
 #include <cstdint>
+#include <new>
 #include <string>
 #include <vector>
 
 using namespace fiction;
 using namespace fiction::networks;
+
+TEST_CASE("Collecting fanins propagates allocation failure", "[network-utils]")
+{
+    test::require_allocation_failure_support();
+
+    /** @brief Network with a nonconstant fanin to collect. */
+    technology_network ntk{};
+    /** @brief Gate whose fanin requires storage. */
+    const auto gate = ntk.get_node(ntk.create_buf(ntk.create_pi()));
+
+    test::allocation_budget = 0;
+    try
+    {
+        static_cast<void>(fanins(ntk, gate));
+    }
+    catch (const std::bad_alloc&)
+    {
+        test::allocation_budget.reset();
+        return;
+    }
+    catch (...)
+    {
+        test::allocation_budget.reset();
+        throw;
+    }
+    test::allocation_budget.reset();
+    FAIL("Expected fanin collection to propagate std::bad_alloc");
+}
 
 TEST_CASE("Number of constant fanins", "[network-utils]")
 {

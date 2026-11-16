@@ -165,6 +165,72 @@ TEST_CASE("Mapped placement preserves three ordered inputs", "[placement-utils]"
     CHECK(lyt.source({placed, 1}) == middle);
     CHECK(lyt.source({placed, 2}) == right);
     CHECK(lyt.object_function(placed) == function);
+
+    /** @brief Routes from the input ports to the same gate through the branch map. */
+    mockturtle::node_map<branching_signal_container<>, named_technology_network> branches{ntk};
+    /** @brief Destination node for all three branches. */
+    const auto n = ntk.get_node(gate);
+    branches[a].update_branch(n, left);
+    branches[b].update_branch(n, middle);
+    branches[c].update_branch(n, right);
+    /** @brief Placed gate reached through the three branches. */
+    const auto branching = place(lyt, {2, 1}, ntk, n, branches);
+    CHECK(lyt.input_count(branching) == 3);
+    CHECK(lyt.source({branching, 0}) == left);
+    CHECK(lyt.source({branching, 1}) == middle);
+    CHECK(lyt.source({branching, 2}) == right);
+    CHECK(lyt.object_function(branching) == function);
+}
+
+TEST_CASE("Mapped placement rejects fanins outside the placement map", "[placement-utils]")
+{
+    /** @brief Network with one input when the placement maps are created. */
+    named_technology_network ntk{};
+    /** @brief Input covered by both maps. */
+    const auto a = ntk.create_pi();
+    /** @brief Layout receiving the mapped gate. */
+    gate_layout<cartesian_layout> lyt{{3, 3}};
+    /** @brief Layout port for the first input. */
+    const auto left = lyt.create_pi("a", {0, 0});
+    /** @brief Port map sized before the second input is created. */
+    mockturtle::node_map<layout_object_id, named_technology_network> ports{ntk};
+    /** @brief Branch map sized before the second input is created. */
+    mockturtle::node_map<branching_signal_container<>, named_technology_network> branches{ntk};
+    /** @brief Input outside both maps. */
+    const auto b = ntk.create_pi();
+    /** @brief Gate whose second fanin is outside both maps. */
+    const auto n = ntk.get_node(ntk.create_and(a, b));
+
+    ports[a] = left;
+    branches[a].update_branch(n, left);
+    CHECK_THROWS_AS(place(lyt, {1, 1}, ntk, n, ports), std::out_of_range);
+    CHECK_THROWS_AS(place(lyt, {1, 1}, ntk, n, branches), std::out_of_range);
+}
+
+TEST_CASE("Mapped placement connects a single fanin", "[placement-utils]")
+{
+    /** @brief Network with one inverter. */
+    named_technology_network ntk{};
+    /** @brief Inverter input signal. */
+    const auto a = ntk.create_pi();
+    /** @brief Inverter node to place through both maps. */
+    const auto n = ntk.get_node(ntk.create_not(a));
+    /** @brief Layout receiving the mapped inverters. */
+    gate_layout<cartesian_layout> lyt{{3, 3}};
+    /** @brief Layout port corresponding to the inverter input. */
+    const auto input = lyt.create_pi("a", {0, 0});
+    /** @brief Direct mapping of the input port. */
+    mockturtle::node_map<layout_object_id, named_technology_network> ports{ntk};
+    /** @brief Mapping of the input port through its branch. */
+    mockturtle::node_map<branching_signal_container<>, named_technology_network> branches{ntk};
+    ports[a] = input;
+    branches[a].update_branch(n, input);
+
+    for (const auto placed : {place(lyt, {1, 0}, ntk, n, ports), place(lyt, {0, 1}, ntk, n, branches)})
+    {
+        CHECK(lyt.is_inv(placed));
+        CHECK(lyt.source({placed, 0}) == input);
+    }
 }
 
 TEST_CASE("Two-input placement validates constant reduction", "[placement-utils]")
