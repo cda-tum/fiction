@@ -242,6 +242,7 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
  * @param node2pos Mapping from network nodes to layout output ports. The
  * map is used to fetch location of the fanins. The `mockturtle::node_map` is not updated by this function.
  * @return Output port of the newly placed gate in `lyt`.
+ * @throws std::out_of_range If a fanin node index is outside `node2pos`.
  */
 template <typename Geometry>
 [[nodiscard]] typename fiction::layouts::gate_layout<Geometry>::object_id
@@ -262,24 +263,16 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
     }
     if (num_fanins == 1)
     {
-        const auto fanin_signal = ntk.make_signal(fc.fanin_nodes[0]);
-
-        return place(lyt, t, ntk, n, node2pos[fanin_signal]);
+        return place(lyt, t, ntk, n, node2pos.at(fc.fanin_nodes[0]));
     }
     if (num_fanins == 2)
     {
-        const auto fanin_signal_a = ntk.make_signal(fc.fanin_nodes[0]);
-        const auto fanin_signal_b = ntk.make_signal(fc.fanin_nodes[1]);
-
-        return place(lyt, t, ntk, n, node2pos[fanin_signal_a], node2pos[fanin_signal_b], fc.constant_fanin);
+        return place(lyt, t, ntk, n, node2pos.at(fc.fanin_nodes[0]), node2pos.at(fc.fanin_nodes[1]), fc.constant_fanin);
     }
     if (num_fanins == 3)
     {
-        const auto fanin_signal_a = ntk.make_signal(fc.fanin_nodes[0]);
-        const auto fanin_signal_b = ntk.make_signal(fc.fanin_nodes[1]);
-        const auto fanin_signal_c = ntk.make_signal(fc.fanin_nodes[2]);
-
-        return place(lyt, t, ntk, n, node2pos[fanin_signal_a], node2pos[fanin_signal_b], node2pos[fanin_signal_c]);
+        return place(lyt, t, ntk, n, node2pos.at(fc.fanin_nodes[0]), node2pos.at(fc.fanin_nodes[1]),
+                     node2pos.at(fc.fanin_nodes[2]));
     }
 
     throw std::invalid_argument("Unsupported gate input count");
@@ -385,6 +378,7 @@ struct branching_signal_container
  * branches. The map is used to fetch location of the fanins. The `mockturtle::node_map` is not updated by this
  * function.
  * @return Output port of the newly placed gate in `lyt`.
+ * @throws std::out_of_range If a fanin node index is outside `node2pos`.
  */
 template <typename Geometry, uint16_t fanout_size = 2>
 [[nodiscard]] typename fiction::layouts::gate_layout<Geometry>::object_id
@@ -405,25 +399,17 @@ place(fiction::layouts::gate_layout<Geometry>& lyt, const fiction::layouts::layo
     }
     if (num_fanins == 1)
     {
-        const auto fanin_signal = ntk.make_signal(fc.fanin_nodes[0]);
-
-        return place(lyt, t, ntk, n, node2pos[fanin_signal][n]);
+        return place(lyt, t, ntk, n, node2pos.at(fc.fanin_nodes[0])[n]);
     }
     if (num_fanins == 2)
     {
-        const auto fanin_signal_a = ntk.make_signal(fc.fanin_nodes[0]);
-        const auto fanin_signal_b = ntk.make_signal(fc.fanin_nodes[1]);
-
-        return place(lyt, t, ntk, n, node2pos[fanin_signal_a][n], node2pos[fanin_signal_b][n], fc.constant_fanin);
+        return place(lyt, t, ntk, n, node2pos.at(fc.fanin_nodes[0])[n], node2pos.at(fc.fanin_nodes[1])[n],
+                     fc.constant_fanin);
     }
     if (num_fanins == 3)
     {
-        const auto fanin_signal_a = ntk.make_signal(fc.fanin_nodes[0]);
-        const auto fanin_signal_b = ntk.make_signal(fc.fanin_nodes[1]);
-        const auto fanin_signal_c = ntk.make_signal(fc.fanin_nodes[2]);
-
-        return place(lyt, t, ntk, n, node2pos[fanin_signal_a][n], node2pos[fanin_signal_b][n],
-                     node2pos[fanin_signal_c][n]);
+        return place(lyt, t, ntk, n, node2pos.at(fc.fanin_nodes[0])[n], node2pos.at(fc.fanin_nodes[1])[n],
+                     node2pos.at(fc.fanin_nodes[2])[n]);
     }
 
     throw std::invalid_argument("Unsupported gate input count");
