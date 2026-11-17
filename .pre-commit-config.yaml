@@ -90,7 +90,7 @@ repos:
 
   # Format and lint documentation with MyST support.
   - repo: https://github.com/rvben/rumdl-pre-commit
-    rev: v0.3.2
+    rev: v0.3.3
     hooks:
       - id: rumdl
         files: ^docs/.*\.md$
@@ -192,7 +192,7 @@ repos:
   # shell imports without compiling the extension, and the `docs` group resolves the imports of
   # `docs/conf.py` and its Sphinx extension
   - repo: https://github.com/astral-sh/ty-pre-commit
-    rev: v0.0.98
+    rev: v0.0.100
     hooks:
       - id: ty
         args: [--no-install-project, --group, docs]
@@ -223,7 +223,7 @@ repos:
 
   # Check the pyproject.toml file
   - repo: https://github.com/henryiii/validate-pyproject-schema-store
-    rev: 2026.11.05
+    rev: 2026.11.10
     hooks:
       - id: validate-pyproject
         priority: 0
