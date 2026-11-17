@@ -79,7 +79,7 @@ endif()
 
 # parallel-hashmap
 set(PARALLEL_HASHMAP_VERSION
-    2.0.0
+    2.1.0
     CACHE STRING "parallel-hashmap version")
 if(NOT DEFINED PARALLEL_HASHMAP_URL)
   set(PARALLEL_HASHMAP_URL
@@ -88,7 +88,7 @@ if(NOT DEFINED PARALLEL_HASHMAP_URL)
 endif()
 if(NOT DEFINED PARALLEL_HASHMAP_SHA256)
   set(PARALLEL_HASHMAP_SHA256
-      4f462f51a3468166ea4cf87c80e001dc1999093264cf55cbda3492ca39a7730b)
+      d2c94659a5301c94cd5bbd6cf4b01c1dd635bba15c76cc188cdd82b928136838)
 endif()
 FetchContent_Declare(
   parallel-hashmap
