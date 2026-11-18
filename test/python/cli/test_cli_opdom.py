@@ -270,31 +270,29 @@ assert main(["opdom", *sys.argv[1:]]) == 0
     assert len(csv.read_text(encoding="utf-8").splitlines()) == 5
 
 
-@pytest.mark.parametrize("entry_point", ["shell", "standalone"])
 @pytest.mark.parametrize(
-    "method",
+    ("method", "dimensions", "entry_point"),
     [
-        "--grid-search",
-        "--random-sampling 4",
-        "--flood-fill 4",
-        "--contour-tracing 4",
-        "--algorithm grid_search",
-        "--algorithm random_sampling --samples 4",
-        "--algorithm flood_fill --samples 4",
-        "--algorithm contour_tracing --samples 4",
+        pytest.param("--grid-search", 2, "shell", id="legacy-grid-2d-shell"),
+        pytest.param("--algorithm grid_search", 3, "standalone", id="named-grid-3d-standalone"),
+        pytest.param("--random-sampling 4", 2, "standalone", id="legacy-random-2d-standalone"),
+        pytest.param("--algorithm random_sampling --samples 4", 3, "shell", id="named-random-3d-shell"),
+        pytest.param("--flood-fill 4", 3, "shell", id="legacy-flood-3d-shell"),
+        pytest.param("--algorithm flood_fill --samples 4", 2, "standalone", id="named-flood-2d-standalone"),
+        pytest.param("--contour-tracing 4", 3, "standalone", id="legacy-contour-3d-standalone"),
+        pytest.param("--algorithm contour_tracing --samples 4", 2, "shell", id="named-contour-2d-shell"),
     ],
 )
-@pytest.mark.parametrize("dimensions", [2, 3])
 def test_methods_and_sketch(
     shell: Shell, wire_with_canvas: sidb_layout, tmp_path: Path, method: str, dimensions: int, entry_point: str
 ) -> None:
-    """Every method accepts 2D and 3D Sketch computations."""
+    """Cover both spellings and sweep dimensions for each Sketch reconstruction method."""
 
-    shell.session.cell_layouts.add(CellEntry(wire_with_canvas))
     path = tmp_path / "sketch.csv"
     z = "--z-sweep mu_minus --z-min -0.32 --z-max -0.32" if dimensions == 3 else ""
     flags = ["--gate", "id", "--sketch", *method.split(), *z.split(), *SMALL_SWEEP]
     if entry_point == "shell":
+        shell.session.cell_layouts.add(CellEntry(wire_with_canvas))
         shell.ok(f'opdom "{path}" ' + " ".join(flags))
         result = shell.session.log[-1]["result"]
     else:

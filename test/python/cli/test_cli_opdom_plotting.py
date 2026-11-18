@@ -122,22 +122,18 @@ def test_static_visibility_and_size(domain: operational_domain) -> None:
     assert figure.dpi == 150
 
 
-@pytest.mark.parametrize("suffix", ["png", "svg", "pdf", "html"])
-def test_opdom_plot_files(xor_gate: Shell, tmp_path: Path, suffix: str) -> None:
-    """A shell computation can export every supported plot format."""
-    path = tmp_path / f"domain.{suffix}"
-    xor_gate.ok(f'opdom "{tmp_path / "domain.csv"}" --plot "{path}" --x-min 5.6 --x-max 5.6 --y-min 5 --y-max 5')
-    data = path.read_bytes()
-    assert data
-    if suffix == "png":
-        assert data.startswith(b"\x89PNG")
-    elif suffix == "pdf":
-        assert data.startswith(b"%PDF")
-    elif suffix == "svg":
-        assert b"<svg" in data
-    else:
-        assert b"Plotly.newPlot" in data
-        assert b"<script src=" not in data
+def test_opdom_plot_files(xor_gate: Shell, tmp_path: Path) -> None:
+    """One shell sweep exports every supported plot format."""
+    png, svg, pdf, html = (tmp_path / f"domain.{suffix}" for suffix in ("png", "svg", "pdf", "html"))
+    plots = " ".join(f'--plot "{path}"' for path in (png, svg, pdf, html))
+    xor_gate.ok(f'opdom "{tmp_path / "domain.csv"}" {plots} --x-min 5.6 --x-max 5.6 --y-min 5 --y-max 5')
+
+    assert png.read_bytes().startswith(b"\x89PNG")
+    assert b"<svg" in svg.read_bytes()
+    assert pdf.read_bytes().startswith(b"%PDF")
+    html_data = html.read_bytes()
+    assert b"Plotly.newPlot" in html_data
+    assert b"<script src=" not in html_data
 
 
 def test_entry_points_share_results_and_compute_once(
