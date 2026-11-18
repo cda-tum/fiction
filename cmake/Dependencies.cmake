@@ -79,7 +79,7 @@ endif()
 
 # parallel-hashmap
 set(PARALLEL_HASHMAP_VERSION
-    2.0.0
+    2.1.0
     CACHE STRING "parallel-hashmap version")
 if(NOT DEFINED PARALLEL_HASHMAP_URL)
   set(PARALLEL_HASHMAP_URL
@@ -88,7 +88,7 @@ if(NOT DEFINED PARALLEL_HASHMAP_URL)
 endif()
 if(NOT DEFINED PARALLEL_HASHMAP_SHA256)
   set(PARALLEL_HASHMAP_SHA256
-      4f462f51a3468166ea4cf87c80e001dc1999093264cf55cbda3492ca39a7730b)
+      d2c94659a5301c94cd5bbd6cf4b01c1dd635bba15c76cc188cdd82b928136838)
 endif()
 FetchContent_Declare(
   parallel-hashmap
@@ -122,7 +122,7 @@ FetchContent_MakeAvailable(tinyxml2)
 # fiction supplies fmt explicitly so its headers are available in both the build
 # tree and the installed package.
 set(FMT_VERSION
-    12.2.0
+    12.2.1
     CACHE STRING "fmt version")
 if(NOT DEFINED FMT_URL)
   set(FMT_URL
@@ -130,7 +130,7 @@ if(NOT DEFINED FMT_URL)
 endif()
 if(NOT DEFINED FMT_SHA256)
   set(FMT_SHA256
-      8b852bb5aa6e7d8564f9e81394055395dd1d1936d38dfd3a17792a02bebd7af0)
+      449374d74f31b67796dece454d59b93e6f1538efcce0e9ac78000c98142c139e)
 endif()
 # `SOURCE_SUBDIR` names a directory without a CMakeLists.txt, so the archive is
 # only populated; fmt's own CMake would build a library and install rules
@@ -159,7 +159,7 @@ set(MOCKTURTLE_INSTALL ON)
 FetchContent_Declare(
   mockturtle
   GIT_REPOSITORY https://github.com/marcelwa/mockturtle.git
-  GIT_TAG 8c44f284d2e408984a0278d7b55a335fadf33c8e # mnt
+  GIT_TAG 7b7c0aed68424468b27400aa2619869757e5bf96 # mnt
 )
 FetchContent_MakeAvailable(mockturtle)
 
