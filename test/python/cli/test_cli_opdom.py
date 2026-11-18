@@ -417,15 +417,39 @@ def test_installed_console_command(resource: Callable[[str], str], tmp_path: Pat
     assert len(csv.read_text(encoding="utf-8").splitlines()) == 5
 
 
-@pytest.mark.parametrize("output_flag", ["--csv", "--plot", "--log"])
-def test_input_is_not_an_output(resource: Callable[[str], str], tmp_path: Path, output_flag: str) -> None:
+@pytest.mark.parametrize(
+    ("output_flag", "alias_suffix"),
+    [
+        pytest.param("--csv", None, id="csv"),
+        pytest.param("--plot", ".png", id="plot-hard-link"),
+        pytest.param("--log", None, id="log"),
+        pytest.param("--log", ".json", id="log-hard-link"),
+    ],
+)
+def test_input_is_not_an_output(
+    resource: Callable[[str], str],
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    output_flag: str,
+    alias_suffix: str | None,
+) -> None:
     """A colliding output or log path cannot overwrite the input SQD file."""
     main = importlib.import_module("mnt.fiction.opdom").main
     path = tmp_path / "input.sqd"
     source = Path(resource("hex_21_inputsdbp_xor_v1.sqd")).read_bytes()
     path.write_bytes(source)
-    assert main([str(path), "--gate", "xor", output_flag, str(path), *SMALL_SWEEP]) != 0
+    target = path
+    if alias_suffix is not None:
+        target = tmp_path / f"alias{alias_suffix}"
+        target.hardlink_to(path)
+    csv = tmp_path / "domain.csv"
+    outputs = ["--csv", str(csv)] if output_flag == "--log" else []
+
+    assert main([str(path), "--gate", "xor", output_flag, str(target), *outputs, *SMALL_SWEEP]) != 0
+    assert "would overwrite the input SQD file" in capsys.readouterr().err
+    assert target.samefile(path)
     assert path.read_bytes() == source
+    assert not csv.exists()
 
 
 def test_shell_log_is_not_a_plot(xor_gate: Shell, tmp_path: Path) -> None:
@@ -436,20 +460,6 @@ def test_shell_log_is_not_a_plot(xor_gate: Shell, tmp_path: Path) -> None:
     assert "distinct" in xor_gate.fails(f'opdom "{csv}" --plot "{plot}" ' + " ".join(SMALL_SWEEP))
     assert not csv.exists()
     assert not plot.exists()
-
-
-def test_input_hard_link_is_not_a_log(resource: Callable[[str], str], tmp_path: Path) -> None:
-    """A log hard link cannot truncate the input SQD file."""
-    main = importlib.import_module("mnt.fiction.opdom").main
-    path = tmp_path / "input.sqd"
-    source = Path(resource("hex_21_inputsdbp_xor_v1.sqd")).read_bytes()
-    path.write_bytes(source)
-    log = tmp_path / "alias.json"
-    log.hardlink_to(path)
-    csv = tmp_path / "domain.csv"
-    assert main([str(path), "--gate", "xor", "--log", str(log), "--csv", str(csv), *SMALL_SWEEP]) != 0
-    assert path.read_bytes() == source
-    assert not csv.exists()
 
 
 def test_expression_rejects_inputs_beyond_variable_names(
