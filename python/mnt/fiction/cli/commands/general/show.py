@@ -16,13 +16,13 @@ from typing import TYPE_CHECKING
 
 from mnt.fiction.cli.drawing import (
     drawing_flags,
-    open_viewer,
     render_dot,
     validate_drawing_options,
     write_dot,
     write_svg,
 )
 from mnt.fiction.cli.errors import CommandError
+from mnt.fiction.cli.output import open_viewer
 from mnt.fiction.cli.registry import Category, command, one_store, store_flags
 from mnt.pyfiction.mol_qca import mol_qca_layout
 from mnt.pyfiction.qca import qca_layout

@@ -28,8 +28,8 @@ from prompt_toolkit.input import DummyInput
 from prompt_toolkit.output import DummyOutput
 
 from mnt.fiction.cli import Session, main
-from mnt.fiction.cli import app as cli_app
-from mnt.fiction.cli.app import CommandCompleter
+from mnt.fiction.cli import repl as cli_app
+from mnt.fiction.cli.repl import CommandCompleter
 from mnt.pyfiction.sidb.simulation import engines
 from mnt.pyfiction.utils import __version__
 
@@ -52,6 +52,7 @@ def interactive_prompt(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Itera
         yield prompt
 
 
+@pytest.mark.parametrize("prefix", [[], ["repl"]])
 @pytest.mark.parametrize(
     ("commands", "status"),
     [
@@ -60,14 +61,38 @@ def interactive_prompt(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Itera
         pytest.param("version; quit; frobnicate", 0, id="quit-skips-remaining-commands"),
     ],
 )
-def test_command_exit_status(commands: str, status: int) -> None:
-    assert main(["-c", commands]) == status
+def test_command_exit_status(commands: str, status: int, prefix: list[str]) -> None:
+    assert main([*prefix, "-c", commands]) == status
 
 
-def test_script_file(tmp_path: Path) -> None:
+@pytest.mark.parametrize("prefix", [[], ["repl"]])
+def test_script_file(tmp_path: Path, prefix: list[str]) -> None:
     script = tmp_path / "run.fs"
     script.write_text("version\n# a comment\n\nversion\n", encoding="utf-8")
-    assert main(["-f", str(script)]) == 0
+    assert main([*prefix, "-f", str(script)]) == 0
+
+
+@pytest.mark.parametrize("options", [["--help"], ["--help", "-q"], ["-h", "-q"]])
+def test_entry_point_help(capsys: pytest.CaptureFixture[str], options: list[str]) -> None:
+    """Top-level help introduces the dedicated workflow and explicit shell route."""
+    assert main(options) == 0
+    help_text = capsys.readouterr().out
+    assert "opdom" in help_text
+    assert "repl" in help_text
+
+
+@pytest.mark.parametrize("prefix", [[], ["repl"]])
+def test_entry_point_piped_input(prefix: list[str]) -> None:
+    """Both shell spellings execute piped commands without an interactive prompt."""
+    result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed executable and argument list
+        [sys.executable, "-m", "mnt.fiction.cli", *prefix, "--quiet"],
+        input="version\nquit\n",
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert __version__ in result.stdout
 
 
 @pytest.mark.parametrize("kind", ["missing", "directory"])
@@ -100,10 +125,13 @@ def test_module_runs_as_a_process() -> None:
     assert __version__ in result.stdout
 
 
-def test_interactive_interrupt_continues_and_eof_closes_log(tmp_path: Path, interactive_prompt: Mock) -> None:
+@pytest.mark.parametrize("prefix", [[], ["repl"]])
+def test_interactive_interrupt_continues_and_eof_closes_log(
+    tmp_path: Path, interactive_prompt: Mock, prefix: list[str]
+) -> None:
     interactive_prompt.side_effect = [KeyboardInterrupt, "version", EOFError]
     log = tmp_path / "interactive.json"
-    assert main(["--log", str(log)]) == 0
+    assert main([*prefix, "--log", str(log)]) == 0
     entries = json.loads(log.read_text(encoding="utf-8"))
     assert len(entries) == 1
     assert entries[0]["status"] == "ok"
@@ -144,11 +172,12 @@ def test_quit_stops_the_rest_of_a_script(tmp_path: Path) -> None:
     assert main(["-f", str(script)]) == 0
 
 
-def test_interactive_continues_after_commands(tmp_path: Path, interactive_prompt: Mock) -> None:
+@pytest.mark.parametrize("prefix", [[], ["repl"]])
+def test_interactive_continues_after_commands(tmp_path: Path, interactive_prompt: Mock, prefix: list[str]) -> None:
     """-i runs the shell once -c is done, as the C++ shell did."""
     interactive_prompt.side_effect = ["version", EOFError]
     log = tmp_path / "interactive.json"
-    assert main(["-i", "--log", str(log), "-c", "version"]) == 0
+    assert main([*prefix, "-i", "--log", str(log), "-c", "version"]) == 0
     entries = json.loads(log.read_text(encoding="utf-8"))
     assert [entry["command"] for entry in entries] == ["version", "version"]
 

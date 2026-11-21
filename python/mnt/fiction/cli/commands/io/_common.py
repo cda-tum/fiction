@@ -17,6 +17,7 @@ from aigverse.io import read_ascii_aiger_into_aig, read_pla_into_aig
 
 from mnt.fiction.cli.aigverse_bridge import from_aigverse
 from mnt.fiction.cli.errors import CommandError
+from mnt.fiction.cli.parsing import existing_file
 from mnt.fiction.cli.stores import CellEntry, describe
 from mnt.fiction.cli.topologies import FGL_READERS
 from mnt.pyfiction.networks import aig_network, mig_network, set_name, technology_network, xag_network
@@ -79,32 +80,6 @@ def _topology_argument(parser: Parser) -> None:
         default="cartesian",
         help="FGL layout topology; choices: %(choices)s",
     )
-
-
-def _existing_file(path: Path, suffixes: tuple[str, ...]) -> Path:
-    """Check that a path is a readable file of an accepted format.
-
-    Args:
-        path: The path the user gave.
-        suffixes: The suffixes the reader accepts.
-
-    Returns:
-        The path itself.
-
-    Raises:
-        CommandError: The path is missing, a directory, or of another format.
-    """
-    if path.is_dir():
-        msg = f"'{path}' is a directory; give one file to read"
-        raise CommandError(msg)
-    if not path.is_file():
-        msg = f"no such file: '{path}'"
-        raise CommandError(msg)
-    if suffixes and path.suffix.lower() not in suffixes:
-        accepted = " or ".join(suffixes)
-        msg = f"'{path.suffix}' is not {accepted}; use 'read' to choose the reader by suffix"
-        raise CommandError(msg)
-    return path
 
 
 def _read_path_argument(parser: Parser) -> None:
@@ -208,7 +183,7 @@ def read_file(
     Raises:
         CommandError: The file or selected format is invalid.
     """
-    _existing_file(path, suffixes)
+    existing_file(path, suffixes)
     suffix = f".{file_format}" if file_format else path.suffix.lower()
     if suffix in {".v", ".aig", ".blif", ".aag", ".pla"}:
         network = _read_network(session, path, network_type, file_format)

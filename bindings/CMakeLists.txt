@@ -21,6 +21,10 @@ set(Python_ARTIFACTS_INTERACTIVE
     ON
     CACHE BOOL
           "Prevent multiple searches for Python and instead cache the results.")
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.26 AND NOT DEFINED
+                                                SKBUILD_SABI_COMPONENT)
+  set(SKBUILD_SABI_COMPONENT Development.SABIModule)
+endif()
 find_package(Python REQUIRED COMPONENTS Interpreter Development.Module
                                         ${SKBUILD_SABI_COMPONENT})
 execute_process(
