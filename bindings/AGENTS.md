@@ -1,5 +1,8 @@
 # AGENTS.md — `pyfiction` bindings
 
+Use these instructions for binding sources, public `mnt.pyfiction` module
+wiring, stubs, and generated binding docstrings.
+
 The Python bindings use **nanobind**, with one translation unit per binding to keep
 compile time and memory usage manageable. `docs/getting_started.md` §"Bindings
 Architecture" describes the layout in full; read it before adding a binding.
@@ -38,18 +41,17 @@ A new binding:
    copy of the exception's type information, and macOS does not match the copies. An
    exception whose Python class lives in another module is raised through that class, as
    `physical_design` does for `high_degree_fanin_exception`.
-6. Comes with regenerated stubs: run `nox -s stubs` and commit the `.pyi` changes. CI
+6. Comes with regenerated stubs. Run `nox -s stubs` and commit the `.pyi` changes. CI
    fails when the committed stubs differ from the generated ones. Where stubgen cannot infer a
    type, state it at the binding with `nanobind::sig`, or `nanobind::for_getter` and
    `nanobind::for_setter` on a property.
 
-Never:
+## Build discovery and generated files
 
-- Add source files to a manual list in `CMakeLists.txt`. `file(GLOB_RECURSE ...)` picks
-  them up.
-- Edit the `.pyi` files by hand, or rewrite them in `nox -s stubs`. Fix the binding, or its
-  docstring, and regenerate.
-- Edit `include/pyfiction/pybind11_mkdoc_docstrings.hpp` by hand. It is generated from the
-  Doxygen comments in `include/fiction/`, and keeps its historical name. CI's
-  `🐍 Docstrings` job regenerates it and fails when the committed file differs; take the
-  replacement from that job's `pyfiction-docstrings` artifact.
+- Let `file(GLOB_RECURSE ...)` discover binding sources.
+- Fix bindings or docstrings at the source and regenerate the `.pyi` files. Keep
+  manual edits and post-processing out of the generated stubs.
+- Get the generated `include/pyfiction/pybind11_mkdoc_docstrings.hpp` from the
+  `pyfiction-docstrings` artifact when the `🐍 Docstrings` job reports a
+  mismatch. The job generates the header from Doxygen comments in
+  `include/fiction/`.

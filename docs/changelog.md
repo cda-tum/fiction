@@ -418,6 +418,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     11.0.2 does not compile with clang 20.
 
 - Documentation:
+  - Agent instructions now define task scope and verification by change type.
   - Multi-output truth-table factories now document their output-port order.
   - Color routing documentation no longer claims lexicographic ordering.
   - Progress callback docs state the input-mutation precondition, propagation from construction and updates,

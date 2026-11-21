@@ -35,8 +35,8 @@ Follow the guidelines below when preparing a pull request.
 ## Core Guidelines
 
 - ["Commit early and push often"](https://www.worklytics.co/blog/commit-early-push-often).
-- Write meaningful commit messages. Prefix each subject with a single [gitmoji](https://gitmoji.dev) character matching the change's dominant nature; `AGENTS.md` documents the convention in full.
-- Focus on one feature or bug. Include fixes and cleanups found during the work as separate commits; discuss redesigns first. Keep dependency updates in separate pull requests.
+- Start each commit subject and PR title with one plain [gitmoji](https://gitmoji.dev) for the main purpose, such as 🐛 for a bug fix or 📝 for documentation.
+- Focus on one feature or bug. Include directly related fixes and cleanups in separate commits when the same checks cover them. Report unrelated findings and discuss redesigns first. Keep dependency updates in separate pull requests.
 - If you added a new feature, you should add tests that ensure it works as intended. Furthermore, the new feature should be documented appropriately.
 - If you fixed a bug, you should add tests that demonstrate that the bug has been fixed.
 - Document your code thoroughly and write readable code.
@@ -45,6 +45,21 @@ Follow the guidelines below when preparing a pull request.
 - Enable EditorConfig support in your editor to apply the repository's indentation, line endings, and final-newline settings. The formatter hooks check the full style.
 - Run `clang-format` and `clang-tidy` to check your code for style and linting errors before committing.
 - We recommend installing [prek](https://prek.j178.dev/) and running `prek install` once so that formatting and linting checks run automatically before every commit.
+
+## C++ file headers
+
+Start each C++ source and header with the copyright block managed by the `license-tools` hook at offset zero. Place the Doxygen file block directly after it. The generated `pybind11_mkdoc_docstrings.hpp` gets its header from the generator.
+
+```cpp
+/**
+ * @file
+ * @brief SMT-based exact placement and routing of FCN gate-level layouts.
+ * @author Marcel Walter (marcelwa)
+ * @author Jan Drewniok (Drewniok)
+ */
+```
+
+Use one line for `@brief` that describes what the file provides. List human contributors oldest first. Use `Full Name (handle)` without an `@` before the handle, or the name alone if the contributor has no handle. Human contributors append their own name when they edit a file. Preserve the existing attribution and use `git log --follow -- <file>` to trace history across renames. Automated edits do not add file authors.
 
 ## C++ Static Analysis
 
@@ -66,7 +81,9 @@ every eligible C++ file.
 
 - Create PRs early. It is ok to create work-in-progress PRs. You may mark these as draft PRs on GitHub.
 
-- Follow the PR template. Use a descriptive title and a short paragraph explaining the need, resulting behavior, and any decision the diff cannot explain. Reference related issues and complete the checklist.
+- Follow the PR template and complete its checklist. Use one short paragraph of up to three sentences for the description. Explain the need, resulting behavior, and any decision the diff cannot explain. Reference related issues and add reproduction or measurement details when they support a claim. Put the AI-disclosure line after the body.
+
+- In issues, state the symptom, observation, and reproduction. Keep review replies to a line or two per finding. Let GitHub wrap prose by entering one line per paragraph, list item, or table row.
 
 - Whenever a PR is created or updated, the `CI` workflow runs. Its `🔍 Change` job classifies your diff and skips the jobs your changes cannot affect, so a documentation-only PR does not pay for the C++ matrix. `🚦 Check` aggregates every job and is the one status that has to be green. Here are some tips for finding the cause of certain failures:
 
@@ -78,9 +95,11 @@ every eligible C++ file.
   - If the `🐍 Docstrings` check fails, the generated `pybind11_mkdoc_docstrings.hpp` no longer matches the Doxygen comments in `include/fiction/`. Download the `pyfiction-docstrings` artifact from that run, put it in place of `bindings/include/pyfiction/pybind11_mkdoc_docstrings.hpp`, and commit it. Never edit that file by hand; the job's summary carries the same instructions.
   - If `🚦 Check` fails while every job below it looks green, a job was skipped for a reason change detection did not predict — usually because something it depends on failed first.
 
+- Poll `gh pr checks <PR>` or the GitHub checks view, fix failures caused by your change, and check again after each push. If a check remains blocked, report the job and relevant failing lines.
+
 - Once your PR is ready, change it from a draft PR to a regular PR and request a review from one of the project maintainers.
 
-- If your PR gets a "Changes requested" review, you will need to address the feedback and update your PR by pushing to the same branch. You don't need to close the PR and open a new one. Respond to review comments on the PR (e.g., with "done 👍"). Be sure to re-request review once you have made changes after a code review so that maintainers know that the requests have been addressed.
+- If your PR gets a "Changes requested" review, push fixes to the same branch, reply to the review comments, and re-request review.
 
 ## Selecting Python Tests
 
@@ -115,6 +134,8 @@ patch status; Python project coverage is compared with the measured base revisio
 
 ## Code Review
 
+Before calling a PR complete, check unresolved review threads in the GitHub conversation or query [GitHub's GraphQL review threads](https://docs.github.com/en/graphql/reference/pulls#pullrequestreviewthread) and inspect `isResolved`. Verify each finding against the current diff. Reply with the commit hash for a finding already fixed, a brief explanation for one that does not apply, or the fix for a valid finding. Consolidate duplicate findings in one reply and leave thread resolution to the reviewer.
+
 Two automated reviewers comment on every pull request, and they carry different weight.
 
 - The `🚨 Lint` check posts `clang-tidy` findings. Treat these as **binding**: fix them, or suppress the specific check with a `// NOLINT(check-name)` comment that states the reason.
@@ -123,8 +144,7 @@ Two automated reviewers comment on every pull request, and they carry different 
 When working with CodeRabbit:
 
 - **Review the review.** Language models skew conservative and will sometimes push toward overcomplicated code. Verify each finding against the current code, and disagree in writing when it is wrong — that is a normal outcome, not a problem.
-- **Respond to comments rather than silently resolving them.** CodeRabbit learns from replies, and a resolved-but-unanswered thread hides the reasoning from human reviewers. Leave resolution to the reviewer.
-- **Re-request a pass** with `@coderabbitai review` after a substantial push, or `@coderabbitai full review` after a rebase. When you need a CodeRabbit response in a thread, mention `@coderabbitai`.
+- **Re-request a pass** with `@coderabbitai review` after marking a draft ready or after a substantial push. Use `@coderabbitai full review` after a rebase. When you need a CodeRabbit response in a thread, mention `@coderabbitai`.
 - **Do not enable a second AI reviewer** on the same pull request. CodeRabbit performs noticeably worse when another review bot is active on the same diff.
 - **Apply reviewer code suggestions through GitHub's batch flow** ("Add suggestion to batch" → "Commit suggestions"). Each suggestion's author is recorded as a co-author of the resulting commit, and the person committing the batch is the committer and also a co-author.
 - **Avoid force-pushing or squashing locally while a review is open.** It detaches existing comments from their lines. Maintainers squash on merge.
@@ -163,7 +183,7 @@ Contributions written with the help of an AI agent are welcome, under two condit
 - **Disclose it.** Add an `Assisted-by: <Model Name> via <Tool Name>` trailer to any commit whose content an agent authored, and add a line disclosing AI assistance to every public text body an agent wrote or edited: pull request descriptions, issues, discussions, review comments, and replies. One line at the end is enough, and it should name what you actually checked. Titles are exempt, and having your PR reviewed by CodeRabbit does not make it an AI-assisted contribution.
 - **Take responsibility for it.** Review and understand the content before you post it. If you cannot explain it, do not submit it. A contribution should be worth more than the effort it costs to review.
 
-Agent instructions live in `AGENTS.md` at the repository root, with additional files in the subdirectories they apply to. If your tool expects a different file name, create a local symlink — for example `ln -s AGENTS.md CLAUDE.md`. Those names are gitignored, so the repository itself stays tool-neutral.
+Agent instructions live in `AGENTS.md` at the repository root and in the subdirectories they apply to. Claude Code 2.1.277 and later can read `AGENTS.md` directly. Its default depends on whether a `CLAUDE.md` or `CLAUDE.local.md` takes precedence. If your setup requires a local `CLAUDE.md`, place `@AGENTS.md` in it and check `/memory` in a fresh session. See the [Claude Code instruction loading rules](https://code.claude.com/docs/en/memory#agentsmd) for supported versions and settings.
 
 ## Writing Catch2 tests
 

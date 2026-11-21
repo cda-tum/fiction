@@ -1,16 +1,10 @@
 # AGENTS.md — tests
 
 `test/python/` holds the `pytest` suite of `mnt.pyfiction`. It mirrors the Python module
-tree, not `include/fiction/`: the tests of `mnt.pyfiction.sidb.simulation.engines` live in
-`test/python/sidb/simulation/engines/`. The directories carry no `__init__.py`, so the suite
-never shadows an installed `mnt.pyfiction`. Everything else below is about the C++ tests.
-
-Catch2 tests. The tree mirrors `include/fiction/` exactly: `layouts/`, `networks/`,
-`synthesis/`, `physical_design/`, `verification/`, `technology/` (with `fcn/`, `qca/`,
-`inml/`, and the `sidb/` subtree), and `utils/`, plus `benchmark/`, shared `resources/`,
-and the blueprints under `utils/blueprints/`. A test lives at the path its header does,
-so `technology/sidb/model/charge_state.hpp` is tested by
-`test/technology/sidb/model/test_charge_state.cpp`.
+tree. For example, the tests of `mnt.pyfiction.sidb.simulation.engines` live in
+`test/python/sidb/simulation/engines/`. Keep those directories free of `__init__.py`
+so the suite does not shadow the installed package. `test/docs/` holds tests for
+documentation behavior. The rules below cover the Catch2 suite.
 
 ## Wiring
 
@@ -23,8 +17,7 @@ so `technology/sidb/model/charge_state.hpp` is tested by
   with the same name in different subdirectories collide and CMake fails. The `test_`
   prefix also keeps them clear of `benchmark/`, which is filtered out of that glob and
   whose files are unprefixed.
-- Do not edit `test/CMakeLists.txt` to register a test. The glob picks it up; re-run
-  CMake.
+- Rerun CMake to discover new test files through the existing glob.
 - Load test data through the `TEST_PATH` compile definition, not a relative path.
 - Include the shared helpers as `"utils/blueprints/..."`, without a `../` prefix:
   `test/CMakeLists.txt` puts `test/` on the include path. Benchmarks are the exception
@@ -69,13 +62,6 @@ so `technology/sidb/model/charge_state.hpp` is tested by
   request.
 - Follow the [Catch2 guide](../docs/contributing.md#writing-catch2-tests). Use the
   gate-layout tests as examples, not a mandatory list of macros to include.
-- Use sections for independent operations, generators for independent data rows,
-  and typed tests for distinct type contracts. Keep dependent state transitions
-  and allocation-failure sweeps as sequences. Avoid accidental Cartesian products.
-- Reuse blueprints before adding fixtures. Share nontrivial per-test setup with a
-  small local fixture only when multiple cases need it; never share mutable state.
-- Use `REQUIRE` for prerequisites and `CHECK` for independent observations. Capture
-  the values needed to reproduce a failed row or loop iteration.
 - Compare complete visitor results, including multiplicity. Ignore order only
   when the contract permits it; converting observations to sets can hide defects.
 - Before deleting coverage, name the surviving oracle and justify its input and
