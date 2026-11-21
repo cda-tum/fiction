@@ -272,9 +272,10 @@ class sqd_reader
 
         std::string lattice_name{lattice::si_100_2x1().name};
 
-        if (const auto* const name = lat_vec_element->FirstChildElement("name"); name != nullptr)
+        /** @brief Optional lattice reconstruction name element. */
+        if (const auto* const name_element = lat_vec_element->FirstChildElement("name"); name_element != nullptr)
         {
-            if (const auto* const text = name->GetText(); text != nullptr)
+            if (const auto* const text = name_element->GetText(); text != nullptr)
             {
                 lattice_name = text;
             }
