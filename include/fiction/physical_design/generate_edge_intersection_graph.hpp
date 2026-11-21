@@ -123,11 +123,14 @@ class generate_edge_intersection_graph_impl
      */
     edge_intersection_graph run()
     {
+        /** @brief Graph of candidate paths and their intersections. */
+        edge_intersection_graph graph{};
+
         // measure runtime
         mockturtle::stopwatch stop{pst.time_total};
 
         std::ranges::for_each(objectives,
-                              [this](const auto& obj)
+                              [this, &graph](const auto& obj)
                               {
                                   /** @brief Candidate coordinate paths for the current routing objective. */
                                   path_collection paths{};
@@ -151,7 +154,7 @@ class generate_edge_intersection_graph_impl
                                                                   std::make_move_iterator(paths.end())};
 
                                   // assign a unique label to each path and create a corresponding node in the graph
-                                  initiate_objective_nodes(obj_paths,
+                                  initiate_objective_nodes(graph, obj_paths,
                                                            static_cast<std::size_t>(&obj - objectives.data()));
 
                                   // if there are no paths, the objective could not be fulfilled
@@ -163,10 +166,10 @@ class generate_edge_intersection_graph_impl
                                   {
                                       // since all paths of the same objective have intersections by definition, create
                                       // edges between all of them by iterating over all possible combinations of size 2
-                                      connect_clique(obj_paths);
+                                      connect_clique(graph, obj_paths);
                                   }
                                   // for each previously stored path, create an edge if there is an intersection
-                                  create_intersection_edges(obj_paths);
+                                  create_intersection_edges(graph, obj_paths);
 
                                   // add the collection to all paths gathered thus far
                                   all_paths.insert(all_paths.end(), std::make_move_iterator(obj_paths.begin()),
@@ -177,8 +180,7 @@ class generate_edge_intersection_graph_impl
         pst.num_vertices = graph.size_vertices();
         pst.num_edges    = graph.size_edges();
 
-        // The one-shot implementation transfers its completed graph.
-        return std::move(graph);
+        return graph;
     }
 
   private:
@@ -198,10 +200,6 @@ class generate_edge_intersection_graph_impl
      * Statistics.
      */
     generate_edge_intersection_graph_stats& pst;
-    /**
-     * The edge intersection graph to be created.
-     */
-    edge_intersection_graph graph{};
     /**
      * IDs for nodes and edges.
      */
@@ -266,16 +264,18 @@ class generate_edge_intersection_graph_impl
      * Since each path of the same objective belongs to a clique in the final graph, this function
      * additionally stores their node IDs in the statistics.
      *
+     * @param graph Graph to add the nodes to.
      * @param objective_paths Collection of paths belonging to the same objective.
      * @param objective_index Index of the routing objective.
      * @throws std::bad_alloc If storage allocation fails.
      */
-    void initiate_objective_nodes(std::vector<clk_path>& objective_paths, const std::size_t objective_index)
+    void initiate_objective_nodes(edge_intersection_graph& graph, std::vector<clk_path>& objective_paths,
+                                  const std::size_t objective_index)
     {
         std::vector<std::size_t> clique{};
 
         std::ranges::for_each(objective_paths,
-                              [this, &clique, objective_index](auto& p)
+                              [this, &graph, &clique, objective_index](auto& p)
                               {
                                   p.label = node_id++;
                                   graph.insert_vertex(p.label, p);
@@ -292,13 +292,14 @@ class generate_edge_intersection_graph_impl
      * Given a collection of paths belonging to the same objective, this function creates edges in the edge intersection
      * graph between each pair of corresponding nodes, thus, forming a clique (complete sub-graph).
      *
+     * @param graph Graph to add the edges to.
      * @param objective_paths Collection of paths belonging to the same objective.
      * @throws std::bad_alloc If storage allocation fails.
      */
-    void connect_clique(std::vector<clk_path>& objective_paths)
+    void connect_clique(edge_intersection_graph& graph, std::vector<clk_path>& objective_paths)
     {
         combinations::for_each_combination(objective_paths.begin(), objective_paths.begin() + 2, objective_paths.end(),
-                                           [this](const auto begin, [[maybe_unused]] const auto end)
+                                           [this, &graph](const auto begin, [[maybe_unused]] const auto end)
                                            {
                                                graph.insert_edge(begin->label, (begin + 1)->label, edge_id++);
 
@@ -310,16 +311,17 @@ class generate_edge_intersection_graph_impl
      * graph between each corresponding node and all of the already existing nodes that represent paths that intersect
      * with it, i.e., that share at least one coordinate.
      *
+     * @param graph Graph to add the edges to.
      * @param objective_paths Collection of paths belonging to the same objective.
      * @throws std::bad_alloc If storage allocation fails.
      */
-    void create_intersection_edges(std::vector<clk_path>& objective_paths)
+    void create_intersection_edges(edge_intersection_graph& graph, std::vector<clk_path>& objective_paths)
     {
         std::ranges::for_each(objective_paths,
-                              [this](const auto& obj_p)
+                              [this, &graph](const auto& obj_p)
                               {
                                   std::ranges::for_each(all_paths,
-                                                        [this, &obj_p](const auto& stored_p)
+                                                        [this, &graph, &obj_p](const auto& stored_p)
                                                         {
                                                             if (ps.crossings ? obj_p.has_overlap_with(stored_p) :
                                                                                obj_p.has_intersection_with(stored_p))

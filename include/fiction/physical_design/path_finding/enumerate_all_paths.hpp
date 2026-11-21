@@ -26,7 +26,6 @@
 #include <cassert>
 #include <concepts>
 #include <stdexcept>
-#include <utility>
 
 namespace fiction::physical_design::path_finding
 {
@@ -81,10 +80,10 @@ class enumerate_all_paths_impl
         }
 
         layout_coordinate_path path{};
-        recursively_enumerate_all_paths(objective.source, objective.target, path);
-
-        // The public search consumes this implementation's result.
-        return std::move(collection);
+        /** @brief Collection of all enumerated paths. */
+        path_collection collection{};
+        recursively_enumerate_all_paths(objective.source, objective.target, path, collection);
+        return collection;
     }
 
   private:
@@ -106,10 +105,6 @@ class enumerate_all_paths_impl
      * Set of visited coordinates.
      */
     phmap::flat_hash_set<fiction::layouts::layout_base::coordinate> visited{};
-    /**
-     * Collection of all enumerated paths.
-     */
-    path_collection collection{};
     /**
      * Mark a coordinate as visited.
      *
@@ -146,10 +141,11 @@ class enumerate_all_paths_impl
      * @param src Source coordinate.
      * @param tgt Target coordinate.
      * @param p Current path to extend.
+     * @param collection Result collection to append completed paths to.
      */
     void recursively_enumerate_all_paths(const fiction::layouts::layout_base::coordinate& src,
                                          const fiction::layouts::layout_base::coordinate& tgt,
-                                         layout_coordinate_path&                          p)
+                                         layout_coordinate_path& p, path_collection& collection)
     {
         // mark source coordinate as visited and append it to the path
         mark_visited(src);
@@ -175,7 +171,7 @@ class enumerate_all_paths_impl
                 if (!is_visited(*next))
                 {
                     // recurse
-                    recursively_enumerate_all_paths(*next, tgt, p);
+                    recursively_enumerate_all_paths(*next, tgt, p, collection);
                 }
 
                 return;  // keep looping
