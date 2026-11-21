@@ -951,6 +951,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Continuous integration:
   - Canceled CI runs now stop optional summary jobs.
+  - The Windows ClangCL job now uses the Clang bundled with Visual Studio.
   - Docstring generation now loads the libclang development symlink on Ubuntu 26.04.
   - Ubuntu 26.04 jobs now use matching compiler-cache keys and coverage labels.
   - Coverage collection, extraction, and listing now tolerate GCC 13 function-range and hit-count inconsistencies reported by lcov 2.4.
