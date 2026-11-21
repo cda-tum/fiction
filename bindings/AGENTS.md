@@ -51,7 +51,7 @@ A new binding:
 - Let `file(GLOB_RECURSE ...)` discover binding sources.
 - Fix bindings or docstrings at the source and regenerate the `.pyi` files. Keep
   manual edits and post-processing out of the generated stubs.
-- Get the generated `include/pyfiction/pybind11_mkdoc_docstrings.hpp` from the
-  `pyfiction-docstrings` artifact when the `🐍 Docstrings` job reports a
-  mismatch. The job generates the header from Doxygen comments in
+- Replace `bindings/include/pyfiction/pybind11_mkdoc_docstrings.hpp` with the
+  file from the `pyfiction-docstrings` artifact when the `🐍 Docstrings` job
+  reports a mismatch. The job generates the header from Doxygen comments in
   `include/fiction/`.

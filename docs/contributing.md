@@ -85,7 +85,7 @@ every eligible C++ file.
 
 - In issues, state the symptom, observation, and reproduction. Keep review replies to a line or two per finding. Let GitHub wrap prose by entering one line per paragraph, list item, or table row.
 
-- Whenever a PR is created or updated, the `CI` workflow runs. Its `🔍 Change` job classifies your diff and skips the jobs your changes cannot affect, so a documentation-only PR does not pay for the C++ matrix. `🚦 Check` aggregates every job and is the one status that has to be green. Here are some tips for finding the cause of certain failures:
+- The `CI` workflow runs when you open or update a PR. Its `🔍 Change` job selects jobs by path. Changes confined to `docs/` can skip the C++ matrix. A Markdown file under `test/` or `experiments/` can still trigger it. `🚦 Check` aggregates the jobs and must pass. Use the job logs to trace failures.
 
   - If any of the `🐧 Test`, `🍎 Test`, `🪟 Test`, `🧪 Experiments`, or `🐳 Docker` checks fail, this most likely indicates build errors or test failures in the C++ part of the code base. Look through the respective logs on GitHub for any error or failure messages.
   - If `☂️ Coverage` or `🐍 Coverage` fails, inspect the job log for a build, test, report, or upload error. Codecov's separate project and patch statuses enforce coverage targets; add tests when those statuses report insufficient coverage.
