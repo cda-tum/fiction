@@ -191,25 +191,26 @@ class sqd_reader
 {
   public:
     /**
-     * Creates an SQD reader with a layout name.
+     * Creates an SQD reader.
      *
      * @param s Input stream.
-     * @param name Layout name.
      */
-    sqd_reader(std::istream& s, const std::string_view& name) : is{s}
-    {
-        lyt.set_layout_name(std::string{name});
-    }
+    explicit sqd_reader(std::istream& s) : is{s} {}
 
     /**
      * Parses the stream and reports malformed numeric attributes as SQD parsing errors.
      *
+     * @param name Layout name.
      * @return The parsed layout.
      * @throws sqd_parsing_error if the SQD input is malformed.
      */
-    layout run()
+    layout run(const std::string_view& name)
     try
     {
+        /** @brief Layout being parsed. */
+        layout lyt{};
+        lyt.set_layout_name(std::string{name});
+
         // tinyXML2 does not support std::istream, so we have to read the whole file into a string first
         std::stringstream buffer{};
         buffer << is.rdbuf();
@@ -271,9 +272,10 @@ class sqd_reader
 
         std::string lattice_name{lattice::si_100_2x1().name};
 
-        if (const auto* const name = lat_vec_element->FirstChildElement("name"); name != nullptr)
+        /** @brief Optional lattice reconstruction name element. */
+        if (const auto* const name_element = lat_vec_element->FirstChildElement("name"); name_element != nullptr)
         {
-            if (const auto* const text = name->GetText(); text != nullptr)
+            if (const auto* const text = name_element->GetText(); text != nullptr)
             {
                 lattice_name = text;
             }
@@ -307,7 +309,7 @@ class sqd_reader
                 for (const auto* db_dot = layer->FirstChildElement("dbdot"); db_dot != nullptr;
                      db_dot             = db_dot->NextSiblingElement("dbdot"))
                 {
-                    parse_db_dot(db_dot);
+                    parse_db_dot(db_dot, lyt);
                 }
             }
             else if (std::string{layer_type} == "Defects")
@@ -315,12 +317,12 @@ class sqd_reader
                 for (const auto* defect = layer->FirstChildElement("defect"); defect != nullptr;
                      defect             = defect->NextSiblingElement("defect"))
                 {
-                    parse_defect(defect);
+                    parse_defect(defect, lyt);
                 }
             }
         }
 
-        return std::move(lyt);
+        return lyt;
     }
     catch (const std::invalid_argument&)
     {
@@ -332,10 +334,6 @@ class sqd_reader
     }
 
   private:
-    /**
-     * Layout being parsed.
-     */
-    layout lyt{};
     /**
      * Input stream.
      */
@@ -431,9 +429,10 @@ class sqd_reader
      * Adds a DB dot at its lattice coordinate with the specified dot tag.
      *
      * @param db_dot DB-dot element.
+     * @param lyt Layout to add the dot to.
      * @throws sqd_parsing_error if the lattice-coordinate element is missing or invalid.
      */
-    void parse_db_dot(const tinyxml2::XMLElement* db_dot)
+    static void parse_db_dot(const tinyxml2::XMLElement* db_dot, layout& lyt)
     {
         const auto* const latcoord = db_dot->FirstChildElement("latcoord");
 
@@ -448,8 +447,9 @@ class sqd_reader
      * Reads a defect with finite, non-negative Coulomb material parameters.
      *
      * @param defect The defect element.
+     * @param lyt Layout to add the defect to.
      */
-    void parse_defect(const tinyxml2::XMLElement* defect)
+    static void parse_defect(const tinyxml2::XMLElement* defect, layout& lyt)
     {
         std::vector<lattice_site> incl_sites{};
         sidb::model::defect_type  defect_type{sidb::model::defect_type::UNKNOWN};
@@ -524,9 +524,9 @@ class sqd_reader
  */
 [[nodiscard]] inline layout read_sqd_layout(std::istream& is, const std::string_view& name = "")
 {
-    detail::sqd_reader p{is, name};
+    detail::sqd_reader p{is};
 
-    return p.run();
+    return p.run(name);
 }
 /**
  * Reads an SQD file into an `sidb::layout` in binary mode. The input must have a single `siqad` root, no text outside

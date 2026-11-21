@@ -71,11 +71,7 @@ class yen_k_shortest_paths_impl
             objective{obj},
             num_shortest_paths{k},
             params{p}
-    {
-        // start by determining the shortest path between source and target
-        k_shortest_paths.push_back(a_star(layout, objective, default_distance_functor<Lyt>{},
-                                          unit_cost_functor<uint8_t>(), params.astar_params, search_obstructions));
-    }
+    {}
 
     /**
      * Enumerate up to k shortest paths in a layout that start at `objective.source` and lead to `objective.target`.
@@ -84,11 +80,17 @@ class yen_k_shortest_paths_impl
      */
     [[nodiscard]] path_collection run()
     {
-        // if there was no path to begin with, abort
-        if (k_shortest_paths.back().empty())
+        /** @brief Shortest path between the routing endpoints. */
+        auto shortest_path = a_star(layout, objective, default_distance_functor<Lyt>{}, unit_cost_functor<uint8_t>(),
+                                    params.astar_params, search_obstructions);
+        if (shortest_path.empty())
         {
             return {};
         }
+
+        /** @brief Shortest paths found so far. */
+        path_collection k_shortest_paths{};
+        k_shortest_paths.push_back(std::move(shortest_path));
 
         // for the number of shortest paths k
         for (uint32_t k = 1; k < num_shortest_paths; ++k)
@@ -162,8 +164,7 @@ class yen_k_shortest_paths_impl
             }
         }
 
-        // The public search consumes this implementation's result.
-        return std::move(k_shortest_paths);
+        return k_shortest_paths;
     }
 
   private:
@@ -187,10 +188,6 @@ class yen_k_shortest_paths_impl
      * Routing parameters.
      */
     const yen_k_shortest_paths_params params;
-    /**
-     * The list of k shortest paths that is created during the algorithm.
-     */
-    path_collection k_shortest_paths{};
     /**
      * A set of potential shortest paths.
      */
