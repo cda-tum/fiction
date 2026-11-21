@@ -59,6 +59,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     The old include paths and names have no compatibility aliases.
   - **Breaking:** `gate_level_layout` becomes `gate_layout`. Use object IDs and typed ports in
     place of tile-valued signals. Gate layouts own clocking, synchronization, and obstructions.
+  - **Breaking:** On a gate layout, `assign_clock_number` assigns one phase to all layers of a
+    tile and ignores `z`. Check designs that assign separate phases to ground and crossing layers.
+  - **Breaking:** `clocking::scheme::name()` returns a `std::string_view`. Copy the name if it
+    must outlive the scheme.
   - **Breaking:** Layouts use signed coordinates and `get_extent()` returns width, height, and
     layer counts. Pass the arrangement at construction for shifted Cartesian and hexagonal layouts.
   - **Breaking:** Use technology-specific QCA, molQCA, and iNML layouts. QCA and iNML assign clock
@@ -109,6 +113,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Technology mapping preserves constant-one signals and respects the selected comparison gates.
     Rerun mapping if you used LT, GT, LE, or GE selectors in an earlier version.
+  - Corrected the LE and GE truth tables and restored Bestagon skeleton lookup. Recheck designs
+    that used the old tables. Published experiment reproductions retain their original tables.
   - Network conversion preserves inverters when converting technology networks to AIG, XAG, or MIG.
   - Default A* and Yen routing find shortest paths on shifted Cartesian and hexagonal layouts.
   - SiDB contour tracing terminates on isolated operational points. Parameter sweeps reject
