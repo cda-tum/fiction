@@ -689,6 +689,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     dependency are gone with the C++ command-line interface.
   - **Breaking:** `FICTION_PROGRESS_BARS` and mockturtle's progress bars on `std::cout`; the
     `on_progress` callbacks replace them.
+
 - CLI:
 
   - **Breaking:** The C++ command-line interface and `shortcuts.fs`. Use the Python `fiction` shell.
@@ -696,14 +697,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     gate-based SiDB simulations, `temp -g` and `opdom`, alone.
   - The alice built-ins `alias`, `set`, `!<shell command>`, `-e/--echo`, `-n/--counter`, and
     `help --docs`.
+
 - Algorithms:
 
   - **Breaking:** `reserve_input_nodes` is gone. Place each primary input with `place` or `create_pi` when its coordinate is known.
+
 - Code quality:
 
   - **Breaking:** Removed preset pointer aliases, `truth_table_t`, `logic_network_t`, `*_name`,
     `get_ntk_type_name`, and `ntk_type_name`. Use `std::shared_ptr<T>` for shared ownership.
   - **Breaking:** Removed `utils/stl/execution_utils.hpp` and its `FICTION_EXECUTION_POLICY_*` macros.
+
 - Data structures:
 
   - **Breaking:** Removed the non-network layout and gate-library capability traits and `cell<Lyt>`.
@@ -728,15 +732,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     and `cell_layout_t`; `tech_impl_name`, `tech_cell_name`, and `to_sidb_layout`. Use the technology layouts.
   - **Breaking:** The header `sidb/technology.hpp`. `sidb::dot_tag` is defined in `sidb/layout.hpp`, like the cell
     types of the other technologies.
+
 - Dependencies:
 
   - Removed the optional TBB dependency.
+
 - Documentation:
 
   - Removed the bundled overview paper and poster PDFs and their documentation links.
+
 - I/O:
 
   - **Breaking:** Removed FQCA and QCA-STACK readers, writers, CLI commands, Python exports, and stacked QCA layout aliases.
+
 - Python bindings:
 
   - **Breaking:** Removed the `volume` function and layout methods. Use `area() * layers()` to count coordinates.
@@ -751,6 +759,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **Breaking:** The classes `qca_technology`, `mol_qca_technology`, and `inml_technology`. Cell layouts no longer
     provide `clone`, obstruction methods, clocked-neighborhood queries, `get_cells_by_type`, and
     `num_cells_of_given_type`; `mol_qca_layout` has no clocking and no cell modes.
+
 - **Breaking:** The template SiDB stack. Gone are `sidb::surfaces::lattice`, `defect_surface`,
   `charge_distribution_surface`, and the lattice orientation tags; `model/nm_position.hpp` and
   `model/nm_distance.hpp` (use `lattice::nm_position` and `lattice::nm_distance`); the SiQAD coordinate
@@ -762,21 +771,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   `all_coordinates_in_spanned_area` (use `sidb::sites_in_area`); the SiDB branches of `bounding_box` and
   `print_layout`; every `template <typename Lyt>` overload of the SiDB simulation, analysis, generator, and I/O
   functions together with `legacy_result`, `legacy_bdl_wire`, and `legacy_bdl_input_iterator`
+
 - **Breaking:** `layouts::are_cell_layouts_identical`, `layouts::cell_layout_digest`, and
   `utils::stl::hash_combine_unordered`, which existed only to deduplicate randomly generated SiDB cell-level
   layouts. `generate_multiple_random_layouts` deduplicates `sidb::layout` values directly
+
 - **Breaking:** `layouts::coords::to_cube`, the offset-to-cube coordinate conversion, which lost its last caller
   with the SiQAD coordinate type
+
 - **Breaking:** `sidb::to_cell_level_layout`, `sidb::to_cell`, and `sidb::to_cube`. Physical design converts in
   one direction only; use `to_lattice_site`
+
 - **Breaking:** The tuple interface of `sidb::simulation::logic::parameter_point`
   (`get<I>`, `std::tuple_size`, `std::tuple_element`). It was fixed at two dimensions and would have bound only
   two of three coordinates in a 3D sweep; use `get_parameters()`
+
 - The unused pointer aliases `sidb_cell_clk_lyt_ptr` and `sidb_cell_clk_lyt_cube_ptr`
+
 - **Breaking:** The SQD writer takes an `sidb::layout` and no longer accepts QCA layouts, which it wrote as four
   dangling bonds per cell. The CLI's `sqd` command also takes an `sidb::layout`
+
 - **Breaking:** In Python, `sidb_technology` and its `cell_type` alias for `sidb_dot_tag`; no Python API takes
   an SiDB cell type any more. Use `sidb_dot_tag`
+
 - **Breaking:** In Python, `sidb_cell_level_layout`, `sidb_100_lattice`, `sidb_111_lattice`,
   `charge_distribution_surface` and its `_100`/`_111` twins with the `charge_index_mode`,
   `dependent_cell_mode`, `energy_calculation`, `charge_distribution_history`, and `charge_distribution_mode`
