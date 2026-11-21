@@ -28,7 +28,7 @@ env:
   Z3_VERSION: 5.1.0
   CMAKE_BUILD_PARALLEL_LEVEL: 4
   CTEST_PARALLEL_LEVEL: 4
-  COMPILER: ${{ inputs.toolset == 'ClangCL' && 'clang-cl' || 'cl' }}
+  COMPILER: cl
   # ccache refuses to cache a compilation that uses a precompiled header unless told that
   # the PCH's macro definitions and __DATE__/__TIME__ expansions can be ignored. On Unix
   # cmake/Cache.cmake wraps the launcher with this; on Windows it cannot, so it is set here
@@ -55,6 +55,14 @@ jobs:
 
       - name: Set up MSVC development environment
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+
+      - name: Select Visual Studio ClangCL
+        if: inputs.toolset == 'ClangCL'
+        run: |
+          # Use the Clang that ships with the selected MSVC standard library.
+          $clangCl = Join-Path $env:VCINSTALLDIR 'Tools\Llvm\x64\bin\clang-cl.exe'
+          & $clangCl --version
+          Add-Content -LiteralPath $env:GITHUB_ENV -Value "COMPILER=$clangCl"
 
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
