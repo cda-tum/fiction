@@ -119,10 +119,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Default A* and Yen routing find shortest paths on shifted Cartesian and hexagonal layouts.
   - SiDB contour tracing terminates on isolated operational points. Parameter sweeps reject
     invalid ranges and steps.
+  - `operational_input_patterns` excludes patterns with no physically valid charge distribution.
+    Recheck pattern results from earlier releases if simulations returned no states.
   - SiDB ground-state comparisons preserve distinct charge distributions beyond the 64-bit
     charge-index range.
   - SiDB energy labeling counts each matching charge distribution once when rejecting kinks,
     and time-to-solution estimates include failed QuickSim attempts.
+  - `energy_distribution::degeneracy` returns the number of states at an energy. Recheck analyses
+    that used earlier degeneracy values.
 
 - Dependencies:
 
