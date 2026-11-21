@@ -174,11 +174,7 @@ Fiction when we're not together; Mistaken for a vision, something of my own crea
 
 - Continuous integration:
 
-  - The 🐍 Packaging jobs now run `check-sdist --inject-junk`, which fails if the source
-    distribution drops a tracked source or ships an untracked one
-  - Added a 🐍 Lint job that runs the `mypy` hook, which pre-commit.ci no longer runs
-  - Added a 🐍 Test job that runs `nox -s tests` and `nox -s minimums` on Linux, macOS, and
-    Windows against a source build
+  - Added source distribution checks and Python lint and test jobs, including minimum-dependency tests
 
 - Data structures:
 
@@ -209,8 +205,7 @@ Fiction when we're not together; Mistaken for a vision, something of my own crea
 
 - Tooling:
 
-  - Added the `license-tools` prek hook, which puts an MIT copyright header on every Python
-    file and rewrites any that departs from the canonical text
+  - Added the `license-tools` hook to enforce the MIT copyright header on Python files
   - Added the `minimums` nox session, which runs the Python test suite on Python 3.10 against
     the lowest declared direct dependencies instead of the newest compatible ones
 
@@ -235,9 +230,7 @@ Fiction when we're not together; Mistaken for a vision, something of my own crea
     once per canvas enumeration
   - `bdl_input_iterator` now determines the BDL dot distances that decide the input assignment once
     in its constructor instead of on every increment; they cannot change over its lifetime
-  - `is_operational_impl` no longer detects the output BDL pairs twice under `TOLERATE_KINKS`
-  - `quicksim` and `multi_simulated_annealing` no longer pass a parallel execution policy to
-    `std::find` and `std::min_element`, whose ranges are too small to pay for the dispatch
+  - Operational checks detect output BDL pairs once under `TOLERATE_KINKS`
   - `generate_multiple_random_sidb_layouts` now rejects duplicate candidates by digest lookup
     instead of pairwise comparison. Collecting 4000 layouts of 10 SiDBs takes about 7 ms instead
     of 160 ms
@@ -251,7 +244,7 @@ Fiction when we're not together; Mistaken for a vision, something of my own crea
     `FICTION_LIGHTWEIGHT_DEBUG_BUILDS`, which cuts Debug compile time and memory substantially
   - `FICTION_ENABLE_PCH` now covers the test suite as well as the CLI, and is on in the `dev`
     and `tests-slim` presets
-  - The CI presets no longer build the experiments; the 🧪 Experiments job compiles them instead
+  - The CI presets leave experiment builds to the dedicated Experiments job
   - `vcs-versioning` replaces `setuptools-scm` for deriving the version from git, which drops
     `setuptools` from the build. Building from source now requires `scikit-build-core` 1.0
   - The CMake policy range now ends at 4.4
@@ -262,33 +255,19 @@ Fiction when we're not together; Mistaken for a vision, something of my own crea
     `cell_type` as a scoped `enum class`. Qualify the enumerators, e.g.,
     `sidb_technology::cell_type::INPUT` instead of `sidb_technology::INPUT`, and
     `static_cast` wherever a cell type was implicitly converted. `pyfiction` is unaffected
-  - Pruned the include graph of the most widely included headers, keeping `nlohmann/json.hpp`,
-    `fmt`, and the vendored `combinations.h` off the path that `traits.hpp` pulls in
+  - Reduced the dependencies transitively included by `traits.hpp`
   - **Breaking:** moved `determine_all_combinations_of_distributing_k_entities_on_n_positions`
     from `fiction/utils/math_utils.hpp` to the new `fiction/utils/combination_utils.hpp`.
     Include the latter to keep using it
-  - `orthogonal` and `graph_oriented_layout_design` no longer template their implementation on
-    the specification network type. Their public entry points are unchanged
   - Modernized the entire code base for C++20, adopting `std::ranges` algorithms, concepts,
     defaulted comparison operators, and designated initializers throughout
-  - Replaced unchecked `operator[]` with bounds-checked `at()` in the operational domain module
   - The type checks on the path-finding, operational domain, and `hexagonal_layout` entry points
     are now `requires` clauses, so an unsatisfied one is reported at the call site
   - `hexagonal_layout` now rejects an invalid `HexagonalCoordinateSystem` where the type is
     named rather than where it is constructed
-  - `exact` no longer polls its worker futures every 10 ms while solving asynchronously
   - `exact` now surfaces a failure in one of its asynchronous workers instead of reporting it
     as "no layout found"
-  - Cleared the pre-existing Clang-Tidy findings in `exact.hpp`
-  - Migrated the `pyfiction` test suite from `unittest` to pytest and enabled ruff's `PT`,
-    `PTH`, and `E501` rule sets. The suite now fails on warnings
-  - Every Python file now carries `from __future__ import annotations`, which ruff's
-    `future-annotations` setting assumes
-  - Retired ruff's TODO ignore list. Every entry that remains states a decision in a comment,
-    including `CPY001`, which stays off because the `license-tools` hook enforces the
-    headers instead
-  - `mypy` now checks every Python file the repository owns, where it previously checked only
-    the bindings and `noxfile.py`
+  - Migrated the `pyfiction` test suite from `unittest` to pytest and expanded Python linting
 
 - Continuous integration:
 
@@ -301,28 +280,17 @@ Fiction when we're not together; Mistaken for a vision, something of my own crea
     administrator must repoint branch protection at `🚦 Check` together with
     `🔍 Change / 🕵️ Check`, `pre-commit.ci - pr`, and `docs/readthedocs.org:fiction`. Never
     require an individual matrix leg; `🚦 Check` covers them and survives a matrix change
-  - The `ci-*` presets now reuse the precompiled header that the `dev` preset already used,
-    which the 120 single-source test executables each paid for separately before
-  - The build jobs no longer cap themselves at two hours. Three of them had started failing on
-    that cap rather than on a regression; the short jobs keep a ceiling
   - Publishing moved out of CI: only `cd.yml`, which runs on a published release, holds the
     credentials for PyPI, Docker Hub, and ghcr.io
   - The wheel jobs now run whenever anything the extension is compiled from changes, not only when
     the packaging metadata does
   - Updated the Ubuntu compiler matrix for C++20: dropped `g++-10`, `clang++-14`, and
     `clang++-15`, and added `clang++-19` and `clang++-20`
-  - Halved the OS matrices; `docs/getting_started.rst` records the combinations we verify
   - The wheel builds now run the `pyfiction` test suite against the repaired wheel instead of
     only smoke-testing the import
-  - `prek` now validates `.codecov.yml` against its schema
-  - The `prek` hooks now carry explicit priorities, which run the read-only checks concurrently
-    and cut a warm `prek run -a` by about 18%
+  - Prek runs independent checks concurrently, cutting a warm `prek run -a` by about 18%
   - The docstring generator is now a `🐍 Docstrings` check that uploads the regenerated header as
     an artifact and fails when the committed one differs, instead of committing it itself
-  - The docstring generator parses the headers in sorted order, so the numbering of repeated
-    symbol names no longer depends on the filesystem's order
-  - Publishing to PyPI runs in a `pypi` deployment environment, which is where a required
-    reviewer or a wait timer on releases would go
   - The 🐧 Test jobs build with Z3 on `ubuntu-24.04-arm` as well. `cda-tum/setup-z3` does
     serve an `arm64` archive, so the `-DFICTION_Z3=OFF` override those jobs carried is gone
 
@@ -338,27 +306,18 @@ Fiction when we're not together; Mistaken for a vision, something of my own crea
 
 - Documentation:
 
-  - The README's six per-workflow status badges are replaced by one `CI` and one `CD` badge,
-    matching the two workflows that remain
-  - `docs/contributing.rst` describes the checks a pull request now reports and what
-    `🚦 Check` means
+  - Updated the contributor guide and README badges for the consolidated CI and CD workflows
 
 - Experiments:
 
-  - Modernized `generate_defective_surface.py`. Apart from the out-of-bounds fix below, the
-    surface it generates is unchanged
-  - `generate_defective_surface.py` is executable and declares its dependencies in a PEP 723
-    block, so running it needs nothing installed first
-  - `generate_defective_surface.py` now writes the surface it generates, which it previously
-    discarded, and takes the parameters it used to hard-code as command-line arguments
+  - `generate_defective_surface.py` now writes the generated surface and accepts command-line
+    parameters. The script declares its dependencies inline for standalone execution
 
 - Python bindings:
 
   - **Breaking:** generated docstring symbols are now named `mkd_doc_*` instead of the reserved
     `__doc_*`. `DOC(...)` is unchanged; a hand-written docstring that defines such a symbol
     must be renamed
-  - `mnt.pyfiction` now advertises developers and information technology as intended audiences
-    and physics as a topic on PyPI
   - Adopted nanobind's split mode, so one `abi3` wheel per platform now covers Python 3.10 and
     up instead of four. `mnt.pyfiction` gains a `nanobind-backend` runtime dependency
   - The `pyfiction` extension no longer re-exports the internals of the `tinyxml2`,
@@ -423,8 +382,7 @@ Fiction when we're not together; Mistaken for a vision, something of my own crea
 
 - Build system:
 
-  - `.gitignore` now covers the build, virtual environment, and editor droppings that a local
-    `uv build --sdist` would otherwise ship into the source distribution
+  - Excluded local build, virtual environment, and editor files from source distributions
   - Fixed the source distribution shipping none of the C++ sources it needs to build, which made
     `pip install mnt.pyfiction` fail wherever no matching wheel exists
 
@@ -437,7 +395,7 @@ Fiction when we're not together; Mistaken for a vision, something of my own crea
   - Fixed the execution-policy guard in `execution_utils.hpp`, which read the feature-test
     macros before including `<version>` and disabled parallel STL algorithms on every Clang
     build
-  - Fixed several `fmt` compile-time format-string misuses surfaced by the C++20 bump
+  - Fixed `fmt` compile-time format-string errors exposed by the C++20 upgrade
   - Fixed `std::string_view::data()` calls that assumed null termination, which `std::string_view`
     does not guarantee
   - Fixed plain `char` values being passed to `::toupper`, `::tolower`, `::isdigit`, and
@@ -448,17 +406,9 @@ Fiction when we're not together; Mistaken for a vision, something of my own crea
 
   - Renamed `.readthedocs.yml` to `.readthedocs.yaml`, the name the preview guard and the
     `check-readthedocs` hook expect, so editing the file rebuilds the documentation preview
-  - Publishing the Docker image no longer clears its Docker Hub short description, which it
-    derived from a field that never held one
-  - Fixed the Renovate `github-tags` custom managers to reference `owner/repository` package names
-    instead of full GitHub URLs, which the datasource requires to resolve tags
-  - Fixed patch-level CMake `GIT_TAG` bumps being eligible for Renovate's automerge
   - Pinned the vendored `alice` dependency's `GIT_TAG` to a fixed commit carrying a C++20 fix,
     instead of floating on `master`
-  - Fixed ccache being skipped on every `ubuntu-24.04-arm` job, leaving the slowest runners cold
-  - Fixed the CodeQL ccache key interpolating an undefined `matrix.os`
-  - The CodeQL jobs now declare their build mode: `manual` for C++, whose database comes from
-    the CMake build, and `none` for Python, which has no build
+  - Restored compiler caching on the `ubuntu-24.04-arm` test jobs
   - Fixed the packaging path filter still pointing at the removed `bindings/pyfiction/**`
 
 - Documentation:
@@ -484,8 +434,7 @@ Fiction when we're not together; Mistaken for a vision, something of my own crea
     longer emitted now that the operator is compiler-synthesized
   - Fixed nine `DOC(...)` references that named symbols the broken parse had invented; the
     `*_stats` runtime members are now documented under their real names
-  - Fixed `bdl_input_iterator.py` never being collected, as its name did not match pytest's
-    `python_files` pattern, so its five tests had never run
+  - Fixed pytest collection of the BDL input iterator tests
 
 ## v0.7.0 - 2026-07-31
 
