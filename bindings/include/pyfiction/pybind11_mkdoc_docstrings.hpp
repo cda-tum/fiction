@@ -5246,8 +5246,6 @@ Parsed layout.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_io_detail_read_fgl_layout_impl_target = R"doc(Scratch layout created from the file.)doc";
-
 static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl = R"doc(Serialize a finished layout. @tparam Lyt Gate-level layout type.)doc";
 
 static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl_lyt = R"doc(The layout to be written.)doc";
@@ -10096,6 +10094,7 @@ pair of corresponding nodes, thus, forming a clique (complete sub-
 graph).
 
 Args:
+    graph: Graph to add the edges to.
     objective_paths: Collection of paths belonging to the same
                      objective.
 
@@ -10112,6 +10111,7 @@ represent paths that intersect with it, i.e., that share at least one
 coordinate.
 
 Args:
+    graph: Graph to add the edges to.
     objective_paths: Collection of paths belonging to the same
                      objective.
 
@@ -10133,8 +10133,6 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_graph = R"doc(The edge intersection graph to be created.)doc";
-
 static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_initiate_objective_nodes =
 R"doc(Given a collection of paths belonging to the same objective, this
 function assigns them unique labels and generates corresponding nodes
@@ -10145,6 +10143,7 @@ graph, this function additionally stores their node IDs in the
 statistics.
 
 Args:
+    graph: Graph to add the nodes to.
     objective_paths: Collection of paths belonging to the same
                      objective.
     objective_index: Index of the routing objective.
@@ -13107,8 +13106,6 @@ R"doc(Implements loop-free path enumeration.
 Template Args:
     Lyt: Layout type.)doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate_all_paths_impl_collection = R"doc(Collection of all enumerated paths.)doc";
-
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_enumerate_all_paths_impl_enumerate_all_paths_impl =
 R"doc(Initializes path enumeration.
 
@@ -13164,6 +13161,7 @@ Args:
     src: Source coordinate.
     tgt: Target coordinate.
     p: Current path to extend.
+    collection: Result collection to append completed paths to.
 
 )doc";
 
@@ -13188,8 +13186,6 @@ Template Args:
     Lyt: Layout type.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_initial_obstructions = R"doc(Caller constraints retained across spur searches.)doc";
-
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_k_shortest_paths = R"doc(The list of k shortest paths that is created during the algorithm.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_yen_k_shortest_paths_impl_layout = R"doc(The caller's layout, queried without modification.)doc";
 
@@ -15745,13 +15741,12 @@ at the `(n, m, l)` lattice coordinates the file names.)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_is = R"doc(Input stream.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_lyt = R"doc(Layout being parsed.)doc";
-
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_db_dot =
 R"doc(Adds a DB dot at its lattice coordinate with the specified dot tag.
 
 Args:
     db_dot: DB-dot element.
+    lyt: Layout to add the dot to.
 
 Raises:
     sqd_parsing_error: if the lattice-coordinate element is missing or
@@ -15764,6 +15759,7 @@ R"doc(Reads a defect with finite, non-negative Coulomb material parameters.
 
 Args:
     defect: The defect element.
+    lyt: Layout to add the defect to.
 
 )doc";
 
@@ -15818,6 +15814,9 @@ static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_run =
 R"doc(Parses the stream and reports malformed numeric attributes as SQD
 parsing errors.
 
+Args:
+    name: Layout name.
+
 Returns:
     The parsed layout.
 
@@ -15827,11 +15826,10 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_sqd_reader =
-R"doc(Creates an SQD reader with a layout name.
+R"doc(Creates an SQD reader.
 
 Args:
     s: Input stream.
-    name: Layout name.
 
 )doc";
 

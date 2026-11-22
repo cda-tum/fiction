@@ -195,16 +195,18 @@ class read_fgl_layout_impl
                 fmt::format("Error parsing FGL file: target arrangement differs from {}", topology_name));
         }
 
-        if constexpr (std::derived_from<Lyt, fiction::layouts::cartesian_layout>)
+        /** @brief Layout built and validated before publication. */
+        auto lyt = [&]() -> Lyt
         {
-            target.emplace(typename Lyt::extent{}, layout_name);
-        }
-        else
-        {
-            target.emplace(*file_arrangement, typename Lyt::extent{}, layout_name);
-        }
-
-        auto& lyt = *target;
+            if constexpr (std::derived_from<Lyt, fiction::layouts::cartesian_layout>)
+            {
+                return Lyt{typename Lyt::extent{}, layout_name};
+            }
+            else
+            {
+                return Lyt{*file_arrangement, typename Lyt::extent{}, layout_name};
+            }
+        }();
 
         // set layout name
         if (auto* const name = layout->FirstChildElement("name"); name != nullptr)
@@ -567,7 +569,7 @@ class read_fgl_layout_impl
                 throw fgl_parsing_error(error.what());
             }
         }
-        return std::move(lyt);
+        return lyt;
     }
 
   private:
@@ -585,10 +587,6 @@ class read_fgl_layout_impl
          {"LE", "b", 2},
          {"GE", "d", 2},
          {"MAJ", "e8", 3}}};
-    /**
-     * Scratch layout created from the file.
-     */
-    std::optional<Lyt> target{};
     /** @brief Required arrangement when reading into an existing layout. */
     std::optional<fiction::layouts::arrangement> expected_arrangement{};
     /**
