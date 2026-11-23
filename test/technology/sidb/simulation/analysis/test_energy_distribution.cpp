@@ -113,7 +113,8 @@ TEST_CASE("Overlapping energy tolerances count each SiDB configuration once", "[
     {
         const auto result = calculate_energy_distribution({middle, lowest, highest});
         REQUIRE(result.size() == 1);
-        CHECK(result.min_energy() == middle.energy());
+        // The representative must preserve the exact first-seen energy.
+        CHECK_THAT(result.min_energy(), Catch::Matchers::WithinAbs(middle.energy(), 0.0));
         CHECK(result.degeneracy(middle.energy()) == 3);
     }
 }
