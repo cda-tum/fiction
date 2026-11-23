@@ -12,10 +12,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.parsing import integer
 from mnt.fiction.cli.registry import Category, command
 from mnt.fiction.cli.stores import describe
+from mnt.fiction.cli.truth_tables import table_from_string
 from mnt.pyfiction.synthesis import dynamic_truth_table
 
 if TYPE_CHECKING:
@@ -55,28 +55,6 @@ def tt(session: Session, args: argparse.Namespace) -> Result:
         table = dynamic_truth_table(max(variables, default=0))
         table.create_from_expression(args.expression)
     else:
-        table = _table_from_string(args.table)
+        table = table_from_string(args.table)
     session.truth_tables.add(table)
     return {"truth_table": describe(table)}
-
-
-def _table_from_string(text: str) -> dynamic_truth_table:
-    """Create a truth table from binary bits or hexadecimal digits."""
-    if text.lower().startswith("0x"):
-        digits = text[2:]
-        bits = len(digits) * 4
-        num_vars = _log2(bits, what="hex digits times four")
-        table = dynamic_truth_table(num_vars)
-        table.create_from_hex_string(digits)
-        return table
-    table = dynamic_truth_table(_log2(len(text), what="bits"))
-    table.create_from_binary_string(text)
-    return table
-
-
-def _log2(count: int, *, what: str) -> int:
-    """Return the variable count for a nonempty power-of-two bit count."""
-    if count == 0 or count & (count - 1):
-        msg = f"the number of {what} must be a power of two, got {count}"
-        raise CommandError(msg)
-    return count.bit_length() - 1

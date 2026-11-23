@@ -24,9 +24,10 @@ from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TimeElapsedColumn
 
 from mnt.fiction.cli.errors import CommandError
+from mnt.fiction.cli.output import ignore_progress, ignore_worker_progress
 from mnt.fiction.cli.parsing import tokenize
 from mnt.fiction.cli.registry import REGISTRY, STORE_FLAGS, Category
-from mnt.fiction.cli.session import Session, ignore_progress, ignore_worker_progress
+from mnt.fiction.cli.session import Session
 from mnt.fiction.cli.statistics import stats_to_dict
 from mnt.fiction.cli.stores import Store
 from mnt.pyfiction.networks import set_name
@@ -54,7 +55,7 @@ def progress_display(monkeypatch: pytest.MonkeyPatch) -> Iterator[tuple[Session,
     """
     session = Session(console=Console(file=io.StringIO(), force_terminal=True))
     display = Progress(console=session.console, auto_refresh=False)
-    monkeypatch.setattr("mnt.fiction.cli.session.Progress", lambda *_args, **_kwargs: display)
+    monkeypatch.setattr("mnt.fiction.cli.output.Progress", lambda *_args, **_kwargs: display)
     try:
         yield session, display
     finally:
@@ -387,7 +388,7 @@ def test_parallel_progress_has_one_aggregate_row(
     console = Console(file=io.StringIO(), width=100, height=height, force_terminal=True)
     session = Session(console=console)
     display = Progress(console=console, auto_refresh=False)
-    monkeypatch.setattr("mnt.fiction.cli.session.Progress", lambda *_args, **_kwargs: display)
+    monkeypatch.setattr("mnt.fiction.cli.output.Progress", lambda *_args, **_kwargs: display)
     total = 0 if command in {"exact", "gold", "clustercomplete"} else 256
     active, inactive = True, False
     with session.progress(command) as report:
@@ -533,7 +534,7 @@ def test_spinner_refreshes_during_native_read(tmp_path: Path, monkeypatch: pytes
 
     session = Session(console=Console(file=io.StringIO(), force_terminal=True))
     display = Progress(RecordingSpinner(), TimeElapsedColumn(), console=session.console, transient=True)
-    monkeypatch.setattr("mnt.fiction.cli.session.Progress", lambda *_args, **_kwargs: display)
+    monkeypatch.setattr("mnt.fiction.cli.output.Progress", lambda *_args, **_kwargs: display)
     interval = sys.getswitchinterval()
     try:
         # Only the native call can release the GIL while the reading flag is set.

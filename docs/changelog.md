@@ -17,13 +17,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - CLI:
 
-  - Install the Python `fiction` shell with `pip install mnt.pyfiction`. It supports completion,
+  - Install the Python `fiction` shell with `uv tool install mnt.pyfiction`. It supports completion,
     scripts, JSON statistics, and progress displays.
   - `plane` runs crossing-free physical design. Use `equiv -n -g` to verify the resulting layout
     against its source network, including duplicated inputs.
+  - `fiction opdom` computes SQD operational domains and exports CSV, static 2D/3D plots,
+    or interactive HTML. It requires `--csv` or `--plot`. Install `mnt-pyfiction[plot]` to plot.
+  - `fiction repl` starts the shell explicitly. Bare `fiction`, shell flags, and piped input
+    retain their behavior. Leading `--help` or `-h` shows help for the available commands.
+  - Both `opdom` entry points accept `--algorithm` for all reconstruction methods and `--samples`
+    for random sampling, flood fill, and contour tracing. Legacy flags remain accepted, and
+    `--sketch` enables filter-only analysis.
+  - Operational domain plots validate dependencies and colors before computation and preserve
+    broken-package diagnostics. Viewer failures retain exports and statistics.
+
+- Documentation:
+
+  - Added SiQAD OR gate operational domain plots for all four reconstruction methods.
 
 - Python bindings:
 
+  - `operational_domain.to_numpy()` returns sampled coordinates and operational flags as NumPy
+    arrays. It rejects mismatched dimensions and reports an installation hint when NumPy is missing.
   - Added AIG, XAG, and MIG support for network I/O, conversion, mapping, and simulation.
   - Added on-the-fly SiDB circuit design from routed hexagonal gate layouts.
   - `mnt.pyfiction` ships type stubs and a `py.typed` marker.
@@ -70,6 +85,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     layer counts. Pass the arrangement at construction for shifted Cartesian and hexagonal layouts.
   - **Breaking:** Use technology-specific QCA, molQCA, and iNML layouts. QCA and iNML assign clock
     zones by tile, and gate-library application returns the target technology's layout type.
+
+- Documentation:
+
+  - Installation guides now use `uv` for CLI tools and Python environments.
 
 - I/O:
 
@@ -138,6 +157,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Data structures:
 
   - QCA synchronization assignments apply to the same clock zone on every layer.
+
+- Build system:
+
+  - Direct Python binding builds request the stable-ABI component on CMake 3.26 and newer.
 
 - Dependencies:
 
