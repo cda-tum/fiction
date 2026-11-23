@@ -217,7 +217,7 @@ class layout : public layouts::cell_grid<cell_type>, public layouts::tile_clocki
      */
     void assign_synchronization_element(const clock_zone& cz, const sync_elem_t se)
     {
-        clocking.assign_synchronization_element(cz, se);
+        clocking.assign_synchronization_element({cz.x, cz.y}, se);
     }
     /**
      * Whether the clock zone that contains a cell is a synchronization element.

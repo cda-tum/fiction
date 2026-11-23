@@ -29,8 +29,9 @@ Usually, one gate or one wire fits into a tile. `get_clock_zone(c)` returns the 
 
 Clock numbers belong to clock zones. `assign_clock_number(cz, number)` takes the clock-zone coordinate, whereas
 `get_clock_number(c)` takes a cell and looks up its clock zone. For a tile size of 2 by 2, assigning zone `(1, 1)`
-changes the result for cells `(2, 2)` through `(3, 3)` on every layer. The QCA layout additionally stores
-synchronization elements per clock zone.
+changes the result for cells `(2, 2)` through `(3, 3)` on every layer. QCA synchronization delays follow the
+same rule. `assign_synchronization_element(cz, delay)` uses the zone's x and y on every layer, and a zero delay
+removes the element. `get_synchronization_element(c)` reads the delay of the zone containing cell `c`.
 
 Clock-zone dimensions must be positive. The constructor and tile-size setters reject zero; a rejected setter call
 preserves the stored dimensions.
