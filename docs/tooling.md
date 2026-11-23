@@ -9,6 +9,7 @@ presets, see {doc}`getting_started`. For contribution and review commands, see
 | Tool | Purpose | Configuration and use |
 | --- | --- | --- |
 | [CMake](https://cmake.org/) and [Ninja](https://ninja-build.org/) | Configure and build the library's tests, experiments, and Python bindings. | `CMakeLists.txt` and `CMakePresets.json`; see {ref}`cmake-presets`. |
+| [cmakefmt](https://cmakefmt.dev/) | Format CMake sources and templates. | `.cmakefmt.yaml`; `prek run cmakefmt-fix -a` formats tracked files. |
 | [Catch2](https://github.com/catchorg/Catch2) and [CTest](https://cmake.org/cmake/help/latest/manual/ctest.1.html) | Write and run C++ tests and micro-benchmarks. | `test/`; see {ref}`building-tests`. |
 | [clang-format](https://clang.llvm.org/docs/ClangFormat.html) | Format C++ code. | `.clang-format`; runs through prek. |
 | [clang-tidy](https://clang.llvm.org/extra/clang-tidy/) | Analyze C++ code. | `.clang-tidy`; `uvx nox -s cpp_lint -- --all` runs the CI configuration. |

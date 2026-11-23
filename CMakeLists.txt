@@ -42,9 +42,7 @@ fiction_setup_options()
 fiction_global_options()
 fiction_local_options()
 
-set(GIT_SHA
-    "Unknown"
-    CACHE STRING "SHA this build was generated from")
+set(GIT_SHA "Unknown" CACHE STRING "SHA this build was generated from")
 string(SUBSTRING "${GIT_SHA}" 0 8 GIT_SHORT_SHA)
 
 target_compile_features(fiction_options INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
@@ -109,9 +107,10 @@ configure_package_config_file(
   ${CMAKE_CURRENT_BINARY_DIR}/fictionConfig.cmake
   INSTALL_DESTINATION lib/cmake/fiction)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/fictionConfig.cmake
-              ${CMAKE_CURRENT_BINARY_DIR}/fictionConfigVersion.cmake
-        DESTINATION lib/cmake/fiction)
+install(
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/fictionConfig.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/fictionConfigVersion.cmake
+  DESTINATION lib/cmake/fiction)
 
 if(CMAKE_SKIP_INSTALL_RULES)
   return()

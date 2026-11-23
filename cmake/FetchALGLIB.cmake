@@ -35,10 +35,7 @@ FetchContent_Declare(
 
 # Download ALGLIB tarball (without extraction) using FetchContent. FetchContent
 # handles retries and multiple URLs automatically.
-FetchContent_Declare(
-  alglib
-  URL ${ALGLIB_URLS}
-  DOWNLOAD_NO_EXTRACT TRUE)
+FetchContent_Declare(alglib URL ${ALGLIB_URLS} DOWNLOAD_NO_EXTRACT TRUE)
 
 # Get the ALGLIB tarball
 FetchContent_GetProperties(alglib)
@@ -98,9 +95,9 @@ if(NOT alglib-cmake_POPULATED)
     # Update include paths in source files
     foreach(source_file ${ALGLIB_SOURCES})
       file(READ "${source_file}" file_content)
-      string(REGEX
-             REPLACE "#include \"([^\"]+)\\.h\"" "#include \"headers/\\1.h\""
-                     modified_content "${file_content}")
+      string(REGEX REPLACE "#include \"([^\"]+)\\.h\""
+             "#include \"headers/\\1.h\"" modified_content "${file_content}"
+      )
       file(WRITE "${source_file}" "${modified_content}")
     endforeach()
 
@@ -115,6 +112,7 @@ if(NOT alglib-cmake_POPULATED)
 
   # The wrapper's install rule reads the version file from the top-level build
   # directory.
-  configure_file(${alglib-cmake_BINARY_DIR}/alglib-configVersion.cmake
-                 ${CMAKE_BINARY_DIR}/alglib-configVersion.cmake COPYONLY)
+  configure_file(
+    ${alglib-cmake_BINARY_DIR}/alglib-configVersion.cmake
+    ${CMAKE_BINARY_DIR}/alglib-configVersion.cmake COPYONLY)
 endif()

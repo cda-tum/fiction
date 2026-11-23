@@ -1,0 +1,11 @@
+format:
+  line_ending: unix
+  line_width: 80
+  tab_size: 2
+  max_hanging_wrap_groups: 2
+  # Preserve canonical spellings such as FetchContent_Declare.
+  command_case: unchanged
+  keyword_case: unchanged
+  enable_sort: true
+markup:
+  first_comment_is_literal: false

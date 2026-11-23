@@ -44,10 +44,12 @@ function(add_pyfiction_python_binding target_name)
   # the tree.
   foreach(z3_library IN LISTS Z3_LIBRARIES)
     get_filename_component(z3_library_dir "${z3_library}" DIRECTORY)
-    cmake_path(IS_PREFIX CMAKE_SOURCE_DIR "${z3_library_dir}" NORMALIZE
-               z3_in_source_tree)
-    cmake_path(IS_PREFIX CMAKE_BINARY_DIR "${z3_library_dir}" NORMALIZE
-               z3_in_binary_tree)
+    cmake_path(
+      IS_PREFIX CMAKE_SOURCE_DIR "${z3_library_dir}"
+      NORMALIZE z3_in_source_tree)
+    cmake_path(
+      IS_PREFIX CMAKE_BINARY_DIR "${z3_library_dir}"
+      NORMALIZE z3_in_binary_tree)
     if(z3_in_source_tree OR z3_in_binary_tree)
       set_property(
         TARGET ${target_name}
@@ -63,8 +65,9 @@ function(add_pyfiction_python_binding target_name)
   # and keep default visibility, so each extension would re-export them. Ported
   # from marcelwa/aigverse#490.
   if(APPLE)
-    target_link_options(${target_name} PRIVATE
-                        "LINKER:-exported_symbol,_PyInit_${ARG_MODULE_NAME}")
+    target_link_options(
+      ${target_name}
+      PRIVATE "LINKER:-exported_symbol,_PyInit_${ARG_MODULE_NAME}")
   elseif(UNIX)
     target_link_options(${target_name} PRIVATE "LINKER:--exclude-libs,ALL")
 
@@ -72,8 +75,8 @@ function(add_pyfiction_python_binding target_name)
       # Archive hiding does not cover the module's own C++ instantiations.
       # nanobind's exception ABI remains shared with the split backend.
       set(export_map "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/pyfiction.exports.map")
-      target_link_options(${target_name} PRIVATE
-                          "LINKER:--version-script,${export_map}")
+      target_link_options(
+        ${target_name} PRIVATE "LINKER:--version-script,${export_map}")
       set_property(
         TARGET ${target_name}
         APPEND
@@ -81,10 +84,7 @@ function(add_pyfiction_python_binding target_name)
     endif()
   endif()
 
-  install(
-    TARGETS ${target_name}
-    DESTINATION .
-    COMPONENT fiction_Python)
+  install(TARGETS ${target_name} DESTINATION . COMPONENT fiction_Python)
 
   # Install the committed stubs next to the extension in editable mode, so IDEs
   # and type checkers find them. A module with submodules has a stub package.

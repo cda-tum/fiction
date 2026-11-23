@@ -120,12 +120,11 @@ repos:
           ]
         priority: 6
 
-  # CMake format and lint the CMakeLists.txt files
-  - repo: https://github.com/cheshirekow/cmake-format-precommit
-    rev: v0.6.13
+  # Format CMake sources and templates.
+  - repo: https://github.com/cmakefmt/cmakefmt
+    rev: v2.4.0
     hooks:
-      - id: cmake-format
-        additional_dependencies: [pyyaml]
+      - id: cmakefmt-fix
         types: [file]
         files: (\.cmake|CMakeLists.txt)(.in)?$
         priority: 6

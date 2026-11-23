@@ -4,15 +4,19 @@ include(CheckCXXCompilerFlag)
 include(FetchContent)
 
 macro(fiction_supports_sanitizers)
-  if((CMAKE_CXX_COMPILER_ID MATCHES ".*Clang.*" OR CMAKE_CXX_COMPILER_ID MATCHES
-                                                   ".*GNU.*") AND NOT WIN32)
+  if(
+    (CMAKE_CXX_COMPILER_ID MATCHES ".*Clang.*" OR CMAKE_CXX_COMPILER_ID MATCHES
+                                                   ".*GNU.*")
+    AND NOT WIN32)
     set(SUPPORTS_UBSAN ON)
   else()
     set(SUPPORTS_UBSAN OFF)
   endif()
 
-  if((CMAKE_CXX_COMPILER_ID MATCHES ".*Clang.*" OR CMAKE_CXX_COMPILER_ID MATCHES
-                                                   ".*GNU.*") AND WIN32)
+  if(
+    (CMAKE_CXX_COMPILER_ID MATCHES ".*Clang.*" OR CMAKE_CXX_COMPILER_ID MATCHES
+                                                   ".*GNU.*")
+    AND WIN32)
     set(SUPPORTS_ASAN OFF)
   else()
     set(SUPPORTS_ASAN ON)
@@ -71,8 +75,8 @@ macro(fiction_local_options)
   add_library(fiction_options INTERFACE)
 
   include(cmake/CompilerWarnings.cmake)
-  fiction_set_project_warnings(fiction_warnings ${FICTION_WARNINGS_AS_ERRORS}
-                               "" "" "")
+  fiction_set_project_warnings(fiction_warnings ${FICTION_WARNINGS_AS_ERRORS} ""
+                               "" "")
 
   target_compile_options(
     fiction_options
@@ -128,10 +132,10 @@ macro(fiction_local_options)
       # format has to be set, not just the flag, or CMake appends /Zi after it.
       set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "Embedded")
       string(REGEX REPLACE "/Zi" "" CMAKE_CXX_FLAGS_DEBUG
-                           "${CMAKE_CXX_FLAGS_DEBUG}")
+             "${CMAKE_CXX_FLAGS_DEBUG}")
       set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Z7 /Ob0")
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID
-                                                   MATCHES ".*Clang")
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
+           OR CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
       set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g1 -fno-inline")
     else()
       message(

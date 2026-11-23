@@ -3,20 +3,20 @@ include(CMakeFindDependencyMacro)
 # Keep package lookup state local, including early returns on missing
 # dependencies.
 function(_fiction_load_package)
-  @PACKAGE_INIT@
+@PACKAGE_INIT@
   set(_fiction_package_prefix "${PACKAGE_PREFIX_DIR}")
 
-  set(fiction_FOUND
-      FALSE
-      PARENT_SCOPE)
+  set(fiction_FOUND FALSE PARENT_SCOPE)
   set(fiction_NOT_FOUND_MESSAGE
       "The required mockturtle dependency is unavailable."
       PARENT_SCOPE)
   # A cached mockturtle_DIR must not select another installation.
   set(mockturtle_DIR
       "${_fiction_package_prefix}/@CMAKE_INSTALL_LIBDIR@/cmake/mockturtle")
-  find_dependency(mockturtle CONFIG PATHS "${_fiction_package_prefix}"
-                  NO_DEFAULT_PATH)
+  find_dependency(
+    mockturtle
+    CONFIG
+    PATHS "${_fiction_package_prefix}" NO_DEFAULT_PATH)
   set(fiction_NOT_FOUND_MESSAGE
       "The required tinyxml2 dependency is unavailable."
       PARENT_SCOPE)
@@ -25,11 +25,8 @@ function(_fiction_load_package)
   find_dependency(
     tinyxml2
     CONFIG
-    COMPONENTS
-    static
-    PATHS
-    "${_fiction_package_prefix}"
-    NO_DEFAULT_PATH)
+    COMPONENTS static
+    PATHS "${_fiction_package_prefix}" NO_DEFAULT_PATH)
   include("${CMAKE_CURRENT_LIST_DIR}/fictionTargets.cmake")
 
   # Helper macro to define imported interface library
@@ -60,9 +57,7 @@ function(_fiction_load_package)
 
   set(fiction_FOUND TRUE)
   check_required_components(fiction)
-  set(fiction_FOUND
-      "${fiction_FOUND}"
-      PARENT_SCOPE)
+  set(fiction_FOUND "${fiction_FOUND}" PARENT_SCOPE)
   unset(fiction_NOT_FOUND_MESSAGE PARENT_SCOPE)
 endfunction()
 

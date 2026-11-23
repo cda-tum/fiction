@@ -11,33 +11,39 @@ pkg_check_modules(PC_JEMALLOC QUIET libjemalloc)
 
 find_path(
   JEMALLOC_INCLUDE_DIR jemalloc/jemalloc.h
-  HINTS ${JEMALLOC_ROOT}
-        ENV
-        JEMALLOC_ROOT
-        ${PC_JEMALLOC_MINIMAL_INCLUDEDIR}
-        ${PC_JEMALLOC_MINIMAL_INCLUDE_DIRS}
-        ${PC_JEMALLOC_INCLUDEDIR}
-        ${PC_JEMALLOC_INCLUDE_DIRS}
-  PATH_SUFFIXES include)
+  HINTS
+    ${JEMALLOC_ROOT}
+    ENV
+    JEMALLOC_ROOT
+    ${PC_JEMALLOC_MINIMAL_INCLUDEDIR}
+    ${PC_JEMALLOC_MINIMAL_INCLUDE_DIRS}
+    ${PC_JEMALLOC_INCLUDEDIR}
+    ${PC_JEMALLOC_INCLUDE_DIRS}
+    PATH_SUFFIXES
+    include)
 
 find_library(
   JEMALLOC_LIBRARY
   NAMES jemalloc libjemalloc
-  HINTS ${JEMALLOC_ROOT}
-        ENV
-        JEMALLOC_ROOT
-        ${PC_JEMALLOC_MINIMAL_LIBDIR}
-        ${PC_JEMALLOC_MINIMAL_LIBRARY_DIRS}
-        ${PC_JEMALLOC_LIBDIR}
-        ${PC_JEMALLOC_LIBRARY_DIRS}
-  PATH_SUFFIXES lib lib64)
+  HINTS
+    ${JEMALLOC_ROOT}
+    ENV
+    JEMALLOC_ROOT
+    ${PC_JEMALLOC_MINIMAL_LIBDIR}
+    ${PC_JEMALLOC_MINIMAL_LIBRARY_DIRS}
+    ${PC_JEMALLOC_LIBDIR}
+    ${PC_JEMALLOC_LIBRARY_DIRS}
+    PATH_SUFFIXES
+    lib
+    lib64)
 
 if(JEMALLOC_INCLUDE_DIR)
   set(_version_regex "^#define[ \t]+JEMALLOC_VERSION[ \t]+\"([^\"]+)\".*")
-  file(STRINGS "${JEMALLOC_INCLUDE_DIR}/jemalloc/jemalloc.h" JEMALLOC_VERSION
-       REGEX "${_version_regex}")
+  file(
+    STRINGS "${JEMALLOC_INCLUDE_DIR}/jemalloc/jemalloc.h" JEMALLOC_VERSION
+    REGEX "${_version_regex}")
   string(REGEX REPLACE "${_version_regex}" "\\1" JEMALLOC_VERSION
-                       "${JEMALLOC_VERSION}")
+         "${JEMALLOC_VERSION}")
   unset(_version_regex)
 endif()
 
