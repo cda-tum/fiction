@@ -15,7 +15,8 @@ presets, see {doc}`getting_started`. For contribution and review commands, see
 | [clang-tidy](https://clang.llvm.org/extra/clang-tidy/) | Analyze C++ code. | `.clang-tidy`; `uvx nox -s cpp_lint -- --all` runs the CI configuration. |
 | [ccache](https://ccache.dev/) | Cache compilations. | `FICTION_ENABLE_CACHE`; see {ref}`cmake-presets` for the PCH setting. |
 
-The first `cmakefmt` hook run builds the formatter with Cargo. The formatter
+The first `cmakefmt` hook run builds the formatter with Cargo and needs a host linker.
+If you supply your own Rust toolchain, use Rust 1.89 or newer. The formatter
 preserves existing command spelling because it has no canonical casing mode.
 
 ## Python bindings and packaging
