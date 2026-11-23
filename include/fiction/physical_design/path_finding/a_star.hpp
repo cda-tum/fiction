@@ -181,7 +181,7 @@ class a_star_impl
          */
         bool operator>(const coordinate_f& other) const
         {
-            return f == other.f ? h > other.h : f > other.f;
+            return f > other.f || (!(other.f > f) && h > other.h);
         }
     };
 

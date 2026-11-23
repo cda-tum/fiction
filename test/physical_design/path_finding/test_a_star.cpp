@@ -31,6 +31,7 @@
 #include <fiction/physical_design/routing_utils.hpp>
 
 #include <array>
+#include <compare>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
@@ -61,6 +62,44 @@ TEST_CASE("A* explores a linear number of steps on an open square", "[A*]")
     CHECK(path.source() == layout_base::coordinate{0, 0});
     CHECK(path.target() == layout_base::coordinate{63, 63});
     CHECK(evaluations <= 4 * 126);
+}
+
+TEST_CASE("A* accepts custom costs with ordering alone", "[A*]")
+{
+    /** @brief Numeric type with ordering and addition, without an equality operator. */
+    struct ordered_cost
+    {
+        /** @brief Underlying cost in units. */
+        uint64_t value{};
+
+        /** @brief Converts an integer to a cost. @param units Cost in units. */
+        // NOLINTNEXTLINE(google-explicit-constructor): A* constructs zero costs from integer literals.
+        ordered_cost(const uint64_t units = 0) : value{units} {}
+
+        /** @brief Adds two costs. @param other Cost to add. @return Sum. */
+        ordered_cost operator+(const ordered_cost& other) const
+        {
+            return {value + other.value};
+        }
+
+        /** @brief Orders costs. @param other Cost to compare. @return Relative order. */
+        std::strong_ordering operator<=>(const ordered_cost& other) const
+        {
+            return value <=> other.value;
+        }
+    };
+
+    /** @brief Open grid with equal total estimates along shortest routes. */
+    const cartesian_layout layout{{3, 3}};
+    /** @brief Converts Manhattan distances to the custom ordered cost. */
+    const distance_functor<ordered_cost> distance{manhattan_distance};
+    /** @brief Unit step cost in the same custom type. */
+    const cost_functor<ordered_cost> cost{unit_cost<>};
+
+    /** @brief Shortest path from corner to corner. */
+    const auto path = a_star(layout, {.source = {0, 0}, .target = {2, 2}}, distance, cost);
+
+    CHECK(path.size() == 5);
 }
 
 TEST_CASE("A* preserves priority after improving a queued coordinate", "[A*]")
