@@ -61,6 +61,20 @@ TEST_CASE("Energy degeneracy returns the stored state count", "[energy-distribut
     CHECK_FALSE(distribution.degeneracy(1.0).has_value());
 }
 
+TEST_CASE("Energy distributions reject non-finite inserted keys", "[energy-distribution]")
+{
+    energy_distribution distribution{};
+    distribution.add_energy_state({1.0, 7});
+
+    for (const double energy : {std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::infinity(),
+                                -std::numeric_limits<double>::infinity()})
+    {
+        CHECK_THROWS_AS(distribution.add_energy_state({energy, 2}), std::invalid_argument);
+    }
+    CHECK(distribution.size() == 1);
+    CHECK(distribution.degeneracy(1.0) == 7);
+}
+
 TEST_CASE("Calculated energy distributions reject non-finite energies", "[energy-distribution]")
 {
     charge_distribution distribution{};
@@ -69,6 +83,10 @@ TEST_CASE("Calculated energy distributions reject non-finite energies", "[energy
 
     distribution.assign_energy(std::numeric_limits<double>::infinity());
     CHECK_THROWS_AS(calculate_energy_distribution({distribution}), std::invalid_argument);
+
+    distribution.assign_energy(-std::numeric_limits<double>::infinity());
+    CHECK_THROWS_AS(calculate_energy_distribution({charge_distribution{}, distribution}), std::invalid_argument);
+    CHECK(calculate_energy_distribution({}).empty());
 }
 
 TEST_CASE("Overlapping energy tolerances count each SiDB configuration once", "[energy-distribution]")

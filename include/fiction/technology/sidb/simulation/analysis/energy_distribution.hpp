@@ -20,6 +20,7 @@
 #include "fiction/technology/sidb/charge_distribution.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 
+#include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -111,12 +112,17 @@ class energy_distribution
         return std::nullopt;
     }
     /**
-     * Adds a state to the energy distribution.
+     * Adds a state to the energy distribution, replacing any state at the same exact energy.
      *
      * @param state The energy state to be added.
+     * @throws std::invalid_argument If the energy is non-finite.
      */
-    void add_energy_state(const energy_state& state) noexcept
+    void add_energy_state(const energy_state& state)
     {
+        if (!std::isfinite(state.electrostatic_potential_energy))
+        {
+            throw std::invalid_argument{"Energy state must have finite energy"};
+        }
         distribution[state.electrostatic_potential_energy] = state.degeneracy;
     }
     /**
@@ -181,28 +187,34 @@ class energy_distribution
     }
 
   private:
+    /** @brief Lets the calculator adopt its populated map without reallocating its entries. */
+    friend energy_distribution calculate_energy_distribution(const std::vector<charge_distribution>&);
+
     /**
      * The energy distribution map. The key is the energy value and the value is the degeneracy of the energy value.
      */
     std::map<double, uint64_t> distribution;
 };
+namespace detail
+{
+
 /**
- * Computes the number of distinct charge configurations at each energy level. For identical charge states, the first
- * occurrence supplies the energy. A configuration starts a new level at its own energy when every existing level is
- * at least `ERROR_MARGIN` away. With the levels established, each configuration counts at the lowest level within
- * `ERROR_MARGIN` of its energy.
- *
+ * @brief Accumulates each distinct configuration at its lowest matching first-seen energy level.
+ * @tparam Group Accumulator stored at each representative energy.
+ * @tparam Fn Callable that updates a group from one distinct configuration.
  * @param charge_distributions Charge distributions of one layout.
- * @return The energy distribution.
- * @throws std::invalid_argument if a charge distribution has non-finite energy.
+ * @param accumulate Called with the group and first occurrence of each configuration.
+ * @return Groups ordered by representative energy.
+ * @throws std::invalid_argument If any input energy is non-finite.
  */
-[[nodiscard]] inline energy_distribution
-calculate_energy_distribution(const std::vector<charge_distribution>& charge_distributions)
+template <typename Group, typename Fn>
+[[nodiscard]] std::map<double, Group>
+group_energy_configurations(const std::vector<charge_distribution>& charge_distributions, Fn&& accumulate)
 {
     const auto by_charge_states = [](const charge_distribution* lhs, const charge_distribution* rhs)
     { return lhs->charge_states() < rhs->charge_states(); };
     std::set<const charge_distribution*, decltype(by_charge_states)> unique{};
-    std::map<double, uint64_t>                                       levels{};
+    std::map<double, Group>                                          levels{};
 
     const auto matching_level = [&levels](const double energy)
     {
@@ -232,22 +244,39 @@ calculate_energy_distribution(const std::vector<charge_distribution>& charge_dis
 
         if (unique.insert(&cd).second && matching_level(cd.energy()) == levels.end())
         {
-            levels.emplace(cd.energy(), 0);
+            levels.try_emplace(cd.energy());
         }
     }
 
     for (const auto* cd : unique)
     {
-        ++matching_level(cd->energy())->second;
+        const auto level = matching_level(cd->energy());
+        assert(level != levels.end() && "Each unique configuration has a matching energy level.");
+        std::invoke(accumulate, level->second, *cd);
     }
 
-    energy_distribution distribution{};
-    for (const auto& [energy, degeneracy] : levels)
-    {
-        distribution.add_energy_state(energy_state{energy, degeneracy});
-    }
+    return levels;
+}
 
-    return distribution;
+}  // namespace detail
+
+/**
+ * Computes the number of distinct charge configurations at each energy level. For identical charge states, the first
+ * occurrence supplies the energy. A configuration starts a new level at its own energy when every existing level is
+ * at least `ERROR_MARGIN` away. With the levels established, each configuration counts at the lowest level within
+ * `ERROR_MARGIN` of its energy.
+ *
+ * @param charge_distributions Charge distributions of one layout.
+ * @return The energy distribution.
+ * @throws std::invalid_argument if a charge distribution has non-finite energy.
+ */
+[[nodiscard]] inline energy_distribution
+calculate_energy_distribution(const std::vector<charge_distribution>& charge_distributions)
+{
+    energy_distribution result{};
+    result.distribution =
+        detail::group_energy_configurations<uint64_t>(charge_distributions, [](auto& count, const auto&) { ++count; });
+    return result;
 }
 
 }  // namespace fiction::sidb::simulation::analysis

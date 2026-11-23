@@ -2,6 +2,10 @@
 
 # Temperature Behavior
 
+Gate-based and non-gate-based critical temperatures count each distinct simulated charge configuration once.
+The first occurrence of a configuration supplies its energy, and its thermal weight uses the lowest matching
+energy level within the simulation tolerance.
+
 ::::{tab-set}
 :sync-group: language
 
