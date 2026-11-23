@@ -87,6 +87,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     origin, and missing neighbors and empty bounds return `None`.
   - More native calls release the GIL. Synchronize concurrent access to shared native objects.
 
+- Tooling:
+
+  - The pre-commit hook now formats CMake sources and templates with `cmakefmt`.
+
 ### Removed
 
 - Build system:

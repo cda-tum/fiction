@@ -24,20 +24,17 @@ include_directories(.)
 # async workers propagate exceptions. Keep PCH off for this ABI until
 # https://github.com/llvm/llvm-project/issues/53486 is fixed.
 if(FICTION_ENABLE_PCH AND NOT (MSVC AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
-  add_library(libfiction_test_pch STATIC
-              ${CMAKE_CURRENT_SOURCE_DIR}/pch_test.cpp)
+  add_library(
+    libfiction_test_pch STATIC ${CMAKE_CURRENT_SOURCE_DIR}/pch_test.cpp)
   target_link_libraries(
     libfiction_test_pch PRIVATE libfiction_test fiction::libfiction
                                 Catch2::Catch2WithMain)
-  target_compile_definitions(libfiction_test_pch
-                             PRIVATE CATCH_CONFIG_NO_POSIX_SIGNALS)
+  target_compile_definitions(
+    libfiction_test_pch PRIVATE CATCH_CONFIG_NO_POSIX_SIGNALS)
   target_precompile_headers(libfiction_test_pch PRIVATE pch_test.hpp)
 endif()
 
-file(
-  GLOB_RECURSE FILENAMES
-  RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
-  */*.cpp)
+file(GLOB_RECURSE FILENAMES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} */*.cpp)
 list(FILTER FILENAMES EXCLUDE REGEX "^benchmark/")
 # The installed consumer has its own CMake project, driven by
 # test/package/run.py.
@@ -80,7 +77,8 @@ foreach(FILE IN LISTS FILENAMES)
       ${TEST_NAME}
       PRIVATE $<TARGET_PROPERTY:libfiction,INTERFACE_INCLUDE_DIRECTORIES>)
     target_include_directories(
-      ${TEST_NAME} SYSTEM
+      ${TEST_NAME}
+      SYSTEM
       PRIVATE $<TARGET_PROPERTY:libfiction,INTERFACE_SYSTEM_INCLUDE_DIRECTORIES>
     )
     target_compile_options(
@@ -98,8 +96,8 @@ foreach(FILE IN LISTS FILENAMES)
   target_compile_definitions(${TEST_NAME} PRIVATE CATCH_CONFIG_NO_POSIX_SIGNALS)
 
   # The shared PCH carrier inherits libfiction's allocator dependencies.
-  if(TARGET libfiction_test_pch AND NOT TEST_NAME IN_LIST
-                                    ALLOCATION_FAILURE_TESTS)
+  if(TARGET libfiction_test_pch
+     AND NOT TEST_NAME IN_LIST ALLOCATION_FAILURE_TESTS)
     target_precompile_headers(${TEST_NAME} REUSE_FROM libfiction_test_pch)
   endif()
 

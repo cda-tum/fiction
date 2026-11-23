@@ -28,9 +28,7 @@ include(FetchContent)
 # step. Supporting both paths means reworking vendors/CMakeLists.txt first.
 
 # nlohmann_json
-set(JSON_VERSION
-    3.12.0
-    CACHE STRING "nlohmann_json version")
+set(JSON_VERSION 3.12.0 CACHE STRING "nlohmann_json version")
 if(NOT DEFINED JSON_URL)
   set(JSON_URL
       https://github.com/nlohmann/json/releases/download/v${JSON_VERSION}/json.tar.xz
@@ -40,9 +38,7 @@ if(NOT DEFINED JSON_SHA256)
   set(JSON_SHA256
       42f6e95cad6ec532fd372391373363b62a14af6d771056dbfc86160e6dfff7aa)
 endif()
-set(JSON_BuildTests
-    OFF
-    CACHE INTERNAL "")
+set(JSON_BuildTests OFF CACHE INTERNAL "")
 FetchContent_Declare(
   nlohmann_json
   URL ${JSON_URL}
@@ -51,9 +47,7 @@ FetchContent_MakeAvailable(nlohmann_json)
 
 # Catch2
 if(FICTION_TEST)
-  set(CATCH2_VERSION
-      3.16.1
-      CACHE STRING "Catch2 version")
+  set(CATCH2_VERSION 3.16.1 CACHE STRING "Catch2 version")
   if(NOT DEFINED CATCH2_URL)
     set(CATCH2_URL
         https://github.com/catchorg/Catch2/archive/refs/tags/v${CATCH2_VERSION}.tar.gz
@@ -78,9 +72,7 @@ endif()
 # known.
 
 # parallel-hashmap
-set(PARALLEL_HASHMAP_VERSION
-    2.1.0
-    CACHE STRING "parallel-hashmap version")
+set(PARALLEL_HASHMAP_VERSION 2.1.0 CACHE STRING "parallel-hashmap version")
 if(NOT DEFINED PARALLEL_HASHMAP_URL)
   set(PARALLEL_HASHMAP_URL
       https://github.com/greg7mdp/parallel-hashmap/archive/refs/tags/v${PARALLEL_HASHMAP_VERSION}.tar.gz
@@ -97,9 +89,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(parallel-hashmap)
 
 # tinyxml2
-set(TINYXML2_VERSION
-    11.0.0
-    CACHE STRING "tinyxml2 version")
+set(TINYXML2_VERSION 11.0.0 CACHE STRING "tinyxml2 version")
 if(NOT DEFINED TINYXML2_URL)
   set(TINYXML2_URL
       https://github.com/leethomason/tinyxml2/archive/refs/tags/${TINYXML2_VERSION}.tar.gz
@@ -121,9 +111,7 @@ FetchContent_MakeAvailable(tinyxml2)
 #
 # fiction supplies fmt explicitly so its headers are available in both the build
 # tree and the installed package.
-set(FMT_VERSION
-    12.2.1
-    CACHE STRING "fmt version")
+set(FMT_VERSION 12.2.1 CACHE STRING "fmt version")
 if(NOT DEFINED FMT_URL)
   set(FMT_URL
       https://github.com/fmtlib/fmt/archive/refs/tags/${FMT_VERSION}.tar.gz)

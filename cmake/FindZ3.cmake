@@ -9,11 +9,11 @@ function(check_z3_version z3_include z3_lib)
   try_run(
     Z3_RUN_RESULT Z3_COMPILE_RESULT ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/try_z3.cpp
-    CMAKE_FLAGS -DINCLUDE_DIRECTORIES:STRING=${z3_include} LINK_LIBRARIES
-                ${z3_lib}
-    COMPILE_OUTPUT_VARIABLE
-      COMPILE_OUTPUT RUN_OUTPUT_STDOUT_VARIABLE RUN_OUTPUT
-      RUN_OUTPUT_STDERR_VARIABLE RUN_OUTPUT_STDERR)
+    CMAKE_FLAGS -DINCLUDE_DIRECTORIES:STRING=${z3_include}
+    LINK_LIBRARIES ${z3_lib}
+    COMPILE_OUTPUT_VARIABLE COMPILE_OUTPUT
+    RUN_OUTPUT_STDOUT_VARIABLE RUN_OUTPUT
+    RUN_OUTPUT_STDERR_VARIABLE RUN_OUTPUT_STDERR)
 
   if(NOT Z3_COMPILE_RESULT OR RUN_OUTPUT_STDERR)
     if(NOT Z3_COMPILE_RESULT)
@@ -28,19 +28,22 @@ function(check_z3_version z3_include z3_lib)
     endif()
     if(z3_include AND EXISTS "${z3_include}/z3_version.h")
       file(STRINGS "${z3_include}/z3_version.h" z3_version_str
-           REGEX "^#define[\t ]+Z3_MAJOR_VERSION[\t ]+.*")
-      string(REGEX REPLACE "^.*Z3_MAJOR_VERSION[\t ]+([0-9]*).*$" "\\1"
-                           Z3_MAJOR "${z3_version_str}")
+           REGEX "^#define[\t ]+Z3_MAJOR_VERSION[\t ]+.*"
+      )
+      string(REGEX REPLACE "^.*Z3_MAJOR_VERSION[\t ]+([0-9]*).*$" "\\1" Z3_MAJOR
+             "${z3_version_str}")
 
       file(STRINGS "${z3_include}/z3_version.h" z3_version_str
-           REGEX "^#define[\t ]+Z3_MINOR_VERSION[\t ]+.*")
-      string(REGEX REPLACE "^.*Z3_MINOR_VERSION[\t ]+([0-9]*).*$" "\\1"
-                           Z3_MINOR "${z3_version_str}")
+           REGEX "^#define[\t ]+Z3_MINOR_VERSION[\t ]+.*"
+      )
+      string(REGEX REPLACE "^.*Z3_MINOR_VERSION[\t ]+([0-9]*).*$" "\\1" Z3_MINOR
+             "${z3_version_str}")
 
       file(STRINGS "${z3_include}/z3_version.h" z3_version_str
-           REGEX "^#define[\t ]+Z3_BUILD_NUMBER[\t ]+.*")
+           REGEX "^#define[\t ]+Z3_BUILD_NUMBER[\t ]+.*"
+      )
       string(REGEX REPLACE "^.*Z3_BUILD_NUMBER[\t ]+([0-9]*).*$" "\\1" Z3_BUILD
-                           "${z3_version_str}")
+             "${z3_version_str}")
 
       set(z3_version_string ${Z3_MAJOR}.${Z3_MINOR}.${Z3_BUILD})
     endif()
@@ -51,29 +54,23 @@ function(check_z3_version z3_include z3_lib)
     endif()
   else()
     string(REGEX MATCH "(Z3 )?([0-9]+.[0-9]+.[0-9]+.[0-9]+)" Z3_VERSION_STRING
-                 ${RUN_OUTPUT})
+           ${RUN_OUTPUT})
     set(z3_version_string ${CMAKE_MATCH_2})
   endif()
 
-  find_package_check_version(${z3_version_string} suitable_version
-                             RESULT_MESSAGE_VARIABLE reason)
+  find_package_check_version(
+    ${z3_version_string} suitable_version RESULT_MESSAGE_VARIABLE reason)
 
   if(suitable_version)
-    set(FOUND_SUITABLE_VERSION
-        TRUE
-        PARENT_SCOPE)
-    set(Z3_VERSION_STRING
-        ${z3_version_string}
-        PARENT_SCOPE)
+    set(FOUND_SUITABLE_VERSION TRUE PARENT_SCOPE)
+    set(Z3_VERSION_STRING ${z3_version_string} PARENT_SCOPE)
   else()
     message(STATUS "${reason}")
   endif()
 
 endfunction(check_z3_version)
 
-set(Z3_ROOT
-    ""
-    CACHE PATH "Root of Z3 distribution.")
+set(Z3_ROOT "" CACHE PATH "Root of Z3 distribution.")
 if(DEFINED ENV{Z3_ROOT})
   set(Z3_ROOT $ENV{Z3_ROOT})
   message(STATUS "Z3_ROOT from environment: ${Z3_ROOT}")
@@ -83,17 +80,13 @@ endif()
 if(NOT ${Z3_ROOT} STREQUAL "")
   find_path(
     Z3_CXX_INCLUDE_DIRS
-    NAMES z3.h z3++.h
-    NO_DEFAULT_PATH
-    PATHS ${Z3_ROOT}/include
-    PATH_SUFFIXES libz3 z3)
+    NAMES z3.h z3++.h NO_DEFAULT_PATH
+    PATHS ${Z3_ROOT}/include PATH_SUFFIXES libz3 z3)
 
   find_library(
     Z3_LIBRARIES
-    NAMES z3 libz3
-    NO_DEFAULT_PATH
-    PATHS ${Z3_ROOT}
-    PATH_SUFFIXES lib bin)
+    NAMES z3 libz3 NO_DEFAULT_PATH
+    PATHS ${Z3_ROOT} PATH_SUFFIXES lib bin)
 
   if(Z3_CXX_INCLUDE_DIRS AND Z3_LIBRARIES)
     message(STATUS "Z3_ROOT provided and includes and libraries found.")
@@ -123,14 +116,8 @@ if(NOT FOUND_SUITABLE_VERSION)
   unset(Z3_CXX_INCLUDE_DIRS CACHE)
   unset(Z3_LIBRARIES CACHE)
 
-  find_path(
-    Z3_CXX_INCLUDE_DIRS
-    NAMES z3.h z3++.h
-    PATH_SUFFIXES libz3 z3)
-  find_library(
-    Z3_LIBRARIES
-    NAMES z3 libz3
-    PATH_SUFFIXES lib bin)
+  find_path(Z3_CXX_INCLUDE_DIRS NAMES z3.h z3++.h PATH_SUFFIXES libz3 z3)
+  find_library(Z3_LIBRARIES NAMES z3 libz3 PATH_SUFFIXES lib bin)
 
   if(Z3_CXX_INCLUDE_DIRS AND Z3_LIBRARIES)
     message(STATUS "Found Z3 includes and libraries in system paths.")
@@ -158,17 +145,13 @@ if(NOT FOUND_SUITABLE_VERSION)
     if(Z3_PYTHON_ROOT)
       find_path(
         Z3_CXX_INCLUDE_DIRS
-        NAMES z3.h z3++.h
-        NO_DEFAULT_PATH
-        PATHS ${Z3_PYTHON_ROOT}
-        PATH_SUFFIXES libz3 z3 include)
+        NAMES z3.h z3++.h NO_DEFAULT_PATH
+        PATHS ${Z3_PYTHON_ROOT} PATH_SUFFIXES libz3 z3 include)
 
       find_library(
         Z3_LIBRARIES
-        NAMES z3 libz3
-        NO_DEFAULT_PATH
-        PATHS ${Z3_PYTHON_ROOT}
-        PATH_SUFFIXES lib bin)
+        NAMES z3 libz3 NO_DEFAULT_PATH
+        PATHS ${Z3_PYTHON_ROOT} PATH_SUFFIXES lib bin)
 
       if(Z3_CXX_INCLUDE_DIRS AND Z3_LIBRARIES)
         message(

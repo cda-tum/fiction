@@ -10,9 +10,7 @@ function(find_substring_by_prefix output prefix input)
   math(EXPR start_index "${prefix_index} + ${prefix_length}")
 
   string(SUBSTRING "${input}" "${start_index}" "-1" _output)
-  set("${output}"
-      "${_output}"
-      PARENT_SCOPE)
+  set("${output}" "${_output}" PARENT_SCOPE)
 endfunction()
 
 # A function to set environment variables of CMake from the output of `cmd /c
@@ -51,9 +49,7 @@ endfunction()
 function(get_all_targets var)
   set(targets)
   get_all_targets_recursive(targets ${CMAKE_CURRENT_SOURCE_DIR})
-  set(${var}
-      ${targets}
-      PARENT_SCOPE)
+  set(${var} ${targets} PARENT_SCOPE)
 endfunction()
 
 function(get_all_installable_targets var)
@@ -65,24 +61,16 @@ function(get_all_installable_targets var)
       list(REMOVE_ITEM targets ${_target})
     endif()
   endforeach()
-  set(${var}
-      ${targets}
-      PARENT_SCOPE)
+  set(${var} ${targets} PARENT_SCOPE)
 endfunction()
 
 macro(get_all_targets_recursive targets dir)
-  get_property(
-    subdirectories
-    DIRECTORY ${dir}
-    PROPERTY SUBDIRECTORIES)
+  get_property(subdirectories DIRECTORY ${dir} PROPERTY SUBDIRECTORIES)
   foreach(subdir ${subdirectories})
     get_all_targets_recursive(${targets} ${subdir})
   endforeach()
 
-  get_property(
-    current_targets
-    DIRECTORY ${dir}
-    PROPERTY BUILDSYSTEM_TARGETS)
+  get_property(current_targets DIRECTORY ${dir} PROPERTY BUILDSYSTEM_TARGETS)
   list(APPEND ${targets} ${current_targets})
 endmacro()
 
@@ -90,13 +78,9 @@ function(is_verbose var)
   if("CMAKE_MESSAGE_LOG_LEVEL" STREQUAL "VERBOSE"
      OR "CMAKE_MESSAGE_LOG_LEVEL" STREQUAL "DEBUG"
      OR "CMAKE_MESSAGE_LOG_LEVEL" STREQUAL "TRACE")
-    set(${var}
-        ON
-        PARENT_SCOPE)
+    set(${var} ON PARENT_SCOPE)
   else()
-    set(${var}
-        OFF
-        PARENT_SCOPE)
+    set(${var} OFF PARENT_SCOPE)
   endif()
 endfunction()
 

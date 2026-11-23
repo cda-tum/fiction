@@ -10,9 +10,7 @@ endif()
 
 include(ExternalProject)
 
-set(JEMALLOC_TAG
-    "5.3.0"
-    CACHE STRING "Which tag/revision of jemalloc to use")
+set(JEMALLOC_TAG "5.3.0" CACHE STRING "Which tag/revision of jemalloc to use")
 set(JEMALLOC_SOURCE_DIR "${CMAKE_BINARY_DIR}/_deps/jemalloc-src")
 set(JEMALLOC_PREFIX_DIR "${CMAKE_BINARY_DIR}/_deps/jemalloc-build")
 set(JEMALLOC_INSTALL_DIR "${JEMALLOC_PREFIX_DIR}/install")
@@ -27,14 +25,23 @@ endif()
 ExternalProject_Add(
   jemalloc_project
   PREFIX ${JEMALLOC_PREFIX_DIR}
-  URL "https://github.com/jemalloc/jemalloc/archive/refs/tags/${JEMALLOC_TAG}.tar.gz"
+  URL
+    "https://github.com/jemalloc/jemalloc/archive/refs/tags/${JEMALLOC_TAG}.tar.gz"
   SOURCE_DIR ${JEMALLOC_SOURCE_DIR}
   UPDATE_COMMAND ""
   CONFIGURE_COMMAND
-    bash -c
+    bash
+    -c
     "echo \"${JEMALLOC_TAG}-0-g$(git ls-remote --tags https://github.com/jemalloc/jemalloc.git | grep ${JEMALLOC_TAG} | tail -1 | cut -f1)\" > ${JEMALLOC_SOURCE_DIR}/VERSION"
-    && cd ${JEMALLOC_SOURCE_DIR} && ./autogen.sh
-    --prefix=${JEMALLOC_INSTALL_DIR} && rm VERSION
+    &&
+    cd
+    ${JEMALLOC_SOURCE_DIR}
+    &&
+    ./autogen.sh
+    --prefix=${JEMALLOC_INSTALL_DIR}
+    &&
+    rm
+    VERSION
   BUILD_COMMAND cd ${JEMALLOC_SOURCE_DIR} && make ${PARALLEL_BUILD_ARGS}
   INSTALL_COMMAND cd ${JEMALLOC_SOURCE_DIR} && make -j1 install
   BUILD_BYPRODUCTS ${JEMALLOC_INSTALL_DIR}/lib/libjemalloc.a)
@@ -44,6 +51,7 @@ add_library(jemalloc STATIC IMPORTED)
 add_dependencies(jemalloc jemalloc_project)
 
 set_target_properties(
-  jemalloc
-  PROPERTIES IMPORTED_LOCATION "${JEMALLOC_INSTALL_DIR}/lib/libjemalloc.a"
-             INTERFACE_INCLUDE_DIRECTORIES "${JEMALLOC_INSTALL_DIR}/include")
+  jemalloc PROPERTIES IMPORTED_LOCATION
+                      "${JEMALLOC_INSTALL_DIR}/lib/libjemalloc.a"
+                      INTERFACE_INCLUDE_DIRECTORIES
+                      "${JEMALLOC_INSTALL_DIR}/include")

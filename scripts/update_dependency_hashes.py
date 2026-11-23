@@ -52,7 +52,7 @@ def read_variable(text: str, name: str) -> str:
     """Read the first value of a ``set()`` call.
 
     Handles the plain form and the ``CACHE STRING "..."`` form, and tolerates
-    the line breaks that ``cmake-format`` introduces.
+    line breaks introduced by CMake formatting.
 
     Args:
         text: Contents of ``cmake/Dependencies.cmake``.

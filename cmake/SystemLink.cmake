@@ -13,8 +13,7 @@ function(target_include_system_directories target)
       endif()
       if(${scope} STREQUAL "INTERFACE" OR ${scope} STREQUAL "PUBLIC")
         target_include_directories(
-          ${target} ${_SYSTEM} ${scope}
-          "$<BUILD_INTERFACE:${lib_include_dirs}>"
+          ${target} ${_SYSTEM} ${scope} "$<BUILD_INTERFACE:${lib_include_dirs}>"
           "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
       else()
         target_include_directories(${target} ${_SYSTEM} ${scope}
@@ -45,7 +44,7 @@ function(target_include_system_library target scope lib)
     else()
       message(
         TRACE
-        "${check_target} library does not have the INTERFACE_INCLUDE_DIRECTORIES property."
+          "${check_target} library does not have the INTERFACE_INCLUDE_DIRECTORIES property."
       )
     endif()
   endif()

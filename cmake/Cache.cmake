@@ -1,8 +1,6 @@
 # Enable cache if available
 function(fiction_enable_cache)
-  set(CACHE_OPTION
-      "ccache"
-      CACHE STRING "Compiler cache to be used")
+  set(CACHE_OPTION "ccache" CACHE STRING "Compiler cache to be used")
   set(CACHE_OPTION_VALUES "ccache" "sccache")
   set_property(CACHE CACHE_OPTION PROPERTY STRINGS ${CACHE_OPTION_VALUES})
   list(FIND CACHE_OPTION_VALUES ${CACHE_OPTION} CACHE_OPTION_INDEX)
@@ -22,8 +20,9 @@ function(fiction_enable_cache)
     list(REMOVE_ITEM CACHE_OPTION_VALUES ${CACHE_OPTION})
     find_program(CACHE_BINARY NAMES ${CACHE_OPTION_VALUES})
     if(CACHE_BINARY)
-      message(STATUS "${CACHE_OPTION} was not found, falling back to "
-                     "${CACHE_BINARY}")
+      message(
+        STATUS "${CACHE_OPTION} was not found, falling back to "
+               "${CACHE_BINARY}")
     endif()
   endif()
 
@@ -64,11 +63,9 @@ function(fiction_enable_cache)
     # FICTION_ENABLE_PCH was turned on keeps its bare `ccache` launcher and
     # never picks up the sloppiness wrapper, silently losing every PCH
     # compilation's cache entry.
-    set(CMAKE_CXX_COMPILER_LAUNCHER
-        ${CACHE_LAUNCHER}
+    set(CMAKE_CXX_COMPILER_LAUNCHER ${CACHE_LAUNCHER}
         CACHE STRING "CXX compiler cache used" FORCE)
-    set(CMAKE_C_COMPILER_LAUNCHER
-        ${CACHE_LAUNCHER}
+    set(CMAKE_C_COMPILER_LAUNCHER ${CACHE_LAUNCHER}
         CACHE STRING "C compiler cache used" FORCE)
   else()
     message(

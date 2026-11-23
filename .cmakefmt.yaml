@@ -1,0 +1,24 @@
+format:
+  line_ending: unix
+  line_width: 80
+  tab_size: 2
+  # Keep longer conditions in hanging layouts when their clauses fit.
+  max_hanging_wrap_lines: 6
+  max_rows_cmdline: 6
+  max_hanging_wrap_groups: 2
+  dangle_parens: false
+  # cmakefmt has no canonical mode. Preserve spellings such as FetchContent_Declare.
+  command_case: unchanged
+  keyword_case: unchanged
+  enable_sort: true
+markup:
+  first_comment_is_literal: false
+  fence_pattern: '^\s*([`~]{3}[`~]*)(.*)$'
+  ruler_pattern: '^\s*[^\w\s]{3}.*[^\w\s]{3}$'
+per_command_overrides:
+  if:
+    wrap_after_first_arg: true
+  elseif:
+    wrap_after_first_arg: true
+  file:
+    wrap_after_first_arg: true

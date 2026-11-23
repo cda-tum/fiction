@@ -7,8 +7,8 @@ function(
   ENABLE_SANITIZER_THREAD
   ENABLE_SANITIZER_MEMORY)
 
-  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES
-                                             ".*Clang")
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
+     OR CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
     set(SANITIZERS "")
 
     if(${ENABLE_SANITIZER_ADDRESS})
@@ -71,10 +71,10 @@ function(
   if(LIST_OF_SANITIZERS)
     if(NOT "${LIST_OF_SANITIZERS}" STREQUAL "")
       if(NOT MSVC)
-        target_compile_options(${project_name}
-                               INTERFACE -fsanitize=${LIST_OF_SANITIZERS})
-        target_link_options(${project_name} INTERFACE
-                            -fsanitize=${LIST_OF_SANITIZERS})
+        target_compile_options(
+          ${project_name} INTERFACE -fsanitize=${LIST_OF_SANITIZERS})
+        target_link_options(
+          ${project_name} INTERFACE -fsanitize=${LIST_OF_SANITIZERS})
       else()
         string(FIND "$ENV{PATH}" "$ENV{VSINSTALLDIR}" index_of_vs_install_dir)
         if("${index_of_vs_install_dir}" STREQUAL "-1")

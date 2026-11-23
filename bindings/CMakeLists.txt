@@ -11,23 +11,21 @@ set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 # nanobind is resolved as an installed Python build dependency (not
 # FetchContent'd); locate it via the interpreter that scikit-build-core is
 # building against.
-set(Python_FIND_VIRTUALENV
-    FIRST
+set(Python_FIND_VIRTUALENV FIRST
     CACHE STRING "Give precedence to virtualenvs when searching for Python")
-set(Python_FIND_FRAMEWORK
-    LAST
+set(Python_FIND_FRAMEWORK LAST
     CACHE STRING "Prefer Brew/Conda to Apple framework Python")
-set(Python_ARTIFACTS_INTERACTIVE
-    ON
+set(Python_ARTIFACTS_INTERACTIVE ON
     CACHE BOOL
           "Prevent multiple searches for Python and instead cache the results.")
-find_package(Python REQUIRED COMPONENTS Interpreter Development.Module
-                                        ${SKBUILD_SABI_COMPONENT})
+find_package(
+  Python
+  REQUIRED
+  COMPONENTS Interpreter Development.Module ${SKBUILD_SABI_COMPONENT})
 execute_process(
   COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
   RESULT_VARIABLE nanobind_exec_result
-  ERROR_VARIABLE nanobind_exec_err
-  OUTPUT_STRIP_TRAILING_WHITESPACE
+  ERROR_VARIABLE nanobind_exec_err OUTPUT_STRIP_TRAILING_WHITESPACE
   OUTPUT_VARIABLE nanobind_ROOT)
 if(NOT nanobind_exec_result EQUAL 0)
   message(
@@ -36,13 +34,10 @@ if(NOT nanobind_exec_result EQUAL 0)
   )
 endif()
 find_package(
-  nanobind
-  3.1
+  nanobind 3.1
   CONFIG
   REQUIRED
-  PATHS
-  "${nanobind_ROOT}"
-  NO_DEFAULT_PATH)
+  PATHS "${nanobind_ROOT}" NO_DEFAULT_PATH)
 
 include(${PROJECT_SOURCE_DIR}/cmake/AddPyfictionPythonBinding.cmake)
 
@@ -51,8 +46,8 @@ include(${PROJECT_SOURCE_DIR}/cmake/AddPyfictionPythonBinding.cmake)
 # that Clang-Tidy reads. The generated docstring header has no include guard and
 # is only included through `documentation.hpp`.
 add_library(pyfiction_headers INTERFACE)
-target_include_directories(pyfiction_headers
-                           INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(
+  pyfiction_headers INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(pyfiction_headers SYSTEM INTERFACE ${NB_DIR}/include)
 target_link_libraries(pyfiction_headers INTERFACE libfiction Python::Module)
 file(GLOB_RECURSE FICTION_PYFICTION_HEADERS CONFIGURE_DEPENDS
@@ -61,8 +56,10 @@ list(FILTER FICTION_PYFICTION_HEADERS EXCLUDE REGEX
      "pybind11_mkdoc_docstrings\\.hpp$")
 target_sources(
   pyfiction_headers
-  INTERFACE FILE_SET HEADERS BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include
-            FILES ${FICTION_PYFICTION_HEADERS})
+  INTERFACE
+  FILE_SET HEADERS
+    BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include
+    FILES ${FICTION_PYFICTION_HEADERS})
 set_property(TARGET pyfiction_headers PROPERTY VERIFY_INTERFACE_HEADER_SETS ON)
 
 # Builds every extension module of the wheel.
@@ -85,6 +82,6 @@ foreach(
   physical_design)
   file(GLOB_RECURSE module_sources CONFIGURE_DEPENDS
        ${CMAKE_CURRENT_SOURCE_DIR}/${module}/*.cpp)
-  add_pyfiction_python_binding(pyfiction-${module} ${module_sources}
-                               MODULE_NAME ${module})
+  add_pyfiction_python_binding(pyfiction-${module} ${module_sources} MODULE_NAME
+                               ${module})
 endforeach()
