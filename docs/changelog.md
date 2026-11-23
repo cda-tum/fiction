@@ -40,6 +40,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     Simulation engines return one layout with separate charge distributions. Use `sim_params`
     for the physical parameters in C++ engine options.
   - QuickSim returns no result for layouts with charged surface defects.
+  - Critical path and throughput analysis look up clock numbers only at path sources.
   - A* prefers smaller remaining distances when estimated total costs tie, reducing search work on open grids.
 
 - Build system:
