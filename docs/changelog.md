@@ -40,6 +40,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     Simulation engines return one layout with separate charge distributions. Use `sim_params`
     for the physical parameters in C++ engine options.
   - QuickSim returns no result for layouts with charged surface defects.
+  - Critical path and throughput analysis look up clock numbers only at path sources.
+  - A* prefers smaller remaining estimates when total costs tie, reducing search work on open grids.
+    It may return a different route of the same cost.
 
 - Build system:
 
@@ -129,6 +132,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     that used earlier degeneracy values.
   - SiDB energy distribution calculation rejects charge configurations with non-finite energies.
   - SiDB energy distributions count each configuration once when energy tolerances overlap.
+
+- Data structures:
+
+  - QCA synchronization assignments apply to the same clock zone on every layer.
 
 - Dependencies:
 

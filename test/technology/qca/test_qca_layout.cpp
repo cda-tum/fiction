@@ -113,3 +113,22 @@ TEST_CASE("QCA synchronization elements belong to clock zones", "[qca-layout]")
         CHECK(copy != original);
     }
 }
+
+TEST_CASE("QCA synchronization assignments address the same zone from every layer", "[qca-layout]")
+{
+    layout lyt{{6, 6, 2}, clocking::twoddwave(), "cells", 2, 2};
+
+    lyt.assign_synchronization_element({1, 1, 1}, 2);
+    CHECK(lyt.num_se() == 1);
+    CHECK(lyt.get_synchronization_element({2, 2, 0}) == 2);
+    CHECK(lyt.get_synchronization_element({3, 3, 1}) == 2);
+    CHECK(lyt.get_synchronization_element({1, 1, 1}) == 0);
+
+    lyt.assign_synchronization_element({1, 1, 0}, 3);
+    CHECK(lyt.num_se() == 1);
+    CHECK(lyt.get_synchronization_element({3, 3, 1}) == 3);
+
+    lyt.assign_synchronization_element({1, 1, 1}, 0);
+    CHECK(lyt.num_se() == 0);
+    CHECK_FALSE(lyt.is_synchronization_element({2, 2}));
+}

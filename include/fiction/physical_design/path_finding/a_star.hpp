@@ -90,7 +90,7 @@ class a_star_impl
             cost{cost_fn},
             params{p}
     {
-        open_list.push(coordinate_f{objective.source, 0});
+        open_list.push(coordinate_f{objective.source, 0, 0});
     }
 
     /**
@@ -157,7 +157,7 @@ class a_star_impl
      */
     using g_f_type = std::common_type_t<Dist, Cost>;
     /**
-     * Stores a coordinate and its f-value.
+     * Stores a coordinate and its search priorities.
      */
     struct coordinate_f
     {
@@ -170,16 +170,18 @@ class a_star_impl
          * f-value of the coordinate.
          */
         g_f_type f;
+        /** @brief Estimated cost remaining to the target. */
+        g_f_type h;
 
         /**
-         * Comparator for the priority queue. Compares only the f-values.
+         * Orders by total estimated cost, then by remaining estimated cost.
          *
          * @param other Other coordinate_f to compare with.
-         * @return `true` iff this f-value is greater than the other's.
+         * @return `true` if this entry has lower priority than `other`.
          */
         bool operator>(const coordinate_f& other) const
         {
-            return this->f > other.f;
+            return f > other.f || (!(other.f > f) && h > other.h);
         }
     };
 
@@ -255,10 +257,12 @@ class a_star_impl
             came_from[successor] = current;
             set_g(successor, tentative_g);
 
-            // compute new f-value
-            const auto f = tentative_g + static_cast<g_f_type>(distance(successor, objective.target));
+            /** @brief Heuristic estimate used to prioritize equal total costs. */
+            const auto h = static_cast<g_f_type>(distance(successor, objective.target));
+            /** @brief Total estimated cost through the successor. */
+            const auto f = tentative_g + h;
 
-            open_list.push({successor, f});
+            open_list.push({successor, f, h});
         };
 
         if constexpr (requires { requires std::same_as<typename Lyt::object_id, fiction::layouts::layout_object_id>; })
@@ -344,6 +348,10 @@ class a_star_impl
  * steps. The default uses Manhattan distance for Cartesian layouts and Chebyshev distance for shifted Cartesian and
  * hexagonal layouts, whose unit-cost steps can change both planar coordinates. See `distance_functor` for
  * implementations.
+ *
+ * When estimated total costs tie, the queue prefers the lower remaining estimate. On an unclocked Cartesian layout
+ * with no obstructions, unit costs, and the default heuristic, it examines a number of steps proportional to the
+ * shortest path length.
  *
  * Paths do not pass obstructed coordinates or connections, except that the target is never obstructed. A coordinate
  * or connection is obstructed if the `obstructions` argument marks it or if the layout's `is_obstructed_coordinate`
