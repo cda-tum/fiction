@@ -12797,6 +12797,11 @@ Chebyshev distance for shifted Cartesian and hexagonal layouts, whose
 unit-cost steps can change both planar coordinates. See
 `distance_functor` for implementations.
 
+When estimated total costs tie, the queue prefers the lower remaining
+estimate. On an unclocked Cartesian layout with no obstructions, unit
+costs, and the default heuristic, it examines a number of steps
+proportional to the shortest path length.
+
 Paths do not pass obstructed coordinates or connections, except that
 the target is never obstructed. A coordinate or connection is
 obstructed if the `obstructions` argument marks it or if the layout's
@@ -12990,20 +12995,22 @@ static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_im
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_closed_list = R"doc(Closed list that acts as a set of already visited coordinates.)doc";
 
-static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_coordinate_f = R"doc(Stores a coordinate and its f-value.)doc";
+static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_coordinate_f = R"doc(Stores a coordinate and its search priorities.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_coordinate_f_coord = R"doc(Coordinate.)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_coordinate_f_f = R"doc(f-value of the coordinate.)doc";
 
+static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_coordinate_f_h = R"doc(Estimated cost remaining to the target.)doc";
+
 static const char *mkd_doc_fiction_physical_design_path_finding_detail_a_star_impl_coordinate_f_operator_gt =
-R"doc(Comparator for the priority queue. Compares only the f-values.
+R"doc(Orders by total estimated cost, then by remaining estimated cost.
 
 Args:
     other: Other coordinate_f to compare with.
 
 Returns:
-    `true` iff this f-value is greater than the other's.
+    `true` if this entry has lower priority than `other`.
 
 )doc";
 

@@ -93,11 +93,10 @@ class critical_path_length_and_throughput_impl
                         }
                         continue;
                     }
-                    path_info path{1, lyt.get_clock_number(lyt.get_tile(current.object))};
+                    path_info path{};
                     if (lyt.input_count(current.object) != 0)
                     {
                         uint64_t shortest_delay = std::numeric_limits<uint64_t>::max();
-                        path                    = {};
                         for (uint32_t input{}; input < lyt.input_count(current.object); ++input)
                         {
                             const auto child = *cache.at(*lyt.source({current.object, input}));
@@ -108,6 +107,10 @@ class critical_path_length_and_throughput_impl
                         max_diff = std::max(max_diff, path.delay - shortest_delay);
                         ++path.length;
                         ++path.delay;
+                    }
+                    else
+                    {
+                        path = {1, lyt.get_clock_number(lyt.get_tile(current.object))};
                     }
                     cache.at(current.object) = path;
                     pending.pop_back();

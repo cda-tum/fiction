@@ -79,6 +79,21 @@ TEST_CASE("Unbalanced layout", "[throughput]")
     check(blueprints::unbalanced_and_layout<cartesian_gate_layout>(), 6, 2);
 }
 
+TEST_CASE("Timing uses assigned clock numbers at path sources", "[throughput][placed-objects]")
+{
+    cartesian_gate_layout lyt{{4, 2}, clocking::twoddwave()};
+    const auto            late  = lyt.create_pi("late", {0, 0});
+    const auto            early = lyt.create_pi("early", {0, 1});
+    const auto            wire  = lyt.create_buf(late, {1, 0});
+    const auto            gate  = lyt.create_and(wire, early, {2, 0});
+    lyt.create_po(gate, "out", {3, 0});
+    lyt.assign_clock_number({0, 0}, 3);
+    lyt.assign_clock_number({0, 1}, 0);
+    lyt.assign_clock_number({1, 0}, 0);
+
+    check(lyt, 4, 2);
+}
+
 TEST_CASE("Timing counts declared wire paths independently of placement", "[throughput][placed-objects]")
 {
     gate_layout<cartesian_layout> lyt{{1, 1}};
