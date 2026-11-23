@@ -73,7 +73,7 @@ TEST_CASE("A* accepts custom costs with ordering alone", "[A*]")
         uint64_t value{};
 
         /** @brief Converts an integer to a cost. @param units Cost in units. */
-        // NOLINTNEXTLINE(google-explicit-constructor): A* constructs zero costs from integer literals.
+        // NOLINTNEXTLINE(google-explicit-constructor,hicpp-explicit-conversions): A* converts integer zero to a cost.
         ordered_cost(const uint64_t units = 0) : value{units} {}
 
         /** @brief Adds two costs. @param other Cost to add. @return Sum. */
