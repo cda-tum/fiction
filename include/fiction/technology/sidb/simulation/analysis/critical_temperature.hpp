@@ -34,6 +34,7 @@
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
+#include "fiction/technology/sidb/simulation/logic/verify_logic_match.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/utils/execution_timeout.hpp"
 #include "fiction/utils/math/math_utils.hpp"

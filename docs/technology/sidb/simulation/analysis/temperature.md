@@ -5,6 +5,9 @@
 Gate-based and non-gate-based critical temperatures count each distinct simulated charge configuration once.
 The first occurrence of a configuration supplies its energy, and its thermal weight uses the lowest matching
 energy level within the simulation tolerance.
+A non-finite simulation energy raises an error in the temperature calculation and aborts any parameter sweep
+that calls it. The reported count of physically valid configurations comes from the simulation engine and
+may include repeated configurations.
 
 ::::{tab-set}
 :sync-group: language

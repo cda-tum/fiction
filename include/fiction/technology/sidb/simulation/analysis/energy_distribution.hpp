@@ -209,11 +209,12 @@ namespace detail
  */
 template <typename Group, typename Fn>
 [[nodiscard]] std::map<double, Group>
-group_energy_configurations(const std::vector<charge_distribution>& charge_distributions, Fn&& accumulate)
+group_energy_configurations(const std::vector<charge_distribution>& charge_distributions, Fn accumulate)
 {
     const auto by_charge_states = [](const charge_distribution* lhs, const charge_distribution* rhs)
     { return lhs->charge_states() < rhs->charge_states(); };
     std::set<const charge_distribution*, decltype(by_charge_states)> unique{};
+    std::vector<const charge_distribution*>                          first_seen{};
     std::map<double, Group>                                          levels{};
 
     const auto matching_level = [&levels](const double energy)
@@ -242,13 +243,18 @@ group_energy_configurations(const std::vector<charge_distribution>& charge_distr
             throw std::invalid_argument{"Charge-distribution energy must be finite"};
         }
 
-        if (unique.insert(&cd).second && matching_level(cd.energy()) == levels.end())
+        if (!unique.insert(&cd).second)
+        {
+            continue;
+        }
+        first_seen.push_back(&cd);
+        if (matching_level(cd.energy()) == levels.end())
         {
             levels.try_emplace(cd.energy());
         }
     }
 
-    for (const auto* cd : unique)
+    for (const auto* cd : first_seen)
     {
         const auto level = matching_level(cd->energy());
         assert(level != levels.end() && "Each unique configuration has a matching energy level.");

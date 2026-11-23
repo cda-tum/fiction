@@ -98,7 +98,7 @@ namespace detail
 template <typename Classify>
 [[nodiscard]] energy_and_state_type
 calculate_distinct_energy_and_state_type(const std::vector<charge_distribution>& charge_distributions,
-                                         Classify&&                              classify)
+                                         Classify                                classify)
 {
     const auto groups = group_energy_configurations<std::vector<state_type>>(
         charge_distributions, [&classify](auto& labels, const auto& cd) { labels.push_back(classify(cd)); });

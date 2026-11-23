@@ -71,16 +71,19 @@ TEST_CASE("Gate thermal weights include one label per distinct configuration", "
     auto                      repeated = middle;
     repeated.assign_energy(1.25 * tolerance);
 
-    const std::vector distributions{high, middle, low, repeated};
+    const std::vector distributions{high, low, middle, repeated};
     const std::vector output_pairs{bdl_pair{dot_tag::OUTPUT, upper, lower}};
     const std::vector spec{create_id_tt()};
     const auto        labels = fiction::sidb::simulation::analysis::detail::calculate_distinct_energy_and_state_type(
         distributions, [&](const auto& cd)
         { return fiction::sidb::simulation::analysis::detail::classify_outputs(cd, output_pairs, spec, 0); });
 
-    const double temperature{0.1};
-    const auto   high_weight = calculate_boltzmann_factor(high.energy(), low.energy(), temperature);
-    CHECK(labels.size() == 3);
+    const double                temperature{0.1};
+    const auto                  high_weight = calculate_boltzmann_factor(high.energy(), low.energy(), temperature);
+    const energy_and_state_type expected{{low.energy(), state_type::ACCEPTED},
+                                         {low.energy(), state_type::REJECTED},
+                                         {high.energy(), state_type::ACCEPTED}};
+    CHECK(labels == expected);
     CHECK_THAT(occupation_probability_gate_based(labels, temperature),
                Catch::Matchers::WithinAbs(1.0 / (2.0 + high_weight), 1e-12));
 }
