@@ -132,7 +132,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     that used earlier degeneracy values.
   - SiDB energy distributions reject non-finite energies during calculation and manual insertion.
   - SiDB energy distributions and gate-based critical temperatures count each configuration once
-    when energy tolerances overlap.
+    when energy tolerances overlap. Critical-temperature analysis uses the same energy tolerance
+    to distinguish excited states from the ground level.
 
 - Data structures:
 

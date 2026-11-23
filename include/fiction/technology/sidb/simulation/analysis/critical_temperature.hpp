@@ -326,6 +326,7 @@ class critical_temperature_impl
                         return classify_outputs(cd, output_bdl_pairs, spec, i);
                     });
 
+                assert(!energy_state_type.empty() && "A nonempty simulation has at least one energy label.");
                 const auto min_energy = energy_state_type.cbegin()->first;
 
                 auto ground_state_is_transparent = is_ground_state_transparent(energy_state_type, min_energy);
@@ -481,13 +482,7 @@ class critical_temperature_impl
 
         for (const auto& [energy, state_type] : est)
         {
-            // Check if there is at least one ground state that satisfies the logic (transparent). Round the energy
-            // value of the given valid_layout to six decimal places to overcome possible rounding errors and for
-            // comparability with the min_energy.
-            if (std::abs(fiction::utils::math::round_to_n_decimal_places(energy, 6) -
-                         fiction::utils::math::round_to_n_decimal_places(min_energy, 6)) <
-                    fiction::utils::math::ERROR_MARGIN &&
-                state_type == state_type::ACCEPTED)
+            if (energy - min_energy < fiction::utils::math::ERROR_MARGIN && state_type == state_type::ACCEPTED)
             {
                 ground_state_is_transparent = true;
             }
