@@ -34,11 +34,13 @@
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
+#include <fiction/utils/math/math_utils.hpp>
 
 #include <kitty/dynamic_truth_table.hpp>
 
 #include <algorithm>
 #include <cstddef>
+#include <limits>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -49,6 +51,62 @@ using namespace fiction::sidb::simulation::analysis;
 using namespace fiction::sidb::simulation::engines;
 using namespace fiction::sidb::simulation::logic;
 using namespace fiction::synthesis;
+
+TEST_CASE("Gate thermal weights include one label per distinct configuration", "[calculate-energy-and-state-type]")
+{
+    const lattice_site upper{0, 0, 0};
+    const lattice_site lower{0, 0, 1};
+    const auto         tolerance = utils::math::ERROR_MARGIN;
+    layout             lyt{};
+    lyt.assign_sidb(upper, dot_tag::OUTPUT);
+    lyt.assign_sidb(lower, dot_tag::OUTPUT);
+
+    charge_distribution high{lyt, model::charge_state::NEUTRAL};
+    high.assign_charge_state(upper, model::charge_state::NEGATIVE);
+    high.assign_energy(1.5 * tolerance);
+    charge_distribution middle{lyt, model::charge_state::NEUTRAL};
+    middle.assign_charge_state(lower, model::charge_state::NEGATIVE);
+    middle.assign_energy(0.75 * tolerance);
+    const charge_distribution low{lyt, model::charge_state::NEUTRAL};
+    auto                      repeated = middle;
+    repeated.assign_energy(1.25 * tolerance);
+
+    const std::vector distributions{high, low, middle, repeated};
+    const std::vector output_pairs{bdl_pair{dot_tag::OUTPUT, upper, lower}};
+    const std::vector spec{create_id_tt()};
+    const auto        labels = fiction::sidb::simulation::analysis::detail::calculate_distinct_energy_and_state_type(
+        distributions, [&](const auto& cd)
+        { return fiction::sidb::simulation::analysis::detail::classify_outputs(cd, output_pairs, spec, 0); });
+
+    const double                temperature{0.1};
+    const auto                  high_weight = calculate_boltzmann_factor(high.energy(), low.energy(), temperature);
+    const energy_and_state_type expected{{low.energy(), state_type::ACCEPTED},
+                                         {low.energy(), state_type::REJECTED},
+                                         {high.energy(), state_type::ACCEPTED}};
+    CHECK(labels == expected);
+    CHECK_THAT(occupation_probability_gate_based(labels, temperature),
+               Catch::Matchers::WithinAbs(1.0 / (2.0 + high_weight), 1e-12));
+}
+
+TEST_CASE("Non-finite charge energies do not match a labeler level", "[calculate-energy-and-state-type]")
+{
+    const lattice_site upper{0, 0, 0};
+    const lattice_site lower{0, 0, 1};
+    layout             lyt{};
+    lyt.assign_sidb(upper, dot_tag::OUTPUT);
+    lyt.assign_sidb(lower, dot_tag::OUTPUT);
+
+    charge_distribution invalid{lyt};
+    invalid.assign_energy(std::numeric_limits<double>::quiet_NaN());
+    const std::vector   distributions{invalid};
+    energy_distribution energies{};
+    energies.add_energy_state({0.0, 1});
+    const std::vector spec{create_id_tt()};
+    const std::vector output_pairs{bdl_pair{dot_tag::OUTPUT, upper, lower}};
+
+    CHECK(calculate_energy_and_state_type_with_kinks_accepted(energies, distributions, output_pairs, spec, 0).empty());
+    CHECK(calculate_energy_and_state_type_with_kinks_rejected(lyt, energies, distributions, spec, 0, {}, {}).empty());
+}
 
 TEST_CASE("Single SiDB", "[calculate-energy-and-state-type]")
 {

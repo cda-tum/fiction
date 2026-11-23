@@ -60,6 +60,62 @@ enum class state_type : uint8_t
  */
 using energy_and_state_type = std::vector<std::pair<double, state_type>>;
 
+namespace detail
+{
+
+/**
+ * @brief Classifies one charge configuration by its expected BDL outputs, tolerating wire kinks.
+ * @param cd Charge configuration to classify.
+ * @param output_bdl_pairs Output BDL pairs with one pair per truth table.
+ * @param spec Expected Boolean output functions.
+ * @param input_index Input pattern for which the configuration was simulated.
+ * @return Whether the configuration encodes the desired outputs.
+ */
+[[nodiscard]] inline state_type classify_outputs(const charge_distribution&                     cd,
+                                                 const std::vector<logic::bdl_pair>&            output_bdl_pairs,
+                                                 const std::vector<kitty::dynamic_truth_table>& spec,
+                                                 const uint64_t                                 input_index)
+{
+    for (std::size_t i = 0; i < output_bdl_pairs.size(); ++i)
+    {
+        if (static_cast<bool>(-model::charge_state_to_sign(cd.get_charge_state(output_bdl_pairs[i].lower))) !=
+            static_cast<bool>(kitty::get_bit(spec[i], input_index)))
+        {
+            return state_type::REJECTED;
+        }
+    }
+    return state_type::ACCEPTED;
+}
+
+/**
+ * @brief Builds the ascending energy labels used for gate-based thermal weights.
+ * @tparam Classify Callable that labels one charge configuration.
+ * @param charge_distributions Charge distributions of one layout.
+ * @param classify Classifier for the simulated input pattern and kink policy.
+ * @return One label per distinct configuration at its lowest matching energy level.
+ * @throws std::invalid_argument If any input energy is non-finite or the classifier rejects its arguments.
+ */
+template <typename Classify>
+[[nodiscard]] energy_and_state_type
+calculate_distinct_energy_and_state_type(const std::vector<charge_distribution>& charge_distributions,
+                                         Classify                                classify)
+{
+    const auto groups = group_energy_configurations<std::vector<state_type>>(
+        charge_distributions, [&classify](auto& labels, const auto& cd) { labels.push_back(classify(cd)); });
+
+    energy_and_state_type result{};
+    for (const auto& [energy, labels] : groups)
+    {
+        for (const auto label : labels)
+        {
+            result.emplace_back(energy, label);
+        }
+    }
+    return result;
+}
+
+}  // namespace detail
+
 /**
  * @brief Labels each charge distribution matching an energy level by whether its output BDL pairs encode the expected
  * output for the given input pattern (`ACCEPTED`) or not (`REJECTED`). Kinks in the wires are tolerated.
@@ -88,24 +144,12 @@ using energy_and_state_type = std::vector<std::pair<double, state_type>>;
         {
             for (const auto& cd : valid_charge_distributions)
             {
-                if (std::abs(cd.energy() - energy) >= utils::math::ERROR_MARGIN)
+                if (!(std::abs(cd.energy() - energy) < utils::math::ERROR_MARGIN))
                 {
                     continue;
                 }
 
-                auto type_of_considered_state = state_type::ACCEPTED;
-
-                for (std::size_t i = 0; i < output_bdl_pairs.size(); ++i)
-                {
-                    if (static_cast<bool>(-model::charge_state_to_sign(cd.get_charge_state(
-                            output_bdl_pairs[i].lower))) != static_cast<bool>(kitty::get_bit(spec[i], input_index)))
-                    {
-                        type_of_considered_state = state_type::REJECTED;
-                        break;
-                    }
-                }
-
-                est.emplace_back(energy, type_of_considered_state);
+                est.emplace_back(energy, detail::classify_outputs(cd, output_bdl_pairs, spec, input_index));
             }
         });
 
@@ -146,7 +190,7 @@ using energy_and_state_type = std::vector<std::pair<double, state_type>>;
         {
             for (const auto& cd : valid_charge_distributions)
             {
-                if (std::abs(cd.energy() - energy) >= utils::math::ERROR_MARGIN)
+                if (!(std::abs(cd.energy() - energy) < utils::math::ERROR_MARGIN))
                 {
                     continue;
                 }

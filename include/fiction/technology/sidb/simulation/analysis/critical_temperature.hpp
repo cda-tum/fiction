@@ -34,6 +34,7 @@
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
+#include "fiction/technology/sidb/simulation/logic/verify_logic_match.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/utils/execution_timeout.hpp"
 #include "fiction/utils/math/math_utils.hpp"
@@ -229,6 +230,8 @@ class critical_temperature_impl
     /**
      * *Gate-based Critical Temperature* Simulation of a SiDB layout for a given Boolean function.
      *
+     * Each distinct simulated charge configuration contributes once to the thermal weights.
+     *
      * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      */
     void gate_based_simulation(const std::vector<kitty::dynamic_truth_table>& spec)
@@ -301,27 +304,29 @@ class critical_temperature_impl
                     critical_temperature = 0.0;
                     return;
                 }
-                stats.num_valid_lyt = sim_result.charge_distributions.size();
-                // The energy distribution of the physically valid charge configurations for the given layout is
-                // determined.
-                const auto distribution = calculate_energy_distribution(sim_result.charge_distributions);
+                stats.num_valid_lyt     = sim_result.charge_distributions.size();
+                const bool reject_kinks = params.operational_params.op_condition ==
+                                          logic::is_operational_params::operational_condition::REJECT_KINKS;
+                assert((reject_kinks || (!output_bdl_pairs.empty() && spec.size() == output_bdl_pairs.size())) &&
+                       "Expected one output BDL pair per truth table.");
+                const logic::is_operational_params kink_check{
+                    .op_condition = logic::is_operational_params::operational_condition::REJECT_KINKS};
 
-                energy_and_state_type energy_state_type{};
+                const auto energy_state_type = calculate_distinct_energy_and_state_type(
+                    sim_result.charge_distributions,
+                    [&](const auto& cd)
+                    {
+                        if (reject_kinks)
+                        {
+                            const auto status = logic::verify_logic_match(lyt_with_input_pattern, cd, kink_check, spec,
+                                                                          i, input_bdl_wires, output_bdl_wires);
+                            return status == logic::operational_status::OPERATIONAL ? state_type::ACCEPTED :
+                                                                                      state_type::REJECTED;
+                        }
+                        return classify_outputs(cd, output_bdl_pairs, spec, i);
+                    });
 
-                if (params.operational_params.op_condition ==
-                    sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS)
-                {
-                    energy_state_type = calculate_energy_and_state_type_with_kinks_rejected(
-                        lyt_with_input_pattern, distribution, sim_result.charge_distributions, spec, i, input_bdl_wires,
-                        output_bdl_wires);
-                }
-                else
-                {
-                    // A label that indicates whether the state still fulfills the logic.
-                    energy_state_type = calculate_energy_and_state_type_with_kinks_accepted(
-                        distribution, sim_result.charge_distributions, output_bdl_pairs, spec, i);
-                }
-
+                assert(!energy_state_type.empty() && "A nonempty simulation has at least one energy label.");
                 const auto min_energy = energy_state_type.cbegin()->first;
 
                 auto ground_state_is_transparent = is_ground_state_transparent(energy_state_type, min_energy);
@@ -477,13 +482,7 @@ class critical_temperature_impl
 
         for (const auto& [energy, state_type] : est)
         {
-            // Check if there is at least one ground state that satisfies the logic (transparent). Round the energy
-            // value of the given valid_layout to six decimal places to overcome possible rounding errors and for
-            // comparability with the min_energy.
-            if (std::abs(fiction::utils::math::round_to_n_decimal_places(energy, 6) -
-                         fiction::utils::math::round_to_n_decimal_places(min_energy, 6)) <
-                    fiction::utils::math::ERROR_MARGIN &&
-                state_type == state_type::ACCEPTED)
+            if (energy - min_energy < fiction::utils::math::ERROR_MARGIN && state_type == state_type::ACCEPTED)
             {
                 ground_state_is_transparent = true;
             }

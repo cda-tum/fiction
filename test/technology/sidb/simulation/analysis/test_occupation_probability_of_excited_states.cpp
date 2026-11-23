@@ -16,15 +16,34 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/technology/sidb/simulation/analysis/calculate_energy_and_state_type.hpp>
 #include <fiction/technology/sidb/simulation/analysis/energy_distribution.hpp>
 #include <fiction/technology/sidb/simulation/analysis/occupation_probability_of_excited_states.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
+#include <cmath>
+
 using namespace fiction;
 using namespace fiction::sidb::simulation::analysis;
 using namespace fiction::utils::math;
+
+TEST_CASE("Excited-state occupation includes levels at the tolerance boundary", "[occupation-probability-erroneous]")
+{
+    constexpr auto      temperature = 0.1;
+    energy_distribution distribution{};
+    distribution.add_energy_state({0.0, 1});
+    const auto nearer = std::nextafter(ERROR_MARGIN, 0.0);
+    distribution.add_energy_state({nearer, 1});
+    distribution.add_energy_state({ERROR_MARGIN, 1});
+
+    const auto near_weight    = calculate_boltzmann_factor(nearer, 0.0, temperature);
+    const auto excited_weight = calculate_boltzmann_factor(ERROR_MARGIN, 0.0, temperature);
+    CHECK_THAT(occupation_probability_non_gate_based(distribution, temperature),
+               Catch::Matchers::WithinAbs(excited_weight / (1.0 + near_weight + excited_weight), 1e-12));
+}
 
 TEST_CASE("occupation probability of all erroneous charge distribution states", "[occupation-probability-erroneous]")
 {

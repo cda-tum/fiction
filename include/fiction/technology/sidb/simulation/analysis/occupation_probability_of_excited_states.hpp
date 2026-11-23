@@ -104,38 +104,30 @@ namespace fiction::sidb::simulation::analysis
 {
     assert((temperature > 0.0) && "Temperature should be slightly above 0 K");
 
-    if (energy_dist.empty())
+    const auto ground = energy_dist.get_nth_state(0);
+    if (!ground.has_value())
     {
         return 0.0;
     }
 
-    const auto min_energy = energy_dist.min_energy();  // unit: eV
-
-    // The partition function is obtained by summing up all the Boltzmann factors.
-
-    double partition_function = 0.0;
+    const auto min_energy         = ground->electrostatic_potential_energy;
+    double     partition_function = 0.0;
+    double     excited_weight     = 0.0;
 
     energy_dist.for_each(
-        [&partition_function, min_energy, temperature](const double energy, const uint64_t degeneracy)
+        [&partition_function, &excited_weight, min_energy, temperature](const double   energy,
+                                                                        const uint64_t degeneracy) noexcept
         {
-            partition_function +=
+            const auto weight =
                 static_cast<double>(degeneracy) * calculate_boltzmann_factor(energy, min_energy, temperature);
-        });
-
-    double p = 0;
-
-    energy_dist.for_each(
-        [&p, min_energy, temperature](const double energy, const uint64_t degeneracy)
-        {
-            if (std::abs(fiction::utils::math::round_to_n_decimal_places(energy, 6) -
-                         fiction::utils::math::round_to_n_decimal_places(min_energy, 6)) >
-                fiction::utils::math::ERROR_MARGIN)
+            partition_function += weight;
+            if (energy - min_energy >= fiction::utils::math::ERROR_MARGIN)
             {
-                p += static_cast<double>(degeneracy) * calculate_boltzmann_factor(energy, min_energy, temperature);
+                excited_weight += weight;
             }
         });
 
-    return p / partition_function;  // Occupation probability of the excited states.
+    return excited_weight / partition_function;
 }
 
 }  // namespace fiction::sidb::simulation::analysis
