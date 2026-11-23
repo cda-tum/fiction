@@ -385,7 +385,7 @@ class qca_layout(mnt.pyfiction.layouts.cartesian_layout):
         Turns a clock zone into a synchronization element.
 
         Args:
-            cz: Clock zone.
+            cz: Clock-zone coordinate. The z-coordinate is ignored.
             se: Number of full clock cycles to extend the Hold phase of `cz`
                 by; 0 turns `cz` back into a normal clock zone.
 

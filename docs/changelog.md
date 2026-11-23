@@ -131,6 +131,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `energy_distribution::degeneracy` returns the number of states at an energy. Recheck analyses
     that used earlier degeneracy values.
 
+- Data structures:
+
+  - QCA synchronization assignments apply to the same clock zone on every layer.
+
 - Dependencies:
 
   - Download and lock tooling requires `uv` 0.13.4 or later to reject compromised eMudhra
