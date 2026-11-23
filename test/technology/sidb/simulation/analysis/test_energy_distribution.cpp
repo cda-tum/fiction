@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <limits>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -57,6 +58,16 @@ TEST_CASE("Energy degeneracy returns the stored state count", "[energy-distribut
     CHECK(distribution.degeneracy(-1.0 + 1e-7) == 7);
     CHECK(distribution.degeneracy(0.0) == 3);
     CHECK_FALSE(distribution.degeneracy(1.0).has_value());
+}
+
+TEST_CASE("Calculated energy distributions reject non-finite energies", "[energy-distribution]")
+{
+    charge_distribution distribution{};
+    distribution.assign_energy(std::numeric_limits<double>::quiet_NaN());
+    CHECK_THROWS_AS(calculate_energy_distribution({distribution}), std::invalid_argument);
+
+    distribution.assign_energy(std::numeric_limits<double>::infinity());
+    CHECK_THROWS_AS(calculate_energy_distribution({distribution}), std::invalid_argument);
 }
 
 TEST_CASE("Test calculate_energy_distribution function", "[energy-distribution]")

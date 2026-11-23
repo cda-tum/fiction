@@ -127,6 +127,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     and time-to-solution estimates include failed QuickSim attempts.
   - `energy_distribution::degeneracy` returns the number of states at an energy. Recheck analyses
     that used earlier degeneracy values.
+  - SiDB energy distribution calculation rejects charge configurations with non-finite energies.
 
 - Dependencies:
 

@@ -193,6 +193,7 @@ class energy_distribution
  *
  * @param charge_distributions Charge distributions of one layout.
  * @return The energy distribution.
+ * @throws std::invalid_argument if a charge distribution has non-finite energy.
  */
 [[nodiscard]] inline energy_distribution
 calculate_energy_distribution(const std::vector<charge_distribution>& charge_distributions)
@@ -204,6 +205,11 @@ calculate_energy_distribution(const std::vector<charge_distribution>& charge_dis
 
     for (const auto& cd : charge_distributions)
     {
+        if (!std::isfinite(cd.energy()))
+        {
+            throw std::invalid_argument{"Charge-distribution energy must be finite"};
+        }
+
         if (std::ranges::none_of(unique, [&cd](const auto* u) { return u->same_charge_states(cd); }))
         {
             unique.push_back(&cd);
