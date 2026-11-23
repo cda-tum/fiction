@@ -20,11 +20,10 @@
 #include "fiction/technology/sidb/charge_distribution.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 
-#include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
-#include <cstdlib>
+#include <functional>
 #include <iterator>
 #include <map>
 #include <optional>
@@ -188,8 +187,10 @@ class energy_distribution
     std::map<double, uint64_t> distribution;
 };
 /**
- * The energy distribution of a set of charge distributions: every distinct energy with the number of distinct charge
- * distributions that have it. Distributions with identical charge states count once.
+ * Computes the number of distinct charge configurations at each energy level. For identical charge states, the first
+ * occurrence supplies the energy. A configuration starts a new level at its own energy when every existing level is
+ * at least `ERROR_MARGIN` away. With the levels established, each configuration counts at the lowest level within
+ * `ERROR_MARGIN` of its energy.
  *
  * @param charge_distributions Charge distributions of one layout.
  * @return The energy distribution.
@@ -198,10 +199,29 @@ class energy_distribution
 [[nodiscard]] inline energy_distribution
 calculate_energy_distribution(const std::vector<charge_distribution>& charge_distributions)
 {
-    energy_distribution distribution{};
+    const auto by_charge_states = [](const charge_distribution* lhs, const charge_distribution* rhs)
+    { return lhs->charge_states() < rhs->charge_states(); };
+    std::set<const charge_distribution*, decltype(by_charge_states)> unique{};
+    std::map<double, uint64_t>                                       levels{};
 
-    std::vector<const charge_distribution*> unique{};
-    unique.reserve(charge_distributions.size());
+    const auto matching_level = [&levels](const double energy)
+    {
+        const auto higher = levels.lower_bound(energy);
+        // Representatives are at least ERROR_MARGIN apart. Only the two neighbors can match.
+        if (higher != levels.begin())
+        {
+            const auto lower = std::prev(higher);
+            if (energy - lower->first < utils::math::ERROR_MARGIN)
+            {
+                return lower;
+            }
+        }
+        if (higher != levels.end() && higher->first - energy < utils::math::ERROR_MARGIN)
+        {
+            return higher;
+        }
+        return levels.end();
+    };
 
     for (const auto& cd : charge_distributions)
     {
@@ -210,29 +230,20 @@ calculate_energy_distribution(const std::vector<charge_distribution>& charge_dis
             throw std::invalid_argument{"Charge-distribution energy must be finite"};
         }
 
-        if (std::ranges::none_of(unique, [&cd](const auto* u) { return u->same_charge_states(cd); }))
+        if (unique.insert(&cd).second && matching_level(cd.energy()) == levels.end())
         {
-            unique.push_back(&cd);
+            levels.emplace(cd.energy(), 0);
         }
     }
-
-    std::set<double> unique_energies{};
 
     for (const auto* cd : unique)
     {
-        if (std::ranges::none_of(unique_energies, [cd](const double e)
-                                 { return std::fabs(cd->energy() - e) < fiction::utils::math::ERROR_MARGIN; }))
-        {
-            unique_energies.insert(cd->energy());
-        }
+        ++matching_level(cd->energy())->second;
     }
 
-    for (const auto energy : unique_energies)
+    energy_distribution distribution{};
+    for (const auto& [energy, degeneracy] : levels)
     {
-        const auto degeneracy = static_cast<uint64_t>(
-            std::ranges::count_if(unique, [energy](const auto* cd)
-                                  { return std::abs(cd->energy() - energy) < fiction::utils::math::ERROR_MARGIN; }));
-
         distribution.add_energy_state(energy_state{energy, degeneracy});
     }
 

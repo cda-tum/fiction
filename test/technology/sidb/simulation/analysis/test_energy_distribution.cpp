@@ -26,6 +26,7 @@
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/simulation/analysis/energy_distribution.hpp>
 #include <fiction/technology/sidb/simulation/potential_landscape.hpp>
+#include <fiction/utils/math/math_utils.hpp>
 
 #include <algorithm>
 #include <cstdint>
@@ -68,6 +69,35 @@ TEST_CASE("Calculated energy distributions reject non-finite energies", "[energy
 
     distribution.assign_energy(std::numeric_limits<double>::infinity());
     CHECK_THROWS_AS(calculate_energy_distribution({distribution}), std::invalid_argument);
+}
+
+TEST_CASE("Overlapping energy tolerances count each SiDB configuration once", "[energy-distribution]")
+{
+    constexpr auto tolerance = utils::math::ERROR_MARGIN;
+    layout         lyt{};
+    lyt.assign_sidb({0, 0, 0});
+
+    const charge_distribution lowest{lyt, charge_state::NEGATIVE};
+    charge_distribution       highest{lyt, charge_state::POSITIVE};
+    charge_distribution       middle{lyt, charge_state::NEUTRAL};
+    highest.assign_energy(1.5 * tolerance);
+    middle.assign_energy(0.75 * tolerance);
+
+    SECTION("A configuration that matches two levels counts at the lower level")
+    {
+        const auto result = calculate_energy_distribution({highest, middle, lowest, middle});
+        REQUIRE(result.size() == 2);
+        CHECK(result.degeneracy(0.0) == 2);
+        CHECK(result.degeneracy(highest.energy()) == 1);
+    }
+
+    SECTION("A representative stays at the first observed energy")
+    {
+        const auto result = calculate_energy_distribution({middle, lowest, highest});
+        REQUIRE(result.size() == 1);
+        CHECK(result.min_energy() == middle.energy());
+        CHECK(result.degeneracy(middle.energy()) == 3);
+    }
 }
 
 TEST_CASE("Test calculate_energy_distribution function", "[energy-distribution]")
