@@ -210,7 +210,7 @@ class layout : public layouts::cell_grid<cell_type>, public layouts::tile_clocki
     /**
      * Turns a clock zone into a synchronization element.
      *
-     * @param cz Clock zone.
+     * @param cz Clock-zone coordinate. The z-coordinate is ignored.
      * @param se Number of full clock cycles to extend the Hold phase of `cz` by; 0 turns `cz` back into a normal clock
      * zone.
      * @throws std::bad_alloc If allocation fails.
