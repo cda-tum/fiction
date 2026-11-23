@@ -30,7 +30,8 @@ exclude: "^vendors/|^benchmarks/|bindings/include/pyfiction/pybind11_mkdoc_docst
 #         the same file at the same time and lose one of the two edits
 #   6     the language and configuration formatters. These share a tier because their file
 #         types are disjoint
-#   7-9   the hooks that must observe the formatters' result
+#   7-9   the hooks that must observe the formatters' result, including cmakefmt reading
+#         its YAML configuration after Prettier
 #
 # Do not collapse tiers 1-5 to win back the wall clock; those hooks are cheap, and the
 # concurrency that matters is already in tiers 0 and 6. `require_serial` is not a substitute:
@@ -127,7 +128,7 @@ repos:
       - id: cmakefmt-fix
         types: [file]
         files: (\.cmake|CMakeLists.txt)(.in)?$
-        priority: 6
+        priority: 7
 
   # clang-format the C++ part of the code base
   - repo: https://github.com/pre-commit/mirrors-clang-format
