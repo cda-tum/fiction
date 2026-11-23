@@ -26,9 +26,11 @@
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/simulation/analysis/energy_distribution.hpp>
 #include <fiction/technology/sidb/simulation/potential_landscape.hpp>
+#include <fiction/utils/math/math_utils.hpp>
 
 #include <algorithm>
 #include <cstdint>
+#include <limits>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -57,6 +59,64 @@ TEST_CASE("Energy degeneracy returns the stored state count", "[energy-distribut
     CHECK(distribution.degeneracy(-1.0 + 1e-7) == 7);
     CHECK(distribution.degeneracy(0.0) == 3);
     CHECK_FALSE(distribution.degeneracy(1.0).has_value());
+}
+
+TEST_CASE("Energy distributions reject non-finite inserted keys", "[energy-distribution]")
+{
+    energy_distribution distribution{};
+    distribution.add_energy_state({1.0, 7});
+
+    for (const double energy : {std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::infinity(),
+                                -std::numeric_limits<double>::infinity()})
+    {
+        CHECK_THROWS_AS(distribution.add_energy_state({energy, 2}), std::invalid_argument);
+    }
+    CHECK(distribution.size() == 1);
+    CHECK(distribution.degeneracy(1.0) == 7);
+}
+
+TEST_CASE("Calculated energy distributions reject non-finite energies", "[energy-distribution]")
+{
+    charge_distribution distribution{};
+    distribution.assign_energy(std::numeric_limits<double>::quiet_NaN());
+    CHECK_THROWS_AS(calculate_energy_distribution({distribution}), std::invalid_argument);
+
+    distribution.assign_energy(std::numeric_limits<double>::infinity());
+    CHECK_THROWS_AS(calculate_energy_distribution({distribution}), std::invalid_argument);
+
+    distribution.assign_energy(-std::numeric_limits<double>::infinity());
+    CHECK_THROWS_AS(calculate_energy_distribution({charge_distribution{}, distribution}), std::invalid_argument);
+    CHECK(calculate_energy_distribution({}).empty());
+}
+
+TEST_CASE("Overlapping energy tolerances count each SiDB configuration once", "[energy-distribution]")
+{
+    constexpr auto tolerance = utils::math::ERROR_MARGIN;
+    layout         lyt{};
+    lyt.assign_sidb({0, 0, 0});
+
+    const charge_distribution lowest{lyt, charge_state::NEGATIVE};
+    charge_distribution       highest{lyt, charge_state::POSITIVE};
+    charge_distribution       middle{lyt, charge_state::NEUTRAL};
+    highest.assign_energy(1.5 * tolerance);
+    middle.assign_energy(0.75 * tolerance);
+
+    SECTION("A configuration that matches two levels counts at the lower level")
+    {
+        const auto result = calculate_energy_distribution({highest, middle, lowest, middle});
+        REQUIRE(result.size() == 2);
+        CHECK(result.degeneracy(0.0) == 2);
+        CHECK(result.degeneracy(highest.energy()) == 1);
+    }
+
+    SECTION("A representative stays at the first observed energy")
+    {
+        const auto result = calculate_energy_distribution({middle, lowest, highest});
+        REQUIRE(result.size() == 1);
+        // The representative must preserve the exact first-seen energy.
+        CHECK_THAT(result.min_energy(), Catch::Matchers::WithinAbs(middle.energy(), 0.0));
+        CHECK(result.degeneracy(middle.energy()) == 3);
+    }
 }
 
 TEST_CASE("Test calculate_energy_distribution function", "[energy-distribution]")

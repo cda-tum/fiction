@@ -335,10 +335,14 @@ class energy_distribution:
 
     def add_energy_state(self, state: energy_state) -> None:
         """
-        Adds a state to the energy distribution.
+        Adds a state to the energy distribution, replacing any state at the
+        same exact energy.
 
         Args:
             state: The energy state to be added.
+
+        Raises:
+            ValueError: If the energy is non-finite.
         """
 
     def size(self) -> int:
@@ -383,15 +387,21 @@ def calculate_energy_distribution(
     charge_distributions: Sequence[mnt.pyfiction.sidb.charge_distribution],
 ) -> energy_distribution:
     """
-    The energy distribution of a set of charge distributions: every
-    distinct energy with the number of distinct charge distributions that
-    have it. Distributions with identical charge states count once.
+    Computes the number of distinct charge configurations at each energy
+    level. For identical charge states, the first occurrence supplies the
+    energy. A configuration starts a new level at its own energy when
+    every existing level is at least `ERROR_MARGIN` away. With the levels
+    established, each configuration counts at the lowest level within
+    `ERROR_MARGIN` of its energy.
 
     Args:
         charge_distributions: Charge distributions of one layout.
 
     Returns:
         The energy distribution.
+
+    Raises:
+        ValueError: if a charge distribution has non-finite energy.
     """
 
 def minimum_energy(charge_distributions: Sequence[mnt.pyfiction.sidb.charge_distribution]) -> float:

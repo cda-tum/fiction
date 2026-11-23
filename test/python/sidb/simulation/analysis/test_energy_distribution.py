@@ -29,6 +29,30 @@ def test_empty_energy_distribution_rejects_extrema(query: str) -> None:
         getattr(energy_distribution(), query)()
 
 
+@pytest.mark.parametrize("energy", [float("nan"), float("inf"), -float("inf")])
+def test_non_finite_energies_raise_value_error(energy: float) -> None:
+    """Non-finite energies cannot become levels, including on repeated configurations.
+
+    Args:
+        energy: Non-finite energy to attempt to store.
+    """
+    layout = sidb_layout()
+    layout.assign_sidb(lattice_site())
+    valid = charge_distribution(layout)
+    invalid = charge_distribution(layout)
+    invalid.assign_energy(energy)
+
+    with pytest.raises(ValueError, match="Charge-distribution energy must be finite"):
+        calculate_energy_distribution([valid, invalid])
+
+    distribution = energy_distribution()
+    distribution.add_energy_state(energy_state(1.0, 7))
+    with pytest.raises(ValueError, match="Energy state must have finite energy"):
+        distribution.add_energy_state(energy_state(energy, 2))
+    assert distribution.size() == 1
+    assert distribution.degeneracy(1.0) == 7
+
+
 def test_degeneracy_returns_state_count() -> None:
     """Energy lookup returns the stored state count rather than the energy-level index."""
     distribution = energy_distribution()

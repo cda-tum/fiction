@@ -17475,15 +17475,21 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_calculate_energy_distribution =
-R"doc(The energy distribution of a set of charge distributions: every
-distinct energy with the number of distinct charge distributions that
-have it. Distributions with identical charge states count once.
+R"doc(Computes the number of distinct charge configurations at each energy
+level. For identical charge states, the first occurrence supplies the
+energy. A configuration starts a new level at its own energy when
+every existing level is at least `ERROR_MARGIN` away. With the levels
+established, each configuration counts at the lowest level within
+`ERROR_MARGIN` of its energy.
 
 Args:
     charge_distributions: Charge distributions of one layout.
 
 Returns:
     The energy distribution.
+
+Raises:
+    ValueError: if a charge distribution has non-finite energy.
 
 )doc";
 
@@ -17676,6 +17682,28 @@ static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_stats_time_total = R"doc(The total runtime of the critical temperature computation.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_calculate_distinct_energy_and_state_type =
+R"doc(Builds the ascending energy labels used for gate-based thermal
+weights.
+
+Args:
+    charge_distributions: Charge distributions of one layout.
+    classify: Classifier for the simulated input pattern and kink
+              policy.
+
+Template Args:
+    Classify: Callable that labels one charge configuration.
+
+Returns:
+    One label per distinct configuration at its lowest matching energy
+    level.
+
+Raises:
+    ValueError: If any input energy is non-finite or the classifier
+                rejects its arguments.
+
+)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_checked_parameters =
 R"doc(Starts the shared budget and validates the centikelvin iteration
 range.
@@ -17690,6 +17718,22 @@ Raises:
     utils::timeout_error: If the deadline expires.
     ValueError: If the operational parameters or temperature range are
                 invalid.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_classify_outputs =
+R"doc(Classifies one charge configuration by its expected BDL outputs,
+tolerating wire kinks.
+
+Args:
+    cd: Charge configuration to classify.
+    output_bdl_pairs: Output BDL pairs with one pair per truth table.
+    spec: Expected Boolean output functions.
+    input_index: Input pattern for which the configuration was
+                 simulated.
+
+Returns:
+    Whether the configuration encodes the desired outputs.
 
 )doc";
 
@@ -17747,6 +17791,9 @@ Args:
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_gate_based_simulation =
 R"doc(*Gate-based Critical Temperature* Simulation of a SiDB layout for a
 given Boolean function.
+
+Each distinct simulated charge configuration contributes once to the
+thermal weights.
 
 Args:
     spec: Expected Boolean function of the layout given as a multi-
@@ -17838,6 +17885,27 @@ static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temp
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_stats = R"doc(Statistics.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_group_energy_configurations =
+R"doc(Accumulates each distinct configuration at its lowest matching first-
+seen energy level.
+
+Args:
+    charge_distributions: Charge distributions of one layout.
+    accumulate: Called with the group and first occurrence of each
+                configuration.
+
+Template Args:
+    Group: Accumulator stored at each representative energy.
+    Fn: Callable that updates a group from one distinct configuration.
+
+Returns:
+    Groups ordered by representative energy.
+
+Raises:
+    ValueError: If any input energy is non-finite.
+
+)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl = R"doc(Implementation of the population stability analysis.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl_handle_negative_charges =
@@ -17904,10 +17972,14 @@ if two different charge distributions occur with the same energy, the
 degeneracy value of the energy state is 2.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_energy_distribution_add_energy_state =
-R"doc(Adds a state to the energy distribution.
+R"doc(Adds a state to the energy distribution, replacing any state at the
+same exact energy.
 
 Args:
     state: The energy state to be added.
+
+Raises:
+    ValueError: If the energy is non-finite.
 
 )doc";
 
