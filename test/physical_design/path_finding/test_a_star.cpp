@@ -41,6 +41,28 @@ using namespace fiction::layouts;
 using namespace fiction::physical_design;
 using namespace fiction::physical_design::path_finding;
 
+TEST_CASE("A* explores a linear number of steps on an open square", "[A*]")
+{
+    /** @brief Open grid with many equal-cost routes between opposite corners. */
+    const cartesian_layout layout{{64, 64}};
+    /** @brief Externally observable step-cost evaluations. */
+    std::size_t evaluations{};
+    /** @brief Unit edge cost with an evaluation counter. */
+    const cost_functor<uint8_t> cost{[&evaluations](const auto&, const auto&)
+                                     {
+                                         ++evaluations;
+                                         return uint8_t{1};
+                                     }};
+
+    /** @brief Result of the search with the default Cartesian heuristic. */
+    const auto path = a_star(layout, {.source = {0, 0}, .target = {63, 63}}, manhattan_distance_functor{}, cost);
+
+    REQUIRE(path.size() == 127);
+    CHECK(path.source() == layout_base::coordinate{0, 0});
+    CHECK(path.target() == layout_base::coordinate{63, 63});
+    CHECK(evaluations <= 4 * 126);
+}
+
 TEST_CASE("A* preserves priority after improving a queued coordinate", "[A*]")
 {
     /** @brief Six-tile geometry with two competing routes. */
