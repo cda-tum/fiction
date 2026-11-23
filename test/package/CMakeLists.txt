@@ -7,33 +7,12 @@ if(EXPECT_MISSING_DEPENDENCY)
   set(mockturtle_DIR "consumer-mockturtle")
   set(tinyxml2_DIR "consumer-tinyxml2")
   find_package(fiction CONFIG QUIET)
-  if(
-    fiction_FOUND
-    OR
-    NOT
-    CMAKE_MODULE_PATH
-    STREQUAL
-    "consumer-module-path"
-    OR
-    NOT
-    PACKAGE_PREFIX_DIR
-    STREQUAL
-    "consumer-prefix"
-    OR
-    NOT
-    mockturtle_DIR
-    STREQUAL
-    "consumer-mockturtle"
-    OR
-    NOT
-    tinyxml2_DIR
-    STREQUAL
-    "consumer-tinyxml2"
-    OR
-    NOT
-    fiction_NOT_FOUND_MESSAGE
-    MATCHES
-    "${EXPECT_MISSING_DEPENDENCY}")
+  if(fiction_FOUND
+     OR NOT CMAKE_MODULE_PATH STREQUAL "consumer-module-path"
+     OR NOT PACKAGE_PREFIX_DIR STREQUAL "consumer-prefix"
+     OR NOT mockturtle_DIR STREQUAL "consumer-mockturtle"
+     OR NOT tinyxml2_DIR STREQUAL "consumer-tinyxml2"
+     OR NOT fiction_NOT_FOUND_MESSAGE MATCHES "${EXPECT_MISSING_DEPENDENCY}")
     message(
       FATAL_ERROR
         "Unavailable ${EXPECT_MISSING_DEPENDENCY} changed lookup state or omitted its diagnostic"

@@ -51,6 +51,7 @@ add_library(jemalloc STATIC IMPORTED)
 add_dependencies(jemalloc jemalloc_project)
 
 set_target_properties(
-  jemalloc
-  PROPERTIES IMPORTED_LOCATION "${JEMALLOC_INSTALL_DIR}/lib/libjemalloc.a"
-             INTERFACE_INCLUDE_DIRECTORIES "${JEMALLOC_INSTALL_DIR}/include")
+  jemalloc PROPERTIES IMPORTED_LOCATION
+                      "${JEMALLOC_INSTALL_DIR}/lib/libjemalloc.a"
+                      INTERFACE_INCLUDE_DIRECTORIES
+                      "${JEMALLOC_INSTALL_DIR}/include")

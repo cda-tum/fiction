@@ -27,23 +27,20 @@ function(check_z3_version z3_include z3_lib)
                ${RUN_OUTPUT} " RUN_OUTPUT_STDERR: " ${RUN_OUTPUT_STDERR})
     endif()
     if(z3_include AND EXISTS "${z3_include}/z3_version.h")
-      file(
-        STRINGS "${z3_include}/z3_version.h" z3_version_str
-        REGEX "^#define[\t ]+Z3_MAJOR_VERSION[\t ]+.*"
+      file(STRINGS "${z3_include}/z3_version.h" z3_version_str
+           REGEX "^#define[\t ]+Z3_MAJOR_VERSION[\t ]+.*"
       )
       string(REGEX REPLACE "^.*Z3_MAJOR_VERSION[\t ]+([0-9]*).*$" "\\1" Z3_MAJOR
              "${z3_version_str}")
 
-      file(
-        STRINGS "${z3_include}/z3_version.h" z3_version_str
-        REGEX "^#define[\t ]+Z3_MINOR_VERSION[\t ]+.*"
+      file(STRINGS "${z3_include}/z3_version.h" z3_version_str
+           REGEX "^#define[\t ]+Z3_MINOR_VERSION[\t ]+.*"
       )
       string(REGEX REPLACE "^.*Z3_MINOR_VERSION[\t ]+([0-9]*).*$" "\\1" Z3_MINOR
              "${z3_version_str}")
 
-      file(
-        STRINGS "${z3_include}/z3_version.h" z3_version_str
-        REGEX "^#define[\t ]+Z3_BUILD_NUMBER[\t ]+.*"
+      file(STRINGS "${z3_include}/z3_version.h" z3_version_str
+           REGEX "^#define[\t ]+Z3_BUILD_NUMBER[\t ]+.*"
       )
       string(REGEX REPLACE "^.*Z3_BUILD_NUMBER[\t ]+([0-9]*).*$" "\\1" Z3_BUILD
              "${z3_version_str}")

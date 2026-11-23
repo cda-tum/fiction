@@ -4,19 +4,15 @@ include(CheckCXXCompilerFlag)
 include(FetchContent)
 
 macro(fiction_supports_sanitizers)
-  if(
-    (CMAKE_CXX_COMPILER_ID MATCHES ".*Clang.*" OR CMAKE_CXX_COMPILER_ID MATCHES
-                                                   ".*GNU.*")
-    AND NOT WIN32)
+  if((CMAKE_CXX_COMPILER_ID MATCHES ".*Clang.*" OR CMAKE_CXX_COMPILER_ID MATCHES
+                                                   ".*GNU.*") AND NOT WIN32)
     set(SUPPORTS_UBSAN ON)
   else()
     set(SUPPORTS_UBSAN OFF)
   endif()
 
-  if(
-    (CMAKE_CXX_COMPILER_ID MATCHES ".*Clang.*" OR CMAKE_CXX_COMPILER_ID MATCHES
-                                                   ".*GNU.*")
-    AND WIN32)
+  if((CMAKE_CXX_COMPILER_ID MATCHES ".*Clang.*" OR CMAKE_CXX_COMPILER_ID MATCHES
+                                                   ".*GNU.*") AND WIN32)
     set(SUPPORTS_ASAN OFF)
   else()
     set(SUPPORTS_ASAN ON)

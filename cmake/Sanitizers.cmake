@@ -44,7 +44,8 @@ function(
           "Memory sanitizer requires all the code (including libc++) to be MSan-instrumented otherwise it reports false positives"
       )
       if("address" IN_LIST SANITIZERS
-         OR "thread" IN_LIST SANITIZERS OR "leak" IN_LIST SANITIZERS)
+         OR "thread" IN_LIST SANITIZERS
+         OR "leak" IN_LIST SANITIZERS)
         message(
           WARNING
             "Memory sanitizer does not work with Address, Thread or Leak sanitizer enabled"
@@ -57,14 +58,10 @@ function(
     if(${ENABLE_SANITIZER_ADDRESS})
       list(APPEND SANITIZERS "address")
     endif()
-    if(
-      ${ENABLE_SANITIZER_LEAK}
-      OR
-      ${ENABLE_SANITIZER_UNDEFINED_BEHAVIOR}
-      OR
-      ${ENABLE_SANITIZER_THREAD}
-      OR
-      ${ENABLE_SANITIZER_MEMORY})
+    if(${ENABLE_SANITIZER_LEAK}
+       OR ${ENABLE_SANITIZER_UNDEFINED_BEHAVIOR}
+       OR ${ENABLE_SANITIZER_THREAD}
+       OR ${ENABLE_SANITIZER_MEMORY})
       message(WARNING "MSVC only supports address sanitizer")
     endif()
   endif()
