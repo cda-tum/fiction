@@ -21,7 +21,7 @@ set(Python_ARTIFACTS_INTERACTIVE ON
 find_package(
   Python 3.11
   REQUIRED
-  COMPONENTS Interpreter Development.Module ${SKBUILD_SABI_COMPONENT})
+  COMPONENTS Interpreter Development.Module Development.SABIModule)
 execute_process(
   COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
   RESULT_VARIABLE nanobind_exec_result

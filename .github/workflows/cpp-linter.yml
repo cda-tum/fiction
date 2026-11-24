@@ -41,7 +41,7 @@ jobs:
           timeout 10m sudo -E apt-get install -yq -o Acquire::Retries=3 cmake python3-dev
 
       - name: Install nanobind
-        # the ci-tidy preset builds the Python bindings, which need nanobind's CMake package
+        # The lint preset configures the Python bindings, which need nanobind's CMake package
         # config discoverable via `python -m nanobind --cmake_dir` (see
         # bindings/CMakeLists.txt); unlike the previous pybind11-based bindings,
         # this isn't fetched by CMake and must be pip-installed ahead of time
@@ -58,9 +58,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate compilation database
-        # `ci-tidy` keeps unity builds off on purpose: Clang-Tidy needs one entry per
+        # `lint` keeps unity builds off on purpose: Clang-Tidy needs one entry per
         # translation unit, and a unity build collapses them
-        run: cmake -S . --preset ci-tidy
+        run: cmake -S . --preset lint
 
       - name: Run clang-tidy
         id: linter
@@ -70,7 +70,7 @@ jobs:
         with:
           style: ""
           tidy-checks: ""
-          database: "build-ci-tidy"
+          database: "build-lint"
           step-summary: true
           thread-comments: ${{ ((github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork) && 'update') || 'false' }}
           ignore: "build-*|libs/*|vendors/*|docs/*|benchmarks/*|bindings/include/pyfiction/pybind11_mkdoc_docstrings.hpp|bindings/include/pyfiction/documentation.hpp"

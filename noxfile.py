@@ -224,8 +224,7 @@ def cpp_lint(session: nox.Session) -> None:
             "-S",
             ".",
             "--preset",
-            "ci-tidy",
-            "-DSKBUILD_SABI_COMPONENT=Development.SABIModule",
+            "lint",
             f"-DZ3_ROOT={z3_root}",
             f"-DZ3_CXX_INCLUDE_DIRS={z3_root / 'include'}",
             f"-DZ3_LIBRARIES={z3_root / 'lib' / z3_library_name}",
@@ -235,7 +234,7 @@ def cpp_lint(session: nox.Session) -> None:
         linter_args = [
             "--style=",
             "--tidy-checks=",
-            "--database=build-ci-tidy",
+            "--database=build-lint",
             "--version=21",
             "--lines-changed-only=false",
             f"--files-changed-only={'false' if args.all_files else 'true'}",

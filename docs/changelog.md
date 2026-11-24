@@ -47,6 +47,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Build system:
 
+  - **Breaking:** Source builds require CMake 3.26 or later.
+  - **Breaking:** Use `debug` for `dev` and `tests-slim`, `lint` for `ci-tidy`, and `sanitizers`
+    for `dev-asan` on Linux or macOS. For `dev-full` and `tests-full`, use `debug` with
+    `FICTION_Z3` and `FICTION_ALGLIB` enabled or `experiments` for experiment executables.
+  - The `pyfiction` preset defaults to Release to match the packaged bindings' ABI on MSVC.
   - Direct CMake builds of the Python bindings require nanobind 3.1 or later.
   - **Breaking:** Link `fiction::libfiction` in place of the removed `fiction::mockturtle` target.
 

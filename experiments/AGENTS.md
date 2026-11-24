@@ -6,8 +6,8 @@ Record experiment changes under `Experiments` in `docs/changelog.md`.
 
 - Give each `.cpp` file a unique basename across `experiments/`. CMake discovers
   files recursively and uses their basenames as executable names.
-- Configure with `cmake -S . --preset dev-full` and build the affected executable
-  with `cmake --build --preset dev-full --target <basename>`.
+- Configure with `cmake -S . --preset experiments` and build the affected executable
+  with `cmake --build --preset experiments --target <basename>`.
 - The [Experiments workflow](../.github/workflows/cpp-experiments.yml) builds the
   executables. It does not run them. Compare the affected experiment's output
   with the baseline or published result for the same inputs and parameters.

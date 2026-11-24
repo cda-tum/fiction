@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 3.26)
 project(fiction_package_consumer LANGUAGES CXX)
 
 if(EXPECT_MISSING_DEPENDENCY)
