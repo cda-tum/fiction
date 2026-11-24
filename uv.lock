@@ -25,18 +25,23 @@ wheels = [
 
 [[package]]
 name = "aigverse"
-version = "0.1.7"
+version = "0.1.8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "nanobind-backend" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ec/44/f2d3479df3aeab73dfd19d5ec52648467bb7639c0684db634659c1f83939/aigverse-0.1.7.tar.gz", hash = "sha256:7a3fc2ee0baf65a1bae9f51c47901ed9c2f32f8c609aa5909a87df911dfe2441", size = 425046, upload-time = "2026-10-21T09:24:23.198Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/0d/cf/0a4dd7f99b4fe79840194fb9be0d11348f1e97003cfe2c0357a1f0861c58/aigverse-0.1.8.tar.gz", hash = "sha256:d3fb35279ade791aced934573d857942dcef76cc683183c42f4f56038e3b3b35", size = 349454, upload-time = "2026-11-24T16:57:16.498Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e5/ac/292d5f67b26f6ffac6246a69c45a02240887f3fa319c215ffd4ba7a221e4/aigverse-0.1.7-cp310-abi3-macosx_11_0_arm64.whl", hash = "sha256:84a60a1b6e0c2e29fb41644c774ec2918b5fee33f2ef8520b5f2e899b4045425", size = 659231, upload-time = "2026-10-21T09:24:14.68Z" },
-    { url = "https://files.pythonhosted.org/packages/f9/76/73667bd488aacf79de7368f16a3e34f9d9be42fd2e0073f2d72c167115cc/aigverse-0.1.7-cp310-abi3-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:9cc7b995c0c2e0f72d022007c005f5fc1ea7a27902340a5050f546621d0bf945", size = 623281, upload-time = "2026-10-21T09:24:16.624Z" },
-    { url = "https://files.pythonhosted.org/packages/15/28/6285ed56732c873e049c7eee2a9d53f524512644402e152cdc153e090b97/aigverse-0.1.7-cp310-abi3-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:402d8ff6a766959bcf5b2820a28a339824e3c4c8f3f7d481bd38f20ce1fbcf76", size = 643021, upload-time = "2026-10-21T09:24:18.122Z" },
-    { url = "https://files.pythonhosted.org/packages/13/78/b5a61bfee083cd1b94af09c73165a1c48f10b021acb33a0fa3ce2766c7b0/aigverse-0.1.7-cp310-abi3-win_amd64.whl", hash = "sha256:58102bffcd2b0a1864cbc61b0e8334d0df591d3da9bd6bbeb251c6096ad198f1", size = 1225393, upload-time = "2026-10-21T09:24:19.983Z" },
-    { url = "https://files.pythonhosted.org/packages/7b/e3/47a18cf6d2cdf328089030bb964f834dcf018ba7a444410311ed14672987/aigverse-0.1.7-cp310-abi3-win_arm64.whl", hash = "sha256:7cb9d779b8a7a75bcc131d3024d94c2504d004d230ba7af6d7e2581443d2912f", size = 1450485, upload-time = "2026-10-21T09:24:21.539Z" },
+    { url = "https://files.pythonhosted.org/packages/84/4f/f7393933d93b99465399b56e03bd814c2c1e84bd605b65148d1c19cd32f8/aigverse-0.1.8-cp311-abi3-macosx_11_0_arm64.whl", hash = "sha256:64c28b92493240e3e6d98823c85a08b5a90df254518dd324ea7873e36e376640", size = 662183, upload-time = "2026-11-24T16:57:02.287Z" },
+    { url = "https://files.pythonhosted.org/packages/88/ad/d91c03aa0c9c93f088de00f292e5008382d6e8229396829b909947f21900/aigverse-0.1.8-cp311-abi3-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:6b279fab709f55d4573e2082faf0072cb09a0d1baef729c03682f906229bee11", size = 627345, upload-time = "2026-11-24T16:57:03.822Z" },
+    { url = "https://files.pythonhosted.org/packages/9e/34/196b1108b0c51db11beeef89592253b6df957351f114e4565a9ee2dcf3c3/aigverse-0.1.8-cp311-abi3-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:e7adb6f58e82fee9d7417074a67d7154fe57c90e1f9e66817936cceca634bab5", size = 647331, upload-time = "2026-11-24T16:57:05.166Z" },
+    { url = "https://files.pythonhosted.org/packages/03/65/3381be3df4eb424b0d57081dd4b925fe8820d47497d37240202887af2026/aigverse-0.1.8-cp311-abi3-win_amd64.whl", hash = "sha256:2baef84a82ff7aee0de48941f2ad31c20badf7be6035f2375c6f389a8a58adbe", size = 1230497, upload-time = "2026-11-24T16:57:06.658Z" },
+    { url = "https://files.pythonhosted.org/packages/08/ff/d3abf22f89e642dba1ee77b2b047b0104b9efd6756ae81e6150d598de0ef/aigverse-0.1.8-cp311-abi3-win_arm64.whl", hash = "sha256:fb3f4f04b2a57fd76045786ce9a64fc6bf9ddfc959df3c892a99673a358b08cc", size = 1453929, upload-time = "2026-11-24T16:57:08.095Z" },
+    { url = "https://files.pythonhosted.org/packages/d6/9c/d75584f28def23227bd33ada02b11d389ae5d091c8ca5a7611aa40d59b69/aigverse-0.1.8-cp315-abi3t-macosx_11_0_arm64.whl", hash = "sha256:0e33b90d6893ed04a1ecd8e6f67507e946ea47a01bc6e2cef19edc3a0c66ee00", size = 664256, upload-time = "2026-11-24T16:57:09.596Z" },
+    { url = "https://files.pythonhosted.org/packages/32/4c/32bfab1cf28c81ccf80c6ab017ef4109771431e5dcf5361dbaeec186e067/aigverse-0.1.8-cp315-abi3t-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:ddb5d793656f6a05ba52deff4c5969996cfcbfcaaca46e43ad9c1bcef9b933be", size = 628704, upload-time = "2026-11-24T16:57:10.859Z" },
+    { url = "https://files.pythonhosted.org/packages/17/0d/82a08aa0f0763befebd37c1e36cd2e6f0891ef765e23fe7f51e977bdedf4/aigverse-0.1.8-cp315-abi3t-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:16217693bd348a02c3ad33c9f05145966bc4adce3aee673268aa468f5cf09105", size = 648498, upload-time = "2026-11-24T16:57:12.56Z" },
+    { url = "https://files.pythonhosted.org/packages/24/20/fee224074bf014f0eb554b68736343c64d51a22011c797ad967f5b4ea13d/aigverse-0.1.8-cp315-abi3t-win_amd64.whl", hash = "sha256:44366f89e208fc2d2d32196f5a07fdf1585cd7f02fa2db986b7e20a321abfe2e", size = 1258285, upload-time = "2026-11-24T16:57:13.858Z" },
+    { url = "https://files.pythonhosted.org/packages/85/1e/83c77a63ef98d7cad52e7562f67ad268d72f7f36b73d93adf6b305317959/aigverse-0.1.8-cp315-abi3t-win_arm64.whl", hash = "sha256:5d53109f23663331c8960eac8567bdcd0ae8c33cba9b9740fdf7ad6887321ac4", size = 1489892, upload-time = "2026-11-24T16:57:15.248Z" },
 ]
 
 [[package]]
