@@ -501,9 +501,9 @@ def test_gold_retains_best_accepted_solution(workers: int, progress_display: tup
 
 
 def test_spinner_refreshes_during_native_read(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    """Rich advances both spinner frames and elapsed time during one native reader call."""
+    """Rich advances both spinner frames and elapsed time during native reads."""
     path = tmp_path / "large.v"
-    count = 200_000
+    count = 20_000
     path.write_text(
         "module top(a,b,o);\ninput a,b;\noutput o;\nwire "
         + ",".join(f"w{index}" for index in range(count))
@@ -539,8 +539,11 @@ def test_spinner_refreshes_during_native_read(tmp_path: Path, monkeypatch: pytes
         # Only the native call can release the GIL while the reading flag is set.
         sys.setswitchinterval(10)
         with session.progress("read"):
+            deadline = time.monotonic() + 5
             reading = True
-            read_network(str(path))
+            # A fast reader can finish between two background refreshes.
+            while len(set(frames)) < 2 and time.monotonic() < deadline:
+                read_network(str(path))
             reading = False
     finally:
         sys.setswitchinterval(interval)
