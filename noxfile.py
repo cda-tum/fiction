@@ -30,7 +30,7 @@ import nox
 if TYPE_CHECKING:
     from collections.abc import Generator, Sequence
 
-nox.needs_version = ">=2025.10.16"
+nox.needs_version = ">=2026.08.10"
 nox.options.default_venv_backend = "uv"
 
 if os.environ.get("CI", None):
@@ -148,6 +148,15 @@ def _run_tests(
 @nox.session(python=PYTHON_ALL_VERSIONS, reuse_venv=True, default=True)
 def tests(session: nox.Session) -> None:
     """Run the test suite."""
+    python = session.python
+    if isinstance(python, str) and python.endswith("t"):
+        session.run(
+            "python",
+            "-c",
+            "import sysconfig\n"
+            "if not sysconfig.get_config_var('Py_GIL_DISABLED'):\n"
+            "    raise SystemExit('Expected a free-threaded CPython interpreter')",
+        )
     _run_tests(session)
 
 
