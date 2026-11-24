@@ -141,6 +141,7 @@ $ cmake --list-presets
 
 Presets that enable Z3 expect it to be installed. CMake fetches ALGLIB for the presets that enable it.
 Use the same preset name for configure and build, and for `ctest` when the preset enables a C++ test workflow.
+CTest reports an error if no tests match the selection.
 When reproducing a CI job, copy the workflow's compiler and other `-D` options as well.
 The `sanitizers` preset requires a compiler and runtime that support ASan and UBSan. With `ctest --preset sanitizers`,
 UBSan reports cause a test failure by default, and CTest stops after the first failure.
@@ -419,7 +420,7 @@ int main()
 }
 ```
 
-Each file can be built individually via CMake:
+Install Z3 before configuring the `experiments` preset. Build individual experiments by target name:
 
 ```console
 $ cmake -S . --preset experiments

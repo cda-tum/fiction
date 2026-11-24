@@ -21,6 +21,12 @@ set(Python_ARTIFACTS_INTERACTIVE ON
 set(python_development_components Development.Module ${SKBUILD_SABI_COMPONENT})
 if(WIN32 AND NOT SKBUILD_SABI_COMPONENT)
   # Direct CMake builds need the stable-ABI import library for split mode.
+  if(CMAKE_VERSION VERSION_LESS 3.26)
+    message(
+      FATAL_ERROR
+        "Direct Windows builds of the Python bindings require CMake 3.26 or later."
+    )
+  endif()
   list(APPEND python_development_components Development.SABIModule)
 endif()
 find_package(
