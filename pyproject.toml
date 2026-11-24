@@ -239,7 +239,8 @@ repair-wheel-command = [
 environment = { MACOSX_DEPLOYMENT_TARGET = "13.0" }
 
 [tool.cibuildwheel.windows]
-before-build = 'uv pip install "delvewheel>=1.11.2"'
+# 1.12.1 added support for repairing abi3t wheels.
+before-build = 'uv pip install "delvewheel>=1.12.1"'
 repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel} --namespace-pkg mnt --ignore-existing"
 
 [[tool.cibuildwheel.overrides]]

@@ -106,7 +106,7 @@ This installs all dependencies for running the tests in an isolated environment,
 runs the tests.
 
 The `minimums` session runs the same tests against the lowest declared direct dependencies instead of the newest
-compatible ones, which exercises the lower bounds in `pyproject.toml`. It requires Python 3.10, the oldest version
+compatible ones, which exercises the lower bounds in `pyproject.toml`. It requires Python 3.11, the oldest version
 _fiction_ supports.
 
 ```bash
