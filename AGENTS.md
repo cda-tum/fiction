@@ -75,8 +75,9 @@ than one file.
 ## Verification and handoff
 
 - For C++ changes, use a [preset](docs/getting_started.md#cmake-presets) that enables
-  the affected features. Start with `tests-slim` when it covers the change and use
-  `dev-full` for experiments or coverage that needs Z3 or ALGLIB. Configure with
+  the affected features. Start with `debug` for local tests. Use `ci-debug` for
+  tests that need Z3 or ALGLIB, and `experiments` for experiment executables.
+  Configure with
   `cmake -S . --preset <preset>`, build the affected target with
   `cmake --build --preset <preset> --target <target> --parallel`, and run the affected
   tests with `ctest --preset <preset> --output-on-failure -R <pattern>`. Confirm the

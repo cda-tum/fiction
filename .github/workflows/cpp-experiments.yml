@@ -68,10 +68,10 @@ jobs:
 
       - name: Configure CMake
         run: >
-          cmake -S . --preset ci-debug
+          cmake -S . --preset experiments
           -DCMAKE_CXX_COMPILER=g++-14
-          -DFICTION_EXPERIMENTS=ON
-          -DFICTION_TEST=OFF
+          -DCMAKE_BUILD_TYPE=Debug
+          -DFICTION_LIGHTWEIGHT_DEBUG_BUILDS=ON
 
       - name: Build
-        run: cmake --build --preset ci-debug
+        run: cmake --build --preset experiments
