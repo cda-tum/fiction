@@ -12,16 +12,16 @@ from __future__ import annotations
 
 import io
 import re
-import sys
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
+from functools import partial
 from typing import TYPE_CHECKING
 
 import pytest
 from rich.cells import cell_len
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TimeElapsedColumn
+from rich.progress import Progress, SpinnerColumn
 
 from mnt.fiction.cli.errors import CommandError
 from mnt.fiction.cli.parsing import tokenize
@@ -30,7 +30,6 @@ from mnt.fiction.cli.session import Session, ignore_progress, ignore_worker_prog
 from mnt.fiction.cli.statistics import stats_to_dict
 from mnt.fiction.cli.stores import Store
 from mnt.pyfiction.networks import set_name
-from mnt.pyfiction.networks.io import read_network
 from mnt.pyfiction.physical_design import orthogonal, orthogonal_stats
 
 if TYPE_CHECKING:
@@ -500,53 +499,38 @@ def test_gold_retains_best_accepted_solution(workers: int, progress_display: tup
         assert display.tasks[0].completed == 128
 
 
-def test_spinner_refreshes_during_native_read(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    """Rich advances both spinner frames and elapsed time during native reads."""
-    path = tmp_path / "large.v"
-    count = 20_000
-    path.write_text(
-        "module top(a,b,o);\ninput a,b;\noutput o;\nwire "
-        + ",".join(f"w{index}" for index in range(count))
-        + ";\n"
-        + "".join(f"assign w{index} = a & b;\n" for index in range(count))
-        + "assign o = w0;\nendmodule\n",
-        encoding="utf-8",
-    )
-    reading = False
-    frames: list[str] = []
-    elapsed: list[float] = []
+def test_spinner_refreshes_during_progress(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Background refreshes advance the spinner frame and task elapsed time."""
+    clock = 0.0
+    caller = threading.current_thread()
+    refreshed = threading.Event()
+    frames: list[tuple[str, float]] = []
+    render_spinner = SpinnerColumn.render
 
-    class RecordingSpinner(SpinnerColumn):
-        """Record frames while the native reader owns the calling thread."""
+    def record_frame(column: SpinnerColumn, task: Task) -> RenderableType:
+        """Sample two background refreshes at distinct clock times.
 
-        def render(self, task: Task) -> RenderableType:
-            """Render the current frame and record its elapsed time.
-
-            Returns:
-                The spinner frame.
-            """
-            frame = super().render(task)
-            if reading:
-                frames.append(str(frame))
-                elapsed.append(task.elapsed or 0)
-            return frame
+        Returns:
+            The spinner frame.
+        """
+        nonlocal clock
+        frame = render_spinner(column, task)
+        if threading.current_thread() is not caller and len(frames) < 2:
+            frames.append((str(frame), task.elapsed or 0))
+            if len(frames) == 1:
+                clock = 1.0
+            else:
+                refreshed.set()
+        return frame
 
     session = Session(console=Console(file=io.StringIO(), force_terminal=True))
-    display = Progress(RecordingSpinner(), TimeElapsedColumn(), console=session.console, transient=True)
-    monkeypatch.setattr("mnt.fiction.cli.session.Progress", lambda *_args, **_kwargs: display)
-    interval = sys.getswitchinterval()
+    monkeypatch.setattr(SpinnerColumn, "render", record_frame)
+    monkeypatch.setattr("mnt.fiction.cli.session.Progress", partial(Progress, get_time=lambda: clock))
     try:
-        # Only the native call can release the GIL while the reading flag is set.
-        sys.setswitchinterval(10)
         with session.progress("read"):
-            deadline = time.monotonic() + 5
-            reading = True
-            # A fast reader can finish between two background refreshes.
-            while len(set(frames)) < 2 and time.monotonic() < deadline:
-                read_network(str(path))
-            reading = False
+            assert refreshed.wait(timeout=10)
     finally:
-        sys.setswitchinterval(interval)
         session.close()
-    assert len(set(frames)) > 1
-    assert max(elapsed) > min(elapsed)
+    (first_frame, first_elapsed), (second_frame, second_elapsed) = frames
+    assert first_frame != second_frame
+    assert first_elapsed < second_elapsed

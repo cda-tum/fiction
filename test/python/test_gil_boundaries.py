@@ -22,6 +22,7 @@ import pytest
 
 from mnt.pyfiction.layouts import cartesian_gate_layout, cartesian_layout
 from mnt.pyfiction.networks import random_network
+from mnt.pyfiction.networks.io import read_network
 from mnt.pyfiction.physical_design import color_routing
 from mnt.pyfiction.sidb import charge_distribution, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.io import read_surface_defects
@@ -117,6 +118,19 @@ def test_native_work_releases_the_gil(kind: str, tmp_path: Path) -> None:
     else:
         table = dynamic_truth_table(24)
         assert run_with_python_progress(table.to_binary) == "0" * (1 << 24)
+
+
+@REQUIRES_GIL
+def test_reading_a_network_releases_the_gil(tmp_path: Path) -> None:
+    """A Python thread can run while the native Verilog reader parses a network."""
+    path = tmp_path / "network.v"
+    path.write_text("module top(a,b,o);\ninput a,b;\noutput o;\nassign o = a & b;\nendmodule\n", encoding="utf-8")
+    filename = str(path)
+
+    network = run_with_python_progress(lambda: read_network(filename))
+
+    assert network.num_pis() == 2
+    assert network.num_pos() == 1
 
 
 @REQUIRES_GIL
