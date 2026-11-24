@@ -241,6 +241,8 @@ environment = { MACOSX_DEPLOYMENT_TARGET = "13.0" }
 # 1.12.1 added support for repairing abi3t wheels.
 before-build = 'uv pip install "delvewheel>=1.12.1"'
 repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel} --namespace-pkg mnt --ignore-existing"
+# Test the bundled Z3 DLL without registering the runner's installation directory.
+test-environment = { Z3_ROOT = "" }
 
 [[tool.cibuildwheel.overrides]]
 select = "*-macosx_arm64"
