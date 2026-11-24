@@ -131,19 +131,19 @@ $ cmake --list-presets
 | --- | --- | --- |
 | Iterate on C++ tests | `debug` | Debug tests with precompiled headers and reduced debug information |
 | Test optimized C++ code | `release` | Release tests with IPO when supported |
-| Check memory errors and undefined behavior | `sanitizers` | Debug tests with ASan and UBSan on Linux and macOS |
+| Check memory errors and undefined behavior | `sanitizers` | Debug tests with ASan and UBSan on Linux and macOS. Z3 and ALGLIB are off by default. |
 | Collect C++ coverage | `coverage` | Instrumented Debug tests with Z3 and ALGLIB. CI uses GCC and `lcov`. |
 | Build research experiments | `experiments` | Release experiment executables with Z3 and ALGLIB |
-| Iterate on Python bindings | `pyfiction` | Debug extension modules with Z3, ALGLIB, and [nanobind](https://nanobind.readthedocs.io/) |
+| Iterate on Python bindings | `pyfiction` | Release extension modules with Z3, ALGLIB, and [nanobind](https://nanobind.readthedocs.io/) |
 | Prepare Clang-Tidy | `lint` | A compilation database for tests, benchmarks, experiments, and bindings. Requires Z3 and nanobind. |
 | Reproduce a C++ test matrix job | `ci-debug`, `ci-release` | Debug or Release tests with the CI options and both optional dependencies enabled by default |
 | Reproduce the CodeQL build | `ci-codeql` | The Debug CI profile with precompiled headers disabled |
 
 Presets that enable Z3 expect it to be installed. CMake fetches ALGLIB for the presets that enable it.
 Use the same preset name for configure and build, and for `ctest` when the preset enables a C++ test workflow.
-When reproducing a CI job, copy its compiler and platform-specific `-D` options as well.
-The `sanitizers` preset requires a compiler and runtime that support ASan and UBSan. CTest stops on the first
-failing test, and UBSan reports cause a test failure by default.
+When reproducing a CI job, copy the workflow's compiler and other `-D` options as well.
+The `sanitizers` preset requires a compiler and runtime that support ASan and UBSan. With `ctest --preset sanitizers`,
+UBSan reports cause a test failure by default, and CTest stops after the first failure.
 
 ```console
 $ cmake -S . --preset ci-debug
@@ -330,7 +330,8 @@ of `pip install`), make sure the Python interpreter CMake picks up has `nanobind
 `-DPython_EXECUTABLE=<path_to_repo>/.venv/bin/python3` (or the equivalent `.venv\Scripts\python.exe` on
 Windows) if CMake would otherwise pick up a different interpreter.
 
-Use `-DCMAKE_BUILD_TYPE=Release` with this preset on MSVC to match the packaged `nanobind-backend` ABI.
+On Windows, direct builds require CMake 3.26 or later to find the Python stable ABI import library.
+The preset uses `Release` to match the packaged `nanobind-backend` ABI on MSVC.
 :::
 
 :::{note}

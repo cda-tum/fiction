@@ -76,6 +76,7 @@
       "inherits": ["cpp-tests", "solvers"],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_UNITY_BUILD": "OFF",
         "FICTION_ENABLE_COVERAGE": "ON"
       }
     },
@@ -94,10 +95,10 @@
     {
       "name": "pyfiction",
       "displayName": "Python binding development",
-      "description": "Debug builds of the pyfiction extension modules directly with CMake",
+      "description": "Build the pyfiction extension modules directly with the wheel build type",
       "inherits": ["base", "solvers"],
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_BUILD_TYPE": "Release",
         "FICTION_TEST": "OFF",
         "FICTION_PYTHON_BINDINGS": "ON"
       }
