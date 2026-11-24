@@ -109,8 +109,9 @@ jobs:
         run: uv tool install sccache
 
       - if: runner.os == 'Windows' && runner.arch == 'ARM64'
-        name: Install native Python 3.11
-        run: uv python install cpython-3.11-windows-aarch64-none
+        name: Select native Python for Nox
+        # uvx uses this for its own interpreter. Nox clears it for each test environment.
+        run: echo "UV_PYTHON=cpython-3.11-windows-aarch64-none" >> "$GITHUB_ENV"
 
       - if: runner.os == 'Linux'
         name: Install external ABC for CLI integration tests

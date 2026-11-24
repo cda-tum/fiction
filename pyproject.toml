@@ -56,7 +56,7 @@ dependencies = [
     # the `fiction` command-line interface
     "prompt-toolkit>=3.0.43",
     "rich>=13.7.0",
-    # Use the first release with a native wheel on each supported platform.
+    # 4.10.2 avoids source builds on macOS and Linux aarch64. Windows ARM64 wheels start at 4.15.8.
     "z3-solver>=4.10.2; sys_platform!='win32' or platform_machine!='ARM64'",
     "z3-solver>=4.15.8.0; sys_platform=='win32' and platform_machine=='ARM64'",
 ]
@@ -242,7 +242,7 @@ environment = { MACOSX_DEPLOYMENT_TARGET = "13.0" }
 before-build = 'uv pip install "delvewheel>=1.12.1"'
 repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel} --namespace-pkg mnt --ignore-existing"
 # Test the bundled Z3 DLL without registering the runner's installation directory.
-test-environment = { Z3_ROOT = "" }
+test-environment = { Z3_ROOT = "${VIRTUAL_ENV}/no-external-z3" }
 
 [[tool.cibuildwheel.overrides]]
 select = "*-macosx_arm64"
