@@ -355,7 +355,7 @@ Retaining the GIL in a small accessor or mutation does not protect that object f
 On free-threaded CPython, synchronize shared native objects across all threads.
 
 Concurrent `next()` calls on a BDL iterator consume distinct patterns in both interpreter modes.
-Do not peek with `it + n`, `it - n`, or `it[n]` while another thread advances `it`.
+Use a lock when mixing `next()` with other operations on the same iterator, including snapshots and cursor jumps.
 
 Binding contributors should use `nanobind::call_guard<nanobind::gil_scoped_release>()` for entirely native call
 bodies. Mixed wrappers need an inner release scope after Python validation and before Python result construction.
