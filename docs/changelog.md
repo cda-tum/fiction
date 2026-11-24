@@ -161,6 +161,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Transactional writers replace existing files only after successful serialization and report
     replacement errors as stream failures.
 
+- Python bindings:
+
+  - Concurrent BDL iterator calls yield distinct patterns on free-threaded CPython.
+
 ## v0.8.0 - 2026-09-02
 
 :::{epigraph}
