@@ -39,7 +39,7 @@ if os.environ.get("CI", None):
 
 nox.options.sessions = ["lint", "tests"]
 
-PYTHON_ALL_VERSIONS = ["3.10", "3.11", "3.12", "3.13", "3.14"]
+PYTHON_ALL_VERSIONS = ["3.11", "3.12", "3.13", "3.14", "3.15", "3.15t"]
 CPP_LINT_IGNORED_PATHS = (
     "build-*",
     "build/*",
@@ -151,7 +151,7 @@ def tests(session: nox.Session) -> None:
     _run_tests(session)
 
 
-@nox.session(python="3.10", reuse_venv=True)
+@nox.session(python=PYTHON_ALL_VERSIONS[0], reuse_venv=True)
 def minimums(session: nox.Session) -> None:
     """Run the test suite against the lowest declared direct dependencies.
 
@@ -160,10 +160,10 @@ def minimums(session: nox.Session) -> None:
     to the oldest version its declared bound allows, so the test suite exercises the bounds
     themselves.
 
-    The session pins Python 3.10, the `requires-python` floor, because the oldest interpreter
+    The session uses the `requires-python` floor because the oldest interpreter
     combined with the oldest dependencies is the one combination nothing else in the project
     covers. Under `CI` the module sets `error_on_missing_interpreters`, without which a runner
-    that lacks Python 3.10 skips the session and reports success.
+    that lacks that interpreter skips the session and reports success.
 
     `preserve_lockfile` keeps the lockfile out of the resolution; read its caveat before running
     this session next to anything else in the same worktree.

@@ -168,7 +168,7 @@ jobs:
     if: fromJSON(needs.change-detection.outputs.run-docstrings)
     uses: $/.github/workflows/docstrings.yml
 
-  # `nox -s tests` across every supported interpreter and `nox -s minimums` on Python 3.10, both
+  # `nox -s tests` across every supported interpreter and `nox -s minimums` on Python 3.11, both
   # building the extension from source outside the wheel jobs' `cibuildwheel` path. The caller
   # job's name is the group its checks appear under, so it stays a short label: GitHub appends
   # the matrix entry itself, and the called job spells it out as `🐍 ubuntu-24.04`.

@@ -31,7 +31,7 @@ from mnt.pyfiction.sidb.simulation.logic import (
 )
 
 if TYPE_CHECKING:
-    from typing_extensions import assert_type
+    from typing import assert_type
 
     from mnt.pyfiction.networks import technology_network
 

@@ -295,7 +295,7 @@ class Session:
             ``True`` when the command succeeded or only printed its help.
         """
         name, *arguments = argv
-        started = dt.datetime.now(tz=dt.timezone.utc)
+        started = dt.datetime.now(tz=dt.UTC)
         clock = time.perf_counter()
         entry: dict[str, object] = {
             "command": name,

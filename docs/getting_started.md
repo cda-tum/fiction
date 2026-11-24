@@ -92,7 +92,8 @@ $ cd fiction
 ```
 
 CMake fetches the third-party libraries during configuration. Only `CMake` and a C++20 compiler are required for
-the C++ part. If you want to work with the Python bindings, you need a Python 3.10+ installation.
+the C++ part. The Python bindings require CPython 3.11 or newer. CI tests CPython 3.11–3.15
+and free-threaded CPython 3.15.
 
 On Ubuntu, the build dependencies can be installed via:
 
@@ -324,10 +325,10 @@ Use `-DCMAKE_BUILD_TYPE=Release` with this preset on MSVC to match the packaged 
 :::{note}
 nanobind is used in _split mode_: the extension contains no nanobind library code and resolves it at import time
 from the separate `nanobind-backend` package, which is therefore a runtime dependency of `mnt.pyfiction`.
-That is what lets a single `abi3` wheel per platform serve every supported interpreter. Free-threaded
-interpreters are not supported until Python 3.15 gives them a stable ABI
-([PEP 803](https://peps.python.org/pep-0803/)); building on an earlier one stops the CMake configure with a
-message naming that version.
+Ordinary CPython uses one `cp311-abi3` wheel per platform. Free-threaded CPython 3.15 uses a separate
+`cp315-abi3t` wheel ([PEP 803](https://peps.python.org/pep-0803/)). CMake rejects free-threaded interpreters
+older than 3.15. To verify a free-threaded installation, run
+`python -c "import mnt.pyfiction, sys; assert not sys._is_gil_enabled()"` with the free-threaded interpreter.
 :::
 
 \---
@@ -336,7 +337,7 @@ message naming that version.
 
 ### GIL handling
 
-`pyfiction` releases Python's global interpreter lock (GIL) during substantial native computation, collection
+On ordinary CPython, `pyfiction` releases the global interpreter lock (GIL) during substantial native computation, collection
 traversal, and file I/O. Other Python threads can run while these calls execute. Small accessors and mutations
 retain the GIL because a release would add overhead. Python object construction, imports, and printing also
 require the GIL; wrappers release it only around their native work.
@@ -351,6 +352,7 @@ all such access or pass independent objects. A callback may read its supplied ar
 native objects still in use by the algorithm.
 
 Retaining the GIL in a small accessor or mutation does not protect that object from calls that release the GIL.
+On free-threaded CPython, synchronize shared native objects across all threads.
 
 On GIL-enabled Python builds, BDL iterator cursor updates retain the GIL so concurrent `next()` calls consume
 distinct patterns. Do not peek with `it + n`, `it - n`, or `it[n]` while another thread advances `it`.

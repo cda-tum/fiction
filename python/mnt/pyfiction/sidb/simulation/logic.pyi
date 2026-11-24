@@ -11,9 +11,7 @@
 import datetime as dt
 import enum
 from collections.abc import Callable, Iterator, Sequence
-from typing import overload
-
-from typing_extensions import Self
+from typing import Self, overload
 
 import mnt.pyfiction.sidb
 import mnt.pyfiction.sidb.simulation
