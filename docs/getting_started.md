@@ -107,9 +107,9 @@ sudo apt-get install build-essential cmake ninja-build python3 python3-dev
 Configure and build with CMake:
 
 ```console
-$ cmake -S . --preset tests-slim
-$ cmake --build --preset tests-slim --parallel
-$ ctest --preset tests-slim --output-on-failure
+$ cmake -S . --preset debug
+$ cmake --build --preset debug --parallel
+$ ctest --preset debug
 ```
 
 Several options can be toggled during the build. For a more interactive interface, please refer to `ccmake` for a
@@ -119,22 +119,31 @@ full list of supported customizations.
 
 ### CMake Presets
 
-The repository ships a [CMakePresets.json](https://github.com/cda-tum/fiction/blob/main/CMakePresets.json) with a
-curated set of configurations for common tasks, so that you do not have to remember all relevant `-D` flags
-yourself. List them with:
+The [CMake presets](https://github.com/cda-tum/fiction/blob/main/CMakePresets.json) require CMake 3.23 or later
+and Ninja. On Windows with MSVC, run the commands from a Visual Studio developer shell for your target
+architecture. Each preset configures a separate `build-<preset>` directory.
 
 ```console
 $ cmake --list-presets
 ```
 
-Noteworthy presets include `dev` and `tests-slim` (Debug builds with only the tests enabled),
-`dev-full` and `tests-full` (tests and experiments with Z3 and ALGLIB enabled), `dev-asan`
-(`dev` with sanitizers), `pyfiction`
-(mirrors the `pyproject.toml` configuration for iterating on the Python bindings directly with CMake), and
-`release` (an optimized, IPO-enabled build). The `ci-*` and `coverage` presets provide the shared baseline
-configuration used by the corresponding GitHub Actions workflows; each job layers a few compiler- and
-platform-specific `-D` overrides on top, so reproducing a specific failing job locally may require adding those
-too, e.g.:
+| Task | Preset | What it configures |
+| --- | --- | --- |
+| Iterate on C++ tests | `debug` | Debug tests with precompiled headers and reduced debug information |
+| Test optimized C++ code | `release` | Release tests with IPO when supported |
+| Check memory errors and undefined behavior | `sanitizers` | Debug tests with ASan and UBSan on Linux and macOS |
+| Collect C++ coverage | `coverage` | Instrumented Debug tests with Z3 and ALGLIB. CI uses GCC and `lcov`. |
+| Build research experiments | `experiments` | Release experiment executables with Z3 and ALGLIB |
+| Iterate on Python bindings | `pyfiction` | Debug extension modules with Z3, ALGLIB, and [nanobind](https://nanobind.readthedocs.io/) |
+| Prepare Clang-Tidy | `lint` | A compilation database for tests, benchmarks, experiments, and bindings. Requires Z3 and nanobind. |
+| Reproduce a C++ test matrix job | `ci-debug`, `ci-release` | Debug or Release tests with the CI options and both optional dependencies enabled by default |
+| Reproduce the CodeQL build | `ci-codeql` | The Debug CI profile with precompiled headers disabled |
+
+Presets that enable Z3 expect it to be installed. CMake fetches ALGLIB for the presets that enable it.
+Use the same preset name for configure and build, and for `ctest` when the preset enables a C++ test workflow.
+When reproducing a CI job, copy its compiler and platform-specific `-D` options as well.
+The `sanitizers` preset requires a compiler and runtime that support ASan and UBSan. CTest stops on the first
+failing test, and UBSan reports cause a test failure by default.
 
 ```console
 $ cmake -S . --preset ci-debug
@@ -142,8 +151,11 @@ $ cmake --build --preset ci-debug
 $ ctest --preset ci-debug
 ```
 
-Any preset can still be combined with additional `-D` overrides on the command line. The `fiction` shell is not
-part of the CMake build; it comes with the Python package, see {ref}`CLI (pip) <cli-pip>`.
+Use `debug` in place of `dev` or `tests-slim`, and `sanitizers` in place of `dev-asan` on Linux or macOS.
+If you used `dev-full` or `tests-full`, use `ci-debug` for solver-enabled tests and `experiments` to build
+experiment executables. Use `lint` in place of `ci-tidy`.
+
+Use {ref}`CLI (pip) <cli-pip>` to install the `fiction` shell from the Python package.
 
 (header-only)=
 
@@ -409,8 +421,8 @@ int main()
 Each file can be built individually via CMake:
 
 ```console
-$ cmake -S . --preset tests-slim -DFICTION_EXPERIMENTS=ON
-$ cmake --build --preset tests-slim --target libfiction_demo
+$ cmake -S . --preset experiments
+$ cmake --build --preset experiments --target libfiction_demo
 ```
 
 ### Building tests
@@ -425,9 +437,9 @@ the performance of our code during development. Any `*.cpp` file that is placed 
 linked against _fiction_ and compiled as a stand-alone binary using the following commands:
 
 ```console
-$ cmake -S . --preset tests-slim -DFICTION_BENCHMARK=ON
-$ cmake --build --preset tests-slim --parallel
-$ ctest --preset tests-slim --output-on-failure
+$ cmake -S . --preset release -DFICTION_BENCHMARK=ON
+$ cmake --build --preset release --parallel
+$ ctest --preset release
 ```
 
 ### Noteworthy CMake options
@@ -437,10 +449,10 @@ attempts, or performance of the resulting binaries:
 
 - `-DFICTION_ENABLE_IPO=ON`: Enable IPO/LTO to improve performance of resulting binaries on some systems.
 - `-DFICTION_ENABLE_PCH=ON`: Enable precompiled headers (PCH) for the test suite to speed up compilation.
-  The `dev` and `tests-slim` presets turn this on. On Windows, add `sloppiness = pch_defines,time_macros` to your
+  The `debug` preset turns this on. On Windows, add `sloppiness = pch_defines,time_macros` to your
   ccache configuration, or ccache will stop caching the compilations that use the PCH.
 - `-DFICTION_LIGHTWEIGHT_DEBUG_BUILDS=ON`: Cut debug information down to `-g1` and disable inlining. This is by far
-  the largest single lever on Debug build cost; the CI Debug preset and the `dev`/`tests-slim` presets enable it.
+  the largest single lever on Debug build cost. The `debug` and `ci-debug` presets enable it.
 - `-DFICTION_ENABLE_SANITIZER_ADDRESS=ON`: Enable the address sanitizer to detect memory issues.
 - `-DFICTION_ENABLE_SANITIZER_LEAK=ON`: Enable the leak sanitizer to detect memory leaks.
 - `-DFICTION_ENABLE_SANITIZER_UNDEFINED=ON`: Enable the undefined behavior sanitizer to detect undefined behavior.
@@ -457,9 +469,9 @@ every object file. [ClangBuildAnalyzer](https://github.com/aras-p/ClangBuildAnal
 of the most expensive headers, template instantiations, and functions:
 
 ```console
-$ cmake -S . --preset tests-slim -DCMAKE_CXX_COMPILER=clang++ -DFICTION_ENABLE_TIME_TRACE=ON
-$ cmake --build --preset tests-slim
-$ ClangBuildAnalyzer --all build-tests-slim trace.bin
+$ cmake -S . --preset debug -DCMAKE_CXX_COMPILER=clang++ -DFICTION_ENABLE_TIME_TRACE=ON
+$ cmake --build --preset debug
+$ ClangBuildAnalyzer --all build-debug trace.bin
 $ ClangBuildAnalyzer --analyze trace.bin
 ```
 

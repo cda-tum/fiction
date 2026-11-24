@@ -110,7 +110,7 @@ jobs:
         id: cpp-tests-changes
         run: echo "run-cpp-tests=true" >> "${GITHUB_OUTPUT}"
 
-      # The `ci-tidy` preset additionally builds the Python bindings, the benchmarks, and
+      # The `lint` preset additionally configures the Python bindings, the benchmarks, and
       # the experiments, so Clang-Tidy watches a wider tree than the test matrix does.
       - name: Get the changed files relevant for Clang-Tidy
         if: github.event_name == 'pull_request'

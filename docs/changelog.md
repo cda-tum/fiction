@@ -46,6 +46,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Build system:
 
+  - **Breaking:** Use `debug` for `dev` and `tests-slim`, `lint` for `ci-tidy`, and `sanitizers`
+    for `dev-asan` on Linux or macOS. Use `ci-debug` for solver-enabled tests and `experiments`
+    for experiment executables in place of `dev-full` and `tests-full`.
   - Direct CMake builds of the Python bindings require nanobind 3.1 or later.
   - **Breaking:** Link `fiction::libfiction` in place of the removed `fiction::mockturtle` target.
 

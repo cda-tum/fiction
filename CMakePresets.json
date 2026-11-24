@@ -17,194 +17,172 @@
       }
     },
     {
-      "name": "dev",
-      "displayName": "Development",
-      "description": "Quick Debug build for local development: tests only, no optional third-party solvers",
+      "name": "cpp-tests",
+      "hidden": true,
       "inherits": "base",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
         "FICTION_TEST": "ON",
-        "FICTION_WARNINGS_AS_ERRORS": "OFF",
-        "FICTION_ENABLE_PCH": "ON",
-        "FICTION_LIGHTWEIGHT_DEBUG_BUILDS": "ON"
+        "FICTION_WARNINGS_AS_ERRORS": "OFF"
       }
     },
     {
-      "name": "dev-asan",
-      "displayName": "Development (ASan)",
-      "description": "Debug build with the address, leak, and undefined behavior sanitizers enabled",
-      "inherits": "dev",
+      "name": "solvers",
+      "hidden": true,
       "cacheVariables": {
-        "FICTION_ENABLE_SANITIZER_ADDRESS": "ON",
-        "FICTION_ENABLE_SANITIZER_LEAK": "ON",
-        "FICTION_ENABLE_SANITIZER_UNDEFINED": "ON"
-      }
-    },
-    {
-      "name": "dev-full",
-      "displayName": "Development (full)",
-      "description": "Debug build with all optional components enabled (Z3 must be installed manually, see the docs)",
-      "inherits": "dev",
-      "cacheVariables": {
-        "FICTION_EXPERIMENTS": "ON",
         "FICTION_Z3": "ON",
         "FICTION_ALGLIB": "ON"
       }
     },
     {
-      "name": "tests-slim",
-      "displayName": "Tests (slim)",
-      "description": "Fastest test-only iteration loop: no optional third-party solvers",
-      "inherits": "base",
+      "name": "debug",
+      "displayName": "C++ tests (Debug)",
+      "description": "Fast local C++ test builds with precompiled headers and reduced debug information",
+      "inherits": "cpp-tests",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "FICTION_TEST": "ON",
-        "FICTION_WARNINGS_AS_ERRORS": "OFF",
         "FICTION_ENABLE_PCH": "ON",
         "FICTION_LIGHTWEIGHT_DEBUG_BUILDS": "ON"
-      }
-    },
-    {
-      "name": "tests-full",
-      "displayName": "Tests (full)",
-      "description": "Tests and experiments with all optional components enabled (Z3 must be installed manually, see the docs)",
-      "inherits": "tests-slim",
-      "cacheVariables": {
-        "FICTION_EXPERIMENTS": "ON",
-        "FICTION_Z3": "ON",
-        "FICTION_ALGLIB": "ON"
-      }
-    },
-    {
-      "name": "pyfiction",
-      "displayName": "Python Bindings",
-      "description": "Mirrors the scikit-build-core configuration in pyproject.toml, for iterating on pyfiction bindings directly with CMake/an IDE without a full pip install",
-      "inherits": "base",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "FICTION_TEST": "OFF",
-        "FICTION_Z3": "ON",
-        "FICTION_ALGLIB": "ON",
-        "FICTION_PYTHON_BINDINGS": "ON"
       }
     },
     {
       "name": "release",
-      "displayName": "Release",
-      "description": "Optimized Release build (with IPO/LTO) for everyday usage or performance testing",
-      "inherits": "base",
+      "displayName": "C++ tests (Release)",
+      "description": "Optimized C++ test builds with IPO when supported",
+      "inherits": "cpp-tests",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
-        "FICTION_TEST": "ON",
-        "FICTION_WARNINGS_AS_ERRORS": "OFF",
         "FICTION_ENABLE_IPO": "ON"
       }
     },
     {
+      "name": "sanitizers",
+      "displayName": "C++ tests with sanitizers",
+      "description": "Debug tests with AddressSanitizer and UndefinedBehaviorSanitizer on Linux and macOS",
+      "inherits": "debug",
+      "condition": {
+        "type": "inList",
+        "string": "${hostSystemName}",
+        "list": ["Linux", "Darwin"]
+      },
+      "cacheVariables": {
+        "FICTION_ENABLE_SANITIZER_ADDRESS": "ON",
+        "FICTION_ENABLE_SANITIZER_UNDEFINED": "ON"
+      }
+    },
+    {
       "name": "coverage",
-      "displayName": "Coverage",
-      "description": "Mirrors the ☂️ Coverage CI workflow: Debug build instrumented for lcov-based coverage reporting",
-      "inherits": "base",
+      "displayName": "C++ test coverage",
+      "description": "Debug tests with Z3, ALGLIB, and coverage instrumentation for lcov",
+      "inherits": ["cpp-tests", "solvers"],
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "FICTION_TEST": "ON",
-        "FICTION_Z3": "ON",
-        "FICTION_ALGLIB": "ON",
-        "FICTION_WARNINGS_AS_ERRORS": "OFF",
         "FICTION_ENABLE_COVERAGE": "ON"
+      }
+    },
+    {
+      "name": "experiments",
+      "displayName": "Research experiments",
+      "description": "Optimized experiment executables with Z3 and ALGLIB enabled",
+      "inherits": ["base", "solvers"],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "FICTION_EXPERIMENTS": "ON",
+        "FICTION_TEST": "OFF",
+        "FICTION_WARNINGS_AS_ERRORS": "OFF"
+      }
+    },
+    {
+      "name": "pyfiction",
+      "displayName": "Python binding development",
+      "description": "Debug builds of the pyfiction extension modules directly with CMake",
+      "inherits": ["base", "solvers"],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "FICTION_TEST": "OFF",
+        "FICTION_PYTHON_BINDINGS": "ON"
+      }
+    },
+    {
+      "name": "lint",
+      "displayName": "Clang-Tidy compilation database",
+      "description": "Generate compile commands for tests, benchmarks, experiments, and Python bindings",
+      "inherits": ["cpp-tests", "solvers"],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_UNITY_BUILD": "OFF",
+        "FICTION_BENCHMARK": "ON",
+        "FICTION_EXPERIMENTS": "ON",
+        "FICTION_PYTHON_BINDINGS": "ON"
       }
     },
     {
       "name": "ci-common",
       "hidden": true,
-      "description": "Baseline shared by all 🐧/🍎/🪟 CI workflows; each job layers its own compiler and platform-specific flags (e.g. Z3 on ARM, jemalloc) on top via -D overrides. Experiments are off here and covered by one dedicated 🐧 job instead of all 22 of them",
-      "inherits": "base",
+      "inherits": ["cpp-tests", "solvers"],
       "cacheVariables": {
-        "FICTION_TEST": "ON",
         "FICTION_BENCHMARK": "OFF",
         "FICTION_EXPERIMENTS": "OFF",
-        "FICTION_ALGLIB": "ON",
-        "FICTION_WARNINGS_AS_ERRORS": "OFF",
         "FICTION_ENABLE_PCH": "ON"
       }
     },
     {
       "name": "ci-debug",
-      "displayName": "CI (Debug)",
-      "description": "Debug configuration used by the 🐧/🍎/🪟 CI workflows",
-      "inherits": "ci-common",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "FICTION_Z3": "ON",
-        "FICTION_LIGHTWEIGHT_DEBUG_BUILDS": "ON"
-      }
+      "displayName": "CI C++ tests (Debug)",
+      "description": "Debug test matrix baseline with Z3 and ALGLIB enabled",
+      "inherits": ["ci-common", "debug"]
     },
     {
       "name": "ci-release",
-      "displayName": "CI (Release)",
-      "description": "Release configuration used by the 🐧/🍎/🪟 CI workflows (jemalloc is Linux/macOS-only, layered on top via -D since it isn't supported on Windows)",
+      "displayName": "CI C++ tests (Release)",
+      "description": "Release test matrix baseline with Z3 and ALGLIB enabled",
       "inherits": "ci-common",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "FICTION_Z3": "ON"
+        "CMAKE_BUILD_TYPE": "Release"
       }
     },
     {
       "name": "ci-codeql",
-      "displayName": "CI (CodeQL)",
-      "description": "Mirrors the 📝 CodeQL CI workflow",
+      "displayName": "CI CodeQL analysis",
+      "description": "Debug test build with precompiled headers disabled for CodeQL extraction",
       "inherits": "ci-debug",
       "cacheVariables": {
         "FICTION_ENABLE_PCH": "OFF"
-      }
-    },
-    {
-      "name": "ci-tidy",
-      "displayName": "CI (Clang-Tidy)",
-      "description": "Mirrors the Clang-Tidy Review CI workflow: everything enabled to maximize static analysis coverage",
-      "inherits": "base",
-      "cacheVariables": {
-        "FICTION_TEST": "ON",
-        "FICTION_BENCHMARK": "ON",
-        "FICTION_EXPERIMENTS": "ON",
-        "FICTION_Z3": "ON",
-        "FICTION_ALGLIB": "ON",
-        "FICTION_PYTHON_BINDINGS": "ON"
       }
     }
   ],
   "buildPresets": [
     {
-      "name": "dev",
-      "configurePreset": "dev"
-    },
-    {
-      "name": "dev-asan",
-      "configurePreset": "dev-asan"
-    },
-    {
-      "name": "dev-full",
-      "configurePreset": "dev-full"
-    },
-    {
-      "name": "tests-slim",
-      "configurePreset": "tests-slim"
-    },
-    {
-      "name": "tests-full",
-      "configurePreset": "tests-full"
-    },
-    {
-      "name": "pyfiction",
-      "configurePreset": "pyfiction"
+      "name": "debug",
+      "configurePreset": "debug"
     },
     {
       "name": "release",
       "configurePreset": "release"
     },
     {
+      "name": "sanitizers",
+      "configurePreset": "sanitizers",
+      "condition": {
+        "type": "inList",
+        "string": "${hostSystemName}",
+        "list": ["Linux", "Darwin"]
+      }
+    },
+    {
       "name": "coverage",
       "configurePreset": "coverage"
+    },
+    {
+      "name": "experiments",
+      "configurePreset": "experiments"
+    },
+    {
+      "name": "pyfiction",
+      "configurePreset": "pyfiction"
+    },
+    {
+      "name": "lint",
+      "configurePreset": "lint"
     },
     {
       "name": "ci-debug",
@@ -217,95 +195,59 @@
     {
       "name": "ci-codeql",
       "configurePreset": "ci-codeql"
-    },
-    {
-      "name": "ci-tidy",
-      "configurePreset": "ci-tidy"
     }
   ],
   "testPresets": [
     {
-      "name": "dev",
-      "configurePreset": "dev",
+      "name": "test-defaults",
+      "hidden": true,
       "output": {
         "outputOnFailure": true
       },
       "execution": {
-        "noTestsAction": "error",
-        "stopOnFailure": false
+        "noTestsAction": "error"
       }
     },
     {
-      "name": "dev-asan",
-      "configurePreset": "dev-asan",
-      "output": {
-        "outputOnFailure": true
+      "name": "debug",
+      "inherits": "test-defaults",
+      "configurePreset": "debug"
+    },
+    {
+      "name": "release",
+      "inherits": "test-defaults",
+      "configurePreset": "release"
+    },
+    {
+      "name": "sanitizers",
+      "inherits": "test-defaults",
+      "configurePreset": "sanitizers",
+      "condition": {
+        "type": "inList",
+        "string": "${hostSystemName}",
+        "list": ["Linux", "Darwin"]
+      },
+      "environment": {
+        "UBSAN_OPTIONS": "halt_on_error=1:$penv{UBSAN_OPTIONS}"
       },
       "execution": {
-        "noTestsAction": "error",
         "stopOnFailure": true
       }
     },
     {
-      "name": "dev-full",
-      "configurePreset": "dev-full",
-      "output": {
-        "outputOnFailure": true
-      },
-      "execution": {
-        "noTestsAction": "error",
-        "stopOnFailure": false
-      }
-    },
-    {
-      "name": "tests-slim",
-      "configurePreset": "tests-slim",
-      "output": {
-        "outputOnFailure": true
-      },
-      "execution": {
-        "noTestsAction": "error",
-        "stopOnFailure": false
-      }
-    },
-    {
-      "name": "tests-full",
-      "configurePreset": "tests-full",
-      "output": {
-        "outputOnFailure": true
-      },
-      "execution": {
-        "noTestsAction": "error",
-        "stopOnFailure": false
-      }
-    },
-    {
-      "name": "release",
-      "configurePreset": "release",
-      "output": {
-        "outputOnFailure": true
-      }
-    },
-    {
       "name": "coverage",
-      "configurePreset": "coverage",
-      "output": {
-        "outputOnFailure": true
-      }
+      "inherits": "test-defaults",
+      "configurePreset": "coverage"
     },
     {
       "name": "ci-debug",
-      "configurePreset": "ci-debug",
-      "output": {
-        "outputOnFailure": true
-      }
+      "inherits": "test-defaults",
+      "configurePreset": "ci-debug"
     },
     {
       "name": "ci-release",
-      "configurePreset": "ci-release",
-      "output": {
-        "outputOnFailure": true
-      }
+      "inherits": "test-defaults",
+      "configurePreset": "ci-release"
     }
   ]
 }

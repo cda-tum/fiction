@@ -35,38 +35,40 @@ def main() -> None:
     scratch = source / ".ai"
     scratch.mkdir(exist_ok=True)
 
-    def run(*command: str | Path, cwd: Path | None = None) -> None:
+    def run(*command: str | Path) -> None:
         """Run a command and stop on failure.
 
         Args:
             command: Program and arguments.
-            cwd: Working directory.
         """
-        subprocess.run(list(map(str, command)), cwd=cwd, check=True)
+        subprocess.run(list(map(str, command)), check=True)
 
     with tempfile.TemporaryDirectory(prefix="package-", dir=scratch) as temporary:
         work = Path(temporary)
         producer_workspace = tempfile.TemporaryDirectory(prefix="producer-", dir=work)
         producer = Path(producer_workspace.name)
+        producer_build = producer / "build"
         for directory in ("include", "cmake", "vendors"):
             shutil.copytree(source / directory, producer / directory)
-        for name in ("CMakeLists.txt", "CMakePresets.json"):
-            shutil.copy2(source / name, producer / name)
+        shutil.copy2(source / "CMakeLists.txt", producer / "CMakeLists.txt")
         shutil.copytree(source / "test/package", work / "consumer-source")
         prefix = work / "prefix"
         run(
             cmake,
-            "--preset",
-            "tests-slim",
+            "-S",
+            producer,
+            "-B",
+            producer_build,
+            "-G",
+            "Ninja",
             "-DFICTION_TEST=OFF",
             "-DFICTION_ENABLE_CACHE=OFF",
             "-DCMAKE_BUILD_TYPE=Release",
             f"-DCMAKE_INSTALL_PREFIX={prefix.as_posix()}",
             *args.cmake_option,
-            cwd=producer,
         )
-        run(cmake, "--build", "--preset", "tests-slim", "--parallel", "2", cwd=producer)
-        run(cmake, "--install", producer / "build-tests-slim")
+        run(cmake, "--build", producer_build, "--parallel", "2")
+        run(cmake, "--install", producer_build)
         relocated = work / "relocated"
         prefix.rename(relocated)
         # TemporaryDirectory handles Git's read-only pack files on Windows.
