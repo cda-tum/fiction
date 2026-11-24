@@ -35,7 +35,7 @@ jobs:
       - name: Check all platform reports are present
         # Keep the runner names aligned with the python-tests matrix in ci.yml.
         run: |
-          for runner in ubuntu-24.04 ubuntu-24.04-arm macos-15 windows-2025; do
+          for runner in ubuntu-24.04 ubuntu-24.04-arm macos-15 windows-2025 windows-11-arm; do
             test -s "coverage-reports/coverage-$runner.xml"
           done
 

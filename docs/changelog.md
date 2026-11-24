@@ -28,6 +28,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Added on-the-fly SiDB circuit design from routed hexagonal gate layouts.
   - `mnt.pyfiction` ships type stubs and a `py.typed` marker.
   - Added CPython 3.15 support, including separate wheels for free-threaded CPython 3.15.
+  - Published releases include native Windows ARM64 wheels for CPython 3.11–3.15 and free-threaded 3.15.
 
 ### Changed
 
