@@ -225,7 +225,6 @@ def cpp_lint(session: nox.Session) -> None:
             ".",
             "--preset",
             "lint",
-            "-DSKBUILD_SABI_COMPONENT=Development.SABIModule",
             f"-DZ3_ROOT={z3_root}",
             f"-DZ3_CXX_INCLUDE_DIRS={z3_root / 'include'}",
             f"-DZ3_LIBRARIES={z3_root / 'lib' / z3_library_name}",

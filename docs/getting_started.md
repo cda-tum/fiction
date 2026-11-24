@@ -91,10 +91,10 @@ $ git clone https://github.com/cda-tum/fiction.git
 $ cd fiction
 ```
 
-CMake fetches the third-party libraries during configuration. Only `CMake` and a C++20 compiler are required for
-the C++ part. If you want to work with the Python bindings, you need a Python 3.10+ installation.
+CMake 3.26 or later and a C++20 compiler are required for the C++ build. CMake fetches third-party libraries during
+configuration. If you want to work with the Python bindings, you need a Python 3.10+ installation.
 
-On Ubuntu, the build dependencies can be installed via:
+On Ubuntu 24.04 or later, install the build dependencies with:
 
 ```text
 sudo apt-get install build-essential cmake ninja-build python3 python3-dev
@@ -119,9 +119,9 @@ full list of supported customizations.
 
 ### CMake Presets
 
-The [CMake presets](https://github.com/cda-tum/fiction/blob/main/CMakePresets.json) require CMake 3.23 or later
-and Ninja. On Windows with MSVC, run the commands from a Visual Studio developer shell for your target
-architecture. Each preset configures a separate `build-<preset>` directory.
+The [CMake presets](https://github.com/cda-tum/fiction/blob/main/CMakePresets.json) use Ninja.
+On Windows with MSVC, run the commands from a Visual Studio developer shell for your target architecture.
+Each preset configures a separate `build-<preset>` directory.
 
 ```console
 $ cmake --list-presets
@@ -136,25 +136,16 @@ $ cmake --list-presets
 | Build research experiments | `experiments` | Release experiment executables with Z3 and ALGLIB |
 | Iterate on Python bindings | `pyfiction` | Release extension modules with Z3, ALGLIB, and [nanobind](https://nanobind.readthedocs.io/) |
 | Prepare Clang-Tidy | `lint` | A compilation database for tests, benchmarks, experiments, and bindings. Requires Z3 and nanobind. |
-| Reproduce a C++ test matrix job | `ci-debug`, `ci-release` | Debug or Release tests with the CI options and both optional dependencies enabled by default |
-| Reproduce the CodeQL build | `ci-codeql` | The Debug CI profile with precompiled headers disabled |
 
 Presets that enable Z3 expect it to be installed. CMake fetches ALGLIB for the presets that enable it.
 Use the same preset name for configure and build, and for `ctest` when the preset enables a C++ test workflow.
 CTest reports an error if no tests match the selection.
-When reproducing a CI job, copy the workflow's compiler and other `-D` options as well.
 The `sanitizers` preset requires a compiler and runtime that support ASan and UBSan. With `ctest --preset sanitizers`,
 UBSan reports cause a test failure by default, and CTest stops after the first failure.
 
-```console
-$ cmake -S . --preset ci-debug
-$ cmake --build --preset ci-debug
-$ ctest --preset ci-debug
-```
-
 Use `debug` in place of `dev` or `tests-slim`, and `sanitizers` in place of `dev-asan` on Linux or macOS.
-If you used `dev-full` or `tests-full`, use `ci-debug` for solver-enabled tests and `experiments` to build
-experiment executables. Use `lint` in place of `ci-tidy`.
+If you used `dev-full` or `tests-full`, configure `debug` with `-DFICTION_Z3=ON -DFICTION_ALGLIB=ON` for
+solver-enabled tests. Use `experiments` to build experiment executables.
 
 Use {ref}`CLI (pip) <cli-pip>` to install the `fiction` shell from the Python package.
 
@@ -331,7 +322,6 @@ of `pip install`), make sure the Python interpreter CMake picks up has `nanobind
 `-DPython_EXECUTABLE=<path_to_repo>/.venv/bin/python3` (or the equivalent `.venv\Scripts\python.exe` on
 Windows) if CMake would otherwise pick up a different interpreter.
 
-On Windows, direct builds require CMake 3.26 or later to find the Python stable ABI import library.
 The preset uses `Release` to match the packaged `nanobind-backend` ABI on MSVC.
 :::
 
@@ -454,7 +444,7 @@ attempts, or performance of the resulting binaries:
   The `debug` preset turns this on. On Windows, add `sloppiness = pch_defines,time_macros` to your
   ccache configuration, or ccache will stop caching the compilations that use the PCH.
 - `-DFICTION_LIGHTWEIGHT_DEBUG_BUILDS=ON`: Cut debug information down to `-g1` and disable inlining. This is by far
-  the largest single lever on Debug build cost. The `debug` and `ci-debug` presets enable it.
+  the largest single lever on Debug build cost. The `debug` preset enables it.
 - `-DFICTION_ENABLE_SANITIZER_ADDRESS=ON`: Enable the address sanitizer to detect memory issues.
 - `-DFICTION_ENABLE_SANITIZER_LEAK=ON`: Enable the leak sanitizer to detect memory leaks.
 - `-DFICTION_ENABLE_SANITIZER_UNDEFINED=ON`: Enable the undefined behavior sanitizer to detect undefined behavior.
