@@ -64,7 +64,7 @@ jobs:
           {
             echo "CMAKE_GENERATOR=Ninja"
             echo "SCCACHE_DIR=$GITHUB_WORKSPACE/.sccache"
-            # Six builds per job: `minimums` plus one per interpreter. GitHub evicts caches
+            # One build per interpreter plus `minimums`. GitHub evicts caches
             # repo-wide at 10 GB, so size this to what the statistics step actually reports
             echo "SCCACHE_CACHE_SIZE=2G"
             # One server for the whole job; a restart would reset the counters
@@ -114,8 +114,7 @@ jobs:
           echo "AIGVERSE_ABC=/usr/bin/yosys-abc" >> "$GITHUB_ENV"
           echo "FICTION_REQUIRE_ABC=1" >> "$GITHUB_ENV"
 
-      # A declared floor is only a claim until something installs it. Pinned to Python 3.10, so
-      # it runs first and fails fastest.
+      # Run the dependency floors on the oldest supported interpreter first.
       - name: ⬇️ Test the lowest supported dependency versions
         run: uvx nox -s minimums --verbose
 

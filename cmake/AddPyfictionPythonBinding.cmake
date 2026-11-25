@@ -8,7 +8,7 @@ function(add_pyfiction_python_binding target_name)
 
   # Split mode: the extension links no nanobind library code and resolves it at
   # import time from the `nanobind-backend` wheel, so one abi3 binary covers
-  # Python 3.10 up. It implies STABLE_ABI. Free-threaded interpreters need the
+  # Python 3.11 up. It implies STABLE_ABI. Free-threaded interpreters need the
   # `abi3t` of Python 3.15 (PEP 803); below that, nanobind stops the configure
   # with a message naming the version.
   #

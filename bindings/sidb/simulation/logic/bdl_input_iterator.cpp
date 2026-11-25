@@ -142,7 +142,7 @@ Args:
             "__next__",
             [](bdl_input_iterator& self) -> layout
             {
-                // Keep the snapshot and cursor advance under the GIL so concurrent next() calls cannot overlap.
+                // Serialize the snapshot and cursor advance across concurrent next() calls.
                 if (self >= (uint64_t{1} << self.num_input_pairs()))
                 {
                     throw nb::stop_iteration();
@@ -153,7 +153,7 @@ Args:
 
                 return result;
             },
-            DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_mul))
+            nb::lock_self(), DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_mul))
         .def(
             "__eq__", [](const bdl_input_iterator& self, const uint64_t n) { return self == n; }, nb::arg("m"),
             DOC(fiction_sidb_simulation_logic_bdl_input_iterator_operator_eq))

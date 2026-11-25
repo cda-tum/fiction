@@ -61,6 +61,19 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@f9b966cfadf4109556cadc5bb39ddb72d0ce664e # v4.3.5
 
+      - name: Check the stable ABI wheel tags
+        shell: bash
+        run: |
+          shopt -s nullglob
+          ordinary=(wheelhouse/*-cp311-abi3-*.whl)
+          free_threaded=(wheelhouse/*-cp315-abi3t-*.whl)
+          wheels=(wheelhouse/*.whl)
+          if [[ ${#ordinary[@]} != 1 || ${#free_threaded[@]} != 1 || ${#wheels[@]} != 2 ]]; then
+            echo "Expected one cp311-abi3 wheel and one cp315-abi3t wheel."
+            printf '%s\n' "${wheels[@]}"
+            exit 1
+          fi
+
       - name: Upload wheel as an artifact
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

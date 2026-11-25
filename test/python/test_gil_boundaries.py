@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- bounded native concurrency regression
 import sys
+import sysconfig
 import textwrap
 import threading
 from time import monotonic
@@ -21,6 +22,7 @@ import pytest
 
 from mnt.pyfiction.layouts import cartesian_gate_layout, cartesian_layout
 from mnt.pyfiction.networks import random_network
+from mnt.pyfiction.networks.io import read_network
 from mnt.pyfiction.physical_design import color_routing
 from mnt.pyfiction.sidb import charge_distribution, lattice_site, sidb_dot_tag, sidb_layout
 from mnt.pyfiction.sidb.io import read_surface_defects
@@ -32,6 +34,40 @@ if TYPE_CHECKING:
     from typing import Any
 
 
+REQUIRES_GIL = pytest.mark.skipif(sysconfig.get_config_var("Py_GIL_DISABLED"), reason="Requires the GIL")
+
+
+@pytest.mark.skipif(not sysconfig.get_config_var("Py_GIL_DISABLED"), reason="Requires free-threaded CPython")
+def test_extension_imports_keep_the_gil_disabled() -> None:
+    """Import the native modules and CLI with the interpreter's default GIL mode."""
+    result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed interpreter and test input
+        [
+            sys.executable,
+            "-E",
+            "-c",
+            textwrap.dedent("""
+                import sys
+
+                assert not sys._is_gil_enabled()
+
+                from mnt import pyfiction
+                from mnt.fiction.cli import app
+
+                for name in pyfiction.__all__:
+                    getattr(pyfiction, name)
+
+                assert not sys._is_gil_enabled()
+            """),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+
+
+@REQUIRES_GIL
 @pytest.mark.parametrize("kind", ["coordinates", "depth", "routing", "defects", "truth_table"])
 def test_native_work_releases_the_gil(kind: str, tmp_path: Path) -> None:
     """Python threads run during native traversal, routing, parsing, and truth-table export.
@@ -84,6 +120,20 @@ def test_native_work_releases_the_gil(kind: str, tmp_path: Path) -> None:
         assert run_with_python_progress(table.to_binary) == "0" * (1 << 24)
 
 
+@REQUIRES_GIL
+def test_reading_a_network_releases_the_gil(tmp_path: Path) -> None:
+    """A Python thread can run while the native Verilog reader parses a network."""
+    path = tmp_path / "network.v"
+    path.write_text("module top(a,b,o);\ninput a,b;\noutput o;\nassign o = a & b;\nendmodule\n", encoding="utf-8")
+    filename = str(path)
+
+    network = run_with_python_progress(lambda: read_network(filename))
+
+    assert network.num_pis() == 2
+    assert network.num_pos() == 1
+
+
+@REQUIRES_GIL
 @pytest.mark.parametrize("kind", ["sites", "charges"])
 def test_sidb_bulk_work_releases_the_gil(kind: str) -> None:
     """Large SiDB collections and charge construction permit Python thread progress.
@@ -113,6 +163,7 @@ def test_sidb_bulk_work_releases_the_gil(kind: str) -> None:
         assert run_with_python_progress(construct).size() == count
 
 
+@REQUIRES_GIL
 def test_progress_check_requires_a_native_gil_release() -> None:
     """A Python call cannot satisfy the native progress check."""
     with pytest.raises(AssertionError):

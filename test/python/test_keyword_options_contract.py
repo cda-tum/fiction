@@ -35,8 +35,7 @@ from mnt.pyfiction.synthesis import (
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-
-    from typing_extensions import assert_type
+    from typing import assert_type
 
     from mnt.pyfiction.networks import technology_network
 

@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Added AIG, XAG, and MIG support for network I/O, conversion, mapping, and simulation.
   - Added on-the-fly SiDB circuit design from routed hexagonal gate layouts.
   - `mnt.pyfiction` ships type stubs and a `py.typed` marker.
+  - Added CPython 3.15 support, including separate wheels for free-threaded CPython 3.15.
 
 ### Changed
 
@@ -95,6 +96,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Tooling:
 
   - The pre-commit hook now formats CMake sources and templates with `cmakefmt`.
+  - Nox sessions require Nox 2026.08.10 or newer for free-threaded interpreter discovery.
 
 ### Removed
 
@@ -118,6 +120,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - I/O:
 
   - **Breaking:** Removed FQCA and QCA-STACK import and export.
+
+- Python bindings:
+
+  - **Breaking:** Python 3.10 is no longer supported. Upgrade to CPython 3.11 or newer.
 
 ### Fixed
 
@@ -160,6 +166,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     defect parameters.
   - Transactional writers replace existing files only after successful serialization and report
     replacement errors as stream failures.
+
+- Python bindings:
+
+  - Concurrent BDL iterator calls yield distinct patterns on free-threaded CPython.
 
 ## v0.8.0 - 2026-09-02
 

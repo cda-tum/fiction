@@ -33,7 +33,7 @@ body:
   - type: input
     attributes:
       label: Python version
-      placeholder: For example, Python 3.10
+      placeholder: For example, Python 3.15
   - type: input
     attributes:
       label: C++ compiler

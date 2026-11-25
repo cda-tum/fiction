@@ -19,7 +19,7 @@ set(Python_ARTIFACTS_INTERACTIVE ON
     CACHE BOOL
           "Prevent multiple searches for Python and instead cache the results.")
 find_package(
-  Python
+  Python 3.11
   REQUIRED
   COMPONENTS Interpreter Development.Module Development.SABIModule)
 execute_process(

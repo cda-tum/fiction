@@ -13,6 +13,7 @@ from __future__ import annotations
 import gc
 import re
 import sys
+import sysconfig
 import threading
 import weakref
 from typing import TYPE_CHECKING, Any
@@ -385,6 +386,11 @@ def test_long_route_statistics_release_the_gil() -> None:
     for x in range(1, length):
         signal = layout.create_buf(signal, (x, 0))
     layout.create_po(signal, "out", (length, 0))
+
+    if sysconfig.get_config_var("Py_GIL_DISABLED"):
+        assert critical_path_length_and_throughput(layout) == (length + 1, 1)
+        return
+
     start = threading.Event()
     refreshed = threading.Event()
 
