@@ -334,8 +334,13 @@ nanobind is used in _split mode_: the extension contains no nanobind library cod
 from the separate `nanobind-backend` package, which is therefore a runtime dependency of `mnt.pyfiction`.
 Ordinary CPython uses one `cp311-abi3` wheel per platform. Free-threaded CPython 3.15 uses a separate
 `cp315-abi3t` wheel ([PEP 803](https://peps.python.org/pep-0803/)). CMake rejects free-threaded interpreters
-older than 3.15. To verify a free-threaded installation, run
-`python -c "import mnt.pyfiction, sys; assert not sys._is_gil_enabled()"` with the free-threaded interpreter.
+older than 3.15. To verify that all of the native modules load with the GIL disabled, run this command
+with the free-threaded interpreter.
+
+```console
+python -c "import sys; from mnt.pyfiction import *; assert not sys._is_gil_enabled()"
+```
+
 :::
 
 \---

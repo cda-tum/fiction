@@ -97,6 +97,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Tooling:
 
   - The pre-commit hook now formats CMake sources and templates with `cmakefmt`.
+  - Nox sessions require Nox 2026.08.10 or newer for free-threaded interpreter discovery.
 
 ### Removed
 
