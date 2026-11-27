@@ -912,11 +912,11 @@ class exact_impl
             return ctx->int_const(fmt::format("rank_({},{})", t.x, t.y).c_str());
         }
         /**
-         * @brief Returns the Boolean variable that assigns a clock phase to a primary input.
+         * @brief Returns the Boolean variable that assigns a clock phase to a network node.
          *
          * @param n Node to be considered.
          * @param clk Clock phase of the node.
-         * @return Primary input clock phase variable.
+         * @return Node clock phase variable.
          */
         [[nodiscard]] z3::expr get_node_clock(const mockturtle::node<topology_ntk_t>& n, const unsigned clk)
         {
