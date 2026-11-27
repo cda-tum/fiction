@@ -872,7 +872,7 @@ TEST_CASE("Exact physical design rejects more inputs than its area limit", "[exa
     CHECK(stats.num_aspect_ratios == 0);
 }
 
-TEST_CASE("Exact fixed-size search can omit I/O tiles", "[exact]")
+TEST_CASE("Exact examines the requested rectangle when I/O tiles are omitted", "[exact]")
 {
     named_technology_network ntk{};
     ntk.create_po(ntk.create_not(ntk.create_pi()));

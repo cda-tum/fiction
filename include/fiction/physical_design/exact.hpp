@@ -130,9 +130,11 @@ struct exact_physical_design_params
      */
     bool crossings = false;
     /**
-     * Flag to indicate that I/Os should be realized by designated wire segments (preferred).
+     * @brief Place primary inputs and outputs on dedicated tiles.
+     * @note Layout extraction requires dedicated I/O tiles. With this flag cleared, variable-size enumeration
+     * still counts gates and primary inputs in its starting area.
      */
-    bool io_pins = true;  // TODO right now, this has to be true
+    bool io_pins = true;
     /**
      * Flag to indicate that I/Os should be placed at the layout's border.
      */
@@ -251,7 +253,7 @@ class exact_impl
     std::optional<Lyt> run()
     {
         const auto min_area = uint64_t{ntk->num_gates()} + ntk->num_pis();
-        // Fixed-size searches can omit the primary I/O tiles.
+        // The gate-plus-PI bound includes I/O tiles that a fixed-size search may omit.
         if ((!ps.fixed_size || ps.io_pins) && min_area > ps.upper_bound_area)
         {
             return std::nullopt;
