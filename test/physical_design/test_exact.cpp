@@ -37,6 +37,7 @@
 #include "utils/progress_recorder.hpp"
 
 #include <fiction/layouts/arrangement.hpp>
+#include <fiction/layouts/layout_base.hpp>
 #include <fiction/networks/extract_layout_network.hpp>
 #include <fiction/networks/network_utils.hpp>
 #include <fiction/networks/technology_network.hpp>
