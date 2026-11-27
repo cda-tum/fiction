@@ -244,13 +244,12 @@ class exact_impl
 
         ntk = std::make_shared<topology_ntk_t>(mockturtle::fanout_view{src});
 
-        lower_bound = static_cast<decltype(lower_bound)>(ntk->num_gates() + ntk->num_pis());
+        lower_bound         = static_cast<decltype(lower_bound)>(ntk->num_gates() + ntk->num_pis());
+        ps.upper_bound_area = static_cast<uint16_t>(
+            std::min<uint32_t>(ps.upper_bound_area, uint32_t{ps.upper_bound_x} * ps.upper_bound_y));
 
         // NOLINTNEXTLINE(*-prefer-member-initializer)
-        ari = aspect_ratio_iterator<typename Lyt::extent>{
-            ps.fixed_size ? std::min(static_cast<uint64_t>(ps.upper_bound_area),
-                                     static_cast<uint64_t>(ps.upper_bound_x) * ps.upper_bound_y) :
-                            static_cast<uint64_t>(lower_bound)};
+        ari = aspect_ratio_iterator<typename Lyt::extent>{ps.fixed_size ? ps.upper_bound_area : lower_bound};
     }
 
     /** @brief Returns a gate-level layout satisfying the exact design constraints, if found. */
@@ -3021,21 +3020,19 @@ class exact_impl
             {
                 const std::scoped_lock guard{ari_mutex};
 
+                if (!(ari <= ps.upper_bound_area))
+                {
+                    return std::nullopt;
+                }
+
+                ex = *ari;
                 ++ari;
-                ex = *ari;  // operations ++ and * are split to prevent a vector copy construction
 
                 // log the examination of a new aspect ratio
                 pst.num_aspect_ratios++;
             }
 
             progress.advance();
-
-            if (layouts::area_of(ex) > ps.upper_bound_area ||
-                ((static_cast<int64_t>(ex.width) - 1) >= ps.upper_bound_x &&
-                 (static_cast<int64_t>(ex.height) - 1) >= ps.upper_bound_y))
-            {
-                return std::nullopt;
-            }
 
             if (handler.skippable(ex))
             {
@@ -3208,10 +3205,7 @@ class exact_impl
 
         smt_handler handler{std::make_shared<z3::context>(), layout, *ntk, ps, black_list};
 
-        const auto upper_bound = std::min(static_cast<uint64_t>(ps.upper_bound_area),
-                                          static_cast<uint64_t>(ps.upper_bound_x) * ps.upper_bound_y);
-
-        for (; ari <= upper_bound; ++ari)  // <= to prevent overflow
+        for (; ari <= ps.upper_bound_area; ++ari)
         {
             auto ex = *ari;
 
