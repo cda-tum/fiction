@@ -58,12 +58,14 @@
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/views/names_view.hpp>
+#include <z3_api.h>
 
 #include <concepts>
 #include <cstdint>
 #include <optional>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 using namespace fiction;
@@ -897,6 +899,34 @@ TEST_CASE("Exact physical design timeout", "[exact]")
                                                   .crossings   = true,
                                                   .timeout     = 1};
         CHECK_FALSE(exact<cartesian_layout>(ntk, params).has_value());
+    }
+}
+
+TEST_CASE("Resource-limited exact wire minimization", "[exact]")
+{
+    named_technology_network ntk{};
+    ntk.create_po(ntk.create_not(ntk.create_pi("a")), "f");
+    const exact_physical_design_params params{.upper_bound_x  = 1,
+                                              .upper_bound_y  = 4,
+                                              .fixed_size     = true,
+                                              .minimize_wires = true};
+
+    const auto optimum = generate_layout<cartesian_gate_layout>(ntk, params);
+    CHECK(optimum.num_wires() == 0u);
+
+    Z3_string previous{};
+    REQUIRE(Z3_global_param_get("rlimit", &previous));
+    const std::string                    saved_limit{previous};
+    std::optional<cartesian_gate_layout> limited{};
+    // On Z3 4.14.1 and 5.1.0 this budget decides feasibility and exhausts the optimizer.
+    Z3_global_param_set("rlimit", "4096");
+    CHECK_NOTHROW(limited = exact<cartesian_layout>(ntk, params));
+    Z3_global_param_set("rlimit", saved_limit.c_str());
+
+    if (limited.has_value())
+    {
+        CHECK(limited->num_wires() == 0u);
+        check_eq(ntk, *limited);
     }
 }
 
