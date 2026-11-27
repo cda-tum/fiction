@@ -164,7 +164,8 @@ struct exact_physical_design_params
     bool minimize_crossings = false;
     /**
      * @brief Millisecond budget shared by aspect-ratio search, feasibility checks, and optimization.
-     * Zero expires immediately.
+     * Zero expires immediately. An inconclusive feasibility check or requested optimization can leave the search
+     * without a layout. Constraint generation and model extraction can run past the deadline.
      */
     unsigned timeout = 4294967u;
     /**
