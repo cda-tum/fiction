@@ -9158,8 +9158,6 @@ static const char *mkd_doc_fiction_physical_design_detail_exact_impl_black_list 
 R"doc(Maps tiles to blacklisted gate types via their truth tables and port
 information.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_deadline = R"doc(Shared deadline for the search and all Z3 checks.)doc";
-
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_exact_impl =
 R"doc(Initializes exact placement and routing with a validated clocking
 scheme.
@@ -9243,6 +9241,8 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_scheme = R"doc(The utilized clocking scheme.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_search_deadline = R"doc(Shared deadline for the search and all Z3 checks.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler =
 R"doc(Sub-class to exact to handle construction of SMT instances as well as
