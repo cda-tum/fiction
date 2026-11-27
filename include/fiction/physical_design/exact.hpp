@@ -103,11 +103,7 @@ struct exact_physical_design_params
      */
     std::optional<layouts::arrangement> layout_arrangement = std::nullopt;
     /**
-     * Number of total tiles to use as an upper bound.
-     *
-     * @note If `upper_bound_area` and (either) `upper_bound_x` or `upper_bound_y` are set, the imposed search space
-     * restrictions are cumulative. E.g., if `upper_bound_area == 20` and `upper_bound_x == 4`, all aspect ratios with
-     * a width of more than 4 *and* a total area of more than 20 will be skipped.
+     * @brief Maximum number of tiles. Every candidate must also satisfy both axis bounds.
      */
     uint16_t upper_bound_area = std::numeric_limits<uint16_t>::max();
     /**
@@ -119,9 +115,8 @@ struct exact_physical_design_params
      */
     uint16_t upper_bound_y = std::numeric_limits<uint16_t>::max();
     /**
-     * Exclusively investigate aspect ratios that conform with the restrictions imposed by the upper bound options.
-     * E.g., if `fixed_size == true` *and* `upper_bound_area == 20`, only aspect ratios with exactly 20 tiles will be
-     * examined. Restricted imposed by the `upper_bound_x` and `upper_bound_y` flags additionally apply.
+     * @brief Search only aspect ratios with area `min(upper_bound_area, upper_bound_x * upper_bound_y)`.
+     * Both axis bounds still apply.
      */
     bool fixed_size = false;
     /**
@@ -248,17 +243,20 @@ class exact_impl
 
         ntk = std::make_shared<topology_ntk_t>(mockturtle::fanout_view{src});
 
-        lower_bound         = static_cast<decltype(lower_bound)>(ntk->num_gates() + ntk->num_pis());
         ps.upper_bound_area = static_cast<uint16_t>(
             std::min<uint32_t>(ps.upper_bound_area, uint32_t{ps.upper_bound_x} * ps.upper_bound_y));
-
-        // NOLINTNEXTLINE(*-prefer-member-initializer)
-        ari = aspect_ratio_iterator<typename Lyt::extent>{ps.fixed_size ? ps.upper_bound_area : lower_bound};
     }
 
     /** @brief Returns a gate-level layout satisfying the exact design constraints, if found. */
     std::optional<Lyt> run()
     {
+        const auto first_area = ps.fixed_size ? ps.upper_bound_area : uint64_t{ntk->num_gates()} + ntk->num_pis();
+        if (first_area > ps.upper_bound_area)
+        {
+            return std::nullopt;
+        }
+        ari = aspect_ratio_iterator<typename Lyt::extent>{first_area};
+
         if (ps.num_threads > 1)
         {
             return run_asynchronously();
@@ -310,10 +308,6 @@ class exact_impl
      * @brief Maps tiles to blacklisted gate types via their truth tables and port information.
      */
     const surface_black_list<fcn::port_direction> black_list;
-    /**
-     * @brief Lower bound for the number of layout tiles.
-     */
-    uint16_t lower_bound{0u};
     /**
      * @brief Iterator for the factorization of possible aspect ratios.
      */

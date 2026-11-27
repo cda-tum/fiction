@@ -853,6 +853,22 @@ TEST_CASE("Exact physical design within a single column", "[exact]")
     }
 }
 
+TEST_CASE("Exact physical design rejects more inputs than its area limit", "[exact]")
+{
+    named_technology_network ntk{};
+    for (auto i = 0u; i < 65'536u; ++i)
+    {
+        ntk.create_pi();
+    }
+
+    const exact_physical_design_params ps{.scheme = "COLUMNAR", .upper_bound_area = 1, .border_io = true};
+    exact_physical_design_stats        stats{};
+    // Isolated inputs need no fanout substitution.
+    fiction::physical_design::detail::exact_impl<cartesian_gate_layout> search{ntk, ps, stats, clocking::columnar()};
+    CHECK_FALSE(search.run().has_value());
+    CHECK(stats.num_aspect_ratios == 0);
+}
+
 TEST_CASE("Cartesian 2DDWave depth limits depend on rectangle shape", "[exact]")
 {
     named_technology_network ntk{};
@@ -864,6 +880,7 @@ TEST_CASE("Cartesian 2DDWave depth limits depend on rectangle shape", "[exact]")
     ntk.create_po(signal);
 
     exact_physical_design_params ps{.upper_bound_x = 3, .upper_bound_y = 2, .fixed_size = true};
+    ps.num_threads = GENERATE(1u, 2u);
     CHECK_FALSE(exact<cartesian_layout>(ntk, ps).has_value());
 
     ps.upper_bound_x = 6;
