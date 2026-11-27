@@ -405,6 +405,29 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
     }
 }
 
+TEST_CASE("OPEN clocking preserves feasible layout orientations", "[exact]")
+{
+    named_technology_network ntk{};
+    ntk.create_po(ntk.create_not(ntk.create_pi()));
+    exact_physical_design_params ps{.scheme = "OPEN", .upper_bound_area = 3};
+
+    SECTION("The blacklist excludes the vertical inverter")
+    {
+        surface_black_list<port_direction> black_list{};
+        black_list[{0, 1}].insert({create_not_tt(), {}});
+        const auto lyt = generate_layout_with_black_list<cartesian_gate_layout>(ntk, black_list, ps);
+        check_eq(ntk, lyt);
+        CHECK(lyt.width() == 3);
+    }
+    SECTION("A single hexagonal column cannot host a straight inverter with shifted rows")
+    {
+        ps.straight_inverters = true;
+        const auto lyt        = generate_layout<hexagonal_gate_layout>(ntk, ps, arrangement::ODD_ROW);
+        check_eq(ntk, lyt);
+        CHECK(lyt.width() == 3);
+    }
+}
+
 TEST_CASE("Exact shifted Cartesian physical design", "[exact]")
 {
     SECTION("odd col")

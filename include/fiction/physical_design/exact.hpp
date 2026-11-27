@@ -385,16 +385,14 @@ class exact_impl
             // OPEN clocking optimization
             if (!layout.is_regularly_clocked())
             {
-                // rotated aspect ratios don't need to be explored
-                if ((static_cast<int64_t>(ex.width) - 1) != (static_cast<int64_t>(ex.height) - 1) &&
-                    (static_cast<int64_t>(ex.width) - 1) == (static_cast<int64_t>(layout.height()) - 1) &&
-                    (static_cast<int64_t>(ex.height) - 1) == (static_cast<int64_t>(layout.width()) - 1))
-                {
-                    return true;
-                }
+                // Swapping axes preserves Cartesian adjacency, but can change gate orientations and blacklist
+                // positions.
+                return std::same_as<typename Lyt::coordinate_layout, layouts::cartesian_layout> && black_list.empty() &&
+                       params.technology_specifics == technology_constraints::NONE && ex.width != ex.height &&
+                       ex.width == layout.height() && ex.height == layout.width();
             }
             // Columnar clocking optimization
-            else if (layout.is_clocking_scheme(layouts::clocking::COLUMNAR_NAME))
+            if (layout.is_clocking_scheme(layouts::clocking::COLUMNAR_NAME))
             {
                 // skip all aspect ratios that are too shallow for the network's depth
                 if ((static_cast<int64_t>(ex.width) - 1) < static_cast<int32_t>(depth_ntk.depth()))
