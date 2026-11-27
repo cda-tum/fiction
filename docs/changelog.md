@@ -130,6 +130,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - Parallel `exact` now checks the first aspect ratio and stops at the configured area and axis bounds.
   - QuickExact includes previously omitted charge distributions at charge transitions. Rerun
     affected simulations and analyses that depend on their ground states or excited states.
   - Technology mapping preserves constant-one signals and respects the selected comparison gates.

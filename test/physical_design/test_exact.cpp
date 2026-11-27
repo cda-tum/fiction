@@ -652,6 +652,32 @@ TEST_CASE("Exact physical design with upper bounds", "[exact]")
     }
 }
 
+TEST_CASE("Exact physical design within a single column", "[exact]")
+{
+    named_technology_network ntk{};
+    ntk.create_po(ntk.create_not(ntk.create_pi("a")), "f");
+
+    auto params        = exact_physical_design_params{.upper_bound_x = 1, .upper_bound_y = 3};
+    params.num_threads = GENERATE(1u, 2u);
+    CAPTURE(params.num_threads);
+
+    SECTION("the inverter fits in three tiles")
+    {
+        const auto layout = generate_layout<cartesian_gate_layout>(ntk, params);
+        CHECK(layout.width() == 1);
+        CHECK(layout.height() == 3);
+        check_eq(ntk, layout);
+    }
+
+    SECTION("the network exceeds the available area")
+    {
+        params.upper_bound_y = 2;
+        exact_physical_design_stats stats{};
+        CHECK_FALSE(exact<cartesian_layout>(ntk, params, &stats).has_value());
+        CHECK(stats.num_aspect_ratios == 0);
+    }
+}
+
 TEST_CASE("Exact physical design timeout", "[exact]")
 {
     auto timeout_config    = exact_physical_design_params{.scheme = "USE", .crossings = true};
