@@ -95,8 +95,6 @@ every eligible C++ file.
   - If the `🐍 Docstrings` check fails, the generated `pybind11_mkdoc_docstrings.hpp` no longer matches the Doxygen comments in `include/fiction/`. Download the `pyfiction-docstrings` artifact from that run, put it in place of `bindings/include/pyfiction/pybind11_mkdoc_docstrings.hpp`, and commit it. Never edit that file by hand; the job's summary carries the same instructions.
   - If `🚦 Check` fails while every job below it looks green, a job was skipped for a reason change detection did not predict — usually because something it depends on failed first.
 
-- Each README CI badge shows the last result published for its summary job on a push to `main`. The publisher saves it as JSON on `ci-badges`. For a stale badge, check the corresponding `publish-*-badge` job and allow time for the badge cache to refresh. Run `bash .github/scripts/test_publish_ci_badge.sh` to verify publishing against a local Git remote.
-
 - Poll `gh pr checks <PR>` or the GitHub checks view, fix failures caused by your change, and check again after each push. If a check remains blocked, report the job and relevant failing lines.
 
 - Once your PR is ready, change it from a draft PR to a regular PR and request a review from one of the project maintainers.
