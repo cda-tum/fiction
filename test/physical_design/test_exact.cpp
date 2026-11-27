@@ -678,6 +678,24 @@ TEST_CASE("Exact physical design within a single column", "[exact]")
     }
 }
 
+TEST_CASE("Cartesian 2DDWave depth limits depend on rectangle shape", "[exact]")
+{
+    named_technology_network ntk{};
+    auto                     signal = ntk.create_pi();
+    for (auto i = 0; i < 4; ++i)
+    {
+        signal = ntk.create_not(signal);
+    }
+    ntk.create_po(signal);
+
+    exact_physical_design_params ps{.upper_bound_x = 3, .upper_bound_y = 2, .fixed_size = true};
+    CHECK_FALSE(exact<cartesian_layout>(ntk, ps).has_value());
+
+    ps.upper_bound_x = 6;
+    ps.upper_bound_y = 1;
+    check_eq(ntk, generate_layout<cartesian_gate_layout>(ntk, ps));
+}
+
 TEST_CASE("Exact physical design timeout", "[exact]")
 {
     auto timeout_config    = exact_physical_design_params{.scheme = "USE", .crossings = true};

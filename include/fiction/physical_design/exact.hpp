@@ -21,6 +21,7 @@
 #if (FICTION_Z3_SOLVER)
 
 #include "fiction/layouts/arrangement.hpp"
+#include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/gate_layout.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
@@ -370,6 +371,16 @@ class exact_impl
                 (static_cast<int64_t>(ex.height) - 1) >= params.upper_bound_y)
             {
                 return true;
+            }
+            if constexpr (std::same_as<typename Lyt::coordinate_layout, layouts::cartesian_layout>)
+            {
+                // A Cartesian 2DDWave path visits at most width + height - 1 tiles. Count gates only:
+                // a longest network path may start at a constant, which occupies no tile.
+                if (params.io_pins && layout.is_clocking_scheme(layouts::clocking::TWODDWAVE_NAME) &&
+                    depth_ntk.depth() >= static_cast<uint64_t>(ex.width) + ex.height)
+                {
+                    return true;
+                }
             }
             // OPEN clocking optimization
             if (!layout.is_regularly_clocked())
