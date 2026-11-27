@@ -18,6 +18,10 @@ the ones we verify.
 | Ubuntu 26.04 (ARM64)         | Clang 22                                    |
 | macOS 15 (ARM64)             | Apple Clang                                  |
 | Windows Server 2025 (x86-64) | MSVC `v143`, `ClangCL`                       |
+| Windows 11 (ARM64)           | MSVC                                        |
+
+Native Windows ARM64 wheels support CPython 3.11–3.15 and free-threaded CPython 3.15.
+Install with `pip install mnt.pyfiction` from a native ARM64 Python and run `fiction --help` to check the installation.
 
 ## Quick Start
 

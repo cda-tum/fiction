@@ -8,7 +8,7 @@ on:
         required: true
         type: string
       toolset:
-        description: The MSVC toolset, `v143` or `ClangCL`
+        description: The toolchain label for MSVC or ClangCL
         required: true
         type: string
 
@@ -55,6 +55,8 @@ jobs:
 
       - name: Set up MSVC development environment
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+        with:
+          arch: ${{ runner.arch == 'ARM64' && 'arm64' || 'x64' }}
 
       - name: Select Visual Studio ClangCL
         if: inputs.toolset == 'ClangCL'

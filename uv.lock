@@ -2,10 +2,14 @@ version = 1
 revision = 5
 requires-python = ">=3.11"
 resolution-markers = [
-    "python_full_version >= '3.15'",
-    "python_full_version >= '3.13' and python_full_version < '3.15'",
-    "python_full_version == '3.12.*'",
-    "python_full_version < '3.12'",
+    "(python_full_version >= '3.15' and platform_machine != 'ARM64') or (python_full_version >= '3.15' and sys_platform != 'win32')",
+    "python_full_version >= '3.15' and platform_machine == 'ARM64' and sys_platform == 'win32'",
+    "(python_full_version >= '3.13' and python_full_version < '3.15' and platform_machine != 'ARM64') or (python_full_version >= '3.13' and python_full_version < '3.15' and sys_platform != 'win32')",
+    "python_full_version >= '3.13' and python_full_version < '3.15' and platform_machine == 'ARM64' and sys_platform == 'win32'",
+    "(python_full_version == '3.12.*' and platform_machine != 'ARM64') or (python_full_version == '3.12.*' and sys_platform != 'win32')",
+    "python_full_version == '3.12.*' and platform_machine == 'ARM64' and sys_platform == 'win32'",
+    "(python_full_version < '3.12' and platform_machine != 'ARM64') or (python_full_version < '3.12' and sys_platform != 'win32')",
+    "python_full_version < '3.12' and platform_machine == 'ARM64' and sys_platform == 'win32'",
 ]
 
 [manifest]
@@ -457,7 +461,8 @@ name = "docutils"
 version = "0.22.4"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version == '3.12.*'",
+    "(python_full_version == '3.12.*' and platform_machine != 'ARM64') or (python_full_version == '3.12.*' and sys_platform != 'win32')",
+    "python_full_version == '3.12.*' and platform_machine == 'ARM64' and sys_platform == 'win32'",
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/ae/b6/03bb70946330e88ffec97aefd3ea75ba575cb2e762061e0e62a213befee8/docutils-0.22.4.tar.gz", hash = "sha256:4db53b1fde9abecbb74d91230d32ab626d94f6badfc575d6db9194a49df29968", size = 2291750, upload-time = "2025-12-18T19:00:26.443Z" }
 wheels = [
@@ -469,8 +474,10 @@ name = "docutils"
 version = "0.23"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.15'",
-    "python_full_version >= '3.13' and python_full_version < '3.15'",
+    "(python_full_version >= '3.15' and platform_machine != 'ARM64') or (python_full_version >= '3.15' and sys_platform != 'win32')",
+    "python_full_version >= '3.15' and platform_machine == 'ARM64' and sys_platform == 'win32'",
+    "(python_full_version >= '3.13' and python_full_version < '3.15' and platform_machine != 'ARM64') or (python_full_version >= '3.13' and python_full_version < '3.15' and sys_platform != 'win32')",
+    "python_full_version >= '3.13' and python_full_version < '3.15' and platform_machine == 'ARM64' and sys_platform == 'win32'",
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/39/a4/5180d9afc57e8fca05601dd652bdff19604c218814037fe90ffc7625a50a/docutils-0.23.tar.gz", hash = "sha256:746f5060322511280a1e50eb76846ed6bf2342984b2ac04dc42caa1a8d78799e", size = 2303823, upload-time = "2026-05-27T17:41:06.934Z" }
 wheels = [
@@ -795,7 +802,8 @@ requires-dist = [
     { name = "nanobind-backend", specifier = ">=1.0" },
     { name = "prompt-toolkit", specifier = ">=3.0.43" },
     { name = "rich", specifier = ">=13.7.0" },
-    { name = "z3-solver", specifier = ">=4.10.2" },
+    { name = "z3-solver", marker = "platform_machine != 'ARM64' or sys_platform != 'win32'", specifier = ">=4.10.2" },
+    { name = "z3-solver", marker = "platform_machine == 'ARM64' and sys_platform == 'win32'", specifier = ">=4.15.8.0" },
 ]
 
 [package.metadata.requires-dev]
@@ -1228,7 +1236,8 @@ name = "sphinx"
 version = "9.1.1"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version == '3.12.*'",
+    "(python_full_version == '3.12.*' and platform_machine != 'ARM64') or (python_full_version == '3.12.*' and sys_platform != 'win32')",
+    "python_full_version == '3.12.*' and platform_machine == 'ARM64' and sys_platform == 'win32'",
 ]
 dependencies = [
     { name = "alabaster" },
@@ -1259,8 +1268,10 @@ name = "sphinx"
 version = "9.2.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.15'",
-    "python_full_version >= '3.13' and python_full_version < '3.15'",
+    "(python_full_version >= '3.15' and platform_machine != 'ARM64') or (python_full_version >= '3.15' and sys_platform != 'win32')",
+    "python_full_version >= '3.15' and platform_machine == 'ARM64' and sys_platform == 'win32'",
+    "(python_full_version >= '3.13' and python_full_version < '3.15' and platform_machine != 'ARM64') or (python_full_version >= '3.13' and python_full_version < '3.15' and sys_platform != 'win32')",
+    "python_full_version >= '3.13' and python_full_version < '3.15' and platform_machine == 'ARM64' and sys_platform == 'win32'",
 ]
 dependencies = [
     { name = "alabaster" },

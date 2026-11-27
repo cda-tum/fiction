@@ -33,8 +33,11 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Set up MSVC development environment (Windows only)
+      - if: runner.os == 'Windows'
+        name: Set up MSVC development environment
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+        with:
+          arch: ${{ runner.arch == 'ARM64' && 'arm64' || 'x64' }}
 
       - if: runner.os == 'Windows'
         name: Configure Ninja
@@ -65,8 +68,13 @@ jobs:
         shell: bash
         run: |
           shopt -s nullglob
-          ordinary=(wheelhouse/*-cp311-abi3-*.whl)
-          free_threaded=(wheelhouse/*-cp315-abi3t-*.whl)
+          if [[ "$RUNNER_OS" == Windows && "$RUNNER_ARCH" == ARM64 ]]; then
+            ordinary=(wheelhouse/*-cp311-abi3-win_arm64.whl)
+            free_threaded=(wheelhouse/*-cp315-abi3t-win_arm64.whl)
+          else
+            ordinary=(wheelhouse/*-cp311-abi3-*.whl)
+            free_threaded=(wheelhouse/*-cp315-abi3t-*.whl)
+          fi
           wheels=(wheelhouse/*.whl)
           if [[ ${#ordinary[@]} != 1 || ${#free_threaded[@]} != 1 || ${#wheels[@]} != 2 ]]; then
             echo "Expected one cp311-abi3 wheel and one cp315-abi3t wheel."
@@ -79,4 +87,5 @@ jobs:
         with:
           name: cibw-wheels-${{ inputs.runs-on }}
           path: ./wheelhouse/*.whl
+          if-no-files-found: error
           overwrite: true

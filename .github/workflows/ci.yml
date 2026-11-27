@@ -100,6 +100,8 @@ jobs:
             toolset: v143
           - runs-on: windows-2025
             toolset: ClangCL
+          - runs-on: windows-11-arm
+            toolset: MSVC
     uses: $/.github/workflows/cpp-tests-windows.yml
     with:
       runs-on: ${{ matrix.runs-on }}
@@ -181,7 +183,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runs-on: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, windows-2025]
+        runs-on:
+          [
+            ubuntu-24.04,
+            ubuntu-24.04-arm,
+            macos-15,
+            windows-2025,
+            windows-11-arm,
+          ]
     uses: $/.github/workflows/python-tests.yml
     with:
       runs-on: ${{ matrix.runs-on }}
@@ -215,7 +224,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runs-on: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, windows-2025]
+        runs-on:
+          [
+            ubuntu-24.04,
+            ubuntu-24.04-arm,
+            macos-15,
+            windows-2025,
+            windows-11-arm,
+          ]
     uses: $/.github/workflows/packaging-wheels.yml
     with:
       runs-on: ${{ matrix.runs-on }}
