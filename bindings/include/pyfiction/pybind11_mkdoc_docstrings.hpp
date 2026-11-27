@@ -9191,8 +9191,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_lower_bound = R"doc(Lower bound for the number of layout tiles.)doc";
-
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_make_layout =
 R"doc(Creates an empty layout of the target type that uses the utilized
 clocking scheme.
@@ -12064,15 +12062,18 @@ R"doc(Flag to indicate that a discrepancy in fan-in path lengths is allowed
 (reduces runtime!).)doc";
 
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_fixed_size =
-R"doc(Exclusively investigate aspect ratios that conform with the
-restrictions imposed by the upper bound options. E.g., if `fixed_size
-== true` *and* `upper_bound_area == 20`, only aspect ratios with
-exactly 20 tiles will be examined. Restricted imposed by the
-`upper_bound_x` and `upper_bound_y` flags additionally apply.)doc";
+R"doc(Search only aspect ratios with area `min(upper_bound_area,
+upper_bound_x * upper_bound_y)`.
+
+Both axis bounds still apply.)doc";
 
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_io_pins =
-R"doc(Flag to indicate that I/Os should be realized by designated wire
-segments (preferred).)doc";
+R"doc(Place primary inputs and outputs on dedicated tiles.
+
+Note:
+    Layout extraction requires dedicated I/O tiles. With this flag
+    cleared, variable-size enumeration still counts gates and primary
+    inputs in its starting area.)doc";
 
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_layout_arrangement =
 R"doc(Arrangement of the shifted rows or columns of the created layout.
@@ -12120,18 +12121,12 @@ requested optimization can leave the search without a layout.
 Constraint generation and model extraction can run past the deadline.)doc";
 
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_upper_bound_area =
-R"doc(Number of total tiles to use as an upper bound.
+R"doc(Maximum number of tiles. Every candidate must also satisfy both axis
+bounds.)doc";
 
-Note:
-    If `upper_bound_area` and (either) `upper_bound_x` or
-    `upper_bound_y` are set, the imposed search space restrictions are
-    cumulative. E.g., if `upper_bound_area == 20` and `upper_bound_x
-    == 4`, all aspect ratios with a width of more than 4 *and* a total
-    area of more than 20 will be skipped.)doc";
+static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_upper_bound_x = R"doc(Maximum width of a candidate layout in tiles.)doc";
 
-static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_upper_bound_x = R"doc(Number of tiles to use as an upper bound in x direction.)doc";
-
-static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_upper_bound_y = R"doc(Number of tiles to use as an upper bound in y direction.)doc";
+static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_upper_bound_y = R"doc(Maximum height of a candidate layout in tiles.)doc";
 
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_stats = R"doc(Statistics.)doc";
 

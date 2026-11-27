@@ -134,6 +134,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Algorithms:
 
   - Parallel `exact` now checks the first aspect ratio and stops at the configured area and axis bounds.
+  - `exact` now checks the full-width minimum tile count before searching, including fixed-size layouts
+    and networks with 65,536 or more gates and primary inputs combined.
   - Exact placement with OPEN clocking now considers both orientations when the layout geometry,
     a blacklist, or technology constraints distinguish them.
   - `exact` now shares its timeout across feasibility checks and requested optimizations. Zero expires

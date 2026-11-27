@@ -68,7 +68,11 @@ def _exact_arguments(parser: Parser) -> None:
     parser.add_argument("--upper-y", type=positive_int, metavar="N", help="maximum layout height in tiles")
     parser.add_argument("--upper-area", type=positive_int, metavar="N", help="maximum layout area in tiles")
     parser.add_argument(
-        "-f", "--fixed-size", type=positive_int, metavar="N", help="only try layouts of exactly N tiles"
+        "-f",
+        "--fixed-size",
+        type=positive_int,
+        metavar="N",
+        help="fix the area to the smaller of N and the product of the axis bounds",
     )
     parser.add_argument("-t", "--timeout", type=positive_float, metavar="SECONDS", help="give up after this long")
     parser.add_argument("-a", "--threads", type=positive_int, metavar="N", help="solve N aspect ratios in parallel")
