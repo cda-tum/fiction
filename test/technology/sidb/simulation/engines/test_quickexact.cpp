@@ -1943,40 +1943,43 @@ TEST_CASE("QuickExact finds both stable dependent SiDB charges at a transition",
 {
     using base_detection = quickexact_params::automatic_base_number_detection;
 
-    layout                lyt{};
-    simulation_parameters params{};
-    std::size_t           expected_count{};
-    const auto            detection = GENERATE(base_detection::ON, base_detection::OFF);
+    const auto detection = GENERATE(base_detection::ON, base_detection::OFF);
+    const auto check_equivalence =
+        [detection](const layout& lyt, const simulation_parameters& params, const std::size_t expected_count)
+    {
+        const auto reference = exhaustive_ground_state_simulation(lyt, params);
+        const auto actual =
+            quickexact(lyt, quickexact_params{.sim_params = params, .base_number_detection = detection});
+        CAPTURE(params.base, detection, actual.charge_distributions.size());
+        REQUIRE(reference.charge_distributions.size() == expected_count);
+        CHECK(check_simulation_results_for_equivalence(reference, actual));
+    };
 
     SECTION("Negative to neutral")
     {
         // The four-dot reproducer from issue #651 has three fixed negative SiDBs.
+        layout lyt{};
         lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
         lyt.assign_sidb({0, 1, 1}, dot_tag::NORMAL);
         lyt.assign_sidb({9, 3, 0}, dot_tag::NORMAL);
         lyt.assign_sidb({2, 4, 0}, dot_tag::NORMAL);
 
-        params.base    = GENERATE(uint8_t{2}, uint8_t{3});
-        expected_count = 2;
+        const auto base = GENERATE(uint8_t{2}, uint8_t{3});
+        check_equivalence(lyt, simulation_parameters{base, -0.32}, 2);
     }
 
     SECTION("Neutral to positive")
     {
+        layout lyt{};
         lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
         lyt.assign_sidb({1, 0, 0}, dot_tag::NORMAL);
 
-        params.epsilon_r = 1.0;
+        simulation_parameters     params{3, -0.32, 1.0};
         const potential_landscape landscape{lyt, params};
         // Place this synthetic layout exactly at the positive transition.
         params.mu_minus += -landscape.chargeless_potential(0, 1) - params.mu_plus();
-        expected_count = 4;
+        check_equivalence(lyt, params, 4);
     }
-
-    const auto reference = exhaustive_ground_state_simulation(lyt, params);
-    const auto actual    = quickexact(lyt, quickexact_params{.sim_params = params, .base_number_detection = detection});
-    CAPTURE(params.base, detection, actual.charge_distributions.size());
-    REQUIRE(reference.charge_distributions.size() == expected_count);
-    CHECK(check_simulation_results_for_equivalence(reference, actual));
 }
 
 TEST_CASE("QuickExact propagates invalid lattice-basis errors", "[quickexact]")
