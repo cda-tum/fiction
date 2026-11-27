@@ -732,14 +732,30 @@ TEST_CASE("Cartesian 2DDWave depth limits depend on rectangle shape", "[exact]")
 
 TEST_CASE("Exact physical design timeout", "[exact]")
 {
-    auto timeout_config    = exact_physical_design_params{.scheme = "USE", .crossings = true};
-    timeout_config.timeout = 1u;  // allow one millisecond to find a solution
+    const auto workers = GENERATE(1u, 2u);
+    CAPTURE(workers);
 
-    const auto half_adder = blueprints::half_adder_network<mockturtle::aig_network>();
-    const auto layout = exact<cartesian_layout>(convert_network<named_technology_network>(half_adder), timeout_config);
+    SECTION("zero budget on a feasible first aspect ratio")
+    {
+        named_technology_network ntk{};
+        ntk.create_po(ntk.create_not(ntk.create_pi("a")), "f");
+        const exact_physical_design_params params{.upper_bound_x = 1,
+                                                  .upper_bound_y = 3,
+                                                  .num_threads   = workers,
+                                                  .timeout       = 0};
+        CHECK_FALSE(exact<cartesian_layout>(ntk, params).has_value());
+    }
 
-    // The one-millisecond budget is insufficient for placing and routing the half adder.
-    CHECK(!layout.has_value());
+    SECTION("one millisecond to place and route a half adder")
+    {
+        const auto ntk =
+            convert_network<named_technology_network>(blueprints::half_adder_network<mockturtle::aig_network>());
+        const exact_physical_design_params params{.scheme      = "USE",
+                                                  .num_threads = workers,
+                                                  .crossings   = true,
+                                                  .timeout     = 1};
+        CHECK_FALSE(exact<cartesian_layout>(ntk, params).has_value());
+    }
 }
 
 TEST_CASE("Name conservation after exact physical design", "[exact]")
