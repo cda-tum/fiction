@@ -250,12 +250,13 @@ class exact_impl
     /** @brief Returns a gate-level layout satisfying the exact design constraints, if found. */
     std::optional<Lyt> run()
     {
-        const auto first_area = ps.fixed_size ? ps.upper_bound_area : uint64_t{ntk->num_gates()} + ntk->num_pis();
-        if (first_area > ps.upper_bound_area)
+        const auto min_area = uint64_t{ntk->num_gates()} + ntk->num_pis();
+        // Fixed-size searches can omit the primary I/O tiles.
+        if ((!ps.fixed_size || ps.io_pins) && min_area > ps.upper_bound_area)
         {
             return std::nullopt;
         }
-        ari = aspect_ratio_iterator<typename Lyt::extent>{first_area};
+        ari = aspect_ratio_iterator<typename Lyt::extent>{ps.fixed_size ? ps.upper_bound_area : min_area};
 
         if (ps.num_threads > 1)
         {
