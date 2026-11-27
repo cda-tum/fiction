@@ -9158,6 +9158,8 @@ static const char *mkd_doc_fiction_physical_design_detail_exact_impl_black_list 
 R"doc(Maps tiles to blacklisted gate types via their truth tables and port
 information.)doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_deadline = R"doc(Shared deadline for the search and all Z3 checks.)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_exact_impl =
 R"doc(Initializes exact placement and routing with a validated clocking
 scheme.
@@ -9185,7 +9187,6 @@ Args:
     t_num: Thread's identifier.
     ti_list: Pointer to a list of shared thread info that the threads
              use for communication.
-    started: Start of the shared timeout budget.
 
 Returns:
     A found layout or `std::nullopt` when interrupted or timed out.
@@ -9401,9 +9402,8 @@ adjacent node or another edge.
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_depth_ntk = R"doc(Mapping of levels to nodes used for symmetry breaking.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_eliminate_cycles =
-R"doc(Adds constraints to the solver to prohibit cycles that loop back
-information. To this end, the formerly established paths are used.
-Without this constraint, useless wire loops appear.
+R"doc(Requires each routed connection to increase the topological rank of
+its ground tile.
 
 )doc";
 
@@ -9416,19 +9416,6 @@ primary outputs at the layout's borders.
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_enforce_straight_inverters =
 R"doc(Adds constraints to the solver to enforce that no bent inverters are
 used.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_establish_sub_paths =
-R"doc(Adds constraints to the solver to map established connections between
-single tiles to sub-paths. They are spanned transitively by the next
-set of constraints.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_establish_transitive_paths =
-R"doc(Adds constraints to the solver to expand the formerly created sub-
-paths transitively.
 
 )doc";
 
@@ -9533,6 +9520,17 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_get_tile_rank =
+R"doc(Returns the integer rank of a ground tile in the routing graph.
+
+Args:
+    t: Ground tile.
+
+Returns:
+    Topological rank of the tile.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_get_tn =
 R"doc(Returns a tn variable from the stored context representing that tile t
 has node n assigned.
@@ -9543,19 +9541,6 @@ Args:
 
 Returns:
     tn variable from ctx.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_get_tp =
-R"doc(Returns a tp variable from the stored context representing that a path
-from tile t1 to tile t2 exists.
-
-Args:
-    t1: Tile 1 to be considered.
-    t2: Tile 2 to be considered.
-
-Returns:
-    tp variable from ctx.
 
 )doc";
 
@@ -9599,12 +9584,16 @@ constraints are moved to an z3::optimize if optimization criteria were
 specified. This way, no unnecessary optimization constraints need to
 be generated over and over for UNSAT instances.
 
-If the instance was found SAT on both levels, a layout is extract from
-the model and stored. The function returns then true.
+Args:
+    deadline: Shared search deadline.
 
 Returns:
-    `true` iff the instance generated for the current configuration is
-    SAT.
+    `true` for a complete layout, or `false` if the solver proves the
+    candidate unsatisfiable.
+
+Raises:
+    z3::exception: if either check is inconclusive or the deadline
+                   expires.
 
 )doc";
 
@@ -9831,14 +9820,6 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_set_timeout =
-R"doc(Sets the given timeout for the current solver.
-
-Args:
-    t: Timeout in ms.
-
-)doc";
-
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_skip_const_or_io_edge =
 R"doc(Returns true, iff skip_const_or_io_node returns true for either source
 or target of the given edge..
@@ -9978,6 +9959,20 @@ Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_timeout_params =
+R"doc(Computes a positive Z3 timeout from the shared search deadline.
+
+Args:
+    deadline: Search deadline.
+
+Returns:
+    Z3 parameters with the remaining milliseconds.
+
+Raises:
+    z3::exception: if the deadline has passed.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_update =
 R"doc(Resizes the layout and creates a new solver checkpoint from where on
 the next incremental instance can be generated.
@@ -10006,15 +10001,9 @@ static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_thread_info_worker_extent = R"doc(Currently examined layout extent.)doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_update_timeout =
-R"doc(Calculates the time left for solving by subtracting the time passed
-from the configured timeout and updates Z3's timeout accordingly.
-
-Args:
-    handler: Handler whose timeout is to be updated.
-    time: Time passed since beginning of the solving process.
-
-)doc";
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_unresolved_area =
+R"doc(Smallest area a worker could not decide, guarded by
+`result_extent_mutex`.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_worker_progress = R"doc(Serializes the active candidate extents of each solver worker.)doc";
 
@@ -12125,7 +12114,13 @@ static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_
 R"doc(Technology-specific constraints that are only to be added for a
 certain target technology.)doc";
 
-static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_timeout = R"doc(Timeout budget for the solving process, in milliseconds.)doc";
+static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_timeout =
+R"doc(Millisecond budget shared by aspect-ratio search, feasibility checks,
+and optimization.
+
+Zero expires immediately. An inconclusive feasibility check or
+requested optimization can leave the search without a layout.
+Constraint generation and model extraction can run past the deadline.)doc";
 
 static const char *mkd_doc_fiction_physical_design_exact_physical_design_params_upper_bound_area =
 R"doc(Number of total tiles to use as an upper bound.
