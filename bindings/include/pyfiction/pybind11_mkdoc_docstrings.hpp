@@ -21852,13 +21852,27 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_quickexact_impl_record =
-R"doc(Records the current charge states of the reduced state as a
-distribution over the full layout. The pre-assigned SiDBs are
-negative; the energy is that of the reduced system, which equals the
-full one.
+R"doc(Records the charge states of the reduced layout as a distribution over
+the full layout. The pre-assigned SiDBs are negative; the energy is
+that of the reduced system, which equals the full one.
 
 Args:
-    reduced_state: State over the reduced layout.
+    reduced_landscape: Potential landscape of the reduced layout.
+    reduced_distribution: Charge distribution of the reduced layout.
+    potentials: Local internal potentials for the reduced charge
+                distribution.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_quickexact_impl_record_valid_distributions =
+R"doc(Records each physically valid charge distribution for the current
+assignment of the independent SiDBs. The population-stability
+tolerance can allow a charged and a neutral state at the dependent
+SiDB.
+
+Args:
+    reduced_state: Enumeration state over the reduced layout.
+    thresholds: Charge transition thresholds of the dependent SiDB.
 
 )doc";
 
@@ -22151,10 +22165,13 @@ orders of magnitude over *ExGS*.
 The performance improvement stems from the use of physically informed
 search space pruning: SiDBs whose local potential forces them negative
 are removed from the enumeration and modeled as fixed negative
-charges, one SiDB's charge state follows from the others, and
-positively charged SiDBs are enumerated only where they can occur.
-Charged surface defects of the layout and external potentials enter
-the potential landscape.
+charges, one SiDB's locally stable charges follow from the other
+SiDBs, and positively charged SiDBs are enumerated only where they can
+occur. The dependent SiDB can contribute both a neutral and a charged
+configuration within the population-stability tolerance
+(``fiction::utils::math::ERROR_MARGIN,`` 1e-6 V). Charged surface
+defects of the layout and external potentials enter the potential
+landscape.
 
 Args:
     lyt: Layout to simulate.
