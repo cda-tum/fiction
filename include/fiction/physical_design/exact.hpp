@@ -903,15 +903,13 @@ class exact_impl
             return ctx->bool_const(fmt::format("tc_({},{})_({},{})", t1.x, t1.y, t2.x, t2.y).c_str());
         }
         /**
-         * Returns a tp variable from the stored context representing that a path from tile t1 to tile t2 exists.
-         *
-         * @param t1 Tile 1 to be considered.
-         * @param t2 Tile 2 to be considered.
-         * @return tp variable from ctx.
+         * @brief Returns the integer rank of a ground tile in the routing graph.
+         * @param t Ground tile.
+         * @return Topological rank of the tile.
          */
-        [[nodiscard]] z3::expr get_tp(const typename Lyt::tile& t1, const typename Lyt::tile& t2)
+        [[nodiscard]] z3::expr get_tile_rank(const typename Lyt::tile& t)
         {
-            return ctx->bool_const(fmt::format("tp_({},{})_({},{})", t1.x, t1.y, t2.x, t2.y).c_str());
+            return ctx->int_const(fmt::format("rank_({},{})", t.x, t.y).c_str());
         }
         /**
          * Returns an ncl variable from the stored context representing node n's (pi) clock number.
@@ -1416,83 +1414,31 @@ class exact_impl
         }
 
         /**
-         * Adds constraints to the solver to map established connections between single tiles to sub-paths. They are
-         * spanned transitively by the next set of constraints.
-         */
-        void establish_sub_paths()
-        {
-            layout.foreach_ground_tile(
-                [this](const auto& t)
-                {
-                    if (layout.is_regularly_clocked())
-                    {
-                        layout.foreach_outgoing_clocked_zone(t,
-                                                             [this, &t](const auto& at)
-                                                             {
-                                                                 // if neither t nor at are in added_tiles, the
-                                                                 // constraint exists already
-                                                                 if (is_added_tile(t) || is_added_tile(at))
-                                                                 {
-                                                                     solver->add(
-                                                                         z3::implies(get_tc(t, at), get_tp(t, at)));
-                                                                 }
-                                                             });
-                    }
-                    else  // irregular clocking
-                    {
-                        layout.foreach_adjacent_tile(t,
-                                                     [this, &t](const auto& at)
-                                                     {
-                                                         // if neither t nor at are in added_tiles, the constraint
-                                                         // exists already
-                                                         if (is_added_tile(t) || is_added_tile(at))
-                                                         {
-                                                             solver->add(z3::implies(get_tc(t, at), get_tp(t, at)));
-                                                         }
-                                                     });
-                    }
-                });
-        }
-        /**
-         * Adds constraints to the solver to expand the formerly created sub-paths transitively.
-         */
-        void establish_transitive_paths()
-        {
-            layout.foreach_ground_tile(
-                [this](const auto& t1)
-                {
-                    layout.foreach_ground_tile(
-                        [this, &t1](const auto& t2)
-                        {
-                            // skip instances where t1 == t2
-                            if (t1 != t2)
-                            {
-                                layout.foreach_ground_tile(
-                                    [this, &t1, &t2](const auto& t3)
-                                    {
-                                        // skip instances where t2 == t3
-                                        if (t2 != t3)
-                                        {
-                                            // if neither t1 nor t2 nor t3 are in added_tiles, the constraint exists
-                                            // already in the solver and does not need to be added
-                                            if (is_added_tile(t1) || is_added_tile(t2) || is_added_tile(t3))
-                                            {
-                                                solver->add(
-                                                    z3::implies(get_tp(t1, t2) && get_tp(t2, t3), get_tp(t1, t3)));
-                                            }
-                                        }
-                                    });
-                            }
-                        });
-                });
-        }
-        /**
-         * Adds constraints to the solver to prohibit cycles that loop back information. To this end, the formerly
-         * established paths are used. Without this constraint, useless wire loops appear.
+         * @brief Requires each routed connection to increase the topological rank of its ground tile.
          */
         void eliminate_cycles()
         {
-            apply_to_added_tiles([this](const auto& t) { solver->add(!(get_tp(t, t))); });
+            apply_to_added_and_updated_tiles(
+                [this](const auto& t)
+                {
+                    const auto rank             = get_tile_rank(t);
+                    const auto order_connection = [this, &t, &rank](const auto& at)
+                    {
+                        if (is_added_tile(t) || is_added_tile(at))
+                        {
+                            solver->add(z3::implies(get_tc(t, at), rank < get_tile_rank(at)));
+                        }
+                    };
+
+                    if (layout.is_regularly_clocked())
+                    {
+                        layout.foreach_outgoing_clocked_zone(t, order_connection);
+                    }
+                    else
+                    {
+                        layout.foreach_adjacent_tile(t, order_connection);
+                    }
+                });
         }
         /**
          * Adds constraints to the solver to ensure that the cl variable of primary input pi is set to the clock zone
@@ -2682,8 +2628,6 @@ class exact_impl
             // path/cycle constraints
             if (!layouts::clocking::is_linear(layout.get_clocking_scheme()))  // linear schemes; no cycles by definition
             {
-                establish_sub_paths();
-                establish_transitive_paths();
                 eliminate_cycles();
             }
 

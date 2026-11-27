@@ -246,6 +246,17 @@ TEST_CASE("Straight inverter validation", "[exact]")
     CHECK_FALSE(has_straight_inverters(lyt));
 }
 
+TEST_CASE("Exact routes a path around a USE clock cycle", "[exact]")
+{
+    named_technology_network ntk{};
+    const auto               input = ntk.create_pi("a");
+    ntk.create_po(ntk.create_not(ntk.create_not(input)), "f");
+
+    // All four tiles of this USE extent form a directed clock cycle.
+    check_without_gate_library<cartesian_gate_layout>(
+        ntk, exact_physical_design_params{.scheme = "USE", .upper_bound_x = 2, .upper_bound_y = 2, .fixed_size = true});
+}
+
 TEST_CASE("Exact Cartesian physical design", "[exact]")
 {
     SECTION("Open clocking")
