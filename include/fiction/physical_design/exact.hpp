@@ -283,49 +283,49 @@ class exact_impl
      */
     using topology_ntk_t = mockturtle::topo_view<mockturtle::fanout_view<fiction::networks::named_technology_network>>;
     /**
-     * Specification network.
+     * @brief Specification network.
      */
     std::shared_ptr<topology_ntk_t> ntk;
     /**
-     * Parameters.
+     * @brief Parameters.
      */
     exact_physical_design_params ps;
     /** @brief Shared deadline for the search and all Z3 checks. */
     const std::chrono::steady_clock::time_point deadline{utils::make_deadline(ps.timeout)};
     /**
-     * Statistics.
+     * @brief Statistics.
      */
     exact_physical_design_stats& pst;
     /**
-     * Reports the examined aspect ratios. Their number is not bounded in advance, so the total stays unknown.
+     * @brief Reports the examined aspect ratios. Their number is not bounded in advance, so the total stays unknown.
      */
     utils::progress_reporter progress;
     /** @brief Serializes the active candidate extents of each solver worker. */
     utils::worker_progress_reporter worker_progress;
     /**
-     * The utilized clocking scheme.
+     * @brief The utilized clocking scheme.
      */
     layouts::clocking::scheme scheme;
     /**
-     * Maps tiles to blacklisted gate types via their truth tables and port information.
+     * @brief Maps tiles to blacklisted gate types via their truth tables and port information.
      */
     const surface_black_list<fcn::port_direction> black_list;
     /**
-     * Lower bound for the number of layout tiles.
+     * @brief Lower bound for the number of layout tiles.
      */
     uint16_t lower_bound{0u};
     /**
-     * Iterator for the factorization of possible aspect ratios.
+     * @brief Iterator for the factorization of possible aspect ratios.
      */
     aspect_ratio_iterator<typename Lyt::extent> ari{0};
     /**
-     * Extent of the found result. Only needed for the asynchronous case.
+     * @brief Extent of the found result. Only needed for the asynchronous case.
      */
     std::optional<typename Lyt::extent> result_extent;
     /** @brief Smallest area a worker could not decide, guarded by `result_extent_mutex`. */
     uint64_t unresolved_area{std::numeric_limits<uint64_t>::max()};
     /**
-     * Restricts access to the aspect-ratio iterator, result, and worker context records.
+     * @brief Restricts access to the aspect-ratio iterator, result, and worker context records.
      */
     std::mutex ari_mutex{}, result_extent_mutex{};
 
