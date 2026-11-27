@@ -1,16 +1,17 @@
 # _fiction_ &ndash; Design Automation for Field-coupled Nanotechnologies
 
-[![Ubuntu](https://img.shields.io/github/check-runs/cda-tum/fiction/main?nameFilter=%F0%9F%90%A7%20Ubuntu&label=Ubuntu&logo=ubuntu&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/ci.yml)
-[![macOS](https://img.shields.io/github/check-runs/cda-tum/fiction/main?nameFilter=%F0%9F%8D%8E%20macOS&label=macOS&logo=apple&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/ci.yml)
-[![Windows](https://img.shields.io/github/check-runs/cda-tum/fiction/main?nameFilter=%F0%9F%AA%9F%20Windows&label=Windows&logo=data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAyMyAyMyIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KIDxwYXRoIGQ9Ik0xIDFoMTB2MTBIMXoiIGZpbGw9IiNmMzUzMjUiLz4KIDxwYXRoIGQ9Ik0xMiAxaDEwdjEwSDEyeiIgZmlsbD0iIzgxYmMwNiIvPgogPHBhdGggZD0iTTEgMTJoMTB2MTBIMXoiIGZpbGw9IiMwNWE2ZjAiLz4KIDxwYXRoIGQ9Ik0xMiAxMmgxMHYxMEgxMnoiIGZpbGw9IiNmZmJhMDgiLz4KPC9zdmc+Cg==&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/ci.yml)
-[![Docker](https://img.shields.io/github/check-runs/cda-tum/fiction/main?nameFilter=%F0%9F%90%B3%20Docker%20Image&label=Docker&logo=docker&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/ci.yml)
-[![CodeQL](https://img.shields.io/github/check-runs/cda-tum/fiction/main?nameFilter=%F0%9F%93%9D%20CodeQL%20Analysis&label=CodeQL&logo=github&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/ci.yml)
+[![CI](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/ci.yml?branch=main&event=push&label=CI&logo=github&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fcda-tum%2Ffiction%2Fmain%2Fpyproject.toml&label=Python&logo=python&style=flat-square)](https://fiction.readthedocs.io/en/latest/getting_started.html#python-bindings)
 [![Documentation Status](https://img.shields.io/readthedocs/fiction?label=Docs&logo=readthedocs&style=flat-square)](https://fiction.readthedocs.io/)
 [![codecov](https://img.shields.io/codecov/c/github/cda-tum/fiction?label=Coverage&logo=codecov&style=flat-square)](https://codecov.io/gh/cda-tum/fiction)
 [![License](https://img.shields.io/github/license/cda-tum/fiction?label=License&style=flat-square)](https://github.com/cda-tum/fiction/blob/main/LICENSE.txt)
 [![PyPI](https://img.shields.io/static/v1?label=PyPI&message=mnt.pyfiction&logo=pypi&color=informational&style=flat-square)](https://pypi.org/project/mnt.pyfiction/)
 [![Release](https://img.shields.io/github/v/release/cda-tum/fiction?label=fiction&style=flat-square)](https://github.com/cda-tum/fiction/releases)
 [![arXiv](https://img.shields.io/static/v1?label=arXiv&message=1905.02477&color=informational&style=flat-square)](https://doi.org/10.48550/arXiv.1905.02477)
+![Linux](https://img.shields.io/badge/Linux-blue?logo=ubuntu&logoColor=white&style=flat-square)
+![macOS](https://img.shields.io/badge/macOS-blue?logo=apple&logoColor=white&style=flat-square)
+![Windows](https://img.shields.io/badge/Windows-blue?logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAyMyAyMyIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KIDxwYXRoIGQ9Ik0xIDFoMTB2MTBIMXoiIGZpbGw9IiNmMzUzMjUiLz4KIDxwYXRoIGQ9Ik0xMiAxaDEwdjEwSDEyeiIgZmlsbD0iIzgxYmMwNiIvPgogPHBhdGggZD0iTTEgMTJoMTB2MTBIMXoiIGZpbGw9IiMwNWE2ZjAiLz4KIDxwYXRoIGQ9Ik0xMiAxMmgxMHYxMEgxMnoiIGZpbGw9IiNmZmJhMDgiLz4KPC9zdmc%2BCg%3D%3D&style=flat-square)
+[![Docker](https://img.shields.io/badge/Docker-blue?logo=docker&logoColor=white&style=flat-square)](https://hub.docker.com/r/mawalter/fiction)
 
 <p align="center">
   <picture>
