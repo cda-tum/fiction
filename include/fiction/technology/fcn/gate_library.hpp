@@ -371,9 +371,9 @@ class gate_library
      */
     static constexpr gate reverse_rows(const gate& g) noexcept
     {
-        gate rev_rows = g;
+        gate rev_rows{g};
 
-        std::reverse(std::begin(rev_rows), std::end(rev_rows));
+        std::ranges::reverse(rev_rows);
 
         return rev_rows;
     }
