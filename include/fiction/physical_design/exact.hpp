@@ -107,11 +107,11 @@ struct exact_physical_design_params
      */
     uint16_t upper_bound_area = std::numeric_limits<uint16_t>::max();
     /**
-     * Number of tiles to use as an upper bound in x direction.
+     * @brief Maximum width of a candidate layout in tiles.
      */
     uint16_t upper_bound_x = std::numeric_limits<uint16_t>::max();
     /**
-     * Number of tiles to use as an upper bound in y direction.
+     * @brief Maximum height of a candidate layout in tiles.
      */
     uint16_t upper_bound_y = std::numeric_limits<uint16_t>::max();
     /**
