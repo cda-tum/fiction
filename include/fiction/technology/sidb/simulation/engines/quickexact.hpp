@@ -35,6 +35,7 @@
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
@@ -188,6 +189,9 @@ class quickexact_impl
     }
 
   private:
+    /** @brief Index of the dependent SiDB in the reduced layout. */
+    static constexpr std::size_t DEPENDENT_SIDB_INDEX{0};
+
     /**
      * The required base number for the simulation.
      */
@@ -266,7 +270,7 @@ class quickexact_impl
             simulation::detail::simulation_state::index_decoding::TRACKED};
 
         reduced_state.update_after_charge_change(simulation::detail::dependent_dot_mode::FIXED);
-        reduced_state.assign_dependent_dot(0);
+        reduced_state.assign_dependent_dot(DEPENDENT_SIDB_INDEX);
 
         // Update all local potentials, system energy, and physical validity. The flag is set to
         // `dependent_dot_mode::VARIABLE` to allow the dependent dot to change its charge state based on the N-1 SiDBs
@@ -312,8 +316,10 @@ class quickexact_impl
      * The population-stability tolerance can allow a charged and a neutral state at the dependent SiDB.
      *
      * @param reduced_state Enumeration state over the reduced layout.
+     * @param thresholds Charge transition thresholds of the dependent SiDB.
      */
-    void record_valid_distributions(const simulation::detail::simulation_state& reduced_state)
+    void record_valid_distributions(const simulation::detail::simulation_state& reduced_state,
+                                    const std::array<double, 4>&                thresholds)
     {
         const auto& reduced_landscape = reduced_state.landscape();
         const auto& distribution      = reduced_state.current();
@@ -324,15 +330,13 @@ class quickexact_impl
             record(reduced_landscape, distribution, potentials);
         }
 
-        const auto dependent = *reduced_state.dependent_dot();
-        const auto charge    = reduced_state.get_charge_state_by_index(dependent);
+        const auto charge = reduced_state.get_charge_state_by_index(DEPENDENT_SIDB_INDEX);
         if (charge == model::charge_state::NEUTRAL)
         {
             return;
         }
 
-        const auto  potential  = -potentials[dependent];
-        const auto& thresholds = reduced_landscape.effective_charge_transition_thresholds(dependent);
+        const auto potential = -potentials[DEPENDENT_SIDB_INDEX];
         if (potential <=
                 thresholds[static_cast<std::size_t>(charge_transition_threshold_bounds::NEUTRAL_LOWER_BOUND)] ||
             potential >= thresholds[static_cast<std::size_t>(charge_transition_threshold_bounds::NEUTRAL_UPPER_BOUND)])
@@ -343,10 +347,10 @@ class quickexact_impl
         auto       neutral_distribution = distribution;
         auto       neutral_potentials   = potentials;
         const auto charge_delta         = -static_cast<double>(model::charge_state_to_sign(charge));
-        neutral_distribution.assign_charge_state_by_index(dependent, model::charge_state::NEUTRAL);
+        neutral_distribution.assign_charge_state_by_index(DEPENDENT_SIDB_INDEX, model::charge_state::NEUTRAL);
         for (std::size_t i = 0; i < neutral_potentials.size(); ++i)
         {
-            neutral_potentials[i] += reduced_landscape.chargeless_potential(i, dependent) * charge_delta;
+            neutral_potentials[i] += reduced_landscape.chargeless_potential(i, DEPENDENT_SIDB_INDEX) * charge_delta;
         }
 
         if (reduced_landscape.is_physically_valid(neutral_distribution, neutral_potentials))
@@ -364,8 +368,9 @@ class quickexact_impl
     {
         reduced_state.assign_base_number(2);
 
-        uint64_t previous_charge_index = 0;
-        uint64_t iterations            = 0;
+        const auto& thresholds = reduced_state.landscape().effective_charge_transition_thresholds(DEPENDENT_SIDB_INDEX);
+        uint64_t    previous_charge_index = 0;
+        uint64_t    iterations            = 0;
 
         utils::progress_reporter progress{params.on_progress, "charge configurations",
                                           reduced_state.max_charge_index() + 1};
@@ -386,7 +391,7 @@ class quickexact_impl
 
             previous_charge_index = gray_code;
 
-            record_valid_distributions(reduced_state);
+            record_valid_distributions(reduced_state, thresholds);
 
             progress.advance();
         }
@@ -399,7 +404,8 @@ class quickexact_impl
      */
     void three_state_simulation(simulation::detail::simulation_state& reduced_state)
     {
-        uint64_t iterations = 0;
+        const auto& thresholds = reduced_state.landscape().effective_charge_transition_thresholds(DEPENDENT_SIDB_INDEX);
+        uint64_t    iterations = 0;
         reduced_state.assign_all_charge_states(model::charge_state::NEGATIVE);
         reduced_state.update_after_charge_change();
         // Not executed to detect if 3-state simulation is required, but to detect the SiDBs that could be positively
@@ -423,7 +429,7 @@ class quickexact_impl
                 {
                     utils::check_deadline(params.deadline);
                 }
-                record_valid_distributions(reduced_state);
+                record_valid_distributions(reduced_state, thresholds);
 
                 reduced_state.increase_charge_index_of_sub_layout_by_one(
                     simulation::detail::dependent_dot_mode::VARIABLE,
@@ -431,7 +437,7 @@ class quickexact_impl
                     simulation::detail::charge_distribution_history::CONSIDER);
             }
 
-            record_valid_distributions(reduced_state);
+            record_valid_distributions(reduced_state, thresholds);
 
             if (reduced_state.max_charge_index_sub_layout() != 0)
             {
@@ -451,7 +457,7 @@ class quickexact_impl
             {
                 utils::check_deadline(params.deadline);
             }
-            record_valid_distributions(reduced_state);
+            record_valid_distributions(reduced_state, thresholds);
 
             reduced_state.increase_charge_index_of_sub_layout_by_one(
                 simulation::detail::dependent_dot_mode::VARIABLE,
@@ -459,7 +465,7 @@ class quickexact_impl
                 simulation::detail::charge_distribution_history::CONSIDER);
         }
 
-        record_valid_distributions(reduced_state);
+        record_valid_distributions(reduced_state, thresholds);
 
         progress.advance();
     }
@@ -476,8 +482,9 @@ class quickexact_impl
  *
  * The performance improvement stems from the use of physically informed search space pruning: SiDBs whose local
  * potential forces them negative are removed from the enumeration and modeled as fixed negative charges, one SiDB's
- * charge state follows from the others, and positively charged SiDBs are enumerated only where they can occur.
- * When the population-stability tolerance allows multiple charges at the dependent SiDB, each is checked.
+ * locally stable charges follow from the other SiDBs, and positively charged SiDBs are enumerated only where they can
+ * occur. The dependent SiDB can contribute both a neutral and a charged configuration within the population-stability
+ * tolerance (\c fiction::utils::math::ERROR_MARGIN, 1e-6 V).
  * Charged surface defects of the layout and external potentials enter the potential landscape.
  *
  * @param lyt Layout to simulate.
