@@ -60,12 +60,14 @@
 #include <mockturtle/views/names_view.hpp>
 #include <z3_api.h>
 
+#include <chrono>
 #include <concepts>
 #include <cstdint>
 #include <optional>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <thread>
 #include <vector>
 
 using namespace fiction;
@@ -890,6 +892,26 @@ TEST_CASE("Exact physical design timeout", "[exact]")
         CHECK_FALSE(exact<cartesian_layout>(ntk, params).has_value());
     }
 
+    SECTION("deadline expires after a worker claims a feasible rectangle")
+    {
+        named_technology_network ntk{};
+        ntk.create_po(ntk.create_not(ntk.create_pi("a")), "f");
+        static constexpr unsigned          budget_ms = 100;
+        const exact_physical_design_params params{
+            .upper_bound_x      = 1,
+            .upper_bound_y      = 3,
+            .num_threads        = workers,
+            .timeout            = budget_ms,
+            .on_worker_progress = [](auto, auto, auto, auto, auto, const bool active)
+            {
+                if (active)
+                {
+                    std::this_thread::sleep_for(std::chrono::milliseconds{budget_ms});
+                }
+            }};
+        CHECK_FALSE(exact<cartesian_layout>(ntk, params).has_value());
+    }
+
     SECTION("one millisecond to place and route a half adder")
     {
         const auto ntk =
@@ -916,17 +938,22 @@ TEST_CASE("Resource-limited exact wire minimization", "[exact]")
 
     Z3_string previous{};
     REQUIRE(Z3_global_param_get("rlimit", &previous));
-    const std::string                    saved_limit{previous};
-    std::optional<cartesian_gate_layout> limited{};
-    // On Z3 4.14.1 and 5.1.0 this budget decides feasibility and exhausts the optimizer.
-    Z3_global_param_set("rlimit", "4096");
-    CHECK_NOTHROW(limited = exact<cartesian_layout>(ntk, params));
-    Z3_global_param_set("rlimit", saved_limit.c_str());
-
-    if (limited.has_value())
+    const std::string saved_limit{previous};
+    // Z3 4.14.1 and 5.1.0 exhaust feasibility at one step and wire optimization at 4096.
+    // A solver that finishes within either limit must still return an equivalent zero-wire layout.
+    for (const auto* const limit : {"1", "4096"})
     {
-        CHECK(limited->num_wires() == 0u);
-        check_eq(ntk, *limited);
+        CAPTURE(limit);
+        std::optional<cartesian_gate_layout> limited{};
+        Z3_global_param_set("rlimit", limit);
+        CHECK_NOTHROW(limited = exact<cartesian_layout>(ntk, params));
+        Z3_global_param_set("rlimit", saved_limit.c_str());
+
+        if (limited.has_value())
+        {
+            CHECK(limited->num_wires() == 0u);
+            check_eq(ntk, *limited);
+        }
     }
 }
 
