@@ -5,6 +5,10 @@
 Utilizes the SMT solver [Z3](https://github.com/Z3Prover/z3) to generate minimal FCN gate-level layouts from logic
 network specifications under constraints. This approach finds exact results but has a large runtime overhead.
 
+The `timeout` argument sets the search budget in milliseconds. A budget of zero expires immediately.
+If Z3 cannot rule out a smaller area or complete a requested optimization, the search can return
+`std::nullopt` in C++ or `None` in Python. Constraint generation and model extraction can run past the deadline.
+
 ::::{tab-set}
 :sync-group: language
 
