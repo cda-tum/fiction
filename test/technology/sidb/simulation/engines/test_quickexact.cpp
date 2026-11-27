@@ -36,8 +36,10 @@
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/check_simulation_results_for_equivalence.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
+#include <fiction/technology/sidb/simulation/potential_landscape.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/utils/execution_timeout.hpp>
 #include <fiction/utils/math/math_utils.hpp>
@@ -46,6 +48,7 @@
 #include <any>
 #include <chrono>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <set>
 #include <stdexcept>
@@ -1935,6 +1938,49 @@ TEST_CASE("QuickExact AND gate simulation of Si-111 surface", "[quickexact]")
     }
 }
 #endif
+
+TEST_CASE("QuickExact finds both stable dependent SiDB charges at a transition", "[quickexact]")
+{
+    using base_detection = quickexact_params::automatic_base_number_detection;
+
+    const auto detection = GENERATE(base_detection::ON, base_detection::OFF);
+    const auto check_equivalence =
+        [detection](const layout& lyt, const simulation_parameters& params, const std::size_t expected_count)
+    {
+        const auto reference = exhaustive_ground_state_simulation(lyt, params);
+        const auto actual =
+            quickexact(lyt, quickexact_params{.sim_params = params, .base_number_detection = detection});
+        CAPTURE(params.base, detection, actual.charge_distributions.size());
+        REQUIRE(reference.charge_distributions.size() == expected_count);
+        CHECK(check_simulation_results_for_equivalence(reference, actual));
+    };
+
+    SECTION("Negative to neutral")
+    {
+        // The four-dot reproducer from issue #651 has three fixed negative SiDBs.
+        layout lyt{};
+        lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({0, 1, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({9, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({2, 4, 0}, dot_tag::NORMAL);
+
+        const auto base = GENERATE(uint8_t{2}, uint8_t{3});
+        check_equivalence(lyt, simulation_parameters{base, -0.32}, 2);
+    }
+
+    SECTION("Neutral to positive")
+    {
+        layout lyt{};
+        lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({1, 0, 0}, dot_tag::NORMAL);
+
+        simulation_parameters     params{3, -0.32, 1.0};
+        const potential_landscape landscape{lyt, params};
+        // Place this synthetic layout exactly at the positive transition.
+        params.mu_minus += -landscape.chargeless_potential(0, 1) - params.mu_plus();
+        check_equivalence(lyt, params, 4);
+    }
+}
 
 TEST_CASE("QuickExact propagates invalid lattice-basis errors", "[quickexact]")
 {
