@@ -142,6 +142,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     affected simulations and analyses that depend on their ground states or excited states.
   - Technology mapping preserves constant-one signals and respects the selected comparison gates.
     Rerun mapping if you used LT, GT, LE, or GE selectors in an earlier version.
+  - `exact_with_blacklist` now allows gates and wires that match only part of a forbidden
+    port pattern.
   - Corrected the LE and GE truth tables and restored Bestagon skeleton lookup. Recheck designs
     that used the old tables. Published experiment reproductions retain their original tables.
   - Network conversion preserves inverters when converting technology networks to AIG, XAG, or MIG.

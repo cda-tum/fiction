@@ -257,6 +257,69 @@ TEST_CASE("Exact routes a path around a USE clock cycle", "[exact]")
         ntk, exact_physical_design_params{.scheme = "USE", .upper_bound_x = 2, .upper_bound_y = 2, .fixed_size = true});
 }
 
+TEST_CASE("Exact placement excludes complete gate and wire port patterns", "[exact]")
+{
+    const bool               wire = GENERATE(false, true);
+    named_technology_network ntk{};
+    const auto               pi = ntk.create_pi();
+    ntk.create_po(wire ? pi : ntk.create_not(pi));
+    const exact_physical_design_params ps{.scheme        = "COLUMNAR",
+                                          .upper_bound_x = 3,
+                                          .upper_bound_y = 1,
+                                          .fixed_size    = true,
+                                          .border_io     = true};
+
+    const port_direction west{port_direction::WEST}, east{port_direction::EAST}, south{port_direction::SOUTH};
+    surface_black_list<port_direction> blacklist{};
+    auto&                              patterns = blacklist[{1, 0}][wire ? create_id_tt() : create_not_tt()];
+    bool                               allowed  = true;
+
+    SECTION("Exclude every orientation")
+    {
+        allowed = false;
+    }
+    SECTION("Exclude west to east")
+    {
+        patterns.push_back({{west}, {east}});
+        allowed = false;
+    }
+    SECTION("Allow west to east when west to south is excluded")
+    {
+        patterns.push_back({{west}, {south}});
+    }
+    SECTION("Allow west to east when only a terminal is excluded")
+    {
+        patterns.push_back({{}, {east}});
+    }
+    SECTION("Allow west to east when an unconnected tile is excluded")
+    {
+        patterns.emplace_back();
+    }
+
+    const auto layout = exact_with_blacklist<cartesian_layout>(ntk, blacklist, ps);
+    CAPTURE(wire);
+    REQUIRE(layout.has_value() == allowed);
+    if (layout)
+    {
+        check_eq(ntk, *layout);
+        check_drvs(*layout);
+    }
+}
+
+TEST_CASE("A blacklisted output tile can carry a wire when the layout grows", "[exact]")
+{
+    named_technology_network ntk{};
+    ntk.create_po(ntk.create_pi());
+    surface_black_list<port_direction> blacklist{};
+    blacklist[{1, 0}][create_id_tt()].push_back({{port_direction{port_direction::WEST}}, {}});
+
+    const auto lyt = generate_layout_with_black_list<cartesian_gate_layout>(
+        ntk, blacklist,
+        exact_physical_design_params{.scheme = "COLUMNAR", .upper_bound_x = 3, .upper_bound_y = 1, .border_io = true});
+    check_eq(ntk, lyt);
+    CHECK(lyt.width() == 3);
+}
+
 TEST_CASE("Exact Cartesian physical design", "[exact]")
 {
     SECTION("Open clocking")
