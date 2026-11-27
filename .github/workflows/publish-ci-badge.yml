@@ -1,0 +1,44 @@
+name: 🏷️ • Publish CI badge
+
+on:
+  workflow_call:
+    inputs:
+      badge:
+        description: Badge file stem on the ci-badges branch
+        required: true
+        type: string
+      result:
+        description: Result of the corresponding CI summary job
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  publish:
+    name: Publish
+    if: >-
+      github.repository == 'cda-tum/fiction' &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      (inputs.result == 'success' || inputs.result == 'failure')
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    permissions:
+      contents: write # required to push the badge JSON to ci-badges
+
+    steps:
+      - name: Clone Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Save the completed badge result
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BADGE: ${{ inputs.badge }}
+          BADGE_RESULT: ${{ inputs.result }}
+        run: |
+          gh auth setup-git --hostname github.com
+          bash .github/scripts/publish_ci_badge.sh "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git" \
+            "$BADGE" "$BADGE_RESULT" "$GITHUB_RUN_NUMBER" "$GITHUB_RUN_ATTEMPT"

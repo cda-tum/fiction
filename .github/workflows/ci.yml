@@ -256,16 +256,9 @@ jobs:
     if: fromJSON(needs.change-detection.outputs.run-workflows)
     uses: $/.github/workflows/zizmor.yml
 
-  # The next five jobs exist so the README can show one badge per platform again. Each
-  # collapses a group into a single check run with a fixed name, which is what
-  # `img.shields.io/github/check-runs/…?nameFilter=` needs: it matches the check run's name
-  # exactly, and the jobs above carry their matrix entry in theirs
-  # (`🐧 Test (ubuntu-24.04, g++-13) / 🐧 ubuntu-24.04 g++-13`), leaving nothing fixed to
-  # point at. They report failed and skipped dependencies. `!cancelled()` lets these
-  # optional summaries stop when the workflow is canceled.
-  #
-  # None of them belong in `required-checks-pass`. They restate jobs the guard already
-  # covers, and CI exposes one required context for branch protection.
+  # Summarize each group for the README, including intentional change-detection skips.
+  # The publishers below wait on these jobs independently. Branch protection uses
+  # the underlying jobs through required-checks-pass.
   cpp-tests-ubuntu-badge:
     name: 🐧 Ubuntu
     if: ${{ !cancelled() }}
@@ -314,9 +307,6 @@ jobs:
             && 'cpp-tests-windows' || '' }}
           jobs: ${{ toJSON(needs) }}
 
-  # `🐳 Docker` produces a single check run today, so its name could be filtered directly.
-  # It gets a badge job anyway: that name embeds the called workflow's job name, and a
-  # change-detection skip would leave the badge grey.
   docker-badge:
     name: 🐳 Docker Image
     if: ${{ !cancelled() }}
@@ -348,6 +338,57 @@ jobs:
             ${{ !fromJSON(needs.change-detection.outputs.run-codeql)
             && 'codeql' || '' }}
           jobs: ${{ toJSON(needs) }}
+
+  # Each badge advances as soon as its own summary finishes on main.
+  publish-ubuntu-badge:
+    if: ${{ !cancelled() && github.event_name == 'push' }}
+    needs: cpp-tests-ubuntu-badge
+    permissions:
+      contents: write # required by the badge publisher
+    uses: $/.github/workflows/publish-ci-badge.yml
+    with:
+      badge: ubuntu
+      result: ${{ needs.cpp-tests-ubuntu-badge.result }}
+
+  publish-macos-badge:
+    if: ${{ !cancelled() && github.event_name == 'push' }}
+    needs: cpp-tests-macos-badge
+    permissions:
+      contents: write # required by the badge publisher
+    uses: $/.github/workflows/publish-ci-badge.yml
+    with:
+      badge: macos
+      result: ${{ needs.cpp-tests-macos-badge.result }}
+
+  publish-windows-badge:
+    if: ${{ !cancelled() && github.event_name == 'push' }}
+    needs: cpp-tests-windows-badge
+    permissions:
+      contents: write # required by the badge publisher
+    uses: $/.github/workflows/publish-ci-badge.yml
+    with:
+      badge: windows
+      result: ${{ needs.cpp-tests-windows-badge.result }}
+
+  publish-docker-badge:
+    if: ${{ !cancelled() && github.event_name == 'push' }}
+    needs: docker-badge
+    permissions:
+      contents: write # required by the badge publisher
+    uses: $/.github/workflows/publish-ci-badge.yml
+    with:
+      badge: docker
+      result: ${{ needs.docker-badge.result }}
+
+  publish-codeql-badge:
+    if: ${{ !cancelled() && github.event_name == 'push' }}
+    needs: codeql-badge
+    permissions:
+      contents: write # required by the badge publisher
+    uses: $/.github/workflows/publish-ci-badge.yml
+    with:
+      badge: codeql
+      result: ${{ needs.codeql-badge.result }}
 
   # This required check uses `always()` to report failed and canceled dependencies.
   # GitHub accepts skipped required jobs, so the guard must run after cancellation.

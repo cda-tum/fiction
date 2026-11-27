@@ -154,6 +154,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     when energy tolerances overlap. Critical-temperature analysis uses the same energy tolerance
     to distinguish excited states from the ground level.
 
+- Continuous integration:
+
+  - README CI badges retain each job group's last completed result while newer CI runs.
+
 - Data structures:
 
   - QCA synchronization assignments apply to the same clock zone on every layer.
