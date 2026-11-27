@@ -44,9 +44,9 @@ namespace fiction::physical_design
 {
 
 /**
- * A black list of gates per tile and function: for each tile, the functions that cannot be implemented by the gates
- * with the listed ports. `surface_analysis` produces one from a defective SiDB surface, and `exact_with_blacklist`
- * consumes it.
+ * A black list of gates per tile and function. Each port list gives the complete sets of incoming and outgoing ports
+ * of a forbidden orientation. An empty vector forbids every orientation of that function at the tile.
+ * `surface_analysis` produces this map from a defective SiDB surface, and `exact_with_blacklist` consumes it.
  *
  * @tparam PortType Port type of the gate library.
  */

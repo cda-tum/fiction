@@ -2498,78 +2498,78 @@ class exact_impl
         /**
          * Adds constraints to the solver to enforce blacklisting of certain gates.
          */
-        void black_list_gates()  // TODO take advantage of incremental solving
+        void black_list_gates()
         {
-            // not `noexcept`: building the `z3::expr_vector` and every `z3` call below can throw `z3::exception`
-            const auto gather_black_list_expr = [this](const auto& port, const auto& t)
-            {
-                z3::expr_vector iop{*ctx};
-
-                for (const auto& i : port.inp)
-                {
-                    const auto adjacent = layouts::port_direction_to_coordinate(layout, t, i);
-                    iop.push_back(adjacent ? !get_tile_connection(*adjacent, t) : ctx->bool_val(true));
-                }
-                for (const auto& o : port.out)
-                {
-                    const auto adjacent = layouts::port_direction_to_coordinate(layout, t, o);
-                    iop.push_back(adjacent ? !get_tile_connection(t, *adjacent) : ctx->bool_val(true));
-                }
-
-                return iop;
-            };
-
-            // the identity function as a truth table
             const auto identity = synthesis::create_id_tt();
 
-            // for each tile-functions pair
             for (const auto& [tile, exclusions] : black_list)
             {
-                for (const auto& [gate, port_list] : exclusions)
+                if (!is_added_tile(tile) && !is_updated_tile(tile))
                 {
+                    continue;
+                }
+
+                const auto matches_ports = [&](const auto& ports, const bool incoming)
+                {
+                    z3::expr_vector connections{*ctx};
+                    std::size_t     matched{};
+                    const auto      check_neighbor = [&](const auto& at)
+                    {
+                        const auto listed = std::ranges::any_of(
+                            ports, [&](const auto& port)
+                            { return layouts::port_direction_to_coordinate(layout, tile, port) == at; });
+                        matched += listed;
+                        const auto connection =
+                            incoming ? get_tile_connection(at, tile) : get_tile_connection(tile, at);
+                        connections.push_back(listed ? connection : !connection);
+                    };
+
+                    if (!layout.is_regularly_clocked())
+                    {
+                        layout.foreach_adjacent_tile(tile, check_neighbor);
+                    }
+                    else if (incoming)
+                    {
+                        layout.foreach_incoming_clocked_zone(tile, check_neighbor);
+                    }
+                    else
+                    {
+                        layout.foreach_outgoing_clocked_zone(tile, check_neighbor);
+                    }
+
+                    return matched == ports.size() ? z3::mk_and(connections) : ctx->bool_val(false);
+                };
+
+                for (const auto& [gate, patterns] : exclusions)
+                {
+                    z3::expr_vector forbidden{*ctx};
+                    for (const auto& pattern : patterns)
+                    {
+                        forbidden.push_back(matches_ports(pattern.inp, true) && matches_ports(pattern.out, false));
+                    }
+                    const auto allowed            = patterns.empty() ? ctx->bool_val(false) : !z3::mk_or(forbidden);
+                    const auto restrict_placement = [&](const z3::expr& placed)
+                    { solver->add(mk_as_if_se(z3::implies(placed, allowed), tile)); };
+
                     network.foreach_node(
-                        [this, &gather_black_list_expr, &t = tile, &tt = gate, &ports = port_list](const auto& n)
+                        [&](const auto& n)
                         {
-                            if (!skip_const_or_io_node(n))
+                            if (!skip_const_or_io_node(n) && kitty::equal(gate, network.node_function(n)))
                             {
-                                if (kitty::equal(tt, network.node_function(n)))
-                                {
-                                    if (ports.empty())
-                                    {
-                                        solver->add(!(get_tile_node(t, n)));
-                                    }
-                                    else
-                                    {
-                                        for (const auto& p : ports)
-                                        {
-                                            solver->add(z3::implies(get_tile_node(t, n),
-                                                                    z3::mk_and(gather_black_list_expr(p, t))));
-                                        }
-                                    }
-                                }
+                                restrict_placement(get_tile_node(tile, n));
                             }
                         });
 
-                    // truth table represents the identity; wires need to be additionally excluded
                     if (kitty::equal(gate, identity))
                     {
-                        networks::foreach_edge(
-                            network,
-                            [this, &gather_black_list_expr, &t = tile, &ports = port_list](const auto& e)
-                            {
-                                if (!skip_const_or_io_edge(e))
-                                {
-                                    if (ports.empty())
-                                    {
-                                        solver->add(!(get_tile_edge(t, e)));
-                                    }
-                                    for (const auto& p : ports)
-                                    {
-                                        solver->add(
-                                            z3::implies(get_tile_edge(t, e), z3::mk_and(gather_black_list_expr(p, t))));
-                                    }
-                                }
-                            });
+                        networks::foreach_edge(network,
+                                               [&](const auto& e)
+                                               {
+                                                   if (!skip_const_or_io_edge(e))
+                                                   {
+                                                       restrict_placement(get_tile_edge(tile, e));
+                                                   }
+                                               });
                     }
                 }
             }
