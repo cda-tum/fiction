@@ -292,7 +292,7 @@ class exact_impl
      */
     exact_physical_design_params ps;
     /** @brief Shared deadline for the search and all Z3 checks. */
-    const std::chrono::steady_clock::time_point deadline{utils::make_deadline(ps.timeout)};
+    const std::chrono::steady_clock::time_point search_deadline{utils::make_deadline(ps.timeout)};
     /**
      * @brief Statistics.
      */
@@ -2991,7 +2991,7 @@ class exact_impl
             {
                 const std::scoped_lock guard{ari_mutex};
 
-                if (!(ari <= ps.upper_bound_area) || std::chrono::steady_clock::now() >= deadline)
+                if (!(ari <= ps.upper_bound_area) || std::chrono::steady_clock::now() >= search_deadline)
                 {
                     return std::nullopt;
                 }
@@ -3045,7 +3045,7 @@ class exact_impl
 
             try
             {
-                if (handler.is_satisfiable(deadline))  // found a layout
+                if (handler.is_satisfiable(search_deadline))  // found a layout
                 {
                     // mutually exclusive access to the result_extent
                     {
@@ -3181,7 +3181,7 @@ class exact_impl
 
         smt_handler handler{std::make_shared<z3::context>(), layout, *ntk, ps, black_list};
 
-        for (; ari <= ps.upper_bound_area && std::chrono::steady_clock::now() < deadline; ++ari)
+        for (; ari <= ps.upper_bound_area && std::chrono::steady_clock::now() < search_deadline; ++ari)
         {
             auto ex = *ari;
 
@@ -3199,7 +3199,7 @@ class exact_impl
 
             try
             {
-                if (handler.is_satisfiable(deadline))
+                if (handler.is_satisfiable(search_deadline))
                 {
                     // statistical information
                     pst.x_size        = layout.width();
