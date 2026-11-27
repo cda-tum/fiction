@@ -130,6 +130,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - QuickExact returns both physically valid charge distributions when the dependent SiDB can
+    hold either charge at a transition. Rerun simulations that may have missed a distribution.
   - Technology mapping preserves constant-one signals and respects the selected comparison gates.
     Rerun mapping if you used LT, GT, LE, or GE selectors in an earlier version.
   - Corrected the LE and GE truth tables and restored Bestagon skeleton lookup. Recheck designs

@@ -286,24 +286,73 @@ class quickexact_impl
         }
     }
     /**
-     * Records the current charge states of the reduced state as a distribution over the full layout. The pre-assigned
+     * Records the charge states of the reduced layout as a distribution over the full layout. The pre-assigned
      * SiDBs are negative; the energy is that of the reduced system, which equals the full one.
      *
-     * @param reduced_state State over the reduced layout.
+     * @param reduced_landscape Potential landscape of the reduced layout.
+     * @param reduced_distribution Charge distribution of the reduced layout.
+     * @param potentials Local internal potentials for the reduced charge distribution.
      */
-    void record(const simulation::detail::simulation_state& reduced_state)
+    void record(const potential_landscape& reduced_landscape, const charge_distribution& reduced_distribution,
+                const std::vector<double>& potentials)
     {
         charge_distribution cd{landscape.sites(), model::charge_state::NEGATIVE};
 
         for (std::size_t k = 0; k < free_sidbs.size(); ++k)
         {
-            cd.assign_charge_state_by_index(free_sidbs[k], reduced_state.get_charge_state_by_index(k));
+            cd.assign_charge_state_by_index(free_sidbs[k], reduced_distribution.charge_states()[k]);
         }
 
-        cd.assign_energy(
-            reduced_state.landscape().energy(reduced_state.current(), reduced_state.local_internal_potentials()));
+        cd.assign_energy(reduced_landscape.energy(reduced_distribution, potentials));
 
         sim_result.charge_distributions.push_back(std::move(cd));
+    }
+    /**
+     * Records each physically valid charge distribution for the current assignment of the independent SiDBs.
+     * The population-stability tolerance can allow a charged and a neutral state at the dependent SiDB.
+     *
+     * @param reduced_state Enumeration state over the reduced layout.
+     */
+    void record_valid_distributions(const simulation::detail::simulation_state& reduced_state)
+    {
+        const auto& reduced_landscape = reduced_state.landscape();
+        const auto& distribution      = reduced_state.current();
+        const auto& potentials        = reduced_state.local_internal_potentials();
+
+        if (reduced_state.is_physically_valid())
+        {
+            record(reduced_landscape, distribution, potentials);
+        }
+
+        const auto dependent = *reduced_state.dependent_dot();
+        const auto charge    = reduced_state.get_charge_state_by_index(dependent);
+        if (charge == model::charge_state::NEUTRAL)
+        {
+            return;
+        }
+
+        const auto  potential  = -potentials[dependent];
+        const auto& thresholds = reduced_landscape.effective_charge_transition_thresholds(dependent);
+        if (potential <=
+                thresholds[static_cast<std::size_t>(charge_transition_threshold_bounds::NEUTRAL_LOWER_BOUND)] ||
+            potential >= thresholds[static_cast<std::size_t>(charge_transition_threshold_bounds::NEUTRAL_UPPER_BOUND)])
+        {
+            return;
+        }
+
+        auto       neutral_distribution = distribution;
+        auto       neutral_potentials   = potentials;
+        const auto charge_delta         = -static_cast<double>(model::charge_state_to_sign(charge));
+        neutral_distribution.assign_charge_state_by_index(dependent, model::charge_state::NEUTRAL);
+        for (std::size_t i = 0; i < neutral_potentials.size(); ++i)
+        {
+            neutral_potentials[i] += reduced_landscape.chargeless_potential(i, dependent) * charge_delta;
+        }
+
+        if (reduced_landscape.is_physically_valid(neutral_distribution, neutral_potentials))
+        {
+            record(reduced_landscape, neutral_distribution, neutral_potentials);
+        }
     }
     /**
      * Enumerates every two-state charge distribution of the reduced layout as a Gray code and records the physically
@@ -337,10 +386,7 @@ class quickexact_impl
 
             previous_charge_index = gray_code;
 
-            if (reduced_state.is_physically_valid())
-            {
-                record(reduced_state);
-            }
+            record_valid_distributions(reduced_state);
 
             progress.advance();
         }
@@ -377,10 +423,7 @@ class quickexact_impl
                 {
                     utils::check_deadline(params.deadline);
                 }
-                if (reduced_state.is_physically_valid())
-                {
-                    record(reduced_state);
-                }
+                record_valid_distributions(reduced_state);
 
                 reduced_state.increase_charge_index_of_sub_layout_by_one(
                     simulation::detail::dependent_dot_mode::VARIABLE,
@@ -388,10 +431,7 @@ class quickexact_impl
                     simulation::detail::charge_distribution_history::CONSIDER);
             }
 
-            if (reduced_state.is_physically_valid())
-            {
-                record(reduced_state);
-            }
+            record_valid_distributions(reduced_state);
 
             if (reduced_state.max_charge_index_sub_layout() != 0)
             {
@@ -411,10 +451,7 @@ class quickexact_impl
             {
                 utils::check_deadline(params.deadline);
             }
-            if (reduced_state.is_physically_valid())
-            {
-                record(reduced_state);
-            }
+            record_valid_distributions(reduced_state);
 
             reduced_state.increase_charge_index_of_sub_layout_by_one(
                 simulation::detail::dependent_dot_mode::VARIABLE,
@@ -422,10 +459,7 @@ class quickexact_impl
                 simulation::detail::charge_distribution_history::CONSIDER);
         }
 
-        if (reduced_state.is_physically_valid())
-        {
-            record(reduced_state);
-        }
+        record_valid_distributions(reduced_state);
 
         progress.advance();
     }
@@ -443,6 +477,7 @@ class quickexact_impl
  * The performance improvement stems from the use of physically informed search space pruning: SiDBs whose local
  * potential forces them negative are removed from the enumeration and modeled as fixed negative charges, one SiDB's
  * charge state follows from the others, and positively charged SiDBs are enumerated only where they can occur.
+ * When the population-stability tolerance allows multiple charges at the dependent SiDB, each is checked.
  * Charged surface defects of the layout and external potentials enter the potential landscape.
  *
  * @param lyt Layout to simulate.

@@ -36,8 +36,10 @@
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/check_simulation_results_for_equivalence.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
+#include <fiction/technology/sidb/simulation/potential_landscape.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/utils/execution_timeout.hpp>
 #include <fiction/utils/math/math_utils.hpp>
@@ -1935,6 +1937,41 @@ TEST_CASE("QuickExact AND gate simulation of Si-111 surface", "[quickexact]")
     }
 }
 #endif
+
+TEST_CASE("QuickExact finds both stable dependent SiDB charges at a transition", "[quickexact]")
+{
+    layout                lyt{};
+    simulation_parameters params{};
+
+    SECTION("Negative to neutral")
+    {
+        lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({0, 1, 1}, dot_tag::NORMAL);
+        lyt.assign_sidb({9, 3, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({2, 4, 0}, dot_tag::NORMAL);
+
+        params.base = GENERATE(uint8_t{2}, uint8_t{3});
+        CAPTURE(params.base);
+    }
+
+    SECTION("Neutral to positive")
+    {
+        lyt.assign_sidb({0, 0, 0}, dot_tag::NORMAL);
+        lyt.assign_sidb({1, 0, 0}, dot_tag::NORMAL);
+
+        params.epsilon_r = 1.0;
+        const potential_landscape landscape{lyt, params};
+        // Align the positive transition with the potential from the other SiDB when it is negative.
+        params.mu_minus += -landscape.chargeless_potential(0, 1) - params.mu_plus();
+    }
+
+    const auto reference = exhaustive_ground_state_simulation(lyt, params);
+    const auto actual    = quickexact(
+        lyt, quickexact_params{.sim_params            = params,
+                               .base_number_detection = quickexact_params::automatic_base_number_detection::OFF});
+    CAPTURE(reference.charge_distributions.size(), actual.charge_distributions.size());
+    CHECK(check_simulation_results_for_equivalence(reference, actual));
+}
 
 TEST_CASE("QuickExact propagates invalid lattice-basis errors", "[quickexact]")
 {
