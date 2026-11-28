@@ -136,6 +136,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Parallel `exact` now checks the first aspect ratio and stops at the configured area and axis bounds.
   - Exact placement with OPEN clocking now considers both orientations when the layout geometry,
     a blacklist, or technology constraints distinguish them.
+  - `exact` now shares its timeout across feasibility checks and requested optimizations. Zero expires
+    immediately. An inconclusive check can leave the search without a layout. Constraint generation
+    and model extraction can run past the deadline.
   - QuickExact includes previously omitted charge distributions at charge transitions. Rerun
     affected simulations and analyses that depend on their ground states or excited states.
   - Technology mapping preserves constant-one signals and respects the selected comparison gates.

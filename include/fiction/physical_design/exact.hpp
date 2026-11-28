@@ -37,6 +37,7 @@
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/types.hpp"
+#include "fiction/utils/execution_timeout.hpp"
 #include "fiction/utils/progress.hpp"
 
 #include <fmt/format.h>
@@ -162,7 +163,9 @@ struct exact_physical_design_params
      */
     bool minimize_crossings = false;
     /**
-     * @brief Timeout budget for the solving process, in milliseconds.
+     * @brief Millisecond budget shared by aspect-ratio search, feasibility checks, and optimization.
+     * Zero expires immediately. An inconclusive feasibility check or requested optimization can leave the search
+     * without a layout. Constraint generation and model extraction can run past the deadline.
      */
     unsigned timeout = 4294967u;
     /**
@@ -280,45 +283,49 @@ class exact_impl
      */
     using topology_ntk_t = mockturtle::topo_view<mockturtle::fanout_view<fiction::networks::named_technology_network>>;
     /**
-     * Specification network.
+     * @brief Specification network.
      */
     std::shared_ptr<topology_ntk_t> ntk;
     /**
-     * Parameters.
+     * @brief Parameters.
      */
     exact_physical_design_params ps;
+    /** @brief Shared deadline for the search and all Z3 checks. */
+    const std::chrono::steady_clock::time_point search_deadline{utils::make_deadline(ps.timeout)};
     /**
-     * Statistics.
+     * @brief Statistics.
      */
     exact_physical_design_stats& pst;
     /**
-     * Reports the examined aspect ratios. Their number is not bounded in advance, so the total stays unknown.
+     * @brief Reports the examined aspect ratios. Their number is not bounded in advance, so the total stays unknown.
      */
     utils::progress_reporter progress;
     /** @brief Serializes the active candidate extents of each solver worker. */
     utils::worker_progress_reporter worker_progress;
     /**
-     * The utilized clocking scheme.
+     * @brief The utilized clocking scheme.
      */
     layouts::clocking::scheme scheme;
     /**
-     * Maps tiles to blacklisted gate types via their truth tables and port information.
+     * @brief Maps tiles to blacklisted gate types via their truth tables and port information.
      */
     const surface_black_list<fcn::port_direction> black_list;
     /**
-     * Lower bound for the number of layout tiles.
+     * @brief Lower bound for the number of layout tiles.
      */
     uint16_t lower_bound{0u};
     /**
-     * Iterator for the factorization of possible aspect ratios.
+     * @brief Iterator for the factorization of possible aspect ratios.
      */
     aspect_ratio_iterator<typename Lyt::extent> ari{0};
     /**
-     * Extent of the found result. Only needed for the asynchronous case.
+     * @brief Extent of the found result. Only needed for the asynchronous case.
      */
     std::optional<typename Lyt::extent> result_extent;
+    /** @brief Smallest area a worker could not decide, guarded by `result_extent_mutex`. */
+    uint64_t unresolved_area{std::numeric_limits<uint64_t>::max()};
     /**
-     * Restricts access to the aspect-ratio iterator, result, and worker context records.
+     * @brief Restricts access to the aspect-ratio iterator, result, and worker context records.
      */
     std::mutex ari_mutex{}, result_extent_mutex{};
 
@@ -438,47 +445,40 @@ class exact_impl
             solver = check_point->state->solver;
         }
         /**
-         * Sets the given timeout for the current solver.
-         *
-         * @param t Timeout in ms.
-         */
-        void set_timeout(const unsigned t)
-        {
-            z3::params p{*ctx};
-            p.set("timeout", t);
-            solver->set(p);
-        }
-        /**
          * Generates the SMT instance for the current solver check point and runs the solver check. In case the instance
          * was satisfiable, all constraints are moved to an z3::optimize if optimization criteria were specified. This
          * way, no unnecessary optimization constraints need to be generated over and over for UNSAT instances.
          *
-         * If the instance was found SAT on both levels, a layout is extract from the model and stored. The function
-         * returns then true.
-         *
-         * @return `true` iff the instance generated for the current configuration is SAT.
+         * @param deadline Shared search deadline.
+         * @return `true` for a complete layout, or `false` if the solver proves the candidate unsatisfiable.
+         * @throws z3::exception if either check is inconclusive or the deadline expires.
          */
-        [[nodiscard]] bool is_satisfiable()
+        [[nodiscard]] bool is_satisfiable(const std::chrono::steady_clock::time_point deadline)
         {
             generate_smt_instance();
 
-            if (const auto z3_result = solver->check(check_point->assumptions); z3_result == z3::sat)
+            solver->set(timeout_params(deadline));
+            const auto result = solver->check(check_point->assumptions);
+            if (result == z3::unsat)
             {
-                // optimize the generated result
-                if (auto opt = optimize(); opt != nullptr)
-                {
-                    opt->check();
-                    assign_layout(opt->get_model());
-                }
-                else
-                {
-                    assign_layout(solver->get_model());
-                }
-
-                return true;
+                return false;
+            }
+            if (result == z3::unknown)
+            {
+                throw z3::exception("inconclusive feasibility check");
             }
 
-            return false;
+            const auto opt = optimize();
+            if (opt)
+            {
+                opt->set(timeout_params(deadline));
+                if (opt->check() != z3::sat)
+                {
+                    throw z3::exception("inconclusive optimization");
+                }
+            }
+            assign_layout(opt ? opt->get_model() : solver->get_model());
+            return true;
         }
         /**
          * Stores the current solver state in the solver tree with extent ex as key.
@@ -511,6 +511,26 @@ class exact_impl
         }
 
       private:
+        /**
+         * @brief Computes a positive Z3 timeout from the shared search deadline.
+         *
+         * @param deadline Search deadline.
+         * @return Z3 parameters with the remaining milliseconds.
+         * @throws z3::exception if the deadline has passed.
+         */
+        [[nodiscard]] z3::params timeout_params(const std::chrono::steady_clock::time_point deadline) const
+        {
+            const auto remaining =
+                std::chrono::ceil<std::chrono::milliseconds>(deadline - std::chrono::steady_clock::now()).count();
+            if (remaining <= 0)
+            {
+                throw z3::exception("timeout");
+            }
+            z3::params p{*ctx};
+            // Z3 treats both zero and UINT_MAX as unlimited.
+            p.set("timeout", std::min(static_cast<unsigned>(remaining), std::numeric_limits<unsigned>::max() - 1));
+            return p;
+        }
         /**
          * During incremental SMT calls, several created assertions need to be reformulated. To still be able to reuse
          * information like learned clauses and lemmas, the push/pop strategy is not employed. Instead, assumption
@@ -2919,25 +2939,6 @@ class exact_impl
     };
 
     /**
-     * Calculates the time left for solving by subtracting the time passed from the configured timeout and updates
-     * Z3's timeout accordingly.
-     *
-     * @param handler Handler whose timeout is to be updated.
-     * @param time Time passed since beginning of the solving process.
-     */
-    void update_timeout(smt_handler& handler, const mockturtle::stopwatch<>::duration& time) const
-    {
-        const auto time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(time).count();
-        const auto time_left = (ps.timeout - time_elapsed > 0 ? static_cast<unsigned>(ps.timeout - time_elapsed) : 0u);
-
-        if (time_left == 0u)
-        {
-            throw z3::exception("timeout");
-        }
-
-        handler.set_timeout(time_left);
-    }
-    /**
      * @brief Shares worker solvers and extents under `result_extent_mutex`.
      *
      * A worker with a result interrupts solvers exploring layouts of equal or greater area.
@@ -2965,12 +2966,10 @@ class exact_impl
      *
      * @param t_num Thread's identifier.
      * @param ti_list Pointer to a list of shared thread info that the threads use for communication.
-     * @param started Start of the shared timeout budget.
      * @return A found layout or `std::nullopt` when interrupted or timed out.
      */
     [[nodiscard]] std::optional<Lyt> explore_asynchronously(const unsigned                                   t_num,
-                                                            const std::shared_ptr<std::vector<thread_info>>& ti_list,
-                                                            const std::chrono::steady_clock::time_point      started)
+                                                            const std::shared_ptr<std::vector<thread_info>>& ti_list)
     {
         const utils::worker_progress_scope worker_scope{worker_progress, t_num};
         const auto                         ctx = std::make_shared<z3::context>();
@@ -2995,7 +2994,7 @@ class exact_impl
             {
                 const std::scoped_lock guard{ari_mutex};
 
-                if (!(ari <= ps.upper_bound_area))
+                if (!(ari <= ps.upper_bound_area) || std::chrono::steady_clock::now() >= search_deadline)
                 {
                     return std::nullopt;
                 }
@@ -3017,6 +3016,11 @@ class exact_impl
             // mutually exclusive access to the result aspect ratio
             {
                 const std::scoped_lock guard{result_extent_mutex};
+
+                if (layouts::area_of(ex) > unresolved_area)
+                {
+                    return std::nullopt;
+                }
 
                 // a result is available already
                 if (result_extent)
@@ -3044,9 +3048,7 @@ class exact_impl
 
             try
             {
-                update_timeout(handler, std::chrono::steady_clock::now() - started);
-
-                if (handler.is_satisfiable())  // found a layout
+                if (handler.is_satisfiable(search_deadline))  // found a layout
                 {
                     // mutually exclusive access to the result_extent
                     {
@@ -3096,6 +3098,8 @@ class exact_impl
             }
             catch (const z3::exception&)  // timed out or interrupted
             {
+                const std::scoped_lock guard{result_extent_mutex};
+                unresolved_area = std::min(unresolved_area, layouts::area_of(ex));
                 return std::nullopt;
             }
         }
@@ -3119,11 +3123,10 @@ class exact_impl
             std::vector<fut_layout> fut(ps.num_threads);
 
             const auto ti_list = std::make_shared<std::vector<thread_info>>(ps.num_threads);
-            const auto started = std::chrono::steady_clock::now() - pst.time_total;
 
             for (auto i = 0u; i < ps.num_threads; ++i)
             {
-                fut[i] = std::async(std::launch::async, &exact_impl::explore_asynchronously, this, i, ti_list, started);
+                fut[i] = std::async(std::launch::async, &exact_impl::explore_asynchronously, this, i, ti_list);
             }
 
             // wait for every task to finish running. This is the join that makes the unguarded `result_extent`
@@ -3154,7 +3157,7 @@ class exact_impl
             }
         }
 
-        if (result_extent.has_value())
+        if (result_extent.has_value() && layouts::area_of(*result_extent) <= unresolved_area)
         {
             // statistical information
             pst.x_size        = layout.width();
@@ -3175,12 +3178,13 @@ class exact_impl
      */
     [[nodiscard]] std::optional<Lyt> run_synchronously()
     {
+        mockturtle::stopwatch              stop{pst.time_total};
         const utils::worker_progress_scope worker_scope{worker_progress, 0};
         Lyt                                layout = make_layout();
 
         smt_handler handler{std::make_shared<z3::context>(), layout, *ntk, ps, black_list};
 
-        for (; ari <= ps.upper_bound_area; ++ari)
+        for (; ari <= ps.upper_bound_area && std::chrono::steady_clock::now() < search_deadline; ++ari)
         {
             auto ex = *ari;
 
@@ -3198,10 +3202,7 @@ class exact_impl
 
             try
             {
-                const auto sat =
-                    mockturtle::call_with_stopwatch(pst.time_total, [&handler] { return handler.is_satisfiable(); });
-
-                if (sat)
+                if (handler.is_satisfiable(search_deadline))
                 {
                     // statistical information
                     pst.x_size        = layout.width();
@@ -3214,8 +3215,6 @@ class exact_impl
                 }
 
                 handler.store_solver_state(ex);
-
-                update_timeout(handler, pst.time_total);
             }
             catch (const z3::exception&)
             {

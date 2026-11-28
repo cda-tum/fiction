@@ -57,12 +57,16 @@
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/views/names_view.hpp>
+#include <z3_api.h>
 
+#include <chrono>
 #include <concepts>
 #include <cstdint>
 #include <optional>
 #include <sstream>
 #include <stdexcept>
+#include <string>
+#include <thread>
 #include <vector>
 
 using namespace fiction;
@@ -767,14 +771,83 @@ TEST_CASE("Cartesian 2DDWave depth limits depend on rectangle shape", "[exact]")
 
 TEST_CASE("Exact physical design timeout", "[exact]")
 {
-    auto timeout_config    = exact_physical_design_params{.scheme = "USE", .crossings = true};
-    timeout_config.timeout = 1u;  // allow one millisecond to find a solution
+    const auto workers = GENERATE(1u, 2u);
+    CAPTURE(workers);
 
-    const auto half_adder = blueprints::half_adder_network<mockturtle::aig_network>();
-    const auto layout = exact<cartesian_layout>(convert_network<named_technology_network>(half_adder), timeout_config);
+    SECTION("zero budget on a feasible first aspect ratio")
+    {
+        named_technology_network ntk{};
+        ntk.create_po(ntk.create_not(ntk.create_pi("a")), "f");
+        const exact_physical_design_params params{.upper_bound_x = 1,
+                                                  .upper_bound_y = 3,
+                                                  .num_threads   = workers,
+                                                  .timeout       = 0};
+        CHECK_FALSE(exact<cartesian_layout>(ntk, params).has_value());
+    }
 
-    // The one-millisecond budget is insufficient for placing and routing the half adder.
-    CHECK(!layout.has_value());
+    SECTION("deadline expires after a worker claims a feasible rectangle")
+    {
+        named_technology_network ntk{};
+        ntk.create_po(ntk.create_not(ntk.create_pi("a")), "f");
+        static constexpr unsigned          budget_ms = 100;
+        const exact_physical_design_params params{
+            .upper_bound_x      = 1,
+            .upper_bound_y      = 3,
+            .num_threads        = workers,
+            .timeout            = budget_ms,
+            .on_worker_progress = [](auto, auto, auto, auto, auto, const bool active)
+            {
+                if (active)
+                {
+                    std::this_thread::sleep_for(std::chrono::milliseconds{budget_ms});
+                }
+            }};
+        CHECK_FALSE(exact<cartesian_layout>(ntk, params).has_value());
+    }
+
+    SECTION("one millisecond to place and route a half adder")
+    {
+        const auto ntk =
+            convert_network<named_technology_network>(blueprints::half_adder_network<mockturtle::aig_network>());
+        const exact_physical_design_params params{.scheme      = "USE",
+                                                  .num_threads = workers,
+                                                  .crossings   = true,
+                                                  .timeout     = 1};
+        CHECK_FALSE(exact<cartesian_layout>(ntk, params).has_value());
+    }
+}
+
+TEST_CASE("Resource-limited exact wire minimization", "[exact]")
+{
+    named_technology_network ntk{};
+    ntk.create_po(ntk.create_not(ntk.create_pi("a")), "f");
+    const exact_physical_design_params params{.upper_bound_x  = 1,
+                                              .upper_bound_y  = 4,
+                                              .fixed_size     = true,
+                                              .minimize_wires = true};
+
+    const auto optimum = generate_layout<cartesian_gate_layout>(ntk, params);
+    CHECK(optimum.num_wires() == 0u);
+
+    Z3_string previous{};
+    REQUIRE(Z3_global_param_get("rlimit", &previous));
+    const std::string saved_limit{previous};
+    // Z3 4.14.1 and 5.1.0 exhaust feasibility at one step and wire optimization at 4096.
+    // A solver that finishes within either limit must still return an equivalent zero-wire layout.
+    for (const auto* const limit : {"1", "4096"})
+    {
+        CAPTURE(limit);
+        std::optional<cartesian_gate_layout> limited{};
+        Z3_global_param_set("rlimit", limit);
+        CHECK_NOTHROW(limited = exact<cartesian_layout>(ntk, params));
+        Z3_global_param_set("rlimit", saved_limit.c_str());
+
+        if (limited.has_value())
+        {
+            CHECK(limited->num_wires() == 0u);
+            check_eq(ntk, *limited);
+        }
+    }
 }
 
 TEST_CASE("Name conservation after exact physical design", "[exact]")
