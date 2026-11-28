@@ -168,6 +168,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Download and lock tooling requires `uv` 0.13.4 or later to reject compromised eMudhra
     certificate chains. Rebuild older Docker images to pick up the patched `uv`.
 
+- Gate libraries:
+
+  - Quarter-turn rotations now return rectangular gates with swapped dimensions.
+
 - I/O:
 
   - FGL round trips preserve three-phase clocking and irregular clocks on crossing layers.

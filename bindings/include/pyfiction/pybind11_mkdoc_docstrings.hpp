@@ -336,7 +336,7 @@ Args:
     g: `gate` to rotate.
 
 Returns:
-    Rotated `gate`.
+    Rotated gate with `GateSizeY` columns and `GateSizeX` rows.
 
 )doc";
 
@@ -347,7 +347,7 @@ Args:
     g: `gate` to rotate.
 
 Returns:
-    Rotated `gate`.
+    Rotated gate with `GateSizeY` columns and `GateSizeX` rows.
 
 )doc";
 
@@ -358,7 +358,7 @@ Args:
     g: `gate` to transpose.
 
 Returns:
-    Transposed `gate`.
+    Transposed gate with `GateSizeY` columns and `GateSizeX` rows.
 
 )doc";
 

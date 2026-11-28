@@ -78,6 +78,27 @@ TEST_CASE("Gate rotation", "[fcn-gate-library]")
     CHECK(lib_t::rotate_270(lib_t::rotate_270(lib_t::rotate_270(lib_t::rotate_270(wire)))) == wire);
 }
 
+/** @brief Quarter-turns swap a rectangular gate's dimensions and preserve its cells. */
+TEST_CASE("Rectangular gate rotation", "[fcn-gate-library]")
+{
+    /** @brief QCA gates with two columns and three rows. */
+    using lib_t = gate_library<qca::layout, 2, 3>;
+    /** @brief QCA gates with three columns and two rows. */
+    using rotated_lib_t = gate_library<qca::layout, 3, 2>;
+
+    /** @brief Asymmetric rectangular gate with input and output cells. */
+    constexpr auto gate{lib_t::cell_list_to_gate<char>({{{'i', 'x'}, {' ', 'x'}, {'o', ' '}}})};
+    /** @brief Expected clockwise quarter-turn with three columns. */
+    constexpr auto rotated_90{rotated_lib_t::cell_list_to_gate<char>({{{'o', ' ', 'i'}, {' ', 'x', 'x'}}})};
+    /** @brief Expected counterclockwise quarter-turn with three columns. */
+    constexpr auto rotated_270{rotated_lib_t::cell_list_to_gate<char>({{{'x', 'x', ' '}, {'i', ' ', 'o'}}})};
+
+    STATIC_REQUIRE(lib_t::rotate_90(gate) == rotated_90);
+    STATIC_REQUIRE(lib_t::rotate_270(gate) == rotated_270);
+    STATIC_REQUIRE(rotated_lib_t::rotate_270(rotated_90) == gate);
+    STATIC_REQUIRE(rotated_lib_t::rotate_90(rotated_270) == gate);
+}
+
 TEST_CASE("Gate merging", "[fcn-gate-library]")
 {
     using lib_t = gate_library<qca::layout, 3, 3>;

@@ -238,11 +238,11 @@ class gate_library
      * Rotates the given `gate` by 90° clockwise at compile time.
      *
      * @param g `gate` to rotate.
-     * @return Rotated `gate`.
+     * @return Rotated gate with `GateSizeY` columns and `GateSizeX` rows.
      */
-    static constexpr gate rotate_90(const gate& g) noexcept
+    static constexpr auto rotate_90(const gate& g) noexcept
     {
-        return reverse_columns(transpose(g));
+        return transpose(reverse_rows(g));
     }
     /**
      * Rotates the given `gate` by 180° at compile time.
@@ -258,9 +258,9 @@ class gate_library
      * Rotates the given `gate` by 270° clockwise at compile time.
      *
      * @param g `gate` to rotate.
-     * @return Rotated `gate`.
+     * @return Rotated gate with `GateSizeY` columns and `GateSizeX` rows.
      */
-    static constexpr gate rotate_270(const gate& g) noexcept
+    static constexpr auto rotate_270(const gate& g) noexcept
     {
         return transpose(reverse_columns(g));
     }
@@ -333,21 +333,21 @@ class gate_library
      * Transposes the given `gate` at compile time.
      *
      * @param g `gate` to transpose.
-     * @return Transposed `gate`.
+     * @return Transposed gate with `GateSizeY` columns and `GateSizeX` rows.
      */
-    static constexpr gate transpose(const gate& g) noexcept
+    static constexpr auto transpose(const gate& g) noexcept
     {
-        auto trans = EMPTY_GATE;
+        std::array<std::array<cell_type, GateSizeY>, GateSizeX> transposed{};
 
         for (auto x = 0ul; x < GateSizeX; ++x)
         {
             for (auto y = 0ul; y < GateSizeY; ++y)
             {
-                trans[y][x] = g[x][y];
+                transposed[x][y] = g[y][x];
             }
         }
 
-        return trans;
+        return transposed;
     }
     /**
      * Reverses the columns of the given `gate` at compile time.
@@ -371,15 +371,14 @@ class gate_library
      */
     static constexpr gate reverse_rows(const gate& g) noexcept
     {
-        gate rev_rows = g;
+        gate rev_rows{g};
 
-        std::reverse(std::begin(rev_rows), std::end(rev_rows));
+        std::ranges::reverse(rev_rows);
 
         return rev_rows;
     }
     /**
-     * Single empty gate of the given tile size. Used as a blue print to create new ones in merge and
-     * transpose for example.
+     * Single empty gate of the given tile size.
      */
     static constexpr const gate EMPTY_GATE =
         fiction::utils::stl::create_array<GateSizeY>(fiction::utils::stl::create_array<GateSizeX>(cell_type::EMPTY));
