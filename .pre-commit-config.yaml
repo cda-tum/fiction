@@ -104,7 +104,7 @@ repos:
 
   # Format the publication bibliography.
   - repo: https://github.com/FlamingTempura/bibtex-tidy
-    rev: v1.14.0
+    rev: v1.15.1
     hooks:
       - id: bibtex-tidy
         args:
