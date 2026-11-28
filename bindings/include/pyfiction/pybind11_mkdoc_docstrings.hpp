@@ -9401,9 +9401,8 @@ adjacent node or another edge.
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_depth_ntk = R"doc(Mapping of levels to nodes used for symmetry breaking.)doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_eliminate_cycles =
-R"doc(Adds constraints to the solver to prohibit cycles that loop back
-information. To this end, the formerly established paths are used.
-Without this constraint, useless wire loops appear.
+R"doc(Requires each routed connection to increase the topological rank of
+its ground tile.
 
 )doc";
 
@@ -9416,19 +9415,6 @@ primary outputs at the layout's borders.
 static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_enforce_straight_inverters =
 R"doc(Adds constraints to the solver to enforce that no bent inverters are
 used.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_establish_sub_paths =
-R"doc(Adds constraints to the solver to map established connections between
-single tiles to sub-paths. They are spanned transitively by the next
-set of constraints.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_establish_transitive_paths =
-R"doc(Adds constraints to the solver to expand the formerly created sub-
-paths transitively.
 
 )doc";
 
@@ -9473,16 +9459,16 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_get_ncl =
-R"doc(Returns an ncl variable from the stored context representing node n's
-(pi) clock number.
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_get_node_clock =
+R"doc(Returns the Boolean variable that assigns a clock phase to a network
+node.
 
 Args:
     n: Node to be considered.
     clk: Clock phase of the node.
 
 Returns:
-    ncl variable from ctx.
+    Node clock phase variable.
 
 )doc";
 
@@ -9494,80 +9480,75 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_get_tc =
-R"doc(Returns a tc variable from the stored context representing that
-information flows from tile t1 to tile t2.
-
-Args:
-    t1: Tile 1 to be considered.
-    t2: Tile 2 to be considered that is adjacent to t1.
-
-Returns:
-    tc variable from ctx.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_get_tcl =
-R"doc(Returns a tcl variable from the stored context representing tile t's
-clock number.
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_get_tile_clock =
+R"doc(Returns the Boolean variable that assigns a clock phase to a tile.
 
 Args:
     t: Tile to be considered.
     clk: Clock phase of the tile.
 
 Returns:
-    tcl variable from ctx.
+    Tile clock phase variable.
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_get_te =
-R"doc(Returns a te variable from the stored context representing that tile t
-has edge e assigned.
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_get_tile_connection =
+R"doc(Returns the Boolean variable for a directed connection between
+adjacent tiles.
+
+Args:
+    t1: Tile 1 to be considered.
+    t2: Tile 2 to be considered that is adjacent to t1.
+
+Returns:
+    Directed connection variable.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_get_tile_delay =
+R"doc(Returns the integer delay of a synchronization element in clock
+cycles.
+
+Args:
+    t: Tile to be considered.
+
+Returns:
+    Synchronization element delay.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_get_tile_edge =
+R"doc(Returns the Boolean variable that assigns a network edge to a tile.
 
 Args:
     t: Tile to be considered.
     e: Edge to be considered.
 
 Returns:
-    te variable from ctx.
+    Edge placement variable.
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_get_tn =
-R"doc(Returns a tn variable from the stored context representing that tile t
-has node n assigned.
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_get_tile_node =
+R"doc(Returns the Boolean variable that assigns a network node to a tile.
 
 Args:
     t: Tile to be considered.
     n: Node to be considered.
 
 Returns:
-    tn variable from ctx.
+    Node placement variable.
 
 )doc";
 
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_get_tp =
-R"doc(Returns a tp variable from the stored context representing that a path
-from tile t1 to tile t2 exists.
+static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_get_tile_rank =
+R"doc(Returns the integer rank of a ground tile in the routing graph.
 
 Args:
-    t1: Tile 1 to be considered.
-    t2: Tile 2 to be considered.
+    t: Ground tile.
 
 Returns:
-    tp variable from ctx.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_detail_exact_impl_smt_handler_get_tse =
-R"doc(Returns a tse variable from the stored context representing tile t's
-synchronization element delay in cycles.
-
-Args:
-    t: Tile to be considered.
-
-Returns:
-    tse variable from ctx.
+    Topological rank of the tile.
 
 )doc";
 

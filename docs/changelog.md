@@ -34,6 +34,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
 
+  - With non-linear clocking, exact physical design now rules out routing cycles with one constraint
+    per possible connection.
   - **Breaking:** Convert inputs to `networks::named_technology_network` before physical design.
     For shifted Cartesian and hexagonal layouts, pass `layout_arrangement` to `exact` and `orthogonal`.
   - **Breaking:** A*, path enumeration, and Yen routing avoid occupied gates and wires by default.

@@ -246,6 +246,52 @@ TEST_CASE("Straight inverter validation", "[exact]")
     CHECK_FALSE(has_straight_inverters(lyt));
 }
 
+TEST_CASE("Exact routes a path around a USE clock cycle", "[exact]")
+{
+    named_technology_network ntk{};
+    const auto               input = ntk.create_pi("a");
+    ntk.create_po(ntk.create_not(ntk.create_not(input)), "f");
+
+    // All four tiles of this USE extent form a directed clock cycle.
+    check_without_gate_library<cartesian_gate_layout>(
+        ntk, exact_physical_design_params{.scheme = "USE", .upper_bound_x = 2, .upper_bound_y = 2, .fixed_size = true});
+}
+
+TEST_CASE("Exact rejects a route that revisits a ground tile at a crossing", "[exact]")
+{
+    named_technology_network ntk{};
+    ntk.create_po(ntk.create_not(ntk.create_pi()));
+
+    const exact_physical_design_params ps{.scheme        = "USE",
+                                          .upper_bound_x = 4,
+                                          .upper_bound_y = 4,
+                                          .fixed_size    = true,
+                                          .crossings     = true,
+                                          .border_io     = true};
+    const cartesian_layout             surface{{4, 4, 1}};
+    surface_black_list<port_direction> black_list{};
+    surface.foreach_coordinate(
+        [&](const auto& t)
+        {
+            if (t != cartesian_layout::coordinate{2, 2})
+            {
+                black_list[t].insert({create_not_tt(), {}});
+            }
+            if (surface.is_at_any_border(t) && t != cartesian_layout::coordinate{1, 0} &&
+                t != cartesian_layout::coordinate{0, 1})
+            {
+                black_list[t].insert({create_id_tt(), {}});
+            }
+        });
+
+    // Both border pins reach the interior inverter through (1, 1).
+    CHECK_FALSE(exact_with_blacklist<cartesian_layout>(ntk, black_list, ps).has_value());
+
+    // A pin next to the inverter lets the route visit (1, 1) only once.
+    black_list.at({2, 3}).erase(create_id_tt());
+    check_eq(ntk, generate_layout_with_black_list<cartesian_gate_layout>(ntk, black_list, ps));
+}
+
 TEST_CASE("Exact Cartesian physical design", "[exact]")
 {
     SECTION("Open clocking")
